@@ -6,6 +6,20 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.3.1</title>
+      <pubDate>Sun, 18 Oct 2026 21:14:43 GMT</pubDate>
+      <sparkle:version>7</sparkle:version>
+      <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction : une chaîne qui ne répond pas ne laisse plus le chargement tourner indéfiniment ; après 20 s sans image, Kastideo essaie la variante .ts / .m3u8 puis affiche une erreur explicite&lt;/li&gt;
+&lt;li&gt;Le démarrage est désormais détecté dès que VLC passe en lecture&lt;/li&gt;
+&lt;li&gt;Nouveau &lt;b&gt;Journal de lecture&lt;/b&gt; (menu Lecture, ⌥⌘L, ou bouton dans le message d&amp;#x27;erreur) : messages du moteur VLC, identifiants et mots de passe masqués, copiable pour le diagnostic&lt;/li&gt;
+&lt;li&gt;Le détail de l&amp;#x27;erreur VLC (par exemple un refus du serveur) est affiché sous le message d&amp;#x27;erreur&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.3.1/Kastideo-0.3.1.dmg" length="41317061" type="application/octet-stream" sparkle:edSignature="J1jh4vxRARjF7nVexGJUnPQugjW1uwuF7qK6ZhzXIDRCgAkDpw8myN25xN9YlPPnSVr2vIhXDHiL2z81/soqBQ==" />
+    </item>
+    <item>
       <title>Kastideo 0.3.0</title>
       <pubDate>Sun, 18 Oct 2026 18:51:32 GMT</pubDate>
       <sparkle:version>6</sparkle:version>
