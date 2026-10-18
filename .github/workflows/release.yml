@@ -1,5 +1,6 @@
-# Publication à chaque tag vX.Y.Z : compilation, signature Developer ID, DMG, notarisation Apple,
-# puis GitHub Release avec le fichier Kastideo-X.Y.Z.dmg.
+# Publication à chaque tag vX.Y.Z (ou vX.Y.Z-betaN) : compilation, signature Developer ID, DMG,
+# notarisation Apple, GitHub Release, puis mise à jour du flux Sparkle (branche « appcast »).
+# Les tags -betaN sont publiés en pré-version et sur le canal Sparkle « beta ».
 #
 # Secrets requis (Settings > Secrets and variables > Actions) :
 #   APPLE_CERTIFICATE           certificat « Developer ID Application » exporté en .p12, encodé en base64
@@ -8,6 +9,7 @@
 #   APPLE_API_KEY               contenu du fichier AuthKey_XXXX.p8 (App Store Connect), en clair ou en base64
 #   APPLE_API_KEY_ID            identifiant de la clé API
 #   APPLE_API_ISSUER_ID         identifiant d'émetteur (Issuer ID)
+#   SPARKLE_PRIVATE_KEY         clé privée EdDSA Sparkle (generate_keys -x)
 name: Release
 
 on:
@@ -34,6 +36,8 @@ jobs:
       APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
       APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
       APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+      SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+      SPARKLE_VERSION: "2.10.0"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,6 +48,16 @@ jobs:
             exit 1
           fi
           VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-beta[0-9]+)?$ ]]; then
+            echo "::error::Tag invalide « $GITHUB_REF_NAME » (attendu : vX.Y.Z ou vX.Y.Z-betaN)."
+            exit 1
+          fi
+          if [[ "$VERSION" == *-beta* ]]; then
+            echo "CHANNEL=beta" >> "$GITHUB_ENV"
+            echo "Version de test : canal Sparkle « beta », pré-version GitHub."
+          else
+            echo "CHANNEL=" >> "$GITHUB_ENV"
+          fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "DMG_PATH=$RUNNER_TEMP/Kastideo-$VERSION.dmg" >> "$GITHUB_ENV"
           echo "Version : $VERSION (build $GITHUB_RUN_NUMBER)"
@@ -52,7 +66,7 @@ jobs:
       - name: Vérifier les secrets
         run: |
           missing=0
-          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_TEAM_ID APPLE_API_KEY APPLE_API_KEY_ID APPLE_API_ISSUER_ID; do
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_TEAM_ID APPLE_API_KEY APPLE_API_KEY_ID APPLE_API_ISSUER_ID SPARKLE_PRIVATE_KEY; do
             if [ -z "${!name}" ]; then echo "::error::Secret manquant : $name"; missing=1; fi
           done
           exit $missing
@@ -174,14 +188,35 @@ jobs:
           xcrun stapler validate "$DMG_PATH"
           spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG_PATH"
 
+      - name: Signer la mise à jour pour Sparkle
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/Sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz"
+          mkdir -p "$RUNNER_TEMP/sparkle"
+          tar -xf "$RUNNER_TEMP/Sparkle.tar.xz" -C "$RUNNER_TEMP/sparkle"
+          KEY_FILE="$RUNNER_TEMP/sparkle_key"
+          printf '%s' "$SPARKLE_PRIVATE_KEY" | tr -d '[:space:]' > "$KEY_FILE"
+          SIGNATURE_LINE=$("$RUNNER_TEMP/sparkle/bin/sign_update" --ed-key-file "$KEY_FILE" "$DMG_PATH")
+          rm -f "$KEY_FILE"
+          ED_SIGNATURE=$(printf '%s' "$SIGNATURE_LINE" | sed -E 's/.*sparkle:edSignature="([^"]+)".*/\1/')
+          DMG_LENGTH=$(printf '%s' "$SIGNATURE_LINE" | sed -E 's/.*length="([0-9]+)".*/\1/')
+          if [ -z "$ED_SIGNATURE" ] || [ "$ED_SIGNATURE" = "$SIGNATURE_LINE" ]; then
+            echo "::error::Signature Sparkle impossible. Vérifiez le secret SPARKLE_PRIVATE_KEY."
+            exit 1
+          fi
+          echo "ED_SIGNATURE=$ED_SIGNATURE" >> "$GITHUB_ENV"
+          echo "DMG_LENGTH=$DMG_LENGTH" >> "$GITHUB_ENV"
+          echo "Signature Sparkle OK ($DMG_LENGTH octets)."
+
       - name: Notes de version
         run: |
           awk -v v="$VERSION" '
             $0 ~ "^## \\[?" v "\\]?([ ]|$)" { found=1; next }
             found && /^## / { exit }
             found { print }
-          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
-          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then echo "Kastideo $VERSION" > "$RUNNER_TEMP/notes.md"; fi
+          ' CHANGELOG.md > "$RUNNER_TEMP/changelog.md"
+          if [ ! -s "$RUNNER_TEMP/changelog.md" ]; then echo "- Kastideo $VERSION" > "$RUNNER_TEMP/changelog.md"; fi
+          cp "$RUNNER_TEMP/changelog.md" "$RUNNER_TEMP/notes.md"
           {
             echo ""
             echo "---"
@@ -199,9 +234,43 @@ jobs:
             gh release upload "$GITHUB_REF_NAME" "$DMG_PATH" --clobber
             gh release edit "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md"
           else
-            gh release create "$GITHUB_REF_NAME" "$DMG_PATH" \
+            PRERELEASE_FLAG=""
+            if [ "$CHANNEL" = "beta" ]; then PRERELEASE_FLAG="--prerelease"; fi
+            gh release create "$GITHUB_REF_NAME" "$DMG_PATH" $PRERELEASE_FLAG \
               --title "Kastideo $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
           fi
+
+      - name: Mettre à jour le flux Sparkle (branche appcast)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          WORK="$RUNNER_TEMP/appcast"
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$REMOTE" appcast > /dev/null 2>&1; then
+            git clone --quiet --depth 1 --branch appcast "$REMOTE" "$WORK"
+          else
+            mkdir -p "$WORK"
+            git -C "$WORK" init --quiet -b appcast
+            git -C "$WORK" remote add origin "$REMOTE"
+            printf '# Flux de mises à jour Sparkle de Kastideo\n\nBranche gérée automatiquement par le workflow Release : ne pas modifier.\n' > "$WORK/README.md"
+          fi
+          python3 scripts/appcast.py \
+            --appcast "$WORK/appcast.xml" \
+            --version "$VERSION" \
+            --build "$GITHUB_RUN_NUMBER" \
+            --url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Kastideo-${VERSION}.dmg" \
+            --length "$DMG_LENGTH" \
+            --signature "$ED_SIGNATURE" \
+            --notes "$RUNNER_TEMP/changelog.md" \
+            --min-system "14.0" \
+            ${CHANNEL:+--channel "$CHANNEL"}
+          cd "$WORK"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "Appcast : Kastideo $VERSION"
+          git push --quiet origin appcast
+          echo "Flux publié : https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/appcast/appcast.xml"
 
       - name: Conserver le DMG comme artefact
         if: always()

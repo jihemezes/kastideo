@@ -4,12 +4,13 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.1.0)
+## Fonctions (version 0.2.0)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
 - Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
 - Lecteur natif avec plein écran et image dans l'image
+- **Mises à jour automatiques** (Sparkle) avec canal bêta facultatif
 - Aide intégrée : voir [docs/AIDE.md](docs/AIDE.md)
 
 ## Installation
@@ -32,6 +33,7 @@ kastideo/
 │                               réutilisable pour iOS, iPadOS et tvOS
 ├── docs/AIDE.md                Aide intégrée à l'application
 ├── scripts/kastideo-release.sh Publication d'une version
+├── scripts/appcast.py          Mise à jour du flux Sparkle (utilisé par la CI)
 ├── .github/workflows/
 │   ├── build.yml               Tests + compilation à chaque push
 │   └── release.yml             DMG signé et notarisé à chaque tag vX.Y.Z
@@ -58,6 +60,15 @@ Le push du tag `vX.Y.Z` déclenche le workflow **Release**. Il compile l'app, la
 | `APPLE_API_KEY` | Contenu du fichier `AuthKey_XXXX.p8` (App Store Connect) |
 | `APPLE_API_KEY_ID` | Identifiant de la clé API |
 | `APPLE_API_ISSUER_ID` | Identifiant d'émetteur (Issuer ID) |
+| `SPARKLE_PRIVATE_KEY` | Clé privée EdDSA Sparkle (`generate_keys --account kastideo -x fichier`) |
+
+### Mises à jour (Sparkle)
+
+Après chaque publication, le workflow signe le DMG avec la clé Sparkle et met à jour `appcast.xml` sur la branche **`appcast`** du dépôt. Cette branche est gérée automatiquement : ne la modifiez pas et ne la fusionnez pas dans `main`. L'application lit ce flux à l'adresse `https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml`.
+
+Pour publier une **version de test**, utilisez un numéro `X.Y.Z-betaN` (par exemple `0.3.0-beta1`). Elle sera publiée en pré-version GitHub et proposée seulement aux utilisateurs qui ont activé le canal bêta.
+
+La clé publique correspondante est inscrite dans `project.yml` (`SUPublicEDKey`). **Ne perdez jamais la clé privée** : sans elle, les copies installées n'accepteront plus de mise à jour.
 
 ## Développer en local (facultatif)
 

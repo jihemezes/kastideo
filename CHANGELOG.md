@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.2.0] - 2026-10-18
+
+- Mises à jour automatiques avec Sparkle : vérification quotidienne, installation en un clic et relance
+- Menu **Kastideo > Rechercher les mises à jour…** et onglet **Mises à jour** dans les réglages
+- Canal bêta facultatif pour recevoir les versions de test en avant-première
+- Fenêtre **Nouveautés** au premier lancement après une mise à jour (aussi dans le menu Aide)
+- Publication : signature des mises à jour et flux Sparkle générés automatiquement par GitHub Actions
+
 ## [0.1.0] - 2026-10-18
 
 - Première version de Kastideo pour macOS : lecteur IPTV avec sources Xtream Codes et playlists M3U

@@ -6,6 +6,7 @@ struct KastideoApp: App {
     @State private var store = LibraryStore()
     @State private var navigation = NavigationModel()
     @State private var playback = PlaybackController()
+    @State private var updater = UpdaterController()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
 
     var body: some Scene {
@@ -14,12 +15,13 @@ struct KastideoApp: App {
                 .environment(store)
                 .environment(navigation)
                 .environment(playback)
+                .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1320, height: 820)
         .commands {
-            KastideoCommands(store: store, navigation: navigation, playback: playback)
+            KastideoCommands(store: store, navigation: navigation, playback: playback, updater: updater)
         }
 
         Window("Aide de Kastideo", id: "help") {
@@ -31,6 +33,7 @@ struct KastideoApp: App {
         Settings {
             SettingsView()
                 .environment(store)
+                .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
         }
     }
@@ -67,8 +70,14 @@ struct KastideoCommands: Commands {
     let store: LibraryStore
     let navigation: NavigationModel
     let playback: PlaybackController
+    let updater: UpdaterController
 
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Rechercher les mises à jour…") { updater.checkForUpdates() }
+                .disabled(!updater.canCheckForUpdates)
+        }
+
         CommandGroup(after: .newItem) {
             Button("Actualiser les sources") { store.refreshAll() }
                 .keyboardShortcut("r", modifiers: .command)
@@ -101,6 +110,7 @@ struct KastideoCommands: Commands {
 
         CommandGroup(replacing: .help) {
             HelpMenuButton()
+            Button("Nouveautés de cette version") { navigation.showWhatsNew = true }
         }
     }
 }

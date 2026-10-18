@@ -7,6 +7,7 @@
 # Exemples :
 #   kastideo-release 0.2.0 "Moteur de lecture étendu"
 #   kastideo-release 0.2.0            # descriptif lu dans CHANGELOG.md
+#   kastideo-release 0.3.0-beta1 "Test du nouveau lecteur"   # version de test (canal bêta)
 #
 # Fait la même chose que le bloc de mise à jour habituel, avec des vérifications :
 #   zip présent, structure kastideo/ correcte, tag inexistant, version cohérente avec project.yml,
@@ -31,14 +32,15 @@ main() {
     for arg in "$@"; do
         case "$arg" in
             -y|--yes) ASSUME_YES=1 ;;
-            -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+            -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
             *) if [ -z "$VERSION" ]; then VERSION="$arg"; elif [ -z "$MESSAGE" ]; then MESSAGE="$arg"; fi ;;
         esac
     done
 
     [ -n "$VERSION" ] || die "Version manquante. Usage : kastideo-release 0.2.0 \"Descriptif\""
     VERSION="${VERSION#v}"
-    [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "Version invalide « $VERSION » (format attendu : X.Y.Z)."
+    [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-beta[0-9]+)?$ ]] || die "Version invalide « $VERSION » (format attendu : X.Y.Z ou X.Y.Z-betaN)."
+    local BASE_VERSION="${VERSION%%-*}"
 
     local ZIP="$DOWNLOADS/kastideo-v$VERSION.zip"
     local TMP="/tmp/kastideo-$VERSION"
@@ -66,8 +68,11 @@ main() {
 
     local ZIP_VERSION
     ZIP_VERSION=$(grep -E '^[[:space:]]*MARKETING_VERSION:' "$TMP/kastideo/project.yml" 2>/dev/null | head -1 | sed -E 's/.*"?([0-9]+\.[0-9]+\.[0-9]+)"?.*/\1/' || true)
-    if [ -n "$ZIP_VERSION" ] && [ "$ZIP_VERSION" != "$VERSION" ]; then
+    if [ -n "$ZIP_VERSION" ] && [ "$ZIP_VERSION" != "$BASE_VERSION" ]; then
         warn "project.yml du zip indique la version $ZIP_VERSION (vous publiez $VERSION)."
+    fi
+    if [ "$VERSION" != "$BASE_VERSION" ]; then
+        info "Version de test : publiée en pré-version et sur le canal bêta de Sparkle."
     fi
 
     if [ -z "$MESSAGE" ] && [ -f "$TMP/kastideo/CHANGELOG.md" ]; then

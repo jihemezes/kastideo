@@ -50,6 +50,8 @@ final class NavigationModel {
     private(set) var lastKind: MediaKind = .live
     /// Liste visible (pour ⌘↑ / ⌘↓).
     var visibleIDs: [String] = []
+    /// Affiche la fenêtre « Nouveautés ».
+    var showWhatsNew = false
 
     func go(_ destination: Browse) {
         browse = destination

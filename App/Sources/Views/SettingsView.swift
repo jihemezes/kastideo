@@ -9,6 +9,8 @@ struct SettingsView: View {
                 .tabItem { Label("Sources", systemImage: "antenna.radiowaves.left.and.right") }
             GeneralSettingsView()
                 .tabItem { Label("Général", systemImage: "gearshape") }
+            UpdateSettingsView()
+                .tabItem { Label("Mises à jour", systemImage: "arrow.down.circle") }
         }
         .frame(width: 680, height: 460)
     }
@@ -164,5 +166,52 @@ struct GeneralSettingsView: View {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         return "\(version) (\(build))"
+    }
+}
+
+struct UpdateSettingsView: View {
+    @Environment(UpdaterController.self) private var updater
+    @AppStorage(UpdateKeys.betaChannel) private var betaChannel = false
+    @State private var autoCheck = true
+    @State private var autoDownload = false
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Rechercher automatiquement les mises à jour (une fois par jour)", isOn: $autoCheck)
+                    .onChange(of: autoCheck) { _, value in updater.automaticallyChecks = value }
+                Toggle("Télécharger et installer automatiquement", isOn: $autoDownload)
+                    .onChange(of: autoDownload) { _, value in updater.automaticallyDownloads = value }
+                    .disabled(!autoCheck)
+            } footer: {
+                Text("Les mises à jour sont publiées sur GitHub, signées et notarisées par Apple. Kastideo vérifie leur signature avant de les installer.")
+            }
+
+            Section {
+                Toggle("Recevoir les versions de test (bêta)", isOn: $betaChannel)
+            } footer: {
+                Text("Les versions bêta apportent les nouveautés plus tôt mais peuvent être moins stables. Vous pouvez revenir aux versions stables à tout moment ; la version suivante sera alors proposée normalement.")
+            }
+
+            Section {
+                LabeledContent("Version installée") {
+                    Text(ReleaseNotes.currentVersion).foregroundStyle(.secondary)
+                }
+                LabeledContent("Dernière vérification") {
+                    Text(updater.lastCheck.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? "Jamais")
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Spacer()
+                    Button("Rechercher maintenant") { updater.checkForUpdates() }
+                        .disabled(!updater.canCheckForUpdates)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear {
+            autoCheck = updater.automaticallyChecks
+            autoDownload = updater.automaticallyDownloads
+        }
     }
 }

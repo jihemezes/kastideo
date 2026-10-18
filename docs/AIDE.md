@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.1.0 — première version de test pour macOS.
+> Version 0.2.0 — mises à jour automatiques, canal bêta et fenêtre Nouveautés.
 
 ## Premiers pas
 
@@ -75,6 +75,27 @@ Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'ad
 - **⌘R** : actualiser toutes les sources
 - **⌘,** : réglages et sources
 - **⌘?** : cette aide
+
+## Mises à jour
+
+Kastideo se met à jour tout seul grâce à **Sparkle**, l'outil de référence des applications Mac distribuées hors App Store.
+
+- Kastideo vérifie une fois par jour si une nouvelle version est disponible sur GitHub.
+- Une fenêtre présente les nouveautés, puis propose **Installer la mise à jour**. Kastideo se ferme, s'installe et se relance.
+- Vous pouvez vérifier à tout moment avec **Kastideo > Rechercher les mises à jour…**.
+- Chaque mise à jour est signée : Kastideo refuse d'installer un fichier qui ne vient pas de son éditeur.
+
+Dans **Réglages > Mises à jour** :
+
+- **Rechercher automatiquement** : active ou désactive la vérification quotidienne.
+- **Télécharger et installer automatiquement** : les mises à jour s'installent sans rien demander, à la fermeture de l'application.
+- **Recevoir les versions de test (bêta)** : propose aussi les versions bêta, qui apportent les nouveautés plus tôt mais peuvent être moins stables. Désactivez l'option pour revenir aux versions stables à la prochaine mise à jour.
+
+> Les versions 0.1.0 et antérieures ne savent pas se mettre à jour : installez la 0.2.0 une fois à la main, les suivantes arriveront toutes seules.
+
+## Nouveautés
+
+Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée. Vous pouvez la rouvrir avec **Aide > Nouveautés de cette version** et y consulter les versions précédentes.
 
 ## Réglages généraux
 

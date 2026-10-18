@@ -5,10 +5,12 @@ import KastideoCore
 struct RootView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
+    @Environment(NavigationModel.self) private var navigation
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @State private var showAddSource = false
 
     var body: some View {
+        @Bindable var navigation = navigation
         Group {
             if store.hasSources {
                 MainSplitView()
@@ -20,7 +22,13 @@ struct RootView: View {
             SourceEditorView(existing: nil)
                 .environment(store)
         }
-        .task { await store.start(autoRefresh: autoRefresh) }
+        .sheet(isPresented: $navigation.showWhatsNew) {
+            WhatsNewView()
+        }
+        .task {
+            if ReleaseNotes.shouldAnnounceUpdate() { navigation.showWhatsNew = true }
+            await store.start(autoRefresh: autoRefresh)
+        }
     }
 }
 

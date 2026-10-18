@@ -31,6 +31,16 @@
 		<key>NSAllowsArbitraryLoadsForMedia</key>
 		<true/>
 	</dict>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>PhRxsgR0m+ocj9knZzFOQUMTl36+TfzEZ1MyRKxgtPQ=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Jean-Michel Ezes</string>
 </dict>

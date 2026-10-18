@@ -11,7 +11,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "0.2.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -21,6 +21,10 @@ settings:
 packages:
   KastideoCore:
     path: Packages/KastideoCore
+  # Mises à jour automatiques (https://sparkle-project.org)
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.10.0"
 
 targets:
   Kastideo:
@@ -31,8 +35,11 @@ targets:
       - path: App/Resources
       - path: docs/AIDE.md
         buildPhase: resources
+      - path: CHANGELOG.md
+        buildPhase: resources
     dependencies:
       - package: KastideoCore
+      - package: Sparkle
     info:
       path: App/Info.plist
       properties:
@@ -47,6 +54,12 @@ targets:
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
           NSAllowsArbitraryLoadsForMedia: true
+        # Sparkle : flux des versions (branche « appcast » du dépôt public) et clé publique EdDSA.
+        SUFeedURL: https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml
+        SUPublicEDKey: PhRxsgR0m+ocj9knZzFOQUMTl36+TfzEZ1MyRKxgtPQ=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUEnableInstallerLauncherService: true
     entitlements:
       path: App/Kastideo.entitlements
       properties:
@@ -54,6 +67,10 @@ targets:
         com.apple.security.network.client: true
         com.apple.security.files.user-selected.read-only: true
         com.apple.security.files.bookmarks.app-scope: true
+        # Sparkle dans le bac à sable : accès au service d'installation.
+        com.apple.security.temporary-exception.mach-lookup.global-name:
+          - fr.jmezes.kastideo-spks
+          - fr.jmezes.kastideo-spki
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fr.jmezes.kastideo
