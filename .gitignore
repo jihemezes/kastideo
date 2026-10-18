@@ -1,14 +1,31 @@
+# macOS
 .DS_Store
-*.xcuserstate
+
+# Xcode (le projet est généré par XcodeGen)
+*.xcodeproj/
+*.xcworkspace/
+!Packages/**/*.xcworkspace/
 xcuserdata/
+*.xcuserstate
 DerivedData/
 build/
+
+# Swift Package Manager
 .build/
+.swiftpm/
+Package.resolved
+
+# Produits et signature (ne jamais versionner de secrets)
+*.dmg
+*.xcarchive
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+*.provisionprofile
+.env
+
+# Divers
 node_modules/
 dist/
 out/
-*.dmg
-*.p12
-*.cer
-*.provisionprofile
-.env

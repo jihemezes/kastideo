@@ -1,0 +1,47 @@
+# Vérification à chaque push sur main : tests du module Core + compilation de l'app (sans signature).
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Tests et compilation macOS
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version de Xcode
+        run: xcodebuild -version
+
+      - name: Installer XcodeGen
+        run: brew install xcodegen
+
+      - name: Tests du module KastideoCore
+        run: swift test --package-path Packages/KastideoCore
+
+      - name: Générer le projet Xcode
+        run: xcodegen generate
+
+      - name: Compiler (sans signature)
+        run: |
+          if ! xcodebuild -project Kastideo.xcodeproj -scheme Kastideo -configuration Release \
+                 -destination 'generic/platform=macOS' \
+                 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+                 build > build.log 2>&1; then
+            echo "::group::Erreurs de compilation"
+            grep -E "error:" build.log | sort -u | head -80
+            echo "::endgroup::"
+            tail -60 build.log
+            exit 1
+          fi
+          grep -E "warning:" build.log | sort -u | head -40 || true
+          echo "Compilation réussie."
