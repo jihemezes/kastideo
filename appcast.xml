@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+  <channel>
+    <title>Kastideo</title>
+    <link>https://github.com/jihemezes/kastideo</link>
+    <description>Mises à jour de Kastideo</description>
+    <language>fr</language>
+    <item>
+      <title>Kastideo 0.2.0</title>
+      <pubDate>Sun, 18 Oct 2026 17:51:27 GMT</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Mises à jour automatiques avec Sparkle : vérification quotidienne, installation en un clic et relance&lt;/li&gt;
+&lt;li&gt;Menu &lt;b&gt;Kastideo &amp;gt; Rechercher les mises à jour…&lt;/b&gt; et onglet &lt;b&gt;Mises à jour&lt;/b&gt; dans les réglages&lt;/li&gt;
+&lt;li&gt;Canal bêta facultatif pour recevoir les versions de test en avant-première&lt;/li&gt;
+&lt;li&gt;Fenêtre &lt;b&gt;Nouveautés&lt;/b&gt; au premier lancement après une mise à jour (aussi dans le menu Aide)&lt;/li&gt;
+&lt;li&gt;Publication : signature des mises à jour et flux Sparkle générés automatiquement par GitHub Actions&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.2.0/Kastideo-0.2.0.dmg" length="2578097" type="application/octet-stream" sparkle:edSignature="y9G6ozydHA5I+mu4+Wyi1dsr0+2ROzURw91cQVAKETlyJXGg3EvHmztpT54F3ypE9YGavm7Z9Wxyu8lRRc2bCw==" />
+    </item>
+  </channel>
+</rss>
