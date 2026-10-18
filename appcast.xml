@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.2.1</title>
+      <pubDate>Sun, 18 Oct 2026 17:56:25 GMT</pubDate>
+      <sparkle:version>4</sparkle:version>
+      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction : les playlists et flux en &lt;b&gt;http://&lt;/b&gt; étaient refusés (« App Transport Security ») ; ils se chargent désormais normalement&lt;/li&gt;
+&lt;li&gt;Publication : un seul workflow GitHub par livraison (Build ne se lance plus qu&amp;#x27;à la demande)&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.2.1/Kastideo-0.2.1.dmg" length="2578297" type="application/octet-stream" sparkle:edSignature="Dz55gjd2zRv1HQQMbo425V8rb8/ptf+B0wXrXcl/K1l7EZWBk9+UwrvmQjIPnbEWLUVImTezDfeJh0g3RdsdBA==" />
+    </item>
+    <item>
       <title>Kastideo 0.2.0</title>
       <pubDate>Sun, 18 Oct 2026 17:51:27 GMT</pubDate>
       <sparkle:version>3</sparkle:version>
