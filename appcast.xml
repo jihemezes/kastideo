@@ -6,6 +6,21 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.2.2</title>
+      <pubDate>Sun, 18 Oct 2026 18:35:23 GMT</pubDate>
+      <sparkle:version>5</sparkle:version>
+      <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction : certains fournisseurs laissaient la requête expirer ; Kastideo s&amp;#x27;identifie désormais comme &lt;b&gt;VLC&lt;/b&gt;, comme la tuile IPTV de Piboard&lt;/li&gt;
+&lt;li&gt;Les adresses de playlist &lt;b&gt;get.php?username=…&amp;amp;password=…&lt;/b&gt; sont reconnues et converties automatiquement en source &lt;b&gt;Xtream Codes&lt;/b&gt; : chargement beaucoup plus rapide, guide TV inclus, mot de passe dans le trousseau&lt;/li&gt;
+&lt;li&gt;Les sources de ce type déjà configurées sont converties au lancement&lt;/li&gt;
+&lt;li&gt;Messages d&amp;#x27;erreur réseau en français et plus explicites (délai dépassé, serveur introuvable, connexion refusée…)&lt;/li&gt;
+&lt;li&gt;Téléchargements : jusqu&amp;#x27;à 10 minutes pour les très grosses playlists&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.2.2/Kastideo-0.2.2.dmg" length="2597674" type="application/octet-stream" sparkle:edSignature="jDiKFjEXmK6ENJlHXX6C6LH6CaKoUBeLQOK49XmCFDXw22vB5jHXy+euYE1WAcE909PKdOnkfX+G4+So3mBJCg==" />
+    </item>
+    <item>
       <title>Kastideo 0.2.1</title>
       <pubDate>Sun, 18 Oct 2026 17:56:25 GMT</pubDate>
       <sparkle:version>4</sparkle:version>
