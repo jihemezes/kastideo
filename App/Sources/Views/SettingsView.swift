@@ -12,7 +12,7 @@ struct SettingsView: View {
             UpdateSettingsView()
                 .tabItem { Label("Mises à jour", systemImage: "arrow.down.circle") }
         }
-        .frame(width: 680, height: 460)
+        .frame(width: 680, height: 520)
     }
 }
 
@@ -132,12 +132,23 @@ struct GeneralSettingsView: View {
     @Environment(LibraryStore.self) private var store
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
+    @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
+    @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
     @State private var cacheSize: Int64 = 0
 
     var body: some View {
         Form {
             Picker("Apparence", selection: $appearance) {
                 ForEach(Appearance.allCases) { Text($0.label).tag($0.rawValue) }
+            }
+            Section("Lecture") {
+                Picker("Mémoire tampon", selection: $buffering) {
+                    ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
+                }
+                Toggle("Afficher le temps de démarrage des chaînes", isOn: $showStartupTime)
+                Text("Moteur de lecture : VLC. Une seule connexion au fournisseur est ouverte à la fois.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Toggle("Actualiser les sources au démarrage (si plus de 6 h)", isOn: $autoRefresh)
             LabeledContent("Cache") {

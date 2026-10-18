@@ -4,12 +4,12 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.2.2)
+## Fonctions (version 0.3.0)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
 - Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
-- Lecteur natif avec plein écran et image dans l'image
+- Moteur de lecture **VLC** (VLCKit) : direct MPEG-TS, HLS, MP4, MKV… ; mode cinéma, mesure du temps de démarrage
 - **Mises à jour automatiques** (Sparkle) avec canal bêta facultatif
 - Aide intégrée : voir [docs/AIDE.md](docs/AIDE.md)
 
@@ -69,6 +69,11 @@ Après chaque publication, le workflow signe le DMG avec la clé Sparkle et met 
 Pour publier une **version de test**, utilisez un numéro `X.Y.Z-betaN` (par exemple `0.3.0-beta1`). Elle sera publiée en pré-version GitHub et proposée seulement aux utilisateurs qui ont activé le canal bêta.
 
 La clé publique correspondante est inscrite dans `project.yml` (`SUPublicEDKey`). **Ne perdez jamais la clé privée** : sans elle, les copies installées n'accepteront plus de mise à jour.
+
+## Licences
+
+- [VLCKit](https://code.videolan.org/videolan/VLCKit) (VideoLAN) — LGPL 2.1+, intégré via [vlckit-spm](https://github.com/tylerjonesio/vlckit-spm) 3.6.0 (bibliothèque dynamique non modifiée)
+- [Sparkle](https://sparkle-project.org) — MIT
 
 ## Développer en local (facultatif)
 

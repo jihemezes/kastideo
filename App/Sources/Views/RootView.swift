@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import KastideoCore
 
 /// Fenêtre principale : accueil si aucune source, sinon navigation en trois colonnes.
@@ -34,6 +35,7 @@ struct RootView: View {
 
 struct MainSplitView: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
     @State private var columns = NavigationSplitViewVisibility.all
 
     var body: some View {
@@ -45,6 +47,10 @@ struct MainSplitView: View {
                 .navigationSplitViewColumnWidth(min: 280, ideal: 360, max: 520)
         } detail: {
             DetailView()
+        }
+        .onChange(of: navigation.isTheater) { _, theater in
+            withAnimation { columns = theater ? .detailOnly : .all }
+            setFullScreen(theater)
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -65,4 +71,12 @@ struct MainSplitView: View {
             }
         }
     }
+}
+
+/// Passe la fenêtre principale en plein écran (ou en sort) pour le mode cinéma.
+@MainActor
+private func setFullScreen(_ enabled: Bool) {
+    guard let window = NSApp.keyWindow ?? NSApp.mainWindow else { return }
+    let isFull = window.styleMask.contains(.fullScreen)
+    if enabled != isFull { window.toggleFullScreen(nil) }
 }

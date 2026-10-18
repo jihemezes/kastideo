@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.2.2 — conversion automatique des adresses Xtream, meilleure compatibilité avec les fournisseurs IPTV.
+> Version 0.3.0 — nouveau moteur de lecture VLC : direct MPEG-TS, MKV, AVI, contrôles et mode cinéma.
 
 ## Premiers pas
 
@@ -54,12 +54,25 @@ Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'ad
 
 ## Lecture
 
-- La lecture démarre dès que vous sélectionnez une chaîne ou un film.
-- Les contrôles du lecteur apparaissent au survol : pause, volume, plein écran, image dans l'image.
-- Pour les sources Xtream, les chaînes en direct sont lues au format HLS (`.m3u8`).
-- Si un flux `.ts` échoue, Kastideo essaie automatiquement sa version `.m3u8`.
+Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…
 
-> Le lecteur natif d'Apple lit le HLS (.m3u8), le MP4 et le MOV. Certains films au format MKV ou AVI ne sont pas encore lisibles : un moteur de lecture étendu est prévu dans une prochaine version.
+- La lecture démarre dès que vous sélectionnez une chaîne, un film ou un épisode.
+- Pendant l'ouverture, le logo et le nom de la chaîne s'affichent. Le badge **« Prête en x s »** indique ensuite le temps de démarrage (désactivable dans les réglages).
+- Les contrôles apparaissent au survol de la vidéo : lecture / pause, recul de 10 s et avance de 30 s pour les films et épisodes, barre de progression, volume (jusqu'à 200 %) et mode cinéma.
+- Un clic sur la vidéo met en pause ; un **double-clic** active le **mode cinéma** (vidéo en plein écran, colonnes masquées). **Échap** ou **⌘↩** pour en sortir.
+- Pour les sources Xtream, le direct est lu au format MPEG-TS (.ts), comme le lecteur de référence Xtream ; si le flux échoue, Kastideo essaie automatiquement la variante .m3u8 (et inversement).
+
+### Une seule connexion à la fois
+
+La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo ferme toujours le flux en cours avant d'ouvrir le suivant : vous pouvez zapper sans risque de dépasser votre limite. Si la lecture échoue, vérifiez qu'aucun autre appareil (TV, téléphone, Piboard…) ne regarde avec le même abonnement.
+
+### Mémoire tampon
+
+Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidité et stabilité :
+
+- **Rapide** (par défaut) : 0,4 s de réserve, le zapping le plus court.
+- **Équilibré** : 1 s.
+- **Stable** : 3 s, pour les connexions ou les serveurs irréguliers (moins de coupures, démarrage plus lent).
 
 ## Favoris et récents
 
@@ -71,6 +84,8 @@ Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'ad
 - **⌘1 à ⌘5** : Direct, Films, Séries, Favoris, Récents
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
+- **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
+- **⌘↩** ou double-clic sur la vidéo : mode cinéma (Échap pour sortir)
 - **⌘.** : arrêter la lecture
 - **⌘D** : ajouter ou retirer des favoris
 - **⌘R** : actualiser toutes les sources
@@ -114,8 +129,12 @@ Kastideo s'identifie auprès des serveurs comme le lecteur **VLC** : beaucoup de
 - **« Compte non actif »** : l'abonnement a expiré ou est suspendu chez votre fournisseur.
 - **Aucun programme dans le guide** : la chaîne n'a pas d'identifiant de guide TV, ou le guide de votre source n'en contient pas pour elle.
 - **« App Transport Security »** : ce message apparaissait en version 0.1.0 et 0.2.0 avec les sources en http://. Il est corrigé depuis la version 0.2.1.
-- **Lecture impossible** : le format du flux n'est pas pris en charge par le lecteur natif, ou le serveur ne répond pas. Essayez **Réessayer**, puis une autre chaîne.
+- **Lecture impossible** : le serveur n'a pas fourni le flux. Vérifiez qu'aucun autre appareil n'utilise votre abonnement (une seule connexion autorisée), puis cliquez sur **Réessayer**. Essayez aussi la mémoire tampon **Stable**.
 
 ## Confidentialité
 
 Kastideo fonctionne dans le bac à sable de macOS. Il n'accède qu'au réseau et aux fichiers que vous choisissez. Vos mots de passe restent dans le trousseau. Aucune donnée n'est envoyée ailleurs qu'à vos propres sources.
+
+## Licences
+
+Kastideo utilise **VLCKit** (moteur de VLC, © VideoLAN, licence LGPL 2.1 ou ultérieure, https://www.videolan.org/vlc/libvlc.html) et **Sparkle** (licence MIT, https://sparkle-project.org). VLCKit est intégré sous forme de bibliothèque dynamique non modifiée.

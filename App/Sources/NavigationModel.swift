@@ -52,6 +52,8 @@ final class NavigationModel {
     var visibleIDs: [String] = []
     /// Affiche la fenêtre « Nouveautés ».
     var showWhatsNew = false
+    /// Mode cinéma : la vidéo occupe toute la fenêtre (colonnes masquées, plein écran).
+    var isTheater = false
 
     func go(_ destination: Browse) {
         browse = destination

@@ -87,7 +87,7 @@ final class XtreamTests: XCTestCase {
     func testURLs() {
         let api = XtreamAPI.apiURL(creds, action: "get_live_streams").absoluteString
         XCTAssertTrue(api.hasPrefix("http://srv.example.com:8080/player_api.php?username=jm&password=p@ss&action=get_live_streams"), api)
-        XCTAssertEqual(XtreamAPI.liveURL(creds, streamID: "12").absoluteString, "http://srv.example.com:8080/live/jm/p@ss/12.m3u8")
+        XCTAssertEqual(XtreamAPI.liveURL(creds, streamID: "12").absoluteString, "http://srv.example.com:8080/live/jm/p@ss/12.ts")
         XCTAssertEqual(XtreamAPI.movieURL(creds, streamID: "5", ext: "mkv").absoluteString, "http://srv.example.com:8080/movie/jm/p@ss/5.mkv")
     }
 
@@ -115,7 +115,7 @@ final class XtreamTests: XCTestCase {
         XCTAssertEqual(items.count, 2)
         XCTAssertEqual(items[0].group, "Sport")
         XCTAssertEqual(items[0].epgID, "bein1.fr")
-        XCTAssertEqual(items[0].streamURL?.lastPathComponent, "101.m3u8")
+        XCTAssertEqual(items[0].streamURL?.lastPathComponent, "101.ts")
         XCTAssertEqual(items[1].group, "Info")
         XCTAssertNil(items[1].logoURL)
         XCTAssertNil(items[1].epgID)

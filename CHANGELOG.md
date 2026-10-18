@@ -3,6 +3,17 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.3.0] - 2026-10-18
+
+- Nouveau moteur de lecture **VLC** (VLCKit) pour tous les contenus : direct **MPEG-TS (.ts)**, HLS, MP4, **MKV**, AVI…
+- Direct Xtream lu en .ts comme le lecteur de référence (certains fournisseurs refusent le .m3u8), avec bascule automatique .ts ↔ .m3u8
+- Une seule connexion au fournisseur à la fois : le flux précédent est fermé avant d'ouvrir le suivant
+- Nouveaux contrôles : lecture / pause, recul 10 s / avance 30 s, barre de progression, volume jusqu'à 200 %
+- **Mode cinéma** (double-clic, ⌘↩, Échap pour sortir) et écran de chargement avec logo de la chaîne
+- Badge **« Prête en x s »** : temps de démarrage mesuré à chaque chaîne
+- Réglage de la **mémoire tampon** : Rapide (par défaut), Équilibré, Stable
+- Publication : cache des paquets Swift dans GitHub Actions pour des compilations plus rapides
+
 ## [0.2.2] - 2026-10-18
 
 - Correction : certains fournisseurs laissaient la requête expirer ; Kastideo s'identifie désormais comme **VLC**, comme la tuile IPTV de Piboard

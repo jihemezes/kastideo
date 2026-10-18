@@ -74,6 +74,13 @@ jobs:
       - name: Installer XcodeGen
         run: brew install xcodegen
 
+      - name: Cache des paquets Swift (VLCKit, Sparkle)
+        uses: actions/cache@v4
+        with:
+          path: ~/spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('project.yml') }}
+          restore-keys: spm-${{ runner.os }}-
+
       - name: Tests du module KastideoCore
         run: swift test --package-path Packages/KastideoCore
 
@@ -114,6 +121,7 @@ jobs:
       - name: Archiver
         run: |
           if ! xcodebuild -project Kastideo.xcodeproj -scheme Kastideo -configuration Release \
+                 -clonedSourcePackagesDirPath ~/spm-cache \
                  -destination 'generic/platform=macOS' \
                  -archivePath "$RUNNER_TEMP/Kastideo.xcarchive" \
                  MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \

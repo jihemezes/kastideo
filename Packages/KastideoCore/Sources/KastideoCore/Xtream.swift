@@ -97,8 +97,9 @@ public enum XtreamAPI {
         return components.url!
     }
 
-    /// Flux direct au format HLS (.m3u8), lisible nativement par AVPlayer.
-    public static func liveURL(_ c: XtreamCredentials, streamID: String, ext: String = "m3u8") -> URL {
+    /// Flux direct au format MPEG-TS (.ts), comme le lecteur de référence Xtream : certains fournisseurs
+    /// refusent le .m3u8 (erreur 405). Lu par le moteur VLC de Kastideo.
+    public static func liveURL(_ c: XtreamCredentials, streamID: String, ext: String = "ts") -> URL {
         streamURL(c, type: "live", id: streamID, ext: ext)
     }
 

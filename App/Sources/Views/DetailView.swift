@@ -1,5 +1,4 @@
 import SwiftUI
-import AVKit
 import KastideoCore
 
 /// Colonne de droite : lecteur ou fiche de série.
@@ -29,69 +28,23 @@ struct DetailView: View {
 struct PlayerPane: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
+    @Environment(NavigationModel.self) private var navigation
     let item: MediaItem
 
     var body: some View {
         VStack(spacing: 0) {
             VideoSurface()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Divider()
-            InfoPanel(item: item)
-                .frame(height: 190)
+            if !navigation.isTheater {
+                Divider()
+                InfoPanel(item: item)
+                    .frame(height: 190)
+            }
         }
         .task(id: item.id) {
             playback.play(item)
             store.recordPlay(item)
         }
-    }
-}
-
-/// Surface vidéo avec états de chargement et d'erreur.
-struct VideoSurface: View {
-    @Environment(PlaybackController.self) private var playback
-
-    var body: some View {
-        ZStack {
-            Color.black
-            PlayerView(player: playback.player)
-            if playback.isLoading && playback.errorMessage == nil {
-                ProgressView()
-                    .controlSize(.large)
-                    .tint(.white)
-            }
-            if let message = playback.errorMessage {
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                    Text(message)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 460)
-                    Button("Réessayer") { playback.retry() }
-                }
-                .foregroundStyle(.white)
-                .padding(24)
-                .background(.black.opacity(0.7), in: RoundedRectangle(cornerRadius: 14))
-            }
-        }
-    }
-}
-
-/// Vue AVKit native (contrôles, plein écran, image dans l'image).
-struct PlayerView: NSViewRepresentable {
-    let player: AVPlayer
-
-    func makeNSView(context: Context) -> AVPlayerView {
-        let view = AVPlayerView()
-        view.player = player
-        view.controlsStyle = .floating
-        view.allowsPictureInPicturePlayback = true
-        view.showsFullScreenToggleButton = true
-        view.videoGravity = .resizeAspect
-        return view
-    }
-
-    func updateNSView(_ view: AVPlayerView, context: Context) {
-        if view.player !== player { view.player = player }
     }
 }
 

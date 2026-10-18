@@ -93,6 +93,13 @@ struct KastideoCommands: Commands {
                 .keyboardShortcut("k", modifiers: .command)
             Button("Arrêter la lecture") { playback.stop() }
                 .keyboardShortcut(".", modifiers: .command)
+            Button("Mode cinéma") { navigation.isTheater.toggle() }
+                .keyboardShortcut(.return, modifiers: .command)
+            Divider()
+            Button("Reculer de 10 secondes") { playback.jump(seconds: -10) }
+                .keyboardShortcut("[", modifiers: .command)
+            Button("Avancer de 30 secondes") { playback.jump(seconds: 30) }
+                .keyboardShortcut("]", modifiers: .command)
             Divider()
             Button("Ajouter / retirer des favoris") {
                 if let id = navigation.selectedItemID { store.toggleFavorite(id) }
