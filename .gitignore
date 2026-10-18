@@ -1,0 +1,14 @@
+.DS_Store
+*.xcuserstate
+xcuserdata/
+DerivedData/
+build/
+.build/
+node_modules/
+dist/
+out/
+*.dmg
+*.p12
+*.cer
+*.provisionprofile
+.env
