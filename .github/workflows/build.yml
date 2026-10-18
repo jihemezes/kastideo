@@ -1,9 +1,10 @@
-# Vérification à chaque push sur main : tests du module Core + compilation de l'app (sans signature).
+# Vérification manuelle (bouton « Run workflow ») ou sur pull request : tests du module Core
+# + compilation de l'app sans signature. Rien n'est publié.
+# Les livraisons (tag vX.Y.Z) sont entièrement prises en charge par release.yml, qui refait
+# les tests et la compilation : un seul run par livraison.
 name: Build
 
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
 

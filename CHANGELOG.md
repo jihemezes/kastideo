@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.2.1] - 2026-10-18
+
+- Correction : les playlists et flux en **http://** étaient refusés (« App Transport Security ») ; ils se chargent désormais normalement
+- Publication : un seul workflow GitHub par livraison (Build ne se lance plus qu'à la demande)
+
 ## [0.2.0] - 2026-10-18
 
 - Mises à jour automatiques avec Sparkle : vérification quotidienne, installation en un clic et relance

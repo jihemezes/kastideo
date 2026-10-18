@@ -11,7 +11,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.2.0"
+    MARKETING_VERSION: "0.2.1"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -51,9 +51,10 @@ targets:
         LSApplicationCategoryType: public.app-category.entertainment
         LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
         NSHumanReadableCopyright: "© 2026 Jean-Michel Ezes"
+        # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
+        # Attention : ne pas ajouter NSAllowsArbitraryLoadsForMedia, sinon macOS ignore NSAllowsArbitraryLoads.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
-          NSAllowsArbitraryLoadsForMedia: true
         # Sparkle : flux des versions (branche « appcast » du dépôt public) et clé publique EdDSA.
         SUFeedURL: https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml
         SUPublicEDKey: PhRxsgR0m+ocj9knZzFOQUMTl36+TfzEZ1MyRKxgtPQ=

@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.2.0 — mises à jour automatiques, canal bêta et fenêtre Nouveautés.
+> Version 0.2.1 — mises à jour automatiques, canal bêta, fenêtre Nouveautés ; sources http:// acceptées.
 
 ## Premiers pas
 
@@ -108,6 +108,7 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 - **« Identifiant ou mot de passe refusé »** : vérifiez vos identifiants avec **Tester la connexion**.
 - **« Compte non actif »** : l'abonnement a expiré ou est suspendu chez votre fournisseur.
 - **Aucun programme dans le guide** : la chaîne n'a pas d'identifiant de guide TV, ou le guide de votre source n'en contient pas pour elle.
+- **« App Transport Security »** : ce message apparaissait en version 0.1.0 et 0.2.0 avec les sources en http://. Il est corrigé depuis la version 0.2.1.
 - **Lecture impossible** : le format du flux n'est pas pris en charge par le lecteur natif, ou le serveur ne répond pas. Essayez **Réessayer**, puis une autre chaîne.
 
 ## Confidentialité

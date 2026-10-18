@@ -4,7 +4,7 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.2.0)
+## Fonctions (version 0.2.1)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
@@ -35,8 +35,8 @@ kastideo/
 ├── scripts/kastideo-release.sh Publication d'une version
 ├── scripts/appcast.py          Mise à jour du flux Sparkle (utilisé par la CI)
 ├── .github/workflows/
-│   ├── build.yml               Tests + compilation à chaque push
-│   └── release.yml             DMG signé et notarisé à chaque tag vX.Y.Z
+│   ├── build.yml               Tests + compilation à la demande (Run workflow)
+│   └── release.yml             Tests, DMG signé et notarisé, flux Sparkle à chaque tag vX.Y.Z
 └── CHANGELOG.md                Notes de version (reprises dans les Releases)
 ```
 
