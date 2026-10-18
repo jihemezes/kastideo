@@ -91,6 +91,9 @@ final class PlaybackController {
     @ObservationIgnored private var didStart = false
     @ObservationIgnored private var fallbacks: [URL] = []
     @ObservationIgnored private var currentURL: URL?
+    @ObservationIgnored private var watchdog: Task<Void, Never>?
+    /// Délai maximal sans image avant d'abandonner (ou d'essayer la variante suivante).
+    static let startTimeout: TimeInterval = 20
 
     init() {
         let defaults = UserDefaults.standard
@@ -98,6 +101,7 @@ final class PlaybackController {
         isMuted = defaults.bool(forKey: PlaybackKeys.muted)
         player = VLCMediaPlayer(options: ["--no-video-title-show", "--no-snapshot-preview"])
         player.libraryInstance.setHumanReadableName("Kastideo", withHTTPUserAgent: HTTP.userAgent)
+        player.libraryInstance.loggers = [PlaybackLog.shared]
         player.delegate = bridge
         bridge.onState = { [weak self] state in
             MainActor.assumeIsolated { self?.handle(state) }
@@ -121,6 +125,7 @@ final class PlaybackController {
     }
 
     func stop() {
+        watchdog?.cancel()
         if player.media != nil { player.stop() }
         player.media = nil
         current = nil
@@ -167,6 +172,7 @@ final class PlaybackController {
         resetTimeline()
 
         let caching = BufferingMode.current.networkCaching
+        PlaybackLog.shared.note("Ouverture de \(url.absoluteString) — tampon \(caching) ms")
         let media = VLCMedia(url: url)
         media.addOption(":network-caching=\(caching)")
         media.addOption(":live-caching=\(caching)")
@@ -175,6 +181,31 @@ final class PlaybackController {
         player.media = media
         applyAudio()
         player.play()
+
+        // Délai de garde : sans image au bout de 20 s, on essaie la variante suivante ou on abandonne.
+        watchdog?.cancel()
+        watchdog = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.startTimeout))
+            guard !Task.isCancelled else { return }
+            self?.startTimedOut(url)
+        }
+    }
+
+    private func startTimedOut(_ url: URL) {
+        guard currentURL == url, !didStart, errorMessage == nil else { return }
+        PlaybackLog.shared.note("Aucune image après \(Int(Self.startTimeout)) s")
+        if !fallbacks.isEmpty {
+            start(fallbacks.removeFirst())
+            return
+        }
+        player.stop()
+        isLoading = false
+        isPlaying = false
+        var message = "Aucune image reçue après \(Int(Self.startTimeout)) secondes. Le serveur ne répond pas pour cette chaîne, ou refuse la connexion (abonnement limité à une connexion : vérifiez qu'aucun autre appareil — TV, Piboard… — ne regarde)."
+        if let startedAt, let detail = PlaybackLog.shared.lastError(since: startedAt) {
+            message += "\n\nDétail : \(detail)"
+        }
+        errorMessage = message
     }
 
     private func resetTimeline() {
@@ -193,11 +224,13 @@ final class PlaybackController {
 
     private func handle(_ state: VLCMediaPlayerState) {
         guard player.media != nil else { return }
+        if state != .buffering || !didStart { PlaybackLog.shared.note("État : \(Self.stateName(state))") }
         switch state {
         case .opening, .buffering:
             if !didStart { isLoading = true }
         case .playing:
             isPlaying = true
+            markStarted()
             applyAudio()
         case .paused:
             isPlaying = false
@@ -206,9 +239,14 @@ final class PlaybackController {
                 start(fallbacks.removeFirst())
                 return
             }
+            watchdog?.cancel()
             isLoading = false
             isPlaying = false
-            errorMessage = Self.describe(url: currentURL)
+            var message = Self.describe(url: currentURL)
+            if let startedAt, let detail = PlaybackLog.shared.lastError(since: startedAt) {
+                message += "\n\nDétail : \(detail)"
+            }
+            errorMessage = message
         case .ended:
             isLoading = false
             isPlaying = false
@@ -222,12 +260,19 @@ final class PlaybackController {
         }
     }
 
-    private func handleTime() {
-        if !didStart {
-            didStart = true
-            isLoading = false
-            if let startedAt { startupTime = Date().timeIntervalSince(startedAt) }
+    private func markStarted() {
+        guard !didStart else { return }
+        didStart = true
+        watchdog?.cancel()
+        isLoading = false
+        if let startedAt {
+            startupTime = Date().timeIntervalSince(startedAt)
+            PlaybackLog.shared.note(String(format: "Lecture démarrée en %.2f s", startupTime ?? 0))
         }
+    }
+
+    private func handleTime() {
+        markStarted()
         elapsed = Double(player.time.intValue) / 1000
         let length = player.media?.length.intValue ?? 0
         duration = length > 0 ? Double(length) / 1000 : 0
@@ -248,6 +293,19 @@ final class PlaybackController {
             return [url.appendingPathExtension("ts")]
         }
         return []
+    }
+
+    static func stateName(_ state: VLCMediaPlayerState) -> String {
+        switch state {
+        case .stopped: return "arrêté"
+        case .opening: return "ouverture"
+        case .buffering: return "mise en mémoire tampon"
+        case .ended: return "terminé"
+        case .error: return "erreur"
+        case .playing: return "lecture"
+        case .paused: return "pause"
+        default: return "autre (\(state.rawValue))"
+        }
     }
 
     static func describe(url: URL?) -> String {

@@ -24,6 +24,12 @@ struct KastideoApp: App {
             KastideoCommands(store: store, navigation: navigation, playback: playback, updater: updater)
         }
 
+        Window("Journal de lecture", id: "playbackLog") {
+            PlaybackLogView()
+                .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
+        }
+        .defaultSize(width: 900, height: 520)
+
         Window("Aide de Kastideo", id: "help") {
             HelpView()
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
@@ -101,6 +107,9 @@ struct KastideoCommands: Commands {
             Button("Avancer de 30 secondes") { playback.jump(seconds: 30) }
                 .keyboardShortcut("]", modifiers: .command)
             Divider()
+            OpenWindowButton(title: "Journal de lecture…", windowID: "playbackLog")
+                .keyboardShortcut("l", modifiers: [.command, .option])
+            Divider()
             Button("Ajouter / retirer des favoris") {
                 if let id = navigation.selectedItemID { store.toggleFavorite(id) }
             }
@@ -119,6 +128,16 @@ struct KastideoCommands: Commands {
             HelpMenuButton()
             Button("Nouveautés de cette version") { navigation.showWhatsNew = true }
         }
+    }
+}
+
+/// Bouton de menu qui ouvre une fenêtre secondaire.
+struct OpenWindowButton: View {
+    @Environment(\.openWindow) private var openWindow
+    let title: String
+    let windowID: String
+    var body: some View {
+        Button(title) { openWindow(id: windowID) }
     }
 }
 

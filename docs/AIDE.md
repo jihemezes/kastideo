@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.3.0 — nouveau moteur de lecture VLC : direct MPEG-TS, MKV, AVI, contrôles et mode cinéma.
+> Version 0.3.1 — délai de garde au démarrage des chaînes et journal de lecture pour le diagnostic.
 
 ## Premiers pas
 
@@ -62,6 +62,12 @@ Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS
 - Un clic sur la vidéo met en pause ; un **double-clic** active le **mode cinéma** (vidéo en plein écran, colonnes masquées). **Échap** ou **⌘↩** pour en sortir.
 - Pour les sources Xtream, le direct est lu au format MPEG-TS (.ts), comme le lecteur de référence Xtream ; si le flux échoue, Kastideo essaie automatiquement la variante .m3u8 (et inversement).
 
+### Si une chaîne ne démarre pas
+
+Si aucune image n'arrive au bout de **20 secondes**, Kastideo essaie automatiquement l'autre format du flux (.ts ou .m3u8), puis affiche un message d'erreur avec le détail renvoyé par le moteur VLC.
+
+Le **Journal de lecture** (menu **Lecture > Journal de lecture…**, **⌥⌘L**, ou bouton dans le message d'erreur) affiche les messages du moteur VLC : ouverture du flux, réponses du serveur, erreurs. Les identifiants et mots de passe y sont **masqués** : vous pouvez le copier avec **Copier le journal** pour le partager en cas de problème.
+
 ### Une seule connexion à la fois
 
 La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo ferme toujours le flux en cours avant d'ouvrir le suivant : vous pouvez zapper sans risque de dépasser votre limite. Si la lecture échoue, vérifiez qu'aucun autre appareil (TV, téléphone, Piboard…) ne regarde avec le même abonnement.
@@ -87,6 +93,7 @@ Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidit�
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
 - **⌘↩** ou double-clic sur la vidéo : mode cinéma (Échap pour sortir)
 - **⌘.** : arrêter la lecture
+- **⌥⌘L** : journal de lecture
 - **⌘D** : ajouter ou retirer des favoris
 - **⌘R** : actualiser toutes les sources
 - **⌘,** : réglages et sources

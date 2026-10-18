@@ -13,6 +13,7 @@ struct VideoSurface: View {
     @State private var hideTask: Task<Void, Never>?
     @State private var showStartupBadge = false
     @State private var scrubbing: Double?
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         ZStack {
@@ -39,7 +40,10 @@ struct VideoSurface: View {
                     Text(message)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 460)
-                    Button("Réessayer") { playback.retry() }
+                    HStack {
+                        Button("Réessayer") { playback.retry() }
+                        Button("Journal de lecture") { openWindow(id: "playbackLog") }
+                    }
                 }
                 .foregroundStyle(.white)
                 .padding(24)

@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.3.1] - 2026-10-18
+
+- Correction : une chaîne qui ne répond pas ne laisse plus le chargement tourner indéfiniment ; après 20 s sans image, Kastideo essaie la variante .ts / .m3u8 puis affiche une erreur explicite
+- Le démarrage est désormais détecté dès que VLC passe en lecture
+- Nouveau **Journal de lecture** (menu Lecture, ⌥⌘L, ou bouton dans le message d'erreur) : messages du moteur VLC, identifiants et mots de passe masqués, copiable pour le diagnostic
+- Le détail de l'erreur VLC (par exemple un refus du serveur) est affiché sous le message d'erreur
+
 ## [0.3.0] - 2026-10-18
 
 - Nouveau moteur de lecture **VLC** (VLCKit) pour tous les contenus : direct **MPEG-TS (.ts)**, HLS, MP4, **MKV**, AVI…
