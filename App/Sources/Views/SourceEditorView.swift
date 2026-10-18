@@ -59,8 +59,16 @@ struct SourceEditorView: View {
                         Text("Le mot de passe est enregistré dans le trousseau macOS. Les chaînes en direct sont lues au format HLS (.m3u8).")
                     }
                 case .m3uURL:
-                    Section("Playlist") {
+                    Section {
                         TextField("Adresse M3U / M3U8", text: $playlistURL, prompt: Text("http://exemple.com/get.php?…"))
+                    } header: {
+                        Text("Playlist")
+                    } footer: {
+                        if detectedXtream != nil {
+                            Label("Adresse Xtream détectée : la source sera enregistrée en Xtream Codes (chargement bien plus rapide, guide TV inclus, mot de passe dans le trousseau).",
+                                  systemImage: "bolt.fill")
+                                .foregroundStyle(Color.accentColor)
+                        }
                     }
                 case .m3uFile:
                     Section("Playlist") {
@@ -129,6 +137,12 @@ struct SourceEditorView: View {
         return types
     }
 
+    /// Identifiants Xtream contenus dans l'adresse de playlist, s'il y en a.
+    private var detectedXtream: XtreamCredentials? {
+        guard mode == .m3uURL, let url = URL(string: playlistURL.trimmingCharacters(in: .whitespaces)) else { return nil }
+        return XtreamCredentials.fromPlaylistURL(url)
+    }
+
     private var defaultName: String {
         switch mode {
         case .xtream: return XtreamCredentials.normalizeServer(server)?.host ?? "Mon abonnement IPTV"
@@ -192,7 +206,7 @@ struct SourceEditorView: View {
             if let max = account.maxConnections { message += ", \(max) connexion(s) simultanée(s)" }
             testResult = (true, message)
         } catch {
-            testResult = (false, error.localizedDescription)
+            testResult = (false, LibraryStore.describe(error))
         }
     }
 
@@ -204,7 +218,11 @@ struct SourceEditorView: View {
             kind = .xtream(server: url, username: username.trimmingCharacters(in: .whitespaces))
         case .m3uURL:
             guard let url = URL(string: playlistURL.trimmingCharacters(in: .whitespaces)) else { return }
-            kind = .m3uURL(url)
+            if let credentials = detectedXtream {
+                kind = .xtream(server: credentials.server, username: credentials.username)
+            } else {
+                kind = .m3uURL(url)
+            }
         case .m3uFile:
             guard let bookmark = fileBookmark else { return }
             kind = .m3uFile(bookmark: bookmark, displayName: fileName)
@@ -214,7 +232,7 @@ struct SourceEditorView: View {
         let source = Source(id: existing?.id ?? UUID(), name: finalName, kind: kind,
                             epgURL: trimmedEPG.isEmpty ? nil : URL(string: trimmedEPG),
                             isEnabled: existing?.isEnabled ?? true, lastRefresh: existing?.lastRefresh)
-        let pass = mode == .xtream ? password : nil
+        let pass = mode == .xtream ? password : detectedXtream?.password
         if existing == nil {
             store.addSource(source, password: pass)
         } else {

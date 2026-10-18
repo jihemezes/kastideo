@@ -15,6 +15,25 @@ public struct XtreamCredentials: Sendable, Hashable {
         self.password = password
     }
 
+    /// Reconnaît une URL de playlist Xtream (« get.php?username=…&password=…&type=m3u_plus ») et en
+    /// extrait le serveur racine et les identifiants. L'API Xtream est bien plus rapide que le fichier M3U complet.
+    public static func fromPlaylistURL(_ url: URL) -> XtreamCredentials? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let scheme = components.scheme?.lowercased(), scheme == "http" || scheme == "https",
+              let host = components.host, !host.isEmpty else { return nil }
+        let items = components.queryItems ?? []
+        func value(_ name: String) -> String? {
+            items.first { $0.name.lowercased() == name }?.value.flatMap { $0.isEmpty ? nil : $0 }
+        }
+        guard let username = value("username"), let password = value("password") else { return nil }
+        var root = URLComponents()
+        root.scheme = scheme
+        root.host = host
+        root.port = components.port
+        guard let server = root.url else { return nil }
+        return XtreamCredentials(server: server, username: username, password: password)
+    }
+
     /// Normalise l'adresse saisie : ajoute http:// si besoin, retire « /player_api.php », « /get.php » et la barre finale.
     public static func normalizeServer(_ input: String) -> URL? {
         var text = input.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -289,14 +308,26 @@ public struct XtreamClient: Sendable {
 
 /// Téléchargement HTTP simple, portable (macOS, iOS, tvOS, Linux pour les tests).
 public enum HTTP {
-    public static let userAgent = "Kastideo/1.0"
+    /// Les plateformes IPTV ne servent souvent qu'un lecteur reconnu : un client inconnu est laissé
+    /// en attente jusqu'à expiration. On s'identifie donc comme VLC (comme la tuile IPTV de Piboard).
+    public static let userAgent = "VLC/3.0.20 LibVLC/3.0.20"
+
+    /// Session dédiée : 60 s sans données = échec, 10 min maximum pour un gros fichier.
+    static let session: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 60
+        configuration.timeoutIntervalForResource = 600
+        configuration.httpAdditionalHeaders = ["User-Agent": userAgent, "Accept": "*/*"]
+        return URLSession(configuration: configuration)
+    }()
 
     public static func get(_ url: URL, timeout: TimeInterval = 60) async throws -> Data {
         if url.isFileURL { return try Data(contentsOf: url) }
         var request = URLRequest(url: url, timeoutInterval: timeout)
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue("*/*", forHTTPHeaderField: "Accept")
         return try await withCheckedThrowingContinuation { continuation in
-            URLSession.shared.dataTask(with: request) { data, response, error in
+            session.dataTask(with: request) { data, response, error in
                 if let error { continuation.resume(throwing: error); return }
                 if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
                     continuation.resume(throwing: XtreamError.badResponse(http.statusCode)); return

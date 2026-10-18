@@ -73,6 +73,17 @@ final class XtreamTests: XCTestCase {
         XCTAssertNil(XtreamCredentials.normalizeServer("   "))
     }
 
+    func testPlaylistURLDetection() {
+        let url = URL(string: "http://gold.example.com:8080/get.php?username=jm&password=s3cr3t&type=m3u_plus&output=ts")!
+        let c = XtreamCredentials.fromPlaylistURL(url)
+        XCTAssertEqual(c?.server.absoluteString, "http://gold.example.com:8080")
+        XCTAssertEqual(c?.username, "jm")
+        XCTAssertEqual(c?.password, "s3cr3t")
+        XCTAssertNil(XtreamCredentials.fromPlaylistURL(URL(string: "http://example.com/list.m3u")!))
+        XCTAssertNil(XtreamCredentials.fromPlaylistURL(URL(string: "http://example.com/get.php?username=jm")!))
+        XCTAssertEqual(HTTP.userAgent, "VLC/3.0.20 LibVLC/3.0.20")
+    }
+
     func testURLs() {
         let api = XtreamAPI.apiURL(creds, action: "get_live_streams").absoluteString
         XCTAssertTrue(api.hasPrefix("http://srv.example.com:8080/player_api.php?username=jm&password=p@ss&action=get_live_streams"), api)

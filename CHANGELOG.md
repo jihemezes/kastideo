@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.2.2] - 2026-10-18
+
+- Correction : certains fournisseurs laissaient la requête expirer ; Kastideo s'identifie désormais comme **VLC**, comme la tuile IPTV de Piboard
+- Les adresses de playlist **get.php?username=…&password=…** sont reconnues et converties automatiquement en source **Xtream Codes** : chargement beaucoup plus rapide, guide TV inclus, mot de passe dans le trousseau
+- Les sources de ce type déjà configurées sont converties au lancement
+- Messages d'erreur réseau en français et plus explicites (délai dépassé, serveur introuvable, connexion refusée…)
+- Téléchargements : jusqu'à 10 minutes pour les très grosses playlists
+
 ## [0.2.1] - 2026-10-18
 
 - Correction : les playlists et flux en **http://** étaient refusés (« App Transport Security ») ; ils se chargent désormais normalement

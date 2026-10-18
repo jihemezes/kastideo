@@ -58,6 +58,44 @@ final class LibraryStore {
            let decoded = try? JSONDecoder().decode([String: MediaItem].self, from: data) {
             extraItems = decoded
         }
+        migrateXtreamPlaylists()
+    }
+
+    /// Convertit les playlists « get.php?username=…&password=… » en sources Xtream :
+    /// chargement bien plus rapide et mot de passe déplacé dans le trousseau.
+    private func migrateXtreamPlaylists() {
+        var changed = false
+        for index in sources.indices {
+            guard case .m3uURL(let url) = sources[index].kind,
+                  let credentials = XtreamCredentials.fromPlaylistURL(url) else { continue }
+            Keychain.set(credentials.password, account: sources[index].id.uuidString)
+            sources[index].kind = .xtream(server: credentials.server, username: credentials.username)
+            sources[index].lastRefresh = nil
+            Storage.delete(name: "content-\(sources[index].id.uuidString)")
+            changed = true
+        }
+        if changed { saveSources() }
+    }
+
+    /// Message d'erreur compréhensible pour l'utilisateur.
+    nonisolated static func describe(_ error: Error) -> String {
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .timedOut:
+                return "Le serveur n'a pas répondu à temps. Il est peut-être surchargé ou indisponible : réessayez plus tard."
+            case .cannotFindHost, .dnsLookupFailed:
+                return "Serveur introuvable : vérifiez l'adresse."
+            case .cannotConnectToHost:
+                return "Connexion au serveur refusée : vérifiez l'adresse et le port."
+            case .notConnectedToInternet, .networkConnectionLost:
+                return "Pas de connexion Internet."
+            case .secureConnectionFailed, .serverCertificateUntrusted, .serverCertificateHasBadDate:
+                return "Connexion sécurisée impossible avec ce serveur (certificat)."
+            default:
+                break
+            }
+        }
+        return error.localizedDescription
     }
 
     // MARK: - État
@@ -185,7 +223,7 @@ final class LibraryStore {
                 Task.detached(priority: .utility) { Storage.save(content, name: "content-\(id.uuidString)") }
                 await refreshEPG(for: source.id)
             } catch {
-                errors[source.id] = error.localizedDescription
+                errors[source.id] = Self.describe(error)
                 loading.remove(source.id)
             }
         }
@@ -203,7 +241,7 @@ final class LibraryStore {
             rebuildEPG()
             Task.detached(priority: .utility) { Storage.save(programmes, name: "epg-\(id.uuidString)") }
         } catch {
-            epgErrors[id] = error.localizedDescription
+            epgErrors[id] = Self.describe(error)
         }
     }
 

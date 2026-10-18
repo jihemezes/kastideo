@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.2.1 — mises à jour automatiques, canal bêta, fenêtre Nouveautés ; sources http:// acceptées.
+> Version 0.2.2 — conversion automatique des adresses Xtream, meilleure compatibilité avec les fournisseurs IPTV.
 
 ## Premiers pas
 
@@ -25,6 +25,7 @@ C'est le format le plus courant chez les fournisseurs IPTV. Il faut trois inform
 ### Playlist M3U / M3U8
 
 - **Par URL** : collez l'adresse de la playlist fournie par votre fournisseur.
+- Si l'adresse est de la forme `get.php?username=…&password=…` (le cas le plus courant chez les fournisseurs par abonnement), Kastideo la reconnaît et l'enregistre en **Xtream Codes** : le chargement est beaucoup plus rapide, le guide TV est inclus et le mot de passe est rangé dans le trousseau. Les sources de ce type déjà enregistrées sont converties automatiquement.
 - **Par fichier** : choisissez un fichier `.m3u` ou `.m3u8` sur votre Mac. Kastideo garde l'autorisation d'y accéder pour pouvoir l'actualiser.
 - Les catégories proviennent de l'attribut `group-title`, les logos de `tvg-logo` et l'association au guide TV de `tvg-id`.
 - Kastideo classe automatiquement les entrées en Direct, Films ou Séries d'après leur adresse.
@@ -104,6 +105,10 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 - **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
 
 ## Dépannage
+
+Kastideo s'identifie auprès des serveurs comme le lecteur **VLC** : beaucoup de fournisseurs IPTV ne répondent qu'aux lecteurs qu'ils reconnaissent.
+
+- **« Le serveur n'a pas répondu à temps »** : le serveur est surchargé ou indisponible. Réessayez plus tard ; si votre adresse est de type `get.php?username=…`, vérifiez qu'elle a bien été convertie en Xtream Codes (type affiché dans les réglages des sources).
 
 - **« Identifiant ou mot de passe refusé »** : vérifiez vos identifiants avec **Tester la connexion**.
 - **« Compte non actif »** : l'abonnement a expiré ou est suspendu chez votre fournisseur.

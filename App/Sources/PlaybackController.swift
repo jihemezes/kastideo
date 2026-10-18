@@ -111,6 +111,9 @@ final class PlaybackController {
         if ["ts", "mkv", "avi", "wmv", "flv"].contains(ext) {
             return "Ce flux (.\(ext)) n'est pas pris en charge par le lecteur natif d'Apple. Les formats HLS (.m3u8) et MP4 fonctionnent. Un moteur de lecture étendu est prévu dans une prochaine version."
         }
+        if ext == "m3u8", url.path.contains("/live/") {
+            return "Lecture impossible. Certains fournisseurs ne diffusent le direct qu'au format MPEG-TS (.ts), que le lecteur natif d'Apple ne sait pas lire. Un moteur de lecture étendu est prévu dans une prochaine version."
+        }
         if let error {
             return "Lecture impossible : \(error.localizedDescription)"
         }
