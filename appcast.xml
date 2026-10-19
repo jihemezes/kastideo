@@ -6,6 +6,25 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.4.0</title>
+      <pubDate>Mon, 19 Oct 2026 05:17:33 GMT</pubDate>
+      <sparkle:version>8</sparkle:version>
+      <sparkle:shortVersionString>0.4.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Enregistrement du direct&lt;/b&gt; pendant la lecture (●, ⇧⌘R), sur la même connexion, arrêt automatique à la fin du programme&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Enregistrements programmés&lt;/b&gt; depuis le guide TV (double-clic ou clic droit) ou à horaires libres, avec marges avant / après&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Téléchargement des films et épisodes&lt;/b&gt; sans les regarder, saison ou série entière, en file d&amp;#x27;attente, &lt;b&gt;cette nuit&lt;/b&gt; à l&amp;#x27;heure choisie&lt;/li&gt;
+&lt;li&gt;Connexion unique respectée : Kastideo demande avant d&amp;#x27;arrêter un enregistrement ; les téléchargements se mettent en pause pendant la lecture&lt;/li&gt;
+&lt;li&gt;Conversion automatique des enregistrements en &lt;b&gt;MP4&lt;/b&gt; sans perte de qualité&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Direct en différé&lt;/b&gt; : pause sur une chaîne en direct, reprise en différé, bouton « Direct »&lt;/li&gt;
+&lt;li&gt;Section &lt;b&gt;Enregistrements&lt;/b&gt; (⌘6) : en cours, conversions, téléchargements, programmations, fichiers&lt;/li&gt;
+&lt;li&gt;Réglages &amp;gt; Enregistrements : dossier (~/Movies/Kastideo par défaut), marges, heure de nuit, MP4, nettoyage automatique, notifications&lt;/li&gt;
+&lt;li&gt;Notifications macOS, blocage de la mise en veille pendant l&amp;#x27;activité, alerte d&amp;#x27;espace disque faible&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.4.0/Kastideo-0.4.0.dmg" length="41667871" type="application/octet-stream" sparkle:edSignature="Z6rLdSXjlPd8GqXRn031YKdAN28R3xVqg5Sy+yyvFN35vFEi5IMvayKGCKwF40jn4j7OdnE5Qu7mxFI6Hq3jAA==" />
+    </item>
+    <item>
       <title>Kastideo 0.3.1</title>
       <pubDate>Sun, 18 Oct 2026 21:14:43 GMT</pubDate>
       <sparkle:version>7</sparkle:version>
