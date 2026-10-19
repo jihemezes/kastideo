@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.6.1</title>
+      <pubDate>Mon, 19 Oct 2026 19:11:08 GMT</pubDate>
+      <sparkle:version>10</sparkle:version>
+      <sparkle:shortVersionString>0.6.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Nouvelle &lt;b&gt;icône&lt;/b&gt; de l&amp;#x27;application : monogramme K avec bouton lecture, sur fond violet, qui remplit toute la surface (plus de marge blanche autour dans le Dock et le Finder)&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.6.1/Kastideo-0.6.1.dmg" length="43953023" type="application/octet-stream" sparkle:edSignature="rUrahUHXNhs0rBhn3lNNqxXbrPzBSKv/74xCjcrjolxGs3Qf8uWVUHD6dw2CVite7+BNhDVLGZZ5K0BOKuz5CA==" />
+    </item>
+    <item>
       <title>Kastideo 0.5.0</title>
       <pubDate>Mon, 19 Oct 2026 17:11:23 GMT</pubDate>
       <sparkle:version>9</sparkle:version>
