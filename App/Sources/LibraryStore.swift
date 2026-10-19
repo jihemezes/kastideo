@@ -34,6 +34,8 @@ final class LibraryStore {
     private(set) var itemsByKind: [MediaKind: [MediaItem]] = [:]
     private(set) var categoriesByKind: [MediaKind: [String]] = [:]
     private var itemsByID: [String: MediaItem] = [:]
+    /// Contenus classés par type puis par catégorie (accès direct pour l'interface Cinéma).
+    private var itemsByCategory: [MediaKind: [String: [MediaItem]]] = [:]
     /// Épisodes lus (absents de l'index principal), pour l'historique.
     private var extraItems: [String: MediaItem] = [:]
     private var epgBySource: [UUID: [Programme]] = [:]
@@ -113,7 +115,7 @@ final class LibraryStore {
         case .all(let kind):
             return itemsByKind[kind] ?? []
         case .category(let kind, let name):
-            return (itemsByKind[kind] ?? []).filter { $0.group == name }
+            return itemsByCategory[kind]?[name] ?? []
         case .favorites:
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
@@ -309,6 +311,7 @@ final class LibraryStore {
         var categories: [MediaKind: [String]] = [:]
         var seen: [MediaKind: Set<String>] = [:]
         var byID: [String: MediaItem] = [:]
+        var byCategory: [MediaKind: [String: [MediaItem]]] = [:]
         for source in sources where source.isEnabled {
             guard let content = contents[source.id] else { continue }
             for item in content.items {
@@ -317,11 +320,13 @@ final class LibraryStore {
                     categories[item.kind, default: []].append(item.group)
                 }
                 byID[item.id] = item
+                byCategory[item.kind, default: [:]][item.group, default: []].append(item)
             }
         }
         itemsByKind = byKind
         categoriesByKind = categories
         itemsByID = byID
+        itemsByCategory = byCategory
     }
 
     private func rebuildEPG() {

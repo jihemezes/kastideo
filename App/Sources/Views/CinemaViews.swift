@@ -1,0 +1,516 @@
+import SwiftUI
+import AppKit
+import KastideoCore
+
+/// Sections proposées dans la barre d'outils de l'interface Cinéma.
+enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
+    case live, movies, series, favorites, recents, recordings
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .live: return "Direct"
+        case .movies: return "Films"
+        case .series: return "Séries"
+        case .favorites: return "Favoris"
+        case .recents: return "Récents"
+        case .recordings: return "Enregistrements"
+        }
+    }
+
+    var browse: Browse {
+        switch self {
+        case .live: return .all(.live)
+        case .movies: return .all(.movie)
+        case .series: return .all(.series)
+        case .favorites: return .favorites
+        case .recents: return .recents
+        case .recordings: return .recordings
+        }
+    }
+
+    static func from(_ browse: Browse?) -> CinemaSection {
+        guard let browse else { return .live }
+        switch browse {
+        case .all(let kind), .category(let kind, _):
+            switch kind {
+            case .live: return .live
+            case .movie: return .movies
+            case .series, .episode: return .series
+            }
+        case .favorites: return .favorites
+        case .recents: return .recents
+        case .recordings: return .recordings
+        }
+    }
+
+}
+
+/// Interface « Cinéma » : accueil à rangées horizontales, puis lecteur plein cadre.
+struct CinemaRootView: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
+    @Environment(PlaybackController.self) private var playback
+    @Environment(RecordingCenter.self) private var recordings
+    let scope: InterfaceScope?
+    let style: InterfaceStyle
+
+    var body: some View {
+        @Bindable var navigation = navigation
+        let browse = navigation.browse ?? .all(.live)
+        NavigationStack {
+            Group {
+                if navigation.selectedItemID != nil {
+                    CinemaDetail()
+                } else {
+                    CinemaCatalog(browse: browse)
+                }
+            }
+            .navigationTitle(browse.title)
+            .searchable(text: $navigation.search, placement: .toolbar, prompt: "Rechercher")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("Section", selection: sectionBinding) {
+                        ForEach(CinemaSection.allCases) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(minWidth: 500)
+                }
+                MainToolbar(store: store, scope: scope, style: style)
+            }
+            .toolbar(navigation.isTheater ? .hidden : .automatic, for: .windowToolbar)
+        }
+    }
+
+    private var sectionBinding: Binding<CinemaSection> {
+        Binding(
+            get: { CinemaSection.from(navigation.browse) },
+            set: { section in
+                if navigation.selectedItemID != nil {
+                    navigation.selectedItemID = nil
+                    if !recordings.isPlayerRecording { playback.stop() }
+                }
+                navigation.go(section.browse)
+            }
+        )
+    }
+}
+
+/// Lecteur en plein cadre avec un bouton de retour vers le catalogue.
+struct CinemaDetail: View {
+    @Environment(NavigationModel.self) private var navigation
+    @Environment(PlaybackController.self) private var playback
+    @Environment(RecordingCenter.self) private var recordings
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if !navigation.isTheater {
+                HStack {
+                    Button {
+                        close()
+                    } label: {
+                        Label("Retour", systemImage: "chevron.left")
+                    }
+                    .buttonStyle(.borderless)
+                    .keyboardShortcut(.cancelAction)
+                    .help("Revenir au catalogue (Échap)")
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                Divider()
+            }
+            DetailView()
+        }
+    }
+
+    private func close() {
+        navigation.selectedItemID = nil
+        // Ne pas couper un enregistrement qui dépend de la lecture.
+        if !recordings.isPlayerRecording { playback.stop() }
+    }
+}
+
+/// Clé qui change quand la liste affichée change (pour ⌘↑ / ⌘↓).
+private struct VisibleKey: Hashable {
+    let browse: Browse
+    let count: Int
+    let search: String
+}
+
+/// Catalogue de l'interface Cinéma : accueil de la section, grille ou résultats de recherche.
+struct CinemaCatalog: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
+    let browse: Browse
+
+    var body: some View {
+        let search = navigation.search
+        let key = search.kastideoSearchKey
+        let items = filtered(store.items(for: browse), key: key)
+
+        ScrollView {
+            if !key.isEmpty {
+                CinemaGrid(title: "Résultats pour « \(search) »", items: items, emptyText: nil)
+            } else {
+                switch browse {
+                case .all(let kind):
+                    CinemaHome(kind: kind)
+                case .category(_, let name):
+                    CinemaGrid(title: name, items: items, emptyText: browse.emptyMessage)
+                case .favorites, .recents:
+                    CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
+                case .recordings:
+                    EmptyView()
+                }
+            }
+        }
+        .task(id: VisibleKey(browse: browse, count: items.count, search: key)) {
+            navigation.visibleIDs = items.map(\.id)
+        }
+    }
+
+    private func filtered(_ items: [MediaItem], key: String) -> [MediaItem] {
+        guard !key.isEmpty else { return items }
+        return items.filter { $0.searchKey.contains(key) }
+    }
+}
+
+/// Accueil d'une section : à la une, reprise, favoris, puis une rangée par catégorie.
+struct CinemaHome: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
+    let kind: MediaKind
+
+    var body: some View {
+        let kinds: Set<MediaKind> = kind == .series ? [.series, .episode] : [kind]
+        let all = store.items(for: .all(kind))
+        let recents = store.recentIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
+        let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
+        let categories = store.categoriesByKind[kind] ?? []
+
+        if all.isEmpty {
+            ContentUnavailableView(kind.label, systemImage: "tray",
+                                   description: Text(Browse.all(kind).emptyMessage))
+                .frame(maxWidth: .infinity, minHeight: 360)
+        } else {
+            let featured = recents.first ?? favorites.first ?? all.first(where: { $0.logoURL != nil }) ?? all.first
+            let caption = recents.first != nil ? "À REPRENDRE" : (favorites.first != nil ? "VOS FAVORIS" : "À LA UNE")
+            LazyVStack(alignment: .leading, spacing: 26) {
+                if let featured {
+                    CinemaHero(item: featured, caption: caption)
+                }
+                if !recents.isEmpty {
+                    CinemaRail(title: kind == .live ? "Regardées récemment" : "Reprendre",
+                               items: recents, seeAll: { navigation.go(.recents) })
+                }
+                if !favorites.isEmpty {
+                    CinemaRail(title: "Favoris", items: favorites, seeAll: { navigation.go(.favorites) })
+                }
+                ForEach(categories, id: \.self) { name in
+                    CinemaRail(title: name,
+                               items: store.items(for: .category(kind, name)),
+                               seeAll: { navigation.go(.category(kind, name)) })
+                }
+            }
+            .padding(.vertical, 20)
+        }
+    }
+}
+
+/// Grille de vignettes (catégorie, favoris, récents, recherche).
+struct CinemaGrid: View {
+    @AppStorage(AppearanceKeys.cardSize) private var cardSizeRaw = CardSize.medium.rawValue
+    let title: String
+    let items: [MediaItem]
+    let emptyText: String?
+
+    var body: some View {
+        let size = CardSize(rawValue: cardSizeRaw) ?? .medium
+        let hasTiles = items.first?.kind == .live
+        let minimum = hasTiles ? size.tileWidth : size.posterWidth
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(title).font(.title2.weight(.bold)).lineLimit(1)
+                Text("\(items.count)").font(.callout).foregroundStyle(.secondary)
+            }
+            if items.isEmpty {
+                ContentUnavailableView(title, systemImage: "tray",
+                                       description: Text(emptyText ?? "Aucun résultat."))
+                    .frame(maxWidth: .infinity, minHeight: 300)
+            } else {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: minimum), spacing: 16, alignment: .top)],
+                          alignment: .leading, spacing: 20) {
+                    ForEach(items) { item in
+                        MediaCard(item: item)
+                    }
+                }
+            }
+        }
+        .padding(24)
+    }
+}
+
+/// Rangée horizontale de vignettes.
+struct CinemaRail: View {
+    let title: String
+    let items: [MediaItem]
+    var seeAll: (() -> Void)?
+    private let limit = 40
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(title).font(.title3.weight(.semibold)).lineLimit(1)
+                Text("\(items.count)").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                if let seeAll, items.count > 8 {
+                    Button("Tout voir", action: seeAll)
+                        .buttonStyle(.link)
+                }
+            }
+            .padding(.horizontal, 24)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(alignment: .top, spacing: 14) {
+                    ForEach(Array(items.prefix(limit))) { item in
+                        MediaCard(item: item)
+                    }
+                    if items.count > limit, let seeAll {
+                        SeeAllCard(remaining: items.count - limit, action: seeAll)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 6)
+            }
+        }
+    }
+}
+
+/// Dernière vignette d'une rangée : ouvre la catégorie complète.
+struct SeeAllCard: View {
+    @AppStorage(AppearanceKeys.cardSize) private var cardSizeRaw = CardSize.medium.rawValue
+    let remaining: Int
+    let action: () -> Void
+
+    var body: some View {
+        let size = CardSize(rawValue: cardSizeRaw) ?? .medium
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: "arrow.right.circle")
+                    .font(.largeTitle)
+                Text("+ \(remaining)")
+                    .font(.headline.monospacedDigit())
+                Text("Tout voir")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: size.posterWidth * 0.8, height: size.posterWidth * 1.5)
+            .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Vignette d'un contenu : affiche (film, série) ou tuile 16:9 (chaîne).
+struct MediaCard: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
+    @AppStorage(AppearanceKeys.cardSize) private var cardSizeRaw = CardSize.medium.rawValue
+    let item: MediaItem
+    @State private var hovering = false
+
+    var body: some View {
+        let size = CardSize(rawValue: cardSizeRaw) ?? .medium
+        let isLive = item.kind == .live
+        let width = isLive ? size.tileWidth : size.posterWidth
+        let height = isLive ? width * 9 / 16 : width * 3 / 2
+        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+
+        Button {
+            navigation.selectedItemID = item.id
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                PosterView(url: item.logoURL, name: item.name, fit: isLive)
+                    .frame(width: width, height: height)
+                    .clipShape(shape)
+                    .overlay(alignment: .topTrailing) {
+                        if store.isFavorite(item.id) {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
+                                .padding(6)
+                        }
+                    }
+                    .overlay(shape.strokeBorder(Color.white.opacity(hovering ? 0.55 : 0.08),
+                                                lineWidth: hovering ? 2 : 1))
+                Text(item.name)
+                    .font(.callout.weight(.medium))
+                    .lineLimit(1)
+                caption
+            }
+            .frame(width: width, alignment: .leading)
+            .scaleEffect(hovering ? 1.03 : 1)
+            .animation(.easeOut(duration: 0.12), value: hovering)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .contextMenu { ItemActionsMenu(item: item) }
+        .help(item.name)
+    }
+
+    @ViewBuilder
+    private var caption: some View {
+        if item.kind == .live, let programme = store.epg.current(for: item.epgID) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(programme.title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                ProgressView(value: programme.progress())
+                    .progressViewStyle(.linear)
+                    .controlSize(.mini)
+            }
+        } else {
+            Text(item.kind == .episode ? item.group : (item.number.map { "\($0) · " } ?? "") + item.group)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+}
+
+/// Affiche ou logo avec un fond dégradé et des initiales en secours.
+struct PosterView: View {
+    let url: URL?
+    let name: String
+    var fit = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(white: 0.22), Color(white: 0.11)],
+                           startPoint: .top, endPoint: .bottom)
+            if let url {
+                AsyncImage(url: url, transaction: Transaction(animation: .easeIn(duration: 0.15))) { phase in
+                    switch phase {
+                    case .success(let image):
+                        if fit {
+                            image.resizable().scaledToFit().padding(14)
+                        } else {
+                            image.resizable().scaledToFill()
+                        }
+                    default:
+                        initials
+                    }
+                }
+            } else {
+                initials
+            }
+        }
+        .clipped()
+    }
+
+    private var initials: some View {
+        Text(String(name.filter { $0.isLetter || $0.isNumber }.prefix(2)).uppercased())
+            .font(.system(size: 34, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white.opacity(0.45))
+    }
+}
+
+/// Bandeau « à la une » en haut de l'accueil d'une section.
+struct CinemaHero: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
+    let item: MediaItem
+    let caption: String
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            backdrop
+            LinearGradient(colors: [.black.opacity(0.85), .black.opacity(0.4), .clear],
+                           startPoint: .leading, endPoint: .trailing)
+            HStack(alignment: .bottom, spacing: 22) {
+                PosterView(url: item.logoURL, name: item.name, fit: item.kind == .live)
+                    .frame(width: item.kind == .live ? 230 : 140, height: item.kind == .live ? 130 : 210)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .shadow(color: .black.opacity(0.5), radius: 14, y: 6)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(caption)
+                        .font(.caption.weight(.bold))
+                        .tracking(1.5)
+                        .foregroundStyle(.tint)
+                    Text(item.name)
+                        .font(.system(size: 32, weight: .bold))
+                        .lineLimit(2)
+                    summary
+                    HStack(spacing: 10) {
+                        Button {
+                            navigation.selectedItemID = item.id
+                        } label: {
+                            Label(item.needsEpisodes ? "Voir les épisodes" : "Lire",
+                                  systemImage: item.needsEpisodes ? "list.bullet" : "play.fill")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        Button {
+                            store.toggleFavorite(item.id)
+                        } label: {
+                            Image(systemName: store.isFavorite(item.id) ? "star.fill" : "star")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .help("Ajouter ou retirer des favoris")
+                    }
+                    .padding(.top, 4)
+                }
+                .foregroundStyle(.white)
+                Spacer(minLength: 0)
+            }
+            .padding(24)
+        }
+        .frame(height: 280)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .padding(.horizontal, 24)
+    }
+
+    @ViewBuilder
+    private var summary: some View {
+        if item.kind == .live, let programme = store.epg.current(for: item.epgID) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("En ce moment : \(programme.title)")
+                    .font(.headline)
+                    .lineLimit(1)
+                ProgressView(value: programme.progress())
+                    .progressViewStyle(.linear)
+                    .frame(maxWidth: 320)
+            }
+        } else if let info = item.info, !info.isEmpty {
+            Text(info)
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.8))
+                .lineLimit(3)
+                .frame(maxWidth: 560, alignment: .leading)
+        } else {
+            Text(item.group)
+                .font(.callout)
+                .foregroundStyle(.white.opacity(0.8))
+                .lineLimit(1)
+        }
+    }
+
+    private var backdrop: some View {
+        ZStack {
+            Color(white: 0.09)
+            if let url = item.logoURL {
+                AsyncImage(url: url) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable().scaledToFill().blur(radius: 40).opacity(0.6)
+                    }
+                }
+            }
+        }
+        .clipped()
+    }
+}

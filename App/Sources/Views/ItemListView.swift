@@ -57,11 +57,14 @@ struct CatalogListView: View {
 struct ItemRow: View {
     @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
+    @AppStorage(AppearanceKeys.density) private var densityRaw = ListDensity.standard.rawValue
     let item: MediaItem
 
     var body: some View {
+        let density = ListDensity(rawValue: densityRaw) ?? .standard
         HStack(spacing: 10) {
-            LogoView(url: item.logoURL, name: item.name, size: item.kind == .live ? 36 : 44)
+            LogoView(url: item.logoURL, name: item.name,
+                     size: item.kind == .live ? density.liveLogo : density.posterLogo)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     if let number = item.number, item.kind == .live {
@@ -86,30 +89,8 @@ struct ItemRow: View {
                     .font(.caption)
             }
         }
-        .padding(.vertical, 2)
-        .contextMenu {
-            Button(store.isFavorite(item.id) ? "Retirer des favoris" : "Ajouter aux favoris") {
-                store.toggleFavorite(item.id)
-            }
-            if item.kind == .live {
-                Divider()
-                Button(recordings.isRecording(item) ? "Arrêter l'enregistrement" : "Enregistrer maintenant") {
-                    if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
-                }
-                Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
-            } else if let url = item.streamURL, !url.isFileURL {
-                Divider()
-                Button("Télécharger") { recordings.download(item, tonight: false) }
-                Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
-            }
-            if let url = item.streamURL, !url.isFileURL {
-                Divider()
-                Button("Copier l'adresse du flux") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(url.absoluteString, forType: .string)
-                }
-            }
-        }
+        .padding(.vertical, density.rowPadding)
+        .contextMenu { ItemActionsMenu(item: item) }
     }
 
     @ViewBuilder
@@ -167,5 +148,36 @@ struct LogoView: View {
         Text(String(name.filter { $0.isLetter || $0.isNumber }.prefix(2)).uppercased())
             .font(.system(size: size * 0.36, weight: .semibold, design: .rounded))
             .foregroundStyle(.secondary)
+    }
+}
+
+/// Actions du menu contextuel d'un contenu (listes et vignettes).
+struct ItemActionsMenu: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(RecordingCenter.self) private var recordings
+    let item: MediaItem
+
+    var body: some View {
+        Button(store.isFavorite(item.id) ? "Retirer des favoris" : "Ajouter aux favoris") {
+            store.toggleFavorite(item.id)
+        }
+        if item.kind == .live {
+            Divider()
+            Button(recordings.isRecording(item) ? "Arrêter l'enregistrement" : "Enregistrer maintenant") {
+                if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
+            }
+            Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
+        } else if let url = item.streamURL, !url.isFileURL {
+            Divider()
+            Button("Télécharger") { recordings.download(item, tonight: false) }
+            Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
+        }
+        if let url = item.streamURL, !url.isFileURL {
+            Divider()
+            Button("Copier l'adresse du flux") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(url.absoluteString, forType: .string)
+            }
+        }
     }
 }

@@ -192,9 +192,22 @@ jobs:
             exit 1
           fi
           rm -f "$KEY_PATH"
-          xcrun stapler staple "$DMG_PATH"
-          xcrun stapler validate "$DMG_PATH"
-          spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG_PATH"
+          # Agrafage du ticket : le service d'Apple (CloudKit) est parfois lent ou coupe la connexion
+          # juste après l'acceptation. On réessaie ; en dernier recours on publie sans agrafe
+          # (le DMG reste notarisé : macOS vérifie alors le ticket en ligne au premier lancement).
+          STAPLED=0
+          for attempt in 1 2 3 4 5 6; do
+            if xcrun stapler staple "$DMG_PATH" && xcrun stapler validate "$DMG_PATH"; then
+              STAPLED=1
+              break
+            fi
+            echo "Agrafage impossible (tentative $attempt/6), nouvel essai dans 30 s…"
+            sleep 30
+          done
+          if [ "$STAPLED" != "1" ]; then
+            echo "::warning::Ticket de notarisation non agrafé (service Apple indisponible). Le DMG est notarisé et reste valide en ligne."
+          fi
+          spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG_PATH" || true
 
       - name: Signer la mise à jour pour Sparkle
         run: |

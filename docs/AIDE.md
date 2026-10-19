@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.4.0 — enregistrement du direct, enregistrements programmés, téléchargement des films et séries, direct en différé.
+> Version 0.5.0 — réglages d'apparence (couleur d'accent, densité) et nouvelle interface Cinéma, au choix pour le direct, les films et les séries.
 
 ## Premiers pas
 
@@ -51,6 +51,21 @@ La fenêtre principale comporte trois colonnes :
 - **Lecteur** : la vidéo, avec en dessous le programme en cours, sa progression et les programmes suivants.
 
 Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'adresse du flux.
+
+### Deux interfaces au choix
+
+Kastideo propose deux présentations, que vous choisissez **séparément pour le direct, les films, les séries, et les favoris / récents** :
+
+- **Classique** : les trois colonnes décrites ci-dessus.
+- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic ouvre le lecteur en plein cadre ; **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
+
+Pour changer d'interface :
+
+- le bouton **Interface** de la barre d'outils (il s'applique au type de contenu affiché),
+- **Présentation** : **⌥⌘1** Classique, **⌥⌘2** Cinéma,
+- ou **Réglages > Apparence**.
+
+Par exemple : Classique pour le direct et Cinéma pour les films et séries. La section **Enregistrements** s'affiche toujours en interface Classique. Le choix par défaut est Classique partout.
 
 ## Lecture
 
@@ -136,6 +151,7 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 ## Raccourcis clavier
 
 - **⌘1 à ⌘6** : Direct, Films, Séries, Favoris, Récents, Enregistrements
+- **⌥⌘1 / ⌥⌘2** : interface Classique / Cinéma (pour le type de contenu affiché)
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
@@ -172,7 +188,7 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 
 ## Réglages généraux
 
-- **Apparence** : sombre (par défaut), clair ou comme le système.
+- **Apparence** (onglet **Apparence**) : thème sombre (par défaut), clair ou comme le système ; **couleur d'accent** (Système, bleu, violet, rose, rouge, orange, vert, turquoise) ; **interface** Classique ou Cinéma pour chaque type de contenu ; **densité des listes** (compacte, standard, aérée) pour l'interface Classique ; **taille des vignettes** (petites, moyennes, grandes) pour l'interface Cinéma.
 - **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
 - **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
 

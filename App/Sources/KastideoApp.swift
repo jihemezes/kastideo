@@ -9,6 +9,7 @@ struct KastideoApp: App {
     @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
+    @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
     init() {
         let store = LibraryStore()
@@ -27,6 +28,7 @@ struct KastideoApp: App {
                 .environment(recordings)
                 .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
+                .tint(AccentChoice(rawValue: accent)?.color)
                 .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1320, height: 820)
@@ -53,6 +55,7 @@ struct KastideoApp: App {
                 .environment(recordings)
                 .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
+                .tint(AccentChoice(rawValue: accent)?.color)
         }
     }
 }
@@ -133,6 +136,13 @@ struct KastideoCommands: Commands {
             .keyboardShortcut("d", modifiers: .command)
         }
 
+        CommandGroup(after: .toolbar) {
+            Button("Interface Classique") { applyInterface(.classic) }
+                .keyboardShortcut("1", modifiers: [.command, .option])
+            Button("Interface Cinéma") { applyInterface(.cinema) }
+                .keyboardShortcut("2", modifiers: [.command, .option])
+        }
+
         CommandMenu("Aller") {
             Button("Direct") { navigation.go(.all(.live)) }.keyboardShortcut("1", modifiers: .command)
             Button("Films") { navigation.go(.all(.movie)) }.keyboardShortcut("2", modifiers: .command)
@@ -146,6 +156,13 @@ struct KastideoCommands: Commands {
             HelpMenuButton()
             Button("Nouveautés de cette version") { navigation.showWhatsNew = true }
         }
+    }
+}
+
+extension KastideoCommands {
+    /// Applique l'interface choisie au type de contenu affiché.
+    func applyInterface(_ style: InterfaceStyle) {
+        InterfaceScope.scope(for: navigation.browse)?.set(style)
     }
 }
 

@@ -145,7 +145,7 @@ struct GuideStrip: View {
                         Text("EN COURS")
                             .font(.caption2.weight(.bold))
                             .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Color.accentColor, in: Capsule())
+                            .background(.tint, in: Capsule())
                             .foregroundStyle(.white)
                         Text(current.title).font(.headline).lineLimit(1)
                         Spacer()

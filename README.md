@@ -4,11 +4,12 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.4.0)
+## Fonctions (version 0.5.0)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
 - Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
+- Deux interfaces au choix par type de contenu : **Classique** (trois colonnes) et **Cinéma** (affiches et rangées) ; couleur d'accent, densité et taille des vignettes réglables
 - Moteur de lecture **VLC** (VLCKit) : direct MPEG-TS, HLS, MP4, MKV… ; mode cinéma, mesure du temps de démarrage
 - **Enregistrement** du direct (immédiat ou programmé), **téléchargement** des films et séries (file d'attente, la nuit), conversion MP4, **direct en différé**
 - **Mises à jour automatiques** (Sparkle) avec canal bêta facultatif

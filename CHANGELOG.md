@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.5.0] - 2026-10-19
+
+- Nouvelle interface **Cinéma** : bandeau « à la une », rangées horizontales (reprise, favoris, une par catégorie), affiches pour les films et séries, vignettes avec programme en cours pour les chaînes, lecteur en plein cadre
+- Interface **au choix par type de contenu** : Classique ou Cinéma séparément pour le direct, les films, les séries et les favoris / récents (bouton Interface de la barre d'outils, ⌥⌘1 / ⌥⌘2, ou Réglages > Apparence)
+- Nouvel onglet **Réglages > Apparence** : thème, couleur d'accent, densité des listes, taille des vignettes
+- Les listes par catégorie s'affichent plus vite
+- Publication : l'agrafage du ticket de notarisation est retenté en cas d'indisponibilité du service Apple (le DMG reste notarisé sans agrafe)
+
 ## [0.4.0] - 2026-10-18
 
 - **Enregistrement du direct** pendant la lecture (●, ⇧⌘R), sur la même connexion, arrêt automatique à la fin du programme

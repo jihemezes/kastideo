@@ -9,6 +9,8 @@ struct SettingsView: View {
                 .tabItem { Label("Sources", systemImage: "antenna.radiowaves.left.and.right") }
             GeneralSettingsView()
                 .tabItem { Label("Général", systemImage: "gearshape") }
+            AppearanceSettingsView()
+                .tabItem { Label("Apparence", systemImage: "paintpalette") }
             RecordingSettingsView()
                 .tabItem { Label("Enregistrements", systemImage: "record.circle") }
             UpdateSettingsView()
@@ -132,7 +134,6 @@ struct SourceSettingsRow: View {
 
 struct GeneralSettingsView: View {
     @Environment(LibraryStore.self) private var store
-    @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
@@ -140,9 +141,6 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
-            Picker("Apparence", selection: $appearance) {
-                ForEach(Appearance.allCases) { Text($0.label).tag($0.rawValue) }
-            }
             Section("Lecture") {
                 Picker("Mémoire tampon", selection: $buffering) {
                     ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
