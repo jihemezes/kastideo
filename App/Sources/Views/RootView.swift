@@ -76,14 +76,17 @@ struct MainSplitView: View {
         case .series: raw = uiSeries
         case .other: raw = uiOther
         }
-        return InterfaceStyle(rawValue: raw) ?? .classic
+        return scope.resolve(raw)
     }
 
     var body: some View {
         Group {
-            if style == .cinema {
+            switch style {
+            case .tv:
+                TVRootView(scope: scope, style: style)
+            case .cinema:
                 CinemaRootView(scope: scope, style: style)
-            } else {
+            case .classic:
                 classic
             }
         }
@@ -124,7 +127,7 @@ struct MainToolbar: ToolbarContent {
             if let scope {
                 Menu {
                     Section("Interface — \(scope.label)") {
-                        ForEach(InterfaceStyle.allCases) { option in
+                        ForEach(scope.availableStyles) { option in
                             Button {
                                 scope.set(option)
                             } label: {
@@ -139,7 +142,7 @@ struct MainToolbar: ToolbarContent {
                 } label: {
                     Label("Interface", systemImage: style.icon)
                 }
-                .help("Changer d'interface pour \(scope.label) (⌥⌘1 Classique, ⌥⌘2 Cinéma)")
+                .help("Changer d'interface pour \(scope.label) (⌥⌘1 Classique, ⌥⌘2 Cinéma, ⌥⌘3 TV)")
             }
             Button {
                 store.refreshAll()

@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.5.0 — réglages d'apparence (couleur d'accent, densité) et nouvelle interface Cinéma, au choix pour le direct, les films et les séries.
+> Version 0.6.1 — nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -52,20 +52,33 @@ La fenêtre principale comporte trois colonnes :
 
 Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'adresse du flux.
 
-### Deux interfaces au choix
+### Trois interfaces au choix
 
-Kastideo propose deux présentations, que vous choisissez **séparément pour le direct, les films, les séries, et les favoris / récents** :
+Kastideo propose trois présentations, que vous choisissez **séparément pour le direct, les films, les séries, et les favoris / récents** :
 
 - **Classique** : les trois colonnes décrites ci-dessus.
+- **TV** (direct uniquement) : voir ci-dessous.
 - **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic ouvre le lecteur en plein cadre ; **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
 
 Pour changer d'interface :
 
 - le bouton **Interface** de la barre d'outils (il s'applique au type de contenu affiché),
-- **Présentation** : **⌥⌘1** Classique, **⌥⌘2** Cinéma,
+- menu **Présentation** : **⌥⌘1** Classique, **⌥⌘2** Cinéma, **⌥⌘3** TV (direct),
 - ou **Réglages > Apparence**.
 
-Par exemple : Classique pour le direct et Cinéma pour les films et séries. La section **Enregistrements** s'affiche toujours en interface Classique. Le choix par défaut est Classique partout.
+Par exemple : TV pour le direct et Cinéma pour les films et séries. La section **Enregistrements** s'affiche toujours en interface Classique. Le choix par défaut est Classique partout.
+
+### L'interface TV (direct)
+
+La chaîne occupe tout le cadre, comme sur une télévision. Au premier affichage, Kastideo reprend la dernière chaîne regardée.
+
+- **Panneau de chaînes** : touche **←**, **Entrée**, ou approchez la souris du bord gauche. Il liste les chaînes avec numéro, logo, programme en cours et progression. Le menu en haut filtre par **Toutes / Favoris / Récents / catégorie**, et le champ **Rechercher** filtre par nom. Il se referme seul après quelques secondes (touche **→** ou **Échap** pour le fermer tout de suite).
+- **Zapping** : **↑ / ↓** chaîne précédente / suivante de la liste affichée, **B** retour à la chaîne précédente.
+- **Numéro de chaîne** : tapez les chiffres (par exemple **1** puis **2**) ; la chaîne s'ouvre après 1,6 s ou avec **Entrée**. Si votre fournisseur ne numérote pas ses chaînes, le numéro désigne la position dans la liste affichée.
+- **Bandeau d'information** : s'affiche cinq secondes à chaque changement de chaîne (logo, numéro, programme en cours, horaires, programme suivant, heure). **I** ou **→** l'affiche ou le masque.
+- Autres touches : **F** favori, **M** muet, **Espace** pause (direct en différé).
+- Double-clic sur l'image ou **⌘↩** : plein écran ; la barre d'outils se masque.
+- Les touches du clavier ne fonctionnent pas pendant la saisie dans le champ de recherche. Les onglets en haut de la fenêtre permettent de passer aux Films, aux Séries, etc.
 
 ## Lecture
 
@@ -151,7 +164,8 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 ## Raccourcis clavier
 
 - **⌘1 à ⌘6** : Direct, Films, Séries, Favoris, Récents, Enregistrements
-- **⌥⌘1 / ⌥⌘2** : interface Classique / Cinéma (pour le type de contenu affiché)
+- **⌥⌘1 / ⌥⌘2 / ⌥⌘3** : interface Classique / Cinéma / TV (pour le type de contenu affiché)
+- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **F** favori, **M** muet
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)

@@ -12,6 +12,7 @@ enum AppearanceKeys {
 enum InterfaceStyle: String, CaseIterable, Identifiable {
     case classic
     case cinema
+    case tv
 
     var id: String { rawValue }
 
@@ -19,6 +20,7 @@ enum InterfaceStyle: String, CaseIterable, Identifiable {
         switch self {
         case .classic: return "Classique"
         case .cinema: return "Cinéma"
+        case .tv: return "TV"
         }
     }
 
@@ -26,6 +28,7 @@ enum InterfaceStyle: String, CaseIterable, Identifiable {
         switch self {
         case .classic: return "sidebar.left"
         case .cinema: return "rectangle.grid.1x2"
+        case .tv: return "tv"
         }
     }
 
@@ -33,6 +36,7 @@ enum InterfaceStyle: String, CaseIterable, Identifiable {
         switch self {
         case .classic: return "Trois colonnes : sources et catégories, liste, lecteur."
         case .cinema: return "Grande affiche et rangées horizontales, comme Apple TV ou Netflix."
+        case .tv: return "Direct uniquement : la chaîne en plein cadre, panneau de chaînes, bandeau d'information, zapping par numéro."
         }
     }
 }
@@ -74,11 +78,23 @@ enum InterfaceScope: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Interfaces proposées pour ce type de contenu (l'interface TV ne concerne que le direct).
+    var availableStyles: [InterfaceStyle] {
+        self == .live ? InterfaceStyle.allCases : [.classic, .cinema]
+    }
+
+    /// Interface enregistrée, ramenée à Classique si elle n'est pas proposée pour ce type de contenu.
+    func resolve(_ raw: String) -> InterfaceStyle {
+        let style = InterfaceStyle(rawValue: raw) ?? .classic
+        return availableStyles.contains(style) ? style : .classic
+    }
+
     func style(in defaults: UserDefaults = .standard) -> InterfaceStyle {
-        InterfaceStyle(rawValue: defaults.string(forKey: storageKey) ?? "") ?? .classic
+        resolve(defaults.string(forKey: storageKey) ?? "")
     }
 
     func set(_ style: InterfaceStyle, in defaults: UserDefaults = .standard) {
+        guard availableStyles.contains(style) else { return }
         defaults.set(style.rawValue, forKey: storageKey)
     }
 }
@@ -222,7 +238,7 @@ struct AppearanceSettingsView: View {
                     ForEach(InterfaceStyle.allCases) { style in
                         Text("**\(style.label)** — \(style.summary)")
                     }
-                    Text("Vous pouvez aussi changer d'interface depuis le bouton de la barre d'outils ou avec ⌥⌘1 (Classique) et ⌥⌘2 (Cinéma).")
+                    Text("Vous pouvez aussi changer d'interface depuis le bouton de la barre d'outils ou avec ⌥⌘1 (Classique), ⌥⌘2 (Cinéma) et ⌥⌘3 (TV).")
                 }
             }
 
@@ -276,7 +292,7 @@ struct InterfaceScopePicker: View {
 
     var body: some View {
         Picker(scope.label, selection: $raw) {
-            ForEach(InterfaceStyle.allCases) { style in
+            ForEach(scope.availableStyles) { style in
                 Label(style.label, systemImage: style.icon).tag(style.rawValue)
             }
         }

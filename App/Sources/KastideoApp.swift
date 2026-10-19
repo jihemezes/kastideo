@@ -141,6 +141,8 @@ struct KastideoCommands: Commands {
                 .keyboardShortcut("1", modifiers: [.command, .option])
             Button("Interface Cinéma") { applyInterface(.cinema) }
                 .keyboardShortcut("2", modifiers: [.command, .option])
+            Button("Interface TV (direct)") { applyInterface(.tv) }
+                .keyboardShortcut("3", modifiers: [.command, .option])
         }
 
         CommandMenu("Aller") {

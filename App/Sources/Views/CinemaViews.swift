@@ -70,20 +70,31 @@ struct CinemaRootView: View {
             .navigationTitle(browse.title)
             .searchable(text: $navigation.search, placement: .toolbar, prompt: "Rechercher")
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("Section", selection: sectionBinding) {
-                        ForEach(CinemaSection.allCases) { Text($0.label).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(minWidth: 500)
-                }
+                SectionPickerToolbar(navigation: self.navigation, playback: playback, recordings: recordings)
                 MainToolbar(store: store, scope: scope, style: style)
             }
             .toolbar(navigation.isTheater ? .hidden : .automatic, for: .windowToolbar)
         }
     }
+}
 
-    private var sectionBinding: Binding<CinemaSection> {
+/// Onglets de section (Direct, Films…) au centre de la barre d'outils des interfaces Cinéma et TV.
+struct SectionPickerToolbar: ToolbarContent {
+    let navigation: NavigationModel
+    let playback: PlaybackController
+    let recordings: RecordingCenter
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            Picker("Section", selection: binding) {
+                ForEach(CinemaSection.allCases) { Text($0.label).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .frame(minWidth: 500)
+        }
+    }
+
+    private var binding: Binding<CinemaSection> {
         Binding(
             get: { CinemaSection.from(navigation.browse) },
             set: { section in

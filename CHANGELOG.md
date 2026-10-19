@@ -3,6 +3,17 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.6.1] - 2026-10-19
+
+- Nouvelle **icône** de l'application : monogramme K avec bouton lecture, sur fond violet, qui remplit toute la surface (plus de marge blanche autour dans le Dock et le Finder)
+
+## [0.6.0] - 2026-10-19
+
+- Nouvelle interface **TV** pour le direct : la chaîne en plein cadre, **panneau de chaînes** (touche ←, Entrée ou bord gauche) avec filtre Toutes / Favoris / Récents / catégorie et recherche, **bandeau d'information** à chaque changement de chaîne (programme en cours, horaires, programme suivant, heure)
+- **Zapping au clavier** : ↑ / ↓ chaîne précédente / suivante, **numéro de chaîne** tapé au clavier, **B** retour à la chaîne précédente, I bandeau, F favori, M muet, Espace pause
+- Reprise automatique de la dernière chaîne regardée à l'ouverture de l'interface TV
+- Choix de l'interface TV dans Réglages > Apparence, par le bouton Interface de la barre d'outils ou avec ⌥⌘3
+
 ## [0.5.0] - 2026-10-19
 
 - Nouvelle interface **Cinéma** : bandeau « à la une », rangées horizontales (reprise, favoris, une par catégorie), affiches pour les films et séries, vignettes avec programme en cours pour les chaînes, lecteur en plein cadre
