@@ -3,6 +3,7 @@ import KastideoCore
 
 struct SidebarView: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(RecordingCenter.self) private var recordings
     @Environment(NavigationModel.self) private var navigation
 
     var body: some View {
@@ -14,6 +15,8 @@ struct SidebarView: View {
                 row(.all(.series), icon: "rectangle.stack", count: store.count(for: .series))
                 row(.favorites, icon: "star", count: store.favoriteIDs.count)
                 row(.recents, icon: "clock.arrow.circlepath", count: nil)
+                row(.recordings, icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
+                    count: recordings.activityCount)
             }
 
             let kind = navigation.lastKind

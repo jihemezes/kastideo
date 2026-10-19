@@ -8,11 +8,12 @@ enum Browse: Hashable {
     case category(MediaKind, String)
     case favorites
     case recents
+    case recordings
 
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .favorites, .recents: return nil
+        case .favorites, .recents, .recordings: return nil
         }
     }
 
@@ -22,6 +23,7 @@ enum Browse: Hashable {
         case .category(_, let name): return name
         case .favorites: return "Favoris"
         case .recents: return "Récents"
+        case .recordings: return "Enregistrements"
         }
     }
 

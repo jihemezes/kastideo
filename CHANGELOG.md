@@ -3,6 +3,18 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.4.0] - 2026-10-18
+
+- **Enregistrement du direct** pendant la lecture (●, ⇧⌘R), sur la même connexion, arrêt automatique à la fin du programme
+- **Enregistrements programmés** depuis le guide TV (double-clic ou clic droit) ou à horaires libres, avec marges avant / après
+- **Téléchargement des films et épisodes** sans les regarder, saison ou série entière, en file d'attente, **cette nuit** à l'heure choisie
+- Connexion unique respectée : Kastideo demande avant d'arrêter un enregistrement ; les téléchargements se mettent en pause pendant la lecture
+- Conversion automatique des enregistrements en **MP4** sans perte de qualité
+- **Direct en différé** : pause sur une chaîne en direct, reprise en différé, bouton « Direct »
+- Section **Enregistrements** (⌘6) : en cours, conversions, téléchargements, programmations, fichiers
+- Réglages > Enregistrements : dossier (~/Movies/Kastideo par défaut), marges, heure de nuit, MP4, nettoyage automatique, notifications
+- Notifications macOS, blocage de la mise en veille pendant l'activité, alerte d'espace disque faible
+
 ## [0.3.1] - 2026-10-18
 
 - Correction : une chaîne qui ne répond pas ne laisse plus le chargement tourner indéfiniment ; après 20 s sans image, Kastideo essaie la variante .ts / .m3u8 puis affiche une erreur explicite

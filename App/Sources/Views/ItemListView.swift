@@ -2,8 +2,21 @@ import SwiftUI
 import AppKit
 import KastideoCore
 
-/// Colonne centrale : liste des chaînes / films / séries de la sélection, avec recherche.
+/// Colonne centrale : catalogue ou section « Enregistrements ».
 struct ItemListView: View {
+    @Environment(NavigationModel.self) private var navigation
+
+    var body: some View {
+        if navigation.browse == .recordings {
+            RecordingsListView()
+        } else {
+            CatalogListView()
+        }
+    }
+}
+
+/// Liste des chaînes / films / séries de la sélection, avec recherche.
+struct CatalogListView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
 
@@ -43,6 +56,7 @@ struct ItemListView: View {
 
 struct ItemRow: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(RecordingCenter.self) private var recordings
     let item: MediaItem
 
     var body: some View {
@@ -77,7 +91,19 @@ struct ItemRow: View {
             Button(store.isFavorite(item.id) ? "Retirer des favoris" : "Ajouter aux favoris") {
                 store.toggleFavorite(item.id)
             }
-            if let url = item.streamURL {
+            if item.kind == .live {
+                Divider()
+                Button(recordings.isRecording(item) ? "Arrêter l'enregistrement" : "Enregistrer maintenant") {
+                    if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
+                }
+                Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
+            } else if let url = item.streamURL, !url.isFileURL {
+                Divider()
+                Button("Télécharger") { recordings.download(item, tonight: false) }
+                Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
+            }
+            if let url = item.streamURL, !url.isFileURL {
+                Divider()
                 Button("Copier l'adresse du flux") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(url.absoluteString, forType: .string)

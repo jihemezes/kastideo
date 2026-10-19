@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.3.1 — délai de garde au démarrage des chaînes et journal de lecture pour le diagnostic.
+> Version 0.4.0 — enregistrement du direct, enregistrements programmés, téléchargement des films et séries, direct en différé.
 
 ## Premiers pas
 
@@ -68,6 +68,10 @@ Si aucune image n'arrive au bout de **20 secondes**, Kastideo essaie automatique
 
 Le **Journal de lecture** (menu **Lecture > Journal de lecture…**, **⌥⌘L**, ou bouton dans le message d'erreur) affiche les messages du moteur VLC : ouverture du flux, réponses du serveur, erreurs. Les identifiants et mots de passe y sont **masqués** : vous pouvez le copier avec **Copier le journal** pour le partager en cas de problème.
 
+### Direct en différé
+
+Mettez une chaîne en direct en **pause** : le moteur VLC continue de recevoir le flux et le garde en réserve. À la reprise, vous regardez en **différé** (indicateur jaune « DIFFÉRÉ −2:34 » dans les contrôles). Le bouton **Direct** revient au direct. Si un flux ne permet pas la pause, le bouton est grisé.
+
 ### Une seule connexion à la fois
 
 La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo ferme toujours le flux en cours avant d'ouvrir le suivant : vous pouvez zapper sans risque de dépasser votre limite. Si la lecture échoue, vérifiez qu'aucun autre appareil (TV, téléphone, Piboard…) ne regarde avec le même abonnement.
@@ -80,6 +84,50 @@ Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidit�
 - **Équilibré** : 1 s.
 - **Stable** : 3 s, pour les connexions ou les serveurs irréguliers (moins de coupures, démarrage plus lent).
 
+## Enregistrements et téléchargements
+
+Tout se retrouve dans la section **Enregistrements** de la barre latérale (**⌘6**) : enregistrement en cours, conversions, téléchargements, programmations et fichiers enregistrés (un clic pour les regarder, clic droit pour les afficher dans le Finder ou les supprimer).
+
+Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglages > Enregistrements**) et nommés automatiquement, par exemple « TF1 – Le goût du détail – 2026-10-18 20h50 ».
+
+### Enregistrer le direct
+
+- Pendant la lecture d'une chaîne, cliquez sur **●** dans les contrôles, sur **Enregistrer** sous la vidéo, ou utilisez **⇧⌘R**. La pastille **REC** indique la durée.
+- L'enregistrement s'arrête automatiquement à la fin du programme en cours (d'après le guide TV, plus la marge après), ou quand vous cliquez sur **■**.
+- Il utilise **la même connexion** que la lecture : rien de plus n'est consommé sur votre abonnement.
+- Clic droit sur une chaîne > **Enregistrer maintenant** : si vous regardez une autre chaîne, Kastideo vous demande s'il faut arrêter la lecture, puis enregistre en arrière-plan.
+- À la fin, l'enregistrement est **converti en MP4** sans perte de qualité (lisible par QuickTime, l'iPhone, l'iPad). Désactivable dans les réglages.
+
+### Programmer un enregistrement
+
+- Dans le guide TV sous la vidéo, **double-cliquez** sur un programme à venir, ou faites un clic droit > **Programmer l'enregistrement**. Une pastille rouge marque les programmes programmés.
+- Clic droit sur une chaîne > **Programmer un enregistrement…** (ou l'icône calendrier sous la vidéo) : choisissez un programme du guide ou des horaires libres.
+- Des **marges** avant et après (2 et 5 minutes par défaut, réglables) évitent de rater le début ou la fin.
+- À l'heure dite, l'enregistrement démarre en arrière-plan. Si vous regardez une autre chaîne, Kastideo vous demande s'il faut arrêter la lecture ; sans réponse, l'enregistrement démarre au bout de 60 secondes.
+
+### Télécharger un film ou des épisodes sans les regarder
+
+- Clic droit sur un film ou un épisode > **Télécharger** ou **Télécharger cette nuit**, ou le bouton **Télécharger** sous la vidéo.
+- Pour une série : bouton **Télécharger** de la fiche > la saison affichée ou toute la série.
+- Les téléchargements passent **l'un après l'autre** (file d'attente). « Cette nuit » démarre à 2 h par défaut (réglable).
+- Vous pouvez mettre en pause, reprendre ou annuler chaque téléchargement dans la section Enregistrements.
+
+### Connexion unique : qui a la priorité ?
+
+Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose à la fois et **vous demande toujours** avant d'interrompre quelque chose :
+
+- Vous changez de chaîne pendant un enregistrement : Kastideo demande s'il faut **arrêter l'enregistrement**.
+- Vous lancez une lecture pendant un téléchargement : le téléchargement est **mis en pause** et reprend tout seul quand la lecture s'arrête.
+- Les fichiers déjà enregistrés se regardent à tout moment, même pendant un enregistrement en arrière-plan.
+
+### Bon à savoir
+
+- Kastideo doit **rester ouvert** et le Mac **allumé** pour les enregistrements programmés et les téléchargements de nuit. Kastideo empêche la mise en veille automatique pendant l'activité et dans l'heure qui précède, mais pas l'extinction ni la mise en veille manuelle.
+- Une **notification macOS** signale le début et la fin des enregistrements et des téléchargements (désactivable).
+- **Nettoyage automatique** (facultatif) : les enregistrements plus anciens que le nombre de jours choisi sont placés dans la corbeille.
+- Une alerte prévient quand l'espace disque devient faible.
+- Les droits de copie dépendent des conditions de votre fournisseur : Kastideo enregistre pour votre usage privé ce que votre abonnement vous donne déjà.
+
 ## Favoris et récents
 
 - Ajoutez un favori avec l'étoile du panneau d'informations, le clic droit ou **⌘D**.
@@ -87,12 +135,14 @@ Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidit�
 
 ## Raccourcis clavier
 
-- **⌘1 à ⌘5** : Direct, Films, Séries, Favoris, Récents
+- **⌘1 à ⌘6** : Direct, Films, Séries, Favoris, Récents, Enregistrements
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
 - **⌘↩** ou double-clic sur la vidéo : mode cinéma (Échap pour sortir)
 - **⌘.** : arrêter la lecture
+- **⇧⌘R** : enregistrer la chaîne regardée / arrêter l'enregistrement
+- **⌘6** : section Enregistrements
 - **⌥⌘L** : journal de lecture
 - **⌘D** : ajouter ou retirer des favoris
 - **⌘R** : actualiser toutes les sources

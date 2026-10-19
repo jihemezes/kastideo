@@ -5,6 +5,7 @@ import KastideoCore
 struct SeriesDetailView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
+    @Environment(RecordingCenter.self) private var recordings
     let series: MediaItem
 
     @State private var seasons: [SeriesSeason] = []
@@ -37,7 +38,8 @@ struct SeriesDetailView: View {
             }
         }
         .task {
-            if let current = playback.current, !(current.kind == .episode && current.group == series.name) {
+            if let current = playback.current, !(current.kind == .episode && current.group == series.name),
+               !recordings.isPlayerRecording {
                 playback.stop()
             }
             await load()
@@ -51,6 +53,27 @@ struct SeriesDetailView: View {
                 HStack {
                     Text(series.name).font(.title2.weight(.semibold))
                     Spacer()
+                    if !seasons.isEmpty {
+                        Menu {
+                            let season = seasons.first { $0.number == selectedSeason } ?? seasons[0]
+                            Section("Saison \(season.number) (\(season.episodes.count) épisodes)") {
+                                Button("Télécharger maintenant") { recordings.download(season.episodes, tonight: false) }
+                                Button("Télécharger cette nuit") { recordings.download(season.episodes, tonight: true) }
+                            }
+                            if seasons.count > 1 {
+                                let all = seasons.flatMap(\.episodes)
+                                Section("Toute la série (\(all.count) épisodes)") {
+                                    Button("Télécharger maintenant") { recordings.download(all, tonight: false) }
+                                    Button("Télécharger cette nuit") { recordings.download(all, tonight: true) }
+                                }
+                            }
+                        } label: {
+                            Label("Télécharger", systemImage: "arrow.down.circle")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                        .help("Télécharger des épisodes sans les regarder (en file d'attente)")
+                    }
                     Button {
                         store.toggleFavorite(series.id)
                     } label: {
@@ -80,7 +103,7 @@ struct SeriesDetailView: View {
         let season = seasons.first { $0.number == selectedSeason } ?? seasons[0]
         return List(season.episodes) { episode in
             Button {
-                playback.play(episode)
+                recordings.requestPlay(episode)
                 store.recordPlay(episode)
             } label: {
                 HStack(spacing: 10) {
@@ -98,6 +121,10 @@ struct SeriesDetailView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .contextMenu {
+                Button("Télécharger l'épisode") { recordings.download(episode, tonight: false) }
+                Button("Télécharger l'épisode cette nuit") { recordings.download(episode, tonight: true) }
+            }
         }
         .listStyle(.inset)
     }

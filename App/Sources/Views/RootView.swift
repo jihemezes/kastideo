@@ -7,11 +7,13 @@ struct RootView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
+    @Environment(RecordingCenter.self) private var recordings
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @State private var showAddSource = false
 
     var body: some View {
         @Bindable var navigation = navigation
+        @Bindable var recordings = recordings
         Group {
             if store.hasSources {
                 MainSplitView()
@@ -25,6 +27,26 @@ struct RootView: View {
         }
         .sheet(isPresented: $navigation.showWhatsNew) {
             WhatsNewView()
+        }
+        .sheet(item: $recordings.scheduleSheetItem) { item in
+            ScheduleRecordingSheet(item: item)
+                .environment(store)
+                .environment(recordings)
+        }
+        .alert(recordings.conflict?.title ?? "",
+               isPresented: Binding(get: { recordings.conflict != nil },
+                                    set: { if !$0 { recordings.conflict = nil } }),
+               presenting: recordings.conflict) { conflict in
+            Button(conflict.confirmTitle, role: .destructive) {
+                recordings.conflict = nil
+                conflict.onConfirm()
+            }
+            Button("Annuler", role: .cancel) {
+                recordings.conflict = nil
+                conflict.onCancel()
+            }
+        } message: { conflict in
+            Text(conflict.message)
         }
         .task {
             if ReleaseNotes.shouldAnnounceUpdate() { navigation.showWhatsNew = true }

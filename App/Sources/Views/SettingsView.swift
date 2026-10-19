@@ -9,10 +9,12 @@ struct SettingsView: View {
                 .tabItem { Label("Sources", systemImage: "antenna.radiowaves.left.and.right") }
             GeneralSettingsView()
                 .tabItem { Label("Général", systemImage: "gearshape") }
+            RecordingSettingsView()
+                .tabItem { Label("Enregistrements", systemImage: "record.circle") }
             UpdateSettingsView()
                 .tabItem { Label("Mises à jour", systemImage: "arrow.down.circle") }
         }
-        .frame(width: 680, height: 520)
+        .frame(width: 720, height: 600)
     }
 }
 

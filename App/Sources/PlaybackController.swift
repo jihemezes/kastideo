@@ -42,6 +42,11 @@ enum PlaybackKeys {
 final class VLCEventBridge: NSObject, VLCMediaPlayerDelegate {
     var onState: ((VLCMediaPlayerState) -> Void)?
     var onTime: (() -> Void)?
+    var onRecordingStopped: ((String) -> Void)?
+
+    func mediaPlayer(_ player: VLCMediaPlayer, recordingStoppedAtPath path: String) {
+        DispatchQueue.main.async { [weak self] in self?.onRecordingStopped?(path) }
+    }
 
     func mediaPlayerStateChanged(_ aNotification: Notification) {
         guard let player = aNotification.object as? VLCMediaPlayer else { return }
@@ -73,6 +78,21 @@ final class PlaybackController {
     private(set) var isSeekable = false
     /// Temps entre la demande de lecture et la première image (mesuré à chaque démarrage).
     private(set) var startupTime: TimeInterval?
+    /// Le flux accepte la pause (direct en différé si le moteur le permet).
+    private(set) var canPause = false
+    /// Retard accumulé sur le direct (pauses), en secondes.
+    private(set) var liveDelay: TimeInterval = 0
+    /// Début de la pause en cours sur le direct.
+    private(set) var pausedAt: Date?
+    /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
+    @ObservationIgnored var onRecordingStopped: ((String) -> Void)?
+
+    var isLive: Bool { current?.kind == .live && !(current?.streamURL?.isFileURL ?? false) }
+    var isTimeshifted: Bool { isLive && (liveDelay > 0.5 || pausedAt != nil) }
+
+    func delay(at date: Date) -> TimeInterval {
+        liveDelay + (pausedAt.map { date.timeIntervalSince($0) } ?? 0)
+    }
 
     var volume: Double {
         didSet {
@@ -109,6 +129,9 @@ final class PlaybackController {
         bridge.onTime = { [weak self] in
             MainActor.assumeIsolated { self?.handleTime() }
         }
+        bridge.onRecordingStopped = { [weak self] path in
+            MainActor.assumeIsolated { self?.onRecordingStopped?(path) }
+        }
     }
 
     // MARK: - Commandes
@@ -126,6 +149,8 @@ final class PlaybackController {
 
     func stop() {
         watchdog?.cancel()
+        pausedAt = nil
+        liveDelay = 0
         if player.media != nil { player.stop() }
         player.media = nil
         current = nil
@@ -137,7 +162,34 @@ final class PlaybackController {
 
     func togglePause() {
         guard player.media != nil else { return }
-        if player.isPlaying { player.pause() } else { player.play() }
+        if player.isPlaying {
+            guard canPause || !isLive else { return }
+            player.pause()
+            if isLive { pausedAt = Date() }
+        } else {
+            player.play()
+            if let pausedAt {
+                liveDelay += Date().timeIntervalSince(pausedAt)
+                self.pausedAt = nil
+            }
+        }
+    }
+
+    /// Revient au direct (rouvre le flux) après une pause.
+    func goLive() {
+        guard isLive, let url = current?.streamURL else { return }
+        fallbacks = Self.alternatives(for: url)
+        start(url)
+    }
+
+    /// Démarre l'enregistrement du flux en cours (même connexion), dans un dossier de travail.
+    func startRecording(into directory: URL) -> Bool {
+        guard player.media != nil, didStart else { return false }
+        return player.startRecording(atPath: directory.path)
+    }
+
+    func stopRecording() -> Bool {
+        player.stopRecording()
     }
 
     func retry() {
@@ -167,6 +219,9 @@ final class PlaybackController {
         isPlaying = false
         startupTime = nil
         didStart = false
+        canPause = false
+        liveDelay = 0
+        pausedAt = nil
         startedAt = Date()
         currentURL = url
         resetTimeline()
@@ -178,6 +233,9 @@ final class PlaybackController {
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
         media.addOption(":http-reconnect")
+        // Direct en différé : VLC met le flux en mémoire sur disque pendant les pauses.
+        media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
+        media.addOption(":input-timeshift-granularity=52428800")
         player.media = media
         applyAudio()
         player.play()
@@ -278,6 +336,7 @@ final class PlaybackController {
         duration = length > 0 ? Double(length) / 1000 : 0
         position = Double(player.position)
         isSeekable = player.isSeekable && duration > 0
+        canPause = player.canPause
     }
 
     /// Variantes à tenter si le flux échoue (.ts ↔ .m3u8 pour le direct).

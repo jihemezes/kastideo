@@ -7,6 +7,7 @@ import KastideoCore
 struct VideoSurface: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
+    @Environment(RecordingCenter.self) private var recordings
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
 
     @State private var controlsVisible = true
@@ -52,6 +53,9 @@ struct VideoSurface: View {
 
             VStack {
                 HStack {
+                    if let live = recordings.activeLive {
+                        RecordingBadge(live: live)
+                    }
                     Spacer()
                     if showStartupTime, showStartupBadge, let time = playback.startupTime {
                         Label(String(format: "Prête en %.1f s", time), systemImage: "bolt.fill")
@@ -99,6 +103,7 @@ struct VideoSurface: View {
 struct ControlsBar: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
+    @Environment(RecordingCenter.self) private var recordings
     @Binding var scrubbing: Double?
 
     var body: some View {
@@ -108,7 +113,8 @@ struct ControlsBar: View {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                     .frame(width: 22)
             }
-            .help("Lecture / pause (⌘K)")
+            .help(playback.isLive && !playback.canPause ? "Ce flux ne permet pas la pause" : "Lecture / pause (⌘K) — en direct : différé")
+            .disabled(playback.isLive && playback.isPlaying && !playback.canPause)
 
             if playback.isSeekable {
                 Button { playback.jump(seconds: -10) } label: { Image(systemName: "gobackward.10") }
@@ -130,12 +136,33 @@ struct ControlsBar: View {
                 Text(playback.duration.clockString)
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
+            } else if playback.isTimeshifted {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock.arrow.circlepath")
+                        Text("DIFFÉRÉ −\(playback.delay(at: context.date).clockString)")
+                            .font(.caption.weight(.bold).monospacedDigit())
+                    }
+                    .foregroundStyle(.yellow)
+                }
+                Button("Direct") { playback.goLive() }
+                    .disabled(recordings.isPlayerRecording)
+                    .help(recordings.isPlayerRecording ? "Indisponible pendant un enregistrement" : "Revenir au direct")
+                Spacer()
             } else {
                 HStack(spacing: 6) {
                     Circle().fill(.red).frame(width: 8, height: 8)
                     Text("EN DIRECT").font(.caption.weight(.bold))
                 }
                 Spacer()
+            }
+
+            if playback.isLive {
+                Button { recordings.toggleCurrentRecording() } label: {
+                    Image(systemName: recordings.isRecording(playback.current) ? "stop.circle.fill" : "record.circle")
+                        .foregroundStyle(.red)
+                }
+                .help(recordings.isRecording(playback.current) ? "Arrêter l'enregistrement (⇧⌘R)" : "Enregistrer cette chaîne (⇧⌘R)")
             }
 
             Button { playback.isMuted.toggle() } label: {

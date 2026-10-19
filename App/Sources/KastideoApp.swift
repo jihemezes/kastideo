@@ -3,11 +3,20 @@ import KastideoCore
 
 @main
 struct KastideoApp: App {
-    @State private var store = LibraryStore()
+    @State private var store: LibraryStore
     @State private var navigation = NavigationModel()
-    @State private var playback = PlaybackController()
+    @State private var playback: PlaybackController
+    @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
+
+    init() {
+        let store = LibraryStore()
+        let playback = PlaybackController()
+        _store = State(initialValue: store)
+        _playback = State(initialValue: playback)
+        _recordings = State(initialValue: RecordingCenter(store: store, playback: playback))
+    }
 
     var body: some Scene {
         WindowGroup("Kastideo", id: "main") {
@@ -15,13 +24,15 @@ struct KastideoApp: App {
                 .environment(store)
                 .environment(navigation)
                 .environment(playback)
+                .environment(recordings)
                 .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1320, height: 820)
         .commands {
-            KastideoCommands(store: store, navigation: navigation, playback: playback, updater: updater)
+            KastideoCommands(store: store, navigation: navigation, playback: playback,
+                             recordings: recordings, updater: updater)
         }
 
         Window("Journal de lecture", id: "playbackLog") {
@@ -39,6 +50,7 @@ struct KastideoApp: App {
         Settings {
             SettingsView()
                 .environment(store)
+                .environment(recordings)
                 .environment(updater)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
         }
@@ -76,6 +88,7 @@ struct KastideoCommands: Commands {
     let store: LibraryStore
     let navigation: NavigationModel
     let playback: PlaybackController
+    let recordings: RecordingCenter
     let updater: UpdaterController
 
     var body: some Commands {
@@ -97,8 +110,12 @@ struct KastideoCommands: Commands {
             Divider()
             Button("Lecture / Pause") { playback.togglePause() }
                 .keyboardShortcut("k", modifiers: .command)
-            Button("Arrêter la lecture") { playback.stop() }
+            Button("Arrêter la lecture") { recordings.requestStop() }
                 .keyboardShortcut(".", modifiers: .command)
+            Button(recordings.isPlayerRecording ? "Arrêter l'enregistrement" : "Enregistrer la chaîne") {
+                recordings.toggleCurrentRecording()
+            }
+            .keyboardShortcut("r", modifiers: [.command, .shift])
             Button("Mode cinéma") { navigation.isTheater.toggle() }
                 .keyboardShortcut(.return, modifiers: .command)
             Divider()
@@ -122,6 +139,7 @@ struct KastideoCommands: Commands {
             Button("Séries") { navigation.go(.all(.series)) }.keyboardShortcut("3", modifiers: .command)
             Button("Favoris") { navigation.go(.favorites) }.keyboardShortcut("4", modifiers: .command)
             Button("Récents") { navigation.go(.recents) }.keyboardShortcut("5", modifiers: .command)
+            Button("Enregistrements") { navigation.go(.recordings) }.keyboardShortcut("6", modifiers: .command)
         }
 
         CommandGroup(replacing: .help) {

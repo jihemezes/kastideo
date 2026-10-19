@@ -6,9 +6,10 @@ struct DetailView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
     @Environment(PlaybackController.self) private var playback
+    @Environment(RecordingCenter.self) private var recordings
 
     var body: some View {
-        if let id = navigation.selectedItemID, let item = store.item(id: id) {
+        if let id = navigation.selectedItemID, let item = store.item(id: id) ?? recordings.fileItem(id: id) {
             if item.needsEpisodes {
                 SeriesDetailView(series: item)
                     .id(item.id)
@@ -19,7 +20,10 @@ struct DetailView: View {
             ContentUnavailableView("Choisissez un programme",
                                    systemImage: "play.tv",
                                    description: Text("Sélectionnez une chaîne, un film ou une série dans la liste."))
-                .onAppear { playback.stop() }
+                .onAppear {
+                    // Ne pas couper un enregistrement qui dépend de la lecture.
+                    if !recordings.isPlayerRecording { playback.stop() }
+                }
         }
     }
 }
@@ -29,6 +33,7 @@ struct PlayerPane: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
+    @Environment(RecordingCenter.self) private var recordings
     let item: MediaItem
 
     var body: some View {
@@ -42,7 +47,10 @@ struct PlayerPane: View {
             }
         }
         .task(id: item.id) {
-            playback.play(item)
+            recordings.requestPlay(item, onCancel: {
+                // Lecture refusée (enregistrement prioritaire) : on revient à l'élément en cours.
+                navigation.selectedItemID = playback.current?.id
+            })
             store.recordPlay(item)
         }
     }
@@ -51,6 +59,7 @@ struct PlayerPane: View {
 /// Panneau d'informations sous le lecteur.
 struct InfoPanel: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(RecordingCenter.self) private var recordings
     let item: MediaItem
 
     var body: some View {
@@ -62,6 +71,34 @@ struct InfoPanel: View {
                         .font(.title2.weight(.semibold))
                         .lineLimit(1)
                     Spacer()
+                    if item.kind == .live {
+                        Button {
+                            if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
+                        } label: {
+                            Label(recordings.isRecording(item) ? "Arrêter" : "Enregistrer",
+                                  systemImage: recordings.isRecording(item) ? "stop.circle.fill" : "record.circle")
+                                .foregroundStyle(.red)
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Enregistrer la chaîne jusqu'à la fin du programme en cours (⇧⌘R)")
+                        Button {
+                            recordings.scheduleSheetItem = item
+                        } label: {
+                            Image(systemName: "calendar.badge.clock")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Programmer un enregistrement")
+                    } else if let url = item.streamURL, !url.isFileURL {
+                        Menu {
+                            Button("Télécharger maintenant") { recordings.download(item, tonight: false) }
+                            Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
+                        } label: {
+                            Label("Télécharger", systemImage: "arrow.down.circle")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                        .help("Télécharger sans regarder")
+                    }
                     Button {
                         store.toggleFavorite(item.id)
                     } label: {
@@ -76,7 +113,7 @@ struct InfoPanel: View {
                     .foregroundStyle(.secondary)
 
                 if item.kind == .live {
-                    GuideStrip(epgID: item.epgID)
+                    GuideStrip(item: item)
                 } else if let info = item.info {
                     ScrollView {
                         Text(info)
@@ -95,7 +132,9 @@ struct InfoPanel: View {
 /// Programme en cours + programmes à venir.
 struct GuideStrip: View {
     @Environment(LibraryStore.self) private var store
-    let epgID: String?
+    @Environment(RecordingCenter.self) private var recordings
+    let item: MediaItem
+    private var epgID: String? { item.epgID }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
@@ -123,15 +162,30 @@ struct GuideStrip: View {
                         HStack(spacing: 8) {
                             ForEach(store.epg.upcoming(for: epgID, after: now)) { programme in
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(programme.start.formatted(date: .omitted, time: .shortened))
-                                        .font(.caption.monospacedDigit())
-                                        .foregroundStyle(.secondary)
+                                    HStack(spacing: 4) {
+                                        Text(programme.start.formatted(date: .omitted, time: .shortened))
+                                            .font(.caption.monospacedDigit())
+                                            .foregroundStyle(.secondary)
+                                        if recordings.isScheduled(item, programme) {
+                                            Image(systemName: "record.circle.fill")
+                                                .font(.caption2)
+                                                .foregroundStyle(.red)
+                                        }
+                                    }
                                     Text(programme.title).font(.caption).lineLimit(1)
                                 }
                                 .padding(8)
                                 .frame(width: 150, alignment: .leading)
                                 .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 8))
-                                .help(programme.desc ?? programme.title)
+                                .help((programme.desc ?? programme.title) + "\n\nDouble-clic ou clic droit : programmer l'enregistrement")
+                                .onTapGesture(count: 2) { recordings.schedule(item, programme: programme) }
+                                .contextMenu {
+                                    if recordings.isScheduled(item, programme) {
+                                        Text("Enregistrement déjà programmé")
+                                    } else {
+                                        Button("Programmer l'enregistrement") { recordings.schedule(item, programme: programme) }
+                                    }
+                                }
                             }
                         }
                     }

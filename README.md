@@ -4,12 +4,13 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.3.1)
+## Fonctions (version 0.4.0)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
 - Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
 - Moteur de lecture **VLC** (VLCKit) : direct MPEG-TS, HLS, MP4, MKV… ; mode cinéma, mesure du temps de démarrage
+- **Enregistrement** du direct (immédiat ou programmé), **téléchargement** des films et séries (file d'attente, la nuit), conversion MP4, **direct en différé**
 - **Mises à jour automatiques** (Sparkle) avec canal bêta facultatif
 - Aide intégrée : voir [docs/AIDE.md](docs/AIDE.md)
 
@@ -28,7 +29,7 @@ kastideo/
 │   ├── Sources/                Application SwiftUI macOS
 │   ├── Resources/              Icône et couleurs (Assets.xcassets)
 │   ├── Info.plist
-│   └── Kastideo.entitlements   Bac à sable : réseau + fichiers choisis
+│   └── Kastideo.entitlements   Bac à sable : réseau, fichiers choisis, ~/Movies
 ├── Packages/KastideoCore/      Logique partagée (M3U, Xtream, XMLTV) + tests
 │                               réutilisable pour iOS, iPadOS et tvOS
 ├── docs/AIDE.md                Aide intégrée à l'application
