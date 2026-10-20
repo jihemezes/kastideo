@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.9.4</title>
+      <pubDate>Tue, 20 Oct 2026 21:45:12 GMT</pubDate>
+      <sparkle:version>19</sparkle:version>
+      <sparkle:shortVersionString>0.9.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Aide&lt;/b&gt; : nouvelle rubrique « Obtenir une clé TMDB (gratuite) », pas à pas, dans Réglages généraux&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.4/Kastideo-0.9.4.dmg" length="44544093" type="application/octet-stream" sparkle:edSignature="9YRc0eb/yt8yVOYNs1Qi0lUGew0c5zl+bNpsWFk0Jff5WjXKZGAoA0hpZ2X9kFt0clcLVnifvjg5TPuwuguKDg==" />
+    </item>
+    <item>
       <title>Kastideo 0.9.2</title>
       <pubDate>Tue, 20 Oct 2026 21:32:50 GMT</pubDate>
       <sparkle:version>18</sparkle:version>
