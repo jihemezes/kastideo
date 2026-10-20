@@ -4,7 +4,7 @@ import KastideoCore
 
 /// Sections proposées dans la barre d'outils de l'interface Cinéma.
 enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
-    case live, movies, series, favorites, recents, recordings
+    case live, movies, series, guide, favorites, recents, recordings
 
     var id: String { rawValue }
 
@@ -13,6 +13,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .live: return "Direct"
         case .movies: return "Films"
         case .series: return "Séries"
+        case .guide: return "Guide TV"
         case .favorites: return "Favoris"
         case .recents: return "Récents"
         case .recordings: return "Enregistrements"
@@ -24,6 +25,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .live: return .all(.live)
         case .movies: return .all(.movie)
         case .series: return .all(.series)
+        case .guide: return .guide
         case .favorites: return .favorites
         case .recents: return .recents
         case .recordings: return .recordings
@@ -42,6 +44,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .favorites: return .favorites
         case .recents: return .recents
         case .recordings: return .recordings
+        case .guide: return .guide
         }
     }
 
@@ -90,7 +93,7 @@ struct SectionPickerToolbar: ToolbarContent {
                 ForEach(CinemaSection.allCases) { Text($0.label).tag($0) }
             }
             .pickerStyle(.segmented)
-            .frame(minWidth: 500)
+            .frame(minWidth: 580)
         }
     }
 
@@ -172,7 +175,7 @@ struct CinemaCatalog: View {
                     CinemaGrid(title: name, items: items, emptyText: browse.emptyMessage)
                 case .favorites, .recents:
                     CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
-                case .recordings:
+                case .recordings, .guide:
                     EmptyView()
                 }
             }
@@ -192,12 +195,16 @@ struct CinemaCatalog: View {
 struct CinemaHome: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
+    @Environment(WatchProgressStore.self) private var watch
     let kind: MediaKind
 
     var body: some View {
         let kinds: Set<MediaKind> = kind == .series ? [.series, .episode] : [kind]
         let all = store.items(for: .all(kind))
-        let recents = store.recentIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
+        let allRecents = store.recentIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
+        // Pour les films et séries : les contenus entamés d'abord (« Reprendre »), puis les autres récents.
+        let started = kind == .live ? [] : allRecents.filter { watch.fraction(for: $0.id) != nil }
+        let recents = kind == .live ? allRecents : allRecents.filter { watch.fraction(for: $0.id) == nil }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         let categories = store.categoriesByKind[kind] ?? []
 
@@ -206,14 +213,19 @@ struct CinemaHome: View {
                                    description: Text(Browse.all(kind).emptyMessage))
                 .frame(maxWidth: .infinity, minHeight: 360)
         } else {
-            let featured = recents.first ?? favorites.first ?? all.first(where: { $0.logoURL != nil }) ?? all.first
-            let caption = recents.first != nil ? "À REPRENDRE" : (favorites.first != nil ? "VOS FAVORIS" : "À LA UNE")
+            let featured = started.first ?? recents.first ?? favorites.first
+                ?? all.first(where: { $0.logoURL != nil }) ?? all.first
+            let caption = started.first != nil ? "À REPRENDRE"
+                : (recents.first != nil ? "REGARDÉ RÉCEMMENT" : (favorites.first != nil ? "VOS FAVORIS" : "À LA UNE"))
             LazyVStack(alignment: .leading, spacing: 26) {
                 if let featured {
                     CinemaHero(item: featured, caption: caption)
                 }
+                if !started.isEmpty {
+                    CinemaRail(title: "Reprendre la lecture", items: started, seeAll: { navigation.go(.recents) })
+                }
                 if !recents.isEmpty {
-                    CinemaRail(title: kind == .live ? "Regardées récemment" : "Reprendre",
+                    CinemaRail(title: kind == .live ? "Regardées récemment" : "Regardés récemment",
                                items: recents, seeAll: { navigation.go(.recents) })
                 }
                 if !favorites.isEmpty {
@@ -328,6 +340,7 @@ struct SeeAllCard: View {
 struct MediaCard: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
+    @Environment(WatchProgressStore.self) private var watch
     @AppStorage(AppearanceKeys.cardSize) private var cardSizeRaw = CardSize.medium.rawValue
     let item: MediaItem
     @State private var hovering = false
@@ -346,6 +359,16 @@ struct MediaCard: View {
                 PosterView(url: item.logoURL, name: item.name, fit: isLive)
                     .frame(width: width, height: height)
                     .clipShape(shape)
+                    .overlay(alignment: .bottom) {
+                        if item.kind != .live, let fraction = watch.fraction(for: item.id) {
+                            ProgressView(value: fraction)
+                                .progressViewStyle(.linear)
+                                .tint(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.bottom, 8)
+                                .shadow(color: .black.opacity(0.6), radius: 2)
+                        }
+                    }
                     .overlay(alignment: .topTrailing) {
                         if store.isFavorite(item.id) {
                             Image(systemName: "star.fill")

@@ -67,8 +67,11 @@ struct MainSplitView: View {
     /// Type de contenu affiché (`nil` pour Enregistrements, toujours en interface Classique).
     private var scope: InterfaceScope? { InterfaceScope.scope(for: navigation.browse) }
 
+    private var isGuide: Bool { navigation.browse == .guide }
+
+    /// Le guide TV suit l'interface choisie pour le direct.
     private var style: InterfaceStyle {
-        guard let scope else { return .classic }
+        guard let scope = isGuide ? InterfaceScope.live : scope else { return .classic }
         let raw: String
         switch scope {
         case .live: raw = uiLive
@@ -81,13 +84,17 @@ struct MainSplitView: View {
 
     var body: some View {
         Group {
-            switch style {
-            case .tv:
-                TVRootView(scope: scope, style: style)
-            case .cinema:
-                CinemaRootView(scope: scope, style: style)
-            case .classic:
-                classic
+            if isGuide && style != .classic {
+                GuideRootView(style: style)
+            } else {
+                switch style {
+                case .tv:
+                    TVRootView(scope: scope, style: style)
+                case .cinema:
+                    CinemaRootView(scope: scope, style: style)
+                case .classic:
+                    classic
+                }
             }
         }
         .onChange(of: navigation.isTheater) { _, theater in
@@ -96,18 +103,32 @@ struct MainSplitView: View {
         }
     }
 
+    @ViewBuilder
     private var classic: some View {
-        NavigationSplitView(columnVisibility: $columns) {
-            SidebarView()
-                .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
-        } content: {
-            ItemListView()
-                .navigationSplitViewColumnWidth(min: 280, ideal: 360, max: 520)
-        } detail: {
-            DetailView()
-        }
-        .toolbar {
-            MainToolbar(store: store, scope: scope, style: style)
+        if isGuide {
+            NavigationSplitView(columnVisibility: $columns) {
+                SidebarView()
+                    .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
+            } detail: {
+                GuideView()
+                    .navigationTitle("Guide TV")
+            }
+            .toolbar {
+                MainToolbar(store: store, scope: .live, style: style)
+            }
+        } else {
+            NavigationSplitView(columnVisibility: $columns) {
+                SidebarView()
+                    .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
+            } content: {
+                ItemListView()
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 360, max: 520)
+            } detail: {
+                DetailView()
+            }
+            .toolbar {
+                MainToolbar(store: store, scope: scope, style: style)
+            }
         }
     }
 }
@@ -124,6 +145,7 @@ struct MainToolbar: ToolbarContent {
                 ProgressView().controlSize(.small)
                     .help("Chargement des sources ou du guide TV…")
             }
+            DownloadIndicator()
             if let scope {
                 Menu {
                     Section("Interface — \(scope.label)") {

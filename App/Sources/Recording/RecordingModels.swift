@@ -13,6 +13,7 @@ enum RecordingKeys {
     static let notifications = "recordings.notifications"
     static let schedules = "recordings.schedules.v1"
     static let downloads = "recordings.downloads.v1"
+    static let batches = "recordings.batches.v1"
 
     static var marginBeforeMinutes: Int { UserDefaults.standard.object(forKey: marginBefore) as? Int ?? 2 }
     static var marginAfterMinutes: Int { UserDefaults.standard.object(forKey: marginAfter) as? Int ?? 5 }
@@ -49,8 +50,45 @@ struct DownloadItem: Identifiable, Codable, Hashable {
     var received: Int64 = 0
     var expected: Int64 = 0
     var error: String?
+    /// Lot d'épisodes (saison, série) auquel appartient ce téléchargement.
+    var batchID: UUID?
 
     var progress: Double { expected > 0 ? min(Double(received) / Double(expected), 1) : 0 }
+}
+
+/// Lot de téléchargements (épisodes d'une saison ou d'une série), pour suivre l'avancement global.
+struct DownloadBatch: Codable, Hashable {
+    var title: String
+    /// Épisodes déjà terminés.
+    var completed = 0
+    /// Octets cumulés des épisodes terminés (pour estimer la taille des suivants).
+    var bytesDone: Int64 = 0
+}
+
+/// Avancement d'une série ou d'une saison en cours de téléchargement.
+struct DownloadBatchInfo {
+    var title: String
+    /// Rang de l'épisode en cours (1, 2, 3…).
+    var position: Int
+    var total: Int
+    /// Avancement global entre 0 et 1.
+    var progress: Double
+    /// Temps restant estimé pour tout le lot.
+    var eta: TimeInterval?
+}
+
+/// État affiché par l'indicateur de téléchargement.
+struct DownloadStatus {
+    var current: DownloadItem
+    /// `false` : téléchargement suspendu (lecture en cours), il reprendra tout seul.
+    var isActive: Bool
+    /// Vitesse lissée en octets par seconde.
+    var speed: Double
+    /// Temps restant estimé pour le fichier en cours.
+    var eta: TimeInterval?
+    var batch: DownloadBatchInfo?
+    /// Autres téléchargements en attente (hors lot en cours).
+    var othersQueued: Int
 }
 
 /// Fichier enregistré dans le dossier des enregistrements.

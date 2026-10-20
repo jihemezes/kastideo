@@ -31,6 +31,9 @@ final class RecordingCenter {
     private(set) var activeLive: ActiveLive?
     private(set) var schedules: [ScheduledRecording] = []
     private(set) var downloads: [DownloadItem] = []
+    private(set) var batches: [UUID: DownloadBatch] = [:]
+    /// Vitesse de téléchargement lissée (octets par seconde).
+    private(set) var downloadSpeed: Double = 0
     private(set) var files: [RecordingFile] = []
     private(set) var converting: [String] = []
     var conflict: RecordingConflict?
@@ -43,6 +46,7 @@ final class RecordingCenter {
     @ObservationIgnored private var workDir: URL?
     @ObservationIgnored private var pendingFinalize: ActiveLive?
     @ObservationIgnored private var activeDownloadID: UUID?
+    @ObservationIgnored private var speedSample: (id: UUID, date: Date, bytes: Int64)?
     @ObservationIgnored private var remuxer: Remuxer?
     @ObservationIgnored private var remuxQueue: [(input: URL, output: URL, name: String)] = []
     @ObservationIgnored private var pendingScheduleID: UUID?
@@ -80,6 +84,37 @@ final class RecordingCenter {
     }
 
     var activeDownload: DownloadItem? { downloads.first { $0.state == .downloading } }
+
+    /// Téléchargement à montrer dans l'indicateur : celui en cours, sinon un téléchargement suspendu pendant la lecture.
+    var downloadStatus: DownloadStatus? {
+        guard let current = activeDownload ?? downloads.first(where: { $0.state == .paused && !$0.pausedByUser }) else {
+            return nil
+        }
+        let active = current.state == .downloading
+        let speed = active ? downloadSpeed : 0
+        let remainingCurrent = Double(max(current.expected - current.received, 0))
+        let eta: TimeInterval? = (active && speed > 1 && current.expected > 0) ? remainingCurrent / speed : nil
+
+        var info: DownloadBatchInfo?
+        if let id = current.batchID, let batch = batches[id] {
+            let remaining = downloads.filter { $0.batchID == id }.count
+            let total = batch.completed + remaining
+            let average = batch.completed > 0 ? Double(batch.bytesDone) / Double(batch.completed) : Double(current.expected)
+            let progress = total > 0 ? (Double(batch.completed) + current.progress) / Double(total) : 0
+            var batchETA: TimeInterval?
+            if active, speed > 1, average > 0 {
+                batchETA = (remainingCurrent + Double(max(remaining - 1, 0)) * average) / speed
+            }
+            info = DownloadBatchInfo(title: batch.title, position: batch.completed + 1, total: total,
+                                     progress: progress, eta: batchETA)
+        }
+        let others = downloads.filter { entry in
+            entry.id != current.id && entry.state != .failed
+                && (current.batchID == nil || entry.batchID != current.batchID)
+        }.count
+        return DownloadStatus(current: current, isActive: active, speed: speed, eta: eta,
+                              batch: info, othersQueued: others)
+    }
 
     var activityCount: Int {
         (activeLive == nil ? 0 : 1) + (activeDownload == nil ? 0 : 1) + converting.count
@@ -387,11 +422,12 @@ final class RecordingCenter {
 
     // MARK: - Téléchargements
 
-    func download(_ item: MediaItem, tonight: Bool) {
+    func download(_ item: MediaItem, tonight: Bool, batch: UUID? = nil) {
         guard let url = item.streamURL, !url.isFileURL else { return }
         if downloads.contains(where: { $0.item.id == item.id }) { return }
         let ext = url.pathExtension.isEmpty ? "mp4" : url.pathExtension
         var entry = DownloadItem(item: item, fileName: FileNaming.mediaName(item) + "." + ext)
+        entry.batchID = batch
         if tonight { entry.startAfter = nextNight() }
         downloads.append(entry)
         saveDownloads()
@@ -404,7 +440,19 @@ final class RecordingCenter {
     }
 
     func download(_ items: [MediaItem], tonight: Bool) {
-        for item in items { download(item, tonight: tonight) }
+        let fresh = items.filter { item in
+            guard let url = item.streamURL, !url.isFileURL else { return false }
+            return !downloads.contains { $0.item.id == item.id }
+        }
+        var batchID: UUID?
+        if fresh.count > 1 {
+            let id = UUID()
+            batchID = id
+            let title = fresh[0].kind == .episode ? fresh[0].group : "\(fresh.count) téléchargements"
+            batches[id] = DownloadBatch(title: title)
+            saveBatches()
+        }
+        for item in fresh { download(item, tonight: tonight, batch: batchID) }
     }
 
     func pauseDownload(_ id: UUID) {
@@ -434,6 +482,7 @@ final class RecordingCenter {
         }
         downloads.removeAll { $0.id == id }
         ResumeStore.delete(id)
+        pruneBatches()
         saveDownloads()
         updateSleepGuard()
         runDownloadQueue()
@@ -448,6 +497,8 @@ final class RecordingCenter {
         }
         saveDownloads()
         downloader.pause { data in ResumeStore.save(data, for: id) }
+        speedSample = nil
+        downloadSpeed = 0
         updateSleepGuard()
     }
 
@@ -463,6 +514,8 @@ final class RecordingCenter {
         downloads[index].error = nil
         let id = downloads[index].id
         activeDownloadID = id
+        speedSample = nil
+        downloadSpeed = 0
         saveDownloads()
         PlaybackLog.shared.note("Téléchargement : \(downloads[index].fileName)")
         downloader.start(id: id, url: url, resumeData: ResumeStore.load(id))
@@ -473,10 +526,24 @@ final class RecordingCenter {
         guard let index = downloads.firstIndex(where: { $0.id == id }) else { return }
         downloads[index].received = received
         downloads[index].expected = expected
+        // Vitesse lissée (moyenne mobile sur des mesures d'au moins une seconde).
+        let now = Date()
+        if let sample = speedSample, sample.id == id {
+            let elapsed = now.timeIntervalSince(sample.date)
+            if elapsed >= 1 {
+                let instant = Double(received - sample.bytes) / elapsed
+                downloadSpeed = downloadSpeed > 0 ? downloadSpeed * 0.7 + instant * 0.3 : instant
+                speedSample = (id, now, received)
+            }
+        } else {
+            speedSample = (id, now, received)
+        }
     }
 
     private func downloadFinished(_ id: UUID, _ location: URL?, _ error: Error?) {
         activeDownloadID = nil
+        speedSample = nil
+        downloadSpeed = 0
         guard let index = downloads.firstIndex(where: { $0.id == id }) else { return }
         let entry = downloads[index]
         if let location {
@@ -486,6 +553,11 @@ final class RecordingCenter {
                 try FileManager.default.moveItem(at: location, to: destination)
                 downloads.remove(at: index)
                 ResumeStore.delete(id)
+                if let batchID = entry.batchID, batches[batchID] != nil {
+                    batches[batchID]?.completed += 1
+                    batches[batchID]?.bytesDone += max(entry.expected, entry.received)
+                }
+                pruneBatches()
                 Notifier.post("Téléchargement terminé", entry.fileName)
                 refreshFiles()
             } catch {
@@ -620,6 +692,10 @@ final class RecordingCenter {
            let decoded = try? JSONDecoder().decode([ScheduledRecording].self, from: data) {
             schedules = decoded
         }
+        if let data = defaults.data(forKey: RecordingKeys.batches),
+           let decoded = try? JSONDecoder().decode([UUID: DownloadBatch].self, from: data) {
+            batches = decoded
+        }
         if let data = defaults.data(forKey: RecordingKeys.downloads),
            let decoded = try? JSONDecoder().decode([DownloadItem].self, from: data) {
             downloads = decoded.map { entry in
@@ -634,6 +710,20 @@ final class RecordingCenter {
         if let data = try? JSONEncoder().encode(schedules) {
             UserDefaults.standard.set(data, forKey: RecordingKeys.schedules)
         }
+    }
+
+    private func saveBatches() {
+        if let data = try? JSONEncoder().encode(batches) {
+            UserDefaults.standard.set(data, forKey: RecordingKeys.batches)
+        }
+    }
+
+    /// Supprime les lots dont tous les épisodes sont terminés ou annulés.
+    private func pruneBatches() {
+        let alive = Set(downloads.compactMap(\.batchID))
+        let before = batches.count
+        batches = batches.filter { alive.contains($0.key) }
+        if batches.count != before || !batches.isEmpty { saveBatches() }
     }
 
     private func saveDownloads() {

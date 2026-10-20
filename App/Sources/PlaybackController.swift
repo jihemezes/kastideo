@@ -36,6 +36,7 @@ enum PlaybackKeys {
     static let showStartupTime = "showStartupTime"
     static let volume = "volume"
     static let muted = "muted"
+    static let resume = "resumePlayback"
 }
 
 /// Relais des événements VLC (objet Objective-C) vers le contrôleur.
@@ -84,6 +85,10 @@ final class PlaybackController {
     private(set) var liveDelay: TimeInterval = 0
     /// Début de la pause en cours sur le direct.
     private(set) var pausedAt: Date?
+    /// Position à laquelle la lecture a repris (films et épisodes), le temps d'afficher l'information.
+    private(set) var resumedAt: TimeInterval?
+    /// Mémoire des positions de lecture (injectée au démarrage).
+    @ObservationIgnored var watchProgress: WatchProgressStore?
     /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
     @ObservationIgnored var onRecordingStopped: ((String) -> Void)?
 
@@ -109,6 +114,9 @@ final class PlaybackController {
 
     @ObservationIgnored private var startedAt: Date?
     @ObservationIgnored private var didStart = false
+    @ObservationIgnored private var pendingResume: TimeInterval?
+    @ObservationIgnored private var ignoreProgressUntil = Date.distantPast
+    @ObservationIgnored private var lastProgressSave = Date.distantPast
     @ObservationIgnored private var fallbacks: [URL] = []
     @ObservationIgnored private var currentURL: URL?
     @ObservationIgnored private var watchdog: Task<Void, Never>?
@@ -142,12 +150,21 @@ final class PlaybackController {
             if !player.isPlaying { player.play() }
             return
         }
+        flushProgress()
         current = item
+        resumedAt = nil
+        pendingResume = nil
+        if WatchProgressStore.isEnabled, item.kind != .live, let point = watchProgress?.resumePoint(for: item.id) {
+            pendingResume = point
+        }
         fallbacks = Self.alternatives(for: url)
         start(url)
     }
 
     func stop() {
+        flushProgress()
+        pendingResume = nil
+        resumedAt = nil
         watchdog?.cancel()
         pausedAt = nil
         liveDelay = 0
@@ -202,6 +219,28 @@ final class PlaybackController {
     func seek(to fraction: Double) {
         guard isSeekable else { return }
         player.position = Float(min(max(fraction, 0), 1))
+    }
+
+    /// Reprend le contenu depuis le début et oublie la position mémorisée.
+    func restartFromBeginning() {
+        guard let item = current, isSeekable else { return }
+        player.position = 0
+        resumedAt = nil
+        ignoreProgressUntil = Date().addingTimeInterval(3)
+        watchProgress?.clear(item.id)
+    }
+
+    func dismissResumeNotice() {
+        resumedAt = nil
+    }
+
+    /// Enregistre la position courante (film ou épisode) avant de changer de contenu.
+    private func flushProgress() {
+        if let item = current, item.kind != .live, pendingResume == nil, duration > 0, elapsed > 1,
+           Date() >= ignoreProgressUntil {
+            watchProgress?.update(id: item.id, position: elapsed, duration: duration)
+        }
+        watchProgress?.flush()
     }
 
     func jump(seconds: Int) {
@@ -337,6 +376,26 @@ final class PlaybackController {
         position = Double(player.position)
         isSeekable = player.isSeekable && duration > 0
         canPause = player.canPause
+        trackProgress()
+    }
+
+    /// Reprise à la dernière position, puis mémorisation régulière de la position.
+    private func trackProgress() {
+        guard let item = current, item.kind != .live else { return }
+        if let pending = pendingResume {
+            guard isSeekable, duration > 0 else { return }
+            let target = min(pending, max(duration - 10, 0))
+            player.position = Float(target / duration)
+            pendingResume = nil
+            resumedAt = target
+            ignoreProgressUntil = Date().addingTimeInterval(3)
+            return
+        }
+        let now = Date()
+        guard now >= ignoreProgressUntil, duration > 0, elapsed > 1,
+              now.timeIntervalSince(lastProgressSave) >= 5 else { return }
+        lastProgressSave = now
+        watchProgress?.update(id: item.id, position: elapsed, duration: duration)
     }
 
     /// Variantes à tenter si le flux échoue (.ts ↔ .m3u8 pour le direct).

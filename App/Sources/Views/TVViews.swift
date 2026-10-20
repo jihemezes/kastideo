@@ -280,6 +280,7 @@ final class TVModel {
         case "f": toggleFavorite(); return true
         case "m": playback?.isMuted.toggle(); return true
         case "b": goBack(); return true
+        case "g": navigation?.go(.guide); return true
         default: return false
         }
     }

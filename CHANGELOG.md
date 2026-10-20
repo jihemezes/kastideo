@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.7.0] - 2026-10-19
+
+- Nouveau **Guide TV en grille** : les chaînes en lignes, les heures en colonnes, trait rouge « maintenant », navigation par demi-journée et par jour, durée affichée 2 / 3 / 6 h, filtre (favoris, récents, catégorie) et recherche ; un clic sur un programme ouvre sa fiche (description, **Regarder**, **Enregistrer**, **Programmer**). Section Guide TV dans la barre latérale (⌘7), l'onglet Cinéma et la touche G de l'interface TV
+- **Reprise de la lecture** : Kastideo mémorise où vous en êtes dans chaque film et épisode et vous propose de reprendre ; barres de progression dans les listes, les affiches et les épisodes ; rangée « Reprendre la lecture » en interface Cinéma
+- **Indicateur de téléchargement** toujours visible dans la barre d'outils : anneau d'avancement et, au clic, le détail : avancement du film ou de l'épisode en cours, « épisode X sur N », avancement de la série ou du lot, vitesse et **temps restant estimé**. Les lignes de la section Enregistrements affichent aussi vitesse et temps restant
+
 ## [0.6.1] - 2026-10-19
 
 - Nouvelle **icône** de l'application : monogramme K avec bouton lecture, sur fond violet, qui remplit toute la surface (plus de marge blanche autour dans le Dock et le Finder)

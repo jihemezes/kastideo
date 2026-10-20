@@ -73,7 +73,7 @@ enum InterfaceScope: String, CaseIterable, Identifiable {
             }
         case .favorites, .recents:
             return .other
-        case .recordings:
+        case .recordings, .guide:
             return nil
         }
     }

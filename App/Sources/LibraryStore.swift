@@ -120,7 +120,7 @@ final class LibraryStore {
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
             return recentIDs.compactMap { item(id: $0) }
-        case .recordings:
+        case .recordings, .guide:
             return []
         }
     }

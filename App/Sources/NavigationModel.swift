@@ -9,11 +9,12 @@ enum Browse: Hashable {
     case favorites
     case recents
     case recordings
+    case guide
 
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .favorites, .recents, .recordings: return nil
+        case .favorites, .recents, .recordings, .guide: return nil
         }
     }
 
@@ -24,6 +25,7 @@ enum Browse: Hashable {
         case .favorites: return "Favoris"
         case .recents: return "Récents"
         case .recordings: return "Enregistrements"
+        case .guide: return "Guide TV"
         }
     }
 
@@ -59,6 +61,12 @@ final class NavigationModel {
 
     func go(_ destination: Browse) {
         browse = destination
+    }
+
+    /// Ouvre une chaîne en direct dans la section Direct (depuis le guide TV, par exemple).
+    func watchLive(_ item: MediaItem) {
+        browse = .all(.live)
+        selectedItemID = item.id
     }
 
     func step(_ delta: Int) {

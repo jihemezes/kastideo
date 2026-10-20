@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.6.1 — nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.7.0 — Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -46,7 +46,7 @@ Ouvrez **Kastideo > Réglages… (⌘,)**, onglet **Sources**, ou cliquez sur le
 
 La fenêtre principale comporte trois colonnes :
 
-- **Barre latérale** : Direct, Films, Séries, Favoris, Récents, puis les catégories de la section choisie et l'état de vos sources.
+- **Barre latérale** : Direct, Films, Séries, Favoris, Récents, Guide TV, puis les catégories de la section choisie et l'état de vos sources.
 - **Liste** : les éléments de la section ou de la catégorie, avec le programme en cours pour les chaînes. Le champ **Rechercher** filtre la liste sans tenir compte des majuscules ni des accents.
 - **Lecteur** : la vidéo, avec en dessous le programme en cours, sa progression et les programmes suivants.
 
@@ -80,6 +80,15 @@ La chaîne occupe tout le cadre, comme sur une télévision. Au premier affichag
 - Double-clic sur l'image ou **⌘↩** : plein écran ; la barre d'outils se masque.
 - Les touches du clavier ne fonctionnent pas pendant la saisie dans le champ de recherche. Les onglets en haut de la fenêtre permettent de passer aux Films, aux Séries, etc.
 
+### Le Guide TV en grille
+
+Section **Guide TV** (barre latérale, onglet **Guide TV** des interfaces Cinéma et TV, **⌘7**, ou touche **G** en interface TV). Les chaînes sont en lignes, les heures en colonnes ; le trait rouge marque l'heure actuelle.
+
+- **‹ ›** décalent la grille, **Maintenant** revient à l'heure actuelle, le menu de la date saute à un autre jour (19 h pour les jours suivants).
+- Choisissez la durée affichée (**2 h / 3 h / 6 h**), filtrez par **favoris**, **récents** ou **catégorie**, ou recherchez une chaîne.
+- Cliquez sur un programme : description, bouton **Regarder**, **Enregistrer** (programme en cours) ou **Programmer l'enregistrement** (programme à venir). Un point rouge signale un enregistrement programmé.
+- Cliquez sur le nom d'une chaîne pour la regarder. Seules les chaînes ayant des programmes sont listées : si la grille est vide, vérifiez l'adresse du guide dans les réglages de la source.
+
 ## Lecture
 
 Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…
@@ -88,6 +97,7 @@ Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS
 - Pendant l'ouverture, le logo et le nom de la chaîne s'affichent. Le badge **« Prête en x s »** indique ensuite le temps de démarrage (désactivable dans les réglages).
 - Les contrôles apparaissent au survol de la vidéo : lecture / pause, recul de 10 s et avance de 30 s pour les films et épisodes, barre de progression, volume (jusqu'à 200 %) et mode cinéma.
 - Un clic sur la vidéo met en pause ; un **double-clic** active le **mode cinéma** (vidéo en plein écran, colonnes masquées). **Échap** ou **⌘↩** pour en sortir.
+- **Reprise de la lecture** : pour les films et épisodes, Kastideo mémorise votre position. À la réouverture, la lecture reprend là où vous vous étiez arrêté, avec un message proposant de **recommencer au début**. Des barres de progression apparaissent dans les listes, les affiches et les épisodes. Désactivable, ou positions effaçables, dans les réglages.
 - Pour les sources Xtream, le direct est lu au format MPEG-TS (.ts), comme le lecteur de référence Xtream ; si le flux échoue, Kastideo essaie automatiquement la variante .m3u8 (et inversement).
 
 ### Si une chaîne ne démarre pas
@@ -139,6 +149,7 @@ Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglage
 - Pour une série : bouton **Télécharger** de la fiche > la saison affichée ou toute la série.
 - Les téléchargements passent **l'un après l'autre** (file d'attente). « Cette nuit » démarre à 2 h par défaut (réglable).
 - Vous pouvez mettre en pause, reprendre ou annuler chaque téléchargement dans la section Enregistrements.
+- **Indicateur permanent** : tant qu'un téléchargement est actif, un anneau d'avancement reste visible dans la barre d'outils. Un clic ouvre le détail : avancement du film ou de l'épisode en cours, « épisode X sur N », avancement de la série ou du lot, vitesse et **temps restant estimé** (affiné au fil du téléchargement).
 
 ### Connexion unique : qui a la priorité ?
 
@@ -163,9 +174,9 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 
 ## Raccourcis clavier
 
-- **⌘1 à ⌘6** : Direct, Films, Séries, Favoris, Récents, Enregistrements
+- **⌘1 à ⌘7** : Direct, Films, Séries, Favoris, Récents, Enregistrements, Guide TV
 - **⌥⌘1 / ⌥⌘2 / ⌥⌘3** : interface Classique / Cinéma / TV (pour le type de contenu affiché)
-- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **F** favori, **M** muet
+- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **G** guide TV, **F** favori, **M** muet
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)

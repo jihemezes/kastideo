@@ -6,6 +6,7 @@ struct SeriesDetailView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(RecordingCenter.self) private var recordings
+    @Environment(WatchProgressStore.self) private var watch
     let series: MediaItem
 
     @State private var seasons: [SeriesSeason] = []
@@ -115,8 +116,19 @@ struct SeriesDetailView: View {
                         if let info = episode.info {
                             Text(info).font(.caption).foregroundStyle(.secondary).lineLimit(2)
                         }
+                        if let fraction = watch.fraction(for: episode.id) {
+                            ProgressView(value: fraction)
+                                .progressViewStyle(.linear)
+                                .controlSize(.mini)
+                                .frame(maxWidth: 160)
+                        }
                     }
                     Spacer()
+                    if watch.fraction(for: episode.id) != nil {
+                        Text("à reprendre")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .contentShape(Rectangle())
             }

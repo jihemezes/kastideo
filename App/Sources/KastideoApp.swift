@@ -8,6 +8,7 @@ struct KastideoApp: App {
     @State private var playback: PlaybackController
     @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
+    @State private var watchProgress = WatchProgressStore()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
@@ -27,8 +28,10 @@ struct KastideoApp: App {
                 .environment(playback)
                 .environment(recordings)
                 .environment(updater)
+                .environment(watchProgress)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
+                .onAppear { playback.watchProgress = watchProgress }
                 .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1320, height: 820)
@@ -54,6 +57,7 @@ struct KastideoApp: App {
                 .environment(store)
                 .environment(recordings)
                 .environment(updater)
+                .environment(watchProgress)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
         }
@@ -152,6 +156,7 @@ struct KastideoCommands: Commands {
             Button("Favoris") { navigation.go(.favorites) }.keyboardShortcut("4", modifiers: .command)
             Button("Récents") { navigation.go(.recents) }.keyboardShortcut("5", modifiers: .command)
             Button("Enregistrements") { navigation.go(.recordings) }.keyboardShortcut("6", modifiers: .command)
+            Button("Guide TV") { navigation.go(.guide) }.keyboardShortcut("7", modifiers: .command)
         }
 
         CommandGroup(replacing: .help) {

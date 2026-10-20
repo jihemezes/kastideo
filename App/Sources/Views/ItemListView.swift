@@ -57,6 +57,7 @@ struct CatalogListView: View {
 struct ItemRow: View {
     @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
+    @Environment(WatchProgressStore.self) private var watch
     @AppStorage(AppearanceKeys.density) private var densityRaw = ListDensity.standard.rawValue
     let item: MediaItem
 
@@ -76,6 +77,13 @@ struct ItemRow: View {
                         .lineLimit(1)
                 }
                 subtitle
+                if item.kind != .live, let fraction = watch.fraction(for: item.id) {
+                    ProgressView(value: fraction)
+                        .progressViewStyle(.linear)
+                        .controlSize(.mini)
+                        .frame(maxWidth: 160)
+                        .help("Déjà vu à \(Int(fraction * 100)) %")
+                }
             }
             Spacer(minLength: 4)
             if store.isFavorite(item.id) {

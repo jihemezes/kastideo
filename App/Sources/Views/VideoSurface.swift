@@ -73,7 +73,32 @@ struct VideoSurface: View {
             }
             .padding(14)
         }
+        .overlay(alignment: .top) {
+            if let resumed = playback.resumedAt {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                    Text("Reprise à \(resumed.clockString)")
+                        .font(.callout.weight(.medium).monospacedDigit())
+                    Button("Recommencer") { playback.restartFromBeginning() }
+                        .buttonStyle(.borderless)
+                        .font(.callout.weight(.semibold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 8)
+                .background(.black.opacity(0.7), in: Capsule())
+                .padding(.top, 54)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .clipped()
+        .animation(.easeInOut(duration: 0.25), value: playback.resumedAt)
+        .onChange(of: playback.resumedAt) { _, value in
+            guard let value else { return }
+            Task {
+                try? await Task.sleep(for: .seconds(8))
+                if playback.resumedAt == value { playback.dismissResumeNotice() }
+            }
+        }
         .animation(.easeInOut(duration: 0.2), value: controlsVisible)
         .animation(.easeInOut(duration: 0.3), value: showStartupBadge)
         .onChange(of: playback.startupTime) { _, time in

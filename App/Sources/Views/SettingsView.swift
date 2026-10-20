@@ -134,6 +134,8 @@ struct SourceSettingsRow: View {
 
 struct GeneralSettingsView: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(WatchProgressStore.self) private var watch
+    @AppStorage(PlaybackKeys.resume) private var resumePlayback = true
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
@@ -146,6 +148,7 @@ struct GeneralSettingsView: View {
                     ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
                 }
                 Toggle("Afficher le temps de démarrage des chaînes", isOn: $showStartupTime)
+                Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
                 Text("Moteur de lecture : VLC. Une seule connexion au fournisseur est ouverte à la fois.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -162,7 +165,10 @@ struct GeneralSettingsView: View {
                 }
             }
             LabeledContent("Historique") {
-                Button("Effacer les récents") { store.clearRecents() }
+                HStack {
+                    Button("Effacer les récents") { store.clearRecents() }
+                    Button("Oublier les positions de lecture") { watch.clearAll() }
+                }
             }
             LabeledContent("Version") {
                 Text(appVersion).foregroundStyle(.secondary)

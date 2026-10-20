@@ -15,6 +15,7 @@ struct SidebarView: View {
                 row(.all(.series), icon: "rectangle.stack", count: store.count(for: .series))
                 row(.favorites, icon: "star", count: store.favoriteIDs.count)
                 row(.recents, icon: "clock.arrow.circlepath", count: nil)
+                row(.guide, icon: "calendar", count: nil)
                 row(.recordings, icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
                     count: recordings.activityCount)
             }

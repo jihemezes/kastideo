@@ -155,7 +155,13 @@ struct DownloadRow: View {
         }()
         switch entry.state {
         case .downloading:
-            return "\(size) — \(Int(entry.progress * 100)) %"
+            var text = "\(size) — \(Int(entry.progress * 100)) %"
+            if let status = recordings.downloadStatus, status.current.id == entry.id {
+                text += " · \(DownloadFormat.speed(status.speed))"
+                if let eta = status.eta { text += " · reste \(DownloadFormat.remaining(eta))" }
+                if let batch = status.batch { text += " · épisode \(batch.position)/\(batch.total)" }
+            }
+            return text
         case .queued:
             if let start = entry.startAfter, start > Date() {
                 return "Programmé : \(start.formatted(date: .abbreviated, time: .shortened))"
