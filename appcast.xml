@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.9.1</title>
+      <pubDate>Tue, 20 Oct 2026 21:18:07 GMT</pubDate>
+      <sparkle:version>17</sparkle:version>
+      <sparkle:shortVersionString>0.9.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction de l&amp;#x27;&lt;b&gt;écran noir&lt;/b&gt; au retour sur une chaîne (bouton « Retourner à la lecture » de l&amp;#x27;accueil, sortie du plein écran…) : la vidéo réapparaît sans relancer le flux&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.1/Kastideo-0.9.1.dmg" length="44546263" type="application/octet-stream" sparkle:edSignature="ydZaamYdakLGqKD8qUyQxxehSWwr2deFKjIeTTCmElmsOloZr8zGOk1W5POuGOPC9Rirumuq9tN8NcJ5KeBmBw==" />
+    </item>
+    <item>
       <title>Kastideo 0.9.0</title>
       <pubDate>Tue, 20 Oct 2026 20:56:03 GMT</pubDate>
       <sparkle:version>16</sparkle:version>
