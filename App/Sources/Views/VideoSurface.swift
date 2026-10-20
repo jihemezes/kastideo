@@ -239,45 +239,89 @@ struct LoadingCard: View {
 /// Vue vidéo VLC (VLCVideoView) intégrée dans SwiftUI.
 /// VLC reste attaché à la vue où la vidéo a démarré : changer de vue en cours de lecture donne un écran noir
 /// (retour depuis l'accueil, plein écran…). On garde donc une seule VLCVideoView par lecteur, déplacée dans
-/// le conteneur affiché.
+/// le conteneur affiché le plus récent. Pendant une transition (plein écran), l'ancien et le nouveau conteneur
+/// coexistent : seul le plus récent présent dans une fenêtre reçoit la vidéo.
 struct VLCVideoRepresentable: NSViewRepresentable {
     let player: VLCMediaPlayer
 
-    @MainActor private static var views: [ObjectIdentifier: VLCVideoView] = [:]
+    func makeNSView(context: Context) -> VideoContainerView {
+        let container = VideoContainerView(player: player)
+        VideoContainerView.register(container)
+        return container
+    }
 
-    @MainActor static func videoView(for player: VLCMediaPlayer) -> VLCVideoView {
+    func updateNSView(_ container: VideoContainerView, context: Context) {
+        VideoContainerView.reassign(for: player)
+    }
+
+    static func dismantleNSView(_ container: VideoContainerView, coordinator: ()) {
+        VideoContainerView.unregister(container)
+    }
+}
+
+/// Conteneur de la vidéo VLC partagée.
+final class VideoContainerView: NSView {
+    let player: VLCMediaPlayer
+    private let order: Int
+
+    private static var counter = 0
+    private static var containers: [WeakContainer] = []
+    private static var videoViews: [ObjectIdentifier: VLCVideoView] = [:]
+
+    private struct WeakContainer { weak var view: VideoContainerView? }
+
+    init(player: VLCMediaPlayer) {
+        self.player = player
+        Self.counter += 1
+        order = Self.counter
+        super.init(frame: .zero)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.black.cgColor
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) non pris en charge") }
+
+    static func videoView(for player: VLCMediaPlayer) -> VLCVideoView {
         let key = ObjectIdentifier(player)
-        if let view = views[key] { return view }
+        if let view = videoViews[key] { return view }
         let view = VLCVideoView(frame: .zero)
         view.backColor = .black
         view.fillScreen = false
         view.autoresizingMask = [.width, .height]
-        views[key] = view
+        videoViews[key] = view
         player.drawable = view
         return view
     }
 
-    func makeNSView(context: Context) -> NSView {
-        let container = NSView(frame: .zero)
-        container.wantsLayer = true
-        container.layer?.backgroundColor = NSColor.black.cgColor
-        attach(to: container)
-        return container
+    static func register(_ container: VideoContainerView) {
+        containers.removeAll { $0.view == nil }
+        containers.append(WeakContainer(view: container))
     }
 
-    func updateNSView(_ container: NSView, context: Context) {
-        attach(to: container)
+    static func unregister(_ container: VideoContainerView) {
+        containers.removeAll { $0.view == nil || $0.view === container }
+        reassign(for: container.player)
     }
 
-    private func attach(to container: NSView) {
-        let view = Self.videoView(for: player)
-        if view.superview !== container {
+    /// Place la vidéo dans le conteneur le plus récent qui est affiché dans une fenêtre.
+    static func reassign(for player: VLCMediaPlayer) {
+        let candidates = containers.compactMap(\.view).filter { $0.player === player && $0.window != nil }
+        guard let target = candidates.max(by: { $0.order < $1.order }) else { return }
+        let view = videoView(for: player)
+        if view.superview !== target {
             view.removeFromSuperview()
-            view.frame = container.bounds
-            container.addSubview(view)
+            view.frame = target.bounds
+            target.addSubview(view)
         }
         if (player.drawable as? VLCVideoView) !== view {
             player.drawable = view
         }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        // Arrivée (nouvel écran) ou départ (ancien écran retiré) : la vidéo va au bon conteneur.
+        let player = player
+        Task { @MainActor in VideoContainerView.reassign(for: player) }
     }
 }

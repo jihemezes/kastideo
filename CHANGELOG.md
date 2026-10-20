@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.2] - 2026-10-20
+
+- Correction de l'**écran noir en plein écran** (le son continuait) : pendant le passage en plein écran, l'ancien et le nouvel écran coexistent un instant ; la vidéo va maintenant toujours à l'écran affiché
+
 ## [0.9.1] - 2026-10-20
 
 - Correction de l'**écran noir** au retour sur une chaîne (bouton « Retourner à la lecture » de l'accueil, sortie du plein écran…) : la vidéo réapparaît sans relancer le flux
