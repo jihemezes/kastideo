@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.1] - 2026-10-20
+
+- Correction de l'**écran noir** au retour sur une chaîne (bouton « Retourner à la lecture » de l'accueil, sortie du plein écran…) : la vidéo réapparaît sans relancer le flux
+
 ## [0.9.0] - 2026-10-20
 
 - **Fiche film / série** en interface Cinéma : un clic sur une affiche ouvre une page de présentation (fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution avec photos, bande-annonce) avec **Lire / Reprendre**, **Voir les épisodes**, **Télécharger** et favori. Bouton **Plus d'infos** dans le bandeau « à la une ». Informations du fournisseur IPTV (get_vod_info / get_series_info), complétées par **TMDB** si vous saisissez une clé gratuite dans Réglages > Général

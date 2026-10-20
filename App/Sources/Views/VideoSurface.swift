@@ -237,18 +237,45 @@ struct LoadingCard: View {
 }
 
 /// Vue vidéo VLC (VLCVideoView) intégrée dans SwiftUI.
+/// VLC reste attaché à la vue où la vidéo a démarré : changer de vue en cours de lecture donne un écran noir
+/// (retour depuis l'accueil, plein écran…). On garde donc une seule VLCVideoView par lecteur, déplacée dans
+/// le conteneur affiché.
 struct VLCVideoRepresentable: NSViewRepresentable {
     let player: VLCMediaPlayer
 
-    func makeNSView(context: Context) -> VLCVideoView {
+    @MainActor private static var views: [ObjectIdentifier: VLCVideoView] = [:]
+
+    @MainActor static func videoView(for player: VLCMediaPlayer) -> VLCVideoView {
+        let key = ObjectIdentifier(player)
+        if let view = views[key] { return view }
         let view = VLCVideoView(frame: .zero)
         view.backColor = .black
         view.fillScreen = false
+        view.autoresizingMask = [.width, .height]
+        views[key] = view
         player.drawable = view
         return view
     }
 
-    func updateNSView(_ view: VLCVideoView, context: Context) {
+    func makeNSView(context: Context) -> NSView {
+        let container = NSView(frame: .zero)
+        container.wantsLayer = true
+        container.layer?.backgroundColor = NSColor.black.cgColor
+        attach(to: container)
+        return container
+    }
+
+    func updateNSView(_ container: NSView, context: Context) {
+        attach(to: container)
+    }
+
+    private func attach(to container: NSView) {
+        let view = Self.videoView(for: player)
+        if view.superview !== container {
+            view.removeFromSuperview()
+            view.frame = container.bounds
+            container.addSubview(view)
+        }
         if (player.drawable as? VLCVideoView) !== view {
             player.drawable = view
         }
