@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.0] - 2026-10-20
+
+- **Fiche film / série** en interface Cinéma : un clic sur une affiche ouvre une page de présentation (fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution avec photos, bande-annonce) avec **Lire / Reprendre**, **Voir les épisodes**, **Télécharger** et favori. Bouton **Plus d'infos** dans le bandeau « à la une ». Informations du fournisseur IPTV (get_vod_info / get_series_info), complétées par **TMDB** si vous saisissez une clé gratuite dans Réglages > Général
+- **Enregistrement du direct visible pendant l'écriture** : le fichier grossit dans le sous-dossier « En cours » du dossier des enregistrements, puis est rangé à l'arrêt
+- **Conversion MP4 fiabilisée** : sous-titres DVB et télétexte écartés, second essai avec les pistes principales, fin de conversion détectée même sans signal du moteur ; le .ts n'est conservé qu'en dernier recours
+- Correction : passer de **Direct** à **Films** (ou Séries) ouvre maintenant la grille de la section au lieu du lecteur de la chaîne précédente
+
 ## [0.8.3] - 2026-10-20
 
 - Corrections de compilation (les versions 0.8.1 et 0.8.2 n'avaient pas pu être construites) : style de couleur des cases à cocher des Récents, accès au dossier personnel depuis la recherche des fichiers d'enregistrement

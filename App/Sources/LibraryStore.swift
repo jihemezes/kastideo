@@ -258,6 +258,14 @@ final class LibraryStore {
 
     // MARK: - Séries
 
+    /// Client Xtream d'une source (nil pour une playlist M3U).
+    func xtreamClient(for sourceID: UUID) -> XtreamClient? {
+        guard let source = self.source(id: sourceID), case .xtream(let server, let username) = source.kind,
+              let password = Keychain.get(account: source.id.uuidString) else { return nil }
+        return XtreamClient(credentials: XtreamCredentials(server: server, username: username, password: password),
+                            sourceID: source.id)
+    }
+
     func seasons(for series: MediaItem) async throws -> [SeriesSeason] {
         guard let source = self.source(id: series.sourceID), case .xtream(let server, let username) = source.kind else {
             throw LibraryError.notXtream

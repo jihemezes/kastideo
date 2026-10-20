@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.8.3 — plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.9.0 — fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -69,7 +69,7 @@ Kastideo propose trois présentations, que vous choisissez **séparément pour l
 
 - **Classique** : les trois colonnes décrites ci-dessus.
 - **TV** (direct uniquement) : voir ci-dessous.
-- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic ouvre le lecteur en plein cadre ; **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
+- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic sur une chaîne ouvre le lecteur en plein cadre. Un clic sur l'affiche d'un **film** ou d'une **série** ouvre d'abord sa **fiche** : grande image de fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution (avec photos), boutons **Lire** / **Reprendre**, **Voir les épisodes**, **Bande-annonce**, **Télécharger** et favori. Les informations viennent de votre fournisseur IPTV ; ajoutez une clé **TMDB** gratuite (Réglages > Général > Fiches des films et séries) pour des fiches plus complètes. **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
 
 Pour changer d'interface :
 
@@ -146,7 +146,8 @@ Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglage
 - Il utilise **la même connexion** que la lecture : rien de plus n'est consommé sur votre abonnement.
 - Clic droit sur une chaîne > **Enregistrer maintenant** : si vous regardez une autre chaîne, Kastideo vous demande s'il faut arrêter la lecture, puis enregistre en arrière-plan.
 - Un **bandeau** en bas de la fenêtre confirme le début et la fin de l'enregistrement et indique **le dossier** où se trouve le fichier (bouton **Afficher**). Si le dossier choisi dans les réglages n'est plus accessible, le fichier est placé dans ~/Movies/Kastideo et le bandeau le signale. Les étapes détaillées sont dans le **Journal de lecture**.
-- À la fin, l'enregistrement est **converti en MP4** sans perte de qualité (lisible par QuickTime, l'iPhone, l'iPad). Désactivable dans les réglages.
+- **Pendant l'enregistrement**, le fichier est visible et grossit dans le sous-dossier **En cours** du dossier des enregistrements (un dossier au nom de l'émission). À l'arrêt, il est placé dans le dossier des enregistrements et le sous-dossier est supprimé. La durée n'est limitée que par l'espace disque : comptez environ 1 à 3 Go par heure selon la chaîne (un avertissement s'affiche sous 3 Go libres).
+- À la fin, l'enregistrement est **converti en MP4** sans perte de qualité (lisible par QuickTime, l'iPhone, l'iPad). Le fichier .ts apparaît d'abord, puis est remplacé par le .mp4 quand la conversion est terminée (quelques minutes pour 2 h ; suivi dans la section Enregistrements). Les sous-titres DVB et le télétexte, incompatibles avec le MP4, sont écartés ; si la conversion échoue, un second essai ne garde que l'image et le son principal, et en dernier recours le .ts est conservé. Désactivable dans les réglages.
 
 ### Programmer un enregistrement
 
@@ -231,6 +232,7 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 
 - **Langue** (onglet **Général**) : Kastideo existe en **français** et en **anglais**. La langue se choisit au premier lancement, puis peut être changée dans **Réglages > Général > Langue** (ou « Système » pour suivre la langue du Mac). Le changement s'applique après un redémarrage de l'application, que Kastideo propose de faire pour vous. L'aide et les menus suivent la langue choisie ; les notes de version restent en français.
 - **Apparence** (onglet **Apparence**) : thème sombre (par défaut), clair ou comme le système ; **couleur d'accent** (Système, bleu, violet, rose, rouge, orange, vert, turquoise) ; **interface** Classique ou Cinéma pour chaque type de contenu ; **densité des listes** (compacte, standard, aérée) pour l'interface Classique ; **taille des vignettes** (petites, moyennes, grandes) pour l'interface Cinéma.
+- **Fiches des films et séries** (onglet **Général**) : clé API **TMDB** facultative (gratuite sur themoviedb.org > Paramètres > API ; clé v3 ou jeton de lecture v4). Elle est conservée dans le trousseau. **Enregistrer et vérifier** contrôle la clé. Sans clé, les fiches utilisent les informations de votre fournisseur IPTV.
 - **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
 - **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
 

@@ -67,9 +67,16 @@ struct CinemaRootView: View {
             Group {
                 if navigation.selectedItemID != nil {
                     CinemaDetail()
+                } else if let id = navigation.infoItemID, let item = store.item(id: id) {
+                    MediaInfoView(item: item)
+                        .id(item.id)
                 } else {
                     CinemaCatalog(browse: browse)
                 }
+            }
+            .onChange(of: navigation.selectedItemID) { _, id in
+                // Retour au catalogue (ou changement de section) : la lecture s'arrête, sauf enregistrement en cours.
+                if id == nil, playback.current != nil, !recordings.isPlayerRecording { playback.stop() }
             }
             .navigationTitle(browse.title)
             .searchable(text: $navigation.search, placement: .toolbar, prompt: "Rechercher")
@@ -357,7 +364,11 @@ struct MediaCard: View {
         let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
 
         Button {
-            navigation.selectedItemID = item.id
+            if item.kind == .movie || item.kind == .series {
+                navigation.infoItemID = item.id
+            } else {
+                navigation.selectedItemID = item.id
+            }
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 PosterView(url: item.logoURL, name: item.name, fit: isLive)
@@ -492,6 +503,15 @@ struct CinemaHero: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
+                        if item.kind == .movie || item.kind == .series {
+                            Button {
+                                navigation.infoItemID = item.id
+                            } label: {
+                                Label("Plus d'infos", systemImage: "info.circle")
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                        }
                         Button {
                             store.toggleFavorite(item.id)
                         } label: {

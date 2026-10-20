@@ -1,0 +1,51 @@
+import XCTest
+@testable import KastideoCore
+
+final class MediaDetailsTests: XCTestCase {
+    func testCleanTitle() {
+        XCTAssertEqual(TMDB.cleanTitle("FR - Dune (2021) 4K").title, "Dune")
+        XCTAssertEqual(TMDB.cleanTitle("FR - Dune (2021) 4K").year, 2021)
+        XCTAssertEqual(TMDB.cleanTitle("|VF| Oppenheimer [MULTI]").title, "Oppenheimer")
+        XCTAssertEqual(TMDB.cleanTitle("Alien: Romulus 2024").title, "Alien: Romulus")
+        XCTAssertEqual(TMDB.cleanTitle("Alien: Romulus 2024").year, 2024)
+    }
+
+    func testVODInfo() throws {
+        let json = """
+        {"info":{"movie_image":"http://x/p.jpg","plot":"Un résumé.","cast":"Acteur A, Acteur B","director":"Réal",
+        "genre":"Drame / Action","rating":"7.4","releasedate":"2021-09-15","duration_secs":9360,
+        "youtube_trailer":"abc123","backdrop_path":["http://x/b.jpg"],"tmdb_id":"438631"},
+        "movie_data":{"name":"Dune","stream_id":12}}
+        """
+        let d = try XtreamAPI.parseVODDetails(Data(json.utf8))
+        XCTAssertEqual(d.title, "Dune")
+        XCTAssertEqual(d.cast.map(\.name), ["Acteur A", "Acteur B"])
+        XCTAssertEqual(d.genres, ["Drame", "Action"])
+        XCTAssertEqual(d.year, 2021)
+        XCTAssertEqual(d.runtime, 156)
+        XCTAssertEqual(d.rating, 7.4)
+        XCTAssertEqual(d.tmdbID, "438631")
+        XCTAssertEqual(d.trailerURL?.absoluteString, "https://www.youtube.com/watch?v=abc123")
+        XCTAssertEqual(d.backdropURL?.absoluteString, "http://x/b.jpg")
+    }
+
+    func testTMDBDetailsAndMerge() throws {
+        let json = """
+        {"id":438631,"title":"Dune","overview":"Paul Atreides…","release_date":"2021-09-15","runtime":155,
+        "vote_average":7.8,"genres":[{"name":"Science-Fiction"}],"poster_path":"/p.jpg","backdrop_path":"/b.jpg",
+        "credits":{"cast":[{"name":"Timothée Chalamet","character":"Paul","profile_path":"/t.jpg"}],
+        "crew":[{"name":"Denis Villeneuve","job":"Director"}]},
+        "videos":{"results":[{"site":"YouTube","type":"Trailer","key":"n9xhJrPXop4"}]}}
+        """
+        let tmdb = try TMDB.parseDetails(Data(json.utf8), isSeries: false)
+        XCTAssertEqual(tmdb.directors, ["Denis Villeneuve"])
+        XCTAssertEqual(tmdb.cast.first?.photoURL?.absoluteString, "https://image.tmdb.org/t/p/w185/t.jpg")
+        var iptv = MediaDetails()
+        iptv.plot = "Résumé IPTV"
+        iptv.sources = ["IPTV"]
+        let merged = iptv.merged(with: tmdb)
+        XCTAssertEqual(merged.plot, "Paul Atreides…")
+        XCTAssertEqual(merged.sources, ["IPTV", "TMDB"])
+        XCTAssertEqual(TMDB.parseSearch(Data(#"{"results":[{"id":1,"release_date":"1984-01-01"},{"id":2,"release_date":"2021-01-01"}]}"#.utf8), year: 2021, isSeries: false), "2")
+    }
+}

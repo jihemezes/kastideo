@@ -9,6 +9,7 @@ struct KastideoApp: App {
     @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
     @State private var watchProgress = WatchProgressStore()
+    @State private var mediaInfo = MediaInfoStore()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
@@ -30,6 +31,7 @@ struct KastideoApp: App {
                 .environment(recordings)
                 .environment(updater)
                 .environment(watchProgress)
+                .environment(mediaInfo)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
                 .onAppear { playback.watchProgress = watchProgress }
@@ -59,6 +61,7 @@ struct KastideoApp: App {
                 .environment(recordings)
                 .environment(updater)
                 .environment(watchProgress)
+                .environment(mediaInfo)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
         }

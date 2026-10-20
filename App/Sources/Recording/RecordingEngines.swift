@@ -68,52 +68,94 @@ final class BackgroundRecorder {
 }
 
 /// Conversion d'un enregistrement .ts en .mp4 sans réencodage (changement de conteneur), avec VLC.
+/// Les sous-titres DVB et le télétexte (incompatibles avec le MP4) sont écartés ; en cas d'échec,
+/// un second essai ne garde que la vidéo et la piste audio principales.
 @MainActor
 final class Remuxer {
     private var player: VLCMediaPlayer?
     private let bridge = VLCEventBridge()
     private var completion: ((Bool) -> Void)?
+    private var input: URL?
     private var output: URL?
+    private var attempt = 0
     private var timeout: Task<Void, Never>?
+    private var watchdog: Task<Void, Never>?
 
     func run(input: URL, output: URL, completion: @escaping (Bool) -> Void) {
         self.completion = completion
+        self.input = input
         self.output = output
         bridge.onState = { [weak self] state in
             MainActor.assumeIsolated { self?.handle(state) }
         }
-        let converter = VLCMediaPlayer(options: ["--no-video-title-show"])
+        attempt = 0
+        start()
+    }
+
+    private func start() {
+        guard let input, let output else { return }
+        attempt += 1
+        try? FileManager.default.removeItem(at: output)
+        let converter = VLCMediaPlayer(options: ["--no-video-title-show", "--no-sout-spu", "--no-spu"])
         let media = VLCMedia(url: input)
         media.addOption(":sout=#std{access=file,mux=mp4,dst=\"\(output.path)\"}")
-        media.addOption(":sout-all")
+        if attempt == 1 { media.addOption(":sout-all") } else { media.addOption(":no-sout-all") }
+        media.addOption(":no-sout-spu")
         converter.delegate = bridge
         converter.media = media
         player = converter
-        PlaybackLog.shared.note("Conversion en MP4 : \(output.lastPathComponent)")
+        PlaybackLog.shared.note("Conversion en MP4 (essai \(attempt)) : \(output.lastPathComponent)")
         converter.play()
+        timeout?.cancel()
         timeout = Task { [weak self] in
             try? await Task.sleep(for: .seconds(4 * 3600))
             guard !Task.isCancelled else { return }
-            self?.finish(false)
+            self?.done(false, reason: "délai dépassé")
+        }
+        // Certains flux finissent sur « arrêté » sans « terminé » : on surveille la taille du fichier produit.
+        watchdog?.cancel()
+        watchdog = Task { [weak self] in
+            var last: Int64 = -1
+            var still = 0
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                guard let self, let output = self.output else { return }
+                let size = RecordingLocator.size(of: output)
+                if size == last { still += 1 } else { still = 0; last = size }
+                if still >= 6 { self.done(size > 64 * 1024, reason: "le fichier n'avance plus"); return }
+            }
         }
     }
 
     private func handle(_ state: VLCMediaPlayerState) {
         switch state {
-        case .ended: finish(true)
-        case .error: finish(false)
+        case .ended: done(true, reason: nil)
+        case .stopped: done(output.map { RecordingLocator.size(of: $0) > 64 * 1024 } ?? false, reason: "arrêt du moteur")
+        case .error: done(false, reason: "erreur du moteur VLC")
         default: break
         }
     }
 
-    private func finish(_ success: Bool) {
-        guard let completion else { return }
-        self.completion = nil
+    private func done(_ success: Bool, reason: String?) {
+        guard completion != nil else { return }
         timeout?.cancel()
-        player?.stop()
+        watchdog?.cancel()
+        let finished = player
         player = nil
-        let size = output.flatMap { try? $0.resourceValues(forKeys: [.fileSizeKey]).fileSize } ?? 0
-        completion(success && size > 64 * 1024)
+        finished?.delegate = nil
+        finished?.stop()
+        let size = output.map { RecordingLocator.size(of: $0) } ?? 0
+        let ok = success && size > 64 * 1024
+        if !ok, attempt < 2 {
+            PlaybackLog.shared.note("Conversion en MP4 : échec (\(reason ?? "fichier vide")), nouvel essai avec les pistes principales")
+            start()
+            return
+        }
+        PlaybackLog.shared.note(ok ? "Conversion en MP4 réussie (\(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)))"
+                                   : "Conversion en MP4 impossible (\(reason ?? "fichier vide"))")
+        let completion = self.completion
+        self.completion = nil
+        completion?(ok)
     }
 }
 

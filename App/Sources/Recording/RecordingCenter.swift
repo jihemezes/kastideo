@@ -297,13 +297,13 @@ final class RecordingCenter {
     }
 
     private func cleanPlayerRecordingDir() {
-        if let dir = playerRecordingDir { try? FileManager.default.removeItem(at: dir) }
+        if let dir = playerRecordingDir { RecordingFolder.removeWorkDirectory(dir) }
         playerRecordingDir = nil
         playerRecordingStart = nil
     }
 
     private func startPlayerRecording(_ item: MediaItem, title: String, end: Date?, scheduleID: UUID?) {
-        let dir = RecordingFolder.workDirectory()
+        let dir = RecordingFolder.liveDirectory(named: FileNaming.liveName(channel: item.name, title: title, date: Date()))
         playerRecordingDir = dir
         playerRecordingStart = Date()
         activeLive = ActiveLive(item: item, title: title, startedAt: Date(), endsAt: end, mode: .player, scheduleID: scheduleID)
@@ -350,7 +350,7 @@ final class RecordingCenter {
 
     private func startBackground(_ item: MediaItem, title: String, end: Date?, scheduleID: UUID?) {
         guard let url = item.streamURL else { return }
-        let dir = RecordingFolder.workDirectory()
+        let dir = RecordingFolder.liveDirectory(named: FileNaming.liveName(channel: item.name, title: title, date: Date()))
         let recorder = BackgroundRecorder(workDir: dir)
         background = recorder
         workDir = dir
@@ -392,6 +392,7 @@ final class RecordingCenter {
             report(String(localized: "Enregistrement vide"),
                    String(localized: "Aucune donnée reçue pour « \(live.title) »."), error: true)
             cleanPlayerRecordingDir()
+            if let dir = workDir { RecordingFolder.removeWorkDirectory(dir); workDir = nil }
             return
         }
         let base = FileNaming.liveName(channel: live.item.name, title: live.title, date: live.startedAt)
@@ -399,7 +400,7 @@ final class RecordingCenter {
             let folder = try destinationFolder()
             let ts = FileNaming.unique(folder.appendingPathComponent(base).appendingPathExtension("ts"))
             try SegmentJoiner.join(valid, into: ts)
-            if let dir = workDir { try? FileManager.default.removeItem(at: dir); workDir = nil }
+            if let dir = workDir { RecordingFolder.removeWorkDirectory(dir); workDir = nil }
             cleanPlayerRecordingDir()
             PlaybackLog.shared.note("Enregistrement : fichier placé dans \(ts.path)")
             if RecordingKeys.convertToMP4 {

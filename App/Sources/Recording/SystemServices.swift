@@ -127,6 +127,34 @@ enum RecordingFolder {
         return values?.volumeAvailableCapacityForImportantUsage
     }
 
+    /// Nom du sous-dossier visible qui contient les enregistrements en cours d'écriture.
+    static var inProgressName: String { String(localized: "En cours") }
+
+    /// Dossier de travail d'un enregistrement du direct, visible dans le dossier des enregistrements
+    /// (« En cours/<nom> ») pour suivre le fichier qui grossit ; dossier temporaire si ce n'est pas possible.
+    static func liveDirectory(named name: String) -> URL {
+        if let folder = try? ensure() {
+            let url = folder.appendingPathComponent(inProgressName, isDirectory: true)
+                .appendingPathComponent(name, isDirectory: true)
+            if (try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)) != nil {
+                return url
+            }
+        }
+        return workDirectory()
+    }
+
+    /// Supprime un dossier de travail, ainsi que « En cours » s'il est devenu vide.
+    static func removeWorkDirectory(_ url: URL) {
+        let manager = FileManager.default
+        try? manager.removeItem(at: url)
+        let parent = url.deletingLastPathComponent()
+        if parent.lastPathComponent == inProgressName,
+           let rest = try? manager.contentsOfDirectory(atPath: parent.path),
+           rest.allSatisfy({ $0.hasPrefix(".") }) {
+            try? manager.removeItem(at: parent)
+        }
+    }
+
     /// Dossier de travail temporaire (enregistrement en cours).
     static func workDirectory() -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("kastideo-rec-\(UUID().uuidString)", isDirectory: true)

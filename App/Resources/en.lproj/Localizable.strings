@@ -382,3 +382,28 @@
 "Dossier d'enregistrement inaccessible" = "Recording folder unavailable";
 "Le dossier choisi n'est plus accessible : l'enregistrement est placé dans ~/Movies/Kastideo. Choisissez à nouveau le dossier dans Réglages > Enregistrements." = "The chosen folder is no longer accessible: the recording was placed in ~/Movies/Kastideo. Choose the folder again in Settings > Recordings.";
 "Afficher" = "Show";
+
+/* 0.9.0 */
+"En cours" = "In progress";
+"Plus d'infos" = "More Info";
+"Bande-annonce" = "Trailer";
+"Ouvrir la bande-annonce dans le navigateur" = "Open the trailer in your browser";
+"Reprendre (%lld %%)" = "Resume (%lld%%)";
+"Création" = "Created by";
+"Réalisation" = "Directed by";
+"Distribution" = "Cast";
+"Informations : %@" = "Information: %@";
+"fournisseur IPTV" = "IPTV provider";
+"· Ajoutez une clé TMDB dans Réglages > Général pour des fiches plus complètes." = "· Add a TMDB key in Settings > General for richer details.";
+"%@ par épisode" = "%@ per episode";
+"1 saison" = "1 season";
+"%lld saisons" = "%lld seasons";
+"TMDB n'a pas répondu (vérifiez la clé dans Réglages > Général)." = "TMDB did not respond (check the key in Settings > General).";
+"Fiches des films et séries" = "Movie and Series Details";
+"Clé API TMDB (facultative)" = "TMDB API key (optional)";
+"Enregistrer et vérifier" = "Save and Verify";
+"Retirer la clé" = "Remove Key";
+"Obtenir une clé gratuite" = "Get a Free Key";
+"En interface Cinéma, un clic sur une affiche ouvre la fiche du film ou de la série. Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce et résumé traduit." = "In the Cinema interface, clicking a poster opens the movie or series details. Information comes from your IPTV provider; with a TMDB (The Movie Database) key, Kastideo adds HD posters, cast photos, trailer and a translated synopsis.";
+"Clé valide ✓" = "Valid key ✓";
+"Clé refusée par TMDB" = "Key rejected by TMDB";

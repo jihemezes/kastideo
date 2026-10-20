@@ -46,11 +46,18 @@ enum Browse: Hashable {
 final class NavigationModel {
     var browse: Browse? = .home {
         didSet {
-            if let kind = browse?.kind { lastKind = kind }
+            if let kind = browse?.kind {
+                // Changement de type de contenu (Direct → Films…) : on arrive sur la grille, pas sur le lecteur.
+                if kind != lastKind { selectedItemID = nil }
+                lastKind = kind
+            }
+            infoItemID = nil
             search = ""
         }
     }
     var selectedItemID: String?
+    /// Fiche ouverte (film ou série) dans l'interface Cinéma, avant la lecture.
+    var infoItemID: String?
     var search = ""
     /// Type de contenu dont les catégories sont affichées dans la barre latérale.
     private(set) var lastKind: MediaKind = .live

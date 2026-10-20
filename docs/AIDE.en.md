@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.8.3 — Full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.9.0 — Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -69,7 +69,7 @@ Kastideo offers three presentations, which you choose **separately for live, mov
 
 - **Classic**: the three columns described above.
 - **TV** (live only): see below.
-- **Cinema**: a large “featured” banner (what you watched last, otherwise your favorites), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click opens the player full frame; **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
+- **Cinema**: a large “featured” banner (what you watched last, otherwise your favorites), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click on a channel opens the player full frame. A click on a **movie** or **series** poster first opens its **details page**: backdrop, poster, year, runtime, genres, rating, synopsis, director, cast (with photos), **Play** / **Resume**, **View Episodes**, **Trailer**, **Download** and favorite buttons. Information comes from your IPTV provider; add a free **TMDB** key (Settings > General > Movie and Series Details) for richer pages. **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
 
 To change the interface:
 
@@ -146,7 +146,8 @@ Files are stored in **~/Movies/Kastideo** (can be changed in **Settings > Record
 - It uses **the same connection** as playback: nothing more is consumed from your subscription.
 - Right-click a channel > **Record Now**: if you are watching another channel, Kastideo asks whether to stop playback, then records in the background.
 - A **banner** at the bottom of the window confirms when a recording starts and ends and shows **the folder** where the file is (**Show** button). If the folder chosen in settings is no longer accessible, the file is placed in ~/Movies/Kastideo and the banner says so. Detailed steps are in the **Playback Log**.
-- At the end, the recording is **converted to MP4** with no quality loss (playable in QuickTime, on iPhone and iPad). This can be turned off in settings.
+- **While recording**, the file is visible and growing in the **In progress** subfolder of the recordings folder (a folder named after the program). When stopped, it is moved to the recordings folder and the subfolder is removed. Length is limited only by disk space: count about 1 to 3 GB per hour depending on the channel (a warning appears below 3 GB free).
+- At the end, the recording is **converted to MP4** with no quality loss (playable in QuickTime, on iPhone and iPad). The .ts file appears first, then is replaced by the .mp4 when conversion is done (a few minutes for 2 hours; shown in the Recordings section). DVB subtitles and teletext, which MP4 cannot hold, are dropped; if conversion fails, a second attempt keeps only the picture and main audio, and as a last resort the .ts is kept. This can be turned off in settings.
 
 ### Scheduling a recording
 
@@ -230,6 +231,7 @@ After each update, the **What's New** window summarizes the changes in the insta
 
 - **Language** (**General** tab): Kastideo is available in **French** and **English**. The language is chosen at first launch, then can be changed in **Settings > General > Language** (or “System” to follow the Mac's language). The change applies after the app restarts, which Kastideo offers to do for you. Help and menus follow the chosen language; release notes remain in French.
 - **Appearance** (**Appearance** tab): dark theme (default), light or same as system; **accent color** (System, blue, purple, pink, red, orange, green, teal); **interface** Classic or Cinema for each type of content; **list density** (compact, standard, spacious) for the Classic interface; **thumbnail size** (small, medium, large) for the Cinema interface.
+- **Movie and Series Details** (**General** tab): optional **TMDB** API key (free at themoviedb.org > Settings > API; v3 key or v4 read token), stored in the keychain. **Save and Verify** checks it. Without a key, details come from your IPTV provider.
 - **Refresh at launch**: reloads sources whose last refresh is more than 6 hours old.
 - **Cache**: Kastideo keeps a local copy of lists and the TV guide to start instantly. **Clear and Reload** erases this copy and restarts loading.
 
