@@ -43,10 +43,16 @@ enum PlaybackKeys {
 final class VLCEventBridge: NSObject, VLCMediaPlayerDelegate {
     var onState: ((VLCMediaPlayerState) -> Void)?
     var onTime: (() -> Void)?
-    var onRecordingStopped: ((String) -> Void)?
+    var onRecordingStopped: ((String?) -> Void)?
+    var onRecordingStarted: (() -> Void)?
 
-    func mediaPlayer(_ player: VLCMediaPlayer, recordingStoppedAtPath path: String) {
+    /// VLC peut transmettre un chemin vide ou nul : il est donc optionnel ici.
+    func mediaPlayer(_ player: VLCMediaPlayer, recordingStoppedAtPath path: String?) {
         DispatchQueue.main.async { [weak self] in self?.onRecordingStopped?(path) }
+    }
+
+    func mediaPlayerStartedRecording(_ player: VLCMediaPlayer) {
+        DispatchQueue.main.async { [weak self] in self?.onRecordingStarted?() }
     }
 
     func mediaPlayerStateChanged(_ aNotification: Notification) {
@@ -90,7 +96,8 @@ final class PlaybackController {
     /// Mémoire des positions de lecture (injectée au démarrage).
     @ObservationIgnored var watchProgress: WatchProgressStore?
     /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
-    @ObservationIgnored var onRecordingStopped: ((String) -> Void)?
+    @ObservationIgnored var onRecordingStopped: ((String?) -> Void)?
+    @ObservationIgnored var onRecordingStarted: (() -> Void)?
 
     var isLive: Bool { current?.kind == .live && !(current?.streamURL?.isFileURL ?? false) }
     var isTimeshifted: Bool { isLive && (liveDelay > 0.5 || pausedAt != nil) }
@@ -139,6 +146,9 @@ final class PlaybackController {
         }
         bridge.onRecordingStopped = { [weak self] path in
             MainActor.assumeIsolated { self?.onRecordingStopped?(path) }
+        }
+        bridge.onRecordingStarted = { [weak self] in
+            MainActor.assumeIsolated { self?.onRecordingStarted?() }
         }
     }
 
@@ -200,13 +210,24 @@ final class PlaybackController {
     }
 
     /// Démarre l'enregistrement du flux en cours (même connexion), dans un dossier de travail.
+    /// Vrai quand le flux est ouvert et l'image affichée : l'enregistrement peut alors démarrer.
+    var canRecord: Bool { player.media != nil && didStart }
+
+    /// VLCKit renvoie souvent `false` alors que l'enregistrement a bien démarré : le résultat n'est donc qu'indicatif
+    /// et c'est la présence du fichier qui fait foi (voir RecordingCenter).
+    @discardableResult
     func startRecording(into directory: URL) -> Bool {
-        guard player.media != nil, didStart else { return false }
-        return player.startRecording(atPath: directory.path)
+        guard canRecord else { return false }
+        let accepted = player.startRecording(atPath: directory.path)
+        PlaybackLog.shared.note("Enregistrement : démarrage demandé dans \(directory.path) (retour VLC : \(accepted))")
+        return accepted
     }
 
+    @discardableResult
     func stopRecording() -> Bool {
-        player.stopRecording()
+        let accepted = player.stopRecording()
+        PlaybackLog.shared.note("Enregistrement : arrêt demandé (retour VLC : \(accepted))")
+        return accepted
     }
 
     func retry() {

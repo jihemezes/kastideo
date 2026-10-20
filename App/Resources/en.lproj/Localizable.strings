@@ -70,8 +70,6 @@
 "Lecture en cours" = "Playback in progress";
 "Votre abonnement n'autorise qu'une connexion : enregistrer « %@ » arrêtera la lecture de « %@ »." = "Your subscription allows only one connection: recording “%@” will stop the playback of “%@”.";
 "Arrêter la lecture et enregistrer" = "Stop Playback and Record";
-"Enregistrement" = "Recording";
-"L'enregistrement de « %@ » n'a pas pu être finalisé." = "The recording of “%@” could not be finalized.";
 "Enregistrement démarré" = "Recording started";
 "Enregistrement impossible" = "Recording failed";
 "Le moteur de lecture n'a pas pu démarrer l'enregistrement de « %@ »." = "The player could not start recording “%@”.";
@@ -381,3 +379,6 @@
 "Relancer maintenant" = "Relaunch Now";
 "La nouvelle langue sera appliquée après le redémarrage de l'application." = "The new language will be applied after the app restarts.";
 "films" = "movies";
+"Dossier d'enregistrement inaccessible" = "Recording folder unavailable";
+"Le dossier choisi n'est plus accessible : l'enregistrement est placé dans ~/Movies/Kastideo. Choisissez à nouveau le dossier dans Réglages > Enregistrements." = "The chosen folder is no longer accessible: the recording was placed in ~/Movies/Kastideo. Choose the folder again in Settings > Recordings.";
+"Afficher" = "Show";

@@ -13,6 +13,15 @@ struct RecordingConflict: Identifiable {
     let onCancel: () -> Void
 }
 
+/// Message affiché en bandeau après un enregistrement ou un téléchargement.
+struct RecordingToast: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+    let file: URL?
+    let isError: Bool
+}
+
 /// Chef d'orchestre des enregistrements (direct, programmés), des téléchargements et des conversions.
 /// Garantit qu'une seule connexion au fournisseur est utilisée à la fois.
 @MainActor
@@ -37,6 +46,8 @@ final class RecordingCenter {
     private(set) var files: [RecordingFile] = []
     private(set) var converting: [String] = []
     var conflict: RecordingConflict?
+    /// Dernier résultat d'enregistrement ou de téléchargement, affiché en bandeau (les notifications macOS peuvent être refusées).
+    var toast: RecordingToast?
     var scheduleSheetItem: MediaItem?
 
     private let store: LibraryStore
@@ -44,6 +55,8 @@ final class RecordingCenter {
     private let downloader = DownloadEngine()
     @ObservationIgnored private var background: BackgroundRecorder?
     @ObservationIgnored private var workDir: URL?
+    @ObservationIgnored private var playerRecordingDir: URL?
+    @ObservationIgnored private var playerRecordingStart: Date?
     @ObservationIgnored private var pendingFinalize: ActiveLive?
     @ObservationIgnored private var activeDownloadID: UUID?
     @ObservationIgnored private var speedSample: (id: UUID, date: Date, bytes: Int64)?
@@ -73,6 +86,17 @@ final class RecordingCenter {
     // MARK: - État
 
     var isPlayerRecording: Bool { activeLive?.mode == .player }
+
+    /// Notifie (notification macOS + bandeau dans l'application, avec le fichier créé le cas échéant).
+    func report(_ title: String, _ message: String, file: URL? = nil, error: Bool = false) {
+        Notifier.post(title, message)
+        let toast = RecordingToast(title: title, message: message, file: file, isError: error)
+        self.toast = toast
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(error ? 20 : 12))
+            if self?.toast?.id == toast.id { self?.toast = nil }
+        }
+    }
 
     func isRecording(_ item: MediaItem?) -> Bool {
         guard let item, let live = activeLive else { return false }
@@ -239,10 +263,8 @@ final class RecordingCenter {
         switch live.mode {
         case .player:
             pendingFinalize = live
-            if !playback.stopRecording() {
-                pendingFinalize = nil
-                Notifier.post(String(localized: "Enregistrement"), String(localized: "L'enregistrement de « \(live.title) » n'a pas pu être finalisé."))
-            }
+            playback.stopRecording()
+            awaitPlayerRecordingFile(live)
         case .background:
             let segments = background?.stop() ?? []
             background = nil
@@ -251,25 +273,79 @@ final class RecordingCenter {
         updateSleepGuard()
     }
 
+    /// Après l'arrêt demandé à VLC : attend l'annonce du fichier ; sans réponse, le retrouve dans le dossier de travail.
+    private func awaitPlayerRecordingFile(_ live: ActiveLive) {
+        let started = playerRecordingStart ?? live.startedAt
+        let dir = playerRecordingDir
+        Task { [weak self] in
+            for _ in 0..<12 {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self else { return }
+                if self.pendingFinalize == nil { return }   // déjà finalisé par l'annonce de VLC
+            }
+            guard let self, let pending = self.pendingFinalize else { return }
+            self.pendingFinalize = nil
+            if let dir, let found = RecordingLocator.find(workDir: dir, since: started) {
+                PlaybackLog.shared.note("Enregistrement : fichier retrouvé sans annonce de VLC : \(found.path)")
+                self.finalizeLive(segments: [found], live: pending)
+            } else {
+                self.report(String(localized: "Enregistrement vide"),
+                            String(localized: "Aucune donnée reçue pour « \(live.title) »."), error: true)
+                self.cleanPlayerRecordingDir()
+            }
+        }
+    }
+
+    private func cleanPlayerRecordingDir() {
+        if let dir = playerRecordingDir { try? FileManager.default.removeItem(at: dir) }
+        playerRecordingDir = nil
+        playerRecordingStart = nil
+    }
+
     private func startPlayerRecording(_ item: MediaItem, title: String, end: Date?, scheduleID: UUID?) {
         let dir = RecordingFolder.workDirectory()
+        playerRecordingDir = dir
+        playerRecordingStart = Date()
         activeLive = ActiveLive(item: item, title: title, startedAt: Date(), endsAt: end, mode: .player, scheduleID: scheduleID)
         updateSleepGuard()
         Task { [weak self] in
-            // La lecture peut être encore en cours d'ouverture : on réessaie pendant 20 s.
-            for _ in 0..<20 {
+            // La lecture peut être encore en cours d'ouverture : on attend jusqu'à 20 s qu'elle ait démarré.
+            for _ in 0..<40 {
                 guard let self, self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
-                if self.playback.startRecording(into: dir) {
-                    Notifier.post(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
+                if self.playback.canRecord { break }
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+            guard let self, self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
+            guard self.playback.canRecord else {
+                self.failPlayerRecording(item, reason: "la lecture n'a pas démarré")
+                return
+            }
+            // Un seul appel : VLCKit renvoie souvent « faux » alors que l'enregistrement a démarré.
+            let since = Date()
+            self.playback.startRecording(into: dir)
+            // C'est la présence du fichier qui confirme le démarrage.
+            for _ in 0..<8 {
+                try? await Task.sleep(for: .seconds(1))
+                guard self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
+                if let found = RecordingLocator.find(workDir: dir, since: since) {
+                    PlaybackLog.shared.note("Enregistrement : fichier en cours d'écriture : \(found.path)")
+                    self.report(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
                     return
                 }
-                try? await Task.sleep(for: .seconds(1))
             }
-            guard let self, self.activeLive?.mode == .player else { return }
-            self.activeLive = nil
-            self.updateSleepGuard()
-            Notifier.post(String(localized: "Enregistrement impossible"), String(localized: "Le moteur de lecture n'a pas pu démarrer l'enregistrement de « \(item.name) »."))
+            self.playback.stopRecording()
+            self.failPlayerRecording(item, reason: "aucun fichier n'a été créé par le moteur de lecture")
         }
+    }
+
+    private func failPlayerRecording(_ item: MediaItem, reason: String) {
+        PlaybackLog.shared.note("Enregistrement impossible : \(reason)")
+        activeLive = nil
+        pendingFinalize = nil
+        cleanPlayerRecordingDir()
+        updateSleepGuard()
+        report(String(localized: "Enregistrement impossible"),
+               String(localized: "Le moteur de lecture n'a pas pu démarrer l'enregistrement de « \(item.name) »."), error: true)
     }
 
     private func startBackground(_ item: MediaItem, title: String, end: Date?, scheduleID: UUID?) {
@@ -284,7 +360,7 @@ final class RecordingCenter {
         updateSleepGuard()
     }
 
-    private func playerRecordingStopped(_ path: String) {
+    private func playerRecordingStopped(_ announced: String?) {
         // Fin demandée (stopLive) ou arrêt par VLC lui-même (changement de flux, coupure).
         var live = pendingFinalize
         pendingFinalize = nil
@@ -294,7 +370,16 @@ final class RecordingCenter {
         }
         updateSleepGuard()
         guard let live else { return }
-        finalizeLive(segments: [URL(fileURLWithPath: path)], live: live)
+        let started = playerRecordingStart ?? live.startedAt
+        // Le chemin annoncé est parfois vide ou faux : on le vérifie, sinon on cherche le fichier.
+        var file: URL?
+        if let announced, !announced.isEmpty, RecordingLocator.size(of: URL(fileURLWithPath: announced)) > 0 {
+            file = URL(fileURLWithPath: announced)
+        } else if let dir = playerRecordingDir {
+            file = RecordingLocator.find(workDir: dir, since: started)
+        }
+        PlaybackLog.shared.note("Enregistrement : fin (chemin annoncé : \(announced ?? "aucun"), fichier retenu : \(file?.path ?? "aucun"))")
+        finalizeLive(segments: file.map { [$0] } ?? [], live: live)
     }
 
     private func finalizeLive(segments: [URL], live: ActiveLive) {
@@ -302,27 +387,56 @@ final class RecordingCenter {
             schedules.removeAll { $0.id == id }
             saveSchedules()
         }
-        let valid = segments.filter { ((try? $0.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0) > 0 }
+        let valid = segments.filter { RecordingLocator.size(of: $0) > 0 }
         guard !valid.isEmpty else {
-            Notifier.post(String(localized: "Enregistrement vide"), String(localized: "Aucune donnée reçue pour « \(live.title) »."))
+            report(String(localized: "Enregistrement vide"),
+                   String(localized: "Aucune donnée reçue pour « \(live.title) »."), error: true)
+            cleanPlayerRecordingDir()
             return
         }
         let base = FileNaming.liveName(channel: live.item.name, title: live.title, date: live.startedAt)
         do {
-            let folder = try RecordingFolder.ensure()
+            let folder = try destinationFolder()
             let ts = FileNaming.unique(folder.appendingPathComponent(base).appendingPathExtension("ts"))
             try SegmentJoiner.join(valid, into: ts)
             if let dir = workDir { try? FileManager.default.removeItem(at: dir); workDir = nil }
+            cleanPlayerRecordingDir()
+            PlaybackLog.shared.note("Enregistrement : fichier placé dans \(ts.path)")
             if RecordingKeys.convertToMP4 {
                 let mp4 = FileNaming.unique(folder.appendingPathComponent(base).appendingPathExtension("mp4"))
                 enqueueRemux(input: ts, output: mp4, name: base)
             } else {
-                Notifier.post(String(localized: "Enregistrement terminé"), base)
+                report(String(localized: "Enregistrement terminé"), base, file: ts)
             }
         } catch {
-            Notifier.post(String(localized: "Enregistrement impossible"), "« \(live.title) » : \(error.localizedDescription)")
+            // Dernier recours : on garde le fichier brut plutôt que de le perdre.
+            PlaybackLog.shared.note("Enregistrement : échec du déplacement (\(error.localizedDescription))")
+            report(String(localized: "Enregistrement impossible"),
+                   "« \(live.title) » : \(error.localizedDescription)", file: valid.first, error: true)
         }
         refreshFiles()
+    }
+
+    /// Dossier d'enregistrement choisi ; s'il n'est pas utilisable, le dossier par défaut (avec un avertissement).
+    private func destinationFolder() throws -> URL {
+        do {
+            let folder = try RecordingFolder.ensure()
+            let probe = folder.appendingPathComponent(".kastideo-\(UUID().uuidString)")
+            guard FileManager.default.createFile(atPath: probe.path, contents: Data()) else {
+                throw CocoaError(.fileWriteNoPermission)
+            }
+            try? FileManager.default.removeItem(at: probe)
+            return folder
+        } catch {
+            guard RecordingFolder.isCustom else { throw error }
+            PlaybackLog.shared.note("Dossier d'enregistrement inaccessible (\(error.localizedDescription)) : utilisation de ~/Movies/Kastideo")
+            let fallback = RecordingFolder.defaultURL
+            try FileManager.default.createDirectory(at: fallback, withIntermediateDirectories: true)
+            report(String(localized: "Dossier d'enregistrement inaccessible"),
+                   String(localized: "Le dossier choisi n'est plus accessible : l'enregistrement est placé dans ~/Movies/Kastideo. Choisissez à nouveau le dossier dans Réglages > Enregistrements."),
+                   error: true)
+            return fallback
+        }
     }
 
     private func enqueueRemux(input: URL, output: URL, name: String) {
@@ -343,10 +457,11 @@ final class RecordingCenter {
             self.converting.removeAll { $0 == job.name }
             if success {
                 try? FileManager.default.removeItem(at: job.input)
-                Notifier.post(String(localized: "Enregistrement terminé"), job.name)
+                self.report(String(localized: "Enregistrement terminé"), job.name, file: job.output)
             } else {
                 try? FileManager.default.removeItem(at: job.output)
-                Notifier.post(String(localized: "Enregistrement terminé"), String(localized: "\(job.name) — conservé au format .ts (conversion MP4 impossible)"))
+                self.report(String(localized: "Enregistrement terminé"),
+                            String(localized: "\(job.name) — conservé au format .ts (conversion MP4 impossible)"), file: job.input)
             }
             self.refreshFiles()
             self.updateSleepGuard()
@@ -558,7 +673,7 @@ final class RecordingCenter {
                     batches[batchID]?.bytesDone += max(entry.expected, entry.received)
                 }
                 pruneBatches()
-                Notifier.post(String(localized: "Téléchargement terminé"), entry.fileName)
+                report(String(localized: "Téléchargement terminé"), entry.fileName)
                 refreshFiles()
             } catch {
                 downloads[index].state = .failed
@@ -569,7 +684,7 @@ final class RecordingCenter {
             ResumeStore.save(resume, for: id)
             downloads[index].state = .failed
             downloads[index].error = error.map { LibraryStore.describe($0) } ?? String(localized: "Échec du téléchargement.")
-            Notifier.post(String(localized: "Téléchargement interrompu"), "\(entry.fileName) — \(downloads[index].error ?? "")")
+            report(String(localized: "Téléchargement interrompu"), "\(entry.fileName) — \(downloads[index].error ?? "")", error: true)
         }
         saveDownloads()
         updateSleepGuard()
@@ -637,7 +752,7 @@ final class RecordingCenter {
                 try? FileManager.default.removeItem(at: file.url)
             }
         }
-        Notifier.post("Nettoyage des enregistrements", "\(old.count) enregistrement(s) de plus de \(RecordingKeys.autoCleanDayCount) jours placé(s) dans la corbeille.")
+        Notifier.post(String(localized: "Nettoyage des enregistrements"), String(localized: "\(old.count) enregistrement(s) de plus de \(RecordingKeys.autoCleanDayCount) jours placé(s) dans la corbeille."))
         refreshFiles()
     }
 
@@ -663,7 +778,7 @@ final class RecordingCenter {
             schedules.removeAll { schedule in missed.contains { $0.id == schedule.id } }
             saveSchedules()
             for recording in missed {
-                Notifier.post(String(localized: "Enregistrement manqué"), String(localized: "« \(recording.title) » (\(recording.item.name)) n'a pas pu être enregistré."))
+                report(String(localized: "Enregistrement manqué"), String(localized: "« \(recording.title) » (\(recording.item.name)) n'a pas pu être enregistré."), error: true)
             }
         }
         runDownloadQueue()

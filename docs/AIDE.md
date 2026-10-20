@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.8.0 — écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.8.1 — plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -107,7 +107,7 @@ Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS
 - La lecture démarre dès que vous sélectionnez une chaîne, un film ou un épisode.
 - Pendant l'ouverture, le logo et le nom de la chaîne s'affichent. Le badge **« Prête en x s »** indique ensuite le temps de démarrage (désactivable dans les réglages).
 - Les contrôles apparaissent au survol de la vidéo : lecture / pause, recul de 10 s et avance de 30 s pour les films et épisodes, barre de progression, volume (jusqu'à 200 %) et mode cinéma.
-- Un clic sur la vidéo met en pause ; un **double-clic** active le **mode cinéma** (vidéo en plein écran, colonnes masquées). **Échap** ou **⌘↩** pour en sortir.
+- Un clic sur la vidéo met en pause ; un **double-clic** active le **mode cinéma** : la fenêtre passe en plein écran et seule la **vidéo** reste affichée (ni colonnes ni barre d'outils ; le bouton vert de la fenêtre et **⌃⌘F** ont le même effet pendant une lecture). **Échap** ou **⌘↩** pour en sortir.
 - **Reprise de la lecture** : pour les films et épisodes, Kastideo mémorise votre position. À la réouverture, la lecture reprend là où vous vous étiez arrêté, avec un message proposant de **recommencer au début**. Des barres de progression apparaissent dans les listes, les affiches et les épisodes. Désactivable, ou positions effaçables, dans les réglages.
 - Pour les sources Xtream, le direct est lu au format MPEG-TS (.ts), comme le lecteur de référence Xtream ; si le flux échoue, Kastideo essaie automatiquement la variante .m3u8 (et inversement).
 
@@ -145,6 +145,7 @@ Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglage
 - L'enregistrement s'arrête automatiquement à la fin du programme en cours (d'après le guide TV, plus la marge après), ou quand vous cliquez sur **■**.
 - Il utilise **la même connexion** que la lecture : rien de plus n'est consommé sur votre abonnement.
 - Clic droit sur une chaîne > **Enregistrer maintenant** : si vous regardez une autre chaîne, Kastideo vous demande s'il faut arrêter la lecture, puis enregistre en arrière-plan.
+- Un **bandeau** en bas de la fenêtre confirme le début et la fin de l'enregistrement et indique **le dossier** où se trouve le fichier (bouton **Afficher**). Si le dossier choisi dans les réglages n'est plus accessible, le fichier est placé dans ~/Movies/Kastideo et le bandeau le signale. Les étapes détaillées sont dans le **Journal de lecture**.
 - À la fin, l'enregistrement est **converti en MP4** sans perte de qualité (lisible par QuickTime, l'iPhone, l'iPad). Désactivable dans les réglages.
 
 ### Programmer un enregistrement

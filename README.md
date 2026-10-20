@@ -4,7 +4,7 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.8.0)
+## Fonctions (version 0.8.1)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir

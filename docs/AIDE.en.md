@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.8.0 — Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.8.1 — Full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -107,7 +107,7 @@ Kastideo plays all content with the **VLC** engine: live MPEG-TS (.ts), HLS (.m3
 - Playback starts as soon as you select a channel, a movie or an episode.
 - While opening, the channel logo and name are shown. The **“Ready in x s”** badge then shows the start-up time (can be turned off in settings).
 - Controls appear when you hover over the video: play / pause, back 10 s and forward 30 s for movies and episodes, progress bar, volume (up to 200%) and theater mode.
-- A click on the video pauses it; a **double-click** turns on **theater mode** (video full screen, columns hidden). **Esc** or **⌘↩** to leave it.
+- A click on the video pauses it; a **double-click** turns on **theater mode**: the window goes full screen and only the **video** remains visible (no columns or toolbar; the green window button and **⌃⌘F** do the same during playback). **Esc** or **⌘↩** to leave it.
 - **Resume playback**: for movies and episodes, Kastideo remembers your position. When you reopen one, playback resumes where you stopped, with a message offering to **start over**. Progress bars appear in lists, posters and episodes. This can be turned off, and positions can be erased, in settings.
 - For Xtream sources, live is played in MPEG-TS (.ts) format, like the Xtream reference player; if the stream fails, Kastideo automatically tries the .m3u8 variant (and vice versa).
 
@@ -145,6 +145,7 @@ Files are stored in **~/Movies/Kastideo** (can be changed in **Settings > Record
 - Recording stops automatically at the end of the current program (according to the TV guide, plus the margin after), or when you click **■**.
 - It uses **the same connection** as playback: nothing more is consumed from your subscription.
 - Right-click a channel > **Record Now**: if you are watching another channel, Kastideo asks whether to stop playback, then records in the background.
+- A **banner** at the bottom of the window confirms when a recording starts and ends and shows **the folder** where the file is (**Show** button). If the folder chosen in settings is no longer accessible, the file is placed in ~/Movies/Kastideo and the banner says so. Detailed steps are in the **Playback Log**.
 - At the end, the recording is **converted to MP4** with no quality loss (playable in QuickTime, on iPhone and iPad). This can be turned off in settings.
 
 ### Scheduling a recording

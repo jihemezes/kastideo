@@ -26,6 +26,7 @@ struct RootView: View {
                 WelcomeView(showAddSource: $showAddSource)
             }
         }
+        .recordingToast()
         .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {
             LanguagePickerSheet(chosen: $appLanguage)
         }
@@ -66,6 +67,7 @@ struct RootView: View {
 struct MainSplitView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
+    @Environment(PlaybackController.self) private var playback
     @AppStorage("interface.live") private var uiLive = InterfaceStyle.classic.rawValue
     @AppStorage("interface.movie") private var uiMovie = InterfaceStyle.classic.rawValue
     @AppStorage("interface.series") private var uiSeries = InterfaceStyle.classic.rawValue
@@ -90,9 +92,18 @@ struct MainSplitView: View {
         return scope.resolve(raw)
     }
 
+    /// Mode plein écran de l'interface Classique : la vidéo seule, sans colonnes ni barre d'outils.
+    private var showsTheater: Bool {
+        navigation.isTheater && style == .classic && !isGuide && navigation.selectedItemID != nil && playback.current != nil
+    }
+
     var body: some View {
         Group {
-            if isGuide && style != .classic {
+            if showsTheater {
+                DetailView()
+                    .background(Color.black)
+                    .toolbar(.hidden, for: .windowToolbar)
+            } else if isGuide && style != .classic {
                 GuideRootView(style: style)
             } else {
                 switch style {
@@ -106,8 +117,16 @@ struct MainSplitView: View {
             }
         }
         .onChange(of: navigation.isTheater) { _, theater in
-            withAnimation { columns = theater ? .detailOnly : .all }
             setFullScreen(theater)
+        }
+        // Plein écran macOS (bouton vert, ⌃⌘F) : pendant une lecture, c'est la vidéo qui passe en plein écran.
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didEnterFullScreenNotification)) { _ in
+            if !navigation.isTheater, playback.current != nil, navigation.selectedItemID != nil {
+                navigation.isTheater = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didExitFullScreenNotification)) { _ in
+            if navigation.isTheater { navigation.isTheater = false }
         }
     }
 
@@ -194,7 +213,8 @@ struct MainToolbar: ToolbarContent {
 /// Passe la fenêtre principale en plein écran (ou en sort) pour le mode cinéma.
 @MainActor
 private func setFullScreen(_ enabled: Bool) {
-    guard let window = NSApp.keyWindow ?? NSApp.mainWindow else { return }
+    guard let window = NSApp.keyWindow ?? NSApp.mainWindow
+            ?? NSApp.windows.first(where: { $0.isVisible && $0.canBecomeMain }) else { return }
     let isFull = window.styleMask.contains(.fullScreen)
     if enabled != isFull { window.toggleFullScreen(nil) }
 }

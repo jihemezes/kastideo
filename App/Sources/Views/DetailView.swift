@@ -47,6 +47,8 @@ struct PlayerPane: View {
             }
         }
         .task(id: item.id) {
+            // Entrée / sortie du plein écran : la vue est recréée, la lecture en cours continue sans redémarrer.
+            if playback.current?.id == item.id, playback.errorMessage == nil { return }
             recordings.requestPlay(item, onCancel: {
                 // Lecture refusée (enregistrement prioritaire) : on revient à l'élément en cours.
                 navigation.selectedItemID = playback.current?.id

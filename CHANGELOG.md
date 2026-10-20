@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.8.1] - 2026-10-20
+
+- **Plein écran** : en interface Classique, le mode plein écran (bouton de la barre de contrôle, double-clic, ⌘↩ ou bouton vert de la fenêtre) affiche maintenant **la vidéo seule**, sans colonnes ni barre d'outils, au lieu de mettre toute l'application en plein écran. Échap ou ⌘↩ pour revenir
+- **Enregistrement du direct** fiabilisé : Kastideo ne se fie plus au retour du moteur VLC (qui annonce parfois un échec alors que l'enregistrement fonctionne) et retrouve lui-même le fichier écrit ; le fichier est toujours déplacé dans le **dossier d'enregistrements choisi** (si ce dossier n'est plus accessible, ~/Movies/Kastideo est utilisé et un message l'indique)
+- Un **bandeau** dans la fenêtre indique maintenant le résultat de chaque enregistrement et téléchargement (avec le dossier et un bouton « Afficher »), même si les notifications macOS sont désactivées ; les étapes sont aussi inscrites dans le Journal de lecture
+
 ## [0.8.0] - 2026-10-20
 
 - Nouvel **écran d'accueil** au lancement : trois grands pavés **Direct**, **Films** et **Séries**, boutons d'accès rapide aux **Favoris**, **Récents**, **Guide TV** et **Enregistrements**, recherche globale (chaînes, films, séries), rangée « Reprendre la lecture » et retour à la lecture en cours. On y revient avec le bouton **Accueil**, **⌘0** (ou **H** en interface TV)
