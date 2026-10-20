@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.8.2] - 2026-10-20
+
+- Correction de compilation (la version 0.8.1 n'avait pas pu être construite) : dossier « Documents » mal désigné dans la recherche des fichiers d'enregistrement
+- Le journal de la construction automatique affiche désormais toutes les lignes d'erreur du compilateur
+
 ## [0.8.1] - 2026-10-20
 
 - **Plein écran** : en interface Classique, le mode plein écran (bouton de la barre de contrôle, double-clic, ⌘↩ ou bouton vert de la fenêtre) affiche maintenant **la vidéo seule**, sans colonnes ni barre d'outils, au lieu de mettre toute l'application en plein écran. Échap ou ⌘↩ pour revenir

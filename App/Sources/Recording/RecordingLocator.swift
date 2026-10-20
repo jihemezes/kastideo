@@ -9,7 +9,7 @@ enum RecordingLocator {
     private static var fallbackDirectories: [URL] {
         let manager = FileManager.default
         var urls = [manager.temporaryDirectory]
-        for directory in [FileManager.SearchPathDirectory.downloadsDirectory, .documentsDirectory,
+        for directory in [FileManager.SearchPathDirectory.downloadsDirectory, .documentDirectory,
                           .moviesDirectory, .desktopDirectory, .cachesDirectory] {
             urls.append(contentsOf: manager.urls(for: directory, in: .userDomainMask))
         }

@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.8.1 — Full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.8.2 — Full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 

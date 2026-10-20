@@ -47,7 +47,7 @@ jobs:
                  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
                  build > build.log 2>&1; then
             echo "::group::Erreurs de compilation"
-            grep -E "error:" build.log | sort -u | head -80
+            grep -n -i -E "error|fatal|stack dump|assertion|crash|failed with" build.log | grep -v -E "^[0-9]+:(note|warning)|-Werror|DeveloperError" | cut -c1-600 | head -120
             echo "::endgroup::"
             tail -60 build.log
             exit 1

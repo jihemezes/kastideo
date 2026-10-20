@@ -130,7 +130,7 @@ jobs:
                  OTHER_CODE_SIGN_FLAGS="--timestamp --keychain $KEYCHAIN_PATH" \
                  archive > archive.log 2>&1; then
             echo "::group::Erreurs"
-            grep -E "error:" archive.log | sort -u | head -80
+            grep -n -i -E "error|fatal|stack dump|assertion|crash|failed with" archive.log | grep -v -E "^[0-9]+:(note|warning)|-Werror|DeveloperError" | cut -c1-600 | head -120
             echo "::endgroup::"
             tail -80 archive.log
             exit 1

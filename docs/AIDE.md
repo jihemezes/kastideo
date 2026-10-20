@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.8.1 — plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.8.2 — plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
