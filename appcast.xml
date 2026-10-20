@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.9.2</title>
+      <pubDate>Tue, 20 Oct 2026 21:32:50 GMT</pubDate>
+      <sparkle:version>18</sparkle:version>
+      <sparkle:shortVersionString>0.9.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction de l&amp;#x27;&lt;b&gt;écran noir en plein écran&lt;/b&gt; (le son continuait) : pendant le passage en plein écran, l&amp;#x27;ancien et le nouvel écran coexistent un instant ; la vidéo va maintenant toujours à l&amp;#x27;écran affiché&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.2/Kastideo-0.9.2.dmg" length="44547745" type="application/octet-stream" sparkle:edSignature="dQjB3o3Hs5VWSsnv9F7f6KvOihpcG+WqiE37Y5gmi7OHRafk8uS7xKQrPtOewdQMVfob9jq8hEez7jZPTNjDAw==" />
+    </item>
+    <item>
       <title>Kastideo 0.9.1</title>
       <pubDate>Tue, 20 Oct 2026 21:18:07 GMT</pubDate>
       <sparkle:version>17</sparkle:version>
