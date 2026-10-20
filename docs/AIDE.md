@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.9.2 — écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.9.4 — procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -69,7 +69,7 @@ Kastideo propose trois présentations, que vous choisissez **séparément pour l
 
 - **Classique** : les trois colonnes décrites ci-dessus.
 - **TV** (direct uniquement) : voir ci-dessous.
-- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic sur une chaîne ouvre le lecteur en plein cadre. Un clic sur l'affiche d'un **film** ou d'une **série** ouvre d'abord sa **fiche** : grande image de fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution (avec photos), boutons **Lire** / **Reprendre**, **Voir les épisodes**, **Bande-annonce**, **Télécharger** et favori. Les informations viennent de votre fournisseur IPTV ; ajoutez une clé **TMDB** gratuite (Réglages > Général > Fiches des films et séries) pour des fiches plus complètes. **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
+- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic sur une chaîne ouvre le lecteur en plein cadre. Un clic sur l'affiche d'un **film** ou d'une **série** ouvre d'abord sa **fiche** : grande image de fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution (avec photos), bouton **Retour à Films** (ou Séries) en haut à gauche, boutons **Lire** / **Reprendre**, **Voir les épisodes**, **Bande-annonce**, **Télécharger** et favori. Les informations viennent de votre fournisseur IPTV ; ajoutez une clé **TMDB** gratuite (Réglages > Général > Fiches des films et séries) pour des fiches plus complètes. **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
 
 Pour changer d'interface :
 
@@ -235,6 +235,20 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 - **Fiches des films et séries** (onglet **Général**) : clé API **TMDB** facultative (gratuite sur themoviedb.org > Paramètres > API ; clé v3 ou jeton de lecture v4). Elle est conservée dans le trousseau. **Enregistrer et vérifier** contrôle la clé. Sans clé, les fiches utilisent les informations de votre fournisseur IPTV.
 - **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
 - **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
+
+### Obtenir une clé TMDB (gratuite)
+
+TMDB (The Movie Database) est une base de films et séries communautaire. Sa clé est **gratuite** pour un usage personnel ; elle permet à Kastideo d'afficher les photos des acteurs, les affiches et fonds en haute définition, la bande-annonce et un résumé traduit.
+
+1. Créez un compte sur **themoviedb.org** (bouton « Rejoindre TMDB »), puis validez-le avec le lien reçu par e-mail.
+2. Connecté, ouvrez **themoviedb.org/settings/api** (avatar > Paramètres > API), ou cliquez sur **Obtenir une clé gratuite** dans les réglages de Kastideo.
+3. Cliquez sur **Créer**, choisissez **Developer** et acceptez les conditions d'utilisation.
+4. Remplissez le formulaire : type d'usage **Personnel**, nom de l'application **Kastideo**, URL **https://github.com/jihemezes/kastideo**, un court résumé (« Lecteur IPTV personnel, affichage des fiches de films »), puis vos coordonnées.
+5. Validez : la page affiche une **Clé d'API** (32 caractères) et un **Jeton d'accès en lecture** (long, commence par « eyJ »). Kastideo accepte l'un ou l'autre ; la clé d'API est la plus simple à copier.
+6. Dans Kastideo : **Réglages (⌘,) > Général > Fiches des films et séries**, collez la clé puis cliquez sur **Enregistrer et vérifier**. « Clé valide ✓ » confirme la saisie.
+7. Rouvrez une fiche (ou cliquez sur **Actualiser** en bas de la fiche) : elle est complétée par TMDB.
+
+La clé est conservée dans le trousseau du Mac. **Retirer la clé** revient aux seules informations du fournisseur IPTV.
 
 ## Dépannage
 

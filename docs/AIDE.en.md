@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.9.2 — black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.9.4 — TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -69,7 +69,7 @@ Kastideo offers three presentations, which you choose **separately for live, mov
 
 - **Classic**: the three columns described above.
 - **TV** (live only): see below.
-- **Cinema**: a large “featured” banner (what you watched last, otherwise your favorites), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click on a channel opens the player full frame. A click on a **movie** or **series** poster first opens its **details page**: backdrop, poster, year, runtime, genres, rating, synopsis, director, cast (with photos), **Play** / **Resume**, **View Episodes**, **Trailer**, **Download** and favorite buttons. Information comes from your IPTV provider; add a free **TMDB** key (Settings > General > Movie and Series Details) for richer pages. **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
+- **Cinema**: a large “featured” banner (what you watched last, otherwise your favorites), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click on a channel opens the player full frame. A click on a **movie** or **series** poster first opens its **details page**: backdrop, poster, year, runtime, genres, rating, synopsis, director, cast (with photos), a **Back to Movies** (or Series) button at the top left, **Play** / **Resume**, **View Episodes**, **Trailer**, **Download** and favorite buttons. Information comes from your IPTV provider; add a free **TMDB** key (Settings > General > Movie and Series Details) for richer pages. **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
 
 To change the interface:
 
@@ -234,6 +234,20 @@ After each update, the **What's New** window summarizes the changes in the insta
 - **Movie and Series Details** (**General** tab): optional **TMDB** API key (free at themoviedb.org > Settings > API; v3 key or v4 read token), stored in the keychain. **Save and Verify** checks it. Without a key, details come from your IPTV provider.
 - **Refresh at launch**: reloads sources whose last refresh is more than 6 hours old.
 - **Cache**: Kastideo keeps a local copy of lists and the TV guide to start instantly. **Clear and Reload** erases this copy and restarts loading.
+
+### Getting a TMDB key (free)
+
+TMDB (The Movie Database) is a community movie and TV database. Its key is **free** for personal use; it lets Kastideo show cast photos, HD posters and backdrops, the trailer and a translated synopsis.
+
+1. Create an account on **themoviedb.org** (“Join TMDB”), then confirm it with the link sent by e-mail.
+2. Signed in, open **themoviedb.org/settings/api** (avatar > Settings > API), or click **Get a Free Key** in Kastideo's settings.
+3. Click **Create**, choose **Developer** and accept the terms of use.
+4. Fill in the form: usage type **Personal**, application name **Kastideo**, URL **https://github.com/jihemezes/kastideo**, a short summary (“Personal IPTV player, shows movie details”), then your contact details.
+5. Submit: the page shows an **API Key** (32 characters) and an **API Read Access Token** (long, starts with “eyJ”). Kastideo accepts either; the API key is easier to copy.
+6. In Kastideo: **Settings (⌘,) > General > Movie and Series Details**, paste the key and click **Save and Verify**. “Valid key ✓” confirms it.
+7. Reopen a details page (or click **Refresh** at its bottom): it is now completed by TMDB.
+
+The key is stored in the Mac keychain. **Remove Key** goes back to IPTV provider information only.
 
 ## Troubleshooting
 

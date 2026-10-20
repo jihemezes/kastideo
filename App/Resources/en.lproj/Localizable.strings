@@ -407,3 +407,4 @@
 "En interface Cinéma, un clic sur une affiche ouvre la fiche du film ou de la série. Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce et résumé traduit." = "In the Cinema interface, clicking a poster opens the movie or series details. Information comes from your IPTV provider; with a TMDB (The Movie Database) key, Kastideo adds HD posters, cast photos, trailer and a translated synopsis.";
 "Clé valide ✓" = "Valid key ✓";
 "Clé refusée par TMDB" = "Key rejected by TMDB";
+"Retour à %@" = "Back to %@";

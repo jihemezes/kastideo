@@ -104,45 +104,59 @@ struct MediaInfoView: View {
     private var details: MediaDetails? { info.details(for: item) }
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            backdrop
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    header
-                    if let plot = details?.plot {
-                        Text(plot)
-                            .font(.body)
-                            .lineSpacing(3)
-                            .frame(maxWidth: 820, alignment: .leading)
-                            .textSelection(.enabled)
-                    } else if info.isLoading(item) {
-                        ProgressView().controlSize(.small)
-                    }
-                    credits
-                    castRail
-                    footer
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                backButton
+                header
+                if let plot = details?.plot {
+                    Text(plot)
+                        .font(.body)
+                        .lineSpacing(3)
+                        .frame(maxWidth: 820, alignment: .leading)
+                        .textSelection(.enabled)
+                } else if info.isLoading(item) {
+                    ProgressView().controlSize(.small)
                 }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 32)
-                .padding(.top, 54)
-                .padding(.bottom, 32)
+                credits
+                castRail
+                footer
             }
-            Button {
-                navigation.infoItemID = nil
-            } label: {
-                Label("Retour", systemImage: "chevron.left")
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.black.opacity(0.35), in: Capsule())
-            }
-            .buttonStyle(.plain)
             .foregroundStyle(.white)
-            .keyboardShortcut(.cancelAction)
-            .help("Revenir au catalogue (Échap)")
-            .padding(14)
+            .padding(.horizontal, 32)
+            .padding(.top, 16)
+            .padding(.bottom, 32)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        // Le fond passe sous la barre d'outils ; le contenu, lui, commence sous la barre.
+        .background { backdrop }
         .environment(\.colorScheme, .dark)
         .task(id: item.id) { await info.load(item, store: store) }
+    }
+
+    private var backButton: some View {
+        Button {
+            navigation.infoItemID = nil
+        } label: {
+            Label(String(localized: "Retour à \(sectionName)"), systemImage: "chevron.left")
+                .font(.callout.weight(.semibold))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.white.opacity(0.14), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .keyboardShortcut(.cancelAction)
+        .help("Revenir au catalogue (Échap)")
+    }
+
+    private var sectionName: String {
+        navigation.browse?.title ?? (item.kind == .series ? String(localized: "Séries") : String(localized: "Films"))
+    }
+
+    /// Titre lisible : celui de TMDB, sinon le nom du catalogue sans les étiquettes (« |FR| », « 4K »…).
+    private var displayTitle: String {
+        if let title = details?.title, details?.sources.contains("TMDB") == true { return title }
+        return TMDB.cleanTitle(details?.title ?? item.name).title
     }
 
     // MARK: Fond
@@ -175,10 +189,10 @@ struct MediaInfoView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .shadow(color: .black.opacity(0.6), radius: 18, y: 8)
             VStack(alignment: .leading, spacing: 10) {
-                Text(details?.title ?? item.name)
+                Text(displayTitle)
                     .font(.system(size: 36, weight: .bold))
                     .lineLimit(3)
-                if let original = details?.originalTitle, original != details?.title {
+                if let original = details?.originalTitle, original != displayTitle {
                     Text(original)
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.65))

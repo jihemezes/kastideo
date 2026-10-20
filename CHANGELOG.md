@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.4] - 2026-10-20
+
+- **Aide** : nouvelle rubrique « Obtenir une clé TMDB (gratuite) », pas à pas, dans Réglages généraux
+
+## [0.9.3] - 2026-10-20
+
+- **Fiche film / série** : la page commence sous la barre d'outils (l'affiche est entière), bouton **Retour à Films / Séries** bien visible en haut (ou Échap), titre affiché sans les étiquettes du fournisseur (« |FR| », « 4K »…)
+
 ## [0.9.2] - 2026-10-20
 
 - Correction de l'**écran noir en plein écran** (le son continuait) : pendant le passage en plein écran, l'ancien et le nouvel écran coexistent un instant ; la vidéo va maintenant toujours à l'écran affiché
