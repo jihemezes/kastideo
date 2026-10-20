@@ -18,9 +18,9 @@ enum InterfaceStyle: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .classic: return "Classique"
-        case .cinema: return "Cinéma"
-        case .tv: return "TV"
+        case .classic: return String(localized: "Classique")
+        case .cinema: return String(localized: "Cinéma")
+        case .tv: return String(localized: "TV")
         }
     }
 
@@ -34,9 +34,9 @@ enum InterfaceStyle: String, CaseIterable, Identifiable {
 
     var summary: String {
         switch self {
-        case .classic: return "Trois colonnes : sources et catégories, liste, lecteur."
-        case .cinema: return "Grande affiche et rangées horizontales, comme Apple TV ou Netflix."
-        case .tv: return "Direct uniquement : la chaîne en plein cadre, panneau de chaînes, bandeau d'information, zapping par numéro."
+        case .classic: return String(localized: "Trois colonnes : sources et catégories, liste, lecteur.")
+        case .cinema: return String(localized: "Grande affiche et rangées horizontales, comme Apple TV ou Netflix.")
+        case .tv: return String(localized: "Direct uniquement : la chaîne en plein cadre, panneau de chaînes, bandeau d'information, zapping par numéro.")
         }
     }
 }
@@ -52,10 +52,10 @@ enum InterfaceScope: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .live: return "Direct"
-        case .movie: return "Films"
-        case .series: return "Séries"
-        case .other: return "Favoris et récents"
+        case .live: return String(localized: "Direct")
+        case .movie: return String(localized: "Films")
+        case .series: return String(localized: "Séries")
+        case .other: return String(localized: "Favoris et récents")
         }
     }
 
@@ -73,7 +73,7 @@ enum InterfaceScope: String, CaseIterable, Identifiable {
             }
         case .favorites, .recents:
             return .other
-        case .recordings, .guide:
+        case .home, .recordings, .guide:
             return nil
         }
     }
@@ -107,14 +107,14 @@ enum AccentChoice: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .system: return "Système"
-        case .blue: return "Bleu"
-        case .purple: return "Violet"
-        case .pink: return "Rose"
-        case .red: return "Rouge"
-        case .orange: return "Orange"
-        case .green: return "Vert"
-        case .teal: return "Turquoise"
+        case .system: return String(localized: "Système")
+        case .blue: return String(localized: "Bleu")
+        case .purple: return String(localized: "Violet")
+        case .pink: return String(localized: "Rose")
+        case .red: return String(localized: "Rouge")
+        case .orange: return String(localized: "Orange")
+        case .green: return String(localized: "Vert")
+        case .teal: return String(localized: "Turquoise")
         }
     }
 
@@ -141,9 +141,9 @@ enum ListDensity: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .compact: return "Compacte"
-        case .standard: return "Standard"
-        case .spacious: return "Aérée"
+        case .compact: return String(localized: "Compacte")
+        case .standard: return String(localized: "Standard")
+        case .spacious: return String(localized: "Aérée")
         }
     }
 
@@ -180,9 +180,9 @@ enum CardSize: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .small: return "Petites"
-        case .medium: return "Moyennes"
-        case .large: return "Grandes"
+        case .small: return String(localized: "Petites")
+        case .medium: return String(localized: "Moyennes")
+        case .large: return String(localized: "Grandes")
         }
     }
 

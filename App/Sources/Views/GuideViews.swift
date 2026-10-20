@@ -92,9 +92,9 @@ struct GuideView: View {
 
     private var filterTitle: String {
         switch filter {
-        case .all: return "Toutes les chaînes"
-        case .favorites: return "Favoris"
-        case .recents: return "Récents"
+        case .all: return String(localized: "Toutes les chaînes")
+        case .favorites: return String(localized: "Favoris")
+        case .recents: return String(localized: "Récents")
         case .category(let name): return name
         }
     }
@@ -103,8 +103,8 @@ struct GuideView: View {
         let date = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
         let text = date.formatted(.dateTime.weekday(.wide).day().month(.wide))
         switch offset {
-        case 0: return "Aujourd'hui — \(text)"
-        case 1: return "Demain — \(text)"
+        case 0: return String(localized: "Aujourd'hui — \(text)")
+        case 1: return String(localized: "Demain — \(text)")
         default: return text
         }
     }
@@ -134,11 +134,11 @@ struct GuideView: View {
                 ProgressView("Chargement du guide TV…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                ContentUnavailableView(query.isEmpty ? "Aucun programme" : "Aucun résultat",
+                ContentUnavailableView(query.isEmpty ? String(localized: "Aucun programme") : String(localized: "Aucun résultat"),
                                        systemImage: "calendar",
                                        description: Text(query.isEmpty
-                                            ? "Le guide TV n'est pas chargé, ou aucune chaîne de ce filtre n'a de programmes. Vérifiez l'adresse du guide dans les réglages de la source."
-                                            : "Aucune chaîne ne correspond à cette recherche."))
+                                            ? String(localized: "Le guide TV n'est pas chargé, ou aucune chaîne de ce filtre n'a de programmes. Vérifiez l'adresse du guide dans les réglages de la source.")
+                                            : String(localized: "Aucune chaîne ne correspond à cette recherche.")))
             }
         } else {
             GeometryReader { geo in
@@ -421,7 +421,7 @@ struct GuideProgrammePopover: View {
 
     private var durationText: String {
         let minutes = Int(programme.stop.timeIntervalSince(programme.start) / 60)
-        return minutes >= 60 ? String(format: "%d h %02d", minutes / 60, minutes % 60) : "\(minutes) min"
+        return minutes >= 60 ? String(format: "%d h %02d", minutes / 60, minutes % 60) : String(localized: "\(minutes) min")
     }
 }
 

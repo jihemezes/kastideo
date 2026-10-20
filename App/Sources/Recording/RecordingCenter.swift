@@ -141,9 +141,9 @@ final class RecordingCenter {
             let compatible = (live.mode == .player && live.item.id == item.id) || (live.mode == .background && isLocal)
             if !compatible {
                 conflict = RecordingConflict(
-                    title: "Enregistrement en cours",
-                    message: "« \(live.title) » (\(live.item.name)) est en cours d'enregistrement. Votre abonnement n'autorise qu'une connexion : regarder « \(item.name) » arrêtera l'enregistrement.",
-                    confirmTitle: "Arrêter l'enregistrement et regarder",
+                    title: String(localized: "Enregistrement en cours"),
+                    message: String(localized: "« \(live.title) » (\(live.item.name)) est en cours d'enregistrement. Votre abonnement n'autorise qu'une connexion : regarder « \(item.name) » arrêtera l'enregistrement."),
+                    confirmTitle: String(localized: "Arrêter l'enregistrement et regarder"),
                     onConfirm: { [weak self] in
                         self?.stopLive()
                         self?.playback.play(item)
@@ -153,9 +153,9 @@ final class RecordingCenter {
             }
         } else if !isLocal, let download = activeDownload {
             conflict = RecordingConflict(
-                title: "Téléchargement en cours",
-                message: "« \(download.fileName) » est en cours de téléchargement. Votre abonnement n'autorise qu'une connexion : le téléchargement sera mis en pause et reprendra automatiquement après la lecture.",
-                confirmTitle: "Mettre en pause et regarder",
+                title: String(localized: "Téléchargement en cours"),
+                message: String(localized: "« \(download.fileName) » est en cours de téléchargement. Votre abonnement n'autorise qu'une connexion : le téléchargement sera mis en pause et reprendra automatiquement après la lecture."),
+                confirmTitle: String(localized: "Mettre en pause et regarder"),
                 onConfirm: { [weak self] in
                     self?.pauseActiveDownload(byUser: false)
                     self?.playback.play(item)
@@ -170,9 +170,9 @@ final class RecordingCenter {
     func requestStop() {
         if let live = activeLive, live.mode == .player {
             conflict = RecordingConflict(
-                title: "Enregistrement en cours",
-                message: "Arrêter la lecture arrêtera aussi l'enregistrement de « \(live.title) ».",
-                confirmTitle: "Tout arrêter",
+                title: String(localized: "Enregistrement en cours"),
+                message: String(localized: "Arrêter la lecture arrêtera aussi l'enregistrement de « \(live.title) »."),
+                confirmTitle: String(localized: "Tout arrêter"),
                 onConfirm: { [weak self] in
                     self?.stopLive()
                     self?.playback.stop()
@@ -200,9 +200,9 @@ final class RecordingCenter {
         if let live = activeLive {
             if live.item.id == item.id { return }
             conflict = RecordingConflict(
-                title: "Un enregistrement est déjà en cours",
-                message: "« \(live.title) » est en cours d'enregistrement. L'arrêter pour enregistrer « \(item.name) » ?",
-                confirmTitle: "Arrêter et enregistrer « \(item.name) »",
+                title: String(localized: "Un enregistrement est déjà en cours"),
+                message: String(localized: "« \(live.title) » est en cours d'enregistrement. L'arrêter pour enregistrer « \(item.name) » ?"),
+                confirmTitle: String(localized: "Arrêter et enregistrer « \(item.name) »"),
                 onConfirm: { [weak self] in
                     self?.stopLive()
                     self?.recordNow(item)
@@ -219,9 +219,9 @@ final class RecordingCenter {
             startPlayerRecording(item, title: title, end: end, scheduleID: nil)
         } else if playbackUsesNetwork, let current = playback.current {
             conflict = RecordingConflict(
-                title: "Lecture en cours",
-                message: "Votre abonnement n'autorise qu'une connexion : enregistrer « \(item.name) » arrêtera la lecture de « \(current.name) ».",
-                confirmTitle: "Arrêter la lecture et enregistrer",
+                title: String(localized: "Lecture en cours"),
+                message: String(localized: "Votre abonnement n'autorise qu'une connexion : enregistrer « \(item.name) » arrêtera la lecture de « \(current.name) »."),
+                confirmTitle: String(localized: "Arrêter la lecture et enregistrer"),
                 onConfirm: { [weak self] in
                     self?.playback.stop()
                     self?.startBackground(item, title: title, end: end, scheduleID: nil)
@@ -241,7 +241,7 @@ final class RecordingCenter {
             pendingFinalize = live
             if !playback.stopRecording() {
                 pendingFinalize = nil
-                Notifier.post("Enregistrement", "L'enregistrement de « \(live.title) » n'a pas pu être finalisé.")
+                Notifier.post(String(localized: "Enregistrement"), String(localized: "L'enregistrement de « \(live.title) » n'a pas pu être finalisé."))
             }
         case .background:
             let segments = background?.stop() ?? []
@@ -260,7 +260,7 @@ final class RecordingCenter {
             for _ in 0..<20 {
                 guard let self, self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
                 if self.playback.startRecording(into: dir) {
-                    Notifier.post("Enregistrement démarré", "\(item.name) — \(title)")
+                    Notifier.post(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
                     return
                 }
                 try? await Task.sleep(for: .seconds(1))
@@ -268,7 +268,7 @@ final class RecordingCenter {
             guard let self, self.activeLive?.mode == .player else { return }
             self.activeLive = nil
             self.updateSleepGuard()
-            Notifier.post("Enregistrement impossible", "Le moteur de lecture n'a pas pu démarrer l'enregistrement de « \(item.name) ».")
+            Notifier.post(String(localized: "Enregistrement impossible"), String(localized: "Le moteur de lecture n'a pas pu démarrer l'enregistrement de « \(item.name) »."))
         }
     }
 
@@ -280,7 +280,7 @@ final class RecordingCenter {
         workDir = dir
         activeLive = ActiveLive(item: item, title: title, startedAt: Date(), endsAt: end, mode: .background, scheduleID: scheduleID)
         recorder.start(url: url)
-        Notifier.post("Enregistrement démarré", "\(item.name) — \(title)")
+        Notifier.post(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
         updateSleepGuard()
     }
 
@@ -304,7 +304,7 @@ final class RecordingCenter {
         }
         let valid = segments.filter { ((try? $0.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0) > 0 }
         guard !valid.isEmpty else {
-            Notifier.post("Enregistrement vide", "Aucune donnée reçue pour « \(live.title) ».")
+            Notifier.post(String(localized: "Enregistrement vide"), String(localized: "Aucune donnée reçue pour « \(live.title) »."))
             return
         }
         let base = FileNaming.liveName(channel: live.item.name, title: live.title, date: live.startedAt)
@@ -317,10 +317,10 @@ final class RecordingCenter {
                 let mp4 = FileNaming.unique(folder.appendingPathComponent(base).appendingPathExtension("mp4"))
                 enqueueRemux(input: ts, output: mp4, name: base)
             } else {
-                Notifier.post("Enregistrement terminé", base)
+                Notifier.post(String(localized: "Enregistrement terminé"), base)
             }
         } catch {
-            Notifier.post("Enregistrement impossible", "« \(live.title) » : \(error.localizedDescription)")
+            Notifier.post(String(localized: "Enregistrement impossible"), "« \(live.title) » : \(error.localizedDescription)")
         }
         refreshFiles()
     }
@@ -343,10 +343,10 @@ final class RecordingCenter {
             self.converting.removeAll { $0 == job.name }
             if success {
                 try? FileManager.default.removeItem(at: job.input)
-                Notifier.post("Enregistrement terminé", job.name)
+                Notifier.post(String(localized: "Enregistrement terminé"), job.name)
             } else {
                 try? FileManager.default.removeItem(at: job.output)
-                Notifier.post("Enregistrement terminé", "\(job.name) — conservé au format .ts (conversion MP4 impossible)")
+                Notifier.post(String(localized: "Enregistrement terminé"), String(localized: "\(job.name) — conservé au format .ts (conversion MP4 impossible)"))
             }
             self.refreshFiles()
             self.updateSleepGuard()
@@ -366,13 +366,13 @@ final class RecordingCenter {
         guard end > start, end > Date() else { return }
         let recording = ScheduledRecording(item: item, title: title, start: start, end: end)
         if let overlap = schedules.first(where: { $0.start < end && start < $0.end }) {
-            Notifier.post("Attention : chevauchement", "« \(title) » chevauche « \(overlap.title) ». Une seule connexion : seul le premier sera enregistré.")
+            Notifier.post(String(localized: "Attention : chevauchement"), String(localized: "« \(title) » chevauche « \(overlap.title) ». Une seule connexion : seul le premier sera enregistré."))
         }
         schedules.append(recording)
         schedules.sort { $0.start < $1.start }
         saveSchedules()
         Notifier.requestAuthorization()
-        Notifier.post("Enregistrement programmé", "\(item.name) — \(title), \(start.formatted(date: .abbreviated, time: .shortened))")
+        Notifier.post(String(localized: "Enregistrement programmé"), "\(item.name) — \(title), \(start.formatted(date: .abbreviated, time: .shortened))")
         updateSleepGuard()
     }
 
@@ -391,15 +391,15 @@ final class RecordingCenter {
             let id = recording.id
             pendingScheduleID = id
             conflict = RecordingConflict(
-                title: "Enregistrement programmé",
-                message: "L'enregistrement de « \(recording.title) » (\(recording.item.name)) doit commencer. Votre abonnement n'autorise qu'une connexion : la lecture de « \(current.name) » va s'arrêter. Sans réponse, l'enregistrement démarrera dans 60 secondes.",
-                confirmTitle: "Arrêter la lecture et enregistrer",
+                title: String(localized: "Enregistrement programmé"),
+                message: String(localized: "L'enregistrement de « \(recording.title) » (\(recording.item.name)) doit commencer. Votre abonnement n'autorise qu'une connexion : la lecture de « \(current.name) » va s'arrêter. Sans réponse, l'enregistrement démarrera dans 60 secondes."),
+                confirmTitle: String(localized: "Arrêter la lecture et enregistrer"),
                 onConfirm: { [weak self] in self?.forceStartScheduled(id) },
                 onCancel: { [weak self] in
                     self?.pendingScheduleID = nil
                     self?.removeSchedule(id)
                 })
-            Notifier.post("Enregistrement programmé", "« \(recording.title) » doit commencer : la lecture en cours va s'arrêter.")
+            Notifier.post(String(localized: "Enregistrement programmé"), String(localized: "« \(recording.title) » doit commencer : la lecture en cours va s'arrêter."))
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(60))
                 guard let self, self.pendingScheduleID == id, self.activeLive == nil else { return }
@@ -433,7 +433,7 @@ final class RecordingCenter {
         saveDownloads()
         Notifier.requestAuthorization()
         if tonight {
-            Notifier.post("Téléchargement programmé", "\(entry.fileName) — \(entry.startAfter?.formatted(date: .abbreviated, time: .shortened) ?? "")")
+            Notifier.post(String(localized: "Téléchargement programmé"), "\(entry.fileName) — \(entry.startAfter?.formatted(date: .abbreviated, time: .shortened) ?? "")")
         }
         runDownloadQueue()
         updateSleepGuard()
@@ -448,7 +448,7 @@ final class RecordingCenter {
         if fresh.count > 1 {
             let id = UUID()
             batchID = id
-            let title = fresh[0].kind == .episode ? fresh[0].group : "\(fresh.count) téléchargements"
+            let title = fresh[0].kind == .episode ? fresh[0].group : String(localized: "\(fresh.count) téléchargements")
             batches[id] = DownloadBatch(title: title)
             saveBatches()
         }
@@ -558,7 +558,7 @@ final class RecordingCenter {
                     batches[batchID]?.bytesDone += max(entry.expected, entry.received)
                 }
                 pruneBatches()
-                Notifier.post("Téléchargement terminé", entry.fileName)
+                Notifier.post(String(localized: "Téléchargement terminé"), entry.fileName)
                 refreshFiles()
             } catch {
                 downloads[index].state = .failed
@@ -568,8 +568,8 @@ final class RecordingCenter {
             let resume = (error as NSError?)?.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
             ResumeStore.save(resume, for: id)
             downloads[index].state = .failed
-            downloads[index].error = error.map { LibraryStore.describe($0) } ?? "Échec du téléchargement."
-            Notifier.post("Téléchargement interrompu", "\(entry.fileName) — \(downloads[index].error ?? "")")
+            downloads[index].error = error.map { LibraryStore.describe($0) } ?? String(localized: "Échec du téléchargement.")
+            Notifier.post(String(localized: "Téléchargement interrompu"), "\(entry.fileName) — \(downloads[index].error ?? "")")
         }
         saveDownloads()
         updateSleepGuard()
@@ -643,7 +643,7 @@ final class RecordingCenter {
 
     private func checkDiskSpace() {
         if let space = RecordingFolder.availableSpace(), space < 3_000_000_000 {
-            Notifier.post("Espace disque faible", "Il reste \(ByteCountFormatter.string(fromByteCount: space, countStyle: .file)) dans le dossier des enregistrements.")
+            Notifier.post(String(localized: "Espace disque faible"), String(localized: "Il reste \(ByteCountFormatter.string(fromByteCount: space, countStyle: .file)) dans le dossier des enregistrements."))
         }
     }
 
@@ -663,7 +663,7 @@ final class RecordingCenter {
             schedules.removeAll { schedule in missed.contains { $0.id == schedule.id } }
             saveSchedules()
             for recording in missed {
-                Notifier.post("Enregistrement manqué", "« \(recording.title) » (\(recording.item.name)) n'a pas pu être enregistré.")
+                Notifier.post(String(localized: "Enregistrement manqué"), String(localized: "« \(recording.title) » (\(recording.item.name)) n'a pas pu être enregistré."))
             }
         }
         runDownloadQueue()

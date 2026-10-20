@@ -10,6 +10,7 @@ struct SidebarView: View {
         @Bindable var navigation = navigation
         List(selection: $navigation.browse) {
             Section("Bibliothèque") {
+                row(.home, icon: "house", count: nil)
                 row(.all(.live), icon: "dot.radiowaves.left.and.right", count: store.count(for: .live))
                 row(.all(.movie), icon: "film", count: store.count(for: .movie))
                 row(.all(.series), icon: "rectangle.stack", count: store.count(for: .series))
@@ -23,7 +24,7 @@ struct SidebarView: View {
             let kind = navigation.lastKind
             let categories = store.categoriesByKind[kind] ?? []
             if !categories.isEmpty {
-                Section("Catégories — \(kind.label)") {
+                Section("Catégories — \(kind.title)") {
                     ForEach(categories, id: \.self) { name in
                         Label(name, systemImage: "folder")
                             .lineLimit(1)
@@ -94,6 +95,6 @@ struct SourceStatusRow: View {
     private var helpText: String {
         if let error = store.errors[source.id] { return error }
         let count = store.contents[source.id]?.items.count ?? 0
-        return "\(source.kind.typeLabel) — \(count) éléments"
+        return String(localized: "\(source.kind.title) — \(count) éléments")
     }
 }

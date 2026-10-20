@@ -9,9 +9,9 @@ enum LibraryError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .missingPassword: return "Mot de passe introuvable dans le trousseau. Modifiez la source pour le saisir à nouveau."
-        case .emptyPlaylist: return "La playlist ne contient aucun flux lisible."
-        case .notXtream: return "Cette source ne fournit pas de liste d'épisodes."
+        case .missingPassword: return String(localized: "Mot de passe introuvable dans le trousseau. Modifiez la source pour le saisir à nouveau.")
+        case .emptyPlaylist: return String(localized: "La playlist ne contient aucun flux lisible.")
+        case .notXtream: return String(localized: "Cette source ne fournit pas de liste d'épisodes.")
         }
     }
 }
@@ -25,6 +25,8 @@ final class LibraryStore {
     private(set) var epg = EPGIndex()
     private(set) var favoriteIDs: [String] = []
     private(set) var recentIDs: [String] = []
+    /// Historique avant la dernière suppression (pour pouvoir l'annuler).
+    private(set) var recentsBackup: RecentsBackup?
     private(set) var loading: Set<UUID> = []
     private(set) var errors: [UUID: String] = [:]
     private(set) var epgErrors: [UUID: String] = [:]
@@ -84,15 +86,15 @@ final class LibraryStore {
         if let urlError = error as? URLError {
             switch urlError.code {
             case .timedOut:
-                return "Le serveur n'a pas répondu à temps. Il est peut-être surchargé ou indisponible : réessayez plus tard."
+                return String(localized: "Le serveur n'a pas répondu à temps. Il est peut-être surchargé ou indisponible : réessayez plus tard.")
             case .cannotFindHost, .dnsLookupFailed:
-                return "Serveur introuvable : vérifiez l'adresse."
+                return String(localized: "Serveur introuvable : vérifiez l'adresse.")
             case .cannotConnectToHost:
-                return "Connexion au serveur refusée : vérifiez l'adresse et le port."
+                return String(localized: "Connexion au serveur refusée : vérifiez l'adresse et le port.")
             case .notConnectedToInternet, .networkConnectionLost:
-                return "Pas de connexion Internet."
+                return String(localized: "Pas de connexion Internet.")
             case .secureConnectionFailed, .serverCertificateUntrusted, .serverCertificateHasBadDate:
-                return "Connexion sécurisée impossible avec ce serveur (certificat)."
+                return String(localized: "Connexion sécurisée impossible avec ce serveur (certificat).")
             default:
                 break
             }
@@ -120,7 +122,7 @@ final class LibraryStore {
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
             return recentIDs.compactMap { item(id: $0) }
-        case .recordings, .guide:
+        case .home, .recordings, .guide:
             return []
         }
     }
@@ -288,9 +290,31 @@ final class LibraryStore {
     }
 
     func clearRecents() {
-        recentIDs = []
+        removeRecents(Set(recentIDs))
+    }
+
+    /// Retire des éléments de l'historique ; l'opération peut être annulée tant que le bandeau est affiché.
+    func removeRecents(_ ids: Set<String>) {
+        guard !ids.isEmpty, recentIDs.contains(where: { ids.contains($0) }) else { return }
+        recentsBackup = RecentsBackup(ids: recentIDs, extras: extraItems,
+                                      removedCount: recentIDs.filter { ids.contains($0) }.count)
+        recentIDs.removeAll { ids.contains($0) }
         defaults.set(recentIDs, forKey: Keys.recents)
         saveExtras()
+    }
+
+    /// Annule la dernière suppression dans les récents.
+    func undoRemoveRecents() {
+        guard let backup = recentsBackup else { return }
+        recentIDs = backup.ids
+        extraItems = backup.extras
+        recentsBackup = nil
+        defaults.set(recentIDs, forKey: Keys.recents)
+        saveExtras()
+    }
+
+    func discardRecentsUndo() {
+        recentsBackup = nil
     }
 
     // MARK: - Interne
@@ -373,4 +397,11 @@ final class LibraryStore {
     nonisolated static func loadEPG(_ url: URL) async throws -> [Programme] {
         try await EPGLoader.load(from: url)
     }
+}
+
+/// État de l'historique avant une suppression.
+struct RecentsBackup {
+    let ids: [String]
+    let extras: [String: MediaItem]
+    let removedCount: Int
 }

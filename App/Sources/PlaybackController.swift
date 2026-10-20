@@ -11,9 +11,9 @@ enum BufferingMode: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .fast: return "Rapide — zapping le plus court (0,4 s)"
-        case .normal: return "Équilibré (1 s)"
-        case .stable: return "Stable — connexions irrégulières (3 s)"
+        case .fast: return String(localized: "Rapide — zapping le plus court (0,4 s)")
+        case .normal: return String(localized: "Équilibré (1 s)")
+        case .stable: return String(localized: "Stable — connexions irrégulières (3 s)")
         }
     }
 
@@ -298,9 +298,9 @@ final class PlaybackController {
         player.stop()
         isLoading = false
         isPlaying = false
-        var message = "Aucune image reçue après \(Int(Self.startTimeout)) secondes. Le serveur ne répond pas pour cette chaîne, ou refuse la connexion (abonnement limité à une connexion : vérifiez qu'aucun autre appareil — TV, Piboard… — ne regarde)."
+        var message = String(localized: "Aucune image reçue après \(Int(Self.startTimeout)) secondes. Le serveur ne répond pas pour cette chaîne, ou refuse la connexion (abonnement limité à une connexion : vérifiez qu'aucun autre appareil — TV, Piboard… — ne regarde).")
         if let startedAt, let detail = PlaybackLog.shared.lastError(since: startedAt) {
-            message += "\n\nDétail : \(detail)"
+            message += String(localized: "\n\nDétail : \(detail)")
         }
         errorMessage = message
     }
@@ -341,14 +341,14 @@ final class PlaybackController {
             isPlaying = false
             var message = Self.describe(url: currentURL)
             if let startedAt, let detail = PlaybackLog.shared.lastError(since: startedAt) {
-                message += "\n\nDétail : \(detail)"
+                message += String(localized: "\n\nDétail : \(detail)")
             }
             errorMessage = message
         case .ended:
             isLoading = false
             isPlaying = false
             if current?.kind == .live {
-                errorMessage = "Le flux s'est interrompu. Le serveur a peut-être coupé la connexion."
+                errorMessage = String(localized: "Le flux s'est interrompu. Le serveur a peut-être coupé la connexion.")
             }
         case .stopped:
             isPlaying = false
@@ -415,19 +415,19 @@ final class PlaybackController {
 
     static func stateName(_ state: VLCMediaPlayerState) -> String {
         switch state {
-        case .stopped: return "arrêté"
+        case .stopped: return String(localized: "arrêté")
         case .opening: return "ouverture"
-        case .buffering: return "mise en mémoire tampon"
-        case .ended: return "terminé"
+        case .buffering: return String(localized: "mise en mémoire tampon")
+        case .ended: return String(localized: "terminé")
         case .error: return "erreur"
         case .playing: return "lecture"
         case .paused: return "pause"
-        default: return "autre (\(state.rawValue))"
+        default: return String(localized: "autre (\(state.rawValue))")
         }
     }
 
     static func describe(url: URL?) -> String {
-        "Lecture impossible : le serveur n'a pas fourni le flux. Votre abonnement n'autorise peut-être qu'une connexion à la fois : vérifiez qu'aucun autre appareil ne regarde, puis réessayez."
+        String(localized: "Lecture impossible : le serveur n'a pas fourni le flux. Votre abonnement n'autorise peut-être qu'une connexion à la fois : vérifiez qu'aucun autre appareil ne regarde, puis réessayez.")
     }
 }
 

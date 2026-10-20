@@ -75,7 +75,7 @@ struct InfoPanel: View {
                         Button {
                             if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
                         } label: {
-                            Label(recordings.isRecording(item) ? "Arrêter" : "Enregistrer",
+                            Label(recordings.isRecording(item) ? String(localized: "Arrêter") : String(localized: "Enregistrer"),
                                   systemImage: recordings.isRecording(item) ? "stop.circle.fill" : "record.circle")
                                 .foregroundStyle(.red)
                         }
@@ -177,7 +177,7 @@ struct GuideStrip: View {
                                 .padding(8)
                                 .frame(width: 150, alignment: .leading)
                                 .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 8))
-                                .help((programme.desc ?? programme.title) + "\n\nDouble-clic ou clic droit : programmer l'enregistrement")
+                                .help((programme.desc ?? programme.title) + String(localized: "\n\nDouble-clic ou clic droit : programmer l'enregistrement"))
                                 .onTapGesture(count: 2) { recordings.schedule(item, programme: programme) }
                                 .contextMenu {
                                     if recordings.isScheduled(item, programme) {
@@ -191,7 +191,7 @@ struct GuideStrip: View {
                     }
                 }
             } else {
-                Text(epgID == nil ? "Pas d'identifiant de guide TV pour cette chaîne." : "Aucun programme disponible pour le moment.")
+                Text(epgID == nil ? String(localized: "Pas d'identifiant de guide TV pour cette chaîne.") : String(localized: "Aucun programme disponible pour le moment."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

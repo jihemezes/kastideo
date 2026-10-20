@@ -100,8 +100,8 @@ struct LiveRecordingRow: View {
 
     private func detail(at date: Date) -> String {
         var text = "\(live.item.name) — \(date.timeIntervalSince(live.startedAt).clockString)"
-        if let end = live.endsAt { text += " · fin à \(end.formatted(date: .omitted, time: .shortened))" }
-        text += live.mode == .player ? " · pendant la lecture" : " · en arrière-plan"
+        if let end = live.endsAt { text += String(localized: " · fin à \(end.formatted(date: .omitted, time: .shortened))") }
+        text += live.mode == .player ? String(localized: " · pendant la lecture") : String(localized: " · en arrière-plan")
         return text
     }
 }
@@ -151,26 +151,26 @@ struct DownloadRow: View {
     private var status: String {
         let size: String = {
             guard entry.expected > 0 else { return ByteCountFormatter.string(fromByteCount: entry.received, countStyle: .file) }
-            return "\(ByteCountFormatter.string(fromByteCount: entry.received, countStyle: .file)) sur \(ByteCountFormatter.string(fromByteCount: entry.expected, countStyle: .file))"
+            return String(localized: "\(ByteCountFormatter.string(fromByteCount: entry.received, countStyle: .file)) sur \(ByteCountFormatter.string(fromByteCount: entry.expected, countStyle: .file))")
         }()
         switch entry.state {
         case .downloading:
             var text = "\(size) — \(Int(entry.progress * 100)) %"
             if let status = recordings.downloadStatus, status.current.id == entry.id {
                 text += " · \(DownloadFormat.speed(status.speed))"
-                if let eta = status.eta { text += " · reste \(DownloadFormat.remaining(eta))" }
-                if let batch = status.batch { text += " · épisode \(batch.position)/\(batch.total)" }
+                if let eta = status.eta { text += String(localized: " · reste \(DownloadFormat.remaining(eta))") }
+                if let batch = status.batch { text += String(localized: " · épisode \(batch.position)/\(batch.total)") }
             }
             return text
         case .queued:
             if let start = entry.startAfter, start > Date() {
-                return "Programmé : \(start.formatted(date: .abbreviated, time: .shortened))"
+                return String(localized: "Programmé : \(start.formatted(date: .abbreviated, time: .shortened))")
             }
-            return "En attente (connexion libre requise : aucune lecture ni enregistrement en cours)"
+            return String(localized: "En attente (connexion libre requise : aucune lecture ni enregistrement en cours)")
         case .paused:
-            return entry.pausedByUser ? "En pause — \(size)" : "Suspendu pendant la lecture — reprendra automatiquement"
+            return entry.pausedByUser ? String(localized: "En pause — \(size)") : String(localized: "Suspendu pendant la lecture — reprendra automatiquement")
         case .failed:
-            return entry.error ?? "Échec"
+            return entry.error ?? String(localized: "Échec")
         }
     }
 }

@@ -10,16 +10,24 @@ struct RootView: View {
     @Environment(RecordingCenter.self) private var recordings
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @State private var showAddSource = false
+    @AppStorage(AppLanguage.storageKey) private var appLanguage = ""
 
     var body: some View {
         @Bindable var navigation = navigation
         @Bindable var recordings = recordings
         Group {
             if store.hasSources {
-                MainSplitView()
+                if navigation.browse == .home {
+                    HomeView()
+                } else {
+                    MainSplitView()
+                }
             } else {
                 WelcomeView(showAddSource: $showAddSource)
             }
+        }
+        .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {
+            LanguagePickerSheet(chosen: $appLanguage)
         }
         .sheet(isPresented: $showAddSource) {
             SourceEditorView(existing: nil)
@@ -140,6 +148,9 @@ struct MainToolbar: ToolbarContent {
     let style: InterfaceStyle
 
     var body: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
+            HomeButton()
+        }
         ToolbarItemGroup(placement: .primaryAction) {
             if store.isBusy {
                 ProgressView().controlSize(.small)

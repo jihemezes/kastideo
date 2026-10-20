@@ -58,7 +58,7 @@ struct VideoSurface: View {
                     }
                     Spacer()
                     if showStartupTime, showStartupBadge, let time = playback.startupTime {
-                        Label(String(format: "Prête en %.1f s", time), systemImage: "bolt.fill")
+                        Label(String(format: String(localized: "Prête en %.1f s"), time), systemImage: "bolt.fill")
                             .font(.caption.weight(.semibold).monospacedDigit())
                             .padding(.horizontal, 10).padding(.vertical, 5)
                             .background(.ultraThinMaterial, in: Capsule())
@@ -138,7 +138,7 @@ struct ControlsBar: View {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                     .frame(width: 22)
             }
-            .help(playback.isLive && !playback.canPause ? "Ce flux ne permet pas la pause" : "Lecture / pause (⌘K) — en direct : différé")
+            .help(playback.isLive && !playback.canPause ? String(localized: "Ce flux ne permet pas la pause") : String(localized: "Lecture / pause (⌘K) — en direct : différé"))
             .disabled(playback.isLive && playback.isPlaying && !playback.canPause)
 
             if playback.isSeekable {
@@ -172,7 +172,7 @@ struct ControlsBar: View {
                 }
                 Button("Direct") { playback.goLive() }
                     .disabled(recordings.isPlayerRecording)
-                    .help(recordings.isPlayerRecording ? "Indisponible pendant un enregistrement" : "Revenir au direct")
+                    .help(recordings.isPlayerRecording ? String(localized: "Indisponible pendant un enregistrement") : String(localized: "Revenir au direct"))
                 Spacer()
             } else {
                 HStack(spacing: 6) {
@@ -187,7 +187,7 @@ struct ControlsBar: View {
                     Image(systemName: recordings.isRecording(playback.current) ? "stop.circle.fill" : "record.circle")
                         .foregroundStyle(.red)
                 }
-                .help(recordings.isRecording(playback.current) ? "Arrêter l'enregistrement (⇧⌘R)" : "Enregistrer cette chaîne (⇧⌘R)")
+                .help(recordings.isRecording(playback.current) ? String(localized: "Arrêter l'enregistrement (⇧⌘R)") : String(localized: "Enregistrer cette chaîne (⇧⌘R)"))
             }
 
             Button { playback.isMuted.toggle() } label: {

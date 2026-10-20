@@ -32,6 +32,8 @@ struct CatalogListView: View {
                 } else {
                     ContentUnavailableView.search(text: navigation.search)
                 }
+            } else if browse == .recents && navigation.search.isEmpty {
+                RecentsList(items: items)
             } else {
                 List(items, selection: $navigation.selectedItemID) { item in
                     ItemRow(item: item)
@@ -39,8 +41,9 @@ struct CatalogListView: View {
                 .listStyle(.inset)
             }
         }
+        .recentsUndoToast()
         .navigationTitle(browse.title)
-        .navigationSubtitle(items.isEmpty ? "" : "\(items.count) éléments")
+        .navigationSubtitle(items.isEmpty ? "" : String(localized: "\(items.count) éléments"))
         .searchable(text: $navigation.search, placement: .toolbar, prompt: "Rechercher")
         .onChange(of: items.map(\.id), initial: true) { _, ids in
             navigation.visibleIDs = ids
@@ -166,12 +169,12 @@ struct ItemActionsMenu: View {
     let item: MediaItem
 
     var body: some View {
-        Button(store.isFavorite(item.id) ? "Retirer des favoris" : "Ajouter aux favoris") {
+        Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris")) {
             store.toggleFavorite(item.id)
         }
         if item.kind == .live {
             Divider()
-            Button(recordings.isRecording(item) ? "Arrêter l'enregistrement" : "Enregistrer maintenant") {
+            Button(recordings.isRecording(item) ? String(localized: "Arrêter l'enregistrement") : String(localized: "Enregistrer maintenant")) {
                 if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
             }
             Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
@@ -179,6 +182,10 @@ struct ItemActionsMenu: View {
             Divider()
             Button("Télécharger") { recordings.download(item, tonight: false) }
             Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
+        }
+        if store.recentIDs.contains(item.id) {
+            Divider()
+            Button("Retirer des récents") { store.removeRecents([item.id]) }
         }
         if let url = item.streamURL, !url.isFileURL {
             Divider()

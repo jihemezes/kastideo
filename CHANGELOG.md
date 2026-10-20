@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.8.0] - 2026-10-20
+
+- Nouvel **écran d'accueil** au lancement : trois grands pavés **Direct**, **Films** et **Séries**, boutons d'accès rapide aux **Favoris**, **Récents**, **Guide TV** et **Enregistrements**, recherche globale (chaînes, films, séries), rangée « Reprendre la lecture » et retour à la lecture en cours. On y revient avec le bouton **Accueil**, **⌘0** (ou **H** en interface TV)
+- **Récents** : suppression d'un ou de plusieurs éléments (clic droit > Retirer des récents, touche ⌫, ou **Modifier** puis cases à cocher), **Tout effacer**, et bandeau **Annuler** après chaque suppression
+- Kastideo est maintenant disponible en **français et en anglais** : choix de la langue au premier lancement, modifiable dans Réglages > Général > Langue (relance proposée). L'aide intégrée est traduite
+
 ## [0.7.0] - 2026-10-19
 
 - Nouveau **Guide TV en grille** : les chaînes en lignes, les heures en colonnes, trait rouge « maintenant », navigation par demi-journée et par jour, durée affichée 2 / 3 / 6 h, filtre (favoris, récents, catégorie) et recherche ; un clic sur un programme ouvre sa fiche (description, **Regarder**, **Enregistrer**, **Programmer**). Section Guide TV dans la barre latérale (⌘7), l'onglet Cinéma et la touche G de l'interface TV

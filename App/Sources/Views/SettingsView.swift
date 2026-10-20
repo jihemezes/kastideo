@@ -61,7 +61,7 @@ struct SourcesSettingsView: View {
         .sheet(item: $editing) { source in
             SourceEditorView(existing: source).environment(store)
         }
-        .confirmationDialog("Supprimer « \(deleting?.name ?? "") » ?",
+        .confirmationDialog(String(localized: "Supprimer « \(deleting?.name ?? "") » ?"),
                             isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }),
                             titleVisibility: .visible) {
             Button("Supprimer", role: .destructive) {
@@ -114,19 +114,19 @@ struct SourceSettingsRow: View {
     }
 
     private var details: String {
-        var parts = [source.kind.typeLabel]
+        var parts = [source.kind.title]
         if let content = store.contents[source.id] {
             let items = content.items
             let live = items.filter { $0.kind == .live }.count
             let movies = items.filter { $0.kind == .movie }.count
             let series = items.filter { $0.kind == .series }.count
-            parts.append("\(live) chaînes · \(movies) films · \(series) séries")
+            parts.append(String(localized: "\(live) chaînes · \(movies) films · \(series) séries"))
         }
         if let count = store.epgCounts[source.id], count > 0 {
-            parts.append("\(count) programmes")
+            parts.append(String(localized: "\(count) programmes"))
         }
         if let date = source.lastRefresh {
-            parts.append("actualisé \(date.formatted(.relative(presentation: .named)))")
+            parts.append(String(localized: "actualisé \(date.formatted(.relative(presentation: .named)))"))
         }
         return parts.joined(separator: " — ")
     }
@@ -139,10 +139,31 @@ struct GeneralSettingsView: View {
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = ""
     @State private var cacheSize: Int64 = 0
+    @State private var askRelaunch = false
+
+    private var languageBinding: Binding<AppLanguage> {
+        Binding(
+            get: { AppLanguage(rawValue: languageRaw) ?? .system },
+            set: { language in
+                language.apply()
+                languageRaw = language.rawValue
+                if language.needsRelaunch { askRelaunch = true }
+            }
+        )
+    }
 
     var body: some View {
         Form {
+            Section("Langue") {
+                Picker("Langue de l'application", selection: languageBinding) {
+                    ForEach(AppLanguage.allCases) { Text($0.label).tag($0) }
+                }
+                Text("Le changement s'applique au prochain lancement de Kastideo.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Section("Lecture") {
                 Picker("Mémoire tampon", selection: $buffering) {
                     ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
@@ -176,6 +197,12 @@ struct GeneralSettingsView: View {
         }
         .formStyle(.grouped)
         .onAppear { cacheSize = Storage.size() }
+        .alert("Relancer Kastideo ?", isPresented: $askRelaunch) {
+            Button("Relancer maintenant") { AppLanguage.relaunch() }
+            Button("Plus tard", role: .cancel) {}
+        } message: {
+            Text("La nouvelle langue sera appliquée après le redémarrage de l'application.")
+        }
     }
 
     private var appVersion: String {
@@ -215,7 +242,7 @@ struct UpdateSettingsView: View {
                     Text(ReleaseNotes.currentVersion).foregroundStyle(.secondary)
                 }
                 LabeledContent("Dernière vérification") {
-                    Text(updater.lastCheck.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? "Jamais")
+                    Text(updater.lastCheck.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? String(localized: "Jamais"))
                         .foregroundStyle(.secondary)
                 }
                 HStack {

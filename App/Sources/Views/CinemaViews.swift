@@ -10,13 +10,13 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
 
     var label: String {
         switch self {
-        case .live: return "Direct"
-        case .movies: return "Films"
-        case .series: return "Séries"
-        case .guide: return "Guide TV"
-        case .favorites: return "Favoris"
-        case .recents: return "Récents"
-        case .recordings: return "Enregistrements"
+        case .live: return String(localized: "Direct")
+        case .movies: return String(localized: "Films")
+        case .series: return String(localized: "Séries")
+        case .guide: return String(localized: "Guide TV")
+        case .favorites: return String(localized: "Favoris")
+        case .recents: return String(localized: "Récents")
+        case .recordings: return String(localized: "Enregistrements")
         }
     }
 
@@ -35,6 +35,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
     static func from(_ browse: Browse?) -> CinemaSection {
         guard let browse else { return .live }
         switch browse {
+        case .home: return .live
         case .all(let kind), .category(let kind, _):
             switch kind {
             case .live: return .live
@@ -166,16 +167,18 @@ struct CinemaCatalog: View {
 
         ScrollView {
             if !key.isEmpty {
-                CinemaGrid(title: "Résultats pour « \(search) »", items: items, emptyText: nil)
+                CinemaGrid(title: String(localized: "Résultats pour « \(search) »"), items: items, emptyText: nil)
             } else {
                 switch browse {
                 case .all(let kind):
                     CinemaHome(kind: kind)
                 case .category(_, let name):
                     CinemaGrid(title: name, items: items, emptyText: browse.emptyMessage)
-                case .favorites, .recents:
+                case .favorites:
                     CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
-                case .recordings, .guide:
+                case .recents:
+                    CinemaRecents(items: items)
+                case .home, .recordings, .guide:
                     EmptyView()
                 }
             }
@@ -183,6 +186,7 @@ struct CinemaCatalog: View {
         .task(id: VisibleKey(browse: browse, count: items.count, search: key)) {
             navigation.visibleIDs = items.map(\.id)
         }
+        .recentsUndoToast()
     }
 
     private func filtered(_ items: [MediaItem], key: String) -> [MediaItem] {
@@ -209,27 +213,27 @@ struct CinemaHome: View {
         let categories = store.categoriesByKind[kind] ?? []
 
         if all.isEmpty {
-            ContentUnavailableView(kind.label, systemImage: "tray",
+            ContentUnavailableView(kind.title, systemImage: "tray",
                                    description: Text(Browse.all(kind).emptyMessage))
                 .frame(maxWidth: .infinity, minHeight: 360)
         } else {
             let featured = started.first ?? recents.first ?? favorites.first
                 ?? all.first(where: { $0.logoURL != nil }) ?? all.first
-            let caption = started.first != nil ? "À REPRENDRE"
-                : (recents.first != nil ? "REGARDÉ RÉCEMMENT" : (favorites.first != nil ? "VOS FAVORIS" : "À LA UNE"))
+            let caption = started.first != nil ? String(localized: "À REPRENDRE")
+                : (recents.first != nil ? String(localized: "REGARDÉ RÉCEMMENT") : (favorites.first != nil ? String(localized: "VOS FAVORIS") : String(localized: "À LA UNE")))
             LazyVStack(alignment: .leading, spacing: 26) {
                 if let featured {
                     CinemaHero(item: featured, caption: caption)
                 }
                 if !started.isEmpty {
-                    CinemaRail(title: "Reprendre la lecture", items: started, seeAll: { navigation.go(.recents) })
+                    CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) })
                 }
                 if !recents.isEmpty {
-                    CinemaRail(title: kind == .live ? "Regardées récemment" : "Regardés récemment",
+                    CinemaRail(title: kind == .live ? String(localized: "Regardées récemment") : String(localized: "Regardés récemment"),
                                items: recents, seeAll: { navigation.go(.recents) })
                 }
                 if !favorites.isEmpty {
-                    CinemaRail(title: "Favoris", items: favorites, seeAll: { navigation.go(.favorites) })
+                    CinemaRail(title: String(localized: "Favoris"), items: favorites, seeAll: { navigation.go(.favorites) })
                 }
                 ForEach(categories, id: \.self) { name in
                     CinemaRail(title: name,
@@ -260,7 +264,7 @@ struct CinemaGrid: View {
             }
             if items.isEmpty {
                 ContentUnavailableView(title, systemImage: "tray",
-                                       description: Text(emptyText ?? "Aucun résultat."))
+                                       description: Text(emptyText ?? String(localized: "Aucun résultat.")))
                     .frame(maxWidth: .infinity, minHeight: 300)
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: minimum), spacing: 16, alignment: .top)],
@@ -483,7 +487,7 @@ struct CinemaHero: View {
                         Button {
                             navigation.selectedItemID = item.id
                         } label: {
-                            Label(item.needsEpisodes ? "Voir les épisodes" : "Lire",
+                            Label(item.needsEpisodes ? String(localized: "Voir les épisodes") : String(localized: "Lire"),
                                   systemImage: item.needsEpisodes ? "list.bullet" : "play.fill")
                         }
                         .buttonStyle(.borderedProminent)

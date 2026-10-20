@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.7.0 — Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.8.0 — écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -44,9 +44,20 @@ Ouvrez **Kastideo > Réglages… (⌘,)**, onglet **Sources**, ou cliquez sur le
 
 ## Naviguer
 
-La fenêtre principale comporte trois colonnes :
+### L'écran d'accueil
 
-- **Barre latérale** : Direct, Films, Séries, Favoris, Récents, Guide TV, puis les catégories de la section choisie et l'état de vos sources.
+Kastideo s'ouvre sur l'**accueil** : trois grands pavés **Direct**, **Films** et **Séries**, puis des boutons plus petits vers les **Favoris**, les **Récents**, le **Guide TV** et les **Enregistrements**.
+
+- Le champ de **recherche** en haut cherche d'un coup dans les chaînes, les films et les séries ; un clic sur un résultat l'ouvre.
+- La rangée **Reprendre la lecture** liste les films et épisodes entamés ; un clic reprend là où vous vous étiez arrêté.
+- Si une lecture est en cours, un bandeau permet d'y **retourner** ou de l'**arrêter**.
+- Pour revenir à l'accueil à tout moment : bouton **Accueil** (maison) en haut à gauche de la barre d'outils, **⌘0**, ligne **Accueil** de la barre latérale, ou touche **H** en interface TV.
+
+### Les colonnes de la fenêtre
+
+En interface Classique, la fenêtre comporte trois colonnes :
+
+- **Barre latérale** : Accueil, Direct, Films, Séries, Favoris, Récents, Guide TV, puis les catégories de la section choisie et l'état de vos sources.
 - **Liste** : les éléments de la section ou de la catégorie, avec le programme en cours pour les chaînes. Le champ **Rechercher** filtre la liste sans tenir compte des majuscules ni des accents.
 - **Lecteur** : la vidéo, avec en dessous le programme en cours, sa progression et les programmes suivants.
 
@@ -58,7 +69,7 @@ Kastideo propose trois présentations, que vous choisissez **séparément pour l
 
 - **Classique** : les trois colonnes décrites ci-dessus.
 - **TV** (direct uniquement) : voir ci-dessous.
-- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic ouvre le lecteur en plein cadre ; **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
+- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic ouvre le lecteur en plein cadre ; **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
 
 Pour changer d'interface :
 
@@ -170,13 +181,17 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 ## Favoris et récents
 
 - Ajoutez un favori avec l'étoile du panneau d'informations, le clic droit ou **⌘D**.
-- La section **Récents** garde les 60 derniers contenus regardés. Vous pouvez l'effacer dans les réglages, onglet **Général**.
+- La section **Récents** garde les 60 derniers contenus regardés.
+- **Supprimer des récents** : clic droit sur un élément > **Retirer des récents** (ou touche **⌫** sur l'élément sélectionné en interface Classique). Pour plusieurs éléments, cliquez sur **Modifier**, cochez les éléments puis **Supprimer** ; **Tout sélectionner** coche toute la liste et **Tout effacer** vide l'historique.
+- Après une suppression, un bandeau **Annuler** reste affiché quelques secondes pour tout restaurer.
+- Les récents peuvent aussi être effacés dans les réglages, onglet **Général**.
 
 ## Raccourcis clavier
 
+- **⌘0** : accueil
 - **⌘1 à ⌘7** : Direct, Films, Séries, Favoris, Récents, Enregistrements, Guide TV
 - **⌥⌘1 / ⌥⌘2 / ⌥⌘3** : interface Classique / Cinéma / TV (pour le type de contenu affiché)
-- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **G** guide TV, **F** favori, **M** muet
+- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **G** guide TV, **H** accueil, **F** favori, **M** muet
 - **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
 - **⌘K** : lecture / pause
 - **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
@@ -213,6 +228,7 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 
 ## Réglages généraux
 
+- **Langue** (onglet **Général**) : Kastideo existe en **français** et en **anglais**. La langue se choisit au premier lancement, puis peut être changée dans **Réglages > Général > Langue** (ou « Système » pour suivre la langue du Mac). Le changement s'applique après un redémarrage de l'application, que Kastideo propose de faire pour vous. L'aide et les menus suivent la langue choisie ; les notes de version restent en français.
 - **Apparence** (onglet **Apparence**) : thème sombre (par défaut), clair ou comme le système ; **couleur d'accent** (Système, bleu, violet, rose, rouge, orange, vert, turquoise) ; **interface** Classique ou Cinéma pour chaque type de contenu ; **densité des listes** (compacte, standard, aérée) pour l'interface Classique ; **taille des vignettes** (petites, moyennes, grandes) pour l'interface Cinéma.
 - **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
 - **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.

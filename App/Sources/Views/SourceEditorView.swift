@@ -10,8 +10,8 @@ struct SourceEditorView: View {
         var label: String {
             switch self {
             case .xtream: return "Xtream Codes"
-            case .m3uURL: return "Playlist (URL)"
-            case .m3uFile: return "Playlist (fichier)"
+            case .m3uURL: return String(localized: "Playlist (URL)")
+            case .m3uFile: return String(localized: "Playlist (fichier)")
             }
         }
     }
@@ -52,7 +52,7 @@ struct SourceEditorView: View {
                         TextField("Identifiant", text: $username)
                             .textContentType(.username)
                         SecureField("Mot de passe", text: $password,
-                                    prompt: Text(existing == nil ? "" : "Inchangé si laissé vide"))
+                                    prompt: Text(existing == nil ? "" : String(localized: "Inchangé si laissé vide")))
                     } header: {
                         Text("Connexion")
                     } footer: {
@@ -73,7 +73,7 @@ struct SourceEditorView: View {
                 case .m3uFile:
                     Section("Playlist") {
                         HStack {
-                            Text(fileName.isEmpty ? "Aucun fichier choisi" : fileName)
+                            Text(fileName.isEmpty ? String(localized: "Aucun fichier choisi") : fileName)
                                 .foregroundStyle(fileName.isEmpty ? .secondary : .primary)
                                 .lineLimit(1)
                             Spacer()
@@ -88,8 +88,8 @@ struct SourceEditorView: View {
                     Text("Guide TV")
                 } footer: {
                     Text(mode == .xtream
-                         ? "Laissez vide pour utiliser le guide fourni par le serveur Xtream."
-                         : "Laissez vide pour utiliser le guide annoncé dans la playlist (url-tvg), s'il existe. Les fichiers .xml.gz sont acceptés.")
+                         ? String(localized: "Laissez vide pour utiliser le guide fourni par le serveur Xtream.")
+                         : String(localized: "Laissez vide pour utiliser le guide annoncé dans la playlist (url-tvg), s'il existe. Les fichiers .xml.gz sont acceptés."))
                 }
 
                 if let testResult {
@@ -114,7 +114,7 @@ struct SourceEditorView: View {
                 Spacer()
                 Button("Annuler", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button(existing == nil ? "Ajouter" : "Enregistrer") { save() }
+                Button(existing == nil ? String(localized: "Ajouter") : String(localized: "Enregistrer")) { save() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!isValid)
             }
@@ -145,9 +145,9 @@ struct SourceEditorView: View {
 
     private var defaultName: String {
         switch mode {
-        case .xtream: return XtreamCredentials.normalizeServer(server)?.host ?? "Mon abonnement IPTV"
-        case .m3uURL: return URL(string: playlistURL)?.host ?? "Ma playlist"
-        case .m3uFile: return fileName.isEmpty ? "Ma playlist" : fileName
+        case .xtream: return XtreamCredentials.normalizeServer(server)?.host ?? String(localized: "Mon abonnement IPTV")
+        case .m3uURL: return URL(string: playlistURL)?.host ?? String(localized: "Ma playlist")
+        case .m3uFile: return fileName.isEmpty ? String(localized: "Ma playlist") : fileName
         }
     }
 
@@ -186,7 +186,7 @@ struct SourceEditorView: View {
             fileName = url.lastPathComponent
             testResult = nil
         } catch {
-            testResult = (false, "Impossible d'accéder au fichier : \(error.localizedDescription)")
+            testResult = (false, String(localized: "Impossible d'accéder au fichier : \(error.localizedDescription)"))
         }
     }
 
@@ -199,11 +199,11 @@ struct SourceEditorView: View {
         do {
             let account = try await XtreamClient(credentials: XtreamCredentials(server: url, username: username, password: pass),
                                                  sourceID: UUID()).account()
-            var message = "Connexion réussie — compte \(account.status)"
+            var message = String(localized: "Connexion réussie — compte \(account.status)")
             if let expiration = account.expiration {
-                message += ", expire le \(expiration.formatted(date: .long, time: .omitted))"
+                message += String(localized: ", expire le \(expiration.formatted(date: .long, time: .omitted))")
             }
-            if let max = account.maxConnections { message += ", \(max) connexion(s) simultanée(s)" }
+            if let max = account.maxConnections { message += String(localized: ", \(max) connexion(s) simultanée(s)") }
             testResult = (true, message)
         } catch {
             testResult = (false, LibraryStore.describe(error))

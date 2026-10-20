@@ -13,6 +13,7 @@ struct KastideoApp: App {
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
     init() {
+        _ = AppLanguage.effectiveCode
         let store = LibraryStore()
         let playback = PlaybackController()
         _store = State(initialValue: store)
@@ -76,9 +77,9 @@ enum Appearance: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .system: return "Comme le système"
-        case .dark: return "Sombre"
-        case .light: return "Clair"
+        case .system: return String(localized: "Comme le système")
+        case .dark: return String(localized: "Sombre")
+        case .light: return String(localized: "Clair")
         }
     }
     var colorScheme: ColorScheme? {
@@ -119,7 +120,7 @@ struct KastideoCommands: Commands {
                 .keyboardShortcut("k", modifiers: .command)
             Button("Arrêter la lecture") { recordings.requestStop() }
                 .keyboardShortcut(".", modifiers: .command)
-            Button(recordings.isPlayerRecording ? "Arrêter l'enregistrement" : "Enregistrer la chaîne") {
+            Button(recordings.isPlayerRecording ? String(localized: "Arrêter l'enregistrement") : String(localized: "Enregistrer la chaîne")) {
                 recordings.toggleCurrentRecording()
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
@@ -150,6 +151,8 @@ struct KastideoCommands: Commands {
         }
 
         CommandMenu("Aller") {
+            Button("Accueil") { navigation.go(.home) }.keyboardShortcut("0", modifiers: .command)
+            Divider()
             Button("Direct") { navigation.go(.all(.live)) }.keyboardShortcut("1", modifiers: .command)
             Button("Films") { navigation.go(.all(.movie)) }.keyboardShortcut("2", modifiers: .command)
             Button("Séries") { navigation.go(.all(.series)) }.keyboardShortcut("3", modifiers: .command)
@@ -176,7 +179,7 @@ extension KastideoCommands {
 /// Bouton de menu qui ouvre une fenêtre secondaire.
 struct OpenWindowButton: View {
     @Environment(\.openWindow) private var openWindow
-    let title: String
+    let title: LocalizedStringKey
     let windowID: String
     var body: some View {
         Button(title) { openWindow(id: windowID) }

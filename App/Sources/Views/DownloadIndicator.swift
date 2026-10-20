@@ -14,10 +14,10 @@ enum DownloadFormat {
 
     /// « moins d'une minute », « 12 min », « 1 h 05 ».
     static func remaining(_ seconds: TimeInterval?) -> String {
-        guard let seconds, seconds.isFinite else { return "calcul en cours…" }
+        guard let seconds, seconds.isFinite else { return String(localized: "calcul en cours…") }
         let minutes = Int((seconds / 60).rounded(.up))
-        if minutes < 1 { return "moins d'une minute" }
-        if minutes < 60 { return "\(minutes) min" }
+        if minutes < 1 { return String(localized: "moins d'une minute") }
+        if minutes < 60 { return String(localized: "\(minutes) min") }
         return String(format: "%d h %02d", minutes / 60, minutes % 60)
     }
 
@@ -25,8 +25,8 @@ enum DownloadFormat {
     static func compactRemaining(_ seconds: TimeInterval?) -> String? {
         guard let seconds, seconds.isFinite else { return nil }
         let minutes = Int((seconds / 60).rounded(.up))
-        if minutes < 1 { return "< 1 min" }
-        if minutes < 60 { return "\(minutes) min" }
+        if minutes < 1 { return String(localized: "< 1 min") }
+        if minutes < 60 { return String(localized: "\(minutes) min") }
         return String(format: "%d h %02d", minutes / 60, minutes % 60)
     }
 }
@@ -83,17 +83,17 @@ struct DownloadIndicator: View {
 
     /// Texte court : « Ép. 3/10 · 42 % · 1 h 12 », « 42 % · 4 min ».
     private func summary(_ status: DownloadStatus) -> String {
-        guard status.isActive else { return "En pause" }
+        guard status.isActive else { return String(localized: "En pause") }
         var parts: [String] = []
-        if let batch = status.batch { parts.append("Ép. \(batch.position)/\(batch.total)") }
+        if let batch = status.batch { parts.append(String(localized: "Ép. \(batch.position)/\(batch.total)")) }
         parts.append("\(Int(status.current.progress * 100)) %")
         if let remaining = DownloadFormat.compactRemaining(status.batch?.eta ?? status.eta) { parts.append(remaining) }
         return parts.joined(separator: " · ")
     }
 
     private func helpText(_ status: DownloadStatus) -> String {
-        if !status.isActive { return "Téléchargement suspendu pendant la lecture : il reprendra automatiquement." }
-        return "Téléchargement en cours — cliquez pour le détail"
+        if !status.isActive { return String(localized: "Téléchargement suspendu pendant la lecture : il reprendra automatiquement.") }
+        return String(localized: "Téléchargement en cours — cliquez pour le détail")
     }
 }
 
@@ -110,7 +110,7 @@ struct DownloadDetails: View {
             HStack(spacing: 8) {
                 Image(systemName: status.isActive ? "arrow.down.circle.fill" : "pause.circle.fill")
                     .foregroundStyle(status.isActive ? Color.accentColor : .orange)
-                Text(status.isActive ? "Téléchargement en cours" : "Téléchargement suspendu")
+                Text(status.isActive ? String(localized: "Téléchargement en cours") : String(localized: "Téléchargement suspendu"))
                     .font(.headline)
             }
 
@@ -142,7 +142,7 @@ struct DownloadDetails: View {
                     ProgressView(value: batch.progress)
                         .progressViewStyle(.linear)
                     HStack {
-                        Text("\(max(batch.position - 1, 0)) terminé\(batch.position > 2 ? "s" : "") sur \(batch.total)")
+                        Text("Terminés : \(max(batch.position - 1, 0)) sur \(batch.total)")
                         Spacer()
                         Text("\(Int(batch.progress * 100)) %").monospacedDigit()
                     }
@@ -163,7 +163,7 @@ struct DownloadDetails: View {
                     .foregroundStyle(.secondary)
             }
             if status.othersQueued > 0 {
-                Text("+ \(status.othersQueued) autre\(status.othersQueued > 1 ? "s" : "") en attente")
+                Text("+ \(status.othersQueued) en attente")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -196,6 +196,6 @@ struct DownloadDetails: View {
 
     private func sizeText(_ item: DownloadItem) -> String {
         guard item.expected > 0 else { return DownloadFormat.bytes(item.received) }
-        return "\(DownloadFormat.bytes(item.received)) sur \(DownloadFormat.bytes(item.expected))"
+        return String(localized: "\(DownloadFormat.bytes(item.received)) sur \(DownloadFormat.bytes(item.expected))")
     }
 }

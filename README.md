@@ -4,10 +4,11 @@ Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos 
 
 Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
 
-## Fonctions (version 0.7.0)
+## Fonctions (version 0.8.0)
 
 - Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
 - **Guide TV** XMLTV : programme en cours et à venir
+- **Écran d'accueil** (Direct, Films, Séries, accès rapides, recherche globale), suppression d'éléments dans les **Récents**, application en **français et anglais**
 - **Guide TV en grille** (chaînes × heures), **reprise de lecture** des films et épisodes, **indicateur de téléchargement** permanent avec temps restant
 - Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
 - Trois interfaces au choix par type de contenu : **Classique** (trois colonnes), **Cinéma** (affiches et rangées) et **TV** pour le direct (panneau de chaînes, zapping par numéro) ; couleur d'accent, densité et taille des vignettes réglables

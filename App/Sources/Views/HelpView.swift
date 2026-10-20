@@ -28,9 +28,11 @@ struct HelpBlock: Identifiable {
     let text: String
 
     static func load() -> [HelpBlock] {
-        guard let url = Bundle.main.url(forResource: "AIDE", withExtension: "md"),
+        let name = AppLanguage.effectiveCode == "en" ? "AIDE.en" : "AIDE"
+        guard let url = Bundle.main.url(forResource: name, withExtension: "md")
+                ?? Bundle.main.url(forResource: "AIDE", withExtension: "md"),
               let content = try? String(contentsOf: url, encoding: .utf8) else {
-            return [HelpBlock(id: 0, kind: .paragraph, text: "Aide introuvable.")]
+            return [HelpBlock(id: 0, kind: .paragraph, text: String(localized: "Aide introuvable."))]
         }
         return parse(content)
     }

@@ -16,7 +16,7 @@ struct PlaybackLogView: View {
                 Toggle("Erreurs et alertes seulement", isOn: $errorsOnly)
                     .toggleStyle(.checkbox)
                 Spacer()
-                Button(copied ? "Copié ✓" : "Copier le journal") {
+                Button(copied ? String(localized: "Copié ✓") : String(localized: "Copier le journal")) {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(PlaybackLog.shared.exportText(), forType: .string)
                     copied = true

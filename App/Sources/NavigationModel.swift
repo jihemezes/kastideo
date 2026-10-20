@@ -4,6 +4,7 @@ import KastideoCore
 
 /// Ce que l'utilisateur parcourt dans la barre latérale.
 enum Browse: Hashable {
+    case home
     case all(MediaKind)
     case category(MediaKind, String)
     case favorites
@@ -14,26 +15,27 @@ enum Browse: Hashable {
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .favorites, .recents, .recordings, .guide: return nil
+        case .home, .favorites, .recents, .recordings, .guide: return nil
         }
     }
 
     var title: String {
         switch self {
-        case .all(let kind): return kind.label
+        case .home: return String(localized: "Accueil")
+        case .all(let kind): return kind.title
         case .category(_, let name): return name
-        case .favorites: return "Favoris"
-        case .recents: return "Récents"
-        case .recordings: return "Enregistrements"
-        case .guide: return "Guide TV"
+        case .favorites: return String(localized: "Favoris")
+        case .recents: return String(localized: "Récents")
+        case .recordings: return String(localized: "Enregistrements")
+        case .guide: return String(localized: "Guide TV")
         }
     }
 
     var emptyMessage: String {
         switch self {
-        case .favorites: return "Ajoutez des favoris avec l'étoile ou ⌘D."
-        case .recents: return "Les contenus que vous regardez apparaîtront ici."
-        default: return "Aucun contenu dans cette section pour vos sources actives."
+        case .favorites: return String(localized: "Ajoutez des favoris avec l'étoile ou ⌘D.")
+        case .recents: return String(localized: "Les contenus que vous regardez apparaîtront ici.")
+        default: return String(localized: "Aucun contenu dans cette section pour vos sources actives.")
         }
     }
 }
@@ -42,7 +44,7 @@ enum Browse: Hashable {
 @MainActor
 @Observable
 final class NavigationModel {
-    var browse: Browse? = .all(.live) {
+    var browse: Browse? = .home {
         didSet {
             if let kind = browse?.kind { lastKind = kind }
             search = ""
@@ -61,6 +63,13 @@ final class NavigationModel {
 
     func go(_ destination: Browse) {
         browse = destination
+    }
+
+    /// Ouvre un contenu dans sa section (depuis l'accueil, par exemple).
+    func open(_ item: MediaItem) {
+        let kind: MediaKind = item.kind == .episode ? .series : item.kind
+        browse = .all(kind)
+        selectedItemID = item.id
     }
 
     /// Ouvre une chaîne en direct dans la section Direct (depuis le guide TV, par exemple).

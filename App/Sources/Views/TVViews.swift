@@ -64,9 +64,9 @@ final class TVModel {
 
     var filterTitle: String {
         switch filter {
-        case .all: return "Toutes les chaînes"
-        case .favorites: return "Favoris"
-        case .recents: return "Récents"
+        case .all: return String(localized: "Toutes les chaînes")
+        case .favorites: return String(localized: "Favoris")
+        case .recents: return String(localized: "Récents")
         case .category(let name): return name
         }
     }
@@ -191,7 +191,7 @@ final class TVModel {
         if let item = resolve(number: number) {
             select(item)
         } else {
-            showNotice("Chaîne \(number) introuvable")
+            showNotice(String(localized: "Chaîne \(number) introuvable"))
         }
     }
 
@@ -281,6 +281,7 @@ final class TVModel {
         case "m": playback?.isMuted.toggle(); return true
         case "b": goBack(); return true
         case "g": navigation?.go(.guide); return true
+        case "h": navigation?.go(.home); return true
         default: return false
         }
     }
@@ -322,7 +323,7 @@ struct TVRootView: View {
             }
             .background(Color.black)
             .background(WindowReader { model.window = $0 })
-            .navigationTitle(model.currentItem?.name ?? "Direct")
+            .navigationTitle(model.currentItem?.name ?? String(localized: "Direct"))
             .toolbar {
                 SectionPickerToolbar(navigation: navigation, playback: playback, recordings: recordings)
                 MainToolbar(store: store, scope: scope, style: style)
@@ -473,7 +474,7 @@ struct TVChannelPanel: View {
             Divider()
 
             if channels.isEmpty {
-                ContentUnavailableView(model.query.isEmpty ? "Aucune chaîne" : "Aucun résultat",
+                ContentUnavailableView(model.query.isEmpty ? String(localized: "Aucune chaîne") : String(localized: "Aucun résultat"),
                                        systemImage: "tv")
                     .frame(maxHeight: .infinity)
             } else {
