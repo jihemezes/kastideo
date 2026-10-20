@@ -104,7 +104,7 @@ struct RecentsList: View {
                 List(items) { item in
                     HStack(spacing: 10) {
                         Image(systemName: checked.contains(item.id) ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(checked.contains(item.id) ? AnyShapeStyle(TintShapeStyle()) : AnyShapeStyle(SecondaryShapeStyle()))
+                            .foregroundStyle(checked.contains(item.id) ? Color.accentColor : Color.secondary)
                             .font(.title3)
                         ItemRow(item: item)
                     }

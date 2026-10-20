@@ -2,6 +2,7 @@ import Foundation
 
 /// Retrouve le fichier écrit par VLC pendant un enregistrement, sans dépendre du chemin qu'il annonce
 /// (VLCKit le transmet parfois vide, ou écrit dans un autre dossier que celui demandé).
+@MainActor
 enum RecordingLocator {
     private static let mediaExtensions: Set<String> = ["ts", "mp4", "mkv", "mpg", "mpeg", "avi", "mov", "m2ts", "webm", "flv", "ogg"]
 

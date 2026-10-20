@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.8.3] - 2026-10-20
+
+- Corrections de compilation (les versions 0.8.1 et 0.8.2 n'avaient pas pu être construites) : style de couleur des cases à cocher des Récents, accès au dossier personnel depuis la recherche des fichiers d'enregistrement
+
 ## [0.8.2] - 2026-10-20
 
 - Correction de compilation (la version 0.8.1 n'avait pas pu être construite) : dossier « Documents » mal désigné dans la recherche des fichiers d'enregistrement
