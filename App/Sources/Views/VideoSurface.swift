@@ -303,10 +303,41 @@ final class VideoContainerView: NSView {
         reassign(for: container.player)
     }
 
+    /// Fenêtre invisible qui héberge la vidéo quand aucun écran ne l'affiche : le moteur VLC a besoin que sa vue
+    /// reste dans une fenêtre, sinon l'arrêt de la lecture peut bloquer l'application (roue multicolore).
+    private static let parking: NSWindow = {
+        let window = NSWindow(contentRect: NSRect(x: -10_000, y: -10_000, width: 320, height: 180),
+                              styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.ignoresMouseEvents = true
+        window.contentView = NSView(frame: NSRect(x: 0, y: 0, width: 320, height: 180))
+        return window
+    }()
+
+    /// Garantit que la vue vidéo est dans une fenêtre (écran affiché, sinon fenêtre invisible).
+    static func ensureHosted(for player: VLCMediaPlayer) {
+        reassign(for: player)
+        let view = videoView(for: player)
+        if view.window == nil, let holder = parking.contentView {
+            view.removeFromSuperview()
+            view.frame = holder.bounds
+            holder.addSubview(view)
+        }
+    }
+
     /// Place la vidéo dans le conteneur le plus récent qui est affiché dans une fenêtre.
     static func reassign(for player: VLCMediaPlayer) {
         let candidates = containers.compactMap(\.view).filter { $0.player === player && $0.window != nil }
-        guard let target = candidates.max(by: { $0.order < $1.order }) else { return }
+        guard let target = candidates.max(by: { $0.order < $1.order }) else {
+            // Aucun écran : la vidéo part dans la fenêtre invisible.
+            let view = videoView(for: player)
+            if view.window == nil || view.superview?.window == nil, let holder = parking.contentView, view.superview !== holder {
+                view.removeFromSuperview()
+                view.frame = holder.bounds
+                holder.addSubview(view)
+            }
+            return
+        }
         let view = videoView(for: player)
         if view.superview !== target {
             view.removeFromSuperview()

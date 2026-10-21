@@ -178,7 +178,10 @@ final class PlaybackController {
         watchdog?.cancel()
         pausedAt = nil
         liveDelay = 0
-        if player.media != nil { player.stop() }
+        if player.media != nil {
+            VideoContainerView.ensureHosted(for: player)
+            player.stop()
+        }
         player.media = nil
         current = nil
         errorMessage = nil
@@ -273,7 +276,10 @@ final class PlaybackController {
 
     private func start(_ url: URL) {
         // Une seule connexion autorisée par l'abonnement : on ferme d'abord le flux en cours.
-        if player.media != nil { player.stop() }
+        if player.media != nil {
+            VideoContainerView.ensureHosted(for: player)
+            player.stop()
+        }
         errorMessage = nil
         isLoading = true
         isPlaying = false
@@ -316,6 +322,7 @@ final class PlaybackController {
             start(fallbacks.removeFirst())
             return
         }
+        VideoContainerView.ensureHosted(for: player)
         player.stop()
         isLoading = false
         isPlaying = false

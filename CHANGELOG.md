@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.7] - 2026-10-21
+
+- Correction d'un **blocage de l'application** (roue multicolore) en passant du Direct à Films pendant la lecture d'une chaîne : la vidéo reste hébergée dans une fenêtre invisible le temps que le moteur VLC s'arrête
+- **Enregistrements sans son** : à la conversion en MP4, le son est maintenant converti en AAC (lisible partout, y compris QuickTime, iPhone et iPad) ; l'image reste copiée sans perte
+
 ## [0.9.6] - 2026-10-21
 
 - **Enregistrement du direct** : si le moteur VLC ne crée pas le fichier dans le dossier « En cours » sous 10 s, Kastideo réessaie automatiquement dans un dossier temporaire avant d'afficher « Enregistrement impossible » ; dossier de travail nommé sans accents ni caractères spéciaux ; chaque essai est noté dans le Journal de lecture

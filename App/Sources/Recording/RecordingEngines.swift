@@ -98,7 +98,8 @@ final class Remuxer {
         try? FileManager.default.removeItem(at: output)
         let converter = VLCMediaPlayer(options: ["--no-video-title-show", "--no-sout-spu", "--no-spu"])
         let media = VLCMedia(url: input)
-        media.addOption(":sout=#std{access=file,mux=mp4,dst=\"\(output.path)\"}")
+        // Vidéo copiée telle quelle ; son converti en AAC (le MP2 et certains AC-3 du direct sont muets dans QuickTime).
+        media.addOption(":sout=#transcode{acodec=mp4a,ab=192,channels=2,samplerate=48000}:std{access=file,mux=mp4,dst=\"\(output.path)\"}")
         if attempt == 1 { media.addOption(":sout-all") } else { media.addOption(":no-sout-all") }
         media.addOption(":no-sout-spu")
         converter.delegate = bridge
