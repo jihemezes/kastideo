@@ -99,6 +99,17 @@ final class PlaybackController {
     @ObservationIgnored var onRecordingStopped: ((String?) -> Void)?
     @ObservationIgnored var onRecordingStarted: (() -> Void)?
 
+    /// Santé du flux (débit, définition, images perdues, coupures), mesurée toutes les 2 s.
+    private(set) var health = StreamHealth()
+    /// Pistes audio et sous-titres du flux en cours.
+    private(set) var audioTracks: [PlayerTrack] = []
+    private(set) var subtitleTracks: [PlayerTrack] = []
+    private(set) var currentAudioTrack: Int32 = -1
+    private(set) var currentSubtitleTrack: Int32 = -1
+    @ObservationIgnored private var healthTask: Task<Void, Never>?
+    @ObservationIgnored private var lastPictures: (displayed: Int, lost: Int)?
+    @ObservationIgnored private var bufferingEvents: [Date] = []
+
     var isLive: Bool { current?.kind == .live && !(current?.streamURL?.isFileURL ?? false) }
     var isTimeshifted: Bool { isLive && (liveDelay > 0.5 || pausedAt != nil) }
 
@@ -351,6 +362,7 @@ final class PlaybackController {
     }
 
     private func resetTimeline() {
+        stopHealthSampling()
         elapsed = 0
         duration = 0
         position = 0
@@ -369,7 +381,7 @@ final class PlaybackController {
         if state != .buffering || !didStart { PlaybackLog.shared.note("État : \(Self.stateName(state))") }
         switch state {
         case .opening, .buffering:
-            if !didStart { isLoading = true }
+            if !didStart { isLoading = true } else if state == .buffering { bufferingEvents.append(Date()) }
         case .playing:
             isPlaying = true
             markStarted()
@@ -411,6 +423,81 @@ final class PlaybackController {
             startupTime = Date().timeIntervalSince(startedAt)
             PlaybackLog.shared.note(String(format: "Lecture démarrée en %.2f s", startupTime ?? 0))
         }
+        startHealthSampling()
+    }
+
+    // MARK: - Santé du flux et pistes
+
+    private func startHealthSampling() {
+        healthTask?.cancel()
+        lastPictures = nil
+        bufferingEvents = []
+        healthTask = Task { [weak self] in
+            while !Task.isCancelled {
+                self?.sampleHealth()
+                try? await Task.sleep(for: .seconds(2))
+            }
+        }
+    }
+
+    private func stopHealthSampling() {
+        healthTask?.cancel()
+        healthTask = nil
+        health = StreamHealth()
+        audioTracks = []
+        subtitleTracks = []
+        currentAudioTrack = -1
+        currentSubtitleTrack = -1
+    }
+
+    private func sampleHealth() {
+        guard let media = player.media, current != nil, didStart, !isStopping else { return }
+        let stats = media.statistics
+        var next = StreamHealth()
+        next.bitrateKbps = Double(stats.inputBitrate) * 8000
+        let size = player.videoSize
+        if size.width > 0, size.height > 0 { next.resolution = size }
+        let displayed = Int(stats.displayedPictures)
+        let lost = Int(stats.lostPictures)
+        if let previous = lastPictures {
+            let shown = max(displayed - previous.displayed, 0)
+            let dropped = max(lost - previous.lost, 0)
+            next.lostRatio = shown + dropped > 0 ? Double(dropped) / Double(shown + dropped) : 0
+            next.framesPerSecond = Double(shown) / 2
+        }
+        lastPictures = (displayed, lost)
+        let now = Date()
+        bufferingEvents.removeAll { now.timeIntervalSince($0) > 60 }
+        next.recentStalls = bufferingEvents.count
+        next.isPaused = !isPlaying
+        next.evaluate()
+        health = next
+        refreshTracks()
+    }
+
+    private func refreshTracks() {
+        func tracks(_ names: [Any], _ indexes: [Any]) -> [PlayerTrack] {
+            zip(indexes, names).compactMap { index, name in
+                guard let id = (index as? NSNumber)?.int32Value else { return nil }
+                return PlayerTrack(id: id, name: (name as? String) ?? "Piste \(id)")
+            }
+        }
+        let audio = tracks(player.audioTrackNames, player.audioTrackIndexes)
+        let subtitles = tracks(player.videoSubTitlesNames, player.videoSubTitlesIndexes)
+        if audio != audioTracks { audioTracks = audio }
+        if subtitles != subtitleTracks { subtitleTracks = subtitles }
+        if currentAudioTrack != player.currentAudioTrackIndex { currentAudioTrack = player.currentAudioTrackIndex }
+        if currentSubtitleTrack != player.currentVideoSubTitleIndex { currentSubtitleTrack = player.currentVideoSubTitleIndex }
+    }
+
+    func selectAudioTrack(_ id: Int32) {
+        player.currentAudioTrackIndex = id
+        currentAudioTrack = id
+    }
+
+    func selectSubtitleTrack(_ id: Int32) {
+        player.currentVideoSubTitleIndex = id
+        currentSubtitleTrack = id
     }
 
     private func handleTime() {
@@ -482,5 +569,55 @@ extension TimeInterval {
         let total = Int(self.rounded(.down))
         let h = total / 3600, m = (total % 3600) / 60, s = total % 60
         return h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%d:%02d", m, s)
+    }
+}
+
+
+/// Piste audio ou de sous-titres.
+struct PlayerTrack: Identifiable, Equatable {
+    let id: Int32
+    let name: String
+}
+
+/// État de santé du flux, présenté sans jargon (Excellent / Correct / Instable).
+struct StreamHealth: Equatable {
+    enum Level: Int { case unknown, poor, fair, good }
+
+    var level: Level = .unknown
+    var bitrateKbps: Double = 0
+    var resolution: CGSize?
+    var lostRatio: Double = 0
+    var framesPerSecond: Double = 0
+    var recentStalls = 0
+    var isPaused = false
+
+    mutating func evaluate() {
+        if isPaused { level = .unknown; return }
+        if recentStalls >= 3 || lostRatio > 0.08 {
+            level = .poor
+        } else if recentStalls >= 1 || lostRatio > 0.02 {
+            level = .fair
+        } else {
+            level = .good
+        }
+    }
+
+    var label: String {
+        switch level {
+        case .good: return String(localized: "Excellent")
+        case .fair: return String(localized: "Correct")
+        case .poor: return String(localized: "Instable")
+        case .unknown: return String(localized: "En attente")
+        }
+    }
+
+    /// Définition lisible : 4K, 1080p, 720p, SD.
+    var qualityLabel: String? {
+        guard let resolution else { return nil }
+        let h = resolution.height
+        if h >= 2000 { return "4K" }
+        if h >= 1000 { return "Full HD 1080p" }
+        if h >= 700 { return "HD 720p" }
+        return "SD \(Int(h))p"
     }
 }

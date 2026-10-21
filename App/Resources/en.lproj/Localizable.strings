@@ -480,3 +480,30 @@
 "Masquer cette catégorie" = "Hide This Category";
 "Réordonner, masquer ou renommer les catégories (⌥⌘C)" = "Reorder, hide or rename categories (⌥⌘C)";
 "Section" = "Section";
+
+/* 0.12.0 */
+"Informations, pistes audio, sous-titres et qualité (⌘I)" = "Information, audio tracks, subtitles and quality (⌘I)";
+"Panneau d'informations (pistes, sous-titres, qualité)" = "Information Panel (tracks, subtitles, quality)";
+"Excellent" = "Excellent";
+"Correct" = "Fair";
+"Instable" = "Unstable";
+"En attente" = "Waiting";
+"Qualité de réception : %@" = "Reception quality: %@";
+"Débit : %@" = "Bitrate: %@";
+"Images : %.0f par seconde" = "Pictures: %.0f per second";
+"Images perdues : %.1f %%" = "Dropped pictures: %.1f%%";
+"Aucune coupure dans la dernière minute" = "No interruption in the last minute";
+"%lld coupure(s) dans la dernière minute" = "%lld interruption(s) in the last minute";
+"Informations" = "Information";
+"Fermer (⌘I)" = "Close (⌘I)";
+"Pas de programme dans le guide pour cette chaîne." = "No program in the guide for this channel.";
+"ENSUITE" = "NEXT";
+"Réalisation : %@" = "Directed by: %@";
+"Avec : %@" = "With: %@";
+"PISTE AUDIO" = "AUDIO TRACK";
+"Aucune piste détectée" = "No track detected";
+"SOUS-TITRES" = "SUBTITLES";
+"Aucun sous-titre dans ce flux" = "No subtitles in this stream";
+"Désactivés" = "Off";
+"RÉCEPTION" = "RECEPTION";
+"%@ / %@" = "%@ / %@";

@@ -14,6 +14,7 @@ struct VideoSurface: View {
     @State private var hideTask: Task<Void, Never>?
     @State private var showStartupBadge = false
     @State private var scrubbing: Double?
+    @State private var hoveringBar = false
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -68,11 +69,27 @@ struct VideoSurface: View {
                 Spacer()
                 if controlsVisible && playback.current != nil && playback.errorMessage == nil {
                     ControlsBar(scrubbing: $scrubbing)
+                        .frame(maxWidth: 860)
+                        .onHover { inside in
+                            hoveringBar = inside
+                            if !inside { revealControls() }
+                        }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
             .padding(14)
+
+            if navigation.showContextPanel, playback.current != nil {
+                HStack {
+                    Spacer()
+                    PlayerContextPanel()
+                        .frame(width: 330)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+                .padding(14)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: navigation.showContextPanel)
         .overlay(alignment: .top) {
             if let resumed = playback.resumedAt {
                 HStack(spacing: 10) {
@@ -110,108 +127,24 @@ struct VideoSurface: View {
             }
         }
         .onChange(of: playback.current?.id) { _, _ in revealControls() }
-        .onExitCommand { if navigation.isTheater { navigation.isTheater = false } }
+        .onExitCommand {
+            if navigation.showContextPanel { navigation.showContextPanel = false }
+            else if navigation.isTheater { navigation.isTheater = false }
+        }
     }
 
+    /// Barre rétractable : visible au moindre mouvement, masquée (avec le pointeur) après 3 s d'inactivité,
+    /// sauf pendant un déplacement dans la timeline, au survol de la barre ou quand le panneau est ouvert.
     private func revealControls() {
         controlsVisible = true
         hideTask?.cancel()
         hideTask = Task {
             try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled, scrubbing == nil else { return }
+            guard !Task.isCancelled, scrubbing == nil, !hoveringBar, !navigation.showContextPanel,
+                  playback.isPlaying else { return }
             controlsVisible = false
+            NSCursor.setHiddenUntilMouseMoves(true)
         }
-    }
-}
-
-/// Barre de contrôles : lecture, avance / recul, progression, volume, mode cinéma.
-struct ControlsBar: View {
-    @Environment(PlaybackController.self) private var playback
-    @Environment(NavigationModel.self) private var navigation
-    @Environment(RecordingCenter.self) private var recordings
-    @Binding var scrubbing: Double?
-
-    var body: some View {
-        @Bindable var playback = playback
-        HStack(spacing: 14) {
-            Button { playback.togglePause() } label: {
-                Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                    .frame(width: 22)
-            }
-            .help(playback.isLive && !playback.canPause ? String(localized: "Ce flux ne permet pas la pause") : String(localized: "Lecture / pause (⌘K) — en direct : différé"))
-            .disabled(playback.isLive && playback.isPlaying && !playback.canPause)
-
-            if playback.isSeekable {
-                Button { playback.jump(seconds: -10) } label: { Image(systemName: "gobackward.10") }
-                    .help("Reculer de 10 s")
-                Button { playback.jump(seconds: 30) } label: { Image(systemName: "goforward.30") }
-                    .help("Avancer de 30 s")
-                Text((scrubbing.map { $0 * playback.duration } ?? playback.elapsed).clockString)
-                    .monospacedDigit()
-                Slider(value: Binding(get: { scrubbing ?? playback.position },
-                                      set: { scrubbing = $0 }),
-                       in: 0...1,
-                       onEditingChanged: { editing in
-                    if !editing, let value = scrubbing {
-                        playback.seek(to: value)
-                        scrubbing = nil
-                    }
-                })
-                .controlSize(.small)
-                Text(playback.duration.clockString)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
-            } else if playback.isTimeshifted {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock.arrow.circlepath")
-                        Text("DIFFÉRÉ −\(playback.delay(at: context.date).clockString)")
-                            .font(.caption.weight(.bold).monospacedDigit())
-                    }
-                    .foregroundStyle(.yellow)
-                }
-                Button("Direct") { playback.goLive() }
-                    .disabled(recordings.isPlayerRecording)
-                    .help(recordings.isPlayerRecording ? String(localized: "Indisponible pendant un enregistrement") : String(localized: "Revenir au direct"))
-                Spacer()
-            } else {
-                HStack(spacing: 6) {
-                    Circle().fill(.red).frame(width: 8, height: 8)
-                    Text("EN DIRECT").font(.caption.weight(.bold))
-                }
-                Spacer()
-            }
-
-            if playback.isLive {
-                Button { recordings.toggleCurrentRecording() } label: {
-                    Image(systemName: recordings.isRecording(playback.current) ? "stop.circle.fill" : "record.circle")
-                        .foregroundStyle(.red)
-                }
-                .help(recordings.isRecording(playback.current) ? String(localized: "Arrêter l'enregistrement (⇧⌘R)") : String(localized: "Enregistrer cette chaîne (⇧⌘R)"))
-            }
-
-            Button { playback.isMuted.toggle() } label: {
-                Image(systemName: playback.isMuted || playback.volume == 0 ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .frame(width: 22)
-            }
-            .help("Couper / rétablir le son")
-            Slider(value: $playback.volume, in: 0...200)
-                .controlSize(.small)
-                .frame(width: 90)
-                .help("Volume (100 = normal, jusqu'à 200 %)")
-
-            Button { navigation.isTheater.toggle() } label: {
-                Image(systemName: navigation.isTheater ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
-            }
-            .help("Mode cinéma (⌘↩ ou double-clic)")
-        }
-        .buttonStyle(.borderless)
-        .foregroundStyle(.white)
-        .font(.callout)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .environment(\.colorScheme, .dark)
     }
 }
 

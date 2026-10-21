@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.12.0] - 2026-10-21
+
+- **Lecteur repensé** : barre de contrôle compacte et **rétractable** (disparaît avec le pointeur après 3 s, revient au moindre mouvement)
+- **Mini-timeline** pour les films et épisodes : trait fin qui s'épaissit au survol, avec l'heure visée
+- **Panneau « Informations »** (ⓘ ou ⌘I) glissant depuis la droite : chaîne et programmes en cours / à venir, ou résumé et distribution du film ; choix de la **piste audio** et des **sous-titres** ; qualité de réception
+- **Santé du flux** : pastille verte / orange / rouge (Excellent, Correct, Instable) et définition (SD, HD, 4K) ; débit, images perdues et coupures au survol
+- Prochaine étape prévue (0.13) : MultiVue en option, selon le nombre de connexions de l'abonnement
+
 ## [0.11.3] - 2026-10-21
 
 - Correction probable de la **lenteur Direct (Classique) → Films (Cinéma)** (55 s mesurées) : la liste classique ne construit plus, même un instant, les ~100 000 films d'une section affichée dans une autre interface

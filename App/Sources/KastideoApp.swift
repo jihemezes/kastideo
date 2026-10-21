@@ -137,6 +137,8 @@ struct KastideoCommands: Commands {
             .keyboardShortcut("r", modifiers: [.command, .shift])
             Button("Mode cinéma") { navigation.isTheater.toggle() }
                 .keyboardShortcut(.return, modifiers: .command)
+            Button("Panneau d'informations (pistes, sous-titres, qualité)") { navigation.showContextPanel.toggle() }
+                .keyboardShortcut("i", modifiers: .command)
             Divider()
             Button("Reculer de 10 secondes") { playback.jump(seconds: -10) }
                 .keyboardShortcut("[", modifiers: .command)

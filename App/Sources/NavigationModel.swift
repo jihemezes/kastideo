@@ -88,6 +88,8 @@ final class NavigationModel {
     var showWhatsNew = false
     /// Mode cinéma : la vidéo occupe toute la fenêtre (colonnes masquées, plein écran).
     var isTheater = false
+    /// Panneau « Contexte » du lecteur (chaîne, programme, pistes, qualité).
+    var showContextPanel = false
 
     func go(_ destination: Browse) {
         browse = destination

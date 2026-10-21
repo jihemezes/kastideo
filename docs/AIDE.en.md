@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.11.3 — fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.12.0 — redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -132,6 +132,13 @@ Kastideo plays all content with the **VLC** engine: live MPEG-TS (.ts), HLS (.m3
 - A click on the video pauses it; a **double-click** turns on **theater mode**: the window goes full screen and only the **video** remains visible (no columns or toolbar; the green window button and **⌃⌘F** do the same during playback). **Esc** or **⌘↩** to leave it.
 - **Resume playback**: for movies and episodes, Kastideo remembers your position. When you reopen one, playback resumes where you stopped, with a message offering to **start over**. Progress bars appear in lists, posters and episodes. This can be turned off, and positions can be erased, in settings.
 - For Xtream sources, live is played in MPEG-TS (.ts) format, like the Xtream reference player; if the stream fails, Kastideo automatically tries the .m3u8 variant (and vice versa).
+
+### Control bar, timeline and information panel
+
+- **Auto-hiding bar**: it appears on the slightest mouse movement and hides, along with the pointer, after 3 seconds of inactivity (it stays while the mouse is over it, while paused or when the panel is open).
+- **Mini-timeline** (movies and episodes): a thin line above the buttons that thickens on hover and shows the target time; click or drag to move.
+- **Stream health**: a **green** (Excellent), **orange** (Fair) or **red** (Unstable) dot shows reception quality, with the definition (SD, HD, 4K). On hover: exact resolution, bitrate, frames per second, dropped pictures and interruptions in the last minute.
+- **Information panel** (ⓘ button or **⌘I**, Esc to close): it slides in from the right over the video and shows the channel with its current and upcoming programs, or a movie's synopsis and cast; the **audio track** (language, audio description…) and **subtitles** choice; detailed reception quality.
 
 ### If a channel does not start
 
