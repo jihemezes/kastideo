@@ -49,6 +49,14 @@ struct KastideoApp: App {
         }
         .defaultSize(width: 900, height: 520)
 
+        Window("Gérer les catégories", id: "categories") {
+            CategoryManagerView()
+                .environment(store)
+                .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
+                .tint(AccentChoice(rawValue: accent)?.color)
+        }
+        .defaultSize(width: 640, height: 640)
+
         Window("Aide de Kastideo", id: "help") {
             HelpView()
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
@@ -145,6 +153,9 @@ struct KastideoCommands: Commands {
         }
 
         CommandGroup(after: .toolbar) {
+            OpenWindowButton(title: "Gérer les catégories…", windowID: "categories")
+                .keyboardShortcut("c", modifiers: [.command, .option])
+            Divider()
             Button("Interface Classique") { applyInterface(.classic) }
                 .keyboardShortcut("1", modifiers: [.command, .option])
             Button("Interface Cinéma") { applyInterface(.cinema) }

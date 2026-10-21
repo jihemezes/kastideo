@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.11.0] - 2026-10-21
+
+- **Gérer les catégories** (Présentation > Gérer les catégories…, ⌥⌘C, ou bouton de la barre latérale) pour le Direct, les Films et les Séries : **réordonner** par glisser-déposer, **masquer** (partout : listes, recherche, Guide TV, Cinéma, TV, bandeau), **masquer par mot-clé** (ex. « PAKISTAN »), **renommer**, trier A → Z, tout afficher ou réinitialiser
+- Clic droit sur une catégorie de la barre latérale > **Masquer cette catégorie**
+- Correction du **bandeau « à la une »** : l'image de fond prenait toute la place et cachait l'affiche, le titre, le résumé et les boutons
+- Titres des affiches en interface Cinéma affichés sans les étiquettes du fournisseur (« |FR| »…)
+
 ## [0.10.0] - 2026-10-21
 
 - Nouveau **bandeau « à la une »** de l'interface Cinéma : carrousel plein cadre avec grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons **Lire / Reprendre**, **Plus d'infos** et **Bande-annonce** ; défilement automatique (pause au survol), flèches et points de navigation

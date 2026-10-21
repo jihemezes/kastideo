@@ -395,7 +395,7 @@ struct MediaCard: View {
                     }
                     .overlay(shape.strokeBorder(Color.white.opacity(hovering ? 0.55 : 0.08),
                                                 lineWidth: hovering ? 2 : 1))
-                Text(item.name)
+                Text(isLive ? item.name : TMDB.cleanTitle(item.name).title)
                     .font(.callout.weight(.medium))
                     .lineLimit(1)
                 caption

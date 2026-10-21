@@ -450,3 +450,33 @@
 "Bandeau « à la une » (Cinéma)" = "“Featured” Banner (Cinema)";
 "Le bandeau fait défiler les films ou séries choisis, avec image de fond, résumé, note et bande-annonce ; il s'arrête quand la souris le survole. En Direct, il montre le programme en cours de vos chaînes favorites et récentes. Les tendances nécessitent une clé TMDB (Réglages > Général)." = "The banner scrolls through the chosen movies or series, with backdrop, synopsis, rating and trailer; it pauses when the mouse is over it. In Live, it shows what's on now on your favorite and recent channels. Trends require a TMDB key (Settings > General).";
 "Tout le catalogue (au hasard)" = "Whole catalog (random)";
+
+/* 0.11.0 */
+"Gérer les catégories" = "Manage Categories";
+"Gérer les catégories…" = "Manage Categories…";
+"Revenir à l'ordre du fournisseur et tout réafficher ?" = "Go back to the provider's order and show everything?";
+"Réinitialiser" = "Reset";
+"Réinitialiser…" = "Reset…";
+"L'ordre, les catégories masquées, les mots-clés et les noms personnalisés de cette section seront effacés." = "The order, hidden categories, keywords and custom names of this section will be cleared.";
+"Rechercher une catégorie" = "Search a category";
+"Masquer les catégories contenant… (ex. PAKISTAN, ARABIC)" = "Hide categories containing… (e.g. PAKISTAN, ARABIC)";
+"Masquer" = "Hide";
+"Ne plus masquer « %@ »" = "Stop hiding “%@”";
+"Aucune catégorie" = "No Categories";
+"Les catégories apparaissent une fois les sources chargées." = "Categories appear once sources are loaded.";
+"Glisser pour déplacer" = "Drag to move";
+"Effacez la recherche pour déplacer" = "Clear the search to move";
+"Masquée par un mot-clé" = "Hidden by a keyword";
+"Afficher ou masquer" = "Show or hide";
+"Renommer" = "Rename";
+"Placer en haut" = "Move to Top";
+"Placer en bas" = "Move to Bottom";
+"%lld catégories · %lld masquées" = "%lld categories · %lld hidden";
+"Tout afficher" = "Show All";
+"Trier A → Z" = "Sort A → Z";
+"Renommer la catégorie" = "Rename Category";
+"Nouveau nom" = "New name";
+"Nom d'origine" = "Original Name";
+"Masquer cette catégorie" = "Hide This Category";
+"Réordonner, masquer ou renommer les catégories (⌥⌘C)" = "Reorder, hide or rename categories (⌥⌘C)";
+"Section" = "Section";

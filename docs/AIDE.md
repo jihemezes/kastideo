@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.10.0 — bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.11.0 — catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -201,6 +201,18 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 - **Nettoyage automatique** (facultatif) : les enregistrements plus anciens que le nombre de jours choisi sont placés dans la corbeille.
 - Une alerte prévient quand l'espace disque devient faible.
 - Les droits de copie dépendent des conditions de votre fournisseur : Kastideo enregistre pour votre usage privé ce que votre abonnement vous donne déjà.
+
+## Organiser les catégories
+
+Vous n'êtes pas obligé de subir l'ordre et la liste des catégories du fournisseur. Ouvrez **Présentation > Gérer les catégories…** (**⌥⌘C**), le bouton à droite du titre « Catégories » de la barre latérale, ou faites un clic droit sur une catégorie. Choisissez la section (**Direct**, **Films** ou **Séries**), puis :
+
+- **Réordonner** : glissez les catégories dans la liste, ou utilisez le menu **…** > **Placer en haut / en bas**. **Trier A → Z** classe tout par ordre alphabétique.
+- **Masquer** : décochez une catégorie (ou clic droit > **Masquer cette catégorie** dans la barre latérale). Une catégorie masquée disparaît **partout** : barre latérale, listes « Direct / Films / Séries », recherche, Guide TV, interfaces Cinéma et TV, bandeau « à la une ». Vos favoris et récents restent accessibles.
+- **Masquer par mot-clé** : saisissez par exemple « PAKISTAN » ou « ARABIC » : toutes les catégories dont le nom contient ce mot sont masquées, y compris celles que le fournisseur ajoutera plus tard. Cliquez sur la croix d'un mot-clé pour l'annuler.
+- **Renommer** : le crayon permet de donner un nom plus lisible (« FRANCE FHD | OTT » → « France HD ») ; **Nom d'origine** l'annule.
+- **Tout afficher** réaffiche les catégories masquées ; **Réinitialiser…** revient entièrement à la présentation du fournisseur.
+
+Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de leur voisine d'origine.
 
 ## Favoris et récents
 

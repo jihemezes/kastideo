@@ -35,6 +35,11 @@ final class LibraryStore {
 
     private(set) var itemsByKind: [MediaKind: [MediaItem]] = [:]
     private(set) var categoriesByKind: [MediaKind: [String]] = [:]
+    /// Toutes les catégories du fournisseur (noms d'origine, ordre personnalisé, y compris masquées) et leur nombre d'éléments.
+    private(set) var allCategoriesByKind: [MediaKind: [String]] = [:]
+    private(set) var categoryCounts: [MediaKind: [String: Int]] = [:]
+    /// Ordre, masquage et noms personnalisés des catégories.
+    private(set) var categoryPrefs: [MediaKind: CategoryPrefs] = [:]
     private var itemsByID: [String: MediaItem] = [:]
     /// Contenus classés par type puis par catégorie (accès direct pour l'interface Cinéma).
     private var itemsByCategory: [MediaKind: [String: [MediaItem]]] = [:]
@@ -64,6 +69,12 @@ final class LibraryStore {
             sources = decoded
         }
         favoriteIDs = defaults.stringArray(forKey: Keys.favorites) ?? []
+        for kind in CategoryPrefs.kinds {
+            if let data = defaults.data(forKey: CategoryPrefs.key(kind)),
+               let prefs = try? JSONDecoder().decode(CategoryPrefs.self, from: data) {
+                categoryPrefs[kind] = prefs
+            }
+        }
         recentIDs = defaults.stringArray(forKey: Keys.recents) ?? []
         if let data = defaults.data(forKey: Keys.extras),
            let decoded = try? JSONDecoder().decode([String: MediaItem].self, from: data) {
@@ -443,9 +454,28 @@ final class LibraryStore {
     }
 
     private func rebuildIndex() {
+        // 1. Catégories du fournisseur, dans l'ordre d'origine, avec leur nombre d'éléments.
+        var providerOrder: [MediaKind: [String]] = [:]
+        var counts: [MediaKind: [String: Int]] = [:]
+        for source in sources where source.isEnabled {
+            guard let content = contents[source.id] else { continue }
+            for item in content.items where item.kind != .episode {
+                if counts[item.kind, default: [:]][item.group] == nil { providerOrder[item.kind, default: []].append(item.group) }
+                counts[item.kind, default: [:]][item.group, default: 0] += 1
+            }
+        }
+        // 2. Ordre personnalisé et catégories masquées.
+        var ordered: [MediaKind: [String]] = [:]
+        var hidden: [MediaKind: Set<String>] = [:]
+        for (kind, names) in providerOrder {
+            let prefs = categoryPrefs[kind] ?? CategoryPrefs()
+            let all = prefs.apply(order: names)
+            ordered[kind] = all
+            hidden[kind] = Set(all.filter { prefs.isHidden($0) })
+        }
+
+        // 3. Index des contenus visibles (les éléments masqués restent accessibles par identifiant : favoris, récents).
         var byKind: [MediaKind: [MediaItem]] = [:]
-        var categories: [MediaKind: [String]] = [:]
-        var seen: [MediaKind: Set<String>] = [:]
         var byID: [String: MediaItem] = [:]
         var byCategory: [MediaKind: [String: [MediaItem]]] = [:]
         for source in sources where source.isEnabled {
@@ -456,19 +486,53 @@ final class LibraryStore {
                 if item.kind == .live, item.epgID?.isEmpty ?? true {
                     item.epgID = "auto:" + ChannelMatcher.normalize(item.name, keepResolution: true)
                 }
-                byKind[item.kind, default: []].append(item)
-                if seen[item.kind, default: []].insert(item.group).inserted {
-                    categories[item.kind, default: []].append(item.group)
+                if item.kind != .episode, let prefs = categoryPrefs[item.kind] {
+                    if hidden[item.kind]?.contains(item.group) == true {
+                        byID[item.id] = item
+                        continue
+                    }
+                    item.group = prefs.displayName(item.group)
                 }
+                byKind[item.kind, default: []].append(item)
                 byID[item.id] = item
                 byCategory[item.kind, default: [:]][item.group, default: []].append(item)
             }
         }
+        var categories: [MediaKind: [String]] = [:]
+        for (kind, names) in ordered {
+            let prefs = categoryPrefs[kind] ?? CategoryPrefs()
+            var seen = Set<String>()
+            categories[kind] = names.filter { !(hidden[kind]?.contains($0) ?? false) }
+                .map { prefs.displayName($0) }
+                .filter { seen.insert($0).inserted }
+        }
         itemsByKind = byKind
         categoriesByKind = categories
+        allCategoriesByKind = ordered
+        categoryCounts = counts
         itemsByID = byID
         itemsByCategory = byCategory
         rebuildEPG()
+    }
+
+    // MARK: - Catégories personnalisées
+
+    func prefs(for kind: MediaKind) -> CategoryPrefs { categoryPrefs[kind] ?? CategoryPrefs() }
+
+    /// Modifie l'ordre, le masquage ou les noms des catégories d'un type de contenu.
+    func updateCategories(_ kind: MediaKind, _ change: (inout CategoryPrefs) -> Void) {
+        var prefs = categoryPrefs[kind] ?? CategoryPrefs()
+        change(&prefs)
+        categoryPrefs[kind] = prefs
+        if let data = try? JSONEncoder().encode(prefs) { defaults.set(data, forKey: CategoryPrefs.key(kind)) }
+        rebuildIndex()
+    }
+
+    /// Déplace des catégories (liste complète, noms d'origine).
+    func moveCategories(_ kind: MediaKind, from offsets: IndexSet, to destination: Int) {
+        var list = allCategoriesByKind[kind] ?? []
+        list.move(fromOffsets: offsets, toOffset: destination)
+        updateCategories(kind) { $0.order = list }
     }
 
     /// Reconstruit l'index du guide (hors du fil principal) : guide des fournisseurs, puis guide de secours
@@ -600,5 +664,49 @@ enum EPGKeys {
         let text = fallbackURLText
         guard let url = URL(string: text), let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return nil }
         return url
+    }
+}
+
+/// Préférences d'affichage des catégories d'un type de contenu.
+struct CategoryPrefs: Codable, Equatable {
+    /// Ordre choisi (noms d'origine). Les catégories absentes gardent l'ordre du fournisseur, à la suite.
+    var order: [String] = []
+    var hidden: Set<String> = []
+    var renames: [String: String] = [:]
+    /// Mots-clés : toute catégorie dont le nom en contient un est masquée.
+    var keywords: [String] = []
+
+    static let kinds: [MediaKind] = [.live, .movie, .series]
+    static func key(_ kind: MediaKind) -> String { "categories.\(kind.rawValue).v1" }
+
+    func isHidden(_ name: String) -> Bool {
+        if hidden.contains(name) { return true }
+        return keywords.contains { !$0.isEmpty && name.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil }
+    }
+
+    func isHiddenByKeyword(_ name: String) -> Bool {
+        !hidden.contains(name) && isHidden(name)
+    }
+
+    func displayName(_ name: String) -> String {
+        if let renamed = renames[name], !renamed.trimmingCharacters(in: .whitespaces).isEmpty { return renamed }
+        return name
+    }
+
+    /// Applique l'ordre personnalisé à la liste du fournisseur.
+    func apply(order provider: [String]) -> [String] {
+        guard !order.isEmpty else { return provider }
+        let available = Set(provider)
+        var result = order.filter { available.contains($0) }
+        let placed = Set(result)
+        // Nouvelle catégorie du fournisseur : insérée après sa voisine d'origine déjà placée.
+        for (index, name) in provider.enumerated() where !placed.contains(name) {
+            if index > 0, let anchor = result.firstIndex(of: provider[index - 1]) {
+                result.insert(name, at: anchor + 1)
+            } else {
+                result.append(name)
+            }
+        }
+        return result
     }
 }

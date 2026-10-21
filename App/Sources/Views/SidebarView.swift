@@ -5,6 +5,7 @@ struct SidebarView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
     @Environment(NavigationModel.self) private var navigation
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         @Bindable var navigation = navigation
@@ -24,11 +25,28 @@ struct SidebarView: View {
             let kind = navigation.lastKind
             let categories = store.categoriesByKind[kind] ?? []
             if !categories.isEmpty {
-                Section("Catégories — \(kind.title)") {
+                Section {
                     ForEach(categories, id: \.self) { name in
                         Label(name, systemImage: "folder")
                             .lineLimit(1)
                             .tag(Browse.category(kind, name))
+                            .contextMenu {
+                                Button("Masquer cette catégorie") { hide(name, kind: kind) }
+                                Divider()
+                                Button("Gérer les catégories…") { openWindow(id: "categories") }
+                            }
+                    }
+                } header: {
+                    HStack {
+                        Text("Catégories — \(kind.title)")
+                        Spacer()
+                        Button {
+                            openWindow(id: "categories")
+                        } label: {
+                            Image(systemName: "slider.horizontal.3")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Réordonner, masquer ou renommer les catégories (⌥⌘C)")
                     }
                 }
             }
@@ -40,6 +58,14 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+    }
+
+    /// Masque une catégorie (nom affiché → nom d'origine du fournisseur).
+    private func hide(_ displayed: String, kind: MediaKind) {
+        let prefs = store.prefs(for: kind)
+        let originals = (store.allCategoriesByKind[kind] ?? []).filter { prefs.displayName($0) == displayed }
+        if case .category(_, displayed)? = navigation.browse { navigation.go(.all(kind)) }
+        store.updateCategories(kind) { prefs in originals.forEach { prefs.hidden.insert($0) } }
     }
 
     private func row(_ browse: Browse, icon: String, count: Int?) -> some View {

@@ -272,7 +272,10 @@ private struct HeroSlideView: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            background
+            // L'image remplit le cadre sans l'agrandir (sinon le texte et les boutons sortent du bandeau).
+            Color.clear
+                .overlay { background }
+                .clipped()
             LinearGradient(colors: [.black.opacity(0.92), .black.opacity(0.55), .clear],
                            startPoint: .leading, endPoint: .trailing)
             LinearGradient(colors: [.clear, .black.opacity(0.6)], startPoint: .center, endPoint: .bottom)
@@ -306,6 +309,7 @@ private struct HeroSlideView: View {
             .padding(28)
             .padding(.bottom, 8)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder
@@ -330,6 +334,7 @@ private struct HeroSlideView: View {
         ZStack(alignment: .trailing) {
             LinearGradient(colors: [KastideoPalette.night, KastideoPalette.violet, KastideoPalette.magenta.opacity(0.7)],
                            startPoint: .leading, endPoint: .trailing)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             if let url = details?.posterURL ?? item.logoURL {
                 AsyncImage(url: url) { phase in
                     if case .success(let image) = phase {
@@ -425,6 +430,7 @@ private struct HeroLiveSlideView: View {
         ZStack(alignment: .bottomLeading) {
             LinearGradient(colors: [KastideoPalette.night, KastideoPalette.indigo, KastideoPalette.magenta.opacity(0.75)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             if let url = item.logoURL {
                 AsyncImage(url: url) { phase in
                     if case .success(let image) = phase {
