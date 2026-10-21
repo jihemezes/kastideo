@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.9.5</title>
+      <pubDate>Wed, 21 Oct 2026 06:28:46 GMT</pubDate>
+      <sparkle:version>20</sparkle:version>
+      <sparkle:shortVersionString>0.9.5</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Guide TV de secours&lt;/b&gt; : le guide gratuit de &lt;b&gt;xmltvfr.fr&lt;/b&gt; (Complet, ~785 chaînes) complète automatiquement les chaînes sans programme chez le fournisseur, reliées par leur nom (« |FR| TF1 FHD » → TF1). Réglages &amp;gt; Général &amp;gt; Guide TV de secours (autre guide xmltvfr.fr ou adresse XMLTV au choix)&lt;/li&gt;
+&lt;li&gt;Correction : un guide &lt;b&gt;vide ou illisible&lt;/b&gt; envoyé par le fournisseur n&amp;#x27;efface plus les programmes déjà connus ; un message l&amp;#x27;indique sous la source&lt;/li&gt;
+&lt;li&gt;Le guide est rechargé automatiquement quand il arrive à moins de 12 h de sa fin, même si Kastideo reste ouvert plusieurs jours&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.5/Kastideo-0.9.5.dmg" length="44724022" type="application/octet-stream" sparkle:edSignature="xsIpC2fFLnZoUtD6Jgtj/OUiezutU8Eo6WsQjrPdsrNmcm9aSvUyBkEy9ktba8msUlrP4e+9zbPZKzFk9RDLDg==" />
+    </item>
+    <item>
       <title>Kastideo 0.9.4</title>
       <pubDate>Tue, 20 Oct 2026 21:45:12 GMT</pubDate>
       <sparkle:version>19</sparkle:version>
