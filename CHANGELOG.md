@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.8] - 2026-10-21
+
+- Passage **instantané** du Direct à Films (ou à toute autre section) : l'arrêt du flux par le moteur VLC, qui pouvait prendre jusqu'à 30 s, se fait maintenant en arrière-plan sans bloquer l'interface. La durée de l'arrêt est notée dans le Journal de lecture quand elle dépasse 1 s
+
 ## [0.9.7] - 2026-10-21
 
 - Correction d'un **blocage de l'application** (roue multicolore) en passant du Direct à Films pendant la lecture d'une chaîne : la vidéo reste hébergée dans une fenêtre invisible le temps que le moteur VLC s'arrête

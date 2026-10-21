@@ -178,11 +178,24 @@ final class PlaybackController {
         watchdog?.cancel()
         pausedAt = nil
         liveDelay = 0
-        if player.media != nil {
+        if player.media != nil, !isStopping {
+            // L'arrêt d'un flux réseau peut prendre plusieurs secondes dans le moteur VLC : il se fait
+            // en arrière-plan pour ne jamais bloquer l'interface (passage du Direct aux Films, etc.).
             VideoContainerView.ensureHosted(for: player)
-            player.stop()
+            isStopping = true
+            let engine = player
+            let begin = Date()
+            Task.detached(priority: .userInitiated) {
+                engine.stop()
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    self.isStopping = false
+                    if self.current == nil { self.player.media = nil }
+                    let elapsed = Date().timeIntervalSince(begin)
+                    if elapsed > 1 { PlaybackLog.shared.note("Arrêt du moteur : \(String(format: "%.1f", elapsed)) s") }
+                }
+            }
         }
-        player.media = nil
         current = nil
         errorMessage = nil
         isLoading = false
@@ -214,7 +227,9 @@ final class PlaybackController {
 
     /// Démarre l'enregistrement du flux en cours (même connexion), dans un dossier de travail.
     /// Vrai quand le flux est ouvert et l'image affichée : l'enregistrement peut alors démarrer.
-    var canRecord: Bool { player.media != nil && didStart }
+    var canRecord: Bool { player.media != nil && didStart && !isStopping }
+    /// Arrêt du moteur en cours (en arrière-plan).
+    @ObservationIgnored private var isStopping = false
 
     /// VLCKit renvoie souvent `false` alors que l'enregistrement a bien démarré : le résultat n'est donc qu'indicatif
     /// et c'est la présence du fichier qui fait foi (voir RecordingCenter).
@@ -275,10 +290,12 @@ final class PlaybackController {
     // MARK: - Interne
 
     private func start(_ url: URL) {
-        // Une seule connexion autorisée par l'abonnement : on ferme d'abord le flux en cours.
-        if player.media != nil {
+        // Une seule connexion autorisée par l'abonnement : on ferme d'abord le flux en cours
+        // (y compris un arrêt encore en cours en arrière-plan).
+        if player.media != nil || isStopping {
             VideoContainerView.ensureHosted(for: player)
             player.stop()
+            isStopping = false
         }
         errorMessage = nil
         isLoading = true
@@ -348,7 +365,7 @@ final class PlaybackController {
     }
 
     private func handle(_ state: VLCMediaPlayerState) {
-        guard player.media != nil else { return }
+        guard player.media != nil, current != nil, !isStopping else { return }
         if state != .buffering || !didStart { PlaybackLog.shared.note("État : \(Self.stateName(state))") }
         switch state {
         case .opening, .buffering:
