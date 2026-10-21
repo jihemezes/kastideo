@@ -98,6 +98,7 @@ struct MainSplitView: View {
     }
 
     var body: some View {
+        let _ = navigation.mark("Fenêtre principale (\(style.rawValue))")
         Group {
             if showsTheater {
                 DetailView()

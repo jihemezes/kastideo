@@ -47,6 +47,7 @@ final class NavigationModel {
     var browse: Browse? = .home {
         didSet {
             browseChangedAt = Date()
+            marked.removeAll()
             if let kind = browse?.kind {
                 // Changement de type de contenu (Direct → Films…) : on arrive sur la grille, pas sur le lecteur.
                 if kind != lastKind { selectedItemID = nil }
@@ -59,6 +60,17 @@ final class NavigationModel {
     var selectedItemID: String?
     /// Instant du dernier changement de section (mesure du temps d'affichage, Journal de lecture).
     @ObservationIgnored var browseChangedAt = Date()
+
+    @ObservationIgnored private var marked = Set<String>()
+
+    /// Étape de construction de l'affichage (diagnostic des lenteurs) : notée une fois par changement de section
+    /// si elle survient plus de 0,3 s après le clic.
+    func mark(_ what: String) {
+        let elapsed = Date().timeIntervalSince(browseChangedAt)
+        guard elapsed > 0.3, elapsed < 300, marked.insert(what).inserted else { return }
+        let text = "Étape « \(what) » à \(String(format: "%.1f", elapsed)) s"
+        Task { @MainActor in PlaybackLog.shared.note(text) }
+    }
 
     /// Note dans le Journal de lecture le temps d'affichage d'une section s'il dépasse une demi-seconde.
     func noteDisplayed(_ what: String) {

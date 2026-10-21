@@ -168,9 +168,11 @@ struct CinemaCatalog: View {
     let browse: Browse
 
     var body: some View {
+        let _ = navigation.mark("Catalogue Cinéma — début")
         let search = navigation.search
         let key = search.kastideoSearchKey
         let items = filtered(store.items(for: browse), key: key)
+        let _ = navigation.mark("Catalogue Cinéma — \(items.count) éléments")
 
         ScrollView {
             if !key.isEmpty {
@@ -220,6 +222,7 @@ struct CinemaHome: View {
         let recents = kind == .live ? allRecents : allRecents.filter { watch.fraction(for: $0.id) == nil }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         let categories = store.categoriesByKind[kind] ?? []
+        let _ = navigation.mark("Accueil Cinéma — \(categories.count) catégories")
 
         if all.isEmpty {
             ContentUnavailableView(kind.title, systemImage: "tray",

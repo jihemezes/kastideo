@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.11.3] - 2026-10-21
+
+- Correction probable de la **lenteur Direct (Classique) → Films (Cinéma)** (55 s mesurées) : la liste classique ne construit plus, même un instant, les ~100 000 films d'une section affichée dans une autre interface
+- Journal de lecture : les étapes de construction de l'affichage sont notées quand elles tardent, pour confirmer ou affiner le diagnostic
+
 ## [0.11.2] - 2026-10-21
 
 - **Écran d'accueil** : grand logo Kastideo en arrière-plan, en-tête plus présent ; la page occupe toute la hauteur de la fenêtre et les grands pavés s'agrandissent avec elle

@@ -9,6 +9,7 @@ struct SidebarView: View {
 
     var body: some View {
         @Bindable var navigation = navigation
+        let _ = navigation.mark("Barre latérale")
         List(selection: $navigation.browse) {
             Section("Bibliothèque") {
                 row(.home, icon: "house", count: nil)

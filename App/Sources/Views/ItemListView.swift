@@ -21,8 +21,20 @@ struct CatalogListView: View {
     @Environment(NavigationModel.self) private var navigation
 
     var body: some View {
-        @Bindable var navigation = navigation
         let browse = navigation.browse ?? .all(.live)
+        // Section affichée dans une autre interface (Cinéma, TV) : la liste classique ne doit pas être construite,
+        // même un instant (une liste de 100 000 films bloquait l'application près d'une minute).
+        if let scope = InterfaceScope.scope(for: browse), scope.style() != .classic {
+            Color.clear
+        } else {
+            list(browse)
+        }
+    }
+
+    @ViewBuilder
+    private func list(_ browse: Browse) -> some View {
+        @Bindable var navigation = navigation
+        let _ = navigation.mark("Liste classique — \(browse.title)")
         let items = filtered(store.items(for: browse), search: navigation.search)
 
         Group {
