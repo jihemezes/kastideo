@@ -6,6 +6,20 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.11.0</title>
+      <pubDate>Wed, 21 Oct 2026 16:54:39 GMT</pubDate>
+      <sparkle:version>25</sparkle:version>
+      <sparkle:shortVersionString>0.11.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Gérer les catégories&lt;/b&gt; (Présentation &amp;gt; Gérer les catégories…, ⌥⌘C, ou bouton de la barre latérale) pour le Direct, les Films et les Séries : &lt;b&gt;réordonner&lt;/b&gt; par glisser-déposer, &lt;b&gt;masquer&lt;/b&gt; (partout : listes, recherche, Guide TV, Cinéma, TV, bandeau), &lt;b&gt;masquer par mot-clé&lt;/b&gt; (ex. « PAKISTAN »), &lt;b&gt;renommer&lt;/b&gt;, trier A → Z, tout afficher ou réinitialiser&lt;/li&gt;
+&lt;li&gt;Clic droit sur une catégorie de la barre latérale &amp;gt; &lt;b&gt;Masquer cette catégorie&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;Correction du &lt;b&gt;bandeau « à la une »&lt;/b&gt; : l&amp;#x27;image de fond prenait toute la place et cachait l&amp;#x27;affiche, le titre, le résumé et les boutons&lt;/li&gt;
+&lt;li&gt;Titres des affiches en interface Cinéma affichés sans les étiquettes du fournisseur (« |FR| »…)&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.0/Kastideo-0.11.0.dmg" length="45027931" type="application/octet-stream" sparkle:edSignature="pI8zSW9fEdlL3oItMNPanoIRXrnVC9cb/DTxAnjCf4nRZBFYSbbXW5MlA8Zc0FKULWhKRt4jHa4RmkRuCpB4AQ==" />
+    </item>
+    <item>
       <title>Kastideo 0.10.0</title>
       <pubDate>Wed, 21 Oct 2026 16:12:41 GMT</pubDate>
       <sparkle:version>24</sparkle:version>
