@@ -507,3 +507,25 @@
 "Désactivés" = "Off";
 "RÉCEPTION" = "RECEPTION";
 "%@ / %@" = "%@ / %@";
+
+/* 0.13.0 */
+"MultiVue" = "MultiView";
+"MultiVue…" = "MultiView…";
+"Ajouter une chaîne" = "Add a Channel";
+"Ajouter une chaîne à la MultiVue" = "Add a channel to MultiView";
+"Regardez jusqu'à %lld chaînes en même temps. Le son suit la vignette sélectionnée (clic ou touches 1 à 4)." = "Watch up to %lld channels at once. Sound follows the selected tile (click or keys 1 to 4).";
+"Choisir une première chaîne" = "Choose a First Channel";
+"MultiVue désactivée" = "MultiView Disabled";
+"Votre abonnement n'autorise qu'une connexion à la fois : un second flux serait refusé par le serveur. Si votre abonnement permet plusieurs connexions, indiquez leur nombre dans Réglages > Général > Lecture." = "Your subscription allows only one connection at a time: a second stream would be refused by the server. If your subscription allows several connections, enter their number in Settings > General > Playback.";
+"Ouvrir les réglages" = "Open Settings";
+"Choisir une chaîne" = "Choose a Channel";
+"Flux refusé ou indisponible" = "Stream refused or unavailable";
+"Changer de chaîne" = "Change Channel";
+"Retirer de la MultiVue" = "Remove from MultiView";
+"Tapez le nom d'une chaîne." = "Type a channel name.";
+"Résultats" = "Results";
+"Connexions simultanées de l'abonnement" = "Simultaneous connections of the subscription";
+"MultiVue désactivée : avec une seule connexion, un second flux serait refusé par votre fournisseur." = "MultiView disabled: with a single connection, a second stream would be refused by your provider.";
+"MultiVue : jusqu'à %lld chaînes en même temps (menu Lecture > MultiVue, ⌥⌘M). Les enregistrements et téléchargements utilisent aussi une connexion." = "MultiView: up to %lld channels at once (Playback menu > MultiView, ⌥⌘M). Recordings and downloads also use a connection.";
+"Ajouter à la MultiVue" = "Add to MultiView";
+"%lld / %lld" = "%lld / %lld";

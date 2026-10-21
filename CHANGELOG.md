@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.13.0] - 2026-10-21
+
+- **MultiVue** : jusqu'à 4 chaînes en direct dans une même fenêtre (1, 2 côte à côte, grille 2×2), le son suit la vignette active (clic ou touches 1 à 4) ; ajout, changement et retrait de chaîne au survol, recherche parmi favoris, récents et tout le direct. Menu Lecture > MultiVue… (⌥⌘M) ou clic droit > Ajouter à la MultiVue
+- Désactivée par défaut : chaque flux consomme une connexion. Réglages > Général > Lecture > **Connexions simultanées de l'abonnement** (1 à 4) pour l'activer
+
 ## [0.12.0] - 2026-10-21
 
 - **Lecteur repensé** : barre de contrôle compacte et **rétractable** (disparaît avec le pointeur après 3 s, revient au moindre mouvement)

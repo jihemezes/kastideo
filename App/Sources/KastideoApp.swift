@@ -10,6 +10,7 @@ struct KastideoApp: App {
     @State private var updater = UpdaterController()
     @State private var watchProgress = WatchProgressStore()
     @State private var mediaInfo = MediaInfoStore()
+    @State private var multiView = MultiViewModel()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
@@ -32,6 +33,7 @@ struct KastideoApp: App {
                 .environment(updater)
                 .environment(watchProgress)
                 .environment(mediaInfo)
+                .environment(multiView)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
                 .onAppear { playback.watchProgress = watchProgress }
@@ -48,6 +50,16 @@ struct KastideoApp: App {
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
         }
         .defaultSize(width: 900, height: 520)
+
+        Window("MultiVue", id: "multiview") {
+            MultiViewWindow()
+                .environment(store)
+                .environment(multiView)
+                .environment(playback)
+                .environment(recordings)
+                .tint(AccentChoice(rawValue: accent)?.color)
+        }
+        .defaultSize(width: 1280, height: 760)
 
         Window("Gérer les catégories", id: "categories") {
             CategoryManagerView()
@@ -70,6 +82,7 @@ struct KastideoApp: App {
                 .environment(updater)
                 .environment(watchProgress)
                 .environment(mediaInfo)
+                .environment(multiView)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
         }
@@ -139,6 +152,8 @@ struct KastideoCommands: Commands {
                 .keyboardShortcut(.return, modifiers: .command)
             Button("Panneau d'informations (pistes, sous-titres, qualité)") { navigation.showContextPanel.toggle() }
                 .keyboardShortcut("i", modifiers: .command)
+            OpenWindowButton(title: "MultiVue…", windowID: "multiview")
+                .keyboardShortcut("m", modifiers: [.command, .option])
             Divider()
             Button("Reculer de 10 secondes") { playback.jump(seconds: -10) }
                 .keyboardShortcut("[", modifiers: .command)

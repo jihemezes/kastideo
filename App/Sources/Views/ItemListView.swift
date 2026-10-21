@@ -179,6 +179,8 @@ struct LogoView: View {
 struct ItemActionsMenu: View {
     @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
+    @Environment(MultiViewModel.self) private var multiView
+    @Environment(\.openWindow) private var openWindow
     let item: MediaItem
 
     var body: some View {
@@ -191,6 +193,12 @@ struct ItemActionsMenu: View {
                 if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
             }
             Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
+            if MultiViewKeys.isAvailable {
+                Button("Ajouter à la MultiVue") {
+                    multiView.add(item)
+                    openWindow(id: "multiview")
+                }
+            }
         } else if let url = item.streamURL, !url.isFileURL {
             Divider()
             Button("Télécharger") { recordings.download(item, tonight: false) }
