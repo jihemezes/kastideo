@@ -6,6 +6,21 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.12.0</title>
+      <pubDate>Wed, 21 Oct 2026 21:03:02 GMT</pubDate>
+      <sparkle:version>29</sparkle:version>
+      <sparkle:shortVersionString>0.12.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Lecteur repensé&lt;/b&gt; : barre de contrôle compacte et &lt;b&gt;rétractable&lt;/b&gt; (disparaît avec le pointeur après 3 s, revient au moindre mouvement)&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Mini-timeline&lt;/b&gt; pour les films et épisodes : trait fin qui s&amp;#x27;épaissit au survol, avec l&amp;#x27;heure visée&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Panneau « Informations »&lt;/b&gt; (ⓘ ou ⌘I) glissant depuis la droite : chaîne et programmes en cours / à venir, ou résumé et distribution du film ; choix de la &lt;b&gt;piste audio&lt;/b&gt; et des &lt;b&gt;sous-titres&lt;/b&gt; ; qualité de réception&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Santé du flux&lt;/b&gt; : pastille verte / orange / rouge (Excellent, Correct, Instable) et définition (SD, HD, 4K) ; débit, images perdues et coupures au survol&lt;/li&gt;
+&lt;li&gt;Prochaine étape prévue (0.13) : MultiVue en option, selon le nombre de connexions de l&amp;#x27;abonnement&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.12.0/Kastideo-0.12.0.dmg" length="45196198" type="application/octet-stream" sparkle:edSignature="LMnyZ7nodX9qClvGVScp/NaurxeVThthHs+SIkaGgTEvCSEPJd3yJJjA9Ntyovs3m1CwCckaFVNGriSkL5IGDQ==" />
+    </item>
+    <item>
       <title>Kastideo 0.11.3</title>
       <pubDate>Wed, 21 Oct 2026 19:07:39 GMT</pubDate>
       <sparkle:version>28</sparkle:version>
