@@ -36,10 +36,12 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
     public var number: Int?
     /// Résumé / informations complémentaires.
     public var info: String?
+    /// Date d'ajout au catalogue du fournisseur (Xtream), si connue.
+    public var added: Date?
 
     public init(id: String, sourceID: UUID, kind: MediaKind, name: String, group: String,
                 logoURL: URL? = nil, streamURL: URL? = nil, epgID: String? = nil,
-                seriesID: String? = nil, number: Int? = nil, info: String? = nil) {
+                seriesID: String? = nil, number: Int? = nil, info: String? = nil, added: Date? = nil) {
         self.id = id
         self.sourceID = sourceID
         self.kind = kind
@@ -51,6 +53,7 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
         self.seriesID = seriesID
         self.number = number
         self.info = info
+        self.added = added
     }
 
     /// Nom normalisé pour la recherche (sans casse ni accents).

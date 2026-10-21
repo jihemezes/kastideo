@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.9.8 — instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.10.0 — “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -79,7 +79,7 @@ Kastideo offers three presentations, which you choose **separately for live, mov
 
 - **Classic**: the three columns described above.
 - **TV** (live only): see below.
-- **Cinema**: a large “featured” banner (what you watched last, otherwise your favorites), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click on a channel opens the player full frame. A click on a **movie** or **series** poster first opens its **details page**: backdrop, poster, year, runtime, genres, rating, synopsis, director, cast (with photos), a **Back to Movies** (or Series) button at the top left, **Play** / **Resume**, **View Episodes**, **Trailer**, **Download** and favorite buttons. Information comes from your IPTV provider; add a free **TMDB** key (Settings > General > Movie and Series Details) for richer pages. **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
+- **Cinema**: a large scrolling **“featured” banner** (see below), then **horizontal rows**: continue watching, favorites and one row per category. Movies and series appear as posters, channels as thumbnails with the current program. A click on a channel opens the player full frame. A click on a **movie** or **series** poster first opens its **details page**: backdrop, poster, year, runtime, genres, rating, synopsis, director, cast (with photos), a **Back to Movies** (or Series) button at the top left, **Play** / **Resume**, **View Episodes**, **Trailer**, **Download** and favorite buttons. Information comes from your IPTV provider; add a free **TMDB** key (Settings > General > Movie and Series Details) for richer pages. **Back** (or Esc) returns to the catalog. At the top of the window, the **Live / Movies / Series / Guide / Favorites / Recents / Recordings** tabs replace the sidebar; search works as in Classic. “See All” opens a complete category as a grid.
 
 To change the interface:
 
@@ -88,6 +88,18 @@ To change the interface:
 - or **Settings > Appearance**.
 
 For example: TV for live and Cinema for movies and series. The **Recordings** section is always shown in the Classic interface. The default is Classic everywhere.
+
+### The “featured” banner (Cinema)
+
+At the top of Movies and Series, a **full-width carousel** scrolls through a selection: backdrop, poster, title, year, runtime, genres, rating, synopsis and **Play** (or **Resume** / **View Episodes**), **More Info** (the details page) and **Trailer** buttons. It mixes:
+
+- this week's **TMDB trends** found in your catalog (TMDB key required);
+- your provider's **latest additions**;
+- a **selection from a category** of your choice (for example “New releases” or “Netflix”), or from the whole catalog at random.
+
+Scrolling pauses while the mouse is over the banner; arrows and dots let you navigate. In **Live**, the banner shows **what's on now** on your favorite and recent channels, with progress, the next program and **Watch**.
+
+Settings > Appearance > **“Featured” Banner**: show or hide, height (compact, normal, large), scrolling speed, carousel sources and movie and series categories.
 
 ### The TV interface (live)
 

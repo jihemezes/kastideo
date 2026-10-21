@@ -207,6 +207,7 @@ struct CinemaHome: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
     @Environment(WatchProgressStore.self) private var watch
+    @AppStorage(HeroKeys.enabled) private var heroEnabled = true
     let kind: MediaKind
 
     var body: some View {
@@ -229,8 +230,8 @@ struct CinemaHome: View {
             let caption = started.first != nil ? String(localized: "À REPRENDRE")
                 : (recents.first != nil ? String(localized: "REGARDÉ RÉCEMMENT") : (favorites.first != nil ? String(localized: "VOS FAVORIS") : String(localized: "À LA UNE")))
             LazyVStack(alignment: .leading, spacing: 26) {
-                if let featured {
-                    CinemaHero(item: featured, caption: caption)
+                if heroEnabled {
+                    CinemaHeroCarousel(kind: kind, fallback: featured, fallbackCaption: caption)
                 }
                 if !started.isEmpty {
                     CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) })

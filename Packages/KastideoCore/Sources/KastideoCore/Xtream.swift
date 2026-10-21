@@ -175,7 +175,8 @@ public enum XtreamAPI {
             return MediaItem(id: "\(sourceID.uuidString):movie:\(streamID)", sourceID: sourceID, kind: .movie,
                              name: string(entry["name"]) ?? "Film \(streamID)", group: groupName(entry, categories),
                              logoURL: url(entry["stream_icon"]),
-                             streamURL: movieURL(c, streamID: streamID, ext: ext), info: info)
+                             streamURL: movieURL(c, streamID: streamID, ext: ext), info: info,
+                             added: timestamp(entry["added"]))
         }
     }
 
@@ -185,7 +186,8 @@ public enum XtreamAPI {
             guard let seriesID = string(entry["series_id"]) else { return nil }
             return MediaItem(id: "\(sourceID.uuidString):series:\(seriesID)", sourceID: sourceID, kind: .series,
                              name: string(entry["name"]) ?? "Série \(seriesID)", group: groupName(entry, categories),
-                             logoURL: url(entry["cover"]), seriesID: seriesID, info: string(entry["plot"]))
+                             logoURL: url(entry["cover"]), seriesID: seriesID, info: string(entry["plot"]),
+                             added: timestamp(entry["last_modified"]))
         }
     }
 
@@ -242,6 +244,12 @@ public enum XtreamAPI {
         case let n as NSNumber: return n.stringValue
         default: return nil
         }
+    }
+
+    /// Horodatage Unix (secondes) envoyé en texte ou en nombre.
+    static func timestamp(_ any: Any?) -> Date? {
+        guard let text = string(any), let value = Double(text), value > 946_684_800 else { return nil }
+        return Date(timeIntervalSince1970: value)
     }
 
     static func url(_ any: Any?) -> URL? {

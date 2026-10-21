@@ -49,3 +49,13 @@ final class MediaDetailsTests: XCTestCase {
         XCTAssertEqual(TMDB.parseSearch(Data(#"{"results":[{"id":1,"release_date":"1984-01-01"},{"id":2,"release_date":"2021-01-01"}]}"#.utf8), year: 2021, isSeries: false), "2")
     }
 }
+
+final class TrendingTests: XCTestCase {
+    func testTrendingAndTitleKey() {
+        let json = #"{"results":[{"id":1,"title":"Dune : Deuxième partie","original_title":"Dune: Part Two","release_date":"2024-02-27","backdrop_path":"/b.jpg"}]}"#
+        let list = TMDB.parseTrending(Data(json.utf8), isSeries: false)
+        XCTAssertEqual(list.first?.year, 2024)
+        XCTAssertEqual(TMDB.titleKey(list[0].title), TMDB.titleKey("|FR| Dune : deuxième partie (2024) 4K"))
+        XCTAssertEqual(XtreamAPI.timestamp("1729500000")?.timeIntervalSince1970, 1729500000)
+    }
+}

@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.9.8 — passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.10.0 — bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -79,7 +79,7 @@ Kastideo propose trois présentations, que vous choisissez **séparément pour l
 
 - **Classique** : les trois colonnes décrites ci-dessus.
 - **TV** (direct uniquement) : voir ci-dessous.
-- **Cinéma** : un grand bandeau « à la une » (ce que vous regardiez en dernier, sinon vos favoris), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic sur une chaîne ouvre le lecteur en plein cadre. Un clic sur l'affiche d'un **film** ou d'une **série** ouvre d'abord sa **fiche** : grande image de fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution (avec photos), bouton **Retour à Films** (ou Séries) en haut à gauche, boutons **Lire** / **Reprendre**, **Voir les épisodes**, **Bande-annonce**, **Télécharger** et favori. Les informations viennent de votre fournisseur IPTV ; ajoutez une clé **TMDB** gratuite (Réglages > Général > Fiches des films et séries) pour des fiches plus complètes. **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
+- **Cinéma** : un grand **bandeau « à la une »** qui défile (voir ci-dessous), puis des **rangées horizontales** : reprise, favoris et une rangée par catégorie. Les films et séries s'affichent en affiches, les chaînes en vignettes avec le programme en cours. Un clic sur une chaîne ouvre le lecteur en plein cadre. Un clic sur l'affiche d'un **film** ou d'une **série** ouvre d'abord sa **fiche** : grande image de fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution (avec photos), bouton **Retour à Films** (ou Séries) en haut à gauche, boutons **Lire** / **Reprendre**, **Voir les épisodes**, **Bande-annonce**, **Télécharger** et favori. Les informations viennent de votre fournisseur IPTV ; ajoutez une clé **TMDB** gratuite (Réglages > Général > Fiches des films et séries) pour des fiches plus complètes. **Retour** (ou Échap) revient au catalogue. En haut de la fenêtre, les onglets **Direct / Films / Séries / Guide TV / Favoris / Récents / Enregistrements** remplacent la barre latérale ; la recherche fonctionne comme en Classique. « Tout voir » ouvre une catégorie complète en grille.
 
 Pour changer d'interface :
 
@@ -88,6 +88,18 @@ Pour changer d'interface :
 - ou **Réglages > Apparence**.
 
 Par exemple : TV pour le direct et Cinéma pour les films et séries. La section **Enregistrements** s'affiche toujours en interface Classique. Le choix par défaut est Classique partout.
+
+### Le bandeau « à la une » (Cinéma)
+
+En haut des sections Films et Séries, un **carrousel plein cadre** fait défiler une sélection : grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons **Lire** (ou **Reprendre** / **Voir les épisodes**), **Plus d'infos** (la fiche) et **Bande-annonce**. Il mélange :
+
+- les **tendances de la semaine** sur TMDB que l'on retrouve dans votre catalogue (clé TMDB nécessaire) ;
+- les **derniers ajouts** de votre fournisseur ;
+- une **sélection d'une catégorie** de votre choix (par exemple « Nouveautés » ou « Netflix »), ou de tout le catalogue au hasard.
+
+Le défilement s'arrête quand la souris survole le bandeau ; les flèches et les points permettent de naviguer. En **Direct**, le bandeau montre le **programme en cours** de vos chaînes favorites et récentes, avec sa progression, le programme suivant et **Regarder**.
+
+Réglages > Apparence > **Bandeau « à la une »** : afficher ou masquer, hauteur (compact, normal, grand), vitesse de défilement, sources du carrousel et catégories des films et des séries.
 
 ### L'interface TV (direct)
 

@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.10.0] - 2026-10-21
+
+- Nouveau **bandeau « à la une »** de l'interface Cinéma : carrousel plein cadre avec grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons **Lire / Reprendre**, **Plus d'infos** et **Bande-annonce** ; défilement automatique (pause au survol), flèches et points de navigation
+- Le carrousel mélange les **tendances de la semaine TMDB** présentes dans votre catalogue, les **derniers ajouts** du fournisseur et une **catégorie au choix** (ou tout le catalogue au hasard)
+- En **Direct**, le bandeau montre le **programme en cours** de vos chaînes favorites et récentes (progression, programme suivant, Regarder)
+- Réglages > Apparence > **Bandeau « à la une »** : afficher/masquer, hauteur, vitesse, sources et catégories
+- Les films et séries Xtream mémorisent leur **date d'ajout** (actualisez la source pour l'obtenir)
+
 ## [0.9.8] - 2026-10-21
 
 - Passage **instantané** du Direct à Films (ou à toute autre section) : l'arrêt du flux par le moteur VLC, qui pouvait prendre jusqu'à 30 s, se fait maintenant en arrière-plan sans bloquer l'interface. La durée de l'arrêt est notée dans le Journal de lecture quand elle dépasse 1 s

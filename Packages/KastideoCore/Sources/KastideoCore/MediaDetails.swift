@@ -241,6 +241,47 @@ public enum TMDB {
     }
 }
 
+/// Film ou série en tendance sur TMDB.
+public struct TMDBTrend: Sendable, Hashable {
+    public var tmdbID: String
+    public var title: String
+    public var originalTitle: String?
+    public var year: Int?
+    public var backdropURL: URL?
+
+    public init(tmdbID: String, title: String, originalTitle: String? = nil, year: Int? = nil, backdropURL: URL? = nil) {
+        self.tmdbID = tmdbID
+        self.title = title
+        self.originalTitle = originalTitle
+        self.year = year
+        self.backdropURL = backdropURL
+    }
+}
+
+extension TMDB {
+    /// Réponse de `/trending/{movie|tv}/week`.
+    public static func parseTrending(_ data: Data, isSeries: Bool) -> [TMDBTrend] {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = root["results"] as? [[String: Any]] else { return [] }
+        let s = XtreamAPI.string
+        return results.compactMap { entry in
+            guard let id = s(entry["id"]), let title = s(entry[isSeries ? "name" : "title"]) else { return nil }
+            return TMDBTrend(tmdbID: id, title: title,
+                             originalTitle: s(entry[isSeries ? "original_name" : "original_title"]),
+                             year: s(entry[isSeries ? "first_air_date" : "release_date"]).flatMap(XtreamAPI.year(in:)),
+                             backdropURL: s(entry["backdrop_path"]).flatMap { URL(string: images + "w1280" + $0) })
+        }
+    }
+
+    /// Clé de comparaison d'un titre (catalogue IPTV ou TMDB) : sans étiquettes, accents ni ponctuation.
+    public static func titleKey(_ raw: String) -> String {
+        let cleaned = cleanTitle(raw).title
+        let folded = cleaned.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "fr_FR"))
+            .lowercased()
+        return folded.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }.joined()
+    }
+}
+
 /// Client de l'API TMDB (clé v3 ou jeton de lecture v4).
 public struct TMDBClient: Sendable {
     public let apiKey: String
@@ -288,6 +329,16 @@ public struct TMDBClient: Sendable {
                                                             URLQueryItem(name: "include_video_language",
                                                                          value: "\(language.prefix(2)),en,null")])
         return try TMDB.parseDetails(data, isSeries: isSeries)
+    }
+
+    /// Films ou séries en tendance cette semaine (2 pages, ~40 titres).
+    public func trending(isSeries: Bool) async throws -> [TMDBTrend] {
+        var all: [TMDBTrend] = []
+        for page in 1...2 {
+            let data = try await request("trending/\(isSeries ? "tv" : "movie")/week", [URLQueryItem(name: "page", value: String(page))])
+            all += TMDB.parseTrending(data, isSeries: isSeries)
+        }
+        return all
     }
 
     /// Vérifie la clé (réglages).

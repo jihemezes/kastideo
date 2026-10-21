@@ -86,6 +86,51 @@ final class MediaInfoStore {
         cache[item.id] = details
     }
 
+    // MARK: Tendances (bandeau Cinéma)
+
+    @ObservationIgnored private var trendingCache: [Bool: (date: Date, list: [TMDBTrend])] = [:]
+    @ObservationIgnored private var titleIndex: [MediaKind: (count: Int, index: [String: MediaItem])] = [:]
+
+    /// Films ou séries en tendance cette semaine (TMDB), mis en cache 6 h.
+    func trending(isSeries: Bool) async -> [TMDBTrend] {
+        guard usesTMDB else { return [] }
+        if let cached = trendingCache[isSeries], Date().timeIntervalSince(cached.date) < 6 * 3600 { return cached.list }
+        do {
+            let list = try await TMDBClient(apiKey: tmdbKey, language: language).trending(isSeries: isSeries)
+            trendingCache[isSeries] = (Date(), list)
+            return list
+        } catch {
+            PlaybackLog.shared.note("TMDB : tendances indisponibles (\(error.localizedDescription))")
+            return []
+        }
+    }
+
+    /// Retrouve les tendances dans votre catalogue (par titre nettoyé, puis titre original).
+    func match(_ trends: [TMDBTrend], in items: [MediaItem], kind: MediaKind) async -> [(item: MediaItem, trend: TMDBTrend)] {
+        let index: [String: MediaItem]
+        if let cached = titleIndex[kind], cached.count == items.count {
+            index = cached.index
+        } else {
+            index = await Task.detached(priority: .utility) { () -> [String: MediaItem] in
+                var result: [String: MediaItem] = [:]
+                for item in items {
+                    let key = TMDB.titleKey(item.name)
+                    if !key.isEmpty, result[key] == nil { result[key] = item }
+                }
+                return result
+            }.value
+            titleIndex[kind] = (items.count, index)
+        }
+        var found: [(item: MediaItem, trend: TMDBTrend)] = []
+        for trend in trends {
+            let keys = [TMDB.titleKey(trend.title)] + (trend.originalTitle.map { [TMDB.titleKey($0)] } ?? [])
+            if let item = keys.lazy.compactMap({ index[$0] }).first {
+                found.append((item, trend))
+            }
+        }
+        return found
+    }
+
     func reload(_ item: MediaItem, store: LibraryStore) async {
         cache[item.id] = nil
         await load(item, store: store)

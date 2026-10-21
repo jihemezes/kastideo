@@ -425,3 +425,28 @@
 "Les chaînes sans programme dans le guide de votre fournisseur sont complétées automatiquement, en les rapprochant par leur nom (« |FR| TF1 FHD » → TF1). Guide gratuit et communautaire de xmltvfr.fr, mis à jour chaque jour, rechargé toutes les 12 heures." = "Channels with no programs in your provider's guide are completed automatically, matched by name (“|FR| TF1 FHD” → TF1). Free community guide from xmltvfr.fr, updated daily, reloaded every 12 hours.";
 "%lld chaînes, %lld reliées à vos chaînes · mis à jour %@" = "%lld channels, %lld linked to your channels · updated %@";
 "Pas encore chargé." = "Not loaded yet.";
+
+/* 0.10.0 */
+"Compact" = "Compact";
+"Normal" = "Normal";
+"Grand" = "Large";
+"TENDANCE CETTE SEMAINE" = "TRENDING THIS WEEK";
+"AJOUTÉ RÉCEMMENT" = "RECENTLY ADDED";
+"À DÉCOUVRIR" = "DISCOVER";
+"EN CE MOMENT" = "ON NOW";
+"Ensuite à %@ : %@" = "Next at %@: %@";
+"Afficher le bandeau « à la une »" = "Show the “featured” banner";
+"Hauteur" = "Height";
+"Défilement" = "Scrolling";
+"Toutes les 6 s" = "Every 6 s";
+"Toutes les 8 s" = "Every 8 s";
+"Toutes les 12 s" = "Every 12 s";
+"Toutes les 20 s" = "Every 20 s";
+"Tendances de la semaine (TMDB) disponibles dans votre catalogue" = "This week's trends (TMDB) available in your catalog";
+"Derniers ajouts du fournisseur" = "Latest additions from your provider";
+"Sélection d'une catégorie" = "Selection from a category";
+"Catégorie des films" = "Movies category";
+"Catégorie des séries" = "Series category";
+"Bandeau « à la une » (Cinéma)" = "“Featured” Banner (Cinema)";
+"Le bandeau fait défiler les films ou séries choisis, avec image de fond, résumé, note et bande-annonce ; il s'arrête quand la souris le survole. En Direct, il montre le programme en cours de vos chaînes favorites et récentes. Les tendances nécessitent une clé TMDB (Réglages > Général)." = "The banner scrolls through the chosen movies or series, with backdrop, synopsis, rating and trailer; it pauses when the mouse is over it. In Live, it shows what's on now on your favorite and recent channels. Trends require a TMDB key (Settings > General).";
+"Tout le catalogue (au hasard)" = "Whole catalog (random)";

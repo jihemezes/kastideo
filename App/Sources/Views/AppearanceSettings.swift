@@ -250,6 +250,8 @@ struct AppearanceSettingsView: View {
                     ForEach(CardSize.allCases) { Text($0.label).tag($0.rawValue) }
                 }
             }
+
+            HeroSettingsSection()
         }
         .formStyle(.grouped)
     }
