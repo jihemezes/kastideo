@@ -40,6 +40,7 @@ struct HomeView: View {
             ZStack {
                 background
                 logoWatermark(in: geo.size)
+                versionLabel
                 ScrollView {
                     VStack(spacing: 26) {
                         header
@@ -105,6 +106,30 @@ struct HomeView: View {
                            center: .topTrailing, startRadius: 10, endRadius: 420)
         }
         .ignoresSafeArea()
+    }
+
+    /// Numéro de version, discret, en bas à droite (clic : nouveautés de la version).
+    private var versionLabel: some View {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String
+        return VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    navigation.showWhatsNew = true
+                } label: {
+                    Text("Kastideo \(version)" + (build.map { " (\($0))" } ?? ""))
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.white.opacity(0.35))
+                }
+                .buttonStyle(.plain)
+                .help("Nouveautés de cette version")
+                .padding(10)
+            }
+        }
+        .zIndex(1)
     }
 
     /// Grands pavés : plus hauts quand la fenêtre est haute.

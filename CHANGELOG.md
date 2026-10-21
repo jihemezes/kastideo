@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.13.1] - 2026-10-21
+
+- Numéro de version (et de build) affiché discrètement en bas à droite de l'**écran d'accueil** ; un clic ouvre les nouveautés
+
 ## [0.13.0] - 2026-10-21
 
 - **MultiVue** : jusqu'à 4 chaînes en direct dans une même fenêtre (1, 2 côte à côte, grille 2×2), le son suit la vignette active (clic ou touches 1 à 4) ; ajout, changement et retrait de chaîne au survol, recherche parmi favoris, récents et tout le direct. Menu Lecture > MultiVue… (⌥⌘M) ou clic droit > Ajouter à la MultiVue

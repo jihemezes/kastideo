@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.13.0 — MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.13.1 — version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -62,6 +62,8 @@ Kastideo opens on the **Home** screen: three large tiles, **Live**, **Movies** a
 - The **Continue Watching** row lists the movies and episodes you have started; click one to resume where you left off.
 - If something is playing, a banner lets you **go back to it** or **stop** it.
 - To return to Home at any time: the **Home** button (house) at the top left of the toolbar, **⌘0**, the **Home** row in the sidebar, or the **H** key in the TV interface.
+
+Kastideo's **version number** is shown discreetly at the bottom right of the Home screen; clicking it opens the release notes.
 
 ### The window columns
 
