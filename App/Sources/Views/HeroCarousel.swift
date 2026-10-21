@@ -75,6 +75,36 @@ struct CinemaHeroCarousel: View {
     }
 
     var body: some View {
+        // Largeur imposée par la fenêtre : une image de fond très large ne peut plus élargir le bandeau
+        // (l'affiche et le texte sortaient du cadre).
+        Color.clear
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .overlay { GeometryReader { geo in content.frame(width: geo.size.width, height: geo.size.height) } }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .padding(.horizontal, 24)
+            .onHover { hovering = $0 }
+            .task(id: settingsKey) {
+                let built = await buildSlides()
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    slides = built
+                    index = 0
+                }
+            }
+            .task(id: "\(index)|\(slides.count)") {
+                await prefetch()
+            }
+            .task(id: "timer|\(slides.count)|\(interval)") {
+                guard slides.count > 1 else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(max(interval, 4)))
+                    guard !Task.isCancelled else { return }
+                    if !hovering { go(1) }
+                }
+            }
+    }
+
+    private var content: some View {
         ZStack {
             if slides.isEmpty {
                 if let fallback {
@@ -96,28 +126,6 @@ struct CinemaHeroCarousel: View {
                 .transition(.asymmetric(insertion: .opacity.combined(with: .move(edge: direction)).combined(with: .scale(scale: 1.02)),
                                         removal: .opacity))
                 controls
-            }
-        }
-        .frame(height: height)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .padding(.horizontal, 24)
-        .onHover { hovering = $0 }
-        .task(id: settingsKey) {
-            let built = await buildSlides()
-            withAnimation(.easeInOut(duration: 0.4)) {
-                slides = built
-                index = 0
-            }
-        }
-        .task(id: "\(index)|\(slides.count)") {
-            await prefetch()
-        }
-        .task(id: "timer|\(slides.count)|\(interval)") {
-            guard slides.count > 1 else { return }
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(max(interval, 4)))
-                guard !Task.isCancelled else { return }
-                if !hovering { go(1) }
             }
         }
     }
@@ -317,7 +325,7 @@ private struct HeroSlideView: View {
         if let backdrop {
             AsyncImage(url: backdrop, transaction: Transaction(animation: .easeIn(duration: 0.4))) { phase in
                 if case .success(let image) = phase {
-                    image.resizable().scaledToFill()
+                    Color.clear.overlay(image.resizable().scaledToFill()).clipped()
                 } else {
                     posterBackground
                 }

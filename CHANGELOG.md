@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.11.1] - 2026-10-21
+
+- **Bandeau « à la une »** : la largeur du bandeau est maintenant imposée par la fenêtre ; une image de fond très large ne peut plus repousser l'affiche, le titre, le résumé et les boutons hors du cadre
+
 ## [0.11.0] - 2026-10-21
 
 - **Gérer les catégories** (Présentation > Gérer les catégories…, ⌥⌘C, ou bouton de la barre latérale) pour le Direct, les Films et les Séries : **réordonner** par glisser-déposer, **masquer** (partout : listes, recherche, Guide TV, Cinéma, TV, bandeau), **masquer par mot-clé** (ex. « PAKISTAN »), **renommer**, trier A → Z, tout afficher ou réinitialiser
