@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.11.2] - 2026-10-21
+
+- **Écran d'accueil** : grand logo Kastideo en arrière-plan, en-tête plus présent ; la page occupe toute la hauteur de la fenêtre et les grands pavés s'agrandissent avec elle
+- **Bandeau « à la une »** : l'image de fond est cadrée sur le haut (2e quart) plutôt qu'au centre, là où se trouvent le plus souvent visages et titres
+- Bandeau préparé hors du fil principal (derniers ajouts, tirage au hasard) pour ne plus ralentir l'ouverture de Films et Séries
+- **Journal de lecture** : le temps d'affichage d'une section est noté quand il dépasse une demi-seconde (pour diagnostiquer la lenteur Direct → Films)
+
 ## [0.11.1] - 2026-10-21
 
 - **Bandeau « à la une »** : la largeur du bandeau est maintenant imposée par la fenêtre ; une image de fond très large ne peut plus repousser l'affiche, le titre, le résumé et les boutons hors du cadre

@@ -48,6 +48,7 @@ struct CatalogListView: View {
         .onChange(of: items.map(\.id), initial: true) { _, ids in
             navigation.visibleIDs = ids
         }
+        .onAppear { navigation.noteDisplayed(String(localized: "Classique — \(browse.title)")) }
     }
 
     private func filtered(_ items: [MediaItem], search: String) -> [MediaItem] {

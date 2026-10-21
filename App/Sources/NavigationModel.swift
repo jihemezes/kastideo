@@ -46,6 +46,7 @@ enum Browse: Hashable {
 final class NavigationModel {
     var browse: Browse? = .home {
         didSet {
+            browseChangedAt = Date()
             if let kind = browse?.kind {
                 // Changement de type de contenu (Direct → Films…) : on arrive sur la grille, pas sur le lecteur.
                 if kind != lastKind { selectedItemID = nil }
@@ -56,6 +57,14 @@ final class NavigationModel {
         }
     }
     var selectedItemID: String?
+    /// Instant du dernier changement de section (mesure du temps d'affichage, Journal de lecture).
+    @ObservationIgnored var browseChangedAt = Date()
+
+    /// Note dans le Journal de lecture le temps d'affichage d'une section s'il dépasse une demi-seconde.
+    func noteDisplayed(_ what: String) {
+        let elapsed = Date().timeIntervalSince(browseChangedAt)
+        if elapsed > 0.5 { PlaybackLog.shared.note("Affichage de « \(what) » : \(String(format: "%.1f", elapsed)) s") }
+    }
     /// Fiche ouverte (film ou série) dans l'interface Cinéma, avant la lecture.
     var infoItemID: String?
     var search = ""

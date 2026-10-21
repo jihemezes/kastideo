@@ -202,6 +202,11 @@ struct CinemaHeroCarousel: View {
         if kind == .live { return liveSlides() }
         let all = store.items(for: .all(kind))
         guard !all.isEmpty else { return [] }
+        let begin = Date()
+        defer {
+            let elapsed = Date().timeIntervalSince(begin)
+            if elapsed > 0.5 { PlaybackLog.shared.note("Bandeau « à la une » préparé en \(String(format: "%.1f", elapsed)) s") }
+        }
 
         var groups: [[HeroSlide]] = []
 
@@ -215,14 +220,22 @@ struct CinemaHeroCarousel: View {
         }
 
         if useRecent {
-            let dated = all.filter { $0.added != nil }
-            let newest: [MediaItem]
-            if dated.count > all.count / 4 {
-                newest = Array(dated.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }.prefix(6))
-            } else {
+            // Calcul hors du fil principal (catalogue de ~100 000 films).
+            let newest: [MediaItem] = await Task.detached(priority: .userInitiated) {
+                var top: [MediaItem] = []
+                var datedCount = 0
+                for item in all {
+                    guard let date = item.added else { continue }
+                    datedCount += 1
+                    if top.count < 6 || date > (top.last?.added ?? .distantPast) {
+                        top.append(item)
+                        top.sort { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
+                        if top.count > 6 { top.removeLast() }
+                    }
+                }
                 // Sans date d'ajout : les derniers éléments de la liste du fournisseur sont en général les plus récents.
-                newest = Array(all.suffix(6).reversed())
-            }
+                return datedCount > all.count / 4 ? top : Array(all.suffix(6).reversed())
+            }.value
             let caption = String(localized: "AJOUTÉ RÉCEMMENT")
             groups.append(newest.map { HeroSlide(item: $0, caption: caption) })
         }
@@ -238,8 +251,14 @@ struct CinemaHeroCarousel: View {
                 pool = all
                 caption = String(localized: "À DÉCOUVRIR")
             }
-            let withPoster = pool.filter { $0.logoURL != nil }
-            groups.append((withPoster.isEmpty ? pool : withPoster).shuffled().prefix(6).map { HeroSlide(item: $0, caption: caption) })
+            // Tirage au hasard de quelques affiches (sans parcourir tout le catalogue).
+            var picked: [MediaItem] = []
+            var ids = Set<String>()
+            for _ in 0..<60 where picked.count < 6 {
+                guard let item = pool.randomElement() else { break }
+                if item.logoURL != nil, ids.insert(item.id).inserted { picked.append(item) }
+            }
+            groups.append(picked.map { HeroSlide(item: $0, caption: caption) })
         }
 
         // Mélange : une diapositive de chaque source à tour de rôle.
@@ -323,15 +342,8 @@ private struct HeroSlideView: View {
     @ViewBuilder
     private var background: some View {
         if let backdrop {
-            AsyncImage(url: backdrop, transaction: Transaction(animation: .easeIn(duration: 0.4))) { phase in
-                if case .success(let image) = phase {
-                    Color.clear.overlay(image.resizable().scaledToFill()).clipped()
-                } else {
-                    posterBackground
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
+            // Cadrage sur le 2e quart de l'image (en partant du haut) : visages et titres y sont le plus souvent.
+            FocusedRemoteImage(url: backdrop, focus: 0.375) { posterBackground }
         } else {
             posterBackground
         }
@@ -553,4 +565,51 @@ struct HeroSettingsSection: View {
             ForEach(store.categoriesByKind[kind] ?? [], id: \.self) { Text($0).tag($0) }
         }
     }
+}
+
+
+/// Image distante qui remplit son cadre en gardant visible une hauteur choisie de l'image
+/// (`focus` : 0 = haut, 0,5 = milieu, 1 = bas).
+struct FocusedRemoteImage<Placeholder: View>: View {
+    let url: URL
+    var focus: CGFloat = 0.375
+    @ViewBuilder var placeholder: () -> Placeholder
+    @State private var image: NSImage?
+
+    var body: some View {
+        GeometryReader { geo in
+            if let image, image.size.width > 0, image.size.height > 0 {
+                let frame = geo.size
+                let scale = max(frame.width / image.size.width, frame.height / image.size.height)
+                let width = image.size.width * scale
+                let height = image.size.height * scale
+                let y = min(0, max(frame.height - height, frame.height / 2 - height * focus))
+                Image(nsImage: image)
+                    .resizable()
+                    .frame(width: width, height: height)
+                    .offset(x: (frame.width - width) / 2, y: y)
+                    .transition(.opacity)
+            } else {
+                placeholder()
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
+        }
+        .clipped()
+        .task(id: url) {
+            image = RemoteImageCache.shared.object(forKey: url as NSURL)
+            guard image == nil else { return }
+            guard let (data, _) = try? await URLSession.shared.data(from: url), let loaded = NSImage(data: data) else { return }
+            RemoteImageCache.shared.setObject(loaded, forKey: url as NSURL)
+            withAnimation(.easeIn(duration: 0.4)) { image = loaded }
+        }
+    }
+}
+
+/// Cache mémoire des grandes images (bandeau, accueil).
+enum RemoteImageCache {
+    static let shared: NSCache<NSURL, NSImage> = {
+        let cache = NSCache<NSURL, NSImage>()
+        cache.countLimit = 60
+        return cache
+    }()
 }

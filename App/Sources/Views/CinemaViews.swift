@@ -194,6 +194,7 @@ struct CinemaCatalog: View {
             navigation.visibleIDs = items.map(\.id)
         }
         .recentsUndoToast()
+        .onAppear { navigation.noteDisplayed(String(localized: "Cinéma — \(browse.title)")) }
     }
 
     private func filtered(_ items: [MediaItem], key: String) -> [MediaItem] {

@@ -36,26 +36,33 @@ struct HomeView: View {
     @State private var results: [MediaItem] = []
 
     var body: some View {
-        ZStack {
-            background
-            ScrollView {
-                VStack(spacing: 26) {
-                    header
-                    searchField
-                    if query.kastideoSearchKey.isEmpty {
-                        nowPlaying
-                        bigTiles
-                        quickButtons
-                        resumeRail
-                    } else {
-                        searchResults
+        GeometryReader { geo in
+            ZStack {
+                background
+                logoWatermark(in: geo.size)
+                ScrollView {
+                    VStack(spacing: 26) {
+                        header
+                        searchField
+                        if query.kastideoSearchKey.isEmpty {
+                            nowPlaying
+                            Spacer(minLength: 0)
+                            bigTiles(height: tileHeight(for: geo.size))
+                            quickButtons
+                            resumeRail
+                            Spacer(minLength: 0)
+                        } else {
+                            searchResults
+                        }
                     }
+                    .frame(maxWidth: 1180)
+                    .padding(.horizontal, 32)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
+                    .frame(maxWidth: .infinity)
+                    // Toute la hauteur de la fenêtre est utilisée : le contenu se répartit au lieu de laisser un grand vide.
+                    .frame(minHeight: geo.size.height)
                 }
-                .frame(maxWidth: 1040)
-                .padding(.horizontal, 32)
-                .padding(.top, 20)
-                .padding(.bottom, 40)
-                .frame(maxWidth: .infinity)
             }
         }
         .environment(\.colorScheme, .dark)
@@ -100,16 +107,37 @@ struct HomeView: View {
         .ignoresSafeArea()
     }
 
+    /// Grands pavés : plus hauts quand la fenêtre est haute.
+    private func tileHeight(for size: CGSize) -> CGFloat {
+        min(max(size.height * 0.30, 210), 380)
+    }
+
+    /// Logo de l'application en très grand, derrière le contenu.
+    private func logoWatermark(in size: CGSize) -> some View {
+        let side = min(max(size.height * 0.95, 520), 1100)
+        return Image(nsImage: NSApp.applicationIconImage)
+            .resizable()
+            .interpolation(.high)
+            .frame(width: side, height: side)
+            .opacity(0.38)
+            .blur(radius: 1.5)
+            .rotationEffect(.degrees(-8))
+            .shadow(color: KastideoPalette.magenta.opacity(0.6), radius: 80)
+            .position(x: size.width - side * 0.28, y: size.height * 0.52)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
     private var header: some View {
         HStack(spacing: 14) {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
-                .frame(width: 58, height: 58)
-                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .frame(width: 92, height: 92)
+                .shadow(color: KastideoPalette.magenta.opacity(0.7), radius: 18)
                 .shadow(color: .black.opacity(0.4), radius: 8, y: 3)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Kastideo")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(.system(size: 46, weight: .heavy, design: .rounded))
                 Text("Vos chaînes, vos films et vos séries au même endroit")
                     .font(.callout)
                     .foregroundStyle(.white.opacity(0.7))
@@ -175,21 +203,21 @@ struct HomeView: View {
 
     // MARK: Les trois grands accès
 
-    private var bigTiles: some View {
+    private func bigTiles(height: CGFloat) -> some View {
         HStack(spacing: 18) {
             HomeBigTile(title: "Direct", icon: "dot.radiowaves.left.and.right",
                         subtitle: count(.live, one: "chaîne", many: "chaînes"),
-                        colors: [KastideoPalette.magenta, KastideoPalette.orange]) {
+                        colors: [KastideoPalette.magenta, KastideoPalette.orange], height: height) {
                 navigation.go(.all(.live))
             }
             HomeBigTile(title: "Films", icon: "film",
                         subtitle: count(.movie, one: "film", many: "films"),
-                        colors: [KastideoPalette.violet, KastideoPalette.magenta]) {
+                        colors: [KastideoPalette.violet, KastideoPalette.magenta], height: height) {
                 navigation.go(.all(.movie))
             }
             HomeBigTile(title: "Séries", icon: "rectangle.stack",
                         subtitle: count(.series, one: "série", many: "séries"),
-                        colors: [KastideoPalette.indigo, KastideoPalette.violet]) {
+                        colors: [KastideoPalette.indigo, KastideoPalette.violet], height: height) {
                 navigation.go(.all(.series))
             }
         }
@@ -297,6 +325,7 @@ struct HomeBigTile: View {
     let icon: String
     let subtitle: String
     let colors: [Color]
+    var height: CGFloat = 210
     let action: () -> Void
     @State private var hovering = false
 
@@ -304,7 +333,7 @@ struct HomeBigTile: View {
         Button(action: action) {
             ZStack(alignment: .bottomLeading) {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(LinearGradient(colors: colors.map { $0.opacity(0.88) }, startPoint: .topLeading, endPoint: .bottomTrailing))
                 Image(systemName: icon)
                     .font(.system(size: 120, weight: .regular))
                     .foregroundStyle(.white.opacity(0.18))
@@ -326,7 +355,7 @@ struct HomeBigTile: View {
                 .padding(22)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 210)
+            .frame(height: height)
             .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .strokeBorder(.white.opacity(hovering ? 0.7 : 0.15), lineWidth: hovering ? 2.5 : 1))
             .shadow(color: .black.opacity(hovering ? 0.5 : 0.3), radius: hovering ? 18 : 10, y: 6)
