@@ -320,21 +320,33 @@ final class RecordingCenter {
                 self.failPlayerRecording(item, reason: "la lecture n'a pas démarré")
                 return
             }
-            // Un seul appel : VLCKit renvoie souvent « faux » alors que l'enregistrement a démarré.
-            let since = Date()
-            self.playback.startRecording(into: dir)
-            // C'est la présence du fichier qui confirme le démarrage.
-            for _ in 0..<8 {
-                try? await Task.sleep(for: .seconds(1))
+            // VLCKit renvoie souvent « faux » alors que l'enregistrement a démarré : c'est la présence du fichier
+            // qui fait foi. Premier essai dans le dossier visible « En cours », second dans un dossier temporaire.
+            var attempts = [dir]
+            let temporary = RecordingFolder.workDirectory()
+            if temporary != dir { attempts.append(temporary) }
+            for (index, target) in attempts.enumerated() {
                 guard self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
-                if let found = RecordingLocator.find(workDir: dir, since: since) {
-                    PlaybackLog.shared.note("Enregistrement : fichier en cours d'écriture : \(found.path)")
-                    self.report(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
-                    return
+                self.playerRecordingDir = target
+                let since = Date()
+                self.playback.startRecording(into: target)
+                for _ in 0..<10 {
+                    try? await Task.sleep(for: .seconds(1))
+                    guard self.activeLive?.mode == .player, self.activeLive?.item.id == item.id else { return }
+                    if let found = RecordingLocator.find(workDir: target, since: since) {
+                        PlaybackLog.shared.note("Enregistrement : fichier en cours d'écriture (essai \(index + 1)) : \(found.path)")
+                        if target != dir { RecordingFolder.removeWorkDirectory(dir) }
+                        else { RecordingFolder.removeWorkDirectory(temporary) }
+                        self.report(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
+                        return
+                    }
                 }
+                PlaybackLog.shared.note("Enregistrement : aucun fichier après 10 s dans \(target.path) (essai \(index + 1))")
+                self.playback.stopRecording()
+                try? await Task.sleep(for: .seconds(1))
             }
-            self.playback.stopRecording()
-            self.failPlayerRecording(item, reason: "aucun fichier n'a été créé par le moteur de lecture")
+            RecordingFolder.removeWorkDirectory(temporary)
+            self.failPlayerRecording(item, reason: "aucun fichier n'a été créé par le moteur de lecture (2 essais)")
         }
     }
 

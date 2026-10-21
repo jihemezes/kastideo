@@ -132,7 +132,12 @@ enum RecordingFolder {
 
     /// Dossier de travail d'un enregistrement du direct, visible dans le dossier des enregistrements
     /// (« En cours/<nom> ») pour suivre le fichier qui grossit ; dossier temporaire si ce n'est pas possible.
-    static func liveDirectory(named name: String) -> URL {
+    static func liveDirectory(named rawName: String) -> URL {
+        // Nom sans accents ni caractères spéciaux : le moteur VLC écrit plus sûrement dans un tel chemin.
+        let folded = rawName.folding(options: [.diacriticInsensitive], locale: Locale(identifier: "fr_FR"))
+        let name = String(folded.unicodeScalars.map { scalar -> Character in
+            CharacterSet.alphanumerics.contains(scalar) && scalar.isASCII ? Character(scalar) : (scalar == " " ? " " : "-")
+        }).replacingOccurrences(of: "--", with: "-")
         if let folder = try? ensure() {
             let url = folder.appendingPathComponent(inProgressName, isDirectory: true)
                 .appendingPathComponent(name, isDirectory: true)

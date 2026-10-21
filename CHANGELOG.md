@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.6] - 2026-10-21
+
+- **Enregistrement du direct** : si le moteur VLC ne crée pas le fichier dans le dossier « En cours » sous 10 s, Kastideo réessaie automatiquement dans un dossier temporaire avant d'afficher « Enregistrement impossible » ; dossier de travail nommé sans accents ni caractères spéciaux ; chaque essai est noté dans le Journal de lecture
+
 ## [0.9.5] - 2026-10-21
 
 - **Guide TV de secours** : le guide gratuit de **xmltvfr.fr** (Complet, ~785 chaînes) complète automatiquement les chaînes sans programme chez le fournisseur, reliées par leur nom (« |FR| TF1 FHD » → TF1). Réglages > Général > Guide TV de secours (autre guide xmltvfr.fr ou adresse XMLTV au choix)
