@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.13.1</title>
+      <pubDate>Wed, 21 Oct 2026 21:41:47 GMT</pubDate>
+      <sparkle:version>31</sparkle:version>
+      <sparkle:shortVersionString>0.13.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Numéro de version (et de build) affiché discrètement en bas à droite de l&amp;#x27;&lt;b&gt;écran d&amp;#x27;accueil&lt;/b&gt; ; un clic ouvre les nouveautés&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.13.1/Kastideo-0.13.1.dmg" length="45412468" type="application/octet-stream" sparkle:edSignature="RuPxxEGyUr8rfiszYvmzVTmv+p1w69mF2YtooEZeLmFENyeAyp8Tu7cQmRwMJMT36UdYQNF5nEyfLNuEBXLjDQ==" />
+    </item>
+    <item>
       <title>Kastideo 0.13.0</title>
       <pubDate>Wed, 21 Oct 2026 21:34:28 GMT</pubDate>
       <sparkle:version>30</sparkle:version>
