@@ -6,6 +6,21 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.10.0</title>
+      <pubDate>Wed, 21 Oct 2026 16:12:41 GMT</pubDate>
+      <sparkle:version>24</sparkle:version>
+      <sparkle:shortVersionString>0.10.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Nouveau &lt;b&gt;bandeau « à la une »&lt;/b&gt; de l&amp;#x27;interface Cinéma : carrousel plein cadre avec grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons &lt;b&gt;Lire / Reprendre&lt;/b&gt;, &lt;b&gt;Plus d&amp;#x27;infos&lt;/b&gt; et &lt;b&gt;Bande-annonce&lt;/b&gt; ; défilement automatique (pause au survol), flèches et points de navigation&lt;/li&gt;
+&lt;li&gt;Le carrousel mélange les &lt;b&gt;tendances de la semaine TMDB&lt;/b&gt; présentes dans votre catalogue, les &lt;b&gt;derniers ajouts&lt;/b&gt; du fournisseur et une &lt;b&gt;catégorie au choix&lt;/b&gt; (ou tout le catalogue au hasard)&lt;/li&gt;
+&lt;li&gt;En &lt;b&gt;Direct&lt;/b&gt;, le bandeau montre le &lt;b&gt;programme en cours&lt;/b&gt; de vos chaînes favorites et récentes (progression, programme suivant, Regarder)&lt;/li&gt;
+&lt;li&gt;Réglages &amp;gt; Apparence &amp;gt; &lt;b&gt;Bandeau « à la une »&lt;/b&gt; : afficher/masquer, hauteur, vitesse, sources et catégories&lt;/li&gt;
+&lt;li&gt;Les films et séries Xtream mémorisent leur &lt;b&gt;date d&amp;#x27;ajout&lt;/b&gt; (actualisez la source pour l&amp;#x27;obtenir)&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.10.0/Kastideo-0.10.0.dmg" length="44883171" type="application/octet-stream" sparkle:edSignature="l5zUFgM+yjRbv/AL3ehopZLslm2N4Binplp+CYhgVgVr+lUMbzI2RGbjo5tLms2WUjaodOx8rPExmFCHiHX/Dw==" />
+    </item>
+    <item>
       <title>Kastideo 0.9.8</title>
       <pubDate>Wed, 21 Oct 2026 13:28:00 GMT</pubDate>
       <sparkle:version>23</sparkle:version>
