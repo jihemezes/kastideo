@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.11.3</title>
+      <pubDate>Wed, 21 Oct 2026 19:07:39 GMT</pubDate>
+      <sparkle:version>28</sparkle:version>
+      <sparkle:shortVersionString>0.11.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction probable de la &lt;b&gt;lenteur Direct (Classique) → Films (Cinéma)&lt;/b&gt; (55 s mesurées) : la liste classique ne construit plus, même un instant, les ~100 000 films d&amp;#x27;une section affichée dans une autre interface&lt;/li&gt;
+&lt;li&gt;Journal de lecture : les étapes de construction de l&amp;#x27;affichage sont notées quand elles tardent, pour confirmer ou affiner le diagnostic&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.3/Kastideo-0.11.3.dmg" length="45031594" type="application/octet-stream" sparkle:edSignature="BOuq0IVfVvnbGHJcP5SXDT2EttWkMystAD+2y9WyXcgL4+Zuri2DDGGwuL3pvloLjJqGa4JKiZkJL3ehUcjbBA==" />
+    </item>
+    <item>
       <title>Kastideo 0.11.2</title>
       <pubDate>Wed, 21 Oct 2026 17:57:49 GMT</pubDate>
       <sparkle:version>27</sparkle:version>
