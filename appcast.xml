@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.13.0</title>
+      <pubDate>Wed, 21 Oct 2026 21:34:28 GMT</pubDate>
+      <sparkle:version>30</sparkle:version>
+      <sparkle:shortVersionString>0.13.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;MultiVue&lt;/b&gt; : jusqu&amp;#x27;à 4 chaînes en direct dans une même fenêtre (1, 2 côte à côte, grille 2×2), le son suit la vignette active (clic ou touches 1 à 4) ; ajout, changement et retrait de chaîne au survol, recherche parmi favoris, récents et tout le direct. Menu Lecture &amp;gt; MultiVue… (⌥⌘M) ou clic droit &amp;gt; Ajouter à la MultiVue&lt;/li&gt;
+&lt;li&gt;Désactivée par défaut : chaque flux consomme une connexion. Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; &lt;b&gt;Connexions simultanées de l&amp;#x27;abonnement&lt;/b&gt; (1 à 4) pour l&amp;#x27;activer&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.13.0/Kastideo-0.13.0.dmg" length="45407689" type="application/octet-stream" sparkle:edSignature="z0fMSBTmC1OiXgNR5EQ623w8219/r8YT63cE9ShdL+vIqZlknuiu56BVyh2rmj8Avr53lxa8+ac7/EBCXZcjAg==" />
+    </item>
+    <item>
       <title>Kastideo 0.12.0</title>
       <pubDate>Wed, 21 Oct 2026 21:03:02 GMT</pubDate>
       <sparkle:version>29</sparkle:version>
