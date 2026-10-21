@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.9.5] - 2026-10-21
+
+- **Guide TV de secours** : le guide gratuit de **xmltvfr.fr** (Complet, ~785 chaînes) complète automatiquement les chaînes sans programme chez le fournisseur, reliées par leur nom (« |FR| TF1 FHD » → TF1). Réglages > Général > Guide TV de secours (autre guide xmltvfr.fr ou adresse XMLTV au choix)
+- Correction : un guide **vide ou illisible** envoyé par le fournisseur n'efface plus les programmes déjà connus ; un message l'indique sous la source
+- Le guide est rechargé automatiquement quand il arrive à moins de 12 h de sa fin, même si Kastideo reste ouvert plusieurs jours
+
 ## [0.9.4] - 2026-10-20
 
 - **Aide** : nouvelle rubrique « Obtenir une clé TMDB (gratuite) », pas à pas, dans Réglages généraux

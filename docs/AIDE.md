@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.9.4 — procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.9.5 — guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -32,7 +32,17 @@ C'est le format le plus courant chez les fournisseurs IPTV. Il faut trois inform
 
 ### Guide TV (XMLTV)
 
-Chaque source peut avoir une adresse de guide TV au format XMLTV (`.xml` ou `.xml.gz`). Si vous la laissez vide, Kastideo utilise celle du serveur Xtream ou celle annoncée dans la playlist (`url-tvg`). Le guide est conservé de 6 h en arrière à 48 h en avant.
+Chaque source peut avoir une adresse de guide TV au format XMLTV (`.xml` ou `.xml.gz`). Si vous la laissez vide, Kastideo utilise celle du serveur Xtream ou celle annoncée dans la playlist (`url-tvg`). Le guide est conservé de 6 h en arrière à 48 h en avant. Il est rechargé quand il arrive à moins de 12 h de sa fin (vérification toutes les heures si Kastideo reste ouvert). Si le fournisseur envoie un guide vide ou illisible, les programmes déjà connus sont conservés et un message l'indique sous la source (Réglages > Sources).
+
+### Guide TV de secours (xmltvfr.fr)
+
+Le guide de votre fournisseur peut être incomplet ou momentanément vide. Kastideo le complète avec un **guide de secours** gratuit, celui de **xmltvfr.fr** (guide « Complet » par défaut : environ 785 chaînes françaises et étrangères, 5 jours, mis à jour chaque jour) :
+
+- seules les chaînes **sans programme** chez votre fournisseur sont complétées ; le guide du fournisseur reste prioritaire ;
+- les chaînes sont reliées **par leur nom** : « |FR| TF1 FHD » → TF1, « |FR| FRANCE 2 UHD » → France 2, « |FR| TF1 4K » → TF1 4K ;
+- le guide de secours est rechargé toutes les 12 heures.
+
+Réglages > Général > **Guide TV de secours** : activer ou désactiver, choisir un autre guide xmltvfr.fr (France ~400 chaînes, TNT) ou saisir n'importe quelle adresse XMLTV, **Actualiser maintenant**, et voir combien de chaînes ont été reliées aux vôtres.
 
 ### Gérer les sources
 

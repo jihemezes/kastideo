@@ -59,6 +59,14 @@ public struct EPGIndex: Sendable {
         return byChannel[Self.key(channel)] ?? []
     }
 
+    public func hasProgrammes(for channel: String?) -> Bool {
+        guard let channel else { return false }
+        return !(byChannel[Self.key(channel)]?.isEmpty ?? true)
+    }
+
+    /// Dernière fin de programme connue (pour savoir si le guide doit être rechargé).
+    public var latestStop: Date? { byChannel.values.compactMap { $0.last?.stop }.max() }
+
     public func current(for channel: String?, at date: Date = Date()) -> Programme? {
         programmes(for: channel).first { $0.start <= date && date < $0.stop }
     }
@@ -82,17 +90,28 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
     private var textBuffer = ""
     private var inProgramme = false
     private var element: String?
+    private var channels: [String: [String]] = [:]
+    private var channelID: String?
+    private var sawRoot = false
 
     /// Analyse un document XMLTV (gère aussi le .gz sur les plateformes Apple).
     public static func parse(data: Data, window: DateInterval? = XMLTVParser.defaultWindow()) -> [Programme] {
+        parseGuide(data: data, window: window).programmes
+    }
+
+    /// Analyse complète : programmes, chaînes (identifiant et noms) et validité du document.
+    public static func parseGuide(data: Data, window: DateInterval? = XMLTVParser.defaultWindow()) -> XMLTVGuide {
         var payload = data
         if Gzip.isGzip(data), let inflated = Gzip.decompress(data) { payload = inflated }
         let delegate = XMLTVParser()
         delegate.window = window
         let parser = XMLParser(data: payload)
         parser.delegate = delegate
-        parser.parse()
-        return delegate.programmes
+        let ok = parser.parse()
+        let channels = delegate.channels.map { XMLTVChannel(id: $0.key, names: $0.value) }
+        return XMLTVGuide(programmes: delegate.programmes, channels: channels,
+                          isValid: delegate.sawRoot && (ok || !delegate.programmes.isEmpty),
+                          byteCount: payload.count)
     }
 
     /// Fenêtre par défaut : de 6 h en arrière à 48 h en avant.
@@ -102,6 +121,14 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
 
     public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?,
                        qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
+        if elementName == "tv" { sawRoot = true }
+        if elementName == "channel", let id = attributeDict["id"] {
+            channelID = id
+            if channels[id] == nil { channels[id] = [] }
+        } else if channelID != nil, elementName == "display-name" {
+            element = elementName
+            textBuffer = ""
+        }
         if elementName == "programme" {
             inProgramme = true
             currentChannel = attributeDict["channel"]
@@ -116,10 +143,17 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
     }
 
     public func parser(_ parser: XMLParser, foundCharacters string: String) {
-        if inProgramme, element != nil { textBuffer += string }
+        if element != nil { textBuffer += string }
     }
 
     public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        if elementName == "channel" { channelID = nil; element = nil; return }
+        if let id = channelID, elementName == "display-name" {
+            let name = textBuffer.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !name.isEmpty { channels[id, default: []].append(name) }
+            element = nil
+            return
+        }
         if elementName == "programme" {
             inProgramme = false
             guard let channel = currentChannel, let start = currentStart else { return }
@@ -233,6 +267,12 @@ public enum Gzip {
 
 /// Chargement d'un guide TV distant.
 public enum EPGLoader {
+    public static func loadGuide(from url: URL, window: DateInterval = XMLTVParser.defaultWindow(),
+                                 timeout: TimeInterval = 180) async throws -> XMLTVGuide {
+        let data = try await HTTP.get(url, timeout: timeout)
+        return XMLTVParser.parseGuide(data: data, window: window)
+    }
+
     public static func load(from url: URL, window: DateInterval = XMLTVParser.defaultWindow()) async throws -> [Programme] {
         let data = try await HTTP.get(url, timeout: 180)
         return XMLTVParser.parse(data: data, window: window)

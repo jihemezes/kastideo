@@ -137,7 +137,7 @@ struct GuideView: View {
                 ContentUnavailableView(query.isEmpty ? String(localized: "Aucun programme") : String(localized: "Aucun résultat"),
                                        systemImage: "calendar",
                                        description: Text(query.isEmpty
-                                            ? String(localized: "Le guide TV n'est pas chargé, ou aucune chaîne de ce filtre n'a de programmes. Vérifiez l'adresse du guide dans les réglages de la source.")
+                                            ? String(localized: "Le guide TV n'est pas chargé, ou aucune chaîne de ce filtre n'a de programmes. Vérifiez l'adresse du guide dans les réglages de la source, et le guide de secours dans Réglages > Général.")
                                             : String(localized: "Aucune chaîne ne correspond à cette recherche.")))
             }
         } else {

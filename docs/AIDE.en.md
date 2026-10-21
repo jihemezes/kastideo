@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.9.4 — TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.9.5 — xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -33,6 +33,16 @@ This is the most common format among IPTV providers. You need three pieces of in
 ### TV guide (XMLTV)
 
 Each source can have a TV guide address in XMLTV format (`.xml` or `.xml.gz`). If you leave it empty, Kastideo uses the one from the Xtream server or the one announced in the playlist (`url-tvg`). The guide is kept from 6 hours back to 48 hours ahead.
+
+### Backup TV guide (xmltvfr.fr)
+
+Your provider's guide can be incomplete or temporarily empty. Kastideo completes it with a free **backup guide** from **xmltvfr.fr** (“Complete” guide by default: about 785 French and foreign channels, 5 days, updated daily):
+
+- only channels **without programs** from your provider are completed; the provider's guide keeps priority;
+- channels are matched **by name**: “|FR| TF1 FHD” → TF1, “|FR| FRANCE 2 UHD” → France 2, “|FR| TF1 4K” → TF1 4K;
+- the backup guide is reloaded every 12 hours. If the provider sends an empty or unreadable guide, programs already known are kept and a message appears under the source.
+
+Settings > General > **Backup TV Guide**: turn it on or off, pick another xmltvfr.fr guide (France ~400 channels, DTT) or enter any XMLTV address, **Refresh Now**, and see how many channels were linked to yours.
 
 ### Managing sources
 

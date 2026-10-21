@@ -408,3 +408,20 @@
 "Clé valide ✓" = "Valid key ✓";
 "Clé refusée par TMDB" = "Key rejected by TMDB";
 "Retour à %@" = "Back to %@";
+
+/* 0.9.5 */
+"Le guide TV n'est pas chargé, ou aucune chaîne de ce filtre n'a de programmes. Vérifiez l'adresse du guide dans les réglages de la source, et le guide de secours dans Réglages > Général." = "The TV guide is not loaded, or no channel in this filter has programs. Check the guide address in the source settings, and the backup guide in Settings > General.";
+"Le fournisseur a envoyé un guide sans programme pour les prochains jours (%@)." = "The provider sent a guide with no programs for the coming days (%@).";
+"Le fournisseur a envoyé un guide vide ou illisible (%@)." = "The provider sent an empty or unreadable guide (%@).";
+"Guide de secours vide ou illisible." = "Backup guide empty or unreadable.";
+"xmltvfr.fr — Complet (~785 chaînes)" = "xmltvfr.fr — Complete (~785 channels)";
+"xmltvfr.fr — France (~400 chaînes)" = "xmltvfr.fr — France (~400 channels)";
+"xmltvfr.fr — TNT France" = "xmltvfr.fr — French DTT";
+"Guide TV de secours" = "Backup TV Guide";
+"Compléter le guide du fournisseur avec un guide de secours" = "Complete the provider's guide with a backup guide";
+"Adresse du guide (XMLTV, .xml ou .xml.gz)" = "Guide address (XMLTV, .xml or .xml.gz)";
+"Choisir" = "Choose";
+"Actualiser maintenant" = "Refresh Now";
+"Les chaînes sans programme dans le guide de votre fournisseur sont complétées automatiquement, en les rapprochant par leur nom (« |FR| TF1 FHD » → TF1). Guide gratuit et communautaire de xmltvfr.fr, mis à jour chaque jour, rechargé toutes les 12 heures." = "Channels with no programs in your provider's guide are completed automatically, matched by name (“|FR| TF1 FHD” → TF1). Free community guide from xmltvfr.fr, updated daily, reloaded every 12 hours.";
+"%lld chaînes, %lld reliées à vos chaînes · mis à jour %@" = "%lld channels, %lld linked to your channels · updated %@";
+"Pas encore chargé." = "Not loaded yet.";

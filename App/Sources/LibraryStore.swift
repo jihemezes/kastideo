@@ -42,6 +42,13 @@ final class LibraryStore {
     private var extraItems: [String: MediaItem] = [:]
     private var epgBySource: [UUID: [Programme]] = [:]
     private var started = false
+    /// Guide de secours (xmltvfr.fr…) : programmes et chaînes.
+    private var fallbackProgrammes: [Programme] = []
+    private var fallbackChannels: [XMLTVChannel] = []
+    private(set) var fallbackStatus = FallbackEPGStatus()
+    @ObservationIgnored private var epgGeneration = 0
+    @ObservationIgnored private var lastEPGAttempt: [UUID: Date] = [:]
+    @ObservationIgnored private var epgTicker: Task<Void, Never>?
 
     private let defaults = UserDefaults.standard
     private enum Keys {
@@ -150,17 +157,27 @@ final class LibraryStore {
 
         contents.merge(cached.0) { current, _ in current }
         epgBySource.merge(cached.1) { current, _ in current }
+        let fallback = await Task.detached(priority: .userInitiated) { () -> ([Programme], [XMLTVChannel]) in
+            (Storage.load([Programme].self, name: "epg-fallback") ?? [],
+             Storage.load([XMLTVChannel].self, name: "epg-fallback-channels") ?? [])
+        }.value
+        fallbackProgrammes = fallback.0
+        fallbackChannels = fallback.1
+        fallbackStatus.programmeCount = fallbackProgrammes.count
+        fallbackStatus.channelCount = fallbackChannels.count
+        fallbackStatus.updated = defaults.object(forKey: EPGKeys.fallbackDate) as? Date
         rebuildIndex()
-        rebuildEPG()
+        startEPGTicker()
 
         let staleLimit = Date().addingTimeInterval(-6 * 3600)
         for source in sources where source.isEnabled {
             if contents[source.id] == nil || (autoRefresh && (source.lastRefresh ?? .distantPast) < staleLimit) {
                 refresh(source)
-            } else if epgBySource[source.id] == nil {
+            } else if epgNeedsRefresh(source.id) {
                 Task { await refreshEPG(for: source.id) }
             }
         }
+        Task { await refreshFallbackEPG(force: false) }
     }
 
     // MARK: - Gestion des sources
@@ -240,8 +257,19 @@ final class LibraryStore {
               let url = source.epgURL ?? contents[id]?.epgURL else { return }
         epgLoadingCount += 1
         defer { epgLoadingCount -= 1 }
+        lastEPGAttempt[id] = Date()
         do {
-            let programmes = try await Self.loadEPG(url)
+            let guide = try await Self.loadGuide(url, timeout: 180)
+            // Réponse vide ou illisible : on garde les programmes déjà connus (le guide de secours prend le relais).
+            guard guide.isValid, !guide.programmes.isEmpty else {
+                let size = ByteCountFormatter.string(fromByteCount: Int64(guide.byteCount), countStyle: .file)
+                epgErrors[id] = guide.isValid
+                    ? String(localized: "Le fournisseur a envoyé un guide sans programme pour les prochains jours (\(size)).")
+                    : String(localized: "Le fournisseur a envoyé un guide vide ou illisible (\(size)).")
+                PlaybackLog.shared.note("Guide TV du fournisseur inutilisable (\(size), valide : \(guide.isValid), programmes : \(guide.programmes.count))")
+                return
+            }
+            let programmes = guide.programmes
             epgBySource[id] = programmes
             epgErrors[id] = nil
             rebuildEPG()
@@ -249,6 +277,82 @@ final class LibraryStore {
         } catch {
             epgErrors[id] = Self.describe(error)
         }
+    }
+
+    /// Vrai si le guide d'une source manque ou se termine bientôt.
+    private func epgNeedsRefresh(_ id: UUID) -> Bool {
+        guard let list = epgBySource[id], !list.isEmpty else { return true }
+        let latest = list.map(\.stop).max() ?? .distantPast
+        return latest < Date().addingTimeInterval(12 * 3600)
+    }
+
+    /// Vérifie toutes les heures si les guides doivent être rechargés (application laissée ouverte).
+    private func startEPGTicker() {
+        epgTicker?.cancel()
+        epgTicker = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(3600))
+                guard let self else { return }
+                for source in self.sources where source.isEnabled && self.epgNeedsRefresh(source.id) {
+                    if let last = self.lastEPGAttempt[source.id], Date().timeIntervalSince(last) < 3 * 3600 { continue }
+                    await self.refreshEPG(for: source.id)
+                }
+                await self.refreshFallbackEPG(force: false)
+                self.rebuildEPG()
+            }
+        }
+    }
+
+    // MARK: - Guide de secours
+
+    /// Télécharge le guide de secours s'il est activé et date de plus de 12 h (ou sur demande).
+    func refreshFallbackEPG(force: Bool) async {
+        guard EPGKeys.fallbackEnabled, let url = EPGKeys.fallbackURL, !fallbackStatus.isLoading else { return }
+        if !force, let updated = fallbackStatus.updated, Date().timeIntervalSince(updated) < 12 * 3600,
+           !fallbackProgrammes.isEmpty { return }
+        fallbackStatus.isLoading = true
+        epgLoadingCount += 1
+        defer {
+            fallbackStatus.isLoading = false
+            epgLoadingCount -= 1
+        }
+        do {
+            let guide = try await Self.loadGuide(url, timeout: 300)
+            guard guide.isValid, !guide.programmes.isEmpty else {
+                fallbackStatus.error = String(localized: "Guide de secours vide ou illisible.")
+                return
+            }
+            fallbackProgrammes = guide.programmes
+            fallbackChannels = guide.channels
+            let date = Date()
+            defaults.set(date, forKey: EPGKeys.fallbackDate)
+            fallbackStatus.updated = date
+            fallbackStatus.error = nil
+            fallbackStatus.programmeCount = guide.programmes.count
+            fallbackStatus.channelCount = guide.channels.count
+            let programmes = guide.programmes
+            let channels = guide.channels
+            Task.detached(priority: .utility) {
+                Storage.save(programmes, name: "epg-fallback")
+                Storage.save(channels, name: "epg-fallback-channels")
+            }
+            rebuildEPG()
+        } catch {
+            fallbackStatus.error = Self.describe(error)
+        }
+    }
+
+    /// Active ou désactive le guide de secours.
+    func setFallbackEnabled(_ enabled: Bool) {
+        defaults.set(enabled, forKey: EPGKeys.fallbackEnabledKey)
+        rebuildEPG()
+        if enabled { Task { await refreshFallbackEPG(force: false) } }
+    }
+
+    /// Change l'adresse du guide de secours et le recharge.
+    func setFallbackURL(_ text: String) {
+        defaults.set(text.trimmingCharacters(in: .whitespacesAndNewlines), forKey: EPGKeys.fallbackURLKey)
+        Task { await refreshFallbackEPG(force: true) }
     }
 
     func clearCache() {
@@ -346,7 +450,12 @@ final class LibraryStore {
         var byCategory: [MediaKind: [String: [MediaItem]]] = [:]
         for source in sources where source.isEnabled {
             guard let content = contents[source.id] else { continue }
-            for item in content.items {
+            for original in content.items {
+                var item = original
+                // Chaîne sans identifiant de guide : clé dérivée du nom, pour le guide de secours.
+                if item.kind == .live, item.epgID?.isEmpty ?? true {
+                    item.epgID = "auto:" + ChannelMatcher.normalize(item.name, keepResolution: true)
+                }
                 byKind[item.kind, default: []].append(item)
                 if seen[item.kind, default: []].insert(item.group).inserted {
                     categories[item.kind, default: []].append(item.group)
@@ -359,8 +468,11 @@ final class LibraryStore {
         categoriesByKind = categories
         itemsByID = byID
         itemsByCategory = byCategory
+        rebuildEPG()
     }
 
+    /// Reconstruit l'index du guide (hors du fil principal) : guide des fournisseurs, puis guide de secours
+    /// pour les chaînes qui n'ont aucun programme.
     private func rebuildEPG() {
         var programmes: [Programme] = []
         var counts: [UUID: Int] = [:]
@@ -369,8 +481,47 @@ final class LibraryStore {
             counts[source.id] = list.count
             programmes += list
         }
-        epg = EPGIndex(programmes: programmes)
         epgCounts = counts
+        epgGeneration += 1
+        let generation = epgGeneration
+        let live = itemsByKind[.live] ?? []
+        let fallback = EPGKeys.fallbackEnabled ? fallbackProgrammes : []
+        let channels = fallbackChannels
+        Task {
+            let result = await Task.detached(priority: .userInitiated) {
+                Self.buildEPG(provider: programmes, live: live, fallback: fallback, channels: channels)
+            }.value
+            guard generation == self.epgGeneration else { return }
+            self.epg = result.index
+            self.fallbackStatus.matchedChannels = result.matched
+        }
+    }
+
+    nonisolated static func buildEPG(provider: [Programme], live: [MediaItem], fallback: [Programme],
+                                     channels: [XMLTVChannel]) -> (index: EPGIndex, matched: Int) {
+        var index = EPGIndex(programmes: provider)
+        guard !fallback.isEmpty, !channels.isEmpty else { return (index, 0) }
+        let matcher = ChannelMatcher(channels: channels)
+        let byChannel = Dictionary(grouping: fallback, by: \.channel)
+        var extra: [Programme] = []
+        var done = Set<String>()
+        var matched = 0
+        for item in live {
+            guard let key = item.epgID, !key.isEmpty else { continue }
+            let lower = key.lowercased()
+            if done.contains(lower) || index.hasProgrammes(for: key) { continue }
+            done.insert(lower)
+            let id = matcher.match(name: item.name, epgID: key.hasPrefix("auto:") ? nil : key)
+            guard let id, let list = byChannel[id], !list.isEmpty else { continue }
+            matched += 1
+            extra += list.map { programme in
+                var copy = programme
+                copy.channel = key
+                return copy
+            }
+        }
+        index.merge(extra)
+        return (index, matched)
     }
 
     // MARK: - Chargement (hors du fil principal)
@@ -402,8 +553,8 @@ final class LibraryStore {
         return SourceContent(items: result.items, epgURL: result.epgURL)
     }
 
-    nonisolated static func loadEPG(_ url: URL) async throws -> [Programme] {
-        try await EPGLoader.load(from: url)
+    nonisolated static func loadGuide(_ url: URL, timeout: TimeInterval) async throws -> XMLTVGuide {
+        try await EPGLoader.loadGuide(from: url, timeout: timeout)
     }
 }
 
@@ -412,4 +563,42 @@ struct RecentsBackup {
     let ids: [String]
     let extras: [String: MediaItem]
     let removedCount: Int
+}
+
+/// État du guide de secours (réglages).
+struct FallbackEPGStatus {
+    var isLoading = false
+    var updated: Date?
+    var error: String?
+    var programmeCount = 0
+    var channelCount = 0
+    var matchedChannels = 0
+}
+
+/// Réglages du guide TV de secours.
+enum EPGKeys {
+    static let fallbackEnabledKey = "epg.fallback.enabled"
+    static let fallbackURLKey = "epg.fallback.url"
+    static let fallbackDate = "epg.fallback.date"
+    static let defaultFallbackURL = "https://xmltvfr.fr/xmltv/xmltv.xml.gz"
+
+    /// Guides proposés par xmltvfr.fr.
+    static let presets: [(label: String, url: String)] = [
+        (String(localized: "xmltvfr.fr — Complet (~785 chaînes)"), "https://xmltvfr.fr/xmltv/xmltv.xml.gz"),
+        (String(localized: "xmltvfr.fr — France (~400 chaînes)"), "https://xmltvfr.fr/xmltv/xmltv_fr.xml.gz"),
+        (String(localized: "xmltvfr.fr — TNT France"), "https://xmltvfr.fr/xmltv/xmltv_tnt.xml.gz"),
+    ]
+
+    static var fallbackEnabled: Bool { UserDefaults.standard.object(forKey: fallbackEnabledKey) as? Bool ?? true }
+
+    static var fallbackURLText: String {
+        let text = UserDefaults.standard.string(forKey: fallbackURLKey) ?? ""
+        return text.isEmpty ? defaultFallbackURL : text
+    }
+
+    static var fallbackURL: URL? {
+        let text = fallbackURLText
+        guard let url = URL(string: text), let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return nil }
+        return url
+    }
 }
