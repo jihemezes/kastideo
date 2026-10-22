@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.14.1] - 2026-10-22
+
+- Correction de compilation (la 0.14.0 n'avait pas pu être construite) : le Guide TV gère maintenant le filtre par thème
+- **Guide TV** : nouveau filtre **Thèmes** (Sport, Films, Info…)
+
 ## [0.14.0] - 2026-10-22
 
 - **Direct par thème** (section Thèmes, sous Direct) : Sport, Films, Séries, Info, Documentaires, Jeunesse, Divertissement, Musique, Généralistes ; modes **En ce moment** (d'après le genre des programmes du guide TV), **Ce soir** (20 h – 23 h) et **Chaînes** (thème de la chaîne, automatique et modifiable par clic droit). Les catégories masquées n'y apparaissent pas

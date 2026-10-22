@@ -70,6 +70,15 @@ struct GuideView: View {
                 Button("Toutes les chaînes") { filter = .all }
                 Button("Favoris") { filter = .favorites }
                 Button("Récents") { filter = .recents }
+                Menu("Thèmes") {
+                    ForEach(ContentTheme.browsable) { theme in
+                        Button {
+                            filter = .theme(theme)
+                        } label: {
+                            Label(theme.label, systemImage: theme.icon)
+                        }
+                    }
+                }
                 let categories = store.categoriesByKind[.live] ?? []
                 if !categories.isEmpty {
                     Divider()
@@ -96,6 +105,7 @@ struct GuideView: View {
         case .favorites: return String(localized: "Favoris")
         case .recents: return String(localized: "Récents")
         case .category(let name): return name
+        case .theme(let theme): return theme.label
         }
     }
 
@@ -174,6 +184,8 @@ struct GuideView: View {
             base = store.items(for: .recents).filter { $0.kind == .live }
         case .category(let name):
             base = store.items(for: .category(.live, name))
+        case .theme(let theme):
+            base = store.liveGroups.filter { $0.theme == theme }.map(\.preferred)
         }
         let key = query.kastideoSearchKey
         return base.filter { item in
