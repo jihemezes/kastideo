@@ -585,3 +585,34 @@
 "Aucune alerte. Vous pouvez aussi faire un clic droit sur un programme de « Ce soir »." = "No alerts. You can also right-click a program in “Tonight”.";
 "Terminé" = "Done";
 "À la télé maintenant" = "On TV Now";
+
+/* 0.15.0 */
+"Auto-Moto" = "Auto & Moto";
+"Cuisine & Maison" = "Food & Home";
+"Nature, Chasse & Pêche" = "Nature, Hunting & Fishing";
+"Religion" = "Religion";
+"Régional" = "Regional";
+"International" = "International";
+"Radio" = "Radio";
+"Adulte" = "Adult";
+"Sports mécaniques en ce moment" = "Motorsport On Now";
+"Cuisine & Maison en ce moment" = "Food & Home On Now";
+"Nature en ce moment" = "Nature On Now";
+"Régional en ce moment" = "Regional On Now";
+"International en ce moment" = "International On Now";
+"Football" = "Football";
+"Rugby" = "Rugby";
+"Tennis" = "Tennis";
+"Basket" = "Basketball";
+"Sports de combat" = "Combat sports";
+"Golf" = "Golf";
+"Cyclisme" = "Cycling";
+"Handball" = "Handball";
+"Sports mécaniques" = "Motorsport";
+"Sports d'hiver" = "Winter sports";
+"Hippisme" = "Horse racing";
+"Athlétisme & natation" = "Athletics & swimming";
+"Autres sports" = "Other sports";
+"Tous les sports" = "All sports";
+"Afficher les contenus adultes" = "Show adult content";
+"Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes, guide) tant que l'option est désactivée." = "Channels and content whose name contains “|XX|” or that are in an adult category: hidden everywhere (lists, search, themes, guide) while this option is off.";

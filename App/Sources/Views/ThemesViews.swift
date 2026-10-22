@@ -13,6 +13,14 @@ extension ContentTheme {
         case .kids: return String(localized: "Jeunesse")
         case .entertainment: return String(localized: "Divertissement")
         case .music: return String(localized: "Musique")
+        case .automotive: return String(localized: "Auto-Moto")
+        case .lifestyle: return String(localized: "Cuisine & Maison")
+        case .nature: return String(localized: "Nature, Chasse & Pêche")
+        case .religion: return String(localized: "Religion")
+        case .regional: return String(localized: "Régional")
+        case .international: return String(localized: "International")
+        case .radio: return String(localized: "Radio")
+        case .adult: return String(localized: "Adulte")
         case .other: return String(localized: "Autres")
         }
     }
@@ -28,12 +36,43 @@ extension ContentTheme {
         case .kids: return String(localized: "Jeunesse en ce moment")
         case .entertainment: return String(localized: "Divertissement en ce moment")
         case .music: return String(localized: "Musique en ce moment")
-        case .general, .other: return String(localized: "En ce moment")
+        case .automotive: return String(localized: "Sports mécaniques en ce moment")
+        case .lifestyle: return String(localized: "Cuisine & Maison en ce moment")
+        case .nature: return String(localized: "Nature en ce moment")
+        case .regional: return String(localized: "Régional en ce moment")
+        case .international: return String(localized: "International en ce moment")
+        case .religion, .radio, .adult, .general, .other: return String(localized: "En ce moment")
         }
     }
 
     /// Thèmes proposés dans les filtres (les « autres » à la fin).
-    static var browsable: [ContentTheme] { [.sport, .movies, .series, .news, .documentary, .kids, .entertainment, .music, .general, .other] }
+    static var browsable: [ContentTheme] {
+        var list: [ContentTheme] = [.sport, .automotive, .movies, .series, .news, .documentary, .nature, .kids, .entertainment,
+                                    .lifestyle, .music, .general, .regional, .international, .religion, .radio]
+        if UserDefaults.standard.bool(forKey: "adult.show") { list.append(.adult) }
+        list.append(.other)
+        return list
+    }
+}
+
+extension SportKind {
+    var label: String {
+        switch self {
+        case .football: return String(localized: "Football")
+        case .rugby: return String(localized: "Rugby")
+        case .tennis: return String(localized: "Tennis")
+        case .basketball: return String(localized: "Basket")
+        case .combat: return String(localized: "Sports de combat")
+        case .golf: return String(localized: "Golf")
+        case .cycling: return String(localized: "Cyclisme")
+        case .handball: return String(localized: "Handball")
+        case .motorsport: return String(localized: "Sports mécaniques")
+        case .winter: return String(localized: "Sports d'hiver")
+        case .horse: return String(localized: "Hippisme")
+        case .athletics: return String(localized: "Athlétisme & natation")
+        case .other: return String(localized: "Autres sports")
+        }
+    }
 }
 
 /// Mode de la vue Thèmes.
@@ -91,6 +130,7 @@ struct ThemesListView: View {
     @Environment(ProgramAlertCenter.self) private var alerts
     @AppStorage(QualityPreference.key) private var qualityRaw = QualityPreference.auto.rawValue
     @State private var showAlerts = false
+    @State private var sportKind: SportKind?
 
     var body: some View {
         @Bindable var navigation = navigation
@@ -104,6 +144,7 @@ struct ThemesListView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     themeChips(now: now)
+                    if navigation.themeSelection == .sport { sportChips(now: now) }
                 }
                 .padding(12)
                 Divider()
@@ -139,6 +180,37 @@ struct ThemesListView: View {
                 }
             }
         }
+    }
+
+    /// Disciplines du sport (d'après le titre, le genre et la description des programmes).
+    private func sportChips(now: Date) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                sportChip(nil)
+                ForEach(SportKind.allCases.filter { $0 != .other }) { kind in sportChip(kind) }
+            }
+        }
+    }
+
+    private func sportChip(_ kind: SportKind?) -> some View {
+        let selected = sportKind == kind
+        return Button {
+            sportKind = kind
+        } label: {
+            Text(kind?.label ?? String(localized: "Tous les sports"))
+                .font(.caption.weight(selected ? .semibold : .regular))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(selected ? Color.accentColor.opacity(0.25) : Color.secondary.opacity(0.1), in: Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Filtre de discipline (vue Sport).
+    private func matchesSport(_ programme: Programme?, _ group: LiveChannelGroup) -> Bool {
+        guard navigation.themeSelection == .sport, let sportKind else { return true }
+        if let programme, let kind = SportKind.of(programme) { return kind == sportKind }
+        return SportKind.detect(group.preferred.name) == sportKind
     }
 
     private func chip(_ theme: ContentTheme?, count: Int?) -> some View {
@@ -185,7 +257,9 @@ struct ThemesListView: View {
                 .listStyle(.inset)
             }
         case .channels:
-            let groups = store.liveGroups.filter { navigation.themeSelection == nil || $0.theme == navigation.themeSelection }
+            let groups = store.liveGroups.filter {
+                (navigation.themeSelection == nil || $0.theme == navigation.themeSelection) && matchesSport(nil, $0)
+            }
             if groups.isEmpty {
                 empty(String(localized: "Aucune chaîne dans ce thème."))
             } else {
@@ -287,7 +361,7 @@ struct ThemesListView: View {
         store.liveGroups.filter { group in
             guard let programme = store.epg.current(for: group.epgID, at: now) else { return false }
             guard let theme else { return true }
-            return (programme.theme ?? group.theme) == theme
+            return (programme.theme ?? group.theme) == theme && matchesSport(programme, group)
         }
     }
 
@@ -298,7 +372,8 @@ struct ThemesListView: View {
             for programme in store.epg.programmes(for: group.epgID)
             where programme.start >= window.start && programme.start < window.end
                 && programme.stop > now
-                && (theme == nil || (programme.theme ?? group.theme) == theme) {
+                && (theme == nil || (programme.theme ?? group.theme) == theme)
+                && matchesSport(programme, group) {
                 result.append((group, programme))
             }
         }
@@ -335,5 +410,20 @@ struct QualitySettingsRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+}
+
+
+/// Réglage : contenus adultes (masqués par défaut, sans code).
+struct AdultSettingsRow: View {
+    @Environment(LibraryStore.self) private var store
+    @AppStorage("adult.show") private var showAdult = false
+
+    var body: some View {
+        Toggle("Afficher les contenus adultes", isOn: $showAdult)
+            .onChange(of: showAdult) { _, _ in store.refreshAdultFilter() }
+        Text("Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes, guide) tant que l'option est désactivée.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 }

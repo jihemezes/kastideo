@@ -461,7 +461,11 @@ final class LibraryStore {
         if let data = try? JSONEncoder().encode(extraItems) { defaults.set(data, forKey: Keys.extras) }
     }
 
+    /// Réaffiche ou masque les contenus adultes (réglage).
+    func refreshAdultFilter() { rebuildIndex() }
+
     private func rebuildIndex() {
+        let showAdult = UserDefaults.standard.bool(forKey: "adult.show")
         // 1. Catégories du fournisseur, dans l'ordre d'origine, avec leur nombre d'éléments.
         var providerOrder: [MediaKind: [String]] = [:]
         var counts: [MediaKind: [String: Int]] = [:]
@@ -494,6 +498,11 @@ final class LibraryStore {
                 if item.kind == .live, item.epgID?.isEmpty ?? true {
                     item.epgID = "auto:" + ChannelMatcher.normalize(item.name, keepResolution: true)
                 }
+                // Contenus adultes (« |XX| », catégorie adulte) : masqués partout tant que l'option n'est pas activée.
+                if !showAdult, item.kind != .episode, ThemeClassifier.isAdult(name: item.name, group: item.group) {
+                    byID[item.id] = item
+                    continue
+                }
                 if item.kind != .episode, let prefs = categoryPrefs[item.kind] {
                     if hidden[item.kind]?.contains(item.group) == true {
                         byID[item.id] = item
@@ -510,7 +519,7 @@ final class LibraryStore {
         for (kind, names) in ordered {
             let prefs = categoryPrefs[kind] ?? CategoryPrefs()
             var seen = Set<String>()
-            categories[kind] = names.filter { !(hidden[kind]?.contains($0) ?? false) }
+            categories[kind] = names.filter { !(hidden[kind]?.contains($0) ?? false) && (showAdult || !ThemeClassifier.isAdult(name: "", group: $0)) }
                 .map { prefs.displayName($0) }
                 .filter { seen.insert($0).inserted }
         }
@@ -601,7 +610,7 @@ final class LibraryStore {
         return order.compactMap { key in
             guard let variants = byKey[key], let first = variants.first else { return nil }
             let programmes = variants.lazy.map { epg.programmes(for: $0.epgID) }.first { !$0.isEmpty } ?? []
-            let auto = ThemeClassifier.theme(forChannelName: first.name)
+            let auto = ThemeClassifier.theme(forChannelName: first.name, group: first.group)
                 ?? ThemeClassifier.dominantTheme(of: programmes)
                 ?? .other
             return LiveChannelGroup(key: key, variants: variants, autoTheme: auto, theme: overrides[key] ?? auto,

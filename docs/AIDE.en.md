@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.14.1 — live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 0.15.0 — new themes (Auto & Moto, Food & Home, Nature, Regional, International, Religion, Radio, Adult), sports disciplines; live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -126,7 +126,7 @@ The **TV Guide** section (sidebar, **TV Guide** tab of the Cinema and TV interfa
 
 ### Live TV by theme
 
-The **Themes** section of the sidebar (under Live) sorts live TV by **theme** — Sports, Movies, Series, News, Documentaries, Kids, Entertainment, Music, General — without the categories you hid. Three modes:
+The **Themes** section of the sidebar (under Live) sorts live TV by **theme** — Sports, Auto & Moto (motorsport), Movies, Series, News, Documentaries, Nature / Hunting & Fishing, Kids, Entertainment, Food & Home, Music, General, Regional (France 3 regions, local TV), International (foreign channels), Religion, Radio — without the categories you hid. Three modes:
 
 - **On now**: what is airing now, sorted by the **program's genre** in the TV guide (a movie on a general channel shows up in “Movies”), with progress.
 - **Tonight**: programs starting between **8 and 11 pm**. Right-click an upcoming program > **Alert Me When It Starts**.
@@ -135,6 +135,10 @@ The **Themes** section of the sidebar (under Live) sorts live TV by **theme** �
 Each channel appears **only once**, even if your provider offers it in several versions (4K, FHD, HD, SD): Kastideo picks the version suited to **your connection** (**Automatic** setting in Settings > General > Playback > Channel version) — it steps down after unstable playback and back up after three smooth ones. Right-click > **Version** to choose another.
 
 Themes are also offered elsewhere: “Sports On Now”, “Movies On Now”… rows at the top of Live in the **Cinema** interface, a **Themes** filter in the **TV** interface's channel panel and the **TV Guide**, and “On TV Now” (and “Tonight”) chips on the **Home** screen.
+
+In **Sports**, a second row filters by **discipline**: Football, Rugby, Tennis, Basketball, Combat sports, Golf, Cycling, Handball, Motorsport, Winter sports, Horse racing, Athletics & swimming (from program titles, genres and descriptions).
+
+**Adult content**: channels and content whose name contains “|XX|” (or in an adult category) are **hidden everywhere** by default. To show them, and the **Adult** theme: Settings > General > Playback > **Show adult content**.
 
 **Program alerts** (🔔 button of the Themes view): Kastideo alerts you two minutes before a program starts whose title contains a chosen word (“PSG”, “Formula 1”…), of a theme on your favorite channels, or a specific program. A notification and a **Watch** banner appear.
 

@@ -43,3 +43,29 @@ final class ThemeTests: XCTestCase {
         XCTAssertEqual(p.first?.theme, .sport)
     }
 }
+
+final class MoreThemeTests: XCTestCase {
+    func testNewThemes() {
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|XX| Something"), .adult)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "Chaine", group: "ADULT 18+"), .adult)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| AUTOMOTO HD"), .automotive)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| CUISINE TV"), .lifestyle)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| CHASSE ET PECHE"), .nature)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| KTO"), .religion)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| FRANCE 3 OCCITANIE"), .regional)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| FRANCE 3 FHD"), .general)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|IT| RAI 1"), .international)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|IT| SKY SPORT"), .sport)
+        XCTAssertEqual(ThemeClassifier.theme(forChannelName: "|FR| NOSTALGIE"), .radio)
+        XCTAssertEqual(ThemeClassifier.theme(forCategory: "Sports mécaniques"), .automotive)
+    }
+
+    func testSportKinds() {
+        XCTAssertEqual(SportKind.detect("Ligue 1 : PSG - OM"), .football)
+        XCTAssertEqual(SportKind.detect("Top 14", "Rugby"), .rugby)
+        XCTAssertEqual(SportKind.detect("Roland-Garros"), .tennis)
+        XCTAssertEqual(SportKind.detect("UFC 300"), .combat)
+        XCTAssertEqual(SportKind.detect("Téléfoot"), .football)
+        XCTAssertNil(SportKind.detect("Journal de 20 heures"))
+    }
+}

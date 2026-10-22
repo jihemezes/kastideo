@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.15.0] - 2026-10-22
+
+- **Nouveaux thèmes** : Auto-Moto (sports mécaniques), Cuisine & Maison, Nature / Chasse & Pêche, Régional (France 3 régions, télés locales), International (chaînes étrangères), Religion, Radio, et **Adulte**
+- **Contenus adultes** (« |XX| » dans le nom ou catégorie adulte) **masqués partout** par défaut ; Réglages > Général > Lecture > Afficher les contenus adultes
+- **Sport par discipline** : Football, Rugby, Tennis, Basket, Combat, Golf, Cyclisme, Handball, Sports mécaniques, Sports d'hiver, Hippisme, Athlétisme & natation
+
 ## [0.14.1] - 2026-10-22
 
 - Correction de compilation (la 0.14.0 n'avait pas pu être construite) : le Guide TV gère maintenant le filtre par thème

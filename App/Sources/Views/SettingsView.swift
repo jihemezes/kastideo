@@ -172,6 +172,7 @@ struct GeneralSettingsView: View {
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
                 MultiViewSettingsRow()
                 QualitySettingsRow()
+                AdultSettingsRow()
                 Text("Moteur de lecture : VLC. Une seule connexion au fournisseur est ouverte à la fois.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
