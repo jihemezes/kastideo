@@ -165,6 +165,15 @@ final class PlaybackController {
         bridge.onRecordingStarted = { [weak self] in
             MainActor.assumeIsolated { self?.onRecordingStarted?() }
         }
+        // En quittant Kastideo, on ferme proprement le flux pour que le fournisseur libère la connexion.
+        NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.player.media != nil else { return }
+                VideoContainerView.ensureHosted(for: self.player)
+                self.player.stop()
+                PlaybackLog.shared.note("Flux fermé à la fermeture de Kastideo")
+            }
+        }
     }
 
     // MARK: - Commandes
@@ -309,8 +318,10 @@ final class PlaybackController {
         // (y compris un arrêt encore en cours en arrière-plan).
         if player.media != nil || isStopping {
             VideoContainerView.ensureHosted(for: player)
+            let closing = Date()
             player.stop()
             isStopping = false
+            PlaybackLog.shared.note("Flux précédent fermé en \(Int(Date().timeIntervalSince(closing) * 1000)) ms")
         }
         errorMessage = nil
         isLoading = true
@@ -570,16 +581,28 @@ final class PlaybackController {
     /// Variantes à tenter si le flux échoue (.ts ↔ .m3u8 pour le direct).
     static func alternatives(for url: URL) -> [URL] {
         let ext = url.pathExtension.lowercased()
+        var list: [URL] = []
         if ext == "ts" {
-            return [url.deletingPathExtension().appendingPathExtension("m3u8")]
+            list = [url.deletingPathExtension().appendingPathExtension("m3u8")]
+        } else if ext == "m3u8", url.path.contains("/live/") {
+            list = [url.deletingPathExtension().appendingPathExtension("ts")]
+        } else if ext.isEmpty, url.query == nil {
+            list = [url.appendingPathExtension("ts")]
         }
-        if ext == "m3u8", url.path.contains("/live/") {
-            return [url.deletingPathExtension().appendingPathExtension("ts")]
+        // Certains fournisseurs (derrière Cloudflare) répondent 520 en https alors que le même flux passe en http
+        // (comme dans Piboard) : on essaie ensuite les mêmes adresses en http.
+        if url.scheme?.lowercased() == "https" {
+            list += ([url] + list).compactMap(Self.plainHTTP)
         }
-        if ext.isEmpty, url.query == nil {
-            return [url.appendingPathExtension("ts")]
-        }
-        return []
+        return list
+    }
+
+    /// Même adresse en http (port par défaut si le port https était explicite).
+    static func plainHTTP(_ url: URL) -> URL? {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
+        components.scheme = "http"
+        if components.port == 443 { components.port = nil }
+        return components.url
     }
 
     static func stateName(_ state: VLCMediaPlayerState) -> String {

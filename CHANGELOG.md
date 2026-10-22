@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.0.2] - 2026-10-23
+
+- **Direct** : quand le serveur refuse un flux en https (erreur HTTP 520 de Cloudflare, alors que la chaîne fonctionne ailleurs), Kastideo réessaie automatiquement la même chaîne en http (.ts puis .m3u8).
+- **Connexion libérée** : le flux est désormais fermé proprement quand on quitte Kastideo, pour que le fournisseur ne compte plus la session (abonnement à une connexion).
+- **Journal de lecture** : durée de fermeture du flux précédent à chaque changement de chaîne.
+
 ## [1.0.1] - 2026-10-22
 
 - **Thèmes — « En ce moment »** : les chaînes dont le nom est suffisamment explicite (beIN Sports, BFM, Gulli, Eurosport…) sont désormais proposées dans leur thème **même sans programme dans le guide TV**. Elles s'affichent avec le nom de la chaîne à la place du titre du programme. Les chaînes que Kastideo ne sait pas classer sans guide restent proposées dans le mode **Chaînes** (vous pouvez les classer vous-même : clic droit > Thème de la chaîne).
