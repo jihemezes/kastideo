@@ -6,6 +6,20 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.0.0</title>
+      <pubDate>Thu, 22 Oct 2026 21:55:22 GMT</pubDate>
+      <sparkle:version>36</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Première version stable de Kastideo.&lt;/b&gt; Direct, films et séries IPTV (Xtream Codes et M3U) lus par le moteur VLC, interfaces Classique, Cinéma et TV, écran d&amp;#x27;accueil, guide TV en grille avec guide de secours xmltvfr.fr, Direct par thème avec alertes de programme, fiches films et séries (TMDB), enregistrement et téléchargement, MultiVue, catégories personnalisables, français et anglais, mises à jour automatiques.&lt;/p&gt;
+&lt;p&gt;Nouveau dans cette version :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Modifier la chaîne…&lt;/b&gt; (clic droit sur une chaîne du direct) : corriger le &lt;b&gt;nom&lt;/b&gt;, le &lt;b&gt;numéro&lt;/b&gt;, le &lt;b&gt;logo&lt;/b&gt; (adresse ou fichier) et la &lt;b&gt;chaîne du guide TV&lt;/b&gt; associée, pour cette version de la chaîne ; &lt;b&gt;Rétablir l&amp;#x27;original&lt;/b&gt; pour annuler. Les corrections survivent aux actualisations de la source&lt;/li&gt;
+&lt;li&gt;Les logos choisis ne sont pas effacés par « Vider et recharger » le cache&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.0/Kastideo-1.0.0.dmg" length="45723209" type="application/octet-stream" sparkle:edSignature="MY1hLjZlUHkRPEvoW3kb0sJ4eC3rNoMBYjFHYfbV4pc68xPgmbQ1T5gXWuZthN3M9QzlcDl71bsNnpD9xG1eDw==" />
+    </item>
+    <item>
       <title>Kastideo 0.15.0</title>
       <pubDate>Thu, 22 Oct 2026 21:37:58 GMT</pubDate>
       <sparkle:version>35</sparkle:version>
