@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.13.2] - 2026-10-22
+
+- **Mises à jour** : recherche discrète **au démarrage** (puis toutes les 24 h si Kastideo reste ouvert) ; une nouvelle version est annoncée par un **bandeau** en haut de la fenêtre, **jamais pendant un visionnage ou un enregistrement**. La mise à jour reste facultative : Mettre à jour…, Plus tard ou Ignorer cette version
+- Les recherches automatiques de Sparkle, qui pouvaient ouvrir une fenêtre à n'importe quel moment, sont remplacées par cette recherche discrète
+
 ## [0.13.1] - 2026-10-21
 
 - Numéro de version (et de build) affiché discrètement en bas à droite de l'**écran d'accueil** ; un clic ouvre les nouveautés

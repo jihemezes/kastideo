@@ -36,7 +36,13 @@ struct KastideoApp: App {
                 .environment(multiView)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
-                .onAppear { playback.watchProgress = watchProgress }
+                .onAppear {
+                    playback.watchProgress = watchProgress
+                    let playback = playback
+                    let recordings = recordings
+                    updater.isBusy = { playback.current != nil || recordings.activeLive != nil }
+                    updater.startBackgroundChecks()
+                }
                 .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1320, height: 820)

@@ -220,18 +220,14 @@ struct UpdateSettingsView: View {
     @Environment(UpdaterController.self) private var updater
     @AppStorage(UpdateKeys.betaChannel) private var betaChannel = false
     @State private var autoCheck = true
-    @State private var autoDownload = false
 
     var body: some View {
         Form {
             Section {
-                Toggle("Rechercher automatiquement les mises à jour (une fois par jour)", isOn: $autoCheck)
+                Toggle("Rechercher les mises à jour au démarrage (puis une fois par jour)", isOn: $autoCheck)
                     .onChange(of: autoCheck) { _, value in updater.automaticallyChecks = value }
-                Toggle("Télécharger et installer automatiquement", isOn: $autoDownload)
-                    .onChange(of: autoDownload) { _, value in updater.automaticallyDownloads = value }
-                    .disabled(!autoCheck)
             } footer: {
-                Text("Les mises à jour sont publiées sur GitHub, signées et notarisées par Apple. Kastideo vérifie leur signature avant de les installer.")
+                Text("La recherche se fait discrètement quelques secondes après le lancement. Si une version est disponible, un bandeau la propose en haut de la fenêtre — jamais pendant un visionnage ni un enregistrement. La mise à jour reste facultative : « Plus tard » ou « Ignorer cette version ». Les mises à jour sont publiées sur GitHub, signées et notarisées par Apple ; Kastideo vérifie leur signature avant de les installer.")
             }
 
             Section {
@@ -258,7 +254,6 @@ struct UpdateSettingsView: View {
         .formStyle(.grouped)
         .onAppear {
             autoCheck = updater.automaticallyChecks
-            autoDownload = updater.automaticallyDownloads
         }
     }
 }

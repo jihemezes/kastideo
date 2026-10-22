@@ -27,6 +27,7 @@ struct RootView: View {
             }
         }
         .recordingToast()
+        .overlay(alignment: .top) { UpdateBanner() }
         .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {
             LanguagePickerSheet(chosen: $appLanguage)
         }

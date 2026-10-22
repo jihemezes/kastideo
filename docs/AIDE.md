@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.13.1 — numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.13.2 — recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -262,15 +262,14 @@ Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de
 
 Kastideo se met à jour tout seul grâce à **Sparkle**, l'outil de référence des applications Mac distribuées hors App Store.
 
-- Kastideo vérifie une fois par jour si une nouvelle version est disponible sur GitHub.
-- Une fenêtre présente les nouveautés, puis propose **Installer la mise à jour**. Kastideo se ferme, s'installe et se relance.
+- **Au démarrage** (quelques secondes après le lancement), puis une fois par jour si Kastideo reste ouvert, Kastideo vérifie discrètement si une nouvelle version est disponible sur GitHub.
+- Si c'est le cas, un **bandeau** en haut de la fenêtre l'annonce — **jamais pendant un visionnage ni un enregistrement** (il attend la fin de la lecture). La mise à jour est **facultative** : **Mettre à jour…** ouvre la fenêtre des nouveautés puis **Installer la mise à jour** (Kastideo se ferme, s'installe et se relance) ; **Plus tard** masque le bandeau jusqu'au prochain lancement ; **Ignorer cette version** ne la propose plus (la suivante le sera).
 - Vous pouvez vérifier à tout moment avec **Kastideo > Rechercher les mises à jour…**.
 - Chaque mise à jour est signée : Kastideo refuse d'installer un fichier qui ne vient pas de son éditeur.
 
 Dans **Réglages > Mises à jour** :
 
-- **Rechercher automatiquement** : active ou désactive la vérification quotidienne.
-- **Télécharger et installer automatiquement** : les mises à jour s'installent sans rien demander, à la fermeture de l'application.
+- **Rechercher les mises à jour au démarrage** : active ou désactive la vérification au lancement et quotidienne.
 - **Recevoir les versions de test (bêta)** : propose aussi les versions bêta, qui apportent les nouveautés plus tôt mais peuvent être moins stables. Désactivez l'option pour revenir aux versions stables à la prochaine mise à jour.
 
 > Les versions 0.1.0 et antérieures ne savent pas se mettre à jour : installez la 0.2.0 une fois à la main, les suivantes arriveront toutes seules.

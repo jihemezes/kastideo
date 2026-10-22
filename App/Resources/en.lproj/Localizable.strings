@@ -529,3 +529,11 @@
 "MultiVue : jusqu'à %lld chaînes en même temps (menu Lecture > MultiVue, ⌥⌘M). Les enregistrements et téléchargements utilisent aussi une connexion." = "MultiView: up to %lld channels at once (Playback menu > MultiView, ⌥⌘M). Recordings and downloads also use a connection.";
 "Ajouter à la MultiVue" = "Add to MultiView";
 "%lld / %lld" = "%lld / %lld";
+
+/* 0.13.2 */
+"Kastideo %@ est disponible" = "Kastideo %@ is available";
+"La mise à jour est facultative ; elle s'installe en quelques secondes et Kastideo redémarre." = "The update is optional; it installs in a few seconds and Kastideo restarts.";
+"Ignorer cette version" = "Skip This Version";
+"Mettre à jour…" = "Update…";
+"Rechercher les mises à jour au démarrage (puis une fois par jour)" = "Check for updates at launch (then once a day)";
+"La recherche se fait discrètement quelques secondes après le lancement. Si une version est disponible, un bandeau la propose en haut de la fenêtre — jamais pendant un visionnage ni un enregistrement. La mise à jour reste facultative : « Plus tard » ou « Ignorer cette version ». Les mises à jour sont publiées sur GitHub, signées et notarisées par Apple ; Kastideo vérifie leur signature avant de les installer." = "The check runs discreetly a few seconds after launch. If a version is available, a banner offers it at the top of the window — never while watching or recording. The update stays optional: “Later” or “Skip This Version”. Updates are published on GitHub, signed and notarized by Apple; Kastideo verifies their signature before installing them.";
