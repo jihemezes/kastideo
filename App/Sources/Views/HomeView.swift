@@ -50,6 +50,7 @@ struct HomeView: View {
                             Spacer(minLength: 0)
                             bigTiles(height: tileHeight(for: geo.size))
                             quickButtons
+                            themeShortcuts
                             resumeRail
                             Spacer(minLength: 0)
                         } else {
@@ -272,6 +273,40 @@ struct HomeView: View {
                             badge: recordings.activityCount) {
                 navigation.go(.recordings)
             }
+        }
+    }
+
+    // MARK: À la télé maintenant
+
+    /// Accès directs à la vue Thèmes : ce qui passe maintenant par thème, et ce soir.
+    @ViewBuilder
+    private var themeShortcuts: some View {
+        let now = Date()
+        let counts: [(ContentTheme, Int)] = [ContentTheme.sport, .movies, .series, .news, .documentary, .kids].map { theme in
+            (theme, store.liveGroups.filter { group in
+                guard let programme = store.epg.current(for: group.epgID, at: now) else { return false }
+                return (programme.theme ?? group.theme) == theme
+            }.count)
+        }.filter { $0.1 > 0 }
+        if !counts.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("À la télé maintenant")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(counts, id: \.0) { entry in
+                            HomeThemeChip(icon: entry.0.icon, title: entry.0.label, detail: "\(entry.1)") {
+                                navigation.showThemes(entry.0, mode: .now)
+                            }
+                        }
+                        HomeThemeChip(icon: "moon.stars", title: String(localized: "Ce soir"), detail: "20 h – 23 h") {
+                            navigation.showThemes(nil, mode: .tonight)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -502,6 +537,33 @@ struct HomeResultRow: View {
             .background(.white.opacity(hovering ? 0.16 : 0.07),
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+    }
+}
+
+
+/// Pastille d'accès à un thème sur l'accueil.
+struct HomeThemeChip: View {
+    let icon: String
+    let title: String
+    let detail: String
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon).foregroundStyle(KastideoPalette.orange)
+                Text(title).font(.callout.weight(.semibold))
+                Text(detail).font(.caption.monospacedDigit()).foregroundStyle(.white.opacity(0.6))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(.white.opacity(hovering ? 0.2 : 0.1), in: Capsule())
+            .overlay(Capsule().strokeBorder(.white.opacity(hovering ? 0.4 : 0.12)))
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }

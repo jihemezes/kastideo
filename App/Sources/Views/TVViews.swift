@@ -14,6 +14,7 @@ final class TVModel {
         case favorites
         case recents
         case category(String)
+        case theme(ContentTheme)
     }
 
     var filter: Filter = .all
@@ -57,6 +58,11 @@ final class TVModel {
             base = store.items(for: .recents).filter { $0.kind == .live }
         case .category(let name):
             base = store.items(for: .category(.live, name))
+        case .theme(let theme):
+            // Chaînes du thème et chaînes qui diffusent ce thème en ce moment, une version par chaîne.
+            base = store.liveGroups.filter { group in
+                group.theme == theme || store.epg.current(for: group.epgID)?.theme == theme
+            }.map(\.preferred)
         }
         let key = query.kastideoSearchKey
         return key.isEmpty ? base : base.filter { $0.searchKey.contains(key) }
@@ -68,6 +74,7 @@ final class TVModel {
         case .favorites: return String(localized: "Favoris")
         case .recents: return String(localized: "Récents")
         case .category(let name): return name
+        case .theme(let theme): return theme.label
         }
     }
 
@@ -448,6 +455,15 @@ struct TVChannelPanel: View {
                         Button("Toutes les chaînes") { model.filter = .all }
                         Button("Favoris") { model.filter = .favorites }
                         Button("Récents") { model.filter = .recents }
+                        Menu("Thèmes") {
+                            ForEach(ContentTheme.browsable) { theme in
+                                Button {
+                                    model.filter = .theme(theme)
+                                } label: {
+                                    Label(theme.label, systemImage: theme.icon)
+                                }
+                            }
+                        }
                         let categories = store.categoriesByKind[.live] ?? []
                         if !categories.isEmpty {
                             Divider()

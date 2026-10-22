@@ -13,16 +13,22 @@ public struct Programme: Codable, Hashable, Sendable, Identifiable {
     public var stop: Date
     public var title: String
     public var desc: String?
+    /// Genre indiqué par le guide (« Sport », « Film », « Documentaire »…).
+    public var category: String?
 
     public var id: String { "\(channel)|\(start.timeIntervalSince1970)" }
 
-    public init(channel: String, start: Date, stop: Date, title: String, desc: String? = nil) {
+    public init(channel: String, start: Date, stop: Date, title: String, desc: String? = nil, category: String? = nil) {
         self.channel = channel
         self.start = start
         self.stop = stop
         self.title = title
         self.desc = desc
+        self.category = category
     }
+
+    /// Thème du programme, d'après son genre (puis son titre).
+    public var theme: ContentTheme? { ThemeClassifier.theme(forProgramme: self) }
 
     /// Avancement entre 0 et 1 à l'instant donné.
     public func progress(at date: Date = Date()) -> Double {
@@ -87,6 +93,7 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
     private var currentStop: Date?
     private var currentTitle = ""
     private var currentDesc = ""
+    private var currentCategory = ""
     private var textBuffer = ""
     private var inProgramme = false
     private var element: String?
@@ -136,6 +143,7 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
             currentStop = attributeDict["stop"].flatMap(XMLTVDate.parse)
             currentTitle = ""
             currentDesc = ""
+            currentCategory = ""
         } else if inProgramme {
             element = elementName
             textBuffer = ""
@@ -163,11 +171,13 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
             let desc = currentDesc.trimmingCharacters(in: .whitespacesAndNewlines)
             programmes.append(Programme(channel: channel, start: start, stop: stop,
                                         title: title.isEmpty ? "Sans titre" : title,
-                                        desc: desc.isEmpty ? nil : desc))
+                                        desc: desc.isEmpty ? nil : desc,
+                                        category: currentCategory.isEmpty ? nil : currentCategory.trimmingCharacters(in: .whitespacesAndNewlines)))
         } else if inProgramme, let el = element, el == elementName {
             // On garde le premier titre / la première description (souvent plusieurs langues).
             if el == "title", currentTitle.isEmpty { currentTitle = textBuffer }
             if el == "desc", currentDesc.isEmpty { currentDesc = textBuffer }
+            if el == "category", currentCategory.isEmpty { currentCategory = textBuffer }
             element = nil
         }
     }

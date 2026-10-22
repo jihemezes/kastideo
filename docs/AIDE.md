@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.13.2 — recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 0.14.0 — Direct par thème (en ce moment, ce soir, chaînes), une version par chaîne selon la connexion, alertes de programme ; recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -123,6 +123,20 @@ Section **Guide TV** (barre latérale, onglet **Guide TV** des interfaces Ciném
 - Choisissez la durée affichée (**2 h / 3 h / 6 h**), filtrez par **favoris**, **récents** ou **catégorie**, ou recherchez une chaîne.
 - Cliquez sur un programme : description, bouton **Regarder**, **Enregistrer** (programme en cours) ou **Programmer l'enregistrement** (programme à venir). Un point rouge signale un enregistrement programmé.
 - Cliquez sur le nom d'une chaîne pour la regarder. Seules les chaînes ayant des programmes sont listées : si la grille est vide, vérifiez l'adresse du guide dans les réglages de la source.
+
+### Le Direct par thème
+
+La section **Thèmes** de la barre latérale (sous Direct) classe le direct par **thème** — Sport, Films, Séries, Info, Documentaires, Jeunesse, Divertissement, Musique, Généralistes — sans les catégories que vous avez masquées. Trois modes :
+
+- **En ce moment** : ce qui est diffusé maintenant, classé d'après le **genre du programme** dans le guide TV (un film sur une chaîne généraliste apparaît dans « Films »), avec la progression.
+- **Ce soir** : les programmes qui commencent entre **20 h et 23 h**. Clic droit sur un programme à venir > **M'alerter au début du programme**.
+- **Chaînes** : les chaînes classées par spécialité. Le thème est déduit automatiquement du nom de la chaîne (beIN, Eurosport → Sport ; BFM, LCI → Info…) puis de ses programmes habituels ; clic droit > **Thème de la chaîne** pour le corriger.
+
+Chaque chaîne n'apparaît **qu'une fois**, même si votre fournisseur la propose en plusieurs versions (4K, FHD, HD, SD) : Kastideo choisit la version adaptée à **votre connexion** (réglage **Automatique**, dans Réglages > Général > Lecture > Version des chaînes) — il descend d'un cran après une lecture instable et remonte après trois lectures fluides. Clic droit > **Version** pour en choisir une autre.
+
+Les thèmes sont aussi proposés ailleurs : rangées « Sport en ce moment », « Films en cours »… en tête du Direct en interface **Cinéma**, filtre **Thèmes** du panneau de chaînes de l'interface **TV**, et pastilles « À la télé maintenant » (et « Ce soir ») sur l'**accueil**.
+
+**Alertes de programme** (bouton 🔔 de la vue Thèmes) : Kastideo vous prévient deux minutes avant le début d'un programme dont le titre contient un mot choisi (« PSG », « Formule 1 »…), d'un thème sur vos chaînes favorites, ou d'un programme précis. Une notification et un bandeau **Regarder** apparaissent.
 
 ## Lecture
 

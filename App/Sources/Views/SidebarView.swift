@@ -14,6 +14,7 @@ struct SidebarView: View {
             Section("Bibliothèque") {
                 row(.home, icon: "house", count: nil)
                 row(.all(.live), icon: "dot.radiowaves.left.and.right", count: store.count(for: .live))
+                row(.themes, icon: "square.grid.2x2", count: nil)
                 row(.all(.movie), icon: "film", count: store.count(for: .movie))
                 row(.all(.series), icon: "rectangle.stack", count: store.count(for: .series))
                 row(.favorites, icon: "star", count: store.favoriteIDs.count)

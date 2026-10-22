@@ -9,6 +9,8 @@ struct ItemListView: View {
     var body: some View {
         if navigation.browse == .recordings {
             RecordingsListView()
+        } else if navigation.browse == .themes {
+            ThemesListView()
         } else {
             CatalogListView()
         }

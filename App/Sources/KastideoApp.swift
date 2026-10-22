@@ -11,6 +11,7 @@ struct KastideoApp: App {
     @State private var watchProgress = WatchProgressStore()
     @State private var mediaInfo = MediaInfoStore()
     @State private var multiView = MultiViewModel()
+    @State private var alerts = ProgramAlertCenter()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.system.rawValue
 
@@ -34,6 +35,7 @@ struct KastideoApp: App {
                 .environment(watchProgress)
                 .environment(mediaInfo)
                 .environment(multiView)
+                .environment(alerts)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
                 .onAppear {
@@ -42,6 +44,7 @@ struct KastideoApp: App {
                     let recordings = recordings
                     updater.isBusy = { playback.current != nil || recordings.activeLive != nil }
                     updater.startBackgroundChecks()
+                    alerts.start(store: store)
                 }
                 .frame(minWidth: 960, minHeight: 600)
         }
@@ -89,6 +92,7 @@ struct KastideoApp: App {
                 .environment(watchProgress)
                 .environment(mediaInfo)
                 .environment(multiView)
+                .environment(alerts)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
         }

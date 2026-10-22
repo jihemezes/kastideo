@@ -11,11 +11,13 @@ enum Browse: Hashable {
     case recents
     case recordings
     case guide
+    /// Direct par thème (Sport, Info…) : en ce moment, ce soir, chaînes.
+    case themes
 
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .home, .favorites, .recents, .recordings, .guide: return nil
+        case .home, .favorites, .recents, .recordings, .guide, .themes: return nil
         }
     }
 
@@ -28,6 +30,7 @@ enum Browse: Hashable {
         case .recents: return String(localized: "Récents")
         case .recordings: return String(localized: "Enregistrements")
         case .guide: return String(localized: "Guide TV")
+        case .themes: return String(localized: "Thèmes")
         }
     }
 
@@ -88,6 +91,17 @@ final class NavigationModel {
     var showWhatsNew = false
     /// Mode cinéma : la vidéo occupe toute la fenêtre (colonnes masquées, plein écran).
     var isTheater = false
+    /// Vue « Thèmes » : thème choisi (nil = tous) et mode d'affichage.
+    var themeSelection: ContentTheme?
+    var themeMode: ThemeMode = .now
+
+    /// Ouvre la vue Thèmes sur un thème et un mode.
+    func showThemes(_ theme: ContentTheme?, mode: ThemeMode) {
+        themeSelection = theme
+        themeMode = mode
+        browse = .themes
+    }
+
     /// Panneau « Contexte » du lecteur (chaîne, programme, pistes, qualité).
     var showContextPanel = false
 

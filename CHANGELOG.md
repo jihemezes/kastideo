@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [0.14.0] - 2026-10-22
+
+- **Direct par thème** (section Thèmes, sous Direct) : Sport, Films, Séries, Info, Documentaires, Jeunesse, Divertissement, Musique, Généralistes ; modes **En ce moment** (d'après le genre des programmes du guide TV), **Ce soir** (20 h – 23 h) et **Chaînes** (thème de la chaîne, automatique et modifiable par clic droit). Les catégories masquées n'y apparaissent pas
+- **Une seule version par chaîne** dans les thèmes : Kastideo choisit entre 4K, FHD, HD et SD selon la **qualité de votre connexion** (mesurée pendant les lectures) ou selon votre choix (Réglages > Général > Lecture)
+- Thèmes aussi dans l'interface **Cinéma** (rangées « Sport en ce moment »…), l'interface **TV** (filtre Thèmes) et l'**accueil** (« À la télé maintenant », « Ce soir »)
+- **Alertes de programme** : mot du titre, thème sur vos favoris, ou programme précis ; notification et bandeau « Regarder » deux minutes avant le début
+- Le guide TV mémorise maintenant le **genre** de chaque programme
+
 ## [0.13.2] - 2026-10-22
 
 - **Mises à jour** : recherche discrète **au démarrage** (puis toutes les 24 h si Kastideo reste ouvert) ; une nouvelle version est annoncée par un **bandeau** en haut de la fenêtre, **jamais pendant un visionnage ou un enregistrement**. La mise à jour reste facultative : Mettre à jour…, Plus tard ou Ignorer cette version

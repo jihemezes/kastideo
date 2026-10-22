@@ -46,6 +46,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .recents: return .recents
         case .recordings: return .recordings
         case .guide: return .guide
+        case .themes: return .live
         }
     }
 
@@ -187,7 +188,7 @@ struct CinemaCatalog: View {
                     CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
                 case .recents:
                     CinemaRecents(items: items)
-                case .home, .recordings, .guide:
+                case .home, .recordings, .guide, .themes:
                     EmptyView()
                 }
             }
@@ -236,6 +237,19 @@ struct CinemaHome: View {
             LazyVStack(alignment: .leading, spacing: 26) {
                 if heroEnabled {
                     CinemaHeroCarousel(kind: kind, fallback: featured, fallbackCaption: caption)
+                }
+                if kind == .live {
+                    // Rangées par thème : ce qui est diffusé en ce moment (une version par chaîne).
+                    ForEach(ContentTheme.browsable.filter { $0 != .general && $0 != .other }) { theme in
+                        let airing = store.liveGroups.filter { group in
+                            guard let programme = store.epg.current(for: group.epgID) else { return false }
+                            return (programme.theme ?? group.theme) == theme
+                        }.map(\.preferred)
+                        if !airing.isEmpty {
+                            CinemaRail(title: theme.nowTitle, items: airing,
+                                       seeAll: { navigation.showThemes(theme, mode: .now) })
+                        }
+                    }
                 }
                 if !started.isEmpty {
                     CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) })

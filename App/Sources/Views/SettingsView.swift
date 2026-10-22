@@ -171,6 +171,7 @@ struct GeneralSettingsView: View {
                 Toggle("Afficher le temps de démarrage des chaînes", isOn: $showStartupTime)
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
                 MultiViewSettingsRow()
+                QualitySettingsRow()
                 Text("Moteur de lecture : VLC. Une seule connexion au fournisseur est ouverte à la fois.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

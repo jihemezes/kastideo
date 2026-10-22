@@ -109,6 +109,10 @@ final class PlaybackController {
     @ObservationIgnored private var healthTask: Task<Void, Never>?
     @ObservationIgnored private var lastPictures: (displayed: Int, lost: Int)?
     @ObservationIgnored private var bufferingEvents: [Date] = []
+    /// Mesure de la session en cours, pour ajuster la qualité automatique des chaînes.
+    @ObservationIgnored private var sessionQuality: ChannelQuality?
+    @ObservationIgnored private var sessionSamples = 0
+    @ObservationIgnored private var sessionPoor = 0
 
     var isLive: Bool { current?.kind == .live && !(current?.streamURL?.isFileURL ?? false) }
     var isTimeshifted: Bool { isLive && (liveDelay > 0.5 || pausedAt != nil) }
@@ -430,6 +434,9 @@ final class PlaybackController {
 
     private func startHealthSampling() {
         healthTask?.cancel()
+        sessionQuality = (current?.kind == .live) ? current.map { ChannelQuality.of($0.name) } : nil
+        sessionSamples = 0
+        sessionPoor = 0
         lastPictures = nil
         bufferingEvents = []
         healthTask = Task { [weak self] in
@@ -441,6 +448,7 @@ final class PlaybackController {
     }
 
     private func stopHealthSampling() {
+        adjustAutoQuality()
         healthTask?.cancel()
         healthTask = nil
         health = StreamHealth()
@@ -472,6 +480,10 @@ final class PlaybackController {
         next.isPaused = !isPlaying
         next.evaluate()
         health = next
+        if sessionQuality != nil {
+            sessionSamples += 1
+            if next.level == .poor { sessionPoor += 1 }
+        }
         refreshTracks()
     }
 
@@ -488,6 +500,31 @@ final class PlaybackController {
         if subtitles != subtitleTracks { subtitleTracks = subtitles }
         if currentAudioTrack != player.currentAudioTrackIndex { currentAudioTrack = player.currentAudioTrackIndex }
         if currentSubtitleTrack != player.currentVideoSubTitleIndex { currentSubtitleTrack = player.currentVideoSubTitleIndex }
+    }
+
+    /// Qualité automatique : un cran plus bas après une lecture instable, un cran plus haut après
+    /// trois lectures fluides d'au moins 5 minutes à la qualité retenue.
+    private func adjustAutoQuality() {
+        guard let quality = sessionQuality, sessionSamples >= 15 else { sessionQuality = nil; return }
+        let defaults = UserDefaults.standard
+        var tier = defaults.object(forKey: QualityPreference.autoTierKey) as? Int ?? ChannelQuality.fhd.rawValue
+        var streak = defaults.integer(forKey: "live.autoTier.goodStreak")
+        let poorRatio = Double(sessionPoor) / Double(sessionSamples)
+        if poorRatio > 0.3 {
+            tier = max(min(tier, quality.rawValue - 1), ChannelQuality.sd.rawValue)
+            streak = 0
+            PlaybackLog.shared.note("Qualité automatique : réception instable en \(quality.label), qualité visée abaissée")
+        } else if sessionPoor == 0, sessionSamples >= 150, quality.rawValue >= tier {
+            streak += 1
+            if streak >= 3, tier < ChannelQuality.uhd.rawValue {
+                tier += 1
+                streak = 0
+                PlaybackLog.shared.note("Qualité automatique : réception fluide, qualité visée relevée")
+            }
+        }
+        defaults.set(tier, forKey: QualityPreference.autoTierKey)
+        defaults.set(streak, forKey: "live.autoTier.goodStreak")
+        sessionQuality = nil
     }
 
     func selectAudioTrack(_ id: Int32) {

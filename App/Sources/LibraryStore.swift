@@ -51,6 +51,10 @@ final class LibraryStore {
     private var fallbackProgrammes: [Programme] = []
     private var fallbackChannels: [XMLTVChannel] = []
     private(set) var fallbackStatus = FallbackEPGStatus()
+    /// Chaînes du direct regroupées (une entrée par chaîne, toutes versions confondues) avec leur thème.
+    private(set) var liveGroups: [LiveChannelGroup] = []
+    private(set) var themeOverrides: [String: ContentTheme] = [:]
+    @ObservationIgnored private var liveGroupsGeneration = 0
     @ObservationIgnored private var epgGeneration = 0
     @ObservationIgnored private var lastEPGAttempt: [UUID: Date] = [:]
     @ObservationIgnored private var epgTicker: Task<Void, Never>?
@@ -69,6 +73,10 @@ final class LibraryStore {
             sources = decoded
         }
         favoriteIDs = defaults.stringArray(forKey: Keys.favorites) ?? []
+        if let data = defaults.data(forKey: "themes.overrides.v1"),
+           let decoded = try? JSONDecoder().decode([String: ContentTheme].self, from: data) {
+            themeOverrides = decoded
+        }
         for kind in CategoryPrefs.kinds {
             if let data = defaults.data(forKey: CategoryPrefs.key(kind)),
                let prefs = try? JSONDecoder().decode(CategoryPrefs.self, from: data) {
@@ -140,7 +148,7 @@ final class LibraryStore {
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
             return recentIDs.compactMap { item(id: $0) }
-        case .home, .recordings, .guide:
+        case .home, .recordings, .guide, .themes:
             return []
         }
     }
@@ -558,7 +566,54 @@ final class LibraryStore {
             guard generation == self.epgGeneration else { return }
             self.epg = result.index
             self.fallbackStatus.matchedChannels = result.matched
+            self.rebuildLiveGroups()
         }
+    }
+
+    // MARK: - Thèmes du direct
+
+    /// Regroupe les versions d'une même chaîne (FHD, HD, SD, 4K) et leur attribue un thème.
+    func rebuildLiveGroups() {
+        let live = itemsByKind[.live] ?? []
+        let index = epg
+        let overrides = themeOverrides
+        liveGroupsGeneration += 1
+        let generation = liveGroupsGeneration
+        Task {
+            let groups = await Task.detached(priority: .utility) {
+                Self.buildLiveGroups(live: live, epg: index, overrides: overrides)
+            }.value
+            guard generation == self.liveGroupsGeneration else { return }
+            self.liveGroups = groups
+        }
+    }
+
+    nonisolated static func buildLiveGroups(live: [MediaItem], epg: EPGIndex,
+                                            overrides: [String: ContentTheme]) -> [LiveChannelGroup] {
+        var order: [String] = []
+        var byKey: [String: [MediaItem]] = [:]
+        for item in live {
+            let key = ChannelMatcher.variantKey(item.name)
+            guard !key.isEmpty else { continue }
+            if byKey[key] == nil { order.append(key) }
+            byKey[key, default: []].append(item)
+        }
+        return order.compactMap { key in
+            guard let variants = byKey[key], let first = variants.first else { return nil }
+            let programmes = variants.lazy.map { epg.programmes(for: $0.epgID) }.first { !$0.isEmpty } ?? []
+            let auto = ThemeClassifier.theme(forChannelName: first.name)
+                ?? ThemeClassifier.dominantTheme(of: programmes)
+                ?? .other
+            return LiveChannelGroup(key: key, variants: variants, autoTheme: auto, theme: overrides[key] ?? auto,
+                                    epgID: variants.first { !epg.programmes(for: $0.epgID).isEmpty }?.epgID ?? first.epgID)
+        }
+    }
+
+    /// Change le thème d'une chaîne (nil : revenir au thème automatique).
+    func setTheme(_ theme: ContentTheme?, forChannelKey key: String) {
+        if let theme { themeOverrides[key] = theme } else { themeOverrides[key] = nil }
+        if let data = try? JSONEncoder().encode(themeOverrides) { defaults.set(data, forKey: "themes.overrides.v1") }
+        rebuildLiveGroups()
     }
 
     nonisolated static func buildEPG(provider: [Programme], live: [MediaItem], fallback: [Programme],
@@ -708,5 +763,21 @@ struct CategoryPrefs: Codable, Equatable {
             }
         }
         return result
+    }
+}
+
+/// Une chaîne du direct et toutes ses versions (qualités).
+struct LiveChannelGroup: Identifiable, Sendable {
+    let key: String
+    let variants: [MediaItem]
+    let autoTheme: ContentTheme
+    let theme: ContentTheme
+    /// Identifiant de guide qui a des programmes (parmi les versions).
+    let epgID: String?
+    var id: String { key }
+
+    /// Version à lire selon la qualité choisie (ou mesurée).
+    var preferred: MediaItem {
+        ChannelQuality.pick(variants, target: QualityPreference.target, quality: { ChannelQuality.of($0.name) }) ?? variants[0]
     }
 }
