@@ -54,6 +54,8 @@ final class LibraryStore {
     /// Chaînes du direct regroupées (une entrée par chaîne, toutes versions confondues) avec leur thème.
     private(set) var liveGroups: [LiveChannelGroup] = []
     private(set) var themeOverrides: [String: ContentTheme] = [:]
+    /// Corrections apportées par l'utilisateur à des chaînes (nom, numéro, guide TV, logo), par identifiant.
+    private(set) var channelEdits: [String: ChannelEdit] = [:]
     @ObservationIgnored private var liveGroupsGeneration = 0
     @ObservationIgnored private var epgGeneration = 0
     @ObservationIgnored private var lastEPGAttempt: [UUID: Date] = [:]
@@ -73,6 +75,10 @@ final class LibraryStore {
             sources = decoded
         }
         favoriteIDs = defaults.stringArray(forKey: Keys.favorites) ?? []
+        if let data = defaults.data(forKey: ChannelEdit.storageKey),
+           let decoded = try? JSONDecoder().decode([String: ChannelEdit].self, from: data) {
+            channelEdits = decoded
+        }
         if let data = defaults.data(forKey: "themes.overrides.v1"),
            let decoded = try? JSONDecoder().decode([String: ContentTheme].self, from: data) {
             themeOverrides = decoded
@@ -461,6 +467,39 @@ final class LibraryStore {
         if let data = try? JSONEncoder().encode(extraItems) { defaults.set(data, forKey: Keys.extras) }
     }
 
+    // MARK: - Corrections de chaînes
+
+    /// Élément tel que fourni par la source (sans les corrections de l'utilisateur).
+    func originalItem(id: String) -> MediaItem? {
+        for content in contents.values {
+            if let item = content.items.first(where: { $0.id == id }) { return item }
+        }
+        return nil
+    }
+
+    /// Enregistre (ou efface, si vide) la correction d'une chaîne.
+    func saveChannelEdit(_ edit: ChannelEdit?, for id: String) {
+        if let edit, !edit.isEmpty { channelEdits[id] = edit } else { channelEdits[id] = nil }
+        if let data = try? JSONEncoder().encode(channelEdits) { defaults.set(data, forKey: ChannelEdit.storageKey) }
+        rebuildIndex()
+    }
+
+    /// Chaînes du guide TV proposées pour corriger l'association d'une chaîne (guide du fournisseur et de secours).
+    func guideChannelChoices() -> [GuideChannelChoice] {
+        var choices: [String: GuideChannelChoice] = [:]
+        for channel in fallbackChannels {
+            choices[channel.id.lowercased()] = GuideChannelChoice(id: channel.id, name: channel.names.first ?? channel.id,
+                                                                  source: String(localized: "Guide de secours"))
+        }
+        for list in epgBySource.values {
+            for programme in list where choices[programme.channel.lowercased()] == nil {
+                choices[programme.channel.lowercased()] = GuideChannelChoice(id: programme.channel, name: programme.channel,
+                                                                              source: String(localized: "Fournisseur"))
+            }
+        }
+        return choices.values.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
     /// Réaffiche ou masque les contenus adultes (réglage).
     func refreshAdultFilter() { rebuildIndex() }
 
@@ -494,6 +533,7 @@ final class LibraryStore {
             guard let content = contents[source.id] else { continue }
             for original in content.items {
                 var item = original
+                if let edit = channelEdits[item.id] { edit.apply(to: &item) }
                 // Chaîne sans identifiant de guide : clé dérivée du nom, pour le guide de secours.
                 if item.kind == .live, item.epgID?.isEmpty ?? true {
                     item.epgID = "auto:" + ChannelMatcher.normalize(item.name, keepResolution: true)
@@ -789,4 +829,29 @@ struct LiveChannelGroup: Identifiable, Sendable {
     var preferred: MediaItem {
         ChannelQuality.pick(variants, target: QualityPreference.target, quality: { ChannelQuality.of($0.name) }) ?? variants[0]
     }
+}
+
+/// Correction d'une chaîne par l'utilisateur.
+struct ChannelEdit: Codable, Equatable {
+    static let storageKey = "channelEdits.v1"
+    var name: String?
+    var number: Int?
+    var epgID: String?
+    var logo: URL?
+
+    var isEmpty: Bool { name == nil && number == nil && epgID == nil && logo == nil }
+
+    func apply(to item: inout MediaItem) {
+        if let name, !name.isEmpty { item.name = name }
+        if let number { item.number = number }
+        if let epgID, !epgID.isEmpty { item.epgID = epgID }
+        if let logo { item.logoURL = logo }
+    }
+}
+
+/// Chaîne du guide TV proposée dans l'éditeur.
+struct GuideChannelChoice: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let source: String
 }

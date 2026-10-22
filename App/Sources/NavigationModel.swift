@@ -102,6 +102,9 @@ final class NavigationModel {
         browse = .themes
     }
 
+    /// Chaîne en cours de modification (feuille « Modifier la chaîne »).
+    var editingChannel: MediaItem?
+
     /// Panneau « Contexte » du lecteur (chaîne, programme, pistes, qualité).
     var showContextPanel = false
 

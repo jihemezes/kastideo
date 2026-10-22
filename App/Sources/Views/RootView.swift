@@ -39,6 +39,10 @@ struct RootView: View {
         .sheet(isPresented: $navigation.showWhatsNew) {
             WhatsNewView()
         }
+        .sheet(item: $navigation.editingChannel) { item in
+            ChannelEditSheet(item: item)
+                .environment(store)
+        }
         .sheet(item: $recordings.scheduleSheetItem) { item in
             ScheduleRecordingSheet(item: item)
                 .environment(store)

@@ -2,7 +2,7 @@
 
 Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
 
-> Version 0.15.0 — new themes (Auto & Moto, Food & Home, Nature, Regional, International, Religion, Radio, Adult), sports disciplines; live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 1.0.0 — first stable release; channel fixing (name, number, logo, TV guide); new themes (Auto & Moto, Food & Home, Nature, Regional, International, Religion, Radio, Adult), sports disciplines; live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
@@ -236,6 +236,16 @@ Your subscription allows only one connection. Kastideo therefore does only one t
 - **Automatic cleanup** (optional): recordings older than the chosen number of days are moved to the Trash.
 - An alert warns you when disk space gets low.
 - Copying rights depend on your provider's conditions: Kastideo records for your private use what your subscription already gives you.
+
+## Fixing a channel
+
+Some channels are badly referenced by the provider (wrong name, wrong programs, missing logo). Right-click the channel > **Edit Channel…**:
+
+- **Name** and **number** (used for number zapping in the TV interface);
+- **Logo**: an image address, or **Choose a File…** (the image is copied into Kastideo);
+- **TV guide programs**: if the programs shown are wrong or missing, search the right channel in the list (provider guide and backup guide); the program on now helps recognize it.
+
+The fix only applies to **this version** of the channel (FHD, HD, SD… are fixed separately) and survives source refreshes. **Restore Original** undoes it.
 
 ## Organizing categories
 

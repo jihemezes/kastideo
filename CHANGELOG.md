@@ -3,6 +3,15 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.0.0] - 2026-10-22
+
+**Première version stable de Kastideo.** Direct, films et séries IPTV (Xtream Codes et M3U) lus par le moteur VLC, interfaces Classique, Cinéma et TV, écran d'accueil, guide TV en grille avec guide de secours xmltvfr.fr, Direct par thème avec alertes de programme, fiches films et séries (TMDB), enregistrement et téléchargement, MultiVue, catégories personnalisables, français et anglais, mises à jour automatiques.
+
+Nouveau dans cette version :
+
+- **Modifier la chaîne…** (clic droit sur une chaîne du direct) : corriger le **nom**, le **numéro**, le **logo** (adresse ou fichier) et la **chaîne du guide TV** associée, pour cette version de la chaîne ; **Rétablir l'original** pour annuler. Les corrections survivent aux actualisations de la source
+- Les logos choisis ne sont pas effacés par « Vider et recharger » le cache
+
 ## [0.15.0] - 2026-10-22
 
 - **Nouveaux thèmes** : Auto-Moto (sports mécaniques), Cuisine & Maison, Nature / Chasse & Pêche, Régional (France 3 régions, télés locales), International (chaînes étrangères), Religion, Radio, et **Adulte**

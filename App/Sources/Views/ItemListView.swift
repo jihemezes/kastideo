@@ -180,6 +180,7 @@ struct LogoView: View {
 /// Actions du menu contextuel d'un contenu (listes et vignettes).
 struct ItemActionsMenu: View {
     @Environment(LibraryStore.self) private var store
+    @Environment(NavigationModel.self) private var navigation
     @Environment(RecordingCenter.self) private var recordings
     @Environment(MultiViewModel.self) private var multiView
     @Environment(\.openWindow) private var openWindow
@@ -195,6 +196,7 @@ struct ItemActionsMenu: View {
                 if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
             }
             Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
+            Button("Modifier la chaîne…") { navigation.editingChannel = item }
             if MultiViewKeys.isAvailable {
                 Button("Ajouter à la MultiVue") {
                     multiView.add(item)

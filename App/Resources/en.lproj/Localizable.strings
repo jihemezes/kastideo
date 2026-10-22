@@ -616,3 +616,21 @@
 "Tous les sports" = "All sports";
 "Afficher les contenus adultes" = "Show adult content";
 "Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes, guide) tant que l'option est désactivée." = "Channels and content whose name contains “|XX|” or that are in an adult category: hidden everywhere (lists, search, themes, guide) while this option is off.";
+
+/* 1.0.0 */
+"Modifier la chaîne…" = "Edit Channel…";
+"Modifier la chaîne" = "Edit Channel";
+"Nom d'origine : %@" = "Original name: %@";
+"Nom" = "Name";
+"Numéro" = "Number";
+"Logo" = "Logo";
+"Adresse de l'image (https://…)" = "Image address (https://…)";
+"Choisir un fichier…" = "Choose a File…";
+"Programmes du guide TV" = "TV guide programs";
+"Rechercher une chaîne du guide (ex. TF1, France 2…)" = "Search a guide channel (e.g. TF1, France 2…)";
+"Automatique (identifiant d'origine)" = "Automatic (original identifier)";
+"Rétablir l'original" = "Restore Original";
+"Guide associé : %@ — en ce moment : %@" = "Linked guide: %@ — on now: %@";
+"Aucun programme trouvé pour « %@ ». Choisissez la bonne chaîne ci-dessous." = "No program found for “%@”. Choose the right channel below.";
+"Guide de secours" = "Backup guide";
+"Fournisseur" = "Provider";

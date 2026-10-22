@@ -2,7 +2,7 @@
 
 Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
-> Version 0.15.0 — nouveaux thèmes (Auto-Moto, Cuisine & Maison, Nature, Régional, International, Religion, Radio, Adulte), disciplines du sport ; Direct par thème (en ce moment, ce soir, chaînes), une version par chaîne selon la connexion, alertes de programme ; recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 1.0.0 — première version stable ; correction des chaînes (nom, numéro, logo, guide TV) ; nouveaux thèmes (Auto-Moto, Cuisine & Maison, Nature, Régional, International, Religion, Radio, Adulte), disciplines du sport ; Direct par thème (en ce moment, ce soir, chaînes), une version par chaîne selon la connexion, alertes de programme ; recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
@@ -236,6 +236,16 @@ Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose
 - **Nettoyage automatique** (facultatif) : les enregistrements plus anciens que le nombre de jours choisi sont placés dans la corbeille.
 - Une alerte prévient quand l'espace disque devient faible.
 - Les droits de copie dépendent des conditions de votre fournisseur : Kastideo enregistre pour votre usage privé ce que votre abonnement vous donne déjà.
+
+## Corriger une chaîne
+
+Certaines chaînes sont mal référencées par le fournisseur (nom erroné, mauvais programmes, logo absent). Clic droit sur la chaîne > **Modifier la chaîne…** :
+
+- **Nom** et **numéro** (utilisé pour le zapping par numéro de l'interface TV) ;
+- **Logo** : adresse d'une image, ou **Choisir un fichier…** (l'image est copiée dans Kastideo) ;
+- **Programmes du guide TV** : si les programmes affichés sont faux ou absents, cherchez la bonne chaîne dans la liste (guide du fournisseur et guide de secours) ; le programme en cours aide à la reconnaître.
+
+La correction ne concerne que **cette version** de la chaîne (FHD, HD, SD… se corrigent séparément) et survit aux actualisations de la source. **Rétablir l'original** l'annule.
 
 ## Organiser les catégories
 
