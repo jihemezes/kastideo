@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.0.1</title>
+      <pubDate>Thu, 22 Oct 2026 22:03:24 GMT</pubDate>
+      <sparkle:version>37</sparkle:version>
+      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Thèmes — « En ce moment »&lt;/b&gt; : les chaînes dont le nom est suffisamment explicite (beIN Sports, BFM, Gulli, Eurosport…) sont désormais proposées dans leur thème &lt;b&gt;même sans programme dans le guide TV&lt;/b&gt;. Elles s&amp;#x27;affichent avec le nom de la chaîne à la place du titre du programme. Les chaînes que Kastideo ne sait pas classer sans guide restent proposées dans le mode &lt;b&gt;Chaînes&lt;/b&gt; (vous pouvez les classer vous-même : clic droit &amp;gt; Thème de la chaîne).&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.1/Kastideo-1.0.1.dmg" length="45726513" type="application/octet-stream" sparkle:edSignature="/Uijp1dRpiBgufdV7eWqfMysEsUwQX6+8229/1UqT6E00K9YCi0ev/2UL83unNI8cOsuWHtnkAIkt9w0sDTJDQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.0.0</title>
       <pubDate>Thu, 22 Oct 2026 21:55:22 GMT</pubDate>
       <sparkle:version>36</sparkle:version>
