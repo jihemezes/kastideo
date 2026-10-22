@@ -239,7 +239,7 @@ struct ThemesListView: View {
         case .now:
             let groups = nowGroups(navigation.themeSelection, now: now)
             if groups.isEmpty {
-                empty(String(localized: "Aucun programme de ce thème en ce moment (d'après le guide TV)."))
+                empty(String(localized: "Aucune chaîne de ce thème en ce moment (d'après le guide TV et le nom des chaînes)."))
             } else {
                 List(groups) { group in
                     programmeRow(group: group, programme: store.epg.current(for: group.epgID, at: now), now: now)
@@ -359,7 +359,12 @@ struct ThemesListView: View {
 
     private func nowGroups(_ theme: ContentTheme?, now: Date) -> [LiveChannelGroup] {
         store.liveGroups.filter { group in
-            guard let programme = store.epg.current(for: group.epgID, at: now) else { return false }
+            guard let programme = store.epg.current(for: group.epgID, at: now) else {
+                // Sans programme au guide : la chaîne reste proposée si son nom suffit à la classer.
+                guard group.themeFromName, group.theme != .other else { return false }
+                guard let theme else { return true }
+                return group.theme == theme && matchesSport(nil, group)
+            }
             guard let theme else { return true }
             return (programme.theme ?? group.theme) == theme && matchesSport(programme, group)
         }

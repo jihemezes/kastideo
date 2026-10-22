@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.0.1] - 2026-10-22
+
+- **Thèmes — « En ce moment »** : les chaînes dont le nom est suffisamment explicite (beIN Sports, BFM, Gulli, Eurosport…) sont désormais proposées dans leur thème **même sans programme dans le guide TV**. Elles s'affichent avec le nom de la chaîne à la place du titre du programme. Les chaînes que Kastideo ne sait pas classer sans guide restent proposées dans le mode **Chaînes** (vous pouvez les classer vous-même : clic droit > Thème de la chaîne).
+
 ## [1.0.0] - 2026-10-22
 
 **Première version stable de Kastideo.** Direct, films et séries IPTV (Xtream Codes et M3U) lus par le moteur VLC, interfaces Classique, Cinéma et TV, écran d'accueil, guide TV en grille avec guide de secours xmltvfr.fr, Direct par thème avec alertes de programme, fiches films et séries (TMDB), enregistrement et téléchargement, MultiVue, catégories personnalisables, français et anglais, mises à jour automatiques.

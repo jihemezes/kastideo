@@ -564,6 +564,7 @@
 "Alertes de programme" = "Program Alerts";
 "Tout" = "All";
 "Aucun programme de ce thème en ce moment (d'après le guide TV)." = "No program of this theme on now (according to the TV guide).";
+"Aucune chaîne de ce thème en ce moment (d'après le guide TV et le nom des chaînes)." = "No channel of this theme on now (according to the TV guide and channel names).";
 "Aucun programme de ce thème ce soir (d'après le guide TV)." = "No program of this theme tonight (according to the TV guide).";
 "Aucune chaîne dans ce thème." = "No channel in this theme.";
 "Clic droit : m'alerter au début du programme" = "Right-click: alert me when the program starts";

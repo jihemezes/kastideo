@@ -650,10 +650,13 @@ final class LibraryStore {
         return order.compactMap { key in
             guard let variants = byKey[key], let first = variants.first else { return nil }
             let programmes = variants.lazy.map { epg.programmes(for: $0.epgID) }.first { !$0.isEmpty } ?? []
-            let auto = ThemeClassifier.theme(forChannelName: first.name, group: first.group)
+            let named = variants.lazy.compactMap { ThemeClassifier.theme(forChannelName: $0.name, group: $0.group) }.first
+            let auto = named
                 ?? ThemeClassifier.dominantTheme(of: programmes)
                 ?? .other
-            return LiveChannelGroup(key: key, variants: variants, autoTheme: auto, theme: overrides[key] ?? auto,
+            let chosen = overrides[key]
+            return LiveChannelGroup(key: key, variants: variants, autoTheme: auto, theme: chosen ?? auto,
+                                    themeFromName: chosen != nil || named != nil,
                                     epgID: variants.first { !epg.programmes(for: $0.epgID).isEmpty }?.epgID ?? first.epgID)
         }
     }
@@ -821,6 +824,8 @@ struct LiveChannelGroup: Identifiable, Sendable {
     let variants: [MediaItem]
     let autoTheme: ContentTheme
     let theme: ContentTheme
+    /// Le thème vient du nom de la chaîne (ou d'un choix de l'utilisateur) : fiable même sans guide TV.
+    let themeFromName: Bool
     /// Identifiant de guide qui a des programmes (parmi les versions).
     let epgID: String?
     var id: String { key }
