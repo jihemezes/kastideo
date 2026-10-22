@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.0.2</title>
+      <pubDate>Thu, 22 Oct 2026 22:14:12 GMT</pubDate>
+      <sparkle:version>38</sparkle:version>
+      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Direct&lt;/b&gt; : quand le serveur refuse un flux en https (erreur HTTP 520 de Cloudflare, alors que la chaîne fonctionne ailleurs), Kastideo réessaie automatiquement la même chaîne en http (.ts puis .m3u8).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Connexion libérée&lt;/b&gt; : le flux est désormais fermé proprement quand on quitte Kastideo, pour que le fournisseur ne compte plus la session (abonnement à une connexion).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : durée de fermeture du flux précédent à chaque changement de chaîne.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.2/Kastideo-1.0.2.dmg" length="46317322" type="application/octet-stream" sparkle:edSignature="rUrmxBAKCFlZOUPUhMX1hpsK9Y3o7x3WeW1zQYtEV7Hm8inztiq7F4sFdcoIRoaGPba35lONIZrJON5KDKCSAQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.0.1</title>
       <pubDate>Thu, 22 Oct 2026 22:03:24 GMT</pubDate>
       <sparkle:version>37</sparkle:version>
