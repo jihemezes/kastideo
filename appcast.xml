@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.13.2</title>
+      <pubDate>Thu, 22 Oct 2026 05:14:23 GMT</pubDate>
+      <sparkle:version>32</sparkle:version>
+      <sparkle:shortVersionString>0.13.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Mises à jour&lt;/b&gt; : recherche discrète &lt;b&gt;au démarrage&lt;/b&gt; (puis toutes les 24 h si Kastideo reste ouvert) ; une nouvelle version est annoncée par un &lt;b&gt;bandeau&lt;/b&gt; en haut de la fenêtre, &lt;b&gt;jamais pendant un visionnage ou un enregistrement&lt;/b&gt;. La mise à jour reste facultative : Mettre à jour…, Plus tard ou Ignorer cette version&lt;/li&gt;
+&lt;li&gt;Les recherches automatiques de Sparkle, qui pouvaient ouvrir une fenêtre à n&amp;#x27;importe quel moment, sont remplacées par cette recherche discrète&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.13.2/Kastideo-0.13.2.dmg" length="45441707" type="application/octet-stream" sparkle:edSignature="9hU+Kv0IxFCToSfHuAZS/SzO3u9EyE4cjDJkmYaruYh62tNdD8URbBLcWVtg26Q9bwc0MYX3gFg8gVydq4hQAA==" />
+    </item>
+    <item>
       <title>Kastideo 0.13.1</title>
       <pubDate>Wed, 21 Oct 2026 21:41:47 GMT</pubDate>
       <sparkle:version>31</sparkle:version>
