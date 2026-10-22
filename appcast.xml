@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 0.14.1</title>
+      <pubDate>Thu, 22 Oct 2026 20:58:41 GMT</pubDate>
+      <sparkle:version>34</sparkle:version>
+      <sparkle:shortVersionString>0.14.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction de compilation (la 0.14.0 n&amp;#x27;avait pas pu être construite) : le Guide TV gère maintenant le filtre par thème&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Guide TV&lt;/b&gt; : nouveau filtre &lt;b&gt;Thèmes&lt;/b&gt; (Sport, Films, Info…)&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.14.1/Kastideo-0.14.1.dmg" length="45546239" type="application/octet-stream" sparkle:edSignature="5bMoMxnno0/7cSjcSkX4Xf9HyTGbh3pMR4d9tr9e4z0hHuWuhkGk1FYWq3QF4tMZ2Op3bTIT3Zf6+MdttqY6CQ==" />
+    </item>
+    <item>
       <title>Kastideo 0.13.2</title>
       <pubDate>Thu, 22 Oct 2026 05:14:23 GMT</pubDate>
       <sparkle:version>32</sparkle:version>
