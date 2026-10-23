@@ -204,6 +204,9 @@ struct HealthPill: View {
         let health = playback.health
         HStack(spacing: 5) {
             Circle().fill(health.color).frame(width: 8, height: 8)
+            if health.audioIssue != nil {
+                Image(systemName: "speaker.slash.fill").foregroundStyle(.orange).font(.caption)
+            }
             if hovering || health.level == .poor {
                 Text(health.label).font(.caption.weight(.semibold))
             }
@@ -256,6 +259,7 @@ extension StreamHealth {
         if lostRatio > 0 { lines.append(String(format: String(localized: "Images perdues : %.1f %%"), lostRatio * 100)) }
         lines.append(recentStalls == 0 ? String(localized: "Aucune coupure dans la dernière minute")
                                        : String(localized: "\(recentStalls) coupure(s) dans la dernière minute"))
+        if let audioIssue { lines.append(audioIssue) }
         return lines.joined(separator: "\n")
     }
 }

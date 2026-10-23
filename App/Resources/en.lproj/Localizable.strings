@@ -655,3 +655,7 @@
 "Vitesse pour rattraper le direct" = "Catch-up speed";
 "Dossier du différé" = "Timeshift folder";
 "Pendant une pause du direct, le flux continue d'être mis en mémoire sur le disque (environ 1 à 4 Go par heure selon la qualité). Les fichiers sont effacés au changement de chaîne. Une fois la durée maximale atteinte, la lecture reprend toute seule." = "While live TV is paused, the stream keeps being stored on disk (about 1 to 4 GB per hour depending on quality). Files are cleared when you change channel. Once the maximum duration is reached, playback resumes by itself.";
+
+/* 1.1.1 */
+"Ce flux ne contient aucune piste son (problème chez le fournisseur)." = "This stream contains no audio track (provider issue).";
+"Son absent : le fournisseur envoie une piste son vide ou illisible. Essayez une autre version de la chaîne (HD, SD…)." = "No sound: the provider sends an empty or unreadable audio track. Try another version of the channel (HD, SD…).";

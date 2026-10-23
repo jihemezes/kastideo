@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.1] - 2026-10-24
+
+- **Chaînes sans son** : Kastideo surveille désormais le son pendant la lecture. Si l'image avance mais qu'aucun son n'est joué, il répare automatiquement : relance de la piste son quand la sortie audio n'a pas pu être créée au démarrage (erreur VLC « too low audio sample frequency (0) »), ou essai de la piste son suivante quand la piste choisie est vide. Si le flux n'a vraiment pas de son, une icône 🔇 orange apparaît dans la pastille de santé avec l'explication.
+- **Journal de lecture** : format des pistes son de chaque chaîne (codec, fréquence, canaux, langue) et détail des tentatives de réparation.
+
 ## [1.1.0] - 2026-10-23
 
 - **Direct en différé** : nouvelle **timeline** (de la pause jusqu'au direct) — glissez le curseur vers la droite pour avancer, Kastideo accélère la lecture jusqu'au point choisi ; **vitesse de lecture** ×1 à ×2 qui revient seule à ×1 en rattrapant le direct ; bouton **Rattraper** (accélère jusqu'au direct) et bouton **Retour au direct** bien visible ; **+30 s** (et −10 s si le flux permet le déplacement) en différé.

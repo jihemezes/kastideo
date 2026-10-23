@@ -676,6 +676,11 @@ final class PlaybackController {
         sessionPoor = 0
         lastPictures = nil
         bufferingEvents = []
+        audioChecks = 0
+        audioRepairs = 0
+        triedAudioTracks = []
+        lastAudio = nil
+        audioIssue = nil
         healthTask = Task { [weak self] in
             while !Task.isCancelled {
                 self?.sampleHealth()
@@ -691,6 +696,7 @@ final class PlaybackController {
         health = StreamHealth()
         audioTracks = []
         subtitleTracks = []
+        userDisabledAudio = false
         currentAudioTrack = -1
         currentSubtitleTrack = -1
     }
@@ -716,12 +722,14 @@ final class PlaybackController {
         next.recentStalls = bufferingEvents.count
         next.isPaused = !isPlaying
         next.evaluate()
+        refreshTracks()
+        checkAudio(stats)
+        next.audioIssue = audioIssue
         health = next
         if sessionQuality != nil {
             sessionSamples += 1
             if next.level == .poor { sessionPoor += 1 }
         }
-        refreshTracks()
     }
 
     private func refreshTracks() {
@@ -767,6 +775,105 @@ final class PlaybackController {
     func selectAudioTrack(_ id: Int32) {
         player.currentAudioTrackIndex = id
         currentAudioTrack = id
+        userDisabledAudio = id < 0
+        audioIssue = nil
+    }
+
+    // MARK: - Son absent : diagnostic et réparation automatique
+
+    /// Problème de son détecté (affiché dans la pastille de santé et le panneau d'informations).
+    private(set) var audioIssue: String?
+    @ObservationIgnored private var audioChecks = 0
+    @ObservationIgnored private var audioRepairs = 0
+    @ObservationIgnored private var triedAudioTracks = Set<Int32>()
+    @ObservationIgnored private var lastAudio: (decoded: Int, played: Int)?
+    @ObservationIgnored private var userDisabledAudio = false
+    static let maxAudioRepairs = 4
+
+    /// Toutes les 2 s : si aucun son n'est joué alors que l'image avance, on cherche pourquoi et on tente
+    /// de réparer (sortie audio non créée → relance de la piste ; piste vide → piste suivante).
+    private func checkAudio(_ stats: VLCMediaStats) {
+        let decoded = Int(stats.decodedAudio)
+        let played = Int(stats.playedAudioBuffers)
+        let previous = lastAudio
+        lastAudio = (decoded, played)
+        guard isPlaying, pausedAt == nil, !userDisabledAudio else { return }
+        audioChecks += 1
+        if audioChecks == 2 { logAudioTracks() }
+        guard let previous, audioChecks >= 3 else { return }
+        let newDecoded = decoded - previous.decoded
+        let newPlayed = played - previous.played
+        if newPlayed > 0 {
+            if audioIssue != nil {
+                audioIssue = nil
+                PlaybackLog.shared.note("Son : rétabli")
+            }
+            return
+        }
+        let realTracks = audioTracks.filter { $0.id >= 0 }
+        if realTracks.isEmpty {
+            if audioIssue == nil {
+                audioIssue = String(localized: "Ce flux ne contient aucune piste son (problème chez le fournisseur).")
+                PlaybackLog.shared.note("Son : aucune piste audio dans le flux")
+            }
+            return
+        }
+        guard audioRepairs < Self.maxAudioRepairs else {
+            if audioIssue == nil {
+                audioIssue = String(localized: "Son absent : le fournisseur envoie une piste son vide ou illisible. Essayez une autre version de la chaîne (HD, SD…).")
+                PlaybackLog.shared.note("Son : toujours absent après \(Self.maxAudioRepairs) tentatives (décodé \(decoded), joué \(played))")
+            }
+            return
+        }
+        audioRepairs += 1
+        let currentTrack = player.currentAudioTrackIndex
+        if newDecoded > 0 || realTracks.count == 1 {
+            // Le son est décodé (ou il n'y a qu'une piste) mais rien n'est joué : la sortie audio n'a pas pu être
+            // créée au démarrage (« too low audio sample frequency (0) »). On relance la piste.
+            let track = currentTrack >= 0 ? currentTrack : realTracks[0].id
+            PlaybackLog.shared.note("Son : \(newDecoded) bloc(s) décodé(s) mais rien joué — relance de la piste \(track) (essai \(audioRepairs)/\(Self.maxAudioRepairs))")
+            player.currentAudioTrackIndex = -1
+            let media = player.media
+            Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(300))
+                guard let self, self.player.media === media else { return }
+                self.player.currentAudioTrackIndex = track
+                self.currentAudioTrack = track
+                self.applyAudio()
+            }
+        } else {
+            // Rien n'est décodé sur cette piste : on essaie la suivante.
+            triedAudioTracks.insert(currentTrack)
+            if let next = realTracks.first(where: { !triedAudioTracks.contains($0.id) }) {
+                PlaybackLog.shared.note("Son : rien décodé sur la piste \(currentTrack) — essai de « \(next.name) »")
+                player.currentAudioTrackIndex = next.id
+                currentAudioTrack = next.id
+                applyAudio()
+            } else {
+                triedAudioTracks = []
+            }
+        }
+    }
+
+    /// Note dans le journal le format des pistes son (codec, fréquence, canaux) pour le diagnostic.
+    private func logAudioTracks() {
+        guard let info = player.media?.tracksInformation else { return }
+        var parts: [String] = []
+        for case let track as [String: Any] in info where (track["type"] as? String) == "audio" {
+            let codec = (track["codec"] as? NSNumber).map { Self.fourCC($0.uint32Value) } ?? "?"
+            let rate = (track["rate"] as? NSNumber)?.intValue ?? 0
+            let channels = (track["channels_number"] as? NSNumber)?.intValue ?? 0
+            let language = (track["language"] as? String).map { " \($0)" } ?? ""
+            parts.append("\(codec) \(rate) Hz \(channels) canal(aux)\(language)")
+        }
+        let names = audioTracks.map(\.name).joined(separator: ", ")
+        PlaybackLog.shared.note("Son : \(parts.isEmpty ? "aucune piste audio annoncée" : parts.joined(separator: " ; ")) — pistes : \(names.isEmpty ? "aucune" : names)")
+    }
+
+    static func fourCC(_ value: UInt32) -> String {
+        let bytes = [value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff, (value >> 24) & 0xff]
+        let text = String(bytes.compactMap { UnicodeScalar($0).map(Character.init) }).trimmingCharacters(in: .whitespaces)
+        return text.isEmpty ? "?" : text
     }
 
     func selectSubtitleTrack(_ id: Int32) {
@@ -872,6 +979,8 @@ struct StreamHealth: Equatable {
     var framesPerSecond: Double = 0
     var recentStalls = 0
     var isPaused = false
+    /// Son absent (diagnostic).
+    var audioIssue: String?
 
     mutating func evaluate() {
         if isPaused { level = .unknown; return }
