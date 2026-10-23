@@ -170,6 +170,7 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Afficher le temps de démarrage des chaînes", isOn: $showStartupTime)
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
+                TimeshiftSettingsRow()
                 MultiViewSettingsRow()
                 QualitySettingsRow()
                 AdultSettingsRow()

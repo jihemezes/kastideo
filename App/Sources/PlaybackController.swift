@@ -37,6 +37,25 @@ enum PlaybackKeys {
     static let volume = "volume"
     static let muted = "muted"
     static let resume = "resumePlayback"
+    /// Durée maximale du différé en minutes (0 = sans limite).
+    static let timeshiftMax = "timeshift.maxMinutes"
+    static let catchUpSpeed = "timeshift.catchUpSpeed"
+}
+
+/// Réglages du direct en différé.
+enum TimeshiftSettings {
+    static var maxMinutes: Int { UserDefaults.standard.object(forKey: PlaybackKeys.timeshiftMax) as? Int ?? 120 }
+    static var catchUpSpeed: Float {
+        let value = UserDefaults.standard.object(forKey: PlaybackKeys.catchUpSpeed) as? Double ?? 1.5
+        return Float(min(max(value, 1.25), 2))
+    }
+    /// Dossier des fichiers du différé (dossier temporaire de l'application).
+    static var folder: URL { URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true) }
+    static let speeds: [Float] = [1, 1.25, 1.5, 2]
+
+    static func label(_ rate: Float) -> String {
+        rate == 1 ? "×1" : "×" + String(format: rate == 1.25 ? "%.2f" : "%.1f", rate).replacingOccurrences(of: ".", with: ",")
+    }
 }
 
 /// Relais des événements VLC (objet Objective-C) vers le contrôleur.
@@ -119,6 +138,141 @@ final class PlaybackController {
 
     func delay(at date: Date) -> TimeInterval {
         liveDelay + (pausedAt.map { date.timeIntervalSince($0) } ?? 0)
+    }
+
+    // MARK: - Différé : vitesse, rattrapage, déplacement
+
+    /// Vitesse de lecture (1 = normale ; plus rapide pour rattraper le direct).
+    private(set) var rate: Float = 1
+    /// Retard visé par le rattrapage en cours (0 = le direct).
+    private(set) var catchUpTarget: TimeInterval?
+    /// Plus grand retard atteint depuis le début du différé (longueur de la timeline).
+    private(set) var peakDelay: TimeInterval = 0
+    /// Le moteur sait se déplacer dans le différé (sinon on avance en accélérant).
+    private(set) var timeshiftSeekable = false
+    /// Message bref affiché dans la barre (vitesse refusée, différé maximal atteint…).
+    var timeshiftNotice: String?
+    @ObservationIgnored private var timeshiftTask: Task<Void, Never>?
+    @ObservationIgnored private var lastTimeshiftTick = Date()
+
+    /// Change la vitesse de lecture du différé (impossible d'aller plus vite que le direct).
+    func setRate(_ value: Float) {
+        guard isLive, player.media != nil else { return }
+        if value > 1 {
+            guard isTimeshifted else { return }
+            if pausedAt != nil { togglePause() }
+        } else {
+            catchUpTarget = nil
+        }
+        applyRate(max(value, 1))
+    }
+
+    /// Avance dans le différé jusqu'à un retard donné (0 = le direct) : saut direct si le moteur le permet,
+    /// sinon lecture accélérée jusqu'à la position visée.
+    func catchUp(toDelay target: TimeInterval) {
+        guard isLive, isTimeshifted, player.media != nil else { return }
+        if pausedAt != nil { togglePause() }
+        let now = delay(at: Date())
+        peakDelay = max(peakDelay, now)
+        let goal = min(max(0, target), peakDelay)
+        if timeshiftSeekable {
+            let shift = now - goal
+            if shift > 0 { player.jumpForward(Int32(shift.rounded())) } else if shift < 0 { player.jumpBackward(Int32((-shift).rounded())) }
+            liveDelay = goal
+            PlaybackLog.shared.note(String(format: "Différé : déplacement à −%.0f s", goal))
+            if goal < 1 { finishCatchUp(reachedLive: true) }
+            return
+        }
+        guard now - goal > 1 else { return }
+        catchUpTarget = goal
+        applyRate(max(rate, TimeshiftSettings.catchUpSpeed))
+        PlaybackLog.shared.note(String(format: "Différé : rattrapage de −%.0f s à −%.0f s", now, goal))
+    }
+
+    private func applyRate(_ value: Float) {
+        tickTimeshift()
+        rate = value
+        player.rate = value
+        PlaybackLog.shared.note("Vitesse de lecture : \(TimeshiftSettings.label(value))")
+        if value != 1 {
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(1.5))
+                guard let self, self.rate == value, self.player.media != nil else { return }
+                if abs(self.player.rate - value) > 0.05 {
+                    PlaybackLog.shared.note("Vitesse refusée par le moteur (\(self.player.rate))")
+                    self.rate = 1
+                    self.catchUpTarget = nil
+                    self.timeshiftNotice = String(localized: "Ce flux ne permet pas d'accélérer la lecture.")
+                }
+            }
+        }
+        startTimeshiftTicker()
+    }
+
+    private func finishCatchUp(reachedLive: Bool) {
+        catchUpTarget = nil
+        if rate != 1 {
+            rate = 1
+            player.rate = 1
+        }
+        if reachedLive {
+            liveDelay = 0
+            peakDelay = 0
+            timeshiftNotice = String(localized: "Direct rattrapé")
+            PlaybackLog.shared.note("Différé : direct rattrapé")
+        }
+    }
+
+    private func startTimeshiftTicker() {
+        guard timeshiftTask == nil else { return }
+        lastTimeshiftTick = Date()
+        timeshiftTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self else { return }
+                if !self.tickTimeshift() {
+                    self.timeshiftTask = nil
+                    return
+                }
+            }
+        }
+    }
+
+    /// Met à jour le retard (lecture accélérée), la fin du rattrapage et la limite du différé.
+    /// Renvoie vrai tant qu'il faut continuer à surveiller.
+    @discardableResult
+    private func tickTimeshift() -> Bool {
+        let now = Date()
+        let elapsedTime = now.timeIntervalSince(lastTimeshiftTick)
+        lastTimeshiftTick = now
+        guard isLive, player.media != nil else { return false }
+        if isPlaying, pausedAt == nil, rate > 1 {
+            liveDelay = max(0, liveDelay - elapsedTime * Double(rate - 1))
+        }
+        let current = delay(at: now)
+        peakDelay = max(peakDelay, current)
+        if let target = catchUpTarget, current <= target + 0.5 {
+            finishCatchUp(reachedLive: target < 1)
+        } else if rate > 1, current < 1 {
+            finishCatchUp(reachedLive: true)
+        }
+        let maxMinutes = TimeshiftSettings.maxMinutes
+        if maxMinutes > 0, pausedAt != nil, current >= Double(maxMinutes * 60) {
+            togglePause()
+            timeshiftNotice = String(localized: "Différé maximal atteint (\(maxMinutes) min) : la lecture reprend.")
+            PlaybackLog.shared.note("Différé maximal atteint : reprise de la lecture")
+        }
+        return pausedAt != nil || rate != 1 || catchUpTarget != nil
+    }
+
+    private func resetTimeshift() {
+        timeshiftTask?.cancel()
+        timeshiftTask = nil
+        rate = 1
+        catchUpTarget = nil
+        peakDelay = 0
+        timeshiftSeekable = false
+        timeshiftNotice = nil
     }
 
     var volume: Double {
@@ -205,6 +359,7 @@ final class PlaybackController {
         openTask = nil
         pausedAt = nil
         liveDelay = 0
+        resetTimeshift()
         if player.media != nil { streamClosedAt = Date() }
         if player.media != nil, !isStopping {
             // L'arrêt d'un flux réseau peut prendre plusieurs secondes dans le moteur VLC : il se fait
@@ -236,7 +391,10 @@ final class PlaybackController {
         if player.isPlaying {
             guard canPause || !isLive else { return }
             player.pause()
-            if isLive { pausedAt = Date() }
+            if isLive {
+                pausedAt = Date()
+                startTimeshiftTicker()
+            }
         } else {
             player.play()
             if let pausedAt {
@@ -249,6 +407,11 @@ final class PlaybackController {
     /// Revient au direct (rouvre le flux) après une pause.
     func goLive() {
         guard isLive, let url = current?.streamURL else { return }
+        if timeshiftSeekable, isTimeshifted, player.media != nil {
+            // Le moteur sait se déplacer dans le différé : on saute au direct en gardant ce qui est en mémoire.
+            catchUp(toDelay: 0)
+            return
+        }
         fallbacks = Self.alternatives(for: url)
         sameURLRetries = 0
         start(url)
@@ -312,6 +475,21 @@ final class PlaybackController {
     }
 
     func jump(seconds: Int) {
+        if isLive, player.media != nil {
+            // Direct en différé : se déplacer dans ce qui a été mis en mémoire.
+            if timeshiftSeekable, isTimeshifted || seconds < 0 {
+                let now = delay(at: Date())
+                let goal = min(max(now - Double(seconds), 0), max(peakDelay, now))
+                if pausedAt != nil { togglePause() }
+                if seconds > 0 { player.jumpForward(Int32(seconds)) } else { player.jumpBackward(Int32(-seconds)) }
+                liveDelay = goal
+                peakDelay = max(peakDelay, goal)
+                if goal < 1 { finishCatchUp(reachedLive: true) }
+            } else if seconds > 0, isTimeshifted {
+                catchUp(toDelay: delay(at: Date()) - Double(seconds))
+            }
+            return
+        }
         guard isSeekable else { return }
         if seconds >= 0 { player.jumpForward(Int32(seconds)) } else { player.jumpBackward(Int32(-seconds)) }
     }
@@ -368,6 +546,7 @@ final class PlaybackController {
         canPause = false
         liveDelay = 0
         pausedAt = nil
+        resetTimeshift()
         startedAt = Date()
         currentURL = url
         resetTimeline()
@@ -383,6 +562,7 @@ final class PlaybackController {
         media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
         media.addOption(":input-timeshift-granularity=52428800")
         player.media = media
+        player.rate = 1
         applyAudio()
         player.play()
 
@@ -601,6 +781,7 @@ final class PlaybackController {
         duration = length > 0 ? Double(length) / 1000 : 0
         position = Double(player.position)
         isSeekable = player.isSeekable && duration > 0
+        timeshiftSeekable = isLive && player.isSeekable
         canPause = player.canPause
         trackProgress()
     }

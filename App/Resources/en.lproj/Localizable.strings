@@ -635,3 +635,23 @@
 "Aucun programme trouvé pour « %@ ». Choisissez la bonne chaîne ci-dessous." = "No program found for “%@”. Choose the right channel below.";
 "Guide de secours" = "Backup guide";
 "Fournisseur" = "Provider";
+
+/* 1.1.0 */
+"Ce flux ne permet pas d'accélérer la lecture." = "This stream does not allow faster playback.";
+"Direct rattrapé" = "Caught up with live";
+"Différé maximal atteint (%lld min) : la lecture reprend." = "Maximum timeshift reached (%lld min): playback resumes.";
+"Reculer de 10 s dans le différé" = "Back 10 s in timeshift";
+"Avancer de 30 s dans le différé" = "Forward 30 s in timeshift";
+"Avancer de 30 s (lecture accélérée jusqu'au point visé)" = "Forward 30 s (faster playback until that point)";
+"Vitesse de lecture du différé : accélérez pour rattraper le direct" = "Timeshift playback speed: speed up to catch up with live";
+"Rattraper" = "Catch up";
+"Accélérer la lecture jusqu'à rattraper le direct (vitesse réglable dans Réglages > Général > Lecture)" = "Speed up playback until live is reached (speed set in Settings > General > Playback)";
+"Retour au direct" = "Back to live";
+"Revenir immédiatement au direct (le différé reste disponible)" = "Return to live now (the timeshift stays available)";
+"Revenir immédiatement au direct (le flux est rouvert : le différé est effacé). Pour le garder, utilisez « Rattraper »." = "Return to live now (the stream is reopened: the timeshift is cleared). To keep it, use “Catch up”.";
+"Glissez vers la droite pour avancer dans le différé ; tout à droite : le direct" = "Drag right to move forward in the timeshift; far right: live";
+"Durée maximale du différé" = "Maximum timeshift duration";
+"Sans limite" = "Unlimited";
+"Vitesse pour rattraper le direct" = "Catch-up speed";
+"Dossier du différé" = "Timeshift folder";
+"Pendant une pause du direct, le flux continue d'être mis en mémoire sur le disque (environ 1 à 4 Go par heure selon la qualité). Les fichiers sont effacés au changement de chaîne. Une fois la durée maximale atteinte, la lecture reprend toute seule." = "While live TV is paused, the stream keeps being stored on disk (about 1 to 4 GB per hour depending on quality). Files are cleared when you change channel. Once the maximum duration is reached, playback resumes by itself.";

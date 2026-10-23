@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.0] - 2026-10-23
+
+- **Direct en différé** : nouvelle **timeline** (de la pause jusqu'au direct) — glissez le curseur vers la droite pour avancer, Kastideo accélère la lecture jusqu'au point choisi ; **vitesse de lecture** ×1 à ×2 qui revient seule à ×1 en rattrapant le direct ; bouton **Rattraper** (accélère jusqu'au direct) et bouton **Retour au direct** bien visible ; **+30 s** (et −10 s si le flux permet le déplacement) en différé.
+- Réglages > Général > Lecture : **durée maximale du différé** (30 min à 3 h ou sans limite, la lecture reprend seule une fois atteinte), **vitesse de rattrapage**, emplacement du dossier du différé avec bouton **Afficher**.
+
 ## [1.0.3] - 2026-10-23
 
 - **Direct — changement de chaîne** : le fournisseur refusait la nouvelle chaîne (HTTP 404/403) parce qu'il comptait encore l'ancienne connexion (abonnement à une connexion). Kastideo laisse désormais 1,5 s au serveur pour libérer la chaîne précédente avant d'ouvrir la suivante, et réessaie deux fois la même chaîne (après 2 puis 4 s) si le serveur la refuse encore, avant d'essayer la variante .m3u8.

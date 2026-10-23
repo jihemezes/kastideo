@@ -14,6 +14,17 @@ struct ControlsBar: View {
         VStack(spacing: 6) {
             if playback.isSeekable {
                 ScrubBar(scrubbing: $scrubbing)
+            } else if playback.isTimeshifted {
+                TimeshiftBar()
+            }
+            if let notice = playback.timeshiftNotice {
+                Text(notice)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.yellow)
+                    .task(id: notice) {
+                        try? await Task.sleep(for: .seconds(4))
+                        if playback.timeshiftNotice == notice { playback.timeshiftNotice = nil }
+                    }
             }
             HStack(spacing: 14) {
                 Button { playback.togglePause() } label: {
@@ -40,9 +51,48 @@ struct ControlsBar: View {
                         }
                         .foregroundStyle(.yellow)
                     }
-                    Button("Direct") { playback.goLive() }
-                        .disabled(recordings.isPlayerRecording)
-                        .help(recordings.isPlayerRecording ? String(localized: "Indisponible pendant un enregistrement") : String(localized: "Revenir au direct"))
+                    if playback.timeshiftSeekable {
+                        Button { playback.jump(seconds: -10) } label: { Image(systemName: "gobackward.10") }
+                            .help("Reculer de 10 s dans le différé")
+                    }
+                    Button { playback.jump(seconds: 30) } label: { Image(systemName: "goforward.30") }
+                        .help(playback.timeshiftSeekable ? String(localized: "Avancer de 30 s dans le différé") : String(localized: "Avancer de 30 s (lecture accélérée jusqu'au point visé)"))
+                    Menu {
+                        ForEach(TimeshiftSettings.speeds, id: \.self) { speed in
+                            Button {
+                                playback.setRate(speed)
+                            } label: {
+                                if playback.rate == speed { Label(TimeshiftSettings.label(speed), systemImage: "checkmark") } else { Text(TimeshiftSettings.label(speed)) }
+                            }
+                        }
+                    } label: {
+                        Text(TimeshiftSettings.label(playback.rate))
+                            .font(.caption.weight(.bold).monospacedDigit())
+                            .foregroundStyle(playback.rate > 1 ? Color.yellow : .white)
+                    }
+                    .menuStyle(.borderlessButton)
+                    .fixedSize()
+                    .help("Vitesse de lecture du différé : accélérez pour rattraper le direct")
+                    Button {
+                        playback.catchUp(toDelay: 0)
+                    } label: {
+                        Label("Rattraper", systemImage: "forward.fill")
+                    }
+                    .help("Accélérer la lecture jusqu'à rattraper le direct (vitesse réglable dans Réglages > Général > Lecture)")
+                    Button {
+                        playback.goLive()
+                    } label: {
+                        Label("Retour au direct", systemImage: "dot.radiowaves.left.and.right")
+                            .font(.callout.weight(.semibold))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(Color.red.opacity(0.85), in: Capsule())
+                    }
+                    .disabled(recordings.isPlayerRecording && !playback.timeshiftSeekable)
+                    .help(recordings.isPlayerRecording && !playback.timeshiftSeekable
+                          ? String(localized: "Indisponible pendant un enregistrement")
+                          : playback.timeshiftSeekable
+                            ? String(localized: "Revenir immédiatement au direct (le différé reste disponible)")
+                            : String(localized: "Revenir immédiatement au direct (le flux est rouvert : le différé est effacé). Pour le garder, utilisez « Rattraper »."))
                 } else {
                     HStack(spacing: 6) {
                         Circle().fill(.red).frame(width: 8, height: 8)
@@ -370,5 +420,106 @@ struct PlayerContextPanel: View {
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.75))
         }
+    }
+}
+
+
+/// Timeline du direct en différé : de la mise en pause (à gauche) jusqu'au direct (à droite).
+/// Glisser le curseur vers la droite avance dans le différé (en accélérant la lecture si le moteur ne sait pas sauter).
+struct TimeshiftBar: View {
+    @Environment(PlaybackController.self) private var playback
+    @State private var dragFraction: Double?
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.5)) { context in
+            let delay = playback.delay(at: context.date)
+            let total = max(playback.peakDelay, delay, 1)
+            let current = (total - delay) / total
+            GeometryReader { geo in
+                let width = max(geo.size.width, 1)
+                let shown = dragFraction ?? current
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.22))
+                    // Déjà regardé (on ne peut pas y revenir sans déplacement possible dans le différé).
+                    Capsule().fill(Color.white.opacity(playback.timeshiftSeekable ? 0.45 : 0.12))
+                        .frame(width: width * CGFloat(current))
+                    if let target = playback.catchUpTarget {
+                        Rectangle().fill(Color.yellow)
+                            .frame(width: 2, height: 12)
+                            .offset(x: width * CGFloat((total - target) / total) - 1)
+                    }
+                    Circle().fill(Color.yellow)
+                        .frame(width: 13, height: 13)
+                        .offset(x: width * CGFloat(min(max(shown, 0), 1)) - 6.5)
+                }
+                .frame(height: 5)
+                .frame(maxHeight: .infinity)
+                .overlay(alignment: .topLeading) {
+                    if let dragFraction {
+                        Text(Self.label(total * (1 - dragFraction)))
+                            .font(.caption2.weight(.semibold).monospacedDigit())
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(.black.opacity(0.75), in: Capsule())
+                            .fixedSize()
+                            .offset(x: min(max(width * CGFloat(dragFraction) - 26, 0), width - 60), y: -20)
+                    }
+                }
+                .overlay(alignment: .trailing) {
+                    Text("DIRECT").font(.system(size: 8, weight: .heavy)).foregroundStyle(.red).offset(y: 10)
+                }
+                .contentShape(Rectangle())
+                .gesture(DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        let fraction = Double(min(max(value.location.x / width, 0), 1))
+                        dragFraction = playback.timeshiftSeekable ? fraction : max(fraction, current)
+                    }
+                    .onEnded { _ in
+                        if let fraction = dragFraction {
+                            playback.catchUp(toDelay: total * (1 - fraction))
+                        }
+                        dragFraction = nil
+                    })
+            }
+            .frame(height: 18)
+        }
+        .help("Glissez vers la droite pour avancer dans le différé ; tout à droite : le direct")
+    }
+
+    static func label(_ delay: TimeInterval) -> String {
+        delay < 1 ? String(localized: "Direct") : "−" + delay.clockString
+    }
+}
+
+/// Réglages du différé (Réglages > Général > Lecture).
+struct TimeshiftSettingsRow: View {
+    @AppStorage(PlaybackKeys.timeshiftMax) private var maxMinutes = 120
+    @AppStorage(PlaybackKeys.catchUpSpeed) private var speed = 1.5
+
+    var body: some View {
+        Picker("Durée maximale du différé", selection: $maxMinutes) {
+            Text("30 min").tag(30)
+            Text("1 h").tag(60)
+            Text("2 h").tag(120)
+            Text("3 h").tag(180)
+            Text("Sans limite").tag(0)
+        }
+        Picker("Vitesse pour rattraper le direct", selection: $speed) {
+            Text("×1,25").tag(1.25)
+            Text("×1,5").tag(1.5)
+            Text("×2").tag(2.0)
+        }
+        LabeledContent("Dossier du différé") {
+            HStack {
+                Text(TimeshiftSettings.folder.path)
+                    .font(.caption.monospaced())
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .textSelection(.enabled)
+                Button("Afficher") { NSWorkspace.shared.open(TimeshiftSettings.folder) }
+            }
+        }
+        Text("Pendant une pause du direct, le flux continue d'être mis en mémoire sur le disque (environ 1 à 4 Go par heure selon la qualité). Les fichiers sont effacés au changement de chaîne. Une fois la durée maximale atteinte, la lecture reprend toute seule.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 }
