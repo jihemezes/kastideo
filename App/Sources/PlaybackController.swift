@@ -792,7 +792,7 @@ final class PlaybackController {
 
     /// Toutes les 2 s : si aucun son n'est joué alors que l'image avance, on cherche pourquoi et on tente
     /// de réparer (sortie audio non créée → relance de la piste ; piste vide → piste suivante).
-    private func checkAudio(_ stats: VLCMediaStats) {
+    private func checkAudio(_ stats: VLCMedia.Stats) {
         let decoded = Int(stats.decodedAudio)
         let played = Int(stats.playedAudioBuffers)
         let previous = lastAudio
