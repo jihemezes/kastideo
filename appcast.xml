@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.2</title>
+      <pubDate>Fri, 23 Oct 2026 22:29:43 GMT</pubDate>
+      <sparkle:version>42</sparkle:version>
+      <sparkle:shortVersionString>1.1.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correctif de compilation de la 1.1.1 (type des statistiques VLC renommé &lt;code&gt;VLCMedia.Stats&lt;/code&gt;). Contient toutes les nouveautés de la 1.1.1.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.2/Kastideo-1.1.2.dmg" length="45864240" type="application/octet-stream" sparkle:edSignature="0/qrDpkvgWZ9N4iz/3+tu4QVBZYOoLt8IuBGOCDVHbxjn3hmKpfawF1mF8Q19MtDomF/z2jb0xyBdM128CiDCQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.0</title>
       <pubDate>Fri, 23 Oct 2026 18:57:20 GMT</pubDate>
       <sparkle:version>40</sparkle:version>
