@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.0</title>
+      <pubDate>Fri, 23 Oct 2026 18:57:20 GMT</pubDate>
+      <sparkle:version>40</sparkle:version>
+      <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Direct en différé&lt;/b&gt; : nouvelle &lt;b&gt;timeline&lt;/b&gt; (de la pause jusqu&amp;#x27;au direct) — glissez le curseur vers la droite pour avancer, Kastideo accélère la lecture jusqu&amp;#x27;au point choisi ; &lt;b&gt;vitesse de lecture&lt;/b&gt; ×1 à ×2 qui revient seule à ×1 en rattrapant le direct ; bouton &lt;b&gt;Rattraper&lt;/b&gt; (accélère jusqu&amp;#x27;au direct) et bouton &lt;b&gt;Retour au direct&lt;/b&gt; bien visible ; &lt;b&gt;+30 s&lt;/b&gt; (et −10 s si le flux permet le déplacement) en différé.&lt;/li&gt;
+&lt;li&gt;Réglages &amp;gt; Général &amp;gt; Lecture : &lt;b&gt;durée maximale du différé&lt;/b&gt; (30 min à 3 h ou sans limite, la lecture reprend seule une fois atteinte), &lt;b&gt;vitesse de rattrapage&lt;/b&gt;, emplacement du dossier du différé avec bouton &lt;b&gt;Afficher&lt;/b&gt;.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.0/Kastideo-1.1.0.dmg" length="45844137" type="application/octet-stream" sparkle:edSignature="gAp+Jzcn/gn1a7IGSz+34ZmgE4mF0n/8/iYegVpgrZfVFG7RxQmnIM6MTEePyCAtjS8h0vzXezgrGGRqqHSfDQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.0.3</title>
       <pubDate>Fri, 23 Oct 2026 05:34:58 GMT</pubDate>
       <sparkle:version>39</sparkle:version>
