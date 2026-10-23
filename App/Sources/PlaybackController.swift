@@ -192,6 +192,7 @@ final class PlaybackController {
             pendingResume = point
         }
         fallbacks = Self.alternatives(for: url)
+        sameURLRetries = 0
         start(url)
     }
 
@@ -200,8 +201,11 @@ final class PlaybackController {
         pendingResume = nil
         resumedAt = nil
         watchdog?.cancel()
+        openTask?.cancel()
+        openTask = nil
         pausedAt = nil
         liveDelay = 0
+        if player.media != nil { streamClosedAt = Date() }
         if player.media != nil, !isStopping {
             // L'arrêt d'un flux réseau peut prendre plusieurs secondes dans le moteur VLC : il se fait
             // en arrière-plan pour ne jamais bloquer l'interface (passage du Direct aux Films, etc.).
@@ -246,6 +250,7 @@ final class PlaybackController {
     func goLive() {
         guard isLive, let url = current?.streamURL else { return }
         fallbacks = Self.alternatives(for: url)
+        sameURLRetries = 0
         start(url)
     }
 
@@ -313,16 +318,48 @@ final class PlaybackController {
 
     // MARK: - Interne
 
-    private func start(_ url: URL) {
+    /// Délai laissé au serveur pour libérer la connexion précédente (abonnement à une connexion) :
+    /// sans lui, le fournisseur refuse le nouveau flux (HTTP 404/403) parce qu'il compte encore l'ancien.
+    static let releaseDelay: TimeInterval = 1.5
+    @ObservationIgnored private var streamClosedAt: Date?
+    @ObservationIgnored private var openTask: Task<Void, Never>?
+    @ObservationIgnored private var sameURLRetries = 0
+
+    private func start(_ url: URL, delay extra: TimeInterval = 0) {
         // Une seule connexion autorisée par l'abonnement : on ferme d'abord le flux en cours
         // (y compris un arrêt encore en cours en arrière-plan).
+        openTask?.cancel()
+        openTask = nil
+        watchdog?.cancel()
         if player.media != nil || isStopping {
             VideoContainerView.ensureHosted(for: player)
-            let closing = Date()
             player.stop()
+            player.media = nil
             isStopping = false
-            PlaybackLog.shared.note("Flux précédent fermé en \(Int(Date().timeIntervalSince(closing) * 1000)) ms")
+            streamClosedAt = Date()
         }
+        errorMessage = nil
+        isLoading = true
+        isPlaying = false
+        didStart = false
+        resetTimeline()
+        currentURL = url
+        let since = streamClosedAt.map { Date().timeIntervalSince($0) } ?? .infinity
+        let wait = max(extra, Self.releaseDelay - since)
+        guard wait > 0.05 else {
+            open(url)
+            return
+        }
+        PlaybackLog.shared.note(String(format: "Attente de %.1f s pour que le serveur libère la connexion précédente", wait))
+        openTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(wait))
+            guard !Task.isCancelled, let self, self.currentURL == url, self.current != nil else { return }
+            self.open(url)
+        }
+    }
+
+    private func open(_ url: URL) {
+        openTask = nil
         errorMessage = nil
         isLoading = true
         isPlaying = false
@@ -404,7 +441,16 @@ final class PlaybackController {
         case .paused:
             isPlaying = false
         case .error:
+            let detail = startedAt.flatMap { PlaybackLog.shared.lastError(since: $0) }
+            if let url = currentURL, sameURLRetries < 2, Self.isRefusal(detail) {
+                // Refus du serveur : souvent l'ancienne connexion n'est pas encore libérée. On patiente puis on réessaie.
+                sameURLRetries += 1
+                PlaybackLog.shared.note("Flux refusé par le serveur : nouvel essai \(sameURLRetries)/2")
+                start(url, delay: 2.0 * Double(sameURLRetries))
+                return
+            }
             if !fallbacks.isEmpty {
+                sameURLRetries = 2 // variante (.m3u8) : un seul essai
                 start(fallbacks.removeFirst())
                 return
             }
@@ -589,20 +635,15 @@ final class PlaybackController {
         } else if ext.isEmpty, url.query == nil {
             list = [url.appendingPathExtension("ts")]
         }
-        // Certains fournisseurs (derrière Cloudflare) répondent 520 en https alors que le même flux passe en http
-        // (comme dans Piboard) : on essaie ensuite les mêmes adresses en http.
-        if url.scheme?.lowercased() == "https" {
-            list += ([url] + list).compactMap(Self.plainHTTP)
-        }
         return list
     }
 
-    /// Même adresse en http (port par défaut si le port https était explicite).
-    static func plainHTTP(_ url: URL) -> URL? {
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
-        components.scheme = "http"
-        if components.port == 443 { components.port = nil }
-        return components.url
+    /// Le serveur a refusé le flux (connexion précédente pas encore libérée, limite de connexions…) :
+    /// cela vaut la peine de réessayer la même adresse un peu plus tard.
+    static func isRefusal(_ detail: String?) -> Bool {
+        guard let detail else { return false }
+        return ["HTTP 401", "HTTP 403", "HTTP 404", "HTTP 429", "HTTP 458", "HTTP 509", "HTTP 520", "HTTP 503", "Forbidden", "unable to open"]
+            .contains { detail.localizedCaseInsensitiveContains($0) }
     }
 
     static func stateName(_ state: VLCMediaPlayerState) -> String {

@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.0.3] - 2026-10-23
+
+- **Direct — changement de chaîne** : le fournisseur refusait la nouvelle chaîne (HTTP 404/403) parce qu'il comptait encore l'ancienne connexion (abonnement à une connexion). Kastideo laisse désormais 1,5 s au serveur pour libérer la chaîne précédente avant d'ouvrir la suivante, et réessaie deux fois la même chaîne (après 2 puis 4 s) si le serveur la refuse encore, avant d'essayer la variante .m3u8.
+- L'essai en http ajouté en 1.0.2 est retiré (le serveur le refuse : HTTP 403).
+
 ## [1.0.2] - 2026-10-23
 
 - **Direct** : quand le serveur refuse un flux en https (erreur HTTP 520 de Cloudflare, alors que la chaîne fonctionne ailleurs), Kastideo réessaie automatiquement la même chaîne en http (.ts puis .m3u8).
