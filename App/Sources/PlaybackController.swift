@@ -306,6 +306,7 @@ final class PlaybackController {
         player = VLCMediaPlayer(options: ["--no-video-title-show", "--no-snapshot-preview"])
         player.libraryInstance.setHumanReadableName("Kastideo", withHTTPUserAgent: HTTP.userAgent)
         player.libraryInstance.loggers = [PlaybackLog.shared]
+        StreamRelay.shared.start()
         player.delegate = bridge
         bridge.onState = { [weak self] state in
             MainActor.assumeIsolated { self?.handle(state) }
@@ -322,6 +323,7 @@ final class PlaybackController {
         // En quittant Kastideo, on ferme proprement le flux pour que le fournisseur libère la connexion.
         NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
+                StreamRelay.shared.closeAll()
                 guard let self, self.player.media != nil else { return }
                 VideoContainerView.ensureHosted(for: self.player)
                 self.player.stop()
@@ -361,6 +363,7 @@ final class PlaybackController {
         liveDelay = 0
         resetTimeshift()
         if player.media != nil { streamClosedAt = Date() }
+        StreamRelay.shared.closeAll()
         if player.media != nil, !isStopping {
             // L'arrêt d'un flux réseau peut prendre plusieurs secondes dans le moteur VLC : il se fait
             // en arrière-plan pour ne jamais bloquer l'interface (passage du Direct aux Films, etc.).
@@ -515,6 +518,7 @@ final class PlaybackController {
             player.media = nil
             isStopping = false
             streamClosedAt = Date()
+            StreamRelay.shared.closeAll()
         }
         errorMessage = nil
         isLoading = true
@@ -552,8 +556,9 @@ final class PlaybackController {
         resetTimeline()
 
         let caching = BufferingMode.current.networkCaching
-        PlaybackLog.shared.note("Ouverture de \(url.absoluteString) — tampon \(caching) ms")
-        let media = VLCMedia(url: url)
+        let source = StreamRelay.shared.playbackURL(for: url, live: current?.kind == .live)
+        PlaybackLog.shared.note("Ouverture de \(url.absoluteString) — tampon \(caching) ms\(source == url ? "" : " (via le relais)")")
+        let media = VLCMedia(url: source)
         media.addOption(":network-caching=\(caching)")
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")

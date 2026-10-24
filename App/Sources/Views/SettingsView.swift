@@ -138,6 +138,7 @@ struct GeneralSettingsView: View {
     @AppStorage(PlaybackKeys.resume) private var resumePlayback = true
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
+    @AppStorage(StreamRelay.enabledKey) private var relayEnabled = true
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
     @AppStorage(AppLanguage.storageKey) private var languageRaw = ""
     @State private var cacheSize: Int64 = 0
@@ -170,6 +171,10 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Afficher le temps de démarrage des chaînes", isOn: $showStartupTime)
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
+                Toggle("Relais de flux pour le direct (une seule connexion au fournisseur)", isOn: $relayEnabled)
+                Text("Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 TimeshiftSettingsRow()
                 MultiViewSettingsRow()
                 QualitySettingsRow()

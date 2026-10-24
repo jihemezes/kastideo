@@ -659,3 +659,7 @@
 /* 1.1.1 */
 "Ce flux ne contient aucune piste son (problème chez le fournisseur)." = "This stream contains no audio track (provider issue).";
 "Son absent : le fournisseur envoie une piste son vide ou illisible. Essayez une autre version de la chaîne (HD, SD…)." = "No sound: the provider sends an empty or unreadable audio track. Try another version of the channel (HD, SD…).";
+
+/* 1.1.3 */
+"Relais de flux pour le direct (une seule connexion au fournisseur)" = "Stream relay for live TV (a single connection to the provider)";
+"Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci." = "Kastideo opens the connection to the provider itself and passes it to the VLC engine, like Piboard: the previous channel is closed cleanly before the next one opens. Turn off only to compare if something goes wrong.";
