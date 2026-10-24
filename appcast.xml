@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.3</title>
+      <pubDate>Sat, 24 Oct 2026 07:31:25 GMT</pubDate>
+      <sparkle:version>43</sparkle:version>
+      <sparkle:shortVersionString>1.1.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Relais de flux pour le direct&lt;/b&gt; (comme Piboard) : Kastideo ouvre lui-même &lt;b&gt;une seule&lt;/b&gt; connexion chez le fournisseur (en-têtes de lecteur VLC, redirections suivies) et la transmet au moteur VLC en local. Les requêtes multiples du moteur VLC à l&amp;#x27;ouverture d&amp;#x27;une chaîne, qui faisaient refuser les flux avec un abonnement à une connexion (HTTP 401/403/404/520), disparaissent ; la chaîne précédente est fermée net avant d&amp;#x27;ouvrir la suivante. Réglage : Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; &lt;b&gt;Relais de flux pour le direct&lt;/b&gt; (activé par défaut).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : réponse réelle du fournisseur (code HTTP, délai, redirections) et durée/volume de chaque connexion.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.3/Kastideo-1.1.3.dmg" length="45931584" type="application/octet-stream" sparkle:edSignature="mnBVjO5DE9u/S2gLIULZ2cSBn+UnPiFvHyn+zStmI4dqvDCuLgqN5Ys7lEfe9v++xiz2QWeLp/PEGQKijtJPCg==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.2</title>
       <pubDate>Fri, 23 Oct 2026 22:29:43 GMT</pubDate>
       <sparkle:version>42</sparkle:version>
