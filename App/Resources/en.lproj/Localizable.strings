@@ -663,3 +663,9 @@
 /* 1.1.3 */
 "Relais de flux pour le direct (une seule connexion au fournisseur)" = "Stream relay for live TV (a single connection to the provider)";
 "Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci." = "Kastideo opens the connection to the provider itself and passes it to the VLC engine, like Piboard: the previous channel is closed cleanly before the next one opens. Turn off only to compare if something goes wrong.";
+
+/* 1.1.6 */
+"Le fournisseur refuse cette chaîne (HTTP %lld). Elle est sans doute hors service chez lui ou absente de votre abonnement : essayez une autre version de la chaîne (HD, SD…) ou réessayez plus tard." = "The provider refuses this channel (HTTP %lld). It is probably out of service on its side or not in your subscription: try another version of the channel (HD, SD…) or try again later.";
+"Flux défectueux chez le fournisseur : son et image mal horodatés. Essayez une autre version de la chaîne (HD, SD…)." = "Faulty stream at the provider: sound and picture have wrong timestamps. Try another version of the channel (HD, SD…).";
+"Chaînes à l'horloge réparée" = "Channels with repaired clock";
+"Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente et les ouvre en se calant sur le son et l'image. « Réinitialiser » revient à la lecture normale pour toutes." = "Kastideo remembers channels whose provider clock is inconsistent and opens them synced on sound and picture. “Reset” returns to normal playback for all of them.";

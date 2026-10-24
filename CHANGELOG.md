@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.6] - 2026-10-24
+
+- **Chaînes refusées par le fournisseur** : quand le fournisseur répond nettement « refusé » ou « introuvable » pour une chaîne (HTTP 403/404, vu grâce au relais), Kastideo ne s'acharne plus (plus de nouvel essai ni de variante .m3u8) et l'explique : chaîne hors service chez lui ou absente de l'abonnement, essayer une autre version.
+- **Image figée / son absent sur les flux à l'horloge incohérente** : la détection couvre maintenant aussi les sauts d'horloge (« clock gap ») et les images en retard, pas seulement le son jeté. La chaîne est rouverte sans l'horloge du fournisseur ; si le flux reste incohérent, Kastideo n'essaie plus de relancer la piste son (ce qui figeait l'image) et indique que le flux est défectueux chez le fournisseur.
+- Réglages > Général > Lecture : **Réinitialiser** les chaînes à l'horloge réparée.
+- Journal : les alertes d'horloge sont regroupées (une ligne toutes les 5 s).
+
 ## [1.1.5] - 2026-10-24
 
 - **Son absent sur certaines chaînes — cause trouvée** : sur ces chaînes, l'horloge envoyée par le fournisseur (PCR) est décalée de plusieurs heures par rapport au son ; le moteur VLC jette alors tout le son (« buffer too late »). Kastideo le détecte en 2 secondes, rouvre la chaîne en se calant sur le son et l'image plutôt que sur cette horloge, et s'en souvient pour les fois suivantes.

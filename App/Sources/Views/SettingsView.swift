@@ -175,6 +175,12 @@ struct GeneralSettingsView: View {
                 Text("Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                LabeledContent("Chaînes à l'horloge réparée") {
+                    Button("Réinitialiser") { PlaybackController.resetClockFixes() }
+                }
+                Text("Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente et les ouvre en se calant sur le son et l'image. « Réinitialiser » revient à la lecture normale pour toutes.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 TimeshiftSettingsRow()
                 MultiViewSettingsRow()
                 QualitySettingsRow()

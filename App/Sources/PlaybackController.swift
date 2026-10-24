@@ -632,12 +632,26 @@ final class PlaybackController {
             isPlaying = false
         case .error:
             let detail = startedAt.flatMap { PlaybackLog.shared.lastError(since: $0) }
+            let relayStatus = StreamRelay.shared.lastUpstreamStatus()
+            if let status = relayStatus, [403, 404, 410].contains(status) {
+                // Réponse nette du fournisseur via le relais : la chaîne elle-même est refusée. Inutile d'insister.
+                watchdog?.cancel()
+                fallbacks = []
+                isLoading = false
+                isPlaying = false
+                PlaybackLog.shared.note("Chaîne refusée par le fournisseur (HTTP \(status)) : pas de nouvel essai")
+                errorMessage = String(localized: "Le fournisseur refuse cette chaîne (HTTP \(status)). Elle est sans doute hors service chez lui ou absente de votre abonnement : essayez une autre version de la chaîne (HD, SD…) ou réessayez plus tard.")
+                return
+            }
             if let url = currentURL, sameURLRetries < 1, Self.isRefusal(detail) {
                 // Refus du serveur : souvent l'ancienne connexion n'est pas encore libérée. On patiente puis on réessaie.
                 sameURLRetries += 1
                 PlaybackLog.shared.note("Flux refusé par le serveur : nouvel essai dans 2 s")
                 start(url, delay: 2.0 * Double(sameURLRetries))
                 return
+            }
+            if relayStatus != nil {
+                fallbacks = []   // via le relais, la variante .m3u8 (lue sans relais) est refusée par ce fournisseur (405)
             }
             if !fallbacks.isEmpty {
                 sameURLRetries = 1 // variante (.m3u8) : un seul essai
@@ -801,6 +815,8 @@ final class PlaybackController {
     @ObservationIgnored private var userDisabledAudio = false
     @ObservationIgnored private var lastLateAudio: Int?
     /// Chaînes dont l'horloge (PCR) est fausse : on les ouvre sans s'y fier (mémorisé d'une session à l'autre).
+    /// Oublie les réglages d'horloge mémorisés (Réglages > Lecture).
+    static func resetClockFixes() { UserDefaults.standard.removeObject(forKey: "audio.clockFix") }
     static var clockFixIDs: Set<String> {
         get { Set(UserDefaults.standard.stringArray(forKey: "audio.clockFix") ?? []) }
         set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.clockFix") }
@@ -814,18 +830,27 @@ final class PlaybackController {
         let played = Int(stats.playedAudioBuffers)
         let previous = lastAudio
         lastAudio = (decoded, played)
-        let late = PlaybackLog.shared.lateAudioDrops()
+        let late = PlaybackLog.shared.clockProblems()
         let newLate = late - (lastLateAudio ?? late)
         lastLateAudio = late
-        // Son décodé mais jeté par VLC : l'horloge (PCR) du flux est fausse — des heures d'écart avec le son.
-        // Le remède est de rouvrir la chaîne en laissant VLC caler son horloge sur le son et l'image (sans le PCR).
-        if newLate >= 20, isLive, let item = current, !Self.clockFixIDs.contains(item.id), let url = currentURL {
+        // Horloge du flux incohérente (son jeté, image en retard, sauts d'horloge) : le PCR du fournisseur est faux.
+        // Remède : rouvrir la chaîne en laissant VLC caler son horloge sur le son et l'image (sans le PCR).
+        if newLate >= 10, isLive, let item = current, !Self.clockFixIDs.contains(item.id), let url = currentURL {
             Self.clockFixIDs.insert(item.id)
-            PlaybackLog.shared.note("Son : \(newLate) blocs son jetés en 2 s (horloge du flux faussée) — réouverture sans l'horloge du fournisseur")
+            PlaybackLog.shared.note("Horloge du flux incohérente (\(newLate) alertes en 2 s) — réouverture sans l'horloge du fournisseur")
             audioIssue = nil
             sameURLRetries = 1
             sessionQuality = nil   // ne pas compter cette lecture dans la qualité automatique
             start(url)
+            return
+        }
+        if newLate >= 10, isLive {
+            // Déjà rouvert sans l'horloge du fournisseur et toujours incohérent : le flux lui-même est défectueux.
+            // Relancer la piste son n'y changerait rien (et perturberait l'image) : on le dit simplement.
+            if audioIssue == nil {
+                audioIssue = String(localized: "Flux défectueux chez le fournisseur : son et image mal horodatés. Essayez une autre version de la chaîne (HD, SD…).")
+                PlaybackLog.shared.note("Horloge du flux toujours incohérente après réouverture : flux défectueux chez le fournisseur")
+            }
             return
         }
         guard isPlaying, pausedAt == nil, !userDisabledAudio else { return }

@@ -22,6 +22,10 @@ final class StreamRelay: NSObject, @unchecked Sendable {
     private var session: URLSession!
     /// Session en cours (une seule à la fois : c'est tout l'intérêt du relais).
     private var active: RelaySession?
+    /// Dernière réponse du fournisseur pour la chaîne demandée (nil : pas encore de réponse ou pas de relais).
+    private var lastStatus: Int?
+
+    func lastUpstreamStatus() -> Int? { queue.sync { lastStatus } }
 
     private override init() {
         super.init()
@@ -73,13 +77,15 @@ final class StreamRelay: NSObject, @unchecked Sendable {
 
     /// Adresse à donner au moteur VLC : le relais pour un flux réseau du direct, sinon l'adresse d'origine.
     func playbackURL(for url: URL, live: Bool) -> URL {
+        queue.sync { lastStatus = nil }
         guard live, Self.isEnabled, let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else { return url }
         // Les listes HLS (.m3u8) contiennent des adresses de segments : le relais ne sert que les flux continus (.ts…).
         guard url.pathExtension.lowercased() != "m3u8" else { return url }
         return queue.sync {
             guard let port else { return url }
             let token = UUID().uuidString.lowercased()
-            routes = [token: url]   // seule la dernière chaîne demandée est servie
+            routes = [token: url]
+            lastStatus = nil   // seule la dernière chaîne demandée est servie
             let ext = url.pathExtension.isEmpty ? "ts" : url.pathExtension
             return URL(string: "http://127.0.0.1:\(port)/s/\(token).\(ext)") ?? url
         }
@@ -206,6 +212,7 @@ extension StreamRelay: URLSessionDataDelegate {
         queue.async {
             guard let relay = self.relay(for: dataTask) else { return completionHandler(.cancel) }
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            self.lastStatus = status
             let elapsed = relay.opened.map { Date().timeIntervalSince($0) } ?? 0
             PlaybackLog.shared.note(String(format: "Relais : réponse du fournisseur HTTP %d en %.2f s", status, elapsed))
             guard (200..<300).contains(status) else {
