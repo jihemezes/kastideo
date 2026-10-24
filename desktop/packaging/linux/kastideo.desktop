@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Kastideo
+GenericName=Lecteur IPTV
+GenericName[en]=IPTV player
+Comment=Vos chaînes, vos films et vos séries au même endroit
+Comment[en]=Your channels, movies and series in one place
+Exec=kastideo
+Icon=fr.jmezes.kastideo
+Terminal=false
+Categories=AudioVideo;Video;Player;TV;
+StartupWMClass=fr.jmezes.kastideo
+Keywords=IPTV;TV;M3U;Xtream;

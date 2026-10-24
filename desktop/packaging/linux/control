@@ -1,0 +1,13 @@
+Package: kastideo
+Version: @VERSION@
+Section: video
+Priority: optional
+Architecture: @ARCH@
+Installed-Size: @SIZE@
+Depends: @LIBMPV@, libgtk-3-0, libsecret-1-0
+Maintainer: Jean-Michel Ezes <noreply@github.com>
+Homepage: https://github.com/jihemezes/kastideo
+Description: Kastideo - lecteur IPTV (direct, films, séries)
+ Kastideo centralise vos chaînes, séries, films et contenus IPTV
+ (Xtream Codes, playlists M3U) dans une interface simple, rapide
+ et personnalisable. Moteur de lecture : mpv.

@@ -94,3 +94,7 @@ open Kastideo.xcodeproj
 Dans Xcode, choisissez votre équipe dans **Signing & Capabilities** pour lancer l'app. Les tests du module partagé se lancent avec `swift test --package-path Packages/KastideoCore`.
 
 Le fichier `Kastideo.xcodeproj` est généré : il n'est pas versionné.
+
+## Windows et Linux (préversion)
+
+Une version Windows / Linux (Flutter + moteur mpv) est en cours dans le dossier `desktop/`. Ses préversions sont publiées avec les tags `vX.Y.Z-desktopN` (workflow `desktop.yml`), sans toucher aux versions Mac ni aux mises à jour Sparkle.

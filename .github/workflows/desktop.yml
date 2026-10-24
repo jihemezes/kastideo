@@ -1,0 +1,205 @@
+# Kastideo pour Windows et Linux (dossier desktop/, Flutter + moteur mpv).
+# Publication en pré-version GitHub à chaque tag vX.Y.Z-desktopN : n'interfère ni avec la version Mac
+# (release.yml ignore ces tags) ni avec les mises à jour Sparkle.
+#
+# Paquets produits :
+#   Windows x64  : Kastideo-<version>-windows-x64.zip (dossier portable, kastideo.exe)
+#   Linux x64    : .deb pour Zorin OS 17 / Ubuntu 22.04 (libmpv1), .deb pour Zorin OS 18 / Ubuntu 24.04 (libmpv2),
+#                  AppImage (toutes distributions, moteur mpv inclus)
+#   Linux ARM64  : AppImage (Raspberry Pi 4/5 sous un système 64 bits) et .deb Ubuntu 22.04 ARM
+name: Desktop
+
+on:
+  push:
+    tags: ['v*-desktop*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: 3.47.8
+
+jobs:
+  windows:
+    name: Windows x64
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Version
+        id: version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          [[ "$TAG" == v* ]] || TAG="v0.0.0-desktop0"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
+      - name: Dépendances et tests
+        shell: bash
+        run: |
+          flutter pub get
+          flutter test
+      - name: Construction
+        shell: bash
+        run: |
+          flutter build windows --release \
+            --build-name "${{ steps.version.outputs.name }}" --build-number "${{ github.run_number }}" \
+            --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
+      - name: Archive portable
+        shell: pwsh
+        run: |
+          $out = "Kastideo-${{ steps.version.outputs.version }}-windows-x64"
+          New-Item -ItemType Directory -Force -Path "dist/$out" | Out-Null
+          Copy-Item -Recurse -Force "build/windows/x64/runner/Release/*" "dist/$out/"
+          Compress-Archive -Path "dist/$out" -DestinationPath "dist/$out.zip" -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: desktop/dist/*.zip
+
+  linux:
+    name: Linux ${{ matrix.arch }} (${{ matrix.distro }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-22.04
+            distro: ubuntu22.04
+            deb_arch: amd64
+            tool_arch: x86_64
+            libmpv: libmpv1
+            appimage: true
+          - arch: x64
+            runner: ubuntu-24.04
+            distro: ubuntu24.04
+            deb_arch: amd64
+            tool_arch: x86_64
+            libmpv: libmpv2
+            appimage: false
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            distro: ubuntu22.04
+            deb_arch: arm64
+            tool_arch: aarch64
+            libmpv: libmpv1
+            appimage: true
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paquets système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev \
+            libstdc++-12-dev libmpv-dev mpv libsecret-1-dev libfuse2 file desktop-file-utils
+      - name: Flutter (${{ matrix.arch }})
+        working-directory: ${{ runner.temp }}
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git flutter
+          echo "${{ runner.temp }}/flutter/bin" >> "$GITHUB_PATH"
+      - name: Version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          [[ "$TAG" == v* ]] || TAG="v0.0.0-desktop0"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
+      - name: Dépendances et tests
+        run: |
+          flutter config --no-analytics --enable-linux-desktop
+          flutter pub get
+          flutter analyze --no-fatal-infos
+          flutter test
+      - name: Construction
+        run: |
+          flutter build linux --release \
+            --build-name "${{ steps.version.outputs.name }}" --build-number "${{ github.run_number }}" \
+            --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
+      - name: Paquet .deb
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUNDLE=$(ls -d build/linux/*/release/bundle)
+          PKG="dist/deb"
+          mkdir -p "$PKG/DEBIAN" "$PKG/opt/kastideo" "$PKG/usr/bin" "$PKG/usr/share/applications" \
+                   "$PKG/usr/share/icons/hicolor/256x256/apps"
+          cp -r "$BUNDLE"/. "$PKG/opt/kastideo/"
+          ln -s /opt/kastideo/kastideo "$PKG/usr/bin/kastideo"
+          cp packaging/linux/kastideo.desktop "$PKG/usr/share/applications/fr.jmezes.kastideo.desktop"
+          cp packaging/linux/kastideo.png "$PKG/usr/share/icons/hicolor/256x256/apps/fr.jmezes.kastideo.png"
+          SIZE=$(du -sk "$PKG" | cut -f1)
+          sed -e "s/@VERSION@/${VERSION//-/\~}/" -e "s/@ARCH@/${{ matrix.deb_arch }}/" -e "s/@SIZE@/$SIZE/" \
+              -e "s/@LIBMPV@/${{ matrix.libmpv }}/" packaging/linux/control > "$PKG/DEBIAN/control"
+          cat "$PKG/DEBIAN/control"
+          dpkg-deb --build --root-owner-group "$PKG" "dist/kastideo_${VERSION}_${{ matrix.distro }}_${{ matrix.deb_arch }}.deb"
+      - name: AppImage
+        if: matrix.appimage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARCH="${{ matrix.tool_arch }}"
+          BUNDLE=$(ls -d build/linux/*/release/bundle)
+          curl -fsSL -o linuxdeploy "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-$ARCH.AppImage"
+          chmod +x linuxdeploy
+          APPDIR="dist/AppDir"
+          mkdir -p "$APPDIR/usr/bin"
+          cp -r "$BUNDLE"/. "$APPDIR/usr/bin/"
+          LIBMPV=$(ldconfig -p | grep -m1 -E 'libmpv\.so\.[0-9]' | awk '{print $NF}')
+          echo "libmpv : $LIBMPV"
+          export LINUXDEPLOY_OUTPUT_VERSION="$VERSION"
+          ./linuxdeploy --appdir "$APPDIR" \
+            --executable "$APPDIR/usr/bin/kastideo" \
+            --library "$LIBMPV" \
+            --desktop-file packaging/linux/kastideo.desktop \
+            --icon-file packaging/linux/kastideo.png \
+            --icon-filename fr.jmezes.kastideo \
+            --output appimage
+          mv Kastideo-*.AppImage "dist/Kastideo-${VERSION}-linux-$ARCH.AppImage"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}-${{ matrix.distro }}
+          path: |
+            desktop/dist/*.deb
+            desktop/dist/*.AppImage
+
+  publish:
+    name: Pré-version GitHub
+    needs: [windows, linux]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Notes de version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' desktop/CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Kastideo $VERSION pour Windows et Linux (pré-version)." > notes.md
+          ls -la artifacts
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Kastideo ${{ github.ref_name }} — Windows / Linux (aperçu)
+          body_path: notes.md
+          prerelease: true
+          files: artifacts/*

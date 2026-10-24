@@ -14,7 +14,8 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    # Les tags vX.Y.Z-desktopN sont ceux de la version Windows / Linux (desktop.yml), pas du Mac.
+    tags: ['v*', '!v*-desktop*']
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,15 @@
+# Kastideo pour Windows et Linux — journal des versions
+
+Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
+
+## [1.1.7-desktop1] - 2026-10-24
+
+**Aperçu 1 — maquette.** Première version de Kastideo pour Windows et Linux (Flutter, moteur de lecture mpv), pour valider la fidélité visuelle avec la version Mac.
+
+- Écran d'accueil identique à la version Mac : dégradés, grand logo en filigrane, recherche globale, pavés Direct / Films / Séries, accès rapides, numéro de version.
+- Direct en interface Classique : barre latérale (toutes les chaînes, favoris, récents, catégories), liste avec recherche, clic droit (favoris).
+- Lecteur mpv : barre de contrôles compacte qui se cache seule, pastille de santé du flux et définition, volume, mode cinéma, plein écran, badge « Prête en x s », écran d'erreur avec Réessayer et Journal de lecture.
+- Relais de flux local (une seule connexion au fournisseur, comme la version Mac 1.1.3) ; chaînes refusées par le fournisseur (HTTP 403/404) expliquées sans nouvel essai.
+- Sources Xtream Codes et M3U (URL ou fichier ; les URL get.php deviennent des sources Xtream), mot de passe dans le coffre du système, cache local pour un démarrage rapide.
+- Français et anglais (selon la langue du système), aide intégrée, journal de lecture (Ctrl+Alt+L).
+- Paquets : Windows x64 (archive portable), .deb pour Ubuntu 22.04 / Zorin OS 17 et Ubuntu 24.04 / Zorin OS 18, AppImage x64 et ARM64 (Raspberry Pi).
