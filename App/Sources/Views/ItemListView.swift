@@ -183,6 +183,7 @@ struct ItemActionsMenu: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(RecordingCenter.self) private var recordings
     @Environment(MultiViewModel.self) private var multiView
+    @Environment(PlaybackController.self) private var playback
     @Environment(\.openWindow) private var openWindow
     let item: MediaItem
 
@@ -197,6 +198,12 @@ struct ItemActionsMenu: View {
             }
             Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
             Button("Modifier la chaîne…") { navigation.editingChannel = item }
+            let videoOnly = PlaybackController.videoOnlyIDs.contains(item.id)
+            Button {
+                playback.setVideoOnly(!videoOnly, for: item)
+            } label: {
+                if videoOnly { Label("Image seule (sans le son)", systemImage: "checkmark") } else { Text("Image seule (sans le son)") }
+            }
             if MultiViewKeys.isAvailable {
                 Button("Ajouter à la MultiVue") {
                     multiView.add(item)

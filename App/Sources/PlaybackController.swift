@@ -568,6 +568,13 @@ final class PlaybackController {
             media.addOption(":no-ts-trust-pcr")
             PlaybackLog.shared.note("Ouverture sans l'horloge du fournisseur (son réparé pour cette chaîne)")
         }
+        if let item = current, item.kind == .live, Self.videoOnlyIDs.contains(item.id) {
+            // Son inutilisable sur cette chaîne : image seule. Sans piste son, VLC n'attend plus un son mal horodaté
+            // et l'image ne se fige plus.
+            media.addOption(":no-audio")
+            media.addOption(":no-ts-trust-pcr")
+            PlaybackLog.shared.note("Ouverture en image seule (sans le son) pour cette chaîne")
+        }
         // Direct en différé : VLC met le flux en mémoire sur disque pendant les pauses.
         media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
         media.addOption(":input-timeshift-granularity=52428800")
@@ -816,7 +823,29 @@ final class PlaybackController {
     @ObservationIgnored private var lastLateAudio: Int?
     /// Chaînes dont l'horloge (PCR) est fausse : on les ouvre sans s'y fier (mémorisé d'une session à l'autre).
     /// Oublie les réglages d'horloge mémorisés (Réglages > Lecture).
-    static func resetClockFixes() { UserDefaults.standard.removeObject(forKey: "audio.clockFix") }
+    static func resetClockFixes() {
+        UserDefaults.standard.removeObject(forKey: "audio.clockFix")
+        UserDefaults.standard.removeObject(forKey: "audio.videoOnly")
+    }
+    /// Chaînes lues en image seule (son inutilisable) : choix automatique ou manuel, mémorisé.
+    static var videoOnlyIDs: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "audio.videoOnly") ?? []) }
+        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.videoOnly") }
+    }
+
+    /// La chaîne en cours est lue sans le son.
+    var isVideoOnly: Bool { current.map { $0.kind == .live && Self.videoOnlyIDs.contains($0.id) } ?? false }
+
+    /// Active ou désactive l'image seule pour une chaîne ; rouvre la chaîne si elle est en cours de lecture.
+    func setVideoOnly(_ on: Bool, for item: MediaItem) {
+        if on { Self.videoOnlyIDs.insert(item.id) } else { Self.videoOnlyIDs.remove(item.id) }
+        PlaybackLog.shared.note(on ? "Image seule activée pour cette chaîne" : "Image seule désactivée : retour du son")
+        guard current?.id == item.id, let url = currentURL else { return }
+        audioIssue = nil
+        sameURLRetries = 1
+        sessionQuality = nil
+        start(url)
+    }
     static var clockFixIDs: Set<String> {
         get { Set(UserDefaults.standard.stringArray(forKey: "audio.clockFix") ?? []) }
         set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.clockFix") }
@@ -845,11 +874,26 @@ final class PlaybackController {
             return
         }
         if newLate >= 10, isLive {
-            // Déjà rouvert sans l'horloge du fournisseur et toujours incohérent : le flux lui-même est défectueux.
-            // Relancer la piste son n'y changerait rien (et perturberait l'image) : on le dit simplement.
+            // Déjà rouvert sans l'horloge du fournisseur et toujours incohérent : le son du flux est défectueux.
+            // On passe en image seule (l'image ne se fige plus), et on s'en souvient pour cette chaîne.
+            if let item = current, !Self.videoOnlyIDs.contains(item.id), let url = currentURL {
+                Self.videoOnlyIDs.insert(item.id)
+                PlaybackLog.shared.note("Horloge toujours incohérente après réouverture : passage en image seule (sans le son)")
+                audioIssue = nil
+                sameURLRetries = 1
+                sessionQuality = nil
+                start(url)
+                return
+            }
             if audioIssue == nil {
                 audioIssue = String(localized: "Flux défectueux chez le fournisseur : son et image mal horodatés. Essayez une autre version de la chaîne (HD, SD…).")
                 PlaybackLog.shared.note("Horloge du flux toujours incohérente après réouverture : flux défectueux chez le fournisseur")
+            }
+            return
+        }
+        if isVideoOnly {
+            if audioIssue == nil {
+                audioIssue = String(localized: "Image seule : le son de cette chaîne est inutilisable chez le fournisseur. Clic droit sur la chaîne > « Image seule » pour réessayer avec le son.")
             }
             return
         }

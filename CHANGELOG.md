@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.7] - 2026-10-24
+
+- **Image seule (sans le son)** : quand le son d'une chaîne est inutilisable et fige l'image (horloge incohérente même après réouverture), Kastideo passe automatiquement en **image seule** : l'image ne se fige plus. Le choix est mémorisé pour la chaîne. Il est aussi disponible à la main : clic droit sur une chaîne du direct > **Image seule (sans le son)** (coché = actif ; décocher pour réessayer avec le son).
+- Réglages > Général > Lecture > **Réinitialiser** annule aussi les chaînes passées en image seule.
+
 ## [1.1.6] - 2026-10-24
 
 - **Chaînes refusées par le fournisseur** : quand le fournisseur répond nettement « refusé » ou « introuvable » pour une chaîne (HTTP 403/404, vu grâce au relais), Kastideo ne s'acharne plus (plus de nouvel essai ni de variante .m3u8) et l'explique : chaîne hors service chez lui ou absente de l'abonnement, essayer une autre version.

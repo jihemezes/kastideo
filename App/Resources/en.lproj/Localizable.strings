@@ -669,3 +669,8 @@
 "Flux défectueux chez le fournisseur : son et image mal horodatés. Essayez une autre version de la chaîne (HD, SD…)." = "Faulty stream at the provider: sound and picture have wrong timestamps. Try another version of the channel (HD, SD…).";
 "Chaînes à l'horloge réparée" = "Channels with repaired clock";
 "Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente et les ouvre en se calant sur le son et l'image. « Réinitialiser » revient à la lecture normale pour toutes." = "Kastideo remembers channels whose provider clock is inconsistent and opens them synced on sound and picture. “Reset” returns to normal playback for all of them.";
+
+/* 1.1.7 */
+"Image seule (sans le son)" = "Picture only (no sound)";
+"Image seule : le son de cette chaîne est inutilisable chez le fournisseur. Clic droit sur la chaîne > « Image seule » pour réessayer avec le son." = "Picture only: this channel's sound is unusable at the provider. Right-click the channel > “Picture only” to try again with sound.";
+"Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente (ouvertes en se calant sur le son et l'image, ou en image seule si le son est inutilisable). « Réinitialiser » revient à la lecture normale pour toutes." = "Kastideo remembers channels whose provider clock is inconsistent (opened synced on sound and picture, or picture only when the sound is unusable). “Reset” returns to normal playback for all of them.";

@@ -178,7 +178,7 @@ struct GeneralSettingsView: View {
                 LabeledContent("Chaînes à l'horloge réparée") {
                     Button("Réinitialiser") { PlaybackController.resetClockFixes() }
                 }
-                Text("Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente et les ouvre en se calant sur le son et l'image. « Réinitialiser » revient à la lecture normale pour toutes.")
+                Text("Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente (ouvertes en se calant sur le son et l'image, ou en image seule si le son est inutilisable). « Réinitialiser » revient à la lecture normale pour toutes.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 TimeshiftSettingsRow()
