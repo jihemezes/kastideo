@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.5</title>
+      <pubDate>Sat, 24 Oct 2026 16:51:50 GMT</pubDate>
+      <sparkle:version>45</sparkle:version>
+      <sparkle:shortVersionString>1.1.5</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Son absent sur certaines chaînes — cause trouvée&lt;/b&gt; : sur ces chaînes, l&amp;#x27;horloge envoyée par le fournisseur (PCR) est décalée de plusieurs heures par rapport au son ; le moteur VLC jette alors tout le son (« buffer too late »). Kastideo le détecte en 2 secondes, rouvre la chaîne en se calant sur le son et l&amp;#x27;image plutôt que sur cette horloge, et s&amp;#x27;en souvient pour les fois suivantes.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : les milliers de lignes « buffer too late » sont regroupées (une ligne toutes les 5 s avec le nombre de blocs jetés), pour que le journal reste lisible.&lt;/li&gt;
+&lt;li&gt;La lecture réparée n&amp;#x27;est pas comptée dans la qualité automatique des chaînes.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.5/Kastideo-1.1.5.dmg" length="45954087" type="application/octet-stream" sparkle:edSignature="3FARGOSYkF/wMpfNzU7Rb4DZ5CEGGFNC9pVNT0t7vl0GK/5ZtOG2aXsZwVb6Ew0oQx6qZ+0jmhqSN8EH5eGqAA==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.4</title>
       <pubDate>Sat, 24 Oct 2026 16:30:59 GMT</pubDate>
       <sparkle:version>44</sparkle:version>
