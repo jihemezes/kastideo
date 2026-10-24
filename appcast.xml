@@ -6,6 +6,20 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.6</title>
+      <pubDate>Sat, 24 Oct 2026 17:19:27 GMT</pubDate>
+      <sparkle:version>46</sparkle:version>
+      <sparkle:shortVersionString>1.1.6</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Chaînes refusées par le fournisseur&lt;/b&gt; : quand le fournisseur répond nettement « refusé » ou « introuvable » pour une chaîne (HTTP 403/404, vu grâce au relais), Kastideo ne s&amp;#x27;acharne plus (plus de nouvel essai ni de variante .m3u8) et l&amp;#x27;explique : chaîne hors service chez lui ou absente de l&amp;#x27;abonnement, essayer une autre version.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Image figée / son absent sur les flux à l&amp;#x27;horloge incohérente&lt;/b&gt; : la détection couvre maintenant aussi les sauts d&amp;#x27;horloge (« clock gap ») et les images en retard, pas seulement le son jeté. La chaîne est rouverte sans l&amp;#x27;horloge du fournisseur ; si le flux reste incohérent, Kastideo n&amp;#x27;essaie plus de relancer la piste son (ce qui figeait l&amp;#x27;image) et indique que le flux est défectueux chez le fournisseur.&lt;/li&gt;
+&lt;li&gt;Réglages &amp;gt; Général &amp;gt; Lecture : &lt;b&gt;Réinitialiser&lt;/b&gt; les chaînes à l&amp;#x27;horloge réparée.&lt;/li&gt;
+&lt;li&gt;Journal : les alertes d&amp;#x27;horloge sont regroupées (une ligne toutes les 5 s).&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.6/Kastideo-1.1.6.dmg" length="45954710" type="application/octet-stream" sparkle:edSignature="AFzgjWOpU73xpGW51vIC1aJE6lMQJNWi1z/wikcWUtrCAXPZqW7T0GUeis6vGIu2JmAO4cM8dNmIuwYM9x9rDg==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.5</title>
       <pubDate>Sat, 24 Oct 2026 16:51:50 GMT</pubDate>
       <sparkle:version>45</sparkle:version>
