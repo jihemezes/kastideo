@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.7</title>
+      <pubDate>Sat, 24 Oct 2026 18:15:38 GMT</pubDate>
+      <sparkle:version>47</sparkle:version>
+      <sparkle:shortVersionString>1.1.7</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Image seule (sans le son)&lt;/b&gt; : quand le son d&amp;#x27;une chaîne est inutilisable et fige l&amp;#x27;image (horloge incohérente même après réouverture), Kastideo passe automatiquement en &lt;b&gt;image seule&lt;/b&gt; : l&amp;#x27;image ne se fige plus. Le choix est mémorisé pour la chaîne. Il est aussi disponible à la main : clic droit sur une chaîne du direct &amp;gt; &lt;b&gt;Image seule (sans le son)&lt;/b&gt; (coché = actif ; décocher pour réessayer avec le son).&lt;/li&gt;
+&lt;li&gt;Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; &lt;b&gt;Réinitialiser&lt;/b&gt; annule aussi les chaînes passées en image seule.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.7/Kastideo-1.1.7.dmg" length="45965467" type="application/octet-stream" sparkle:edSignature="gGraM6EiOmWlit1hOXYhOSl+tEmyOJCwZF48eES82o1R0Np7ZvFEm8Xe6au8b+r3R7RjjnMYQYWXMx6x5q5KBA==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.6</title>
       <pubDate>Sat, 24 Oct 2026 17:19:27 GMT</pubDate>
       <sparkle:version>46</sparkle:version>
