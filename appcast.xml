@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.1.4</title>
+      <pubDate>Sat, 24 Oct 2026 16:30:59 GMT</pubDate>
+      <sparkle:version>44</sparkle:version>
+      <sparkle:shortVersionString>1.1.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Relais de flux&lt;/b&gt; : il ne démarrait pas (« Operation not permitted ») car l&amp;#x27;autorisation réseau locale n&amp;#x27;était pas incluse dans l&amp;#x27;application signée. C&amp;#x27;est corrigé : le direct passe désormais par la connexion d&amp;#x27;Apple (comme Piboard passe par la sienne) et non plus par celle du moteur VLC, que le pare-feu Cloudflare du fournisseur refuse (HTTP 403).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Moins de requêtes en cas de refus&lt;/b&gt; : un seul nouvel essai au lieu de deux, pour ne pas multiplier les connexions chez le fournisseur.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.4/Kastideo-1.1.4.dmg" length="45929616" type="application/octet-stream" sparkle:edSignature="JRjdmooUzuO9BApDuN6WbdwxD8sTJLNdoz/c4nSIPlrhYqkygVOfJQ74b810QupqXN4msGiZciiy4eTwjNaYAg==" />
+    </item>
+    <item>
       <title>Kastideo 1.1.3</title>
       <pubDate>Sat, 24 Oct 2026 07:31:25 GMT</pubDate>
       <sparkle:version>43</sparkle:version>
