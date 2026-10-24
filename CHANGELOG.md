@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.4] - 2026-10-24
+
+- **Relais de flux** : il ne démarrait pas (« Operation not permitted ») car l'autorisation réseau locale n'était pas incluse dans l'application signée. C'est corrigé : le direct passe désormais par la connexion d'Apple (comme Piboard passe par la sienne) et non plus par celle du moteur VLC, que le pare-feu Cloudflare du fournisseur refuse (HTTP 403).
+- **Moins de requêtes en cas de refus** : un seul nouvel essai au lieu de deux, pour ne pas multiplier les connexions chez le fournisseur.
+
 ## [1.1.3] - 2026-10-24
 
 - **Relais de flux pour le direct** (comme Piboard) : Kastideo ouvre lui-même **une seule** connexion chez le fournisseur (en-têtes de lecteur VLC, redirections suivies) et la transmet au moteur VLC en local. Les requêtes multiples du moteur VLC à l'ouverture d'une chaîne, qui faisaient refuser les flux avec un abonnement à une connexion (HTTP 401/403/404/520), disparaissent ; la chaîne précédente est fermée net avant d'ouvrir la suivante. Réglage : Réglages > Général > Lecture > **Relais de flux pour le direct** (activé par défaut).

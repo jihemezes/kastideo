@@ -627,15 +627,15 @@ final class PlaybackController {
             isPlaying = false
         case .error:
             let detail = startedAt.flatMap { PlaybackLog.shared.lastError(since: $0) }
-            if let url = currentURL, sameURLRetries < 2, Self.isRefusal(detail) {
+            if let url = currentURL, sameURLRetries < 1, Self.isRefusal(detail) {
                 // Refus du serveur : souvent l'ancienne connexion n'est pas encore libérée. On patiente puis on réessaie.
                 sameURLRetries += 1
-                PlaybackLog.shared.note("Flux refusé par le serveur : nouvel essai \(sameURLRetries)/2")
+                PlaybackLog.shared.note("Flux refusé par le serveur : nouvel essai dans 2 s")
                 start(url, delay: 2.0 * Double(sameURLRetries))
                 return
             }
             if !fallbacks.isEmpty {
-                sameURLRetries = 2 // variante (.m3u8) : un seul essai
+                sameURLRetries = 1 // variante (.m3u8) : un seul essai
                 start(fallbacks.removeFirst())
                 return
             }
