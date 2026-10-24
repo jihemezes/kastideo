@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.1.5] - 2026-10-24
+
+- **Son absent sur certaines chaînes — cause trouvée** : sur ces chaînes, l'horloge envoyée par le fournisseur (PCR) est décalée de plusieurs heures par rapport au son ; le moteur VLC jette alors tout le son (« buffer too late »). Kastideo le détecte en 2 secondes, rouvre la chaîne en se calant sur le son et l'image plutôt que sur cette horloge, et s'en souvient pour les fois suivantes.
+- **Journal de lecture** : les milliers de lignes « buffer too late » sont regroupées (une ligne toutes les 5 s avec le nombre de blocs jetés), pour que le journal reste lisible.
+- La lecture réparée n'est pas comptée dans la qualité automatique des chaînes.
+
 ## [1.1.4] - 2026-10-24
 
 - **Relais de flux** : il ne démarrait pas (« Operation not permitted ») car l'autorisation réseau locale n'était pas incluse dans l'application signée. C'est corrigé : le direct passe désormais par la connexion d'Apple (comme Piboard passe par la sienne) et non plus par celle du moteur VLC, que le pare-feu Cloudflare du fournisseur refuse (HTTP 403).

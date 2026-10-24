@@ -30,7 +30,35 @@ final class PlaybackLog: NSObject, VLCLogging {
     private var counter = 0
     private let capacity = 300
 
+    /// Blocs son jetés par VLC parce que leur horodatage est faux (« buffer too late »), depuis le lancement.
+    private var lateAudio = 0
+    private var lateAudioLogged = Date.distantPast
+    private var lateAudioSinceLog = 0
+
+    /// Nombre total de blocs son jetés pour horodatage faux (lu par la surveillance du son).
+    func lateAudioDrops() -> Int {
+        lock.lock(); defer { lock.unlock() }
+        return lateAudio
+    }
+
     func handleMessage(_ message: String, logLevel level: VLCLogLevel, context: VLCLogContext?) {
+        // « buffer too late » arrive des dizaines de fois par seconde quand l'horloge du flux est fausse :
+        // on les compte et on n'en écrit qu'une ligne toutes les 5 s (sinon le journal ne contient plus que ça).
+        if message.hasPrefix("buffer too late") {
+            lock.lock()
+            lateAudio += 1
+            lateAudioSinceLog += 1
+            let now = Date()
+            guard now.timeIntervalSince(lateAudioLogged) >= 5 else { lock.unlock(); return }
+            let count = lateAudioSinceLog
+            lateAudioSinceLog = 0
+            lateAudioLogged = now
+            counter += 1
+            lines.append(Line(id: counter, date: now, level: 1, text: "[libvlc] \(message) — \(count) bloc(s) son jeté(s) depuis 5 s"))
+            if lines.count > capacity { lines.removeFirst(lines.count - capacity) }
+            lock.unlock()
+            return
+        }
         var text = Self.redact(message)
         if let module = context?.module, !module.isEmpty { text = "[\(module)] " + text }
         lock.lock()

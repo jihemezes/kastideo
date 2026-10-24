@@ -563,6 +563,11 @@ final class PlaybackController {
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
         media.addOption(":http-reconnect")
+        if let item = current, item.kind == .live, Self.clockFixIDs.contains(item.id) {
+            // Horloge du flux faussée (son jeté) : VLC se cale sur les horodatages du son et de l'image.
+            media.addOption(":no-ts-trust-pcr")
+            PlaybackLog.shared.note("Ouverture sans l'horloge du fournisseur (son réparé pour cette chaîne)")
+        }
         // Direct en différé : VLC met le flux en mémoire sur disque pendant les pauses.
         media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
         media.addOption(":input-timeshift-granularity=52428800")
@@ -683,6 +688,7 @@ final class PlaybackController {
         bufferingEvents = []
         audioChecks = 0
         audioRepairs = 0
+        lastLateAudio = nil
         triedAudioTracks = []
         lastAudio = nil
         audioIssue = nil
@@ -793,6 +799,12 @@ final class PlaybackController {
     @ObservationIgnored private var triedAudioTracks = Set<Int32>()
     @ObservationIgnored private var lastAudio: (decoded: Int, played: Int)?
     @ObservationIgnored private var userDisabledAudio = false
+    @ObservationIgnored private var lastLateAudio: Int?
+    /// Chaînes dont l'horloge (PCR) est fausse : on les ouvre sans s'y fier (mémorisé d'une session à l'autre).
+    static var clockFixIDs: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "audio.clockFix") ?? []) }
+        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.clockFix") }
+    }
     static let maxAudioRepairs = 4
 
     /// Toutes les 2 s : si aucun son n'est joué alors que l'image avance, on cherche pourquoi et on tente
@@ -802,6 +814,20 @@ final class PlaybackController {
         let played = Int(stats.playedAudioBuffers)
         let previous = lastAudio
         lastAudio = (decoded, played)
+        let late = PlaybackLog.shared.lateAudioDrops()
+        let newLate = late - (lastLateAudio ?? late)
+        lastLateAudio = late
+        // Son décodé mais jeté par VLC : l'horloge (PCR) du flux est fausse — des heures d'écart avec le son.
+        // Le remède est de rouvrir la chaîne en laissant VLC caler son horloge sur le son et l'image (sans le PCR).
+        if newLate >= 20, isLive, let item = current, !Self.clockFixIDs.contains(item.id), let url = currentURL {
+            Self.clockFixIDs.insert(item.id)
+            PlaybackLog.shared.note("Son : \(newLate) blocs son jetés en 2 s (horloge du flux faussée) — réouverture sans l'horloge du fournisseur")
+            audioIssue = nil
+            sameURLRetries = 1
+            sessionQuality = nil   // ne pas compter cette lecture dans la qualité automatique
+            start(url)
+            return
+        }
         guard isPlaying, pausedAt == nil, !userDisabledAudio else { return }
         audioChecks += 1
         if audioChecks == 2 { logAudioTracks() }
