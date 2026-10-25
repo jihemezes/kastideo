@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Preview 2 — version 1.2.0-desktop1. This pre-release brings the home screen, live TV in the Classic interface, movies and series (Classic and Cinema interfaces), the player and the settings from the Mac version. Other features will follow in steps.
+> Preview 2 — version 1.2.0-desktop2. This pre-release brings the home screen, live TV in the Classic interface, movies and series (Classic and Cinema interfaces), the player and the settings from the Mac version. Other features will follow in steps.
 
 ## What this preview includes
 

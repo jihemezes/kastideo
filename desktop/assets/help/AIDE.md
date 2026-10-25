@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Aperçu 2 — version 1.2.0-desktop1. Cette préversion reprend l'accueil, le direct en interface Classique, les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
+> Aperçu 2 — version 1.2.0-desktop2. Cette préversion reprend l'accueil, le direct en interface Classique, les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
 
 ## Ce que contient cet aperçu
 
