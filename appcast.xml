@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.2.1</title>
+      <pubDate>Sun, 25 Oct 2026 21:49:58 GMT</pubDate>
+      <sparkle:version>49</sparkle:version>
+      <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Pays et langues des rangées Cinéma&lt;/b&gt; (Réglages &amp;gt; Apparence) : Kastideo repère les pays dans les noms de vos catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…) et vous laisse choisir ceux à montrer. Les derniers ajouts du bandeau « à la une », les tendances TMDB, la sélection au hasard et les rangées par catégorie de l&amp;#x27;interface Cinéma ne montrent plus que ces pays (option pour garder les catégories sans pays, comme « Action »). Les listes et la recherche restent complètes. Le choix est repris par la sauvegarde de la configuration, comme dans Kastideo pour Windows et Linux.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.1/Kastideo-1.2.1.dmg" length="45909963" type="application/octet-stream" sparkle:edSignature="87xJB4jM5jFNac0rJIQagu85+b44+GiljUeTvEqteFuU9wodehMmY2lUygkxFVzEcxKZYmyaB+UG6ZCdG7kxDg==" />
+    </item>
+    <item>
       <title>Kastideo 1.2.0</title>
       <pubDate>Sun, 25 Oct 2026 08:22:25 GMT</pubDate>
       <sparkle:version>48</sparkle:version>
@@ -502,18 +513,6 @@
 &lt;li&gt;Téléchargements : jusqu&amp;#x27;à 10 minutes pour les très grosses playlists&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.2.2/Kastideo-0.2.2.dmg" length="2597674" type="application/octet-stream" sparkle:edSignature="jDiKFjEXmK6ENJlHXX6C6LH6CaKoUBeLQOK49XmCFDXw22vB5jHXy+euYE1WAcE909PKdOnkfX+G4+So3mBJCg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.2.1</title>
-      <pubDate>Sun, 18 Oct 2026 17:56:25 GMT</pubDate>
-      <sparkle:version>4</sparkle:version>
-      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correction : les playlists et flux en &lt;b&gt;http://&lt;/b&gt; étaient refusés (« App Transport Security ») ; ils se chargent désormais normalement&lt;/li&gt;
-&lt;li&gt;Publication : un seul workflow GitHub par livraison (Build ne se lance plus qu&amp;#x27;à la demande)&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.2.1/Kastideo-0.2.1.dmg" length="2578297" type="application/octet-stream" sparkle:edSignature="Dz55gjd2zRv1HQQMbo425V8rb8/ptf+B0wXrXcl/K1l7EZWBk9+UwrvmQjIPnbEWLUVImTezDfeJh0g3RdsdBA==" />
     </item>
   </channel>
 </rss>
