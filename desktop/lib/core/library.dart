@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'log.dart';
 import 'm3u.dart';
+import 'countries.dart';
 import 'models.dart';
 import 'secrets.dart';
 import 'settings.dart';
@@ -84,6 +85,7 @@ class LibraryStore extends ChangeNotifier {
       }
     }
     showAdult = _prefs.getBool('adult.show') ?? false;
+    _loadCountries();
     final edits = _prefs.getString('channelEdits.v1');
     if (edits != null) {
       try {
@@ -157,9 +159,55 @@ class LibraryStore extends ChangeNotifier {
   List<MediaItem> favoritesOf(MediaKind kind) =>
       favorites.where((i) => i.kind == kind || (kind == MediaKind.series && i.kind == MediaKind.episode)).toList();
 
-  /// Derniers ajouts du fournisseur (Xtream), du plus récent au plus ancien.
+  // MARK: Pays et langues (rangées Cinéma et bandeau)
+
+  /// Pays choisis (vide : tous) et catégories sans pays reconnu gardées ou non.
+  Set<String> countries = {};
+  bool countryNeutral = true;
+
+  /// Change quand le choix des pays change (le bandeau se recompose).
+  int countriesGeneration = 0;
+  final Map<String, String?> _categoryCountry = {};
+
+  void _loadCountries() {
+    countries = (_prefs.getStringList('catalog.countries') ?? const []).toSet();
+    countryNeutral = _prefs.getBool('catalog.countries.neutral') ?? true;
+  }
+
+  void setCountries(Set<String> value, {bool? neutral}) {
+    countries = value;
+    if (neutral != null) countryNeutral = neutral;
+    _prefs.setStringList('catalog.countries', value.toList()..sort());
+    _prefs.setBool('catalog.countries.neutral', countryNeutral);
+    countriesGeneration++;
+    liveGeneration++;
+    notifyListeners();
+  }
+
+  String? countryOfCategory(String name) => _categoryCountry.putIfAbsent(name, () => Countries.of(name));
+
+  /// Pays d'un contenu : celui de sa catégorie, sinon celui de son nom.
+  String? countryOf(MediaItem item) => countryOfCategory(item.group) ?? Countries.of(item.name);
+
+  bool _countryAllowed(String? code) => countries.isEmpty || (code == null ? countryNeutral : countries.contains(code));
+  bool inCountries(MediaItem item) => countries.isEmpty || _countryAllowed(countryOf(item));
+  bool categoryInCountries(String name) => countries.isEmpty || _countryAllowed(countryOfCategory(name));
+
+  /// Pays repérés dans les catégories (nombre de contenus), du plus fréquent au moins fréquent.
+  List<(String, int)> detectedCountries() {
+    final counts = <String, int>{};
+    for (final kind in categoryKinds) {
+      for (final name in allCategories(kind)) {
+        final code = countryOfCategory(name);
+        if (code != null) counts[code] = (counts[code] ?? 0) + itemsInCategory(kind, name).length;
+      }
+    }
+    return counts.entries.map((e) => (e.key, e.value)).toList()..sort((a, b) => b.$2.compareTo(a.$2));
+  }
+
+  /// Derniers ajouts du fournisseur (Xtream), du plus récent au plus ancien, dans les pays choisis.
   List<MediaItem> latest(MediaKind kind, {int limit = 40}) {
-    final withDate = items(kind).where((i) => i.added != null).toList()..sort((a, b) => b.added!.compareTo(a.added!));
+    final withDate = items(kind).where((i) => i.added != null && inCountries(i)).toList()..sort((a, b) => b.added!.compareTo(a.added!));
     return withDate.take(limit).toList();
   }
 
@@ -333,6 +381,33 @@ class LibraryStore extends ChangeNotifier {
     return source;
   }
 
+  /// Modifie une source (nom, adresse, identifiant, mot de passe, guide TV). Le contenu est rechargé si l'accès a changé.
+  /// [password] null : mot de passe inchangé. Ses favoris, récents et corrections de chaînes sont gardés (même identifiant).
+  Future<void> updateSource(Source source,
+      {required String name, required String address, String? username, String? password, String? epgUrl, bool enabled = true}) async {
+    var newAddress = address.trim();
+    if (source.kind == SourceKind.xtream) {
+      final normalized = XtreamCredentials.normalizeServer(newAddress);
+      if (normalized == null) throw XtreamException('Adresse du serveur invalide.');
+      newAddress = normalized.toString();
+    }
+    final accessChanged = newAddress != source.address ||
+        (username != null && username.trim() != (source.username ?? '')) ||
+        (password != null && password != (await this.password(source.id) ?? ''));
+    final guideChanged = (epgUrl?.trim() ?? '') != (source.epgUrl ?? '');
+    source
+      ..name = name.trim().isEmpty ? source.name : name.trim()
+      ..address = newAddress
+      ..enabled = enabled
+      ..epgUrl = (epgUrl?.trim().isEmpty ?? true) ? null : epgUrl!.trim();
+    if (username != null) source.username = username.trim();
+    if (password != null) await _secrets.write('password.${source.id}', password);
+    await _saveSources();
+    _rebuild();
+    if (accessChanged) await refresh(source);
+    if (guideChanged && !accessChanged) onSourceRefreshed?.call(source);
+  }
+
   Future<void> removeSource(Source source) async {
     sources.removeWhere((s) => s.id == source.id);
     _contentBySource.remove(source.id);
@@ -438,6 +513,8 @@ class LibraryStore extends ChangeNotifier {
       for (final kind in categoryKinds)
         'interface.${kind.name}': ?settings.rawSetting('interface.${kind.name}'),
       'adult.show': showAdult ? '1' : '0',
+      if (countries.isNotEmpty) 'catalog.countries': (countries.toList()..sort()).join(','),
+      'catalog.countries.neutral': countryNeutral ? '1' : '0',
       ...settings.exportedHero(),
       ...settings.exportedAppearance(),
       if (includePasswords && settings.usesTMDB) 'tmdbKey': settings.tmdbKey,
@@ -536,6 +613,14 @@ class LibraryStore extends ChangeNotifier {
         _prefs.setBool('adult.show', showAdult);
       }
       settings.importHero(Map<String, dynamic>.from(s));
+      if (s['catalog.countries'] case final String c) {
+        countries = c.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();
+        _prefs.setStringList('catalog.countries', countries.toList());
+      }
+      if (s['catalog.countries.neutral'] case final String n) {
+        countryNeutral = n == '1' || n == 'true';
+        _prefs.setBool('catalog.countries.neutral', countryNeutral);
+      }
       settings.importAppearance(Map<String, dynamic>.from(s));
       final key = s['tmdbKey'];
       if (key is String && key.isNotEmpty && !settings.usesTMDB) await settings.setTMDBKey(key);

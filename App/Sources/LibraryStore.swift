@@ -900,7 +900,7 @@ extension LibraryStore {
             export.categories[name] = .init(order: prefs.order, hidden: Array(prefs.hidden), renames: prefs.renames, keywords: prefs.keywords)
         }
         let defaults = UserDefaults.standard
-        for key in ["interface.live", "interface.movie", "interface.series", "adult.show", "buffering"] {
+        for key in ["interface.live", "interface.movie", "interface.series", "adult.show", "buffering", CountryKeys.codes, CountryKeys.neutral] {
             if let value = defaults.object(forKey: key) { export.settings[key] = "\(value)" }
         }
         if includePasswords, let key = MediaInfoStore.storedTMDBKey, !key.isEmpty { export.settings["tmdbKey"] = key }
@@ -963,6 +963,8 @@ extension LibraryStore {
             if let value = export.settings[key], InterfaceStyle(rawValue: value) != nil { defaults.set(value, forKey: key) }
         }
         if let value = export.settings["adult.show"] { defaults.set(value == "1" || value == "true", forKey: "adult.show") }
+        if let value = export.settings[CountryKeys.codes] { defaults.set(value, forKey: CountryKeys.codes) }
+        if let value = export.settings[CountryKeys.neutral] { defaults.set(value == "1" || value == "true", forKey: CountryKeys.neutral) }
         rebuildIndex()
         return summary
     }

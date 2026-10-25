@@ -83,6 +83,12 @@ const Map<String, List<String>> _stopwords = {
 };
 
 /// Langue probable d'un texte (mots les plus courants) : « fr », « es », « en », « it », « pt », « de » ou null si incertain.
+/// Le texte est (sans doute) dans une autre langue que l'interface ([ui] : « fr » ou « en »).
+bool isForeignText(String? text, String ui) {
+  final lang = guessLanguage(text);
+  return lang != null && lang != ui;
+}
+
 String? guessLanguage(String? text) {
   if (text == null) return null;
   final words = text.toLowerCase().split(RegExp(r"[^\p{L}]+", unicode: true)).where((w) => w.isNotEmpty).toList();

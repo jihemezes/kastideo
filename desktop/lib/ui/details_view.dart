@@ -29,6 +29,9 @@ class _DetailsViewState extends State<DetailsView> {
   int? _season;
   final _episodesKey = GlobalKey();
 
+  /// Résumé dans une autre langue que l'interface : replié, affiché à la demande.
+  bool _showForeign = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +69,9 @@ class _DetailsViewState extends State<DetailsView> {
                 if (widget.page) ...[_backButton(context), const SizedBox(height: 22)] else const SizedBox(height: 8),
                 _header(context, d),
                 const SizedBox(height: 22),
-                if (d?.plot != null)
+                if (d?.plot != null && isForeignText(d!.plot, L10n.english ? 'en' : 'fr') && !_showForeign)
+                  _foreignPlot(context, d)
+                else if (d?.plot != null)
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 820),
                     child: SelectableText(d!.plot!, style: kTextD(14, color: Colors.white).copyWith(height: 1.45)),
@@ -337,11 +342,39 @@ class _DetailsViewState extends State<DetailsView> {
     ]);
   }
 
+  static String languageName(String? lang) => switch (lang) {
+        'fr' => tr('en français'),
+        'es' => tr('en espagnol'),
+        'en' => tr('en anglais'),
+        'it' => tr('en italien'),
+        'pt' => tr('en portugais'),
+        'de' => tr('en allemand'),
+        _ => tr('dans une autre langue'),
+      };
+
+  /// Résumé replié : il n'existe que dans une autre langue (TMDB n'en a pas, ou pas de clé TMDB).
+  Widget _foreignPlot(BuildContext context, MediaDetails d) {
+    final lang = guessLanguage(d.plot);
+    final hint = context.settings.usesTMDB
+        ? tr('TMDB n\'a pas de résumé dans votre langue pour ce titre.')
+        : tr('Ajoutez une clé TMDB (Réglages > Général) pour des fiches dans votre langue.');
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white30)),
+        onPressed: () => setState(() => _showForeign = true),
+        icon: const Icon(Icons.translate_rounded, size: 16),
+        label: Text('${tr('Afficher le résumé')} (${languageName(lang)})'),
+      ),
+      const SizedBox(height: 6),
+      Text(hint, style: kTextD(12, color: Colors.white54)),
+    ]);
+  }
+
   /// Résumé du fournisseur dans une autre langue que l'interface : on le signale et on indique comment l'avoir en français.
   Widget? _languageNotice(BuildContext context, MediaDetails? d) {
     final lang = guessLanguage(d?.plot);
     final ui = L10n.english ? 'en' : 'fr';
-    if (lang == null || lang == ui) return null;
+    if (lang == null || lang == ui || !_showForeign) return null;
     final names = {
       'fr': tr('en français'), 'es': tr('en espagnol'), 'en': tr('en anglais'), //
       'it': tr('en italien'), 'pt': tr('en portugais'), 'de': tr('en allemand'),
@@ -420,7 +453,7 @@ class _EpisodeRow extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('${episode.number != null ? '${episode.number}. ' : ''}${episode.name}',
                   style: kTextD(14, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-              if (episode.info != null) ...[
+              if (episode.info != null && !isForeignText(episode.info, L10n.english ? 'en' : 'fr')) ...[
                 const SizedBox(height: 4),
                 Text(episode.info!, style: kTextD(12, color: Colors.white60), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],

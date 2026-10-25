@@ -137,8 +137,16 @@ class PlaybackController extends ChangeNotifier {
   Timer? _shiftTimer;
   double? _catchUpTarget;
 
-  /// Le direct est en différé (en pause ou en retard de plus de 3 s).
-  bool get isTimeshifted => isLive && didStart && (liveDelay > 4.5 || !isPlaying);
+  /// Différé demandé par l'utilisateur (pause, retour en arrière, curseur). Sans action de sa part, le direct n'est
+  /// jamais présenté comme différé : l'écart naturel du cache de mpv (lecture en avance du flux, qui peut grandir
+  /// avec certains fournisseurs) sert de référence au lieu d'être compté comme du retard.
+  bool _userShift = false;
+
+  /// Écart naturel entre la fin du cache et la lecture quand on suit le direct (secondes).
+  double _baseline = 0;
+
+  /// Le direct est en différé (pause ou retour en arrière demandés).
+  bool get isTimeshifted => isLive && didStart && (_userShift || !isPlaying);
 
   /// Cache de mpv : sur disque si possible (différé jusqu'à la durée choisie), sinon limité en mémoire.
   Future<void> applyCacheSettings() async {
@@ -173,18 +181,23 @@ class PlaybackController extends ChangeNotifier {
     final end = double.tryParse(await native.getProperty('demuxer-cache-time', waitForInitialization: false));
     final pos = double.tryParse(await native.getProperty('time-pos', waitForInitialization: false));
     if (end == null || pos == null) return;
-    final delay = (end - pos).clamp(0.0, 1e6);
+    final raw = (end - pos).clamp(0.0, 1e6);
+    if (!isPlaying) _userShift = true;
+    // Au direct : l'écart observé devient la référence (il n'est pas affiché comme du retard).
+    if (!_userShift) _baseline = raw;
+    final delay = _userShift ? (raw - _baseline).clamp(0.0, 1e6) : 0.0;
     final changed = (delay - liveDelay).abs() > 0.4;
     liveDelay = delay;
     // Profondeur du différé disponible : début de la plage du cache où l'on peut revenir.
     final state = await native.getProperty('demuxer-cache-state', waitForInitialization: false);
     final start = _rangeStart(state, pos);
-    final depth = start == null ? delay : end - start;
+    final depth = start == null ? delay : (end - start - _baseline).clamp(0.0, 1e6);
     peakDelay = depth < delay ? delay : depth;
     // Rattrapage en accéléré jusqu'au point visé, puis vitesse normale.
     final target = _catchUpTarget;
     if (rate > 1 && delay <= (target ?? 1.5) + 0.5) {
       _catchUpTarget = null;
+      if ((target ?? 0) <= 0.5) _userShift = false;
       await setRate(1);
     }
     // En pause depuis trop longtemps : le cache est plein, la lecture reprend.
@@ -219,6 +232,7 @@ class PlaybackController extends ChangeNotifier {
   /// Accélère jusqu'à un retard donné (0 : le direct).
   Future<void> catchUp({double toDelay = 0}) async {
     if (!isLive) return;
+    _userShift = true;
     _catchUpTarget = toDelay;
     if (!isPlaying) player.play();
     await setRate(settings?.catchUpSpeed ?? 1.5);
@@ -233,6 +247,7 @@ class PlaybackController extends ChangeNotifier {
     final end = double.tryParse(await native.getProperty('demuxer-cache-time'));
     if (end != null) await native.command(['seek', (end - 0.5).toStringAsFixed(2), 'absolute']);
     if (!isPlaying) player.play();
+    _userShift = false;
     liveDelay = 0;
     notifyListeners();
   }
@@ -243,8 +258,13 @@ class PlaybackController extends ChangeNotifier {
     if (native is! NativePlayer || !isLive) return;
     final end = double.tryParse(await native.getProperty('demuxer-cache-time'));
     if (end == null) return;
+    if (delay <= 0.5) {
+      await returnToLive();
+      return;
+    }
     final d = delay.clamp(0.5, peakDelay > 1 ? peakDelay - 0.5 : 0.5);
-    await native.command(['seek', (end - d).toStringAsFixed(2), 'absolute']);
+    _userShift = true;
+    await native.command(['seek', (end - _baseline - d).toStringAsFixed(2), 'absolute']);
     liveDelay = d;
     notifyListeners();
   }
@@ -350,6 +370,8 @@ class PlaybackController extends ChangeNotifier {
     _shiftTimer?.cancel();
     liveDelay = 0;
     peakDelay = 0;
+    _userShift = false;
+    _baseline = 0;
     if (rate != 1) {
       rate = 1;
       player.setRate(1);
@@ -418,6 +440,8 @@ class PlaybackController extends ChangeNotifier {
     _shiftTimer?.cancel();
     liveDelay = 0;
     peakDelay = 0;
+    _userShift = false;
+    _baseline = 0;
     _catchUpTarget = null;
     if (rate != 1) {
       rate = 1;

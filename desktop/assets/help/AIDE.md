@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.2.0-desktop8 (aperçu 7) — installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
+> Version 1.2.1-desktop1 — enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
 ## Premiers pas
 
@@ -30,7 +30,7 @@ Réglages > Général > **Guide TV** : un guide de secours complète les chaîne
 
 ### Gérer les sources
 
-Réglages > **Sources** : actualiser une source ou toutes, la supprimer, voir l'état de son guide TV. Les sources sont actualisées au démarrage si leur dernière mise à jour date de plus de 6 heures (réglable). Si une actualisation renvoie une section vide, la précédente est gardée.
+Réglages > **Sources** : **modifier** une source (bouton crayon : nom, serveur, identifiant, mot de passe, adresse de la playlist, guide TV — favoris, récents et corrections de chaînes sont gardés), l'actualiser, la supprimer, voir l'état de son guide TV. Le bouton **œil** affiche le mot de passe (ou la clé TMDB) pour le vérifier. Les sources sont actualisées au démarrage si leur dernière mise à jour date de plus de 6 heures (réglable). Si une actualisation renvoie une section vide, la précédente est gardée.
 
 ## Naviguer
 
@@ -54,6 +54,10 @@ Réglages > Apparence > **Interface par type de contenu** :
 
 Il fait défiler des films ou séries (tendances de la semaine sur TMDB disponibles chez vous, derniers ajouts, sélection d'une catégorie) ou, pour le direct, le programme en cours de vos chaînes. Flèches au survol, arrêt quand la souris le survole. Réglages > Apparence > **Bandeau « à la une »** : afficher ou masquer, hauteur, vitesse, sources.
 
+### Pays et langues (Cinéma)
+
+Votre fournisseur mélange souvent plusieurs pays (catégories « FR| … », « |PT| … », « ITALIA »…). Réglages > Apparence > **Pays et langues (interface Cinéma)** liste les pays repérés dans les noms de vos catégories, avec le nombre de contenus : choisissez ceux à montrer. Les **derniers ajouts**, les **tendances**, le **bandeau « à la une »** et les **rangées par catégorie** de l'interface Cinéma ne montrent alors que ces pays. **Garder les catégories sans pays indiqué** conserve les catégories comme « Action » ou « Nouveautés ». **Tous** revient à l'affichage complet. Les listes et la recherche restent complètes.
+
 ### L'interface TV (direct)
 
 - **↑ / ↓** : chaîne précédente / suivante ; **tapez un numéro** (jusqu'à 4 chiffres).
@@ -75,7 +79,7 @@ Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastil
 
 ### Direct en différé
 
-Mettez une chaîne en pause : elle continue d'être gardée (jusqu'à 1 h par défaut, réglable). La barre du différé affiche le retard, un curseur pour revenir en arrière ou rattraper en accéléré, la vitesse, **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s.
+Mettez une chaîne en pause (ou revenez en arrière avec ← ou la barre) : elle continue d'être gardée (jusqu'à 1 h par défaut, réglable). Sans action de votre part, la chaîne reste « EN DIRECT ». La barre du différé affiche le retard, un curseur pour revenir en arrière ou rattraper en accéléré, la vitesse, **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s.
 
 ### Une seule connexion à la fois
 
@@ -101,11 +105,19 @@ La **MultiVue** affiche jusqu'à **4 chaînes en direct** sur un même écran. L
 
 ### Enregistrer le direct
 
-Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une chaîne > **Enregistrer maintenant** : la chaîne est enregistrée jusqu'à la fin du programme en cours (plus la marge) ou jusqu'à l'arrêt. Le flux est recopié sans perte en **MKV** (ou TS) dans **Vidéos/Kastideo/Enregistrements**.
+Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une chaîne > **Enregistrer maintenant** : la chaîne est enregistrée jusqu'à la fin du programme en cours (plus la marge) ou jusqu'à l'arrêt, dans **Vidéos/Kastideo/Enregistrements**.
+
+- Les octets du flux sont recopiés tels quels dans un fichier **.ts**, sans perte : la chaîne regardée est copiée depuis le relais (aucune seconde connexion au fournisseur) ; une autre chaîne est téléchargée directement, avec reconnexion si le flux est coupé.
+- À la fin, le .ts est converti sans perte en **MKV** (format par défaut, Réglages > Enregistrements) ; si la conversion échoue, le .ts est gardé — il se lit partout.
+- Les flux HLS (.m3u8) et la lecture sans relais passent encore par le moteur vidéo.
 
 ### Programmer un enregistrement
 
 Depuis la fiche d'un programme à venir (guide TV, thèmes) : **Programmer l'enregistrement**, avec les marges avant et après (Réglages > Enregistrements). Kastideo doit être ouvert à l'heure prévue.
+
+### Fiches dans votre langue
+
+Avec une **clé TMDB** (Réglages > Général), titres, résumés, genres et épisodes viennent de TMDB, dans la langue de l'interface. Quand le seul résumé disponible est celui du fournisseur dans une autre langue (portugais, espagnol…), il est replié : **Afficher le résumé (portugais)** l'affiche quand même. Il n'apparaît pas dans le bandeau ni dans la liste des épisodes.
 
 ### Télécharger un film ou des épisodes
 
@@ -210,6 +222,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.2.1-desktop1** : enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma.
 - **1.2.0-desktop8** : installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u.
 - **1.2.0-desktop7** : MultiVue (jusqu'à 4 chaînes, dispositions, grande image, groupes mémorisés), thème clair ou comme le système, couleur d'accent, densité des listes, taille des vignettes, catégories réorganisables depuis la barre latérale, notifications du système, aide complète.
 - **1.2.0-desktop6** : différé du direct, enregistrement immédiat et programmé, téléchargements, alertes de programme, correction des chaînes.
@@ -228,7 +241,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 - **La mise à jour ne s'installe pas** : le journal de lecture (Ctrl+Alt+L) donne la raison. Paquet .deb : si la fenêtre de mot de passe n'apparaît pas, la commande à taper dans un terminal s'affiche dans la fenêtre de mise à jour. Vous pouvez toujours télécharger la nouvelle version sur la page des versions GitHub.
 - **MultiVue : une vignette reste noire** : le fournisseur refuse une connexion de plus. Vérifiez le nombre de connexions de votre abonnement (Réglages > Général > Lecture > Détecter).
 - **Pas de notification** : vérifiez Réglages > Général > Notifications, puis les réglages de notification de Windows (Paramètres > Système > Notifications) ou de votre bureau Linux. Sous Linux, le paquet libnotify est nécessaire (installé par le .deb, inclus dans l'AppImage).
-- **Enregistrement vide** : le fournisseur n'a rien envoyé (chaîne refusée, connexion déjà utilisée). Les lignes « Enregistrement » du journal donnent le détail ; si un fichier MKV reste vide, Kastideo repasse seul en TS.
+- **Enregistrement vide** : le fournisseur n'a rien envoyé (chaîne refusée, connexion déjà utilisée par un autre appareil). Les lignes « Enregistrement » du journal donnent la réponse du fournisseur (par exemple « HTTP 403 ») et indiquent si aucune donnée n'est arrivée après 30 s.
 - **Le différé ne remonte pas plus loin** : sa profondeur dépend de l'espace disque temporaire ; sans cache sur disque (certaines versions de libmpv sous Linux), il est limité à 512 Mo en mémoire.
 - **Fiches dans une autre langue** : certains fournisseurs n'ont qu'une langue. Avec une **clé TMDB**, résumés, genres et épisodes sont repris de TMDB en français.
 - **Une seule fenêtre** : relancé alors qu'il tourne déjà, Kastideo ramène simplement la fenêtre existante au premier plan.

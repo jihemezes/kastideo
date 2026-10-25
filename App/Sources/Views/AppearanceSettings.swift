@@ -205,6 +205,104 @@ enum CardSize: String, CaseIterable, Identifiable {
     }
 }
 
+/// Clés du choix des pays (rangées Cinéma et bandeau), communes avec la version Windows / Linux.
+enum CountryKeys {
+    static let codes = "catalog.countries"
+    static let neutral = "catalog.countries.neutral"
+
+    static var filter: CountryFilter {
+        CountryFilter(stored: UserDefaults.standard.string(forKey: codes) ?? "",
+                      keepNeutral: UserDefaults.standard.object(forKey: neutral) as? Bool ?? true)
+    }
+
+    static func name(_ code: String) -> String {
+        switch code {
+        case "FR": return String(localized: "France")
+        case "PT": return String(localized: "Portugal")
+        case "BR": return String(localized: "Brésil")
+        case "IT": return String(localized: "Italie")
+        case "ES": return String(localized: "Espagne")
+        case "EN": return String(localized: "Anglais")
+        case "UK": return String(localized: "Royaume-Uni")
+        case "US": return String(localized: "États-Unis")
+        case "DE": return String(localized: "Allemagne")
+        case "AR": return String(localized: "Arabe")
+        case "TR": return String(localized: "Turquie")
+        case "PL": return String(localized: "Pologne")
+        case "NL": return String(localized: "Pays-Bas")
+        case "BE": return String(localized: "Belgique")
+        case "CH": return String(localized: "Suisse")
+        case "CA": return String(localized: "Canada")
+        case "QC": return String(localized: "Québec")
+        case "IN": return String(localized: "Inde")
+        case "RU": return String(localized: "Russie")
+        case "GR": return String(localized: "Grèce")
+        case "RO": return String(localized: "Roumanie")
+        case "AL": return String(localized: "Albanie")
+        case "MA": return String(localized: "Maroc")
+        case "DZ": return String(localized: "Algérie")
+        case "TN": return String(localized: "Tunisie")
+        case "LAT": return String(localized: "Amérique latine")
+        case "EXYU": return String(localized: "Ex-Yougoslavie")
+        case "AF": return String(localized: "Afrique")
+        case "MX": return String(localized: "Mexique")
+        default: return code
+        }
+    }
+}
+
+/// Pays et langues privilégiés dans les rangées Cinéma et le bandeau (repérés dans les noms des catégories).
+struct CountrySettingsSection: View {
+    @Environment(LibraryStore.self) private var store
+    @AppStorage(CountryKeys.codes) private var stored = ""
+    @AppStorage(CountryKeys.neutral) private var keepNeutral = true
+    @State private var detected: [DetectedCountry] = []
+
+    struct DetectedCountry: Identifiable {
+        let code: String
+        let count: Int
+        var id: String { code }
+    }
+
+    private var selected: Set<String> { CountryFilter(stored: stored, keepNeutral: keepNeutral).codes }
+
+    var body: some View {
+        Section {
+            if detected.isEmpty {
+                Text("Aucun pays repéré dans les noms des catégories de vos sources.")
+                    .foregroundStyle(.secondary)
+            } else {
+                Toggle("Tous les pays", isOn: Binding(get: { selected.isEmpty }, set: { if $0 { stored = "" } }))
+                ForEach(Array(detected.prefix(24))) { entry in
+                    Toggle("\(CountryKeys.name(entry.code)) · \(entry.count)", isOn: Binding(
+                        get: { selected.contains(entry.code) },
+                        set: { on in
+                            var codes = selected
+                            if on { codes.insert(entry.code) } else { codes.remove(entry.code) }
+                            stored = CountryFilter(codes: codes).stored
+                        }))
+                }
+                Toggle("Garder les catégories sans pays indiqué (ex. « Action », « Nouveautés »)", isOn: $keepNeutral)
+                    .disabled(selected.isEmpty)
+            }
+        } header: {
+            Text("Pays et langues (interface Cinéma)")
+        } footer: {
+            Text("Les derniers ajouts, les tendances, le bandeau « à la une » et les rangées par catégorie de l'interface Cinéma ne montrent que les pays choisis. Le pays est repéré dans le nom des catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…). Les listes et la recherche restent complètes.")
+        }
+        .task(id: store.count(for: .movie) + store.count(for: .series) + store.count(for: .live)) {
+            var counts: [String: Int] = [:]
+            for kind in [MediaKind.live, .movie, .series] {
+                for name in store.allCategoriesByKind[kind] ?? [] {
+                    guard let code = CountryDetector.code(for: name) else { continue }
+                    counts[code, default: 0] += store.items(for: .category(kind, name)).count
+                }
+            }
+            detected = counts.map { DetectedCountry(code: $0.key, count: $0.value) }.sorted { $0.count > $1.count }
+        }
+    }
+}
+
 /// Réglages > Apparence.
 struct AppearanceSettingsView: View {
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
@@ -252,6 +350,8 @@ struct AppearanceSettingsView: View {
             }
 
             HeroSettingsSection()
+
+            CountrySettingsSection()
         }
         .formStyle(.grouped)
     }

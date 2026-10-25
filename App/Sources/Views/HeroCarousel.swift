@@ -58,6 +58,8 @@ struct CinemaHeroCarousel: View {
     @AppStorage(HeroKeys.useCategory) private var useCategory = true
     @AppStorage(HeroKeys.useTrending) private var useTrending = true
     @AppStorage(HeroKeys.useRecent) private var useRecent = true
+    @AppStorage(CountryKeys.codes) private var countryCodes = ""
+    @AppStorage(CountryKeys.neutral) private var countryNeutral = true
     let kind: MediaKind
     /// Contenu affiché si le carrousel n'a rien à montrer.
     let fallback: MediaItem?
@@ -71,7 +73,7 @@ struct CinemaHeroCarousel: View {
     private var height: CGFloat { (HeroHeight(rawValue: heightRaw) ?? .normal).points }
 
     private var settingsKey: String {
-        "\(kind.rawValue)|\(categoryMovie)|\(categorySeries)|\(useCategory)|\(useTrending)|\(useRecent)|\(info.usesTMDB)|\(store.count(for: kind))"
+        "\(kind.rawValue)|\(categoryMovie)|\(categorySeries)|\(useCategory)|\(useTrending)|\(useRecent)|\(info.usesTMDB)|\(store.count(for: kind))|\(countryCodes)|\(countryNeutral)"
     }
 
     var body: some View {
@@ -209,13 +211,15 @@ struct CinemaHeroCarousel: View {
         }
 
         var groups: [[HeroSlide]] = []
+        // Pays choisis (Réglages > Apparence) : derniers ajouts, tendances et sélection au hasard.
+        let countries = CountryFilter(stored: countryCodes, keepNeutral: countryNeutral)
 
         if useTrending, info.usesTMDB {
             let trends = await info.trending(isSeries: kind == .series)
             if !trends.isEmpty {
                 let matched = await info.match(trends, in: all, kind: kind)
                 let caption = String(localized: "TENDANCE CETTE SEMAINE")
-                groups.append(matched.prefix(6).map { HeroSlide(item: $0.item, caption: caption, backdrop: $0.trend.backdropURL) })
+                groups.append(matched.filter { countries.allows($0.item) }.prefix(6).map { HeroSlide(item: $0.item, caption: caption, backdrop: $0.trend.backdropURL) })
             }
         }
 
@@ -224,9 +228,23 @@ struct CinemaHeroCarousel: View {
             let newest: [MediaItem] = await Task.detached(priority: .userInitiated) {
                 var top: [MediaItem] = []
                 var datedCount = 0
+                // Pays de chaque catégorie calculé une seule fois (catalogues de ~100 000 films).
+                var groupCode: [String: String?] = [:]
+                func allowed(_ item: MediaItem) -> Bool {
+                    guard countries.isActive else { return true }
+                    let code: String?
+                    if let cached = groupCode[item.group] {
+                        code = cached
+                    } else {
+                        code = CountryDetector.code(for: item.group)
+                        groupCode[item.group] = .some(code)
+                    }
+                    return countries.allows(code: code ?? CountryDetector.code(for: item.name))
+                }
                 for item in all {
                     guard let date = item.added else { continue }
                     datedCount += 1
+                    guard allowed(item) else { continue }
                     if top.count < 6 || date > (top.last?.added ?? .distantPast) {
                         top.append(item)
                         top.sort { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
@@ -234,7 +252,7 @@ struct CinemaHeroCarousel: View {
                     }
                 }
                 // Sans date d'ajout : les derniers éléments de la liste du fournisseur sont en général les plus récents.
-                return datedCount > all.count / 4 ? top : Array(all.suffix(6).reversed())
+                return datedCount > all.count / 4 ? top : Array(all.suffix(400).reversed().filter { countries.allows($0) }.prefix(6))
             }.value
             let caption = String(localized: "AJOUTÉ RÉCEMMENT")
             groups.append(newest.map { HeroSlide(item: $0, caption: caption) })
@@ -254,8 +272,10 @@ struct CinemaHeroCarousel: View {
             // Tirage au hasard de quelques affiches (sans parcourir tout le catalogue).
             var picked: [MediaItem] = []
             var ids = Set<String>()
-            for _ in 0..<60 where picked.count < 6 {
+            let filtered = pool.count == all.count && countries.isActive
+            for _ in 0..<(filtered ? 300 : 60) where picked.count < 6 {
                 guard let item = pool.randomElement() else { break }
+                if filtered && !countries.allows(item) { continue }
                 if item.logoURL != nil, ids.insert(item.id).inserted { picked.append(item) }
             }
             groups.append(picked.map { HeroSlide(item: $0, caption: caption) })

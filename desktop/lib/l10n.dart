@@ -517,6 +517,18 @@ class L10n {
     'Installer et relancer': 'Install and restart',
     'Nouveautés': 'What\'s new',
     'Continuer': 'Continue',
+    'Le flux est recopié tel quel en .ts, sans perte de qualité (la chaîne regardée sans seconde connexion), puis converti en MKV à la fin si ce format est choisi. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture. Les enregistrements programmés ont lieu si Kastideo est ouvert (ordinateur allumé, sans mise en veille).': 'The stream is copied as is to .ts, losslessly (the watched channel without a second connection), then converted to MKV at the end if that format is chosen. One connection: recording another channel than the one watched stops playback. Scheduled recordings happen while Kastideo is open (computer on, not asleep).',
+    'Modifier': 'Edit',
+    'Modifier la source': 'Edit source',
+    'Masquer': 'Hide',
+    'Afficher': 'Show',
+    'Afficher le résumé': 'Show the summary',
+    'dans une autre langue': 'in another language',
+    'Pays et langues (interface Cinéma)': 'Countries and languages (Cinema interface)',
+    'Aucun pays repéré dans les noms des catégories de vos sources.': 'No country found in the category names of your sources.',
+    'Tous': 'All',
+    'Garder les catégories sans pays indiqué (ex. « Action », « Nouveautés »)': 'Keep categories without a country (e.g. “Action”, “New”)',
+    'Les derniers ajouts, les tendances, le bandeau « à la une » et les rangées par catégorie de l\'interface Cinéma ne montrent que les pays choisis. Le pays est repéré dans le nom des catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…). Les listes et la recherche restent complètes.': 'Latest additions, trends, the featured banner and category rows of the Cinema interface only show the chosen countries. The country is found in category names (“FR|”, “|PT|”, “FRANCE”, “VOSTFR”…). Lists and search stay complete.',
   };
 
   static String tr(String french) => english ? (_en[french] ?? french) : french;

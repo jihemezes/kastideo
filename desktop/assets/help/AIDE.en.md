@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.2.0-desktop8 (preview 7) — Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
+> Version 1.2.1-desktop1 — more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
 
 ## Getting started
 
@@ -30,7 +30,7 @@ Settings > General > **TV guide**: a fallback guide fills in channels without pr
 
 ### Managing sources
 
-Settings > **Sources**: refresh one or all sources, delete one, see the state of its TV guide. Sources refresh at startup when their last update is more than 6 hours old (adjustable). If a refresh returns an empty section, the previous one is kept.
+Settings > **Sources**: **edit** a source (pencil button: name, server, username, password, playlist address, TV guide — favorites, recents and channel fixes are kept), refresh it, delete it, see the state of its TV guide. The **eye** button shows the password (or the TMDB key) so you can check it. Sources refresh at startup when their last update is more than 6 hours old (adjustable). If a refresh returns an empty section, the previous one is kept.
 
 ## Navigating
 
@@ -54,6 +54,10 @@ Settings > Appearance > **Interface per content type**:
 
 It cycles through movies or series (this week's TMDB trends available to you, latest additions, a category selection) or, for live TV, the current programme of your channels. Arrows on hover, pauses while the mouse is over it. Settings > Appearance > **Featured banner**: show or hide, height, speed, sources.
 
+### Countries and languages (Cinema)
+
+Providers often mix several countries (categories “FR| …”, “|PT| …”, “ITALIA”…). Settings > Appearance > **Countries and languages (Cinema interface)** lists the countries found in your category names, with the number of items: choose the ones to show. **Latest additions**, **trends**, the **featured banner** and **category rows** of the Cinema interface then only show those countries. **Keep categories without a country** keeps categories such as “Action” or “New”. **All** goes back to the full display. Lists and search stay complete.
+
 ### TV interface (live)
 
 - **↑ / ↓**: previous / next channel; **type a number** (up to 4 digits).
@@ -75,7 +79,7 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 
 ### Live timeshift
 
-Pause a channel: it keeps being buffered (up to 1 h by default, adjustable). The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
+Pause a channel (or go back with ← or the bar): it keeps being buffered (up to 1 h by default, adjustable). Without any action from you, the channel stays “LIVE”. The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
 
 ### One connection at a time
 
@@ -101,11 +105,19 @@ Most subscriptions allow a single connection. Kastideo closes the previous chann
 
 ### Recording live TV
 
-Red round button in the player bar, **R** key, or right-click a channel > **Record now**: the channel is recorded until the end of the current programme (plus the margin) or until you stop it. The stream is copied losslessly to **MKV** (or TS) in **Videos/Kastideo/Enregistrements**.
+Red round button in the player bar, **R** key, or right-click a channel > **Record now**: the channel is recorded until the end of the current programme (plus the margin) or until you stop it, in **Videos/Kastideo/Enregistrements**.
+
+- The stream bytes are copied as is to a **.ts** file, losslessly: the watched channel is copied from the relay (no second connection to the provider); another channel is downloaded directly, reconnecting if the stream drops.
+- At the end, the .ts is converted losslessly to **MKV** (default format, Settings > Recordings); if conversion fails, the .ts is kept — it plays everywhere.
+- HLS streams (.m3u8) and playback without the relay still go through the video engine.
 
 ### Scheduling a recording
 
 From the details of an upcoming programme (TV guide, themes): **Schedule recording**, with margins before and after (Settings > Recordings). Kastideo must be open at the scheduled time.
+
+### Details in your language
+
+With a **TMDB key** (Settings > General), titles, summaries, genres and episodes come from TMDB, in the interface language. When the only summary available is the provider's in another language (Portuguese, Spanish…), it is folded: **Show the summary (Portuguese)** shows it anyway. It doesn't appear in the banner or the episode list.
 
 ### Downloading a movie or episodes
 
@@ -210,6 +222,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.2.1-desktop1**: more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface.
 - **1.2.0-desktop8**: Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files.
 - **1.2.0-desktop7**: MultiView (up to 4 channels, layouts, large view, saved groups), light or system theme, accent color, list density, thumbnail size, categories reordered from the sidebar, system notifications, full help.
 - **1.2.0-desktop6**: live timeshift, immediate and scheduled recording, downloads, programme alerts, channel editing.
@@ -228,7 +241,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 - **The update doesn't install**: the playback log (Ctrl+Alt+L) gives the reason. .deb package: if the password window doesn't appear, the command to type in a terminal is shown in the update window. You can always download the new version from the GitHub releases page.
 - **MultiView: a tile stays black**: the provider refuses an extra connection. Check your subscription's number of connections (Settings > General > Playback > Detect).
 - **No notification**: check Settings > General > Notifications, then the notification settings of Windows (Settings > System > Notifications) or of your Linux desktop. On Linux, the libnotify package is required (installed by the .deb, included in the AppImage).
-- **Empty recording**: the provider sent nothing (channel refused, connection already in use). "Enregistrement" lines in the log give details; if an MKV file stays empty, Kastideo switches to TS by itself.
+- **Empty recording**: the provider sent nothing (channel refused, connection already used by another device). "Enregistrement" lines in the log give the provider's answer (e.g. "HTTP 403") and say if no data arrived after 30 s.
 - **Timeshift doesn't go back further**: its depth depends on temporary disk space; without a disk cache (some libmpv versions on Linux), it is limited to 512 MB in memory.
 - **Details in another language**: some providers only have one language. With a **TMDB key**, summaries, genres and episodes come from TMDB in your language.
 - **Single window**: launched while already running, Kastideo just brings the existing window to the front.

@@ -13,6 +13,7 @@ import 'notify.dart';
 import 'models.dart';
 import 'paths.dart';
 import 'playback.dart';
+import 'relay.dart';
 import 'settings.dart';
 import 'xtream.dart';
 
@@ -93,8 +94,11 @@ class RecordedFile {
 }
 
 /// Enregistrement du direct (immédiat ou programmé), comme RecordingCenter sur Mac.
-/// La chaîne regardée est enregistrée par le lecteur (option « stream-record » de mpv) ; une autre chaîne,
-/// ou une chaîne programmée sans lecture en cours, par un second lecteur sans image ni son.
+/// Les octets du flux sont recopiés tels quels dans un fichier .ts, sans passer par le moteur vidéo :
+/// - la chaîne regardée : copie de ce que reçoit le relais (aucune seconde connexion au fournisseur) ;
+/// - une autre chaîne : téléchargement direct du flux, avec reconnexion s'il est coupé.
+/// À la fin, le .ts est converti sans perte en MKV si ce format est choisi (sinon, ou en cas d'échec, le .ts reste).
+/// Les flux HLS (.m3u8) et la lecture sans relais passent encore par mpv (option « stream-record »).
 class RecordingCenter extends ChangeNotifier {
   RecordingCenter(this.settings, this.playback, this.library);
   final AppSettings settings;
@@ -109,6 +113,8 @@ class RecordingCenter extends ChangeNotifier {
   String? notice;
   late SharedPreferences _prefs;
   Player? _recorder;
+  HttpClient? _http;
+  IOSink? _sink;
   Timer? _ticker;
   Timer? _sizeTimer;
   Timer? _noticeTimer;
@@ -172,11 +178,41 @@ class RecordingCenter extends ChangeNotifier {
 
   String _newPath(MediaItem channel, String title, {String? format}) {
     final now = DateTime.now();
-    final ext = format ?? settings.recordingFormat;
+    final ext = format ?? 'ts';
     final stamp = '${now.year}-${two(now.month)}-${two(now.day)} ${two(now.hour)}h${two(now.minute)}';
     final label = title.isEmpty || title == channel.displayName ? channel.displayName : '${channel.displayName} - $title';
     final sep = Platform.pathSeparator;
     return '$folder${sep}Enregistrements$sep${safeFileName('$label - $stamp')}.$ext';
+  }
+
+  static bool _isHls(String url) => Uri.tryParse(url)?.path.toLowerCase().endsWith('.m3u8') ?? false;
+
+  /// La chaîne regardée passe par le relais : ses octets peuvent être recopiés.
+  bool _relayed(MediaItem channel) {
+    final relayed = StreamRelay.shared.relayedUrl;
+    final url = channel.stream;
+    return relayed != null && url != null && relayed == Uri.tryParse(url)?.toString();
+  }
+
+  void _write(ActiveRecording a, List<int> chunk) {
+    if (!identical(active, a)) return;
+    _sink?.add(chunk);
+    a.bytes += chunk.length;
+  }
+
+  Future<void> _openSink(String path) async {
+    await _closeSink();
+    _sink = File(path).openWrite(mode: FileMode.append);
+  }
+
+  Future<void> _closeSink() async {
+    final sink = _sink;
+    _sink = null;
+    if (sink == null) return;
+    try {
+      await sink.flush();
+      await sink.close();
+    } catch (_) {}
   }
 
   /// Enregistre une chaîne maintenant (jusqu'à [stopS] si donné, sinon jusqu'à l'arrêt).
@@ -185,6 +221,8 @@ class RecordingCenter extends ChangeNotifier {
       if (active!.channel.id == channel.id) return true;
       await stop();
     }
+    final url = channel.stream;
+    if (url == null) return false;
     final path = _newPath(channel, title);
     try {
       await Directory(File(path).parent.path).create(recursive: true);
@@ -193,30 +231,98 @@ class RecordingCenter extends ChangeNotifier {
       return false;
     }
     final viaPlayer = playback.current?.id == channel.id;
+    final a = ActiveRecording(channel: channel, title: title, path: path, viaPlayer: viaPlayer, stopS: stopS, scheduleId: scheduleId);
+    String how;
     try {
-      if (viaPlayer) {
+      if (viaPlayer && _relayed(channel)) {
+        await _openSink(path);
+        active = a;
+        StreamRelay.shared.tap = (chunk) => _write(a, chunk);
+        how = 'copie du flux relayé';
+      } else if (viaPlayer) {
         final native = playback.player.platform;
         if (native is! NativePlayer) return false;
         await native.setProperty('stream-record', path);
+        active = a;
+        how = 'par le lecteur (stream-record)';
       } else {
-        if (playback.current != null) {
+        if (playback.current != null && settings.multiviewConnections < 2) {
           // Une seule connexion : la lecture en cours laisse la place à l'enregistrement.
           await playback.stop();
           _say('Lecture arrêtée : l\'enregistrement de ${channel.displayName} utilise la connexion de l\'abonnement.');
         }
-        await _startRecorder(channel, path);
+        active = a;
+        if (_isHls(url)) {
+          await _startRecorder(channel, path);
+          how = 'en arrière-plan (mpv, flux HLS)';
+        } else {
+          await _openSink(path);
+          unawaited(_directLoop(a, url));
+          how = 'en arrière-plan (téléchargement direct)';
+        }
       }
     } catch (e) {
+      active = null;
+      await _closeSink();
       _say('Enregistrement impossible : $e', system: true);
       PlaybackLog.shared.note('Enregistrement impossible : $e');
       return false;
     }
-    active = ActiveRecording(channel: channel, title: title, path: path, viaPlayer: viaPlayer, stopS: stopS, scheduleId: scheduleId);
-    PlaybackLog.shared.note('Enregistrement de « ${channel.name} » ${viaPlayer ? 'par le lecteur' : 'en arrière-plan'} : $path');
+    PlaybackLog.shared.note('Enregistrement de « ${channel.name} » $how : $path');
     _say('Enregistrement de ${channel.displayName} commencé.', system: true);
     _watchSize();
     notifyListeners();
     return true;
+  }
+
+  /// Téléchargement direct du flux (autre chaîne que celle regardée), avec reconnexion s'il est coupé.
+  Future<void> _directLoop(ActiveRecording a, String url) async {
+    var failures = 0;
+    String? lastError;
+    while (identical(active, a)) {
+      final client = HttpClient()
+        ..userAgent = kUserAgent
+        ..connectionTimeout = const Duration(seconds: 20);
+      _http = client;
+      try {
+        final request = await client.getUrl(Uri.parse(url));
+        request.headers.set(HttpHeaders.acceptHeader, '*/*');
+        request.followRedirects = true;
+        request.maxRedirects = 5;
+        final response = await request.close();
+        PlaybackLog.shared.note('Enregistrement : réponse du fournisseur HTTP ${response.statusCode}');
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          lastError = 'le fournisseur refuse la chaîne (HTTP ${response.statusCode})';
+          failures++;
+          await response.drain<void>().catchError((_) {});
+        } else {
+          await for (final chunk in response) {
+            if (!identical(active, a)) break;
+            _write(a, chunk);
+            failures = 0;
+          }
+          if (identical(active, a)) {
+            PlaybackLog.shared.note('Enregistrement : le fournisseur a coupé le flux, reconnexion');
+            lastError = 'le fournisseur a coupé le flux';
+            failures++;
+          }
+        }
+      } catch (e) {
+        if (!identical(active, a)) break;
+        lastError = '$e';
+        failures++;
+        PlaybackLog.shared.note('Enregistrement : connexion interrompue ($e)');
+      } finally {
+        client.close(force: true);
+        if (identical(_http, client)) _http = null;
+      }
+      if (!identical(active, a)) break;
+      if (failures >= 5 && a.bytes == 0) {
+        await stop(failed: true, error: lastError);
+        break;
+      }
+      await Future<void>.delayed(Duration(seconds: failures.clamp(1, 10)));
+    }
   }
 
   Future<void> _startRecorder(MediaItem channel, String path) async {
@@ -238,7 +344,7 @@ class RecordingCenter extends ChangeNotifier {
     await player.open(Media(channel.stream!, httpHeaders: const {'User-Agent': kUserAgent}), play: true);
   }
 
-  /// Vérifie que le fichier grossit ; sinon (format refusé par le multiplexeur) repasse en .ts.
+  /// Taille du fichier, affichée pendant l'enregistrement ; journal si rien n'arrive.
   void _watchSize() {
     _sizeTimer?.cancel();
     var checks = 0;
@@ -246,21 +352,33 @@ class RecordingCenter extends ChangeNotifier {
       final a = active;
       if (a == null) return;
       checks++;
-      final f = File(a.path);
-      final size = await f.exists() ? await f.length() : 0;
-      a.bytes = size;
-      notifyListeners();
-      if (checks == 5 && size == 0 && a.path.endsWith('.mkv')) {
-        PlaybackLog.shared.note('Enregistrement : fichier MKV vide après 25 s, nouvel essai en .ts');
-        final path = _newPath(a.channel, a.title, format: 'ts');
-        a.path = path;
-        final native = (a.viaPlayer ? playback.player : _recorder)?.platform;
-        if (native is NativePlayer) {
-          await native.setProperty('stream-record', '');
-          await native.setProperty('stream-record', path);
-        }
+      if (_sink == null) {
+        // Enregistrement fait par mpv : taille lue sur le disque.
+        final f = File(a.path);
+        a.bytes = await f.exists() ? await f.length() : 0;
       }
+      if (checks == 6 && a.bytes == 0) {
+        PlaybackLog.shared.note('Enregistrement : aucune donnée reçue après 30 s (le fournisseur n\'envoie rien sur cette connexion)');
+      }
+      notifyListeners();
     });
+  }
+
+  Future<void> _stopEngines(ActiveRecording a) async {
+    StreamRelay.shared.tap = null;
+    final http = _http;
+    _http = null;
+    http?.close(force: true);
+    await _closeSink();
+    try {
+      if (a.viaPlayer) {
+        final native = playback.player.platform;
+        if (native is NativePlayer) await native.setProperty('stream-record', '');
+      }
+      final native = _recorder?.platform;
+      if (native is NativePlayer) await native.setProperty('stream-record', '');
+      await _recorder?.stop();
+    } catch (_) {}
   }
 
   /// Regarder la chaîne enregistrée en arrière-plan : l'enregistrement passe dans le lecteur (une seule connexion).
@@ -269,17 +387,24 @@ class RecordingCenter extends ChangeNotifier {
     if (a == null || a.viaPlayer) return;
     active = null;
     _sizeTimer?.cancel();
-    try {
-      final native = _recorder?.platform;
-      if (native is NativePlayer) await native.setProperty('stream-record', '');
-      await _recorder?.stop();
-    } catch (_) {}
-    playback.play(a.channel);
+    await _stopEngines(a);
     final path = _newPath(a.channel, a.title);
-    final native = playback.player.platform;
-    if (native is NativePlayer) await native.setProperty('stream-record', path);
-    active = ActiveRecording(channel: a.channel, title: a.title, path: path, viaPlayer: true, stopS: a.stopS, scheduleId: a.scheduleId);
+    final next = ActiveRecording(channel: a.channel, title: a.title, path: path, viaPlayer: true, stopS: a.stopS, scheduleId: a.scheduleId);
+    final relay = settings.relayEnabled && !_isHls(a.channel.stream ?? '');
+    if (relay) {
+      // La copie commence dès que le relais reçoit les premiers octets de la nouvelle connexion.
+      await _openSink(path);
+      active = next;
+      StreamRelay.shared.tap = (chunk) => _write(next, chunk);
+      playback.play(a.channel);
+    } else {
+      playback.play(a.channel);
+      final native = playback.player.platform;
+      if (native is NativePlayer) await native.setProperty('stream-record', path);
+      active = next;
+    }
     PlaybackLog.shared.note('Enregistrement de « ${a.channel.name} » poursuivi par le lecteur : $path');
+    unawaited(_finish(a.path));
     _watchSize();
     notifyListeners();
   }
@@ -290,19 +415,15 @@ class RecordingCenter extends ChangeNotifier {
     if (a == null) return;
     active = null;
     _sizeTimer?.cancel();
-    try {
-      if (a.viaPlayer) {
-        final native = playback.player.platform;
-        if (native is NativePlayer) await native.setProperty('stream-record', '');
-      } else {
-        final native = _recorder?.platform;
-        if (native is NativePlayer) await native.setProperty('stream-record', '');
-        await _recorder?.stop();
-      }
-    } catch (_) {}
+    await _stopEngines(a);
     final f = File(a.path);
     final size = await f.exists() ? await f.length() : 0;
     final ok = !failed && size > 0;
+    if (!ok && size == 0) {
+      try {
+        if (await f.exists()) await f.delete();
+      } catch (_) {}
+    }
     if (a.scheduleId != null) {
       final s = schedules.where((s) => s.id == a.scheduleId).firstOrNull;
       if (s != null) {
@@ -317,7 +438,101 @@ class RecordingCenter extends ChangeNotifier {
     _say(ok ? 'Enregistrement terminé : ${f.uri.pathSegments.last} (${sizeText(size)})' : 'Enregistrement sans données : ${error ?? 'le fournisseur n\'a rien envoyé.'}',
         system: true);
     notifyListeners();
-    unawaited(scanFiles());
+    if (ok) {
+      unawaited(_finish(a.path, scheduleId: a.scheduleId));
+    } else {
+      unawaited(scanFiles());
+    }
+  }
+
+  // MARK: Conversion en MKV
+
+  /// Conversions en cours (chemin du .ts).
+  final Set<String> converting = {};
+
+  /// Convertit le .ts en MKV sans perte si ce format est choisi ; le .ts reste en cas d'échec.
+  Future<void> _finish(String path, {String? scheduleId}) async {
+    if (settings.recordingFormat != 'mkv' || !path.toLowerCase().endsWith('.ts')) {
+      await scanFiles();
+      return;
+    }
+    final source = File(path);
+    if (!await source.exists() || await source.length() == 0) {
+      await scanFiles();
+      return;
+    }
+    final target = '${path.substring(0, path.length - 3)}.mkv';
+    converting.add(path);
+    notifyListeners();
+    final ok = await remuxToMkv(path, target);
+    converting.remove(path);
+    if (ok) {
+      try {
+        await source.delete();
+      } catch (_) {}
+      for (final s in schedules.where((s) => s.path == path)) {
+        s.path = target;
+      }
+      _save();
+      PlaybackLog.shared.note('Enregistrement converti en MKV : $target');
+    } else {
+      PlaybackLog.shared.note('Conversion en MKV impossible : le fichier .ts est gardé ($path)');
+    }
+    notifyListeners();
+    await scanFiles();
+  }
+
+  /// Recopie les pistes d'un .ts dans un .mkv (sans réencodage) avec un lecteur mpv en pause, sans image ni son :
+  /// son démultiplexeur lit tout le fichier dans son cache (sur disque) et l'option « stream-record » écrit
+  /// chaque paquet lu. La fin est connue quand le cache signale la fin du fichier.
+  static Future<bool> remuxToMkv(String input, String output) async {
+    final player = Player(configuration: const PlayerConfiguration(title: 'Kastideo', vo: 'null', muted: true, logLevel: MPVLogLevel.warn));
+    try {
+      final native = player.platform;
+      if (native is! NativePlayer) return false;
+      final size = await File(input).length();
+      await native.setProperty('ao', 'null');
+      await native.setProperty('vid', 'auto');
+      await native.setProperty('aid', 'auto');
+      await native.setProperty('sid', 'auto');
+      await native.setProperty('pause', 'yes');
+      await native.setProperty('cache', 'yes');
+      await native.setProperty('cache-on-disk', 'yes');
+      await native.setProperty('cache-secs', '100000000');
+      await native.setProperty('demuxer-readahead-secs', '100000000');
+      await native.setProperty('demuxer-max-bytes', '${size + 64 * 1024 * 1024}');
+      await native.setProperty('stream-record', output);
+      await player.open(Media(input), play: false);
+      // Au moins 2 min, puis environ 1 min par Go.
+      final deadline = DateTime.now().add(Duration(seconds: 120 + size ~/ (1024 * 1024 * 1024) * 60));
+      var ok = false;
+      while (DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        final state = await native.getProperty('demuxer-cache-state', waitForInitialization: false);
+        if (RegExp(r'"eof"\s*:\s*true').hasMatch(state)) {
+          ok = true;
+          break;
+        }
+      }
+      await native.setProperty('stream-record', '');
+      await player.stop();
+      final out = File(output);
+      final outSize = await out.exists() ? await out.length() : 0;
+      // Garde-fou : un MKV bien plus petit que le .ts est sans doute incomplet.
+      if (!ok || outSize < size * 0.6) {
+        PlaybackLog.shared.note('Conversion en MKV incomplète (${sizeText(outSize)} pour ${sizeText(size)})');
+        try {
+          if (await out.exists()) await out.delete();
+        } catch (_) {}
+        return false;
+      }
+      return true;
+    } catch (e) {
+      PlaybackLog.shared.note('Conversion en MKV : $e');
+      return false;
+    } finally {
+      await player.dispose();
+    }
   }
 
   /// La lecture change de chaîne pendant un enregistrement fait par le lecteur : il s'arrête proprement.

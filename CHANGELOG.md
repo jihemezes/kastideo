@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.2.1] - 2026-10-25
+
+- **Pays et langues des rangées Cinéma** (Réglages > Apparence) : Kastideo repère les pays dans les noms de vos catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…) et vous laisse choisir ceux à montrer. Les derniers ajouts du bandeau « à la une », les tendances TMDB, la sélection au hasard et les rangées par catégorie de l'interface Cinéma ne montrent plus que ces pays (option pour garder les catégories sans pays, comme « Action »). Les listes et la recherche restent complètes. Le choix est repris par la sauvegarde de la configuration, comme dans Kastideo pour Windows et Linux.
+
 ## [1.2.0] - 2026-10-25
 
 - **Sauvegarde et transfert de la configuration** (Réglages > Général) : **Exporter la configuration…** crée un fichier avec vos sources (mots de passe compris si vous le souhaitez), favoris, récents, catégories personnalisées et interfaces choisies ; **Importer une configuration…** les ajoute sur un autre Mac — ou dans Kastideo pour Windows et Linux, qui lit et écrit le même fichier. Rien n'est supprimé à l'importation : les sources déjà présentes sont reconnues.

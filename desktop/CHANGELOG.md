@@ -2,6 +2,18 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.1-desktop1] - 2026-10-25
+
+**Corrections des retours de test.**
+
+- **Enregistrement (Windows)** : l'enregistrement restait vide (« le fournisseur n'a rien envoyé »). Il ne passe plus par le moteur vidéo : les octets du flux sont recopiés tels quels dans un fichier .ts — pour la chaîne regardée, depuis le relais (aucune seconde connexion au fournisseur) ; pour une autre chaîne, par un téléchargement direct qui se reconnecte si le flux est coupé. À la fin, le .ts est converti sans perte en MKV (format par défaut) ; en cas d'échec, le .ts est gardé. Le journal indique la réponse exacte du fournisseur.
+- **Différé du direct** : passer la souris sur l'image affichait un différé qui grandissait alors que la chaîne était en direct. L'écart naturel du cache du moteur n'est plus compté comme du retard : le différé ne commence qu'avec une pause ou un retour en arrière.
+- **Modifier une source** (Réglages > Sources, bouton crayon) : nom, serveur, identifiant, mot de passe, adresse de la playlist et guide TV. Les favoris, récents et corrections de chaînes sont gardés.
+- **Bouton « œil »** pour afficher ou masquer le mot de passe d'une source et la clé TMDB.
+- **Fiches en portugais** : avec une clé TMDB, les informations de TMDB (dans votre langue) passent toujours en premier. Un résumé du fournisseur dans une autre langue est replié (« Afficher le résumé (portugais) »), et masqué dans le bandeau et la liste des épisodes.
+- **Pays et langues (interface Cinéma)** (Réglages > Apparence) : choisissez les pays repérés dans les noms de vos catégories (« FR| », « |PT| », « FRANCE »…) ; les derniers ajouts, les tendances, le bandeau « à la une » et les rangées par catégorie ne montrent plus que ceux-ci. Même réglage sur Mac (1.2.1), repris par la sauvegarde de la configuration.
+- Le journal de lecture reste lisible en thème clair.
+
 ## [1.2.0-desktop8] - 2026-10-25
 
 **Aperçu 7 — installateur Windows et mises à jour intégrées.**

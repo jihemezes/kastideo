@@ -10,6 +10,7 @@ import '../core/guide.dart';
 import '../core/models.dart';
 import '../core/settings.dart';
 import '../core/themes.dart';
+import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import 'catalog_screen.dart';
@@ -118,6 +119,7 @@ class _CinemaHome extends StatelessWidget {
       if (favorites.isNotEmpty)
         CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => context.navigation.show(kind, FavoriteItems())),
       for (final name in library.categories(kind))
+        if (library.categoryInCountries(name))
         CinemaRail.items(
           title: library.categoryName(kind, name),
           items: library.itemsInCategory(kind, name),
@@ -179,6 +181,7 @@ class _LiveHome extends StatelessWidget {
       ));
     }
     for (final name in library.categories(MediaKind.live)) {
+      if (!library.categoryInCountries(name)) continue;
       rails.add(CinemaRail.items(
         title: library.categoryName(MediaKind.live, name),
         items: library.itemsInCategory(MediaKind.live, name),
@@ -628,6 +631,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
   late final AppSettings _settings;
   late final GuideStore _guide;
   late final Listenable _sources;
+  int _countriesGeneration = 0;
 
   bool get _live => widget.kind == MediaKind.live;
 
@@ -651,7 +655,10 @@ class _HeroCarouselState extends State<HeroCarousel> {
   void _changed() {
     if (!mounted) return;
     final count = context.library.count(widget.kind);
-    if (_settings.heroGeneration != _heroGeneration || (_slides.isEmpty && count != _libraryCount) || _live) _prepare();
+    final countries = context.library.countriesGeneration;
+    if (_settings.heroGeneration != _heroGeneration || countries != _countriesGeneration || (_slides.isEmpty && count != _libraryCount) || _live) {
+      _prepare();
+    }
   }
 
   void _restartTimer() {
@@ -666,6 +673,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
     if (!mounted) return;
     final generation = ++_generation;
     _heroGeneration = _settings.heroGeneration;
+    _countriesGeneration = context.library.countriesGeneration;
     _libraryCount = context.library.count(widget.kind);
     final slides = _live ? _liveSlides() : await _mediaSlides();
     if (!mounted || generation != _generation) return;
@@ -721,20 +729,21 @@ class _HeroCarouselState extends State<HeroCarousel> {
     if (_settings.heroUseTrending && _settings.usesTMDB) {
       final trends = await info.trending(series: kind == MediaKind.series);
       if (!mounted) return [];
-      final matched = info.match(trends, kind).take(6);
+      final matched = info.match(trends, kind).where((m) => library.inCountries(m.$1)).take(6);
       if (matched.isNotEmpty) {
         groups.add([for (final (item, t) in matched) HeroSlide(item, tr('TENDANCE CETTE SEMAINE'), backdrop: t.backdrop)]);
       }
     }
     if (_settings.heroUseRecent) {
       final dated = library.latest(kind, limit: 6);
-      final newest = dated.length >= 3 ? dated : all.reversed.take(6).toList();
+      final newest = dated.length >= 3 ? dated : all.reversed.where(library.inCountries).take(6).toList();
       groups.add([for (final i in newest) HeroSlide(i, tr('AJOUTÉ RÉCEMMENT'))]);
     }
     if (_settings.heroUseCategory) {
       final chosen = _settings.heroCategory(kind);
       final inCategory = chosen.isEmpty ? const <MediaItem>[] : library.itemsInCategory(kind, chosen);
-      final pool = inCategory.isNotEmpty ? inCategory : all;
+      final inCountries = all.where(library.inCountries).toList();
+      final pool = inCategory.isNotEmpty ? inCategory : (inCountries.isNotEmpty ? inCountries : all);
       final caption = inCategory.isNotEmpty ? library.categoryName(kind, chosen).toUpperCase() : tr('À DÉCOUVRIR');
       final rnd = math.Random();
       final picked = <MediaItem>[];
@@ -915,9 +924,9 @@ class _HeroSlideView extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(meta, style: kTextD(13, weight: FontWeight.w500, color: Colors.white70)),
                 ],
-                if (d?.plot != null && height >= 300) ...[
+                if (d?.plot != null && height >= 300 && !isForeignText(d!.plot, L10n.english ? 'en' : 'fr')) ...[
                   const SizedBox(height: 8),
-                  Text(d!.plot!, style: kTextD(13, color: Colors.white.withValues(alpha: 0.85)), maxLines: 3, overflow: TextOverflow.ellipsis),
+                  Text(d.plot!, style: kTextD(13, color: Colors.white.withValues(alpha: 0.85)), maxLines: 3, overflow: TextOverflow.ellipsis),
                 ],
                 const SizedBox(height: 14),
                 Wrap(spacing: 10, children: [

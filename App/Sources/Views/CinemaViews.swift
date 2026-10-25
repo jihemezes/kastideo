@@ -212,17 +212,21 @@ struct CinemaHome: View {
     @Environment(NavigationModel.self) private var navigation
     @Environment(WatchProgressStore.self) private var watch
     @AppStorage(HeroKeys.enabled) private var heroEnabled = true
+    @AppStorage(CountryKeys.codes) private var countryCodes = ""
+    @AppStorage(CountryKeys.neutral) private var countryNeutral = true
     let kind: MediaKind
 
     var body: some View {
         let kinds: Set<MediaKind> = kind == .series ? [.series, .episode] : [kind]
+        let countries = CountryFilter(stored: countryCodes, keepNeutral: countryNeutral)
         let all = store.items(for: .all(kind))
         let allRecents = store.recentIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         // Pour les films et séries : les contenus entamés d'abord (« Reprendre »), puis les autres récents.
         let started = kind == .live ? [] : allRecents.filter { watch.fraction(for: $0.id) != nil }
         let recents = kind == .live ? allRecents : allRecents.filter { watch.fraction(for: $0.id) == nil }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
-        let categories = store.categoriesByKind[kind] ?? []
+        // Pays choisis (Réglages > Apparence) : seules leurs catégories ont une rangée.
+        let categories = (store.categoriesByKind[kind] ?? []).filter { countries.allows(category: $0) }
         let _ = navigation.mark("Accueil Cinéma — \(categories.count) catégories")
 
         if all.isEmpty {

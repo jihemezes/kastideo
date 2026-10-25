@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 /// Ligne du journal de lecture.
@@ -24,7 +26,18 @@ class PlaybackLog extends ChangeNotifier {
   void note(String message) => _add(2, '[kastideo] $message');
   void engine(String message, {int level = 1}) => _add(level, '[mpv] $message');
 
+  /// KASTIDEO_LOG=1 : le journal est aussi écrit sur la sortie standard (diagnostic).
+  static final bool _stdout = const bool.fromEnvironment('dart.vm.product') == false || _envLog;
+  static bool get _envLog {
+    try {
+      return Platform.environment['KASTIDEO_LOG'] == '1';
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _add(int level, String text) {
+    if (_stdout) debugPrint('${DateTime.now().toIso8601String().substring(11, 23)} $text');
     _lines.add(LogLine(DateTime.now(), level, redact(text)));
     if (_lines.length > _capacity) _lines.removeRange(0, _lines.length - _capacity);
     notifyListeners();

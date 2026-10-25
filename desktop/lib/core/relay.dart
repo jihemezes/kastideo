@@ -19,6 +19,12 @@ class StreamRelay {
   /// Dernière réponse du fournisseur pour la chaîne demandée (null : pas de réponse ou pas de relais).
   int? lastStatus;
 
+  /// Copie des octets reçus du fournisseur (enregistrement de la chaîne regardée, sans seconde connexion).
+  void Function(List<int> chunk)? tap;
+
+  /// Adresse d'origine de la chaîne servie par le relais (null : rien n'est relayé).
+  String? get relayedUrl => _routes.isEmpty ? null : _routes.values.last.toString();
+
   bool get isReady => _server != null;
 
   Future<void> start() async {
@@ -115,6 +121,7 @@ class StreamRelay {
       // addStream respecte le débit du lecteur : le flux n'est pas accumulé en mémoire.
       await request.response.addStream(response.map((chunk) {
         bytes += chunk.length;
+        tap?.call(chunk);
         return chunk;
       }));
       if (identical(_activeClient, client)) {

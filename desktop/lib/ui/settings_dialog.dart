@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/countries.dart';
 import '../core/details.dart';
 import '../core/guide.dart';
 import '../core/models.dart';
@@ -126,6 +127,7 @@ class _GeneralTab extends StatefulWidget {
 class _GeneralTabState extends State<_GeneralTab> {
   late final TextEditingController _tmdb = TextEditingController(text: context.settings.tmdbKey);
   String? _tmdbStatus;
+  bool _showKey = false;
 
   @override
   void dispose() {
@@ -217,11 +219,16 @@ class _GeneralTabState extends State<_GeneralTab> {
             Expanded(
               child: TextField(
                 controller: _tmdb,
-                obscureText: true,
+                obscureText: !_showKey,
                 decoration: InputDecoration(
                   isDense: true,
                   border: const OutlineInputBorder(),
                   labelText: tr('Clé API TMDB (v3) ou jeton de lecture (v4)'),
+                  suffixIcon: IconButton(
+                    tooltip: _showKey ? tr('Masquer') : tr('Afficher'),
+                    icon: Icon(_showKey ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+                    onPressed: () => setState(() => _showKey = !_showKey),
+                  ),
                 ),
                 onSubmitted: (_) => _saveKey(),
               ),
@@ -464,6 +471,55 @@ String _accentLabel(AccentChoice c) => switch (c) {
       AccentChoice.teal => tr('Turquoise'),
     };
 
+/// Pays et langues privilégiés dans les rangées Cinéma et le bandeau (repérés dans les noms des catégories).
+class _CountriesSection extends StatelessWidget {
+  const _CountriesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final library = context.library;
+    return ListenableBuilder(
+      listenable: library,
+      builder: (context, _) {
+        final detected = library.detectedCountries();
+        final selected = library.countries;
+        return _section(tr('Pays et langues (interface Cinéma)'), [
+          if (detected.isEmpty)
+            Text(tr('Aucun pays repéré dans les noms des catégories de vos sources.'), style: kText(13, color: KPalette.secondaryText))
+          else
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              FilterChip(
+                label: Text(tr('Tous')),
+                selected: selected.isEmpty,
+                showCheckmark: false,
+                onSelected: (_) => library.setCountries({}),
+              ),
+              for (final (code, count) in detected.take(24))
+                FilterChip(
+                  label: Text('${Countries.name(code)} · $count'),
+                  selected: selected.contains(code),
+                  onSelected: (on) {
+                    final next = {...selected};
+                    on ? next.add(code) : next.remove(code);
+                    library.setCountries(next);
+                  },
+                ),
+            ]),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Garder les catégories sans pays indiqué (ex. « Action », « Nouveautés »)'), style: kText(14)),
+            value: library.countryNeutral,
+            onChanged: selected.isEmpty ? null : (v) => library.setCountries(selected, neutral: v),
+          ),
+          _caption(tr('Les derniers ajouts, les tendances, le bandeau « à la une » et les rangées par catégorie de l\'interface Cinéma ne montrent '
+              'que les pays choisis. Le pays est repéré dans le nom des catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…). '
+              'Les listes et la recherche restent complètes.')),
+        ]);
+      },
+    );
+  }
+}
+
 class _AppearanceTab extends StatelessWidget {
   const _AppearanceTab();
 
@@ -556,6 +612,7 @@ class _AppearanceTab extends StatelessWidget {
             ),
           ]),
         ]),
+        const _CountriesSection(),
         _section(tr('Interface par type de contenu'), [
           row(MediaKind.live, tr('Direct')),
           row(MediaKind.movie, tr('Films')),
@@ -580,6 +637,10 @@ class _SourcesTab extends StatefulWidget {
 class _SourcesTabState extends State<_SourcesTab> {
   late bool _adding = widget.startAdding;
   bool _xtream = true;
+  bool _showPassword = false;
+
+  /// Source en cours de modification (null : ajout d'une source).
+  Source? _editing;
   bool _saving = false;
   String? _error;
   final _name = TextEditingController();
@@ -604,6 +665,25 @@ class _SourcesTabState extends State<_SourcesTab> {
     });
     final library = context.library;
     try {
+      final editing = _editing;
+      if (editing != null) {
+        await library.updateSource(
+          editing,
+          name: _name.text,
+          address: editing.kind == SourceKind.xtream ? _server.text : _address.text,
+          username: editing.kind == SourceKind.xtream ? _user.text : null,
+          password: editing.kind == SourceKind.xtream ? _pass.text : null,
+          epgUrl: _epg.text,
+        );
+        setState(() {
+          _error = library.lastError;
+          if (_error == null) {
+            _adding = false;
+            _editing = null;
+          }
+        });
+        return;
+      }
       if (_xtream) {
         await library.addXtream(name: _name.text, server: _server.text, username: _user.text, password: _pass.text, epgUrl: _epg.text);
       } else {
@@ -618,6 +698,36 @@ class _SourcesTabState extends State<_SourcesTab> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  void _startAdding() {
+    for (final c in [_name, _server, _user, _pass, _address, _epg]) {
+      c.clear();
+    }
+    setState(() {
+      _editing = null;
+      _error = null;
+      _showPassword = false;
+      _adding = true;
+    });
+  }
+
+  Future<void> _startEditing(Source source) async {
+    final password = source.kind == SourceKind.xtream ? await context.library.password(source.id) ?? '' : '';
+    if (!mounted) return;
+    setState(() {
+      _editing = source;
+      _xtream = source.kind == SourceKind.xtream;
+      _name.text = source.name;
+      _server.text = source.kind == SourceKind.xtream ? source.address : '';
+      _user.text = source.username ?? '';
+      _pass.text = password;
+      _address.text = source.kind == SourceKind.xtream ? '' : source.address;
+      _epg.text = source.epgUrl ?? '';
+      _error = null;
+      _showPassword = false;
+      _adding = true;
+    });
   }
 
   Future<void> _pickFile() async {
@@ -648,7 +758,7 @@ class _SourcesTabState extends State<_SourcesTab> {
           Row(children: [
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
-              onPressed: () => setState(() => _adding = true),
+              onPressed: _startAdding,
               icon: const Icon(Icons.add_rounded),
               label: Text(tr('Ajouter une source')),
             ),
@@ -690,6 +800,11 @@ class _SourcesTabState extends State<_SourcesTab> {
         ),
         if (library.isBusy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
         IconButton(
+          tooltip: tr('Modifier'),
+          onPressed: () => _startEditing(source),
+          icon: const Icon(Icons.edit_outlined),
+        ),
+        IconButton(
           tooltip: tr('Actualiser'),
           onPressed: library.isBusy ? null : () => library.refresh(source),
           icon: const Icon(Icons.refresh_rounded),
@@ -717,15 +832,19 @@ class _SourcesTabState extends State<_SourcesTab> {
   }
 
   Widget _addForm() {
+    final editing = _editing;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SegmentedButton<bool>(
-        segments: const [
-          ButtonSegment(value: true, label: Text('Xtream Codes'), icon: Icon(Icons.dns_rounded)),
-          ButtonSegment(value: false, label: Text('Playlist M3U'), icon: Icon(Icons.playlist_play_rounded)),
-        ],
-        selected: {_xtream},
-        onSelectionChanged: (v) => setState(() => _xtream = v.first),
-      ),
+      if (editing != null)
+        Text('${tr('Modifier la source')} « ${editing.name} »', style: kText(16, weight: FontWeight.w700))
+      else
+        SegmentedButton<bool>(
+          segments: const [
+            ButtonSegment(value: true, label: Text('Xtream Codes'), icon: Icon(Icons.dns_rounded)),
+            ButtonSegment(value: false, label: Text('Playlist M3U'), icon: Icon(Icons.playlist_play_rounded)),
+          ],
+          selected: {_xtream},
+          onSelectionChanged: (v) => setState(() => _xtream = v.first),
+        ),
       const SizedBox(height: 16),
       TextField(controller: _name, decoration: _field(tr('Nom'), hint: tr('Mon abonnement'))),
       const SizedBox(height: 12),
@@ -734,7 +853,17 @@ class _SourcesTabState extends State<_SourcesTab> {
         const SizedBox(height: 12),
         TextField(controller: _user, decoration: _field(tr('Identifiant'))),
         const SizedBox(height: 12),
-        TextField(controller: _pass, obscureText: true, decoration: _field(tr('Mot de passe'))),
+        TextField(
+          controller: _pass,
+          obscureText: !_showPassword,
+          decoration: _field(tr('Mot de passe')).copyWith(
+            suffixIcon: IconButton(
+              tooltip: _showPassword ? tr('Masquer') : tr('Afficher'),
+              icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+              onPressed: () => setState(() => _showPassword = !_showPassword),
+            ),
+          ),
+        ),
       ] else
         Row(children: [
           Expanded(
@@ -759,12 +888,20 @@ class _SourcesTabState extends State<_SourcesTab> {
       Row(children: [
         if (_saving) const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
         const Spacer(),
-        TextButton(onPressed: _saving ? null : () => setState(() => _adding = false), child: Text(tr('Annuler'))),
+        TextButton(
+          onPressed: _saving
+              ? null
+              : () => setState(() {
+                    _adding = false;
+                    _editing = null;
+                  }),
+          child: Text(tr('Annuler')),
+        ),
         const SizedBox(width: 8),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
           onPressed: _saving ? null : _save,
-          child: Text(tr('Ajouter')),
+          child: Text(editing != null ? tr('Enregistrer') : tr('Ajouter')),
         ),
       ]),
     ]);
@@ -1329,7 +1466,8 @@ class _RecordingsTabState extends State<_RecordingsTab> {
               (v) => settings.setInt('recordings.marginBefore', v))),
           _row(tr('Prolonger après la fin de'), _choice<int>(settings.marginAfter, [(0, '0 min'), (5, '5 min'), (10, '10 min'), (15, '15 min'), (30, '30 min')],
               (v) => settings.setInt('recordings.marginAfter', v))),
-          _caption(tr('Le flux est recopié tel quel, sans perte de qualité. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture. '
+          _caption(tr('Le flux est recopié tel quel en .ts, sans perte de qualité (la chaîne regardée sans seconde connexion), puis converti en MKV '
+              'à la fin si ce format est choisi. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture. '
               'Les enregistrements programmés ont lieu si Kastideo est ouvert (ordinateur allumé, sans mise en veille).')),
         ]),
         _section(tr('Téléchargements'), [

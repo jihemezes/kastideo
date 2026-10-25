@@ -69,3 +69,30 @@ final class MoreThemeTests: XCTestCase {
         XCTAssertNil(SportKind.detect("Journal de 20 heures"))
     }
 }
+
+final class CountryTests: XCTestCase {
+    func testCategoryCountries() {
+        XCTAssertEqual(CountryDetector.code(for: "FR| CINÉMA"), "FR")
+        XCTAssertEqual(CountryDetector.code(for: "|PT| FILMES"), "PT")
+        XCTAssertEqual(CountryDetector.code(for: "PT - FILMES 2024"), "PT")
+        XCTAssertEqual(CountryDetector.code(for: "[IT] Film"), "IT")
+        XCTAssertEqual(CountryDetector.code(for: "FRANCE HD"), "FR")
+        XCTAssertEqual(CountryDetector.code(for: "Films VOSTFR"), "FR")
+        XCTAssertEqual(CountryDetector.code(for: "BRASIL | NOVELAS"), "BR")
+        XCTAssertEqual(CountryDetector.code(for: "EN: Movies 4K"), "EN")
+        XCTAssertNil(CountryDetector.code(for: "Action"))
+        XCTAssertNil(CountryDetector.code(for: "Nouveautés"))
+        XCTAssertNil(CountryDetector.code(for: "MOVIES IN 4K"))
+        XCTAssertNil(CountryDetector.code(for: "TV SHOWS"))
+    }
+
+    func testFilter() {
+        let filter = CountryFilter(stored: "FR,IT", keepNeutral: false)
+        XCTAssertTrue(filter.allows(category: "FR| CINÉMA"))
+        XCTAssertFalse(filter.allows(category: "|PT| FILMES"))
+        XCTAssertFalse(filter.allows(category: "Action"))
+        XCTAssertTrue(CountryFilter(stored: "FR", keepNeutral: true).allows(category: "Action"))
+        XCTAssertTrue(CountryFilter().allows(category: "|PT| FILMES"))
+        XCTAssertEqual(filter.stored, "FR,IT")
+    }
+}
