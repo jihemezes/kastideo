@@ -7,6 +7,7 @@ import '../core/models.dart';
 import '../core/themes.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import 'channel_edit_dialog.dart';
 import 'widgets.dart';
 
 /// Heure « 21:05 ».
@@ -52,20 +53,62 @@ Future<void> showProgrammeInfo(BuildContext context, MediaItem channel, Programm
             Text(p.desc ?? tr('Pas de résumé dans le guide TV.'), style: kText(13, color: Colors.white70)),
           ]),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('Fermer'))),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(backgroundColor: KPalette.accent),
-            onPressed: () {
-              Navigator.pop(c);
-              openItem(context, channel);
-            },
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(tr('Regarder la chaîne')),
-          ),
-        ],
+        actions: programmeActions(context, c, channel, p),
       ),
     );
+
+/// Boutons de la fiche d'un programme : alerte et enregistrement programmé (à venir), enregistrer (en cours), regarder.
+List<Widget> programmeActions(BuildContext context, BuildContext dialog, MediaItem channel, Programme p) {
+  final now = nowSeconds();
+  final current = p.isAiring(now);
+  final future = p.startS > now;
+  final recordings = context.recordings;
+  final alerts = context.alerts;
+  return [
+    TextButton(onPressed: () => Navigator.pop(dialog), child: Text(tr('Fermer'))),
+    if (future) ...[
+      TextButton.icon(
+        onPressed: () {
+          alerts.toggle(channel, p);
+          Navigator.pop(dialog);
+        },
+        icon: Icon(alerts.isWatching(channel, p) ? Icons.notifications_active_rounded : Icons.notifications_none_rounded, size: 18),
+        label: Text(alerts.isWatching(channel, p) ? tr('Ne plus m\'alerter') : tr('M\'alerter au début')),
+      ),
+      TextButton.icon(
+        onPressed: recordings.isScheduled(channel, p)
+            ? null
+            : () {
+                recordings.schedule(channel, p);
+                Navigator.pop(dialog);
+              },
+        icon: const Icon(Icons.fiber_manual_record_rounded, size: 18, color: Colors.redAccent),
+        label: Text(recordings.isScheduled(channel, p) ? tr('Programmé') : tr('Programmer l\'enregistrement')),
+      ),
+    ],
+    if (current)
+      TextButton.icon(
+        onPressed: recordings.isRecording(channel)
+            ? null
+            : () async {
+                Navigator.pop(dialog);
+                await recordings.recordNow(channel, title: p.title, stopS: p.stopS + context.settings.marginAfter * 60);
+              },
+        icon: const Icon(Icons.fiber_manual_record_rounded, size: 18, color: Colors.redAccent),
+        label: Text(recordings.isRecording(channel) ? tr('Enregistrement en cours') : tr('Enregistrer')),
+      ),
+    if (p.stopS > now)
+      FilledButton.icon(
+        style: FilledButton.styleFrom(backgroundColor: KPalette.accent),
+        onPressed: () {
+          Navigator.pop(dialog);
+          openItem(context, channel);
+        },
+        icon: const Icon(Icons.play_arrow_rounded),
+        label: Text(current ? tr('Regarder') : tr('Aller sur la chaîne')),
+      ),
+  ];
+}
 
 /// Choix du thème d'une chaîne (correction du classement automatique).
 Future<void> chooseChannelTheme(BuildContext context, LiveChannelGroup group) async {
@@ -116,6 +159,7 @@ Future<void> showGroupMenu(BuildContext context, LiveChannelGroup group, Program
         for (final v in group.variants)
           PopupMenuItem(value: 'v:${v.id}', child: Text('${tr('Version')} : ${v.name}', style: kText(13))),
       PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
+      PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       PopupMenuItem(
           value: 'fav', child: Text(library.isFavorite(item.id) ? tr('Retirer des favoris') : tr('Ajouter aux favoris'), style: kText(13))),
     ],
@@ -124,6 +168,7 @@ Future<void> showGroupMenu(BuildContext context, LiveChannelGroup group, Program
   if (choice == 'open') openItem(context, item);
   if (choice == 'info' && programme != null) showProgrammeInfo(context, item, programme);
   if (choice == 'theme') chooseChannelTheme(context, group);
+  if (choice == 'edit') showChannelEditor(context, item);
   if (choice == 'fav') library.toggleFavorite(item.id);
   if (choice.startsWith('v:')) {
     final variant = group.variants.where((v) => v.id == choice.substring(2)).firstOrNull;

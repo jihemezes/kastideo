@@ -89,6 +89,7 @@ class _PlayerPaneState extends State<PlayerPane> {
         },
         const SingleActivator(LogicalKeyboardKey.bracketLeft, control: true): () => playback.jump(-10),
         const SingleActivator(LogicalKeyboardKey.bracketRight, control: true): () => playback.jump(30),
+        const SingleActivator(LogicalKeyboardKey.keyR): () => toggleRecording(context),
         const SingleActivator(LogicalKeyboardKey.keyF): () {
           final item = playback.current;
           if (item != null) context.library.toggleFavorite(item.id);
@@ -257,9 +258,13 @@ class ControlsBar extends StatelessWidget {
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 18)],
         ),
         child: ListenableBuilder(
-          listenable: Listenable.merge([playback, navigation]),
+          listenable: Listenable.merge([playback, navigation, context.recordings]),
           builder: (context, _) => Column(mainAxisSize: MainAxisSize.min, children: [
             if (playback.isSeekable) ...[const ScrubBar(), const SizedBox(height: 4)],
+            if (playback.isLive && playback.didStart && (playback.isTimeshifted || playback.peakDelay > 10)) ...[
+              const TimeshiftBar(),
+              const SizedBox(height: 4),
+            ],
             Row(mainAxisSize: MainAxisSize.min, children: [
             _BarButton(
               icon: playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
@@ -277,12 +282,24 @@ class ControlsBar extends StatelessWidget {
             const SizedBox(width: 10),
             const _HealthPill(),
             const SizedBox(width: 12),
-            if (playback.isLive)
+            if (playback.isLive && playback.isTimeshifted)
+              Text('${tr('DIFFÉRÉ')} −${formatClock(Duration(seconds: playback.liveDelay.round()))}',
+                  style: kText(12, weight: FontWeight.w700, color: KPalette.orange).copyWith(fontFeatures: const [FontFeature.tabularFigures()]))
+            else if (playback.isLive)
               Row(children: [
                 Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
                 const SizedBox(width: 6),
                 Text(tr('EN DIRECT'), style: kText(12, weight: FontWeight.w700)),
               ]),
+            if (playback.isLive && playback.current != null) ...[
+              const SizedBox(width: 8),
+              _BarButton(
+                icon: context.recordings.isRecording(playback.current!) ? Icons.stop_circle_rounded : Icons.fiber_manual_record_rounded,
+                tooltip: context.recordings.isRecording(playback.current!) ? tr('Arrêter l\'enregistrement (R)') : tr('Enregistrer (R)'),
+                color: Colors.redAccent,
+                onTap: () => toggleRecording(context),
+              ),
+            ],
             const SizedBox(width: 14),
             Flexible(child: _NowTitle(playback.current)),
             const SizedBox(width: 14),
@@ -316,10 +333,11 @@ class ControlsBar extends StatelessWidget {
 }
 
 class _BarButton extends StatelessWidget {
-  const _BarButton({required this.icon, required this.tooltip, required this.onTap});
+  const _BarButton({required this.icon, required this.tooltip, required this.onTap, this.color = Colors.white});
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -327,7 +345,7 @@ class _BarButton extends StatelessWidget {
         child: InkResponse(
           onTap: onTap,
           radius: 18,
-          child: Padding(padding: const EdgeInsets.all(4), child: Icon(icon, size: 22, color: Colors.white)),
+          child: Padding(padding: const EdgeInsets.all(4), child: Icon(icon, size: 22, color: color)),
         ),
       );
 }
@@ -487,7 +505,9 @@ class _ScrubBarState extends State<ScrubBar> {
   double? _drag;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(listenable: context.playback, builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) {
     final playback = context.playback;
     return LayoutBuilder(builder: (context, c) {
       final width = c.maxWidth;
@@ -565,6 +585,111 @@ class _NowTitle extends StatelessWidget {
               style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
         );
       },
+    );
+  }
+}
+
+
+/// Enregistre la chaîne regardée, ou arrête son enregistrement.
+Future<void> toggleRecording(BuildContext context) async {
+  final playback = context.playback;
+  final recordings = context.recordings;
+  final item = playback.current;
+  if (item == null || item.kind != MediaKind.live) return;
+  if (recordings.isRecording(item)) {
+    await recordings.stop();
+    return;
+  }
+  final p = context.guide.current(item);
+  await recordings.recordNow(item, title: p?.title ?? '', stopS: p == null ? null : p.stopS + context.settings.marginAfter * 60);
+}
+
+/// Barre du différé : retard sur le direct, glisser pour revenir en arrière ou rattraper, vitesse, retour au direct.
+class TimeshiftBar extends StatefulWidget {
+  const TimeshiftBar({super.key});
+
+  @override
+  State<TimeshiftBar> createState() => _TimeshiftBarState();
+}
+
+class _TimeshiftBarState extends State<TimeshiftBar> {
+  double? _drag;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(listenable: context.playback, builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) {
+    final playback = context.playback;
+    final depth = playback.peakDelay < 1 ? 1.0 : playback.peakDelay;
+    final delay = (_drag ?? playback.liveDelay).clamp(0.0, depth);
+    final shownDelay = Duration(seconds: delay.round());
+    return SizedBox(
+      width: 780,
+      child: Row(children: [
+        Text('−${formatClock(Duration(seconds: depth.round()))}', style: kText(11, color: Colors.white54)),
+        Expanded(
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: KPalette.orange,
+              inactiveTrackColor: Colors.red.withValues(alpha: 0.55),
+              thumbColor: Colors.white,
+              trackHeight: 3,
+            ),
+            child: Slider(
+              // De gauche (début du différé) à droite (direct).
+              value: depth - delay,
+              max: depth,
+              onChanged: (v) => setState(() => _drag = depth - v),
+              onChangeEnd: (v) {
+                final target = depth - v;
+                setState(() => _drag = null);
+                if (target < playback.liveDelay - 2) {
+                  // Vers la droite : rattrapage en accéléré jusqu'au point choisi (comme sur Mac).
+                  playback.catchUp(toDelay: target);
+                } else {
+                  playback.seekDelay(target);
+                }
+              },
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 64,
+          child: Text(delay < 4.5 ? tr('Direct') : '−${formatClock(shownDelay)}',
+              textAlign: TextAlign.right,
+              style: kText(12, weight: FontWeight.w600, color: delay < 4.5 ? Colors.white : KPalette.orange)
+                  .copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+        ),
+        const SizedBox(width: 8),
+        PopupMenuButton<double>(
+          tooltip: tr('Vitesse de lecture'),
+          color: const Color(0xF02C2C2E),
+          initialValue: playback.rate,
+          onSelected: playback.setRate,
+          itemBuilder: (_) => [
+            for (final r in const [1.0, 1.25, 1.5, 2.0])
+              PopupMenuItem(value: r, child: Text('×${r.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kText(13))),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+            child: Text('×${playback.rate.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kText(12, weight: FontWeight.w600)),
+          ),
+        ),
+        const SizedBox(width: 6),
+        if (delay >= 4.5) ...[
+          TextButton(
+            onPressed: () => playback.catchUp(),
+            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+            child: Text(tr('Rattraper')),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red, visualDensity: VisualDensity.compact),
+            onPressed: playback.returnToLive,
+            child: Text(tr('Retour au direct')),
+          ),
+        ],
+      ]),
     );
   }
 }

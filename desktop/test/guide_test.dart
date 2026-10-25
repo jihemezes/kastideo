@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kastideo/core/epg.dart';
 import 'package:kastideo/core/models.dart';
+import 'package:kastideo/core/paths.dart';
+import 'package:kastideo/core/text.dart';
 import 'package:kastideo/core/themes.dart';
 
 void main() {
@@ -67,5 +69,22 @@ void main() {
     expect(groups.single.preferred.id, '2');
     expect(groups.single.theme, ContentTheme.general);
     expect(SportKind.detect(['Ligue 1 : PSG - OM']), SportKind.football);
+  });
+
+  test('Langue d\'un résumé', () {
+    expect(guessLanguage('Tras la muerte de su padre, el joven decide volver a su pueblo para buscar la verdad con los suyos.'), 'es');
+    expect(guessLanguage('Après la mort de son père, le jeune homme décide de retourner dans son village pour chercher la vérité.'), 'fr');
+    expect(guessLanguage('After the death of his father, the young man decides to return to his village to find the truth.'), 'en');
+    expect(guessLanguage('Court'), isNull);
+  });
+
+  test('Noms de fichiers et extensions', () {
+    expect(safeFileName('TF1 : Le 20h / météo?'), 'TF1 Le 20h météo');
+    expect(extensionOf('http://srv/movie/u/p/101.mkv'), 'mkv');
+    expect(extensionOf('http://srv/live/u/p/1'), 'mp4');
+    final edit = ChannelEdit(name: 'TF1', number: 1);
+    final item = MediaItem(id: 'x', sourceId: 's', kind: MediaKind.live, name: '|FR| TF1 HD', group: 'FR', epgId: 'tf1.fr');
+    expect(edit.apply(item).name, 'TF1');
+    expect(edit.apply(item).epgId, 'tf1.fr');
   });
 }

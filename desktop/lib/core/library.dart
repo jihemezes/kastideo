@@ -35,6 +35,29 @@ class LibraryStore extends ChangeNotifier {
   /// Contenus adultes (« |XX| », catégorie adulte) : masqués partout tant que l'option est désactivée.
   bool showAdult = false;
 
+  /// Corrections des chaînes (par identifiant de chaîne).
+  final Map<String, ChannelEdit> channelEdits = {};
+
+  /// Chaîne telle que fournie par la source (sans correction).
+  MediaItem? originalItem(String id) {
+    for (final list in _contentBySource.values) {
+      for (final i in list) {
+        if (i.id == id) return i;
+      }
+    }
+    return null;
+  }
+
+  void setChannelEdit(String id, ChannelEdit? edit) {
+    if (edit == null || edit.isEmpty) {
+      channelEdits.remove(id);
+    } else {
+      channelEdits[id] = edit;
+    }
+    _prefs.setString('channelEdits.v1', jsonEncode({for (final e in channelEdits.entries) e.key: e.value.toJson()}));
+    _rebuild();
+  }
+
   /// Change à chaque reconstruction de l'index (le guide TV recalcule alors ses chaînes).
   int liveGeneration = 0;
 
@@ -60,6 +83,12 @@ class LibraryStore extends ChangeNotifier {
       }
     }
     showAdult = _prefs.getBool('adult.show') ?? false;
+    final edits = _prefs.getString('channelEdits.v1');
+    if (edits != null) {
+      try {
+        (jsonDecode(edits) as Map).forEach((k, v) => channelEdits[k as String] = ChannelEdit.fromJson(Map<String, dynamic>.from(v as Map)));
+      } catch (_) {}
+    }
     favoriteIds = _prefs.getStringList('favorites.v1') ?? [];
     recentIds = _prefs.getStringList('recents.v1') ?? [];
     for (final kind in categoryKinds) {
@@ -178,7 +207,9 @@ class LibraryStore extends ChangeNotifier {
     _byId.clear();
     final providerOrder = <MediaKind, List<String>>{};
     for (final source in sources.where((s) => s.enabled)) {
-      for (final item in _contentBySource[source.id] ?? const <MediaItem>[]) {
+      for (final original in _contentBySource[source.id] ?? const <MediaItem>[]) {
+        final edit = original.kind == MediaKind.live ? channelEdits[original.id] : null;
+        final item = edit == null ? original : edit.apply(original);
         final prefs = _categoryPrefs[item.kind];
         final key = '${item.kind.index}|${item.group}';
         final list = _byCategory[key];
@@ -229,7 +260,10 @@ class LibraryStore extends ChangeNotifier {
 
   /// Toutes les chaînes d'une source (masquées comprises), pour filtrer son guide TV.
   List<MediaItem> allLiveItems(String sourceId) =>
-      (_contentBySource[sourceId] ?? const <MediaItem>[]).where((i) => i.kind == MediaKind.live).toList();
+      [
+        for (final i in _contentBySource[sourceId] ?? const <MediaItem>[])
+          if (i.kind == MediaKind.live) channelEdits[i.id]?.apply(i) ?? i,
+      ];
 
   /// Adresse du guide TV d'une source : choisie par l'utilisateur, indiquée par le fournisseur, ou xmltv.php (Xtream).
   Future<String?> guideUrlFor(Source source) async {
@@ -333,7 +367,21 @@ class LibraryStore extends ChangeNotifier {
           final path = source.address;
           content = await Isolate.run(() => M3UParser.parse(File(path).readAsStringSync(), id));
       }
-      final items = content.items;
+      var items = content.items;
+      // Une section qui revient vide (serveur qui hoquette) ne doit pas effacer celle déjà connue.
+      final previous = _contentBySource[id];
+      if (previous != null && previous.isNotEmpty) {
+        final kept = <MediaItem>[];
+        for (final kind in categoryKinds) {
+          final before = previous.where((i) => i.kind == kind).length;
+          final now = items.where((i) => i.kind == kind).length;
+          if (now == 0 && before > 0) {
+            kept.addAll(previous.where((i) => i.kind == kind));
+            PlaybackLog.shared.note('Source « ${source.name} » : section ${kind.name} vide à l\'actualisation, la précédente est conservée');
+          }
+        }
+        if (kept.isNotEmpty) items = [...items, ...kept];
+      }
       _contentBySource[id] = items;
       source.lastRefresh = DateTime.now();
       source.guideUrl = content.epgUrl;

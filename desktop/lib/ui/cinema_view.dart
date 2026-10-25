@@ -972,7 +972,7 @@ class _HeroLiveSlide extends StatelessWidget {
           child: Center(
             child: Opacity(
               opacity: 0.14,
-              child: Image.network(item.logo!, width: 280, height: height * 0.5, fit: BoxFit.contain, errorBuilder: (_, _, _) => const SizedBox()),
+              child: LogoView(url: item.logo, name: item.name, size: height * 0.5),
             ),
           ),
         ),

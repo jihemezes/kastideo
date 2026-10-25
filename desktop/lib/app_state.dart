@@ -1,22 +1,26 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
+import 'l10n.dart';
+import 'core/alerts.dart';
+import 'core/downloads.dart';
 import 'core/guide.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/models.dart';
 import 'core/playback.dart';
+import 'core/recording.dart';
 import 'core/settings.dart';
 import 'core/themes.dart';
 
 /// Écran affiché.
-enum Screen { home, live, movies, series, guide }
+enum Screen { home, live, movies, series, guide, recordings }
 
 extension ScreenKind on Screen {
   MediaKind? get kind => switch (this) {
         Screen.live => MediaKind.live,
         Screen.movies => MediaKind.movie,
         Screen.series => MediaKind.series,
-        Screen.home || Screen.guide => null,
+        Screen.home || Screen.guide || Screen.recordings => null,
       };
 }
 
@@ -164,6 +168,9 @@ class AppScope extends InheritedWidget {
     required this.watch,
     required this.info,
     required this.guide,
+    required this.recordings,
+    required this.downloads,
+    required this.alerts,
     required super.child,
   });
 
@@ -174,6 +181,9 @@ class AppScope extends InheritedWidget {
   final WatchProgressStore watch;
   final MediaInfoStore info;
   final GuideStore guide;
+  final RecordingCenter recordings;
+  final DownloadManager downloads;
+  final AlertCenter alerts;
 
   static AppScope of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<AppScope>()!;
 
@@ -189,11 +199,48 @@ extension AppScopeContext on BuildContext {
   WatchProgressStore get watch => AppScope.of(this).watch;
   MediaInfoStore get info => AppScope.of(this).info;
   GuideStore get guide => AppScope.of(this).guide;
+  RecordingCenter get recordings => AppScope.of(this).recordings;
+  DownloadManager get downloads => AppScope.of(this).downloads;
+  AlertCenter get alerts => AppScope.of(this).alerts;
+}
+
+/// Une seule connexion : lancer [item] arrêterait l'enregistrement en cours ? On demande d'abord.
+Future<bool> confirmConnection(BuildContext context, MediaItem item) async {
+  final recordings = context.recordings;
+  if (!recordings.conflictsWith(item)) return true;
+  final active = recordings.active!;
+  final channel = active.channel.displayName;
+  if (item.kind == MediaKind.live && item.id == active.channel.id) {
+    // Même chaîne, enregistrée en arrière-plan : elle passe dans le lecteur, l'enregistrement continue (nouveau fichier).
+    await recordings.moveToPlayer();
+    if (context.mounted) {
+      context.library.noteRecent(item);
+      if (context.navigation.screen != Screen.live) context.navigation.go(Screen.live);
+      context.navigation.openPlayer();
+    }
+    return false;
+  }
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(tr('Enregistrement en cours')),
+      content: Text('${tr('Kastideo enregistre')} $channel. ${tr('Votre abonnement n\'autorise qu\'une connexion : lancer ce contenu arrêtera l\'enregistrement.')}'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Continuer l\'enregistrement'))),
+        FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('Arrêter et lancer'))),
+      ],
+    ),
+  );
+  if (ok != true) return false;
+  await recordings.stop();
+  return true;
 }
 
 /// Ouvre un contenu : chaîne → lecture ; film ou série → fiche (comme sur Mac).
-void openItem(BuildContext context, MediaItem item) {
+Future<void> openItem(BuildContext context, MediaItem item) async {
   final navigation = context.navigation;
+  if (item.kind == MediaKind.live && !await confirmConnection(context, item)) return;
+  if (!context.mounted) return;
   switch (item.kind) {
     case MediaKind.live:
       context.playback.play(item);
@@ -211,7 +258,9 @@ void openItem(BuildContext context, MediaItem item) {
 }
 
 /// Lance la lecture d'un film ou d'un épisode et affiche le lecteur (dans sa section, avec sa fiche derrière).
-void playItem(BuildContext context, MediaItem item) {
+Future<void> playItem(BuildContext context, MediaItem item) async {
+  if (!await confirmConnection(context, item)) return;
+  if (!context.mounted) return;
   final navigation = context.navigation;
   final library = context.library;
   final kind = item.kind == MediaKind.episode ? MediaKind.series : item.kind;

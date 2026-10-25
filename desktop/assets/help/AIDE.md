@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Aperçu 4 — version 1.2.0-desktop4. Cette préversion reprend l'accueil, le direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes), les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
+> Aperçu 5 — version 1.2.0-desktop6. Cette préversion reprend l'accueil, le direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement, alertes, correction des chaînes), les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
 
 ## Ce que contient cet aperçu
 
@@ -17,6 +17,12 @@
   - **Cinéma** : bandeau « à la une » qui défile (flèches au survol ; tendances de la semaine sur TMDB, derniers ajouts, sélection d'une catégorie), rangées Reprendre la lecture, Derniers ajouts, Regardés récemment, Favoris puis une rangée par catégorie (« Tout voir »), fiche en page entière.
 - **Fiches** : affiche, résumé, année, durée, genres, note, réalisation, distribution, bande-annonce. Pour une série : saisons et épisodes, avec la progression de chacun.
 - **Lecteur** (moteur mpv) : barre de contrôles qui se cache seule, pastille de santé du flux, volume, mode cinéma, plein écran. Pour les films et épisodes : mini-timeline (cliquez ou glissez ; l'heure visée s'affiche), −10 s / +30 s, **reprise de lecture** là où vous vous étiez arrêté (« Reprendre au début » pour repartir de zéro), bouton **Retour à la fiche**.
+- **Différé du direct** : mettez une chaîne en pause, elle continue d'être gardée sur le disque (jusqu'à 1 h par défaut, réglable). Une barre apparaît au-dessus des commandes : retard sur le direct, curseur pour revenir en arrière (vers la gauche) ou rattraper en accéléré jusqu'au point choisi (vers la droite), vitesse (×1 à ×2), **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s dans le différé.
+- **Enregistrement du direct** : bouton rond rouge de la barre du lecteur (ou touche **R**, ou clic droit > Enregistrer maintenant) : la chaîne regardée est enregistrée jusqu'à la fin du programme en cours (plus la marge), ou jusqu'à l'arrêt. Depuis la fiche d'un programme (guide TV, thèmes) : **Enregistrer** (en cours) ou **Programmer l'enregistrement** (à venir, point rouge dans le guide). Le flux est recopié sans perte en **MKV** (ou TS) dans **Vidéos/Kastideo/Enregistrements**. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture, et lancer autre chose pendant un enregistrement le demande d'abord. Les enregistrements programmés ont lieu si Kastideo est ouvert.
+- **Téléchargements** : bouton **Télécharger** de la fiche d'un film (maintenant ou cette nuit), **Télécharger la saison** et icône de chaque épisode pour les séries, clic droit > Télécharger. Un à la fois, repris après une coupure, mis en pause pendant la lecture (réglable) ; « cette nuit » à partir de 1 h. Fichiers dans **Vidéos/Kastideo/Films** et **Séries/<série>**. La progression et le temps restant s'affichent en bas de la barre latérale.
+- **Enregistrements** (accueil, barre latérale) : enregistrement en cours (arrêt), téléchargements (pause, reprise, annulation), programmés (annulation, historique), fichiers du dossier — un clic les lit dans le lecteur à droite ; clic droit : afficher dans le dossier, supprimer.
+- **Alertes de programme** : « M'alerter au début » dans la fiche d'un programme à venir (cloche dans le guide), ou mots-clés (Réglages > Enregistrements, sur vos chaînes favorites ou toutes). L'alerte s'affiche en haut à droite avec **Regarder**.
+- **Correction des chaînes** : clic droit > **Modifier la chaîne…** : nom, numéro, logo (adresse ou fichier) et chaîne du guide TV (recherche parmi les guides du fournisseur et de secours), pour cette version de la chaîne ; **Rétablir** pour revenir à l'original.
 - **Relais de flux** : comme sur Mac, une seule connexion chez le fournisseur ; la chaîne précédente est fermée avant d'ouvrir la suivante.
 
 ## Ajouter une source
@@ -33,6 +39,7 @@ Les sources sont actualisées au démarrage si leur dernière mise à jour date 
 - **Général** : langue (système, français, anglais — au prochain lancement), reprise de lecture, relais de flux, actualisation au démarrage, effacer les récents ; **Guide TV** (nombre de chaînes avec programme, Actualiser le guide, **guide de secours** : activation, adresse ou choix parmi les guides xmltvfr.fr, état du chargement) ; **contenus adultes** (masqués par défaut) ; **clé TMDB**.
 - **Apparence** : interface Classique ou Cinéma pour le direct, les films et les séries, et interface **TV** pour le direct ; **bandeau « à la une »** : afficher ou non, hauteur (compact, normal, grand), défilement (6 à 20 s), sources (tendances TMDB, derniers ajouts, catégorie choisie pour les films et pour les séries).
 - **Sources** : ajouter, actualiser, supprimer ; état du guide TV de chaque source.
+- **Enregistrements** : dossier (Vidéos/Kastideo par défaut, Changer…, Ouvrir), format MKV ou TS, marges avant / après les programmes, pause des téléchargements pendant la lecture, heure de « cette nuit », durée maximale et vitesse de rattrapage du différé, alertes (mots-clés, chaînes, avance).
 - **Catégories** : pour le direct, les films ou les séries — glissez pour changer l'ordre, décochez pour masquer partout, double-clic ou crayon pour renommer, mots-clés pour masquer d'un coup toutes les catégories qui les contiennent (ex. « PAKISTAN »), Trier de A à Z, Rétablir. Clic droit sur une catégorie de la barre latérale : Masquer cette catégorie.
 - **Sauvegarde** : **Exporter la configuration…** (sources et leur guide TV, mots de passe si vous le souhaitez, favoris, récents, catégories, interfaces, contenus adultes, bandeau, clé TMDB) et **Importer une configuration…**. Le fichier est le même que celui de Kastideo pour Mac (Réglages > Général > Sauvegarde et transfert) : vous pouvez passer d'un ordinateur à l'autre dans les deux sens. Rien n'est supprimé à l'importation.
 
@@ -44,6 +51,7 @@ Créez un compte sur themoviedb.org, puis **Paramètres > API** et demandez une 
 
 - **Ctrl+0** : accueil — **Ctrl+1** : direct — **Ctrl+2** : films — **Ctrl+3** : séries — **Ctrl+7** : guide TV — **Ctrl+,** : réglages
 - Interface TV : **↑ / ↓** zapping, **chiffres** numéro de chaîne, **←** panneau, **→ / I** bandeau, **B** chaîne précédente, **G** guide, **H** accueil
+- **R** : enregistrer la chaîne regardée / arrêter — **←** / **→** dans le direct : −10 s / +30 s dans le différé
 - **Espace** : lecture / pause — **M** : couper le son — **F** : favori — **←** / **→** : −10 s / +30 s (films et épisodes)
 - **Ctrl+Entrée** ou double-clic sur l'image : mode cinéma — **Échap** : quitter le mode cinéma, puis revenir aux rangées (direct en interface Cinéma, la chaîne s'arrête) ou à la fiche
 - **F11** : plein écran
@@ -62,11 +70,16 @@ Regarder ou ouvrir la fiche, Lire (films), ajouter aux favoris ou les retirer, t
 
 ## Prochaines étapes
 
-1. **Fonctions avancées** : enregistrement, différé (pause du direct et rattrapage), alertes de programme, MultiVue, correction des chaînes.
-2. **Personnalisation** : thème clair, couleur d'accent, taille des vignettes.
+1. **MultiVue** (plusieurs chaînes à l'écran) et **personnalisation** (thème clair, couleur d'accent, taille des vignettes).
+2. Notifications du système pour les alertes et la fin des enregistrements.
 3. **Finitions** : installateur Windows, mises à jour intégrées, aide complète.
 
 ## Dépannage
+
+- **Enregistrement vide** : le fournisseur n'a rien envoyé (chaîne refusée, connexion déjà utilisée). Ouvrez le Journal de lecture : les lignes « Enregistrement » donnent le détail. Si un fichier MKV reste vide, Kastideo repasse seul en TS.
+- **Le différé ne remonte pas plus loin** : sa profondeur dépend de l'espace disque temporaire ; sans cache sur disque (certaines versions de libmpv sous Linux), il est limité à 512 Mo en mémoire, soit quelques minutes.
+
+- **Fiches dans une autre langue** : Kastideo demande les fiches au fournisseur dans la langue de l'interface, mais certains fournisseurs n'en ont qu'une. Avec une **clé TMDB** (Réglages > Général), résumés, genres et épisodes sont repris de TMDB en français ; la fiche signale un résumé resté dans une autre langue.
 
 - **Une seule fenêtre** : Kastideo ne s'ouvre qu'une fois ; relancé alors qu'il tourne déjà, il ramène simplement la fenêtre existante au premier plan. À la fermeture, la lecture est arrêtée et le moteur vidéo libéré avant de quitter.
 

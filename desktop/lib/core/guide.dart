@@ -56,6 +56,17 @@ class GuideStore extends ChangeNotifier {
   bool _started = false;
 
   final Map<String, List<Programme>> _bySource = {};
+  final Map<String, List<XmltvChannel>> _channelsBySource = {};
+
+  /// Chaînes des guides (fournisseurs puis secours), pour relier une chaîne à la main.
+  List<XmltvChannel> get guideChannels {
+    final seen = <String>{};
+    return [
+      for (final list in [..._channelsBySource.values, _fallbackChannels])
+        for (final c in list)
+          if (seen.add(c.id.toLowerCase())) c,
+    ];
+  }
   final Map<String, SourceGuideStatus> status = {};
   List<Programme> _fallback = [];
   List<XmltvChannel> _fallbackChannels = [];
@@ -98,6 +109,7 @@ class GuideStore extends ChangeNotifier {
       final list = await _readCache('epg-${source.id}');
       if (list != null) {
         _bySource[source.id] = list.$1;
+        _channelsBySource[source.id] = list.$2;
         (status[source.id] ??= SourceGuideStatus()).programmes = list.$1.length;
       }
     }
@@ -172,11 +184,12 @@ class GuideStore extends ChangeNotifier {
         PlaybackLog.shared.note('Guide TV de « ${source.name} » inutilisable ($size, programmes : ${guide.programmes.length})');
       } else {
         _bySource[source.id] = guide.programmes;
+        _channelsBySource[source.id] = guide.channels;
         s
           ..programmes = guide.programmes.length
           ..error = null;
         PlaybackLog.shared.note('Guide TV de « ${source.name} » : ${guide.programmes.length} programmes ($size)');
-        await _writeCache('epg-${source.id}', guide.programmes, const []);
+        await _writeCache('epg-${source.id}', guide.programmes, guide.channels);
       }
     } catch (e) {
       s.error = '$e';

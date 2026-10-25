@@ -194,6 +194,7 @@ class TMDBClient {
     try {
       final request = await client.getUrl(url);
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+      request.headers.set(HttpHeaders.acceptLanguageHeader, acceptLanguage);
       if (_bearer) request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $apiKey');
       final response = await request.close().timeout(const Duration(seconds: 20));
       final text = await response.transform(utf8.decoder).join();
@@ -228,9 +229,13 @@ class TMDBClient {
     return XtreamClient.str(results.first['id']);
   }
 
-  Future<MediaDetails?> details(String title, {required bool series, String? tmdbId, int? year}) async {
+  Future<MediaDetails?> details(String title, {required bool series, String? tmdbId, int? year, String? originalTitle}) async {
     final kind = series ? 'tv' : 'movie';
     var id = tmdbId;
+    // Titre original du fournisseur : second essai si le titre affiché n'est pas trouvé.
+    if (id == null && originalTitle != null && originalTitle != title) {
+      id = await _findId(title, series: series, year: year) ?? await _findId(originalTitle, series: series, year: year);
+    }
     if (id == null) {
       final cleaned = cleanTitle(title);
       final wanted = year ?? cleaned.year;
@@ -299,6 +304,34 @@ class TMDBClient {
     return d;
   }
 
+  Future<String?> _findId(String title, {required bool series, int? year}) async {
+    final kind = series ? 'tv' : 'movie';
+    final cleaned = cleanTitle(title);
+    final wanted = year ?? cleaned.year;
+    return _search(
+        await _request('search/$kind', {
+          'query': cleaned.title,
+          if (wanted != null) (series ? 'first_air_date_year' : 'year'): '$wanted',
+        }),
+        wanted,
+        series);
+  }
+
+  /// Épisodes d'une saison (titre, résumé, image) dans la langue choisie.
+  Future<Map<int, TMDBEpisode>> season(String tvId, int number) async {
+    final root = await _request('tv/$tvId/season/$number');
+    final result = <int, TMDBEpisode>{};
+    if (root is! Map || root['episodes'] is! List) return result;
+    final s = XtreamClient.str;
+    for (final e in (root['episodes'] as List).whereType<Map>()) {
+      final n = int.tryParse(s(e['episode_number']) ?? '');
+      if (n == null) continue;
+      final still = s(e['still_path']);
+      result[n] = TMDBEpisode(s(e['name']), s(e['overview']), still == null ? null : '${_images}w300$still');
+    }
+    return result;
+  }
+
   /// Tendances de la semaine (`/trending/{movie|tv}/week`, deux pages).
   Future<List<TMDBTrend>> trending({required bool series}) async {
     final all = <TMDBTrend>[];
@@ -329,4 +362,12 @@ class TMDBTrend {
   final String? originalTitle;
   final int? year;
   final String? backdrop;
+}
+
+/// Épisode d'une série sur TMDB.
+class TMDBEpisode {
+  TMDBEpisode(this.name, this.overview, this.still);
+  final String? name;
+  final String? overview;
+  final String? still;
 }

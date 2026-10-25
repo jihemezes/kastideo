@@ -340,7 +340,11 @@ class _HomeScreenState extends State<HomeScreen> {
       HomeSmallButton(title: tr('Récents'), icon: Icons.history_rounded, badge: library.recentIds.length,
           onTap: () => navigation.show(MediaKind.live, const RecentItems())),
       HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: () => navigation.go(Screen.guide)),
-      HomeSmallButton(title: tr('Enregistrements'), icon: Icons.radio_button_checked_rounded, badge: 0, onTap: null),
+      HomeSmallButton(
+          title: tr('Enregistrements'),
+          icon: Icons.radio_button_checked_rounded,
+          badge: context.downloads.pendingCount + context.recordings.schedules.where((s) => s.status.name == 'scheduled').length,
+          onTap: () => navigation.go(Screen.recordings)),
     ];
     return LayoutBuilder(builder: (context, c) {
       final columns = math.max(1, math.min(4, (c.maxWidth / 224).floor()));

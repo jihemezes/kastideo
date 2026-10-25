@@ -14,7 +14,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
 
-enum SettingsTab { general, appearance, sources, categories, backup }
+enum SettingsTab { general, appearance, sources, categories, recordings, backup }
 
 /// Fenêtre Réglages (Ctrl+,) : Général, Apparence, Sources, Catégories, Sauvegarde.
 Future<void> showSettingsDialog(BuildContext context,
@@ -42,6 +42,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
     (SettingsTab.appearance, Icons.palette_outlined, 'Apparence'),
     (SettingsTab.sources, Icons.settings_input_antenna_rounded, 'Sources'),
     (SettingsTab.categories, Icons.folder_outlined, 'Catégories'),
+    (SettingsTab.recordings, Icons.radio_button_checked_rounded, 'Enregistrements'),
     (SettingsTab.backup, Icons.import_export_rounded, 'Sauvegarde'),
   ];
 
@@ -85,6 +86,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
               SettingsTab.appearance => const _AppearanceTab(),
               SettingsTab.sources => _SourcesTab(startAdding: widget.startAdding),
               SettingsTab.categories => CategoryManager(initialKind: widget.categoryKind),
+              SettingsTab.recordings => const _RecordingsTab(),
               SettingsTab.backup => const _BackupTab(),
             },
           ),
@@ -951,5 +953,143 @@ class _HeroSection extends StatelessWidget {
           'En Direct, il montre le programme en cours de vos chaînes favorites et récentes (à défaut, des grandes chaînes d\'info et de sport). '
           'Les tendances nécessitent une clé TMDB (Réglages > Général).')),
     ]);
+  }
+}
+
+/// Réglages : dossier, enregistrement du direct, téléchargements, différé, alertes.
+class _RecordingsTab extends StatefulWidget {
+  const _RecordingsTab();
+
+  @override
+  State<_RecordingsTab> createState() => _RecordingsTabState();
+}
+
+class _RecordingsTabState extends State<_RecordingsTab> {
+  final _keyword = TextEditingController();
+
+  @override
+  void dispose() {
+    _keyword.dispose();
+    super.dispose();
+  }
+
+  Widget _row(String label, Widget child) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [SizedBox(width: 230, child: Text(label, style: kText(14))), Flexible(child: child)]),
+      );
+
+  Widget _choice<T>(T value, List<(T, String)> options, ValueChanged<T> onChanged) => DropdownButton<T>(
+        value: options.any((o) => o.$1 == value) ? value : options.first.$1,
+        items: [for (final (v, l) in options) DropdownMenuItem(value: v, child: Text(l, style: kText(13)))],
+        onChanged: (v) => v == null ? null : onChanged(v),
+      );
+
+  void _addKeyword() {
+    final settings = context.settings;
+    final word = _keyword.text.trim();
+    if (word.isEmpty) return;
+    settings.setStringList('alerts.keywords', [...settings.alertKeywords.where((k) => k != word), word]);
+    _keyword.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    final recordings = context.recordings;
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, _) => ListView(padding: const EdgeInsets.all(20), children: [
+        _section(tr('Dossier'), [
+          Text(recordings.folder, style: kText(13, color: Colors.white70)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, children: [
+            OutlinedButton(
+              onPressed: () async {
+                final dir = await getDirectoryPath(confirmButtonText: tr('Choisir'));
+                if (dir != null) {
+                  settings.setString('recordings.folder', dir);
+                  recordings.scanFiles();
+                }
+              },
+              child: Text(tr('Changer…')),
+            ),
+            OutlinedButton(onPressed: () => launchUrl(Uri.file(recordings.folder)), child: Text(tr('Ouvrir'))),
+            if (settings.recordingsFolder.isNotEmpty)
+              TextButton(
+                onPressed: () {
+                  settings.setString('recordings.folder', '');
+                  recordings.scanFiles();
+                },
+                child: Text(tr('Rétablir Vidéos/Kastideo')),
+              ),
+          ]),
+          _caption(tr('Enregistrements du direct dans « Enregistrements », films dans « Films », épisodes dans « Séries/<série> ».')),
+        ]),
+        _section(tr('Enregistrement du direct'), [
+          _row(tr('Format des fichiers'), _choice<String>(settings.recordingFormat, [('mkv', 'MKV (${tr('recommandé')})'), ('ts', 'TS')],
+              (v) => settings.setString('recordings.format', v))),
+          _row(tr('Commencer en avance de'), _choice<int>(settings.marginBefore, [(0, '0 min'), (2, '2 min'), (5, '5 min'), (10, '10 min')],
+              (v) => settings.setInt('recordings.marginBefore', v))),
+          _row(tr('Prolonger après la fin de'), _choice<int>(settings.marginAfter, [(0, '0 min'), (5, '5 min'), (10, '10 min'), (15, '15 min'), (30, '30 min')],
+              (v) => settings.setInt('recordings.marginAfter', v))),
+          _caption(tr('Le flux est recopié tel quel, sans perte de qualité. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture. '
+              'Les enregistrements programmés ont lieu si Kastideo est ouvert (ordinateur allumé, sans mise en veille).')),
+        ]),
+        _section(tr('Téléchargements'), [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Mettre en pause pendant la lecture (une seule connexion)'), style: kText(14)),
+            value: settings.pauseDownloadsDuringPlayback,
+            onChanged: (v) => settings.setBool('downloads.pauseDuringPlayback', v),
+          ),
+          _row(tr('« Cette nuit » à partir de'), _choice<int>(settings.nightHour, [for (final h in const [22, 23, 0, 1, 2, 3, 4]) (h, '$h h')],
+              (v) => settings.setInt('downloads.nightHour', v))),
+          _caption(tr('Un téléchargement à la fois, repris là où il s\'est arrêté après une coupure.')),
+        ]),
+        _section(tr('Différé du direct'), [
+          _row(tr('Durée maximale'), _choice<int>(settings.timeshiftMinutes, [(30, '30 min'), (60, '1 h'), (120, '2 h'), (240, '4 h')], (v) {
+            settings.setInt('timeshift.maxMinutes', v);
+            context.playback.applyCacheSettings();
+          })),
+          _row(tr('Vitesse de rattrapage'), _choice<double>(settings.catchUpSpeed, [(1.25, '×1,25'), (1.5, '×1,5'), (2.0, '×2')],
+              (v) => settings.setDouble('timeshift.catchUpSpeed', v))),
+          _caption(tr('Mettez le direct en pause : il continue d\'être gardé sur le disque. Rattrapez-le en accéléré ou revenez au direct depuis la barre du lecteur. '
+              'Environ 1 Go d\'espace temporaire par quart d\'heure en HD.')),
+        ]),
+        _section(tr('Alertes de programme'), [
+          Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _keyword,
+                decoration: InputDecoration(
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                  labelText: tr('M\'alerter quand un titre contient… (ex. PSG, Top Chef)'),
+                ),
+                onSubmitted: (_) => _addKeyword(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(onPressed: _addKeyword, child: Text(tr('Ajouter'))),
+          ]),
+          if (settings.alertKeywords.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final k in settings.alertKeywords)
+                InputChip(
+                  label: Text(k),
+                  onDeleted: () => settings.setStringList('alerts.keywords', settings.alertKeywords.where((x) => x != k).toList()),
+                ),
+            ]),
+          ],
+          const SizedBox(height: 6),
+          _row(tr('Chercher sur'), _choice<String>(settings.alertScope, [('favorites', tr('mes chaînes favorites')), ('all', tr('toutes les chaînes'))],
+              (v) => settings.setString('alerts.scope', v))),
+          _row(tr('Prévenir'), _choice<int>(settings.alertLead, [(0, tr('au début')), (1, tr('1 min avant')), (5, tr('5 min avant')), (10, tr('10 min avant'))],
+              (v) => settings.setInt('alerts.lead', v))),
+          _caption(tr('Pour un programme précis : « M\'alerter au début » dans sa fiche (guide TV, thèmes). L\'alerte s\'affiche en haut à droite de Kastideo, avec « Regarder ».')),
+        ]),
+      ]),
+    );
   }
 }

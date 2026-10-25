@@ -56,8 +56,14 @@ class MediaInfoStore extends ChangeNotifier {
     }
     if (settings.usesTMDB && item.kind != MediaKind.episode) {
       try {
-        final tmdb = await TMDBClient(settings.tmdbKey, _language).details(item.name, series: series, tmdbId: d.tmdbId, year: d.year);
+        final client = TMDBClient(settings.tmdbKey, _language);
+        final tmdb = await client.details(item.name, series: series, tmdbId: d.tmdbId, year: d.year, originalTitle: d.originalTitle);
         if (tmdb != null) d = d.merged(tmdb)..title ??= item.name;
+        // Épisodes : titres et résumés de TMDB dans la langue de l'interface (ceux du fournisseur sont parfois en espagnol…).
+        final seasons = _seasons[item.id];
+        if (series && tmdb?.tmdbId != null && seasons != null && seasons.isNotEmpty) {
+          _seasons[item.id] = await _localizedSeasons(client, tmdb!.tmdbId!, seasons);
+        }
         errors.remove(item.id);
       } catch (e) {
         errors[item.id] = tr('TMDB n\'a pas répondu (vérifiez la clé dans Réglages > Général).');
@@ -69,6 +75,38 @@ class MediaInfoStore extends ChangeNotifier {
     _loading.remove(item.id);
     notifyListeners();
   }
+
+  Future<List<SeriesSeason>> _localizedSeasons(TMDBClient client, String tvId, List<SeriesSeason> seasons) async {
+    final result = <SeriesSeason>[];
+    for (final season in seasons.take(40)) {
+      Map<int, TMDBEpisode> tmdb = const {};
+      try {
+        tmdb = await client.season(tvId, season.number);
+      } catch (_) {}
+      result.add(SeriesSeason(season.number, [
+        for (final e in season.episodes)
+          if (tmdb[e.number] case final t?)
+            MediaItem(
+              id: e.id,
+              sourceId: e.sourceId,
+              kind: e.kind,
+              name: (t.name != null && !_generic(t.name!)) ? t.name! : e.name,
+              group: e.group,
+              logo: e.logo ?? t.still,
+              stream: e.stream,
+              seriesId: e.seriesId,
+              number: e.number,
+              info: t.overview ?? e.info,
+              added: e.added,
+            )
+          else
+            e,
+      ]));
+    }
+    return result;
+  }
+
+  static bool _generic(String name) => RegExp(r'^(Épisode|Episode|Episodio|Capítulo|Capitulo)\s*\d+$', caseSensitive: false).hasMatch(name.trim());
 
   void clear() {
     _cache.clear();

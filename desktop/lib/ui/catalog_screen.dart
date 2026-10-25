@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 
 import '../app_state.dart';
 import '../core/models.dart';
+import '../core/paths.dart';
 import '../core/settings.dart';
 import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import 'channel_edit_dialog.dart';
 import 'cinema_view.dart';
 import 'details_view.dart';
 import 'player_pane.dart';
@@ -100,11 +102,16 @@ String sectionTitle(MediaKind kind) => switch (kind) {
 
 /// Barre latérale : sections, accueil, favoris, récents et catégories.
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key, required this.kind, this.guide = false});
+  const Sidebar({super.key, required this.kind, this.guide = false, this.recordings = false});
   final MediaKind kind;
 
   /// Le guide TV est affiché (entrée sélectionnée).
   final bool guide;
+
+  /// L'écran Enregistrements est affiché.
+  final bool recordings;
+
+  bool get _other => guide || recordings;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +120,7 @@ class Sidebar extends StatelessWidget {
     return Container(
       color: KPalette.sidebar,
       child: ListenableBuilder(
-        listenable: Listenable.merge([library, navigation]),
+        listenable: Listenable.merge([library, navigation, context.recordings, context.downloads]),
         builder: (context, _) {
           final categories = library.categories(kind);
           final filter = navigation.filter(kind);
@@ -138,28 +145,28 @@ class Sidebar extends StatelessWidget {
                     icon: kind == MediaKind.live ? Icons.sensors_rounded : Icons.grid_view_rounded,
                     label: allLabel,
                     count: library.count(kind),
-                    selected: filter is AllItems && !guide,
+                    selected: filter is AllItems && !_other,
                     onTap: () => navigation.show(kind, const AllItems()),
                   ),
                   _SidebarRow(
                     icon: Icons.star_rounded,
                     label: tr('Favoris'),
                     count: library.favoritesOf(kind).length,
-                    selected: filter is FavoriteItems && !guide,
+                    selected: filter is FavoriteItems && !_other,
                     onTap: () => navigation.show(kind, const FavoriteItems()),
                   ),
                   _SidebarRow(
                     icon: Icons.history_rounded,
                     label: tr('Récents'),
                     count: library.recentsOf(kind).length,
-                    selected: filter is RecentItems && !guide,
+                    selected: filter is RecentItems && !_other,
                     onTap: () => navigation.show(kind, const RecentItems()),
                   ),
                   if (kind == MediaKind.live)
                     _SidebarRow(
                       icon: Icons.category_outlined,
                       label: tr('Thèmes'),
-                      selected: filter is ThemesFilter && !guide,
+                      selected: filter is ThemesFilter && !_other,
                       onTap: () => navigation.showThemes(theme: navigation.themeSelection, mode: navigation.themeMode),
                     ),
                   if (kind == MediaKind.live)
@@ -169,6 +176,13 @@ class Sidebar extends StatelessWidget {
                       selected: guide,
                       onTap: () => navigation.go(Screen.guide),
                     ),
+                  _SidebarRow(
+                    icon: Icons.radio_button_checked_rounded,
+                    label: tr('Enregistrements'),
+                    count: context.downloads.pendingCount + (context.recordings.active != null ? 1 : 0),
+                    selected: recordings,
+                    onTap: () => navigation.go(Screen.recordings),
+                  ),
                   const SizedBox(height: 10),
                   Row(children: [
                     Expanded(child: _SectionHeader(tr('Catégories'))),
@@ -187,13 +201,14 @@ class Sidebar extends StatelessWidget {
                       icon: Icons.folder_outlined,
                       label: library.categoryName(kind, name),
                       count: library.itemsInCategory(kind, name).length,
-                      selected: filter is CategoryFilter && filter.name == name && !guide,
+                      selected: filter is CategoryFilter && filter.name == name && !_other,
                       onTap: () => navigation.show(kind, CategoryFilter(name)),
                       onSecondaryTap: (pos) => _categoryMenu(context, name, pos),
                     ),
                 ],
               ),
             ),
+            const ActivityIndicator(),
             const Divider(height: 1, color: KPalette.separator),
             _SidebarRow(
               icon: Icons.settings_rounded,
@@ -547,8 +562,22 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       ),
       if (item.kind == MediaKind.movie) PopupMenuItem(value: 'play', child: Text(tr('Lire'), style: kText(13))),
       PopupMenuItem(value: 'fav', child: Text(favorite ? tr('Retirer des favoris') : tr('Ajouter aux favoris'), style: kText(13))),
+      if (isLive)
+        PopupMenuItem(
+          value: 'record',
+          child: Text(context.recordings.isRecording(item) ? tr('Arrêter l\'enregistrement') : tr('Enregistrer maintenant'), style: kText(13)),
+        ),
+      if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
         PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
+      if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
+        PopupMenuItem(
+          value: 'download',
+          enabled: !context.downloads.contains(item.id),
+          child: Text(context.downloads.contains(item.id) ? tr('Dans les téléchargements') : tr('Télécharger'), style: kText(13)),
+        ),
+      if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
+        PopupMenuItem(value: 'night', enabled: !context.downloads.contains(item.id), child: Text(tr('Télécharger cette nuit'), style: kText(13))),
       PopupMenuItem(value: 'copy', child: Text(tr('Copier le nom'), style: kText(13))),
     ],
   );
@@ -561,10 +590,82 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       playItem(context, item);
     case 'fav':
       library.toggleFavorite(item.id);
+    case 'record':
+      final recordings = context.recordings;
+      if (recordings.isRecording(item)) {
+        await recordings.stop();
+      } else {
+        final p = context.guide.current(item);
+        await recordings.recordNow(item, title: p?.title ?? '', stopS: p == null ? null : p.stopS + context.settings.marginAfter * 60);
+      }
+    case 'edit':
+      await showChannelEditor(context, item);
+    case 'download':
+      context.downloads.enqueue(item);
+    case 'night':
+      context.downloads.enqueue(item, nightOnly: true);
     case 'theme':
       final group = context.guide.groupOf(item);
       if (group != null) await chooseChannelTheme(context, group);
     case 'copy':
       await Clipboard.setData(ClipboardData(text: isLive ? item.name : item.displayName));
   }
+}
+
+/// Bas de la barre latérale : enregistrement et téléchargement en cours (progression, temps restant).
+class ActivityIndicator extends StatelessWidget {
+  const ActivityIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: Listenable.merge([context.recordings, context.downloads]),
+        builder: (context, _) {
+          final rec = context.recordings.active;
+          final dl = context.downloads.running;
+          if (rec == null && dl == null) return const SizedBox();
+          return Hover(
+            onTap: () => context.navigation.go(Screen.recordings),
+            builder: (context, hovering) => Container(
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: hovering ? 0.1 : 0.06),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (rec != null)
+                  Row(children: [
+                    const Icon(Icons.fiber_manual_record, size: 12, color: Colors.red),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text('${tr('Enregistrement')} · ${rec.channel.displayName}',
+                          style: kText(12, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                  ]),
+                if (rec != null && dl != null) const SizedBox(height: 8),
+                if (dl != null) ...[
+                  Row(children: [
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(value: dl.fraction, strokeWidth: 2.4, color: KPalette.accent, backgroundColor: Colors.white12),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(dl.name, style: kText(12, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  ]),
+                  const SizedBox(height: 3),
+                  Text(
+                    [
+                      if (dl.fraction != null) '${(dl.fraction! * 100).round()} %',
+                      if (dl.remaining != null) '${tr('reste')} ${durationText(dl.remaining!)}',
+                      if (context.downloads.pendingCount > 1) '${context.downloads.pendingCount - 1} ${tr('en attente')}',
+                    ].join(' · '),
+                    style: kText(11, color: Colors.white54),
+                  ),
+                ],
+              ]),
+            ),
+          );
+        },
+      );
 }

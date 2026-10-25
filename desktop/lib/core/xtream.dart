@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../l10n.dart';
+
 import 'models.dart';
 import 'm3u.dart';
 
@@ -15,6 +17,9 @@ class XtreamException implements Exception {
 }
 
 /// Téléchargement simple avec l'en-tête de lecteur VLC.
+/// Langues acceptées envoyées aux serveurs (langue de l'interface d'abord).
+String get acceptLanguage => L10n.english ? 'en-US,en;q=0.9,fr;q=0.5' : 'fr-FR,fr;q=0.9,en;q=0.8';
+
 Future<String> httpGetText(Uri url, {Duration timeout = const Duration(seconds: 60)}) async {
   final client = HttpClient()
     ..userAgent = kUserAgent
@@ -22,6 +27,9 @@ Future<String> httpGetText(Uri url, {Duration timeout = const Duration(seconds: 
   try {
     final request = await client.getUrl(url).timeout(timeout);
     request.headers.set(HttpHeaders.acceptHeader, '*/*');
+    // Comme la version Mac (URLSession) : certains fournisseurs choisissent la langue des fiches d'après cet en-tête
+    // et répondent sinon dans une langue par défaut (espagnol…).
+    request.headers.set(HttpHeaders.acceptLanguageHeader, acceptLanguage);
     final response = await request.close().timeout(timeout);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       await response.drain<void>();

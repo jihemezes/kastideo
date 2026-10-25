@@ -36,6 +36,21 @@ class MediaItem {
 
   String get displayName => cleanTitle(name).title;
 
+  MediaItem copyWith({String? name, String? logo, String? epgId, int? number, String? info}) => MediaItem(
+        id: id,
+        sourceId: sourceId,
+        kind: kind,
+        name: name ?? this.name,
+        group: group,
+        logo: logo ?? this.logo,
+        stream: stream,
+        epgId: epgId ?? this.epgId,
+        seriesId: seriesId,
+        number: number ?? this.number,
+        info: info ?? this.info,
+        added: added,
+      );
+
   Map<String, dynamic> toJson() => {
         'id': id,
         's': sourceId,
@@ -130,4 +145,27 @@ class SourceContent {
   SourceContent(this.items, {this.epgUrl});
   final List<MediaItem> items;
   final String? epgUrl;
+}
+
+/// Correction d'une chaîne par l'utilisateur (nom, numéro, logo, chaîne du guide TV), comme ChannelEdit sur Mac.
+class ChannelEdit {
+  ChannelEdit({this.name, this.number, this.logo, this.epgId});
+  String? name;
+  int? number;
+  String? logo;
+  String? epgId;
+
+  bool get isEmpty => (name?.isEmpty ?? true) && number == null && (logo?.isEmpty ?? true) && (epgId?.isEmpty ?? true);
+
+  MediaItem apply(MediaItem item) => item.copyWith(
+        name: (name?.isNotEmpty ?? false) ? name : null,
+        number: number,
+        logo: (logo?.isNotEmpty ?? false) ? logo : null,
+        epgId: (epgId?.isNotEmpty ?? false) ? epgId : null,
+      );
+
+  Map<String, dynamic> toJson() => {'name': ?name, 'number': ?number, 'logo': ?logo, 'epgId': ?epgId};
+
+  static ChannelEdit fromJson(Map<String, dynamic> j) =>
+      ChannelEdit(name: j['name'] as String?, number: j['number'] as int?, logo: j['logo'] as String?, epgId: j['epgId'] as String?);
 }

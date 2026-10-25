@@ -123,7 +123,130 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('hwdec', 'auto-safe');
       await native.setProperty('ytdl', 'no');
     }
+    await applyCacheSettings();
     await StreamRelay.shared.start();
+  }
+
+  // MARK: Différé du direct (cache de mpv)
+
+  /// Retard sur le direct (secondes) et plus grand retard de la séance (pour la barre de rattrapage).
+  double liveDelay = 0;
+  double peakDelay = 0;
+  double rate = 1;
+  bool _diskCache = false;
+  Timer? _shiftTimer;
+  double? _catchUpTarget;
+
+  /// Le direct est en différé (en pause ou en retard de plus de 3 s).
+  bool get isTimeshifted => isLive && didStart && (liveDelay > 4.5 || !isPlaying);
+
+  /// Cache de mpv : sur disque si possible (différé jusqu'à la durée choisie), sinon limité en mémoire.
+  Future<void> applyCacheSettings() async {
+    final native = player.platform;
+    if (native is! NativePlayer) return;
+    final minutes = settings?.timeshiftMinutes ?? 60;
+    await native.setProperty('cache-on-disk', 'yes');
+    _diskCache = (await native.getProperty('cache-on-disk')) == 'yes';
+    // Environ 1 Mo par seconde pour une chaîne HD ; sans cache disque, 512 Mo au plus en mémoire.
+    final bytes = _diskCache ? minutes * 60 * 1024 * 1024 : 512 * 1024 * 1024;
+    await native.setProperty('cache-secs', '${minutes * 60}');
+    await native.setProperty('demuxer-max-bytes', '$bytes');
+    await native.setProperty('demuxer-max-back-bytes', '$bytes');
+    await native.setProperty('demuxer-seekable-cache', 'yes');
+    // Un direct n'est pas « seekable » pour mpv : on autorise quand même le déplacement dans le cache.
+    await native.setProperty('force-seekable', 'yes');
+    PlaybackLog.shared.note('Différé : jusqu\'à $minutes min, cache ${_diskCache ? 'sur disque' : 'en mémoire (512 Mo)'}');
+  }
+
+  /// Durée maximale réelle du différé (secondes).
+  double get maxDelay => _diskCache ? (settings?.timeshiftMinutes ?? 60) * 60.0 : 480;
+
+  void _startShiftTimer() {
+    _shiftTimer?.cancel();
+    if (!isLive) return;
+    _shiftTimer = Timer.periodic(const Duration(milliseconds: 500), (_) => _sampleDelay());
+  }
+
+  Future<void> _sampleDelay() async {
+    final native = player.platform;
+    if (native is! NativePlayer || !isLive || !didStart) return;
+    final end = double.tryParse(await native.getProperty('demuxer-cache-time', waitForInitialization: false));
+    final pos = double.tryParse(await native.getProperty('time-pos', waitForInitialization: false));
+    if (end == null || pos == null) return;
+    final delay = (end - pos).clamp(0.0, 1e6);
+    final changed = (delay - liveDelay).abs() > 0.4;
+    liveDelay = delay;
+    // Profondeur du différé disponible : début de la plage du cache où l'on peut revenir.
+    final state = await native.getProperty('demuxer-cache-state', waitForInitialization: false);
+    final start = _rangeStart(state, pos);
+    final depth = start == null ? delay : end - start;
+    peakDelay = depth < delay ? delay : depth;
+    // Rattrapage en accéléré jusqu'au point visé, puis vitesse normale.
+    final target = _catchUpTarget;
+    if (rate > 1 && delay <= (target ?? 1.5) + 0.5) {
+      _catchUpTarget = null;
+      await setRate(1);
+    }
+    // En pause depuis trop longtemps : le cache est plein, la lecture reprend.
+    if (!isPlaying && delay >= maxDelay - 5) {
+      PlaybackLog.shared.note('Différé : durée maximale atteinte, reprise de la lecture');
+      player.play();
+    }
+    if (changed) notifyListeners();
+  }
+
+  /// Début de la plage du cache où se trouve la lecture (« seekable-ranges » de « demuxer-cache-state », en JSON).
+  static double? _rangeStart(String state, double pos) {
+    double? containing, last, lastEnd;
+    for (final m in RegExp(r'"start"\s*:\s*([0-9.eE+-]+)\s*,\s*"end"\s*:\s*([0-9.eE+-]+)').allMatches(state)) {
+      final a = double.tryParse(m.group(1)!), b = double.tryParse(m.group(2)!);
+      if (a == null || b == null) continue;
+      if (a <= pos + 1 && pos <= b + 5) containing = a;
+      if (lastEnd == null || b > lastEnd) {
+        lastEnd = b;
+        last = a;
+      }
+    }
+    return containing ?? last;
+  }
+
+  Future<void> setRate(double value) async {
+    rate = value;
+    await player.setRate(value);
+    notifyListeners();
+  }
+
+  /// Accélère jusqu'à un retard donné (0 : le direct).
+  Future<void> catchUp({double toDelay = 0}) async {
+    if (!isLive) return;
+    _catchUpTarget = toDelay;
+    if (!isPlaying) player.play();
+    await setRate(settings?.catchUpSpeed ?? 1.5);
+  }
+
+  /// Revient au direct (fin du cache), sans perdre le différé déjà enregistré.
+  Future<void> returnToLive() async {
+    final native = player.platform;
+    if (native is! NativePlayer || !isLive) return;
+    _catchUpTarget = null;
+    await setRate(1);
+    final end = double.tryParse(await native.getProperty('demuxer-cache-time'));
+    if (end != null) await native.command(['seek', (end - 0.5).toStringAsFixed(2), 'absolute']);
+    if (!isPlaying) player.play();
+    liveDelay = 0;
+    notifyListeners();
+  }
+
+  /// Place la lecture à un retard donné sur le direct (barre de différé).
+  Future<void> seekDelay(double delay) async {
+    final native = player.platform;
+    if (native is! NativePlayer || !isLive) return;
+    final end = double.tryParse(await native.getProperty('demuxer-cache-time'));
+    if (end == null) return;
+    final d = delay.clamp(0.5, peakDelay > 1 ? peakDelay - 0.5 : 0.5);
+    await native.command(['seek', (end - d).toStringAsFixed(2), 'absolute']);
+    liveDelay = d;
+    notifyListeners();
   }
 
   bool get isLive => current?.kind == MediaKind.live;
@@ -135,6 +258,11 @@ class PlaybackController extends ChangeNotifier {
   }
 
   void jump(int seconds) {
+    if (isLive && didStart) {
+      // Direct : −10 s / +30 s dans le différé (sans dépasser le direct).
+      seekDelay(liveDelay - seconds);
+      return;
+    }
     if (!isSeekable) return;
     var target = position + Duration(seconds: seconds);
     if (target < Duration.zero) target = Duration.zero;
@@ -219,6 +347,13 @@ class PlaybackController extends ChangeNotifier {
 
   Future<void> stop() async {
     _flushProgress();
+    _shiftTimer?.cancel();
+    liveDelay = 0;
+    peakDelay = 0;
+    if (rate != 1) {
+      rate = 1;
+      player.setRate(1);
+    }
     _watchdog?.cancel();
     _openTimer?.cancel();
     _healthTimer?.cancel();
@@ -236,6 +371,7 @@ class PlaybackController extends ChangeNotifier {
   /// Fermeture de l'application : coupe la lecture et libère mpv (sinon mpv peut ouvrir ses propres fenêtres sous Windows).
   Future<void> shutdown() async {
     _flushProgress();
+    _shiftTimer?.cancel();
     _watchdog?.cancel();
     _openTimer?.cancel();
     _healthTimer?.cancel();
@@ -279,6 +415,14 @@ class PlaybackController extends ChangeNotifier {
       _closedAt = DateTime.now();
     }
     _currentUrl = url;
+    _shiftTimer?.cancel();
+    liveDelay = 0;
+    peakDelay = 0;
+    _catchUpTarget = null;
+    if (rate != 1) {
+      rate = 1;
+      player.setRate(1);
+    }
     errorMessage = null;
     isLoading = true;
     didStart = false;
@@ -323,6 +467,7 @@ class PlaybackController extends ChangeNotifier {
     PlaybackLog.shared.note('Lecture démarrée en ${(startupTime!.inMilliseconds / 1000).toStringAsFixed(2)} s');
     _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) => _evaluateHealth());
     _evaluateHealth();
+    _startShiftTimer();
   }
 
   void _evaluateHealth() {

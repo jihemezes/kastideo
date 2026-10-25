@@ -50,6 +50,52 @@ class AppSettings extends ChangeNotifier {
 
   bool get usesTMDB => tmdbKey.trim().isNotEmpty;
 
+  // MARK: Différé, enregistrements, téléchargements, alertes
+
+  /// Durée maximale du différé du direct (minutes) et vitesse de rattrapage (mêmes clés que sur Mac).
+  int get timeshiftMinutes => _prefs.getInt('timeshift.maxMinutes') ?? 60;
+  double get catchUpSpeed => _prefs.getDouble('timeshift.catchUpSpeed') ?? 1.5;
+
+  /// Dossier des enregistrements et téléchargements (vide : Vidéos/Kastideo).
+  String get recordingsFolder => _prefs.getString('recordings.folder') ?? '';
+
+  /// Format des enregistrements du direct : « mkv » ou « ts ».
+  String get recordingFormat => _prefs.getString('recordings.format') ?? 'mkv';
+  int get marginBefore => _prefs.getInt('recordings.marginBefore') ?? 2;
+  int get marginAfter => _prefs.getInt('recordings.marginAfter') ?? 5;
+  bool get pauseDownloadsDuringPlayback => _prefs.getBool('downloads.pauseDuringPlayback') ?? true;
+  int get nightHour => _prefs.getInt('downloads.nightHour') ?? 1;
+
+  /// Alertes : mots-clés, portée (« favorites » ou « all ») et avance en minutes.
+  List<String> get alertKeywords => _prefs.getStringList('alerts.keywords') ?? const [];
+  String get alertScope => _prefs.getString('alerts.scope') ?? 'favorites';
+  int get alertLead => _prefs.getInt('alerts.lead') ?? 1;
+
+  void setInt(String key, int value) {
+    _prefs.setInt(key, value);
+    notifyListeners();
+  }
+
+  void setDouble(String key, double value) {
+    _prefs.setDouble(key, value);
+    notifyListeners();
+  }
+
+  void setBool(String key, bool value) {
+    _prefs.setBool(key, value);
+    notifyListeners();
+  }
+
+  void setString(String key, String value) {
+    _prefs.setString(key, value);
+    notifyListeners();
+  }
+
+  void setStringList(String key, List<String> value) {
+    _prefs.setStringList(key, value);
+    notifyListeners();
+  }
+
   // MARK: Bandeau « à la une » (mêmes clés que sur Mac)
 
   bool get heroEnabled => _prefs.getBool('hero.enabled') ?? true;

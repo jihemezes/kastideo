@@ -7,7 +7,10 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app_state.dart';
+import 'core/alerts.dart';
+import 'core/downloads.dart';
 import 'core/guide.dart';
+import 'core/recording.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/settings.dart';
@@ -17,9 +20,11 @@ import 'theme.dart';
 import 'ui/home_screen.dart';
 import 'ui/catalog_screen.dart';
 import 'ui/guide_view.dart';
+import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
 import 'ui/widgets.dart';
+import 'ui/notices.dart';
 import 'core/models.dart';
 
 /// Port local qui sert de verrou : une seule instance de Kastideo à la fois.
@@ -54,9 +59,10 @@ Future<bool> _claimSingleInstance() async {
 
 /// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
 class _CloseHandler with WindowListener {
-  _CloseHandler(this.playback, this.watch);
+  _CloseHandler(this.playback, this.watch, this.recordings);
   final PlaybackController playback;
   final WatchProgressStore watch;
+  final RecordingCenter recordings;
   bool _closing = false;
 
   @override
@@ -68,6 +74,9 @@ class _CloseHandler with WindowListener {
     } catch (_) {}
     try {
       await watch.flush().timeout(const Duration(seconds: 1));
+    } catch (_) {}
+    try {
+      await recordings.shutdown().timeout(const Duration(seconds: 3));
     } catch (_) {}
     await playback.shutdown();
     exit(0);
@@ -101,22 +110,33 @@ Future<void> main() async {
   final playback = PlaybackController()
     ..settings = settings
     ..watchProgress = watch;
-  await windowManager.setPreventClose(true);
-  windowManager.addListener(_CloseHandler(playback, watch));
   final navigation = NavigationModel();
   final info = MediaInfoStore(library, settings);
   final guide = GuideStore(library);
-  runApp(KastideoApp(
-    library: library,
-    playback: playback,
-    navigation: navigation,
-    settings: settings,
-    watch: watch,
-    info: info,
-    guide: guide,
-  ));
+  final recordings = RecordingCenter(settings, playback, library);
+  final downloads = DownloadManager(settings, playback);
+  final alerts = AlertCenter(settings, library, guide);
+  await windowManager.setPreventClose(true);
+  windowManager.addListener(_CloseHandler(playback, watch, recordings));
+  runApp(
+    KastideoApp(
+      library: library,
+      playback: playback,
+      navigation: navigation,
+      settings: settings,
+      watch: watch,
+      info: info,
+      guide: guide,
+      recordings: recordings,
+      downloads: downloads,
+      alerts: alerts,
+    ),
+  );
   await library.start(autoRefresh: settings.autoRefresh);
   library.onSourceRemoved = guide.forgetSource;
+  await recordings.start();
+  await downloads.start();
+  await alerts.start();
   await guide.start();
 }
 
@@ -130,6 +150,9 @@ class KastideoApp extends StatelessWidget {
     required this.watch,
     required this.info,
     required this.guide,
+    required this.recordings,
+    required this.downloads,
+    required this.alerts,
   });
 
   final LibraryStore library;
@@ -139,6 +162,9 @@ class KastideoApp extends StatelessWidget {
   final WatchProgressStore watch;
   final MediaInfoStore info;
   final GuideStore guide;
+  final RecordingCenter recordings;
+  final DownloadManager downloads;
+  final AlertCenter alerts;
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +176,9 @@ class KastideoApp extends StatelessWidget {
       watch: watch,
       info: info,
       guide: guide,
+      recordings: recordings,
+      downloads: downloads,
+      alerts: alerts,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
@@ -195,15 +224,23 @@ class RootView extends StatelessWidget {
       },
       child: Focus(
         autofocus: true,
-        child: ListenableBuilder(
-          listenable: navigation,
-          builder: (context, _) => switch (navigation.screen) {
-            Screen.home => const HomeScreen(),
-            Screen.live => const CatalogScreen(kind: MediaKind.live),
-            Screen.movies => const CatalogScreen(kind: MediaKind.movie),
-            Screen.series => const CatalogScreen(kind: MediaKind.series),
-            Screen.guide => const GuideScreen(),
-          },
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ListenableBuilder(
+                listenable: navigation,
+                builder: (context, _) => switch (navigation.screen) {
+                  Screen.home => const HomeScreen(),
+                  Screen.live => const CatalogScreen(kind: MediaKind.live),
+                  Screen.movies => const CatalogScreen(kind: MediaKind.movie),
+                  Screen.series => const CatalogScreen(kind: MediaKind.series),
+                  Screen.guide => const GuideScreen(),
+                  Screen.recordings => const RecordingsScreen(),
+                },
+              ),
+            ),
+            const Positioned(top: 14, right: 14, child: NoticeOverlay()),
+          ],
         ),
       ),
     );

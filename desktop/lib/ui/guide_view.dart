@@ -209,7 +209,7 @@ class _GuideViewState extends State<GuideView> {
     return Container(
       color: KPalette.window,
       child: ListenableBuilder(
-        listenable: Listenable.merge([context.guide, context.library]),
+        listenable: Listenable.merge([context.guide, context.library, context.recordings, context.alerts]),
         builder: (context, _) {
           final guide = context.guide;
           final rows = [
@@ -486,10 +486,22 @@ class _GuideCell extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p.title,
-                  style: kText(12, weight: FontWeight.w600, color: past ? Colors.white54 : Colors.white),
-                  maxLines: c.maxWidth > 80 ? 1 : 2,
-                  overflow: TextOverflow.ellipsis),
+              Row(children: [
+                if (context.recordings.isScheduled(item, p)) ...[
+                  const Icon(Icons.fiber_manual_record, size: 10, color: Colors.red),
+                  const SizedBox(width: 3),
+                ],
+                if (context.alerts.isWatching(item, p)) ...[
+                  const Icon(Icons.notifications_active_rounded, size: 11, color: KPalette.orange),
+                  const SizedBox(width: 3),
+                ],
+                Expanded(
+                  child: Text(p.title,
+                      style: kText(12, weight: FontWeight.w600, color: past ? Colors.white54 : Colors.white),
+                      maxLines: c.maxWidth > 80 ? 1 : 2,
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ]),
               if (c.maxWidth > 80)
                 Text(timeRange(p), style: kText(11, color: Colors.white54), maxLines: 1, overflow: TextOverflow.clip),
             ]),
@@ -504,7 +516,6 @@ class _GuideCell extends StatelessWidget {
 Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Programme p) {
   final now = nowSeconds();
   final current = p.isAiring(now);
-  final past = p.stopS <= now;
   final minutes = (p.stopS - p.startS) ~/ 60;
   final duration = minutes >= 60 ? '${minutes ~/ 60} h ${(minutes % 60).toString().padLeft(2, '0')}' : '$minutes min';
   return showDialog(
@@ -542,19 +553,7 @@ Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Program
           ),
         ]),
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('Fermer'))),
-        if (!past)
-          FilledButton.icon(
-            style: FilledButton.styleFrom(backgroundColor: KPalette.accent),
-            onPressed: () {
-              Navigator.pop(c);
-              openItem(context, channel);
-            },
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(current ? tr('Regarder') : tr('Aller sur la chaîne')),
-          ),
-      ],
+      actions: programmeActions(context, c, channel, p),
     ),
   );
 }

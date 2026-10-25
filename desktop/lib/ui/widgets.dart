@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -52,7 +54,9 @@ class LogoView extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.06),
         child: url == null
             ? fallback
-            : Image.network(
+            : url!.startsWith('file:')
+                ? Image.file(File.fromUri(Uri.parse(url!)), width: size, height: size, fit: BoxFit.contain, errorBuilder: (_, _, _) => fallback)
+                : Image.network(
                 url!,
                 width: size,
                 height: size,

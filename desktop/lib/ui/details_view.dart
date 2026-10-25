@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
 import '../core/details.dart';
+import '../core/downloads.dart';
 import '../core/models.dart';
 import '../core/text.dart';
 import '../l10n.dart';
@@ -51,7 +52,7 @@ class _DetailsViewState extends State<DetailsView> {
   Widget build(BuildContext context) {
     final info = context.info;
     return ListenableBuilder(
-      listenable: Listenable.merge([info, context.library, context.watch, context.settings]),
+      listenable: Listenable.merge([info, context.library, context.watch, context.settings, context.downloads]),
       builder: (context, _) {
         final d = info.details(item.id);
         return Stack(fit: StackFit.expand, children: [
@@ -222,6 +223,7 @@ class _DetailsViewState extends State<DetailsView> {
         icon: Icon(isSeries ? Icons.list_rounded : Icons.play_arrow_rounded),
         label: Text(playLabel),
       ),
+      if (!isSeries) _DownloadButton(item: item),
       if (d?.trailer != null)
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16)),
@@ -294,7 +296,31 @@ class _DetailsViewState extends State<DetailsView> {
     if (seasons.isEmpty) return Text(tr('Aucun épisode.'), style: kText(13, color: Colors.white60));
     final current = seasons.where((s) => s.number == _season).firstOrNull ?? seasons.first;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(tr('Épisodes'), style: kText(18, weight: FontWeight.w600)),
+      Row(children: [
+        Text(tr('Épisodes'), style: kText(18, weight: FontWeight.w600)),
+        const Spacer(),
+        PopupMenuButton<bool>(
+          tooltip: tr('Télécharger la saison'),
+          color: const Color(0xF02C2C2E),
+          onSelected: (night) {
+            for (final e in current.episodes) {
+              context.downloads.enqueue(e, season: current.number, nightOnly: night);
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(value: false, child: Text('${tr('Télécharger la saison')} ${current.number} (${current.episodes.length})', style: kText(13))),
+            PopupMenuItem(value: true, child: Text('${tr('Télécharger la saison')} ${current.number} ${tr('cette nuit')}', style: kText(13))),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.download_rounded, size: 18, color: KPalette.accent),
+              const SizedBox(width: 6),
+              Text(tr('Télécharger la saison'), style: kText(13, color: KPalette.accent)),
+            ]),
+          ),
+        ),
+      ]),
       const SizedBox(height: 10),
       Wrap(spacing: 8, runSpacing: 8, children: [
         for (final s in seasons)
@@ -305,7 +331,26 @@ class _DetailsViewState extends State<DetailsView> {
           ),
       ]),
       const SizedBox(height: 12),
-      for (final e in current.episodes) _EpisodeRow(episode: e),
+      for (final e in current.episodes) _EpisodeRow(episode: e, season: current.number),
+    ]);
+  }
+
+  /// Résumé du fournisseur dans une autre langue que l'interface : on le signale et on indique comment l'avoir en français.
+  Widget? _languageNotice(BuildContext context, MediaDetails? d) {
+    final lang = guessLanguage(d?.plot);
+    final ui = L10n.english ? 'en' : 'fr';
+    if (lang == null || lang == ui) return null;
+    final names = {
+      'fr': tr('en français'), 'es': tr('en espagnol'), 'en': tr('en anglais'), //
+      'it': tr('en italien'), 'pt': tr('en portugais'), 'de': tr('en allemand'),
+    };
+    final text = context.settings.usesTMDB
+        ? '${tr('Résumé fourni par le fournisseur')} ${names[lang]} : ${tr('TMDB n\'a pas de résumé dans votre langue pour ce titre.')}'
+        : '${tr('Résumé fourni par le fournisseur')} ${names[lang]}. ${tr('Ajoutez une clé TMDB (Réglages > Général) pour des fiches dans votre langue.')}';
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      const Icon(Icons.translate_rounded, size: 14, color: KPalette.orange),
+      const SizedBox(width: 6),
+      Flexible(child: Text(text, style: kText(12, color: KPalette.orange))),
     ]);
   }
 
@@ -330,6 +375,7 @@ class _DetailsViewState extends State<DetailsView> {
           if (!context.settings.usesTMDB)
             Text(tr('· Ajoutez une clé TMDB dans Réglages > Général pour des fiches plus complètes.'),
                 style: kText(12, color: Colors.white54)),
+          ?_languageNotice(context, d),
           TextButton(onPressed: () => info.load(item, force: true), child: Text(tr('Actualiser'))),
         ]),
     ]);
@@ -337,8 +383,9 @@ class _DetailsViewState extends State<DetailsView> {
 }
 
 class _EpisodeRow extends StatelessWidget {
-  const _EpisodeRow({required this.episode});
+  const _EpisodeRow({required this.episode, required this.season});
   final MediaItem episode;
+  final int season;
 
   @override
   Widget build(BuildContext context) {
@@ -381,6 +428,7 @@ class _EpisodeRow extends StatelessWidget {
               ],
             ]),
           ),
+          _EpisodeDownload(episode: episode, season: season),
         ]),
       ),
     );
@@ -391,4 +439,87 @@ class _EpisodeRow extends StatelessWidget {
 class ImageFilterBlur {
   static final strong = ImageFilter.blur(sigmaX: 30, sigmaY: 30);
   static final none = ImageFilter.blur(sigmaX: 0, sigmaY: 0);
+}
+
+/// État de téléchargement d'un contenu (icône) : télécharger, en attente, en cours, terminé.
+Widget _downloadIcon(BuildContext context, MediaItem item, VoidCallback onDownload) {
+  final task = context.downloads.task(item.id);
+  if (task == null || task.status == DownloadStatus.failed) {
+    return IconButton(
+      tooltip: task?.status == DownloadStatus.failed ? '${tr('Échec')} : ${task!.error ?? ''}' : tr('Télécharger'),
+      onPressed: onDownload,
+      icon: Icon(Icons.download_rounded, color: task == null ? Colors.white70 : KPalette.orange),
+    );
+  }
+  if (task.status == DownloadStatus.done) {
+    return Tooltip(message: tr('Téléchargé'), child: const Padding(padding: EdgeInsets.all(8), child: Icon(Icons.download_done_rounded, color: Colors.greenAccent)));
+  }
+  return Tooltip(
+    message: task.status == DownloadStatus.running ? tr('Téléchargement en cours') : tr('En attente de téléchargement'),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          value: task.status == DownloadStatus.running ? task.fraction : 0,
+          strokeWidth: 2.5,
+          color: KPalette.accent,
+          backgroundColor: Colors.white12,
+        ),
+      ),
+    ),
+  );
+}
+
+class _EpisodeDownload extends StatelessWidget {
+  const _EpisodeDownload({required this.episode, required this.season});
+  final MediaItem episode;
+  final int season;
+
+  @override
+  Widget build(BuildContext context) => _downloadIcon(context, episode, () => context.downloads.enqueue(episode, season: season));
+}
+
+/// Bouton « Télécharger » d'un film (maintenant ou cette nuit).
+class _DownloadButton extends StatelessWidget {
+  const _DownloadButton({required this.item});
+  final MediaItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final task = context.downloads.task(item.id);
+    if (task != null && task.status != DownloadStatus.failed) {
+      return OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16)),
+        onPressed: () => context.navigation.go(Screen.recordings),
+        icon: task.status == DownloadStatus.done
+            ? const Icon(Icons.download_done_rounded, color: Colors.greenAccent)
+            : SizedBox(width: 18, height: 18, child: CircularProgressIndicator(value: task.fraction, strokeWidth: 2.4)),
+        label: Text(task.status == DownloadStatus.done
+            ? tr('Téléchargé')
+            : task.status == DownloadStatus.running
+                ? '${tr('Téléchargement')} ${((task.fraction ?? 0) * 100).round()} %'
+                : tr('En attente')),
+      );
+    }
+    return PopupMenuButton<bool>(
+      tooltip: tr('Télécharger'),
+      color: const Color(0xF02C2C2E),
+      onSelected: (night) => context.downloads.enqueue(item, nightOnly: night),
+      itemBuilder: (_) => [
+        PopupMenuItem(value: false, child: Text(tr('Télécharger maintenant'), style: kText(13))),
+        PopupMenuItem(value: true, child: Text(tr('Télécharger cette nuit'), style: kText(13))),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(20)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.download_rounded, size: 20, color: KPalette.accent),
+          const SizedBox(width: 8),
+          Text(tr('Télécharger'), style: kText(13, weight: FontWeight.w600, color: KPalette.accent)),
+        ]),
+      ),
+    );
+  }
 }

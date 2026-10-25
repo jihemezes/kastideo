@@ -72,3 +72,33 @@ final RegExp _nonAlnum = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
 
 /// Clé de comparaison d'un titre (catalogue IPTV ou TMDB) : sans étiquettes, accents ni ponctuation.
 String titleKey(String raw) => cleanTitle(raw).title.searchKey.split(_nonAlnum).where((w) => w.isNotEmpty).join();
+
+const Map<String, List<String>> _stopwords = {
+  'fr': ['le', 'la', 'les', 'des', 'une', 'est', 'dans', 'pour', 'qui', 'avec', 'sur', 'pas', 'son', 'leur', 'et', 'du', 'au', 'elle', 'il'],
+  'es': ['el', 'los', 'las', 'una', 'del', 'es', 'por', 'para', 'con', 'que', 'su', 'sus', 'pero', 'como', 'al', 'y', 'se', 'lo', 'tras'],
+  'en': ['the', 'and', 'of', 'to', 'is', 'in', 'his', 'her', 'with', 'for', 'when', 'who', 'their', 'after', 'a', 'an', 'he', 'she'],
+  'it': ['il', 'gli', 'della', 'di', 'che', 'una', 'nel', 'per', 'con', 'sono', 'suo', 'sua', 'dopo', 'e', 'ma', 'lo'],
+  'pt': ['o', 'os', 'as', 'um', 'uma', 'do', 'da', 'dos', 'em', 'para', 'com', 'que', 'seu', 'sua', 'mas', 'não'],
+  'de': ['der', 'die', 'das', 'und', 'ist', 'ein', 'eine', 'mit', 'von', 'nicht', 'sich', 'auf', 'nach', 'sein', 'ihr'],
+};
+
+/// Langue probable d'un texte (mots les plus courants) : « fr », « es », « en », « it », « pt », « de » ou null si incertain.
+String? guessLanguage(String? text) {
+  if (text == null) return null;
+  final words = text.toLowerCase().split(RegExp(r"[^\p{L}]+", unicode: true)).where((w) => w.isNotEmpty).toList();
+  if (words.length < 6) return null;
+  String? best;
+  var bestScore = 0, second = 0;
+  _stopwords.forEach((lang, list) {
+    final set = list.toSet();
+    final score = words.where(set.contains).length;
+    if (score > bestScore) {
+      second = bestScore;
+      bestScore = score;
+      best = lang;
+    } else if (score > second) {
+      second = score;
+    }
+  });
+  return bestScore >= 2 && bestScore > second ? best : null;
+}

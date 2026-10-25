@@ -2,6 +2,27 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop6] - 2026-10-25
+
+**Aperçu 5 — différé, enregistrement, téléchargements, alertes, correction des chaînes.**
+
+- **Différé du direct** : pause gardée sur le disque (cache de mpv, jusqu'à 1 h par défaut), barre de différé (retard, retour en arrière, rattrapage accéléré jusqu'au point choisi, vitesse ×1 à ×2, Rattraper, Retour au direct), −10 s / +30 s dans le différé, reprise automatique quand la durée maximale est atteinte.
+- **Enregistrement du direct** : immédiat (bouton du lecteur, touche R, clic droit) ou programmé depuis le guide TV et les thèmes ; flux recopié sans perte en MKV (repli en TS) dans Vidéos/Kastideo ; la chaîne regardée est enregistrée par le lecteur, une autre par un second lecteur sans image ; marges avant / après ; conflits de connexion demandés avant de couper un enregistrement.
+- **Téléchargements** des films et épisodes (saison entière) : file d'attente, reprise après coupure, « cette nuit », pause pendant la lecture, progression et temps restant en bas de la barre latérale.
+- **Écran Enregistrements** (accueil, barre latérale) : en cours, téléchargements, programmés, fichiers du dossier lus dans le lecteur intégré.
+- **Alertes de programme** : « M'alerter au début » et mots-clés (favoris ou toutes les chaînes, avance réglable), bannière avec Regarder.
+- **Modifier la chaîne…** : nom, numéro, logo (adresse ou fichier) et chaîne du guide TV, par version de chaîne.
+- **Réglages > Enregistrements** : dossier, format, marges, téléchargements, différé, alertes.
+- Corrections : une actualisation qui renvoie une section vide (serveur qui hoquette) ne l'efface plus ; la barre de progression des films se met à jour en continu.
+
+## [1.2.0-desktop5] - 2026-10-25
+
+**Correctif — langue des fiches des films et séries.**
+
+- Les fiches (résumés, genres, épisodes) s'affichaient en espagnol ou dans une autre langue : Kastideo n'indiquait pas sa langue au fournisseur, qui répondait alors dans sa langue par défaut. Les requêtes envoient maintenant la langue de l'interface (en-tête Accept-Language), comme la version Mac.
+- Avec une clé TMDB : titres et résumés des **épisodes** en français (saisons TMDB) ; recherche TMDB aussi par le titre original quand le titre affiché n'est pas trouvé.
+- Si un résumé reste dans une autre langue, la fiche le signale et indique comment l'obtenir en français.
+
 ## [1.2.0-desktop4] - 2026-10-25
 
 **Aperçu 4 — interface TV et guide TV en grille.**

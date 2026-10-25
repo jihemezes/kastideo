@@ -97,7 +97,12 @@ class _TVViewState extends State<TVView> {
 
   // MARK: Actions
 
-  void _select(MediaItem item) {
+  Future<void> _select(MediaItem item) async {
+    if (!await confirmConnection(context, item)) {
+      if (mounted) _flashBanner();
+      return;
+    }
+    if (!mounted) return;
     final current = _current;
     if (current != null && current.id != item.id) _previousId = current.id;
     context.playback.play(item);
@@ -264,6 +269,8 @@ class _TVViewState extends State<TVView> {
       context.playback.toggleMute();
     } else if (key == LogicalKeyboardKey.keyF) {
       _toggleFavorite();
+    } else if (key == LogicalKeyboardKey.keyR) {
+      toggleRecording(context);
     } else if (key == LogicalKeyboardKey.keyI) {
       _toggleBanner();
     } else if (key == LogicalKeyboardKey.keyB) {
