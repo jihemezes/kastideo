@@ -103,7 +103,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev \
-            libstdc++-12-dev libmpv-dev mpv libsecret-1-dev libfuse2 file desktop-file-utils
+            libstdc++-12-dev libmpv-dev mpv libsecret-1-dev libnotify-dev libfuse2 file desktop-file-utils
       - name: Flutter (${{ matrix.arch }})
         working-directory: ${{ runner.temp }}
         run: |

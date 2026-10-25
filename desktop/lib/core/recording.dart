@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'epg.dart';
 import 'library.dart';
 import 'log.dart';
+import 'notify.dart';
 import 'models.dart';
 import 'paths.dart';
 import 'playback.dart';
@@ -143,7 +144,8 @@ class RecordingCenter extends ChangeNotifier {
 
   void _save() => _prefs.setString('recordings.schedule.v1', jsonEncode([for (final s in schedules) s.toJson()]));
 
-  void _say(String text) {
+  void _say(String text, {bool system = false}) {
+    if (system) SystemNotifier.show('Kastideo', text);
     notice = text;
     _noticeTimer?.cancel();
     _noticeTimer = Timer(const Duration(seconds: 6), () {
@@ -205,13 +207,13 @@ class RecordingCenter extends ChangeNotifier {
         await _startRecorder(channel, path);
       }
     } catch (e) {
-      _say('Enregistrement impossible : $e');
+      _say('Enregistrement impossible : $e', system: true);
       PlaybackLog.shared.note('Enregistrement impossible : $e');
       return false;
     }
     active = ActiveRecording(channel: channel, title: title, path: path, viaPlayer: viaPlayer, stopS: stopS, scheduleId: scheduleId);
     PlaybackLog.shared.note('Enregistrement de « ${channel.name} » ${viaPlayer ? 'par le lecteur' : 'en arrière-plan'} : $path');
-    _say('Enregistrement de ${channel.displayName} commencé.');
+    _say('Enregistrement de ${channel.displayName} commencé.', system: true);
     _watchSize();
     notifyListeners();
     return true;
@@ -312,7 +314,8 @@ class RecordingCenter extends ChangeNotifier {
       }
     }
     PlaybackLog.shared.note('Enregistrement arrêté (${sizeText(size)}) : ${a.path}');
-    _say(ok ? 'Enregistrement terminé : ${f.uri.pathSegments.last} (${sizeText(size)})' : 'Enregistrement sans données : ${error ?? 'le fournisseur n\'a rien envoyé.'}');
+    _say(ok ? 'Enregistrement terminé : ${f.uri.pathSegments.last} (${sizeText(size)})' : 'Enregistrement sans données : ${error ?? 'le fournisseur n\'a rien envoyé.'}',
+        system: true);
     notifyListeners();
     unawaited(scanFiles());
   }

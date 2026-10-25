@@ -49,7 +49,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF242426),
+      backgroundColor: KPalette.panel,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 820, maxHeight: 660),
@@ -79,7 +79,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
             ]),
           ),
           const SizedBox(height: 8),
-          const Divider(height: 1, color: KPalette.separator),
+          Divider(height: 1, color: KPalette.separator),
           Expanded(
             child: switch (_tab) {
               SettingsTab.general => const _GeneralTab(),
@@ -99,19 +99,19 @@ class _SettingsDialogState extends State<_SettingsDialog> {
 Widget _section(String title, List<Widget> children) => Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: kText(13, weight: FontWeight.w700, color: Colors.white60)),
+        Text(title, style: kText(13, weight: FontWeight.w700, color: KPalette.ink60)),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(10)),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
         ),
       ]),
     );
 
 Widget _caption(String text) =>
-    Padding(padding: const EdgeInsets.only(top: 4), child: Text(text, style: kText(12, color: Colors.white54)));
+    Padding(padding: const EdgeInsets.only(top: 4), child: Text(text, style: kText(12, color: KPalette.ink54)));
 
 class _GeneralTab extends StatefulWidget {
   const _GeneralTab();
@@ -184,6 +184,17 @@ class _GeneralTabState extends State<_GeneralTab> {
           Row(children: [
             OutlinedButton(onPressed: context.library.clearRecents, child: Text(tr('Effacer les récents'))),
           ]),
+          const SizedBox(height: 12),
+          const _ConnectionsRow(),
+        ]),
+        _section(tr('Notifications'), [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Notifications du système (alertes, fin d\'enregistrement, téléchargement terminé)'), style: kText(14)),
+            value: settings.systemNotifications,
+            onChanged: (v) => settings.setBool('notifications.system', v),
+          ),
+          _caption(tr('Affichées par Windows ou Linux même quand Kastideo est réduit ou derrière une autre fenêtre. Les messages restent aussi affichés dans Kastideo.')),
         ]),
         const _GuideSection(),
         _section(tr('Contenus adultes'), [
@@ -223,12 +234,89 @@ class _GeneralTabState extends State<_GeneralTab> {
           ),
         ]),
         _section(tr('À propos'), [
-          Text('Kastideo $kVersion · ${Platform.operatingSystem}', style: kText(13, color: Colors.white70)),
+          Text('Kastideo $kVersion · ${Platform.operatingSystem}', style: kText(13, color: KPalette.ink70)),
         ]),
       ]),
     );
   }
 }
+
+/// Nombre de connexions simultanées de l'abonnement (MultiVue), avec détection sur les sources Xtream.
+class _ConnectionsRow extends StatefulWidget {
+  const _ConnectionsRow();
+
+  @override
+  State<_ConnectionsRow> createState() => _ConnectionsRowState();
+}
+
+class _ConnectionsRowState extends State<_ConnectionsRow> {
+  String? _status;
+  bool _busy = false;
+
+  Future<void> _detect() async {
+    setState(() {
+      _busy = true;
+      _status = tr('Interrogation du fournisseur…');
+    });
+    final library = context.library;
+    final settings = context.settings;
+    int? best;
+    String? error;
+    for (final source in library.sources.where((s) => s.enabled && s.kind == SourceKind.xtream)) {
+      try {
+        final client = await library.xtreamClient(source.id);
+        final n = await client?.account();
+        if (n != null && (best == null || n > best)) best = n;
+      } catch (e) {
+        error = '$e';
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (best != null) {
+        settings.setInt('multiview.connections', best.clamp(1, 4));
+        _status = '${tr('Votre abonnement autorise')} $best ${tr('connexion(s) simultanée(s).')}';
+      } else {
+        _status = error ?? tr('Le fournisseur n\'indique pas ce nombre (ou aucune source Xtream) : choisissez-le à la main.');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Expanded(child: Text(tr('Connexions simultanées de votre abonnement'), style: kText(14))),
+        DropdownButton<int>(
+          value: settings.multiviewConnections,
+          items: [
+            for (final n in const [1, 2, 3, 4])
+              DropdownMenuItem(value: n, child: Text(n == 1 ? '1 (${tr('MultiVue désactivée')})' : '$n', style: kText(13))),
+          ],
+          onChanged: (v) => settings.setInt('multiview.connections', v ?? 1),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton(onPressed: _busy ? null : _detect, child: Text(tr('Détecter'))),
+      ]),
+      _caption(_status ??
+          tr('La MultiVue affiche jusqu\'à 4 chaînes à la fois : chaque chaîne utilise une connexion à votre fournisseur. '
+              'Indiquez 2 ou plus seulement si votre abonnement l\'autorise, sinon le fournisseur peut refuser les flux ou bloquer le compte.')),
+    ]);
+  }
+}
+
+String _accentLabel(AccentChoice c) => switch (c) {
+      AccentChoice.system => tr('Par défaut'),
+      AccentChoice.blue => tr('Bleu'),
+      AccentChoice.purple => tr('Violet'),
+      AccentChoice.pink => tr('Rose'),
+      AccentChoice.red => tr('Rouge'),
+      AccentChoice.orange => tr('Orange'),
+      AccentChoice.green => tr('Vert'),
+      AccentChoice.teal => tr('Turquoise'),
+    };
 
 class _AppearanceTab extends StatelessWidget {
   const _AppearanceTab();
@@ -259,6 +347,69 @@ class _AppearanceTab extends StatelessWidget {
     return ListenableBuilder(
       listenable: settings,
       builder: (context, _) => ListView(padding: const EdgeInsets.all(20), children: [
+        _section(tr('Thème'), [
+          SegmentedButton<AppearanceMode>(
+            segments: [
+              ButtonSegment(value: AppearanceMode.dark, label: Text(tr('Sombre')), icon: const Icon(Icons.dark_mode_rounded)),
+              ButtonSegment(value: AppearanceMode.light, label: Text(tr('Clair')), icon: const Icon(Icons.light_mode_rounded)),
+              ButtonSegment(value: AppearanceMode.system, label: Text(tr('Comme le système')), icon: const Icon(Icons.brightness_auto_rounded)),
+            ],
+            selected: {settings.appearance},
+            onSelectionChanged: (v) => settings.setString('appearance', v.first.name),
+          ),
+          _caption(tr('Le lecteur, l\'interface TV, la MultiVue, l\'accueil, les fiches et le bandeau « à la une » restent sombres, comme sur Mac.')),
+          const SizedBox(height: 14),
+          Text(tr('Couleur d\'accent'), style: kText(13, weight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 10, runSpacing: 10, children: [
+            for (final choice in AccentChoice.values)
+              Tooltip(
+                message: _accentLabel(choice),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => settings.setString('accent', choice.name),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: KPalette.light ? choice.light : choice.dark,
+                      border: Border.all(color: settings.accent == choice ? KPalette.ink : Colors.transparent, width: 2.5),
+                    ),
+                    child: choice == AccentChoice.system ? const Icon(Icons.auto_awesome_rounded, size: 14, color: Colors.white) : null,
+                  ),
+                ),
+              ),
+          ]),
+          _caption('${tr('Choix actuel')} : ${_accentLabel(settings.accent)}. ${tr('« Par défaut » reprend le bleu de Kastideo.')}'),
+        ]),
+        _section(tr('Taille des éléments'), [
+          Row(children: [
+            SizedBox(width: 240, child: Text(tr('Densité des listes (Classique)'), style: kText(14))),
+            SegmentedButton<ListDensity>(
+              segments: [
+                ButtonSegment(value: ListDensity.compact, label: Text(tr('Compacte'))),
+                ButtonSegment(value: ListDensity.standard, label: Text(tr('Standard'))),
+                ButtonSegment(value: ListDensity.spacious, label: Text(tr('Aérée'))),
+              ],
+              selected: {settings.listDensity},
+              onSelectionChanged: (v) => settings.setString('listDensity', v.first.name),
+            ),
+          ]),
+          const SizedBox(height: 10),
+          Row(children: [
+            SizedBox(width: 240, child: Text(tr('Taille des vignettes (Cinéma)'), style: kText(14))),
+            SegmentedButton<CardSize>(
+              segments: [
+                ButtonSegment(value: CardSize.small, label: Text(tr('Petites'))),
+                ButtonSegment(value: CardSize.medium, label: Text(tr('Moyennes'))),
+                ButtonSegment(value: CardSize.large, label: Text(tr('Grandes'))),
+              ],
+              selected: {settings.cardSize},
+              onSelectionChanged: (v) => settings.setString('cardSize', v.first.name),
+            ),
+          ]),
+        ]),
         _section(tr('Interface par type de contenu'), [
           row(MediaKind.live, tr('Direct')),
           row(MediaKind.movie, tr('Films')),
@@ -376,7 +527,7 @@ class _SourcesTabState extends State<_SourcesTab> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(10)),
       child: Row(children: [
         Icon(source.kind == SourceKind.xtream ? Icons.dns_rounded : Icons.playlist_play_rounded, color: KPalette.orange),
         const SizedBox(width: 12),
@@ -584,11 +735,11 @@ class _CategoryManagerState extends State<CategoryManager> {
             ],
             const SizedBox(height: 10),
             Text(tr('Glissez pour changer l\'ordre ; décochez pour masquer partout ; double-clic pour renommer.'),
-                style: kText(12, color: Colors.white54)),
+                style: kText(12, color: KPalette.ink54)),
             const SizedBox(height: 6),
             Expanded(
               child: names.isEmpty
-                  ? Center(child: Text(tr('Aucune catégorie'), style: kText(13, color: Colors.white54)))
+                  ? Center(child: Text(tr('Aucune catégorie'), style: kText(13, color: KPalette.ink54)))
                   : ReorderableListView.builder(
                       buildDefaultDragHandles: false,
                       itemCount: names.length,
@@ -605,11 +756,11 @@ class _CategoryManagerState extends State<CategoryManager> {
                         return Container(
                           key: ValueKey(name),
                           margin: const EdgeInsets.only(bottom: 2),
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(6)),
+                          decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(6)),
                           child: Row(children: [
                             ReorderableDragStartListener(
                               index: i,
-                              child: const Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_indicator_rounded, size: 18, color: Colors.white38)),
+                              child: Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_indicator_rounded, size: 18, color: KPalette.ink38)),
                             ),
                             Checkbox(
                               value: visible,
@@ -621,13 +772,13 @@ class _CategoryManagerState extends State<CategoryManager> {
                               child: GestureDetector(
                                 onDoubleTap: () => _rename(name),
                                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Text(prefs.displayName(name), style: kText(13, color: visible ? Colors.white : Colors.white38)),
-                                  if (prefs.renames.containsKey(name)) Text(name, style: kText(11, color: Colors.white38)),
+                                  Text(prefs.displayName(name), style: kText(13, color: visible ? KPalette.ink : KPalette.ink38)),
+                                  if (prefs.renames.containsKey(name)) Text(name, style: kText(11, color: KPalette.ink38)),
                                   if (byKeyword) Text(tr('Masquée par un mot-clé'), style: kText(11, color: KPalette.orange)),
                                 ]),
                               ),
                             ),
-                            Text('${library.itemsInCategory(_kind, name).length}', style: kText(12, color: Colors.white38)),
+                            Text('${library.itemsInCategory(_kind, name).length}', style: kText(12, color: KPalette.ink38)),
                             IconButton(
                               tooltip: tr('Renommer'),
                               onPressed: () => _rename(name),
@@ -705,7 +856,7 @@ class _BackupTabState extends State<_BackupTab> {
           Text(
             tr('Le fichier de configuration permet de retrouver vos sources, favoris, récents, catégories et réglages '
                 'sur un autre ordinateur : Mac, Windows ou Linux. Il est compatible avec Kastideo pour Mac (Réglages > Général > Sauvegarde et transfert).'),
-            style: kText(13, color: Colors.white70),
+            style: kText(13, color: KPalette.ink70),
           ),
           const SizedBox(height: 8),
           CheckboxListTile(
@@ -730,7 +881,7 @@ class _BackupTabState extends State<_BackupTab> {
               label: Text(tr('Importer une configuration…')),
             ),
           ]),
-          if (_message != null) ...[const SizedBox(height: 10), Text(_message!, style: kText(13, color: Colors.white70))],
+          if (_message != null) ...[const SizedBox(height: 10), Text(_message!, style: kText(13, color: KPalette.ink70))],
         ]),
       ]);
 }
@@ -756,7 +907,7 @@ class _SourceGuideLine extends StatelessWidget {
             text = tr('Guide TV : pas encore chargé');
           }
           return Text(text,
-              style: kText(12, color: s?.error != null ? KPalette.orange : Colors.white38), maxLines: 2, overflow: TextOverflow.ellipsis);
+              style: kText(12, color: s?.error != null ? KPalette.orange : KPalette.ink38), maxLines: 2, overflow: TextOverflow.ellipsis);
         },
       );
 }
@@ -804,7 +955,7 @@ class _GuideSectionState extends State<_GuideSection> {
           Row(children: [
             Expanded(
               child: Text('${guide.epg.channelCount} ${tr('chaînes ont un programme')} · ${guide.groups.length} ${tr('chaînes classées par thème')}',
-                  style: kText(13, color: Colors.white70)),
+                  style: kText(13, color: KPalette.ink70)),
             ),
             if (guide.isLoading) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
             const SizedBox(width: 8),
@@ -838,7 +989,7 @@ class _GuideSectionState extends State<_GuideSection> {
               const SizedBox(width: 8),
               PopupMenuButton<String>(
                 tooltip: tr('Choisir'),
-                color: const Color(0xF02C2C2E),
+                color: KPalette.menu,
                 onSelected: (url) {
                   _url.text = url;
                   guide.setFallbackUrl(url);
@@ -854,7 +1005,7 @@ class _GuideSectionState extends State<_GuideSection> {
             ]),
             const SizedBox(height: 6),
             Row(children: [
-              Expanded(child: Text(status, style: kText(12, color: f.error != null ? KPalette.orange : Colors.white54))),
+              Expanded(child: Text(status, style: kText(12, color: f.error != null ? KPalette.orange : KPalette.ink54))),
               TextButton(
                 onPressed: f.loading ? null : () => guide.setFallbackUrl(_url.text),
                 child: Text(tr('Actualiser maintenant')),
@@ -885,7 +1036,7 @@ class _HeroSection extends StatelessWidget {
     Widget toggle(String label, bool value, ValueChanged<bool>? onChanged) => SwitchListTile(
           contentPadding: EdgeInsets.zero,
           dense: true,
-          title: Text(label, style: kText(14, color: onChanged == null ? Colors.white38 : Colors.white)),
+          title: Text(label, style: kText(14, color: onChanged == null ? KPalette.ink38 : KPalette.ink)),
           value: value,
           onChanged: onChanged,
         );
@@ -1000,7 +1151,7 @@ class _RecordingsTabState extends State<_RecordingsTab> {
       listenable: settings,
       builder: (context, _) => ListView(padding: const EdgeInsets.all(20), children: [
         _section(tr('Dossier'), [
-          Text(recordings.folder, style: kText(13, color: Colors.white70)),
+          Text(recordings.folder, style: kText(13, color: KPalette.ink70)),
           const SizedBox(height: 8),
           Wrap(spacing: 8, children: [
             OutlinedButton(

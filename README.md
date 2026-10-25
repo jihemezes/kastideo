@@ -52,7 +52,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 | Plateforme | État | Ce qui est disponible |
 |---|---|---|
 | **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
-| **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), réglages, catégories, sauvegarde. Les autres fonctions arrivent par étapes |
+| **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète. Restent : installateur Windows et mises à jour intégrées |
 | **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
 
 Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (numéros se terminant par `-desktop1`, `-desktop2`…).

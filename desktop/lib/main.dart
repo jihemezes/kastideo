@@ -10,6 +10,8 @@ import 'app_state.dart';
 import 'core/alerts.dart';
 import 'core/downloads.dart';
 import 'core/guide.dart';
+import 'core/multiview.dart';
+import 'core/notify.dart';
 import 'core/recording.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
@@ -20,6 +22,7 @@ import 'theme.dart';
 import 'ui/home_screen.dart';
 import 'ui/catalog_screen.dart';
 import 'ui/guide_view.dart';
+import 'ui/multiview_view.dart';
 import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
@@ -59,7 +62,8 @@ Future<bool> _claimSingleInstance() async {
 
 /// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
 class _CloseHandler with WindowListener {
-  _CloseHandler(this.playback, this.watch, this.recordings);
+  _CloseHandler(this.playback, this.watch, this.recordings, this.multiview);
+  final MultiViewController multiview;
   final PlaybackController playback;
   final WatchProgressStore watch;
   final RecordingCenter recordings;
@@ -74,6 +78,9 @@ class _CloseHandler with WindowListener {
     } catch (_) {}
     try {
       await watch.flush().timeout(const Duration(seconds: 1));
+    } catch (_) {}
+    try {
+      await multiview.stopAll().timeout(const Duration(seconds: 2));
     } catch (_) {}
     try {
       await recordings.shutdown().timeout(const Duration(seconds: 3));
@@ -103,6 +110,9 @@ Future<void> main() async {
   );
   final settings = AppSettings();
   await settings.load();
+  await SystemNotifier.setup();
+  SystemNotifier.enabled = settings.systemNotifications;
+  settings.addListener(() => SystemNotifier.enabled = settings.systemNotifications);
   L10n.apply(settings.language);
   final watch = WatchProgressStore();
   await watch.load();
@@ -116,8 +126,9 @@ Future<void> main() async {
   final recordings = RecordingCenter(settings, playback, library);
   final downloads = DownloadManager(settings, playback);
   final alerts = AlertCenter(settings, library, guide);
+  final multiview = MultiViewController(settings, playback);
   await windowManager.setPreventClose(true);
-  windowManager.addListener(_CloseHandler(playback, watch, recordings));
+  windowManager.addListener(_CloseHandler(playback, watch, recordings, multiview));
   runApp(
     KastideoApp(
       library: library,
@@ -130,6 +141,7 @@ Future<void> main() async {
       recordings: recordings,
       downloads: downloads,
       alerts: alerts,
+      multiview: multiview,
     ),
   );
   await library.start(autoRefresh: settings.autoRefresh);
@@ -140,7 +152,7 @@ Future<void> main() async {
   await guide.start();
 }
 
-class KastideoApp extends StatelessWidget {
+class KastideoApp extends StatefulWidget {
   const KastideoApp({
     super.key,
     required this.library,
@@ -153,6 +165,7 @@ class KastideoApp extends StatelessWidget {
     required this.recordings,
     required this.downloads,
     required this.alerts,
+    required this.multiview,
   });
 
   final LibraryStore library;
@@ -165,20 +178,75 @@ class KastideoApp extends StatelessWidget {
   final RecordingCenter recordings;
   final DownloadManager downloads;
   final AlertCenter alerts;
+  final MultiViewController multiview;
+
+  @override
+  State<KastideoApp> createState() => _KastideoAppState();
+}
+
+/// Applique le thème (sombre, clair ou celui du système) et la couleur d'accent, et redessine toute la fenêtre.
+class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.settings.addListener(_apply);
+    _apply(initial: true);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    widget.settings.removeListener(_apply);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() => _apply();
+
+  void _apply({bool initial = false}) {
+    final mode = widget.settings.appearance;
+    final light = switch (mode) {
+      AppearanceMode.light => true,
+      AppearanceMode.dark => false,
+      AppearanceMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light,
+    };
+    final accent = widget.settings.accent;
+    final density = widget.settings.listDensity.factor;
+    final cards = widget.settings.cardSize.factor;
+    if (!initial && light == KPalette.light && accent == KPalette.accentChoice && density == KPalette.density && cards == KPalette.cardScale) return;
+    KPalette.light = light;
+    KPalette.accentChoice = accent;
+    KPalette.density = density;
+    KPalette.cardScale = cards;
+    if (initial) return;
+    setState(() {});
+    // Les couleurs sont lues au moment de construire chaque élément : on les reconstruit tous (l'état est gardé).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      void rebuild(Element e) {
+        e.markNeedsBuild();
+        e.visitChildren(rebuild);
+      }
+
+      WidgetsBinding.instance.rootElement?.visitChildren(rebuild);
+      windowManager.setBackgroundColor(KPalette.window).catchError((_) {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppScope(
-      library: library,
-      playback: playback,
-      navigation: navigation,
-      settings: settings,
-      watch: watch,
-      info: info,
-      guide: guide,
-      recordings: recordings,
-      downloads: downloads,
-      alerts: alerts,
+      library: widget.library,
+      playback: widget.playback,
+      navigation: widget.navigation,
+      settings: widget.settings,
+      watch: widget.watch,
+      info: widget.info,
+      guide: widget.guide,
+      recordings: widget.recordings,
+      downloads: widget.downloads,
+      alerts: widget.alerts,
+      multiview: widget.multiview,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
@@ -205,6 +273,7 @@ class RootView extends StatelessWidget {
         const SingleActivator(LogicalKeyboardKey.digit2, control: true): () => navigation.go(Screen.movies),
         const SingleActivator(LogicalKeyboardKey.digit3, control: true): () => navigation.go(Screen.series),
         const SingleActivator(LogicalKeyboardKey.digit7, control: true): () => navigation.go(Screen.guide),
+        const SingleActivator(LogicalKeyboardKey.keyM, control: true, alt: true): () => openMultiView(context),
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
@@ -236,6 +305,7 @@ class RootView extends StatelessWidget {
                   Screen.series => const CatalogScreen(kind: MediaKind.series),
                   Screen.guide => const GuideScreen(),
                   Screen.recordings => const RecordingsScreen(),
+                  Screen.multiview => const MultiViewScreen(),
                 },
               ),
             ),

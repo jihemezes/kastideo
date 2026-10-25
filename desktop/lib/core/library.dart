@@ -432,6 +432,7 @@ class LibraryStore extends ChangeNotifier {
         'interface.${kind.name}': ?settings.rawSetting('interface.${kind.name}'),
       'adult.show': showAdult ? '1' : '0',
       ...settings.exportedHero(),
+      ...settings.exportedAppearance(),
       if (includePasswords && settings.usesTMDB) 'tmdbKey': settings.tmdbKey,
     };
     return {
@@ -528,6 +529,7 @@ class LibraryStore extends ChangeNotifier {
         _prefs.setBool('adult.show', showAdult);
       }
       settings.importHero(Map<String, dynamic>.from(s));
+      settings.importAppearance(Map<String, dynamic>.from(s));
       final key = s['tmdbKey'];
       if (key is String && key.isNotEmpty && !settings.usesTMDB) await settings.setTMDBKey(key);
     }

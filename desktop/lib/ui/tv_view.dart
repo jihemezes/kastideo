@@ -307,7 +307,9 @@ class _TVViewState extends State<TVView> {
   // MARK: Vue
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     return Focus(
       focusNode: _focus,
       autofocus: true,
@@ -379,7 +381,7 @@ class _TVViewState extends State<TVView> {
                       child: _Glass(
                         radius: 30,
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                        child: Text(_notice!, style: kText(15, weight: FontWeight.w600)),
+                        child: Text(_notice!, style: kTextD(15, weight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -411,7 +413,7 @@ class _TVViewState extends State<TVView> {
           child: Container(
             decoration: const BoxDecoration(
               color: Color(0xD0202024),
-              border: Border(right: BorderSide(color: KPalette.separator)),
+              border: Border(right: BorderSide(color: KPalette.separatorDark)),
             ),
             child: Column(children: [
               Padding(
@@ -434,7 +436,7 @@ class _TVViewState extends State<TVView> {
                       ),
                     ),
                     const Spacer(),
-                    Text('${channels.length}', style: kText(12, color: KPalette.secondaryText)),
+                    Text('${channels.length}', style: kTextD(12, color: KPalette.secondaryDark)),
                     IconButton(
                       tooltip: tr('Fermer'),
                       onPressed: _closePanel,
@@ -452,7 +454,7 @@ class _TVViewState extends State<TVView> {
                         setState(() {});
                         _touchPanel();
                       },
-                      style: kText(13),
+                      style: kTextD(13),
                       decoration: InputDecoration(
                         isDense: true,
                         filled: true,
@@ -460,7 +462,7 @@ class _TVViewState extends State<TVView> {
                         prefixIcon: Icon(Icons.search_rounded, size: 16, color: Colors.white.withValues(alpha: 0.5)),
                         prefixIconConstraints: const BoxConstraints(minWidth: 32),
                         hintText: tr('Rechercher une chaîne'),
-                        hintStyle: kText(13, color: Colors.white.withValues(alpha: 0.4)),
+                        hintStyle: kTextD(13, color: Colors.white.withValues(alpha: 0.4)),
                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                       ),
@@ -468,12 +470,12 @@ class _TVViewState extends State<TVView> {
                   ),
                 ]),
               ),
-              const Divider(height: 1, color: KPalette.separator),
+              const Divider(height: 1, color: KPalette.separatorDark),
               Expanded(
                 child: channels.isEmpty
                     ? Center(
                         child: Text(_query.text.isEmpty ? tr('Aucune chaîne') : tr('Aucun résultat'),
-                            style: kText(13, color: KPalette.secondaryText)),
+                            style: kTextD(13, color: KPalette.secondaryDark)),
                       )
                     : ListView.builder(
                         controller: _listController,
@@ -507,13 +509,13 @@ class _Welcome extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.tv_rounded, size: 64, color: Colors.white.withValues(alpha: 0.4)),
           const SizedBox(height: 12),
-          Text(tr('Direct'), style: kRounded(24, FontWeight.w800)),
+          Text(tr('Direct'), style: kRoundedD(24, FontWeight.w800)),
           const SizedBox(height: 6),
           Text(tr('Choisissez une chaîne dans le panneau (touche ←), tapez son numéro ou utilisez ↑ / ↓.'),
-              style: kText(14, color: KPalette.secondaryText)),
+              style: kTextD(14, color: KPalette.secondaryDark)),
           const SizedBox(height: 14),
           FilledButton.icon(
-            style: FilledButton.styleFrom(backgroundColor: KPalette.accent),
+            style: FilledButton.styleFrom(backgroundColor: KPalette.accentDark),
             onPressed: onOpen,
             icon: const Icon(Icons.list_rounded),
             label: Text(tr('Ouvrir les chaînes')),
@@ -558,7 +560,7 @@ class _TopBar extends StatelessWidget {
         if (title != null)
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 360),
-            child: Text(title!, style: kText(15, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: Text(title!, style: kTextD(15, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
         const Spacer(),
         SizedBox(width: 230, child: SectionPicker(current: MediaKind.live)),
@@ -588,7 +590,7 @@ class _ChannelRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             color: current
-                ? KPalette.accent.withValues(alpha: 0.35)
+                ? KPalette.accentDark.withValues(alpha: 0.35)
                 : hovering
                     ? Colors.white.withValues(alpha: 0.07)
                     : Colors.transparent,
@@ -598,16 +600,16 @@ class _ChannelRow extends StatelessWidget {
             if (item.number != null)
               SizedBox(
                 width: 34,
-                child: Text('${item.number}', textAlign: TextAlign.right, style: kText(13, color: KPalette.secondaryText)),
+                child: Text('${item.number}', textAlign: TextAlign.right, style: kTextD(13, color: KPalette.secondaryDark)),
               ),
             const SizedBox(width: 8),
             LogoView(url: item.logo, name: item.name, size: 34),
             const SizedBox(width: 10),
             Expanded(
               child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(item.displayName, style: kText(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(item.displayName, style: kTextD(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
                 if (p != null) ...[
-                  Text(p.title, style: kText(11, color: KPalette.secondaryText), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(p.title, style: kTextD(11, color: KPalette.secondaryDark), maxLines: 1, overflow: TextOverflow.ellipsis),
                   Padding(
                     padding: const EdgeInsets.only(top: 3, right: 20),
                     child: LinearProgressIndicator(value: p.progress(), minHeight: 2, color: KPalette.orange, backgroundColor: Colors.white12),
@@ -669,13 +671,13 @@ class _TVBanner extends StatelessWidget {
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 if (item.number != null) ...[
-                  Text('${item.number}', style: kText(19, weight: FontWeight.w800, color: KPalette.accent)),
+                  Text('${item.number}', style: kTextD(19, weight: FontWeight.w800, color: KPalette.accentDark)),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: Row(children: [
                     Flexible(
-                      child: Text(item.displayName, style: kText(19, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text(item.displayName, style: kTextD(19, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                     if (context.library.isFavorite(item.id)) ...[
                       const SizedBox(width: 6),
@@ -683,13 +685,13 @@ class _TVBanner extends StatelessWidget {
                     ],
                   ]),
                 ),
-                Text(hm(now), style: kText(19, color: KPalette.secondaryText)),
+                Text(hm(now), style: kTextD(19, color: KPalette.secondaryDark)),
               ]),
               const SizedBox(height: 6),
               if (current != null) ...[
                 Row(children: [
-                  Expanded(child: Text(current.title, style: kText(15, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  Text(timeRange(current), style: kText(12, color: KPalette.secondaryText)),
+                  Expanded(child: Text(current.title, style: kTextD(15, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  Text(timeRange(current), style: kTextD(12, color: KPalette.secondaryDark)),
                 ]),
                 const SizedBox(height: 6),
                 ClipRRect(
@@ -699,10 +701,10 @@ class _TVBanner extends StatelessWidget {
                 if (next != null) ...[
                   const SizedBox(height: 6),
                   Text('${tr('Ensuite')} : ${next.title} (${hm(next.start)})',
-                      style: kText(12, color: KPalette.secondaryText), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      style: kTextD(12, color: KPalette.secondaryDark), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ] else
-                Text(tr('Pas de programme disponible'), style: kText(13, color: KPalette.secondaryText)),
+                Text(tr('Pas de programme disponible'), style: kTextD(13, color: KPalette.secondaryDark)),
             ]),
           ),
         ]),
@@ -722,8 +724,8 @@ class _NumberPad extends StatelessWidget {
         radius: 16,
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
-          Text(typed, style: kRounded(54, FontWeight.w800).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
-          Text(preview ?? '…', style: kText(13, color: KPalette.secondaryText)),
+          Text(typed, style: kRoundedD(54, FontWeight.w800).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+          Text(preview ?? '…', style: kTextD(13, color: KPalette.secondaryDark)),
         ]),
       );
 }

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme.dart';
 import 'models.dart';
 import 'secrets.dart';
 
@@ -95,6 +96,40 @@ class AppSettings extends ChangeNotifier {
     _prefs.setStringList(key, value);
     notifyListeners();
   }
+
+  // MARK: Apparence (mêmes clés que sur Mac : appearance, accent, listDensity, cardSize)
+
+  AppearanceMode get appearance => AppearanceMode.values.where((m) => m.name == _prefs.getString('appearance')).firstOrNull ?? AppearanceMode.dark;
+  AccentChoice get accent => AccentChoice.values.where((m) => m.name == _prefs.getString('accent')).firstOrNull ?? AccentChoice.system;
+  ListDensity get listDensity => ListDensity.values.where((m) => m.name == _prefs.getString('listDensity')).firstOrNull ?? ListDensity.standard;
+  CardSize get cardSize => CardSize.values.where((m) => m.name == _prefs.getString('cardSize')).firstOrNull ?? CardSize.medium;
+
+  static const appearanceKeys = ['appearance', 'accent', 'listDensity', 'cardSize', 'multiview.connections'];
+
+  Map<String, String> exportedAppearance() => {for (final k in appearanceKeys) k: ?rawSetting(k)};
+
+  void importAppearance(Map<String, dynamic> s) {
+    for (final k in appearanceKeys) {
+      final v = s[k];
+      if (v is! String) continue;
+      if (k == 'multiview.connections') {
+        final n = int.tryParse(v);
+        if (n != null) _prefs.setInt(k, n.clamp(1, 4));
+      } else {
+        _prefs.setString(k, v);
+      }
+    }
+    notifyListeners();
+  }
+
+  // MARK: MultiVue
+
+  /// Connexions simultanées autorisées par l'abonnement (1 : MultiVue désactivée), comme sur Mac.
+  int get multiviewConnections => (_prefs.getInt('multiview.connections') ?? 1).clamp(1, 4);
+  bool get multiviewAvailable => multiviewConnections >= 2;
+
+  /// Notifications du système (alertes, fin d'enregistrement, téléchargement terminé).
+  bool get systemNotifications => _prefs.getBool('notifications.system') ?? true;
 
   // MARK: Bandeau « à la une » (mêmes clés que sur Mac)
 

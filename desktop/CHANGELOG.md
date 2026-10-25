@@ -2,6 +2,19 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop7] - 2026-10-25
+
+**Aperçu 6 — MultiVue et personnalisation.**
+
+- **MultiVue** : jusqu'à 4 chaînes en direct sur un même écran, le son suit la vignette active (bordure orange, touches 1 à 4). Dispositions au choix (automatique, grille 2 × 2, une grande et les autres en petit, côte à côte), double-clic pour passer une vignette en grand, **groupes mémorisés** (ex. « Multiplex foot ») rouverts en un clic, changer ou retirer une chaîne au survol, nouvel essai automatique si le flux coupe, plein écran. Ouverture depuis l'accueil, la barre latérale du direct, Ctrl+Alt+M ou clic droit > Ajouter à la MultiVue.
+- **Connexions simultanées** (Réglages > Général > Lecture) : active la MultiVue (2 à 4), avec **Détecter** qui interroge les sources Xtream.
+- **Apparence** : thème **sombre, clair ou comme le système**, **couleur d'accent** (8 choix), **densité des listes** (Classique) et **taille des vignettes** (Cinéma), appliqués tout de suite. Le lecteur, l'interface TV, la MultiVue, l'accueil, les fiches et le bandeau restent sombres, comme sur Mac.
+- **Catégories** : clic droit dans la barre latérale pour renommer, placer en haut ou en bas, monter, descendre.
+- **Notifications du système** (Windows et Linux) : alertes de programme, début et fin d'enregistrement, téléchargement terminé ou impossible ; un clic ramène Kastideo (désactivables dans Réglages > Général).
+- **Aide complète** : sommaire, recherche avec surlignage, toutes les fonctions décrites.
+- La sauvegarde de la configuration inclut l'apparence et le nombre de connexions.
+- Linux : dépendance libnotify ajoutée (paquet .deb ; incluse dans l'AppImage).
+
 ## [1.2.0-desktop6] - 2026-10-25
 
 **Aperçu 5 — différé, enregistrement, téléchargements, alertes, correction des chaînes.**

@@ -1,90 +1,214 @@
 # Kastideo for Windows and Linux
 
-> Preview 5 — version 1.2.0-desktop6. This pre-release brings the home screen, live TV (Classic, Cinema and TV interfaces, TV guide grid, themes, timeshift, recording, alerts, channel fixing), movies and series (Classic and Cinema interfaces), the player and the settings from the Mac version. Other features will follow in steps.
+> Version 1.2.0-desktop7 (preview 6) — MultiView, light theme and accent color, list density and thumbnail size, categories reordered from the sidebar, system notifications. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
 
-## What this preview includes
+## Getting started
 
-- **Home**: global search (channels, movies, series), Live, Movies and Series tiles, Favorites and Recents shortcuts, “Continue watching” row.
-- **Live TV**: two interfaces to choose from (Settings > Appearance).
-  - **Classic**: sidebar (all channels, favorites, recents, **themes**, categories), list with search and the **programme on now** (title, time, progress bar), player on the right.
-  - **Cinema**: “featured” banner with what your favorite and recent channels are showing (otherwise major news, sports and general channels), **“Sports on now”**, “Live news”, “Movies on now”… rows (one version per channel), Recently watched, Favorites, **“Tonight”** rows by theme (movies, sports, series, documentaries…) then one row per category. Clicking a channel opens it full frame; **Back** (or Esc) stops the channel and returns to the rows.
-  - **TV**: the channel full frame, like on a television. **↑ / ↓**: previous / next channel; **type a number** (up to 4 digits, confirmed automatically or with Enter); **←** or the window's left edge: **channel panel** (All / Favorites / Recents / theme / category filter, search, programme on now; it closes by itself); **→** or **I**: **info banner** (number, name, time, programme on now and next, shown on each channel change); **B**: previously watched channel; **F**: favorite; **M**: sound; **Space**: pause; **G**: TV guide; **H**: home. The top bar (home, channels, guide, sections, settings) appears when the mouse moves.
-- **TV guide** (home, live sidebar, Ctrl+7 or the G key in the TV interface): programme grid, channels in rows and hours in columns, red line at the current time; **‹ Now ›** to move, day picker (today, tomorrow… other days open at 7 pm), 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. Click a channel to play it; click a programme to open its details (times, duration, overview) with **Watch** or **Go to channel**.
-- **Themes** (live sidebar, or a row's “See all”): **On now**, **Tonight** (programmes from 8 pm to 11 pm) or **Channels**, filtered by theme (Sports, News, Movies, Kids, Documentaries…) and, for sports, by discipline (football, rugby, tennis…). Channels without guide data are still listed when their name is enough to classify them. An upcoming programme opens its details (overview, times) with “Watch channel”. Right-click: channel version (FHD, HD, SD), **channel theme** (to correct the automatic classification), favorites.
-- **TV guide (data)**: the provider's guide (XMLTV) loaded in the background and kept on disk, completed by a **fallback guide** (xmltvfr.fr) for channels without programmes. The programme on now also shows in the player bar.
-- **Movies and Series**: two interfaces to choose from (Settings > Appearance).
-  - **Classic**: categories, list with posters, details on the right; “Play” shows the player instead of the details.
-  - **Cinema**: scrolling “featured” banner (arrows on hover; TMDB trending of the week, latest additions, a chosen category), Continue watching, Latest additions, Recently watched, Favorites rows then one row per category (“See all”), full-page details.
-- **Details**: poster, overview, year, runtime, genres, rating, director, cast, trailer. For a series: seasons and episodes, with each one's progress.
-- **Player** (mpv engine): auto-hiding control bar, stream health pill, volume, theater mode, full screen. For movies and episodes: mini-timeline (click or drag; the target time is shown), −10 s / +30 s, **resume playback** where you left off (“Start over” to begin again), **Back to details** button.
-- **Live timeshift**: pause a channel and it keeps being saved to disk (up to 1 h by default, adjustable). A bar appears above the controls: delay behind live, a slider to go back (left) or catch up at a faster speed to the chosen point (right), speed (×1 to ×2), **Catch up** and **Back to live**. ← / →: −10 s / +30 s within the timeshift.
-- **Live recording**: the red round button of the player bar (or the **R** key, or right-click > Record now) records the channel you watch until the end of the current programme (plus the margin), or until you stop it. From a programme's details (TV guide, themes): **Record** (on now) or **Schedule recording** (upcoming, red dot in the guide). The stream is copied losslessly to **MKV** (or TS) in **Videos/Kastideo/Enregistrements**. Single connection: recording another channel than the one you watch stops playback, and starting something else during a recording asks first. Scheduled recordings run while Kastideo is open.
-- **Downloads**: **Download** button on a movie's details (now or tonight), **Download season** and an icon on each episode for series, right-click > Download. One at a time, resumed after an interruption, paused during playback (adjustable); “tonight” from 1 am. Files in **Videos/Kastideo/Films** and **Séries/<series>**. Progress and time left show at the bottom of the sidebar.
-- **Recordings** (home, sidebar): recording in progress (stop), downloads (pause, resume, cancel), scheduled (cancel, history), files in the folder — click to play them in the player on the right; right-click: show in folder, delete.
-- **Programme alerts**: “Alert me when it starts” in an upcoming programme's details (bell in the guide), or keywords (Settings > Recordings, on your favorite channels or all). The alert appears at the top right with **Watch**.
-- **Channel fixing**: right-click > **Edit channel…**: name, number, logo (address or file) and TV guide channel (search across the provider and fallback guides), for this version of the channel; **Reset** to go back to the original.
-- **Stream relay**: as on Mac, a single connection to the provider; the previous channel is closed before the next one opens.
+1. Open **Settings** (gear on the home screen, bottom of the sidebar, or **Ctrl+,**) > **Sources** > **Add a source**.
+2. Enter your **Xtream Codes** subscription (server, username, password) or the address of an **M3U playlist**.
+3. Kastideo loads channels, movies, series and the TV guide. Go back **home** and choose **Live**, **Movies** or **Series**.
 
-## Adding a source
+> Tip: already using Kastideo on Mac? Export its configuration (Settings > General > Backup and transfer) and import it here (Settings > Backup).
 
-**Settings** (gear at the top right of the home screen or at the bottom of the sidebar, or Ctrl+,) > **Sources** > **Add a source**:
+## Sources
 
-- **Xtream Codes**: server address, username and password. The password is stored in the system vault (Credential Manager on Windows, GNOME keyring on Linux).
-- **M3U playlist**: playlist address or file path. A “get.php?username=…&password=…” address is recognised and turned into a much faster Xtream source.
+### Xtream Codes
 
-Sources are refreshed at launch when their last update is more than 6 hours old. Optional **TV guide (XMLTV)** field: address of a guide other than the provider's.
+Server address (e.g. http://example.com:8080), username and password. The password is stored in the system vault: Credential Manager on Windows, GNOME Keyring or KWallet on Linux.
 
-## Settings (Ctrl+,)
+### M3U / M3U8 playlist
 
-- **General**: language (system, French, English — at next launch), resume playback, stream relay, refresh at launch, clear recents; **TV guide** (channels with programmes, Refresh guide, **fallback guide**: on/off, address or one of the xmltvfr.fr guides, loading status); **adult content** (hidden by default); **TMDB key**.
-- **Appearance**: Classic or Cinema interface for live TV, movies and series, and the **TV** interface for live TV; **featured banner**: show or hide, height (compact, normal, large), scrolling (6 to 20 s), sources (TMDB trending, latest additions, chosen category for movies and for series).
-- **Sources**: add, refresh, delete; TV guide status of each source.
-- **Recordings**: folder (Videos/Kastideo by default, Change…, Open), MKV or TS format, margins before / after programmes, pausing downloads during playback, “tonight” hour, timeshift maximum length and catch-up speed, alerts (keywords, channels, lead time).
-- **Categories**: for live TV, movies or series — drag to reorder, untick to hide everywhere, double-click or pencil to rename, keywords to hide every category containing them (e.g. “PAKISTAN”), Sort A to Z, Reset. Right-click a category in the sidebar: Hide this category.
-- **Backup**: **Export configuration…** (sources and their TV guide, passwords if you wish, favorites, recents, categories, interfaces, adult content, banner, TMDB key) and **Import configuration…**. The file is the same as Kastideo for Mac's (Settings > General > Backup and transfer): you can move from one computer to another both ways. Nothing is deleted on import.
+Playlist address or file on disk (**Choose a file…**). A "get.php?username=…&password=…" address is recognized and turned into an Xtream source, much faster and more complete (details, episodes, latest additions).
 
-## TMDB key (optional and free)
+### TV guide (XMLTV)
 
-Create an account on themoviedb.org, then **Settings > API** and request a key (personal use). Copy the “API key” (v3) or the “API read access token” (v4) into Settings > General, then **Save**: Kastideo checks the key. Details become richer (HD posters and backdrops, cast with photos, trailers).
+The guide provided by your provider loads in the background and is kept on disk. The optional **TV guide (XMLTV)** field of a source lets you use another guide (.xml or .xml.gz).
+
+### Fallback TV guide (xmltvfr.fr)
+
+Settings > General > **TV guide**: a fallback guide fills in channels without programmes in your provider's guide, matching them by name. Pick an xmltvfr.fr guide or type an address; **Refresh the guide** downloads everything again.
+
+### Managing sources
+
+Settings > **Sources**: refresh one or all sources, delete one, see the state of its TV guide. Sources refresh at startup when their last update is more than 6 hours old (adjustable). If a refresh returns an empty section, the previous one is kept.
+
+## Navigating
+
+### Home screen
+
+Global search (channels, movies, series), **Live**, **Movies** and **Series** tiles, quick access to **Favorites**, **Recents**, **TV Guide**, **MultiView** and **Recordings**, and the **Continue watching** row.
+
+### Sidebar
+
+Live / Movies / Series picker, then: all channels or movies, **Favorites**, **Recents**, and for live TV **Themes**, **TV Guide** and **MultiView**; **Recordings**; the **categories**. At the bottom: the current recording and download (progress, time left) and **Settings**.
+
+### Three interfaces
+
+Settings > Appearance > **Interface per content type**:
+
+- **Classic**: three columns (sidebar, list with the current programme, player or details on the right).
+- **Cinema**: featured banner, posters or thumbnails in horizontal rows, full-page details. For live TV: "Sport right now", "Live news", "Tonight" rows per theme, favorites, recents, categories; a click opens the channel full frame, **Back** (or Esc) stops it.
+- **TV** (live only): the channel full frame, like a television (see below).
+
+### Featured banner (Cinema)
+
+It cycles through movies or series (this week's TMDB trends available to you, latest additions, a category selection) or, for live TV, the current programme of your channels. Arrows on hover, pauses while the mouse is over it. Settings > Appearance > **Featured banner**: show or hide, height, speed, sources.
+
+### TV interface (live)
+
+- **↑ / ↓**: previous / next channel; **type a number** (up to 4 digits).
+- **←** or left edge: **channel panel** (filter, search, current programme).
+- **→** or **I**: **info banner** (current and next programme).
+- **B**: previous channel — **F**: favorite — **M**: sound — **Space**: pause — **G**: TV guide — **H**: home.
+
+### TV guide grid
+
+Home, live sidebar, **Ctrl+7** or the G key in the TV interface. Channels in rows, hours in columns, a red line at the current time; **‹ Now ›**, day picker, 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. A click on a programme opens its details: **Watch**, **Record**, **Schedule recording** (red dot in the grid) or **Alert me when it starts** (bell).
+
+### Live by theme
+
+Sidebar > **Themes**: **Right now**, **Tonight** (8–11 pm) or **Channels**, filtered by theme (Sport, News, Movies, Kids, Documentaries…) and, for sport, by discipline. One version per channel (FHD, HD or SD depending on your connection). Right-click: channel version, **channel theme** (to fix the classification), favorites, edit the channel.
+
+## Playback
+
+The player (mpv engine) has a control bar that hides by itself, a stream health dot, volume, cinema mode (double-click or Ctrl+Enter) and full screen (F11). For movies and episodes: mini timeline, −10 s / +30 s, **resume** where you left off, **Back to details**.
+
+### Live timeshift
+
+Pause a channel: it keeps being buffered (up to 1 h by default, adjustable). The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
+
+### One connection at a time
+
+Most subscriptions allow a single connection. Kastideo closes the previous channel before opening the next (**stream relay**, Settings > General > Playback) and asks before interrupting a recording.
+
+### MultiView (several channels at once)
+
+**MultiView** shows up to **4 live channels** on one screen. **Sound follows the active tile** (orange border).
+
+- **Enabling**: each channel uses a connection to your provider, so MultiView stays off until you set the number of **simultaneous connections** of your subscription: Settings > General > Playback (2 to 4). **Detect** asks your Xtream sources.
+- **Opening**: home > **MultiView**, live sidebar > **MultiView**, **Ctrl+Alt+M**, or right-click a channel > **Add to MultiView**. The channel you were watching becomes the first tile; if it is being recorded, it keeps recording in the background, muted.
+- **Adding**: **+** button (or **A** key): favorites, recents, all channels or search. An empty cell of the grid also offers "Add a channel".
+- **Layouts** (top right): **Automatic** (1 full frame, 2 side by side, 3 or 4 in a grid), **2 × 2 grid**, **One large** and the others small, **Side by side**. The layout is remembered.
+- **Large view ↔ tile**: **double-click** a tile (or press **G**) to make it large with sound; double-click the large view again to go back to the grid.
+- **When hovering a tile**: enlarge, change channel, remove. The channel name and current programme show at the bottom.
+- **Saved groups** (bookmark icon): **Save this group…** stores the channels and the layout under a name (e.g. "Football multiplex"); click a group to reopen it, the cross deletes it.
+- **Keyboard**: **1 to 4** sound on that tile, **G** enlarge, **A** add, **M** mute, **Del** remove the active tile, **F** or **F11** full screen, **Esc** leave full screen then MultiView.
+- **Stop all** (or Back) stops every stream and returns to the previous screen.
+
+> A recording or a download also uses a connection: an ⓘ icon reminds you in the MultiView bar. If a tile says "The channel is not responding", the provider is probably refusing an extra connection: remove a channel or lower the number of connections.
+
+## Recordings and downloads
+
+### Recording live TV
+
+Red round button in the player bar, **R** key, or right-click a channel > **Record now**: the channel is recorded until the end of the current programme (plus the margin) or until you stop it. The stream is copied losslessly to **MKV** (or TS) in **Videos/Kastideo/Enregistrements**.
+
+### Scheduling a recording
+
+From the details of an upcoming programme (TV guide, themes): **Schedule recording**, with margins before and after (Settings > Recordings). Kastideo must be open at the scheduled time.
+
+### Downloading a movie or episodes
+
+**Download** button on a movie's details (now or **tonight**), **Download the season** or each episode's icon for a series, right-click > Download. One download at a time, resumed after an interruption, paused during playback (adjustable). Files go to **Videos/Kastideo/Films** and **Séries/<series>**.
+
+### Recordings screen
+
+Current recording (stop), downloads (pause, resume, cancel), scheduled recordings and history, files in the folder: a click plays them, right-click to show them in the folder or delete them.
+
+## Alerts and notifications
+
+- **Alert me when it starts** on an upcoming programme's details (bell in the guide).
+- **Keywords** (Settings > Recordings): a programme whose title contains a keyword triggers an alert, on your favorite channels or on all of them.
+- The alert shows at the top right of Kastideo with **Watch**, and the window comes back if it was minimized.
+- **System notifications** (Settings > General > Notifications, on by default): alerts, recording start and end, download finished or failed also appear in the Windows or Linux notification center, even when Kastideo is behind another window. Clicking the notification brings Kastideo back.
+
+## Editing a channel
+
+Right-click a channel > **Edit channel…**: name, number, logo (image address or a file copied into Kastideo) and **TV guide** channel (search among the provider and fallback guides). The fix applies to this version of the channel (HD, FHD…) and survives every refresh. **Restore** goes back to the original.
+
+## Organizing categories
+
+- **Right-click a category** in the sidebar: **Rename…**, **Move to top**, **Move up**, **Move down**, **Move to bottom**, **Hide this category**, **Manage categories…**.
+- **Settings > Categories** (or the icon next to "Categories"): for live TV, movies or series — drag to reorder, untick to hide everywhere, double-click to rename, **keywords** to hide every category containing them at once (e.g. "PAKISTAN"), **Sort A to Z**, **Restore**.
+
+A hidden category is hidden everywhere: lists, search, home, rows.
+
+## Favorites and recents
+
+Star in the player bar, **F** key or right-click > Add to favorites. Recents keep the last 60 items opened; Settings > General > **Clear recents**.
+
+## Appearance
+
+Settings > **Appearance**:
+
+- **Theme**: **Dark** (default), **Light** or **Same as system** (follows Windows or Linux). The player, TV interface, MultiView, home screen, details pages and the featured banner stay dark, as on Mac.
+- **Accent color**: default (Kastideo blue), blue, purple, pink, red, orange, green or teal — used for selections, buttons, switches.
+- **List density** (Classic interface): compact, standard or spacious.
+- **Thumbnail size** (Cinema interface): small, medium or large.
+- **Interface** per content type and **featured banner** (see above).
+
+Changes apply immediately, without restarting.
 
 ## Keyboard shortcuts
 
-- **Ctrl+0**: home — **Ctrl+1**: live — **Ctrl+2**: movies — **Ctrl+3**: series — **Ctrl+7**: TV guide — **Ctrl+,**: settings
+- **Ctrl+0**: home — **Ctrl+1**: live — **Ctrl+2**: movies — **Ctrl+3**: series — **Ctrl+7**: TV guide — **Ctrl+Alt+M**: MultiView — **Ctrl+,**: settings
+- **Space**: play / pause — **M**: sound — **F**: favorite — **R**: record / stop — **← / →**: −10 s / +30 s
+- **Ctrl+Enter** or double-click the picture: cinema mode — **F11**: full screen — **Esc**: leave cinema mode, back to details or rows
 - TV interface: **↑ / ↓** zapping, **digits** channel number, **←** panel, **→ / I** banner, **B** previous channel, **G** guide, **H** home
-- **R**: record the channel you watch / stop — **←** / **→** on live TV: −10 s / +30 s within the timeshift
-- **Space**: play / pause — **M**: mute — **F**: favorite — **←** / **→**: −10 s / +30 s (movies and episodes)
-- **Ctrl+Enter** or double-click the picture: theater mode — **Esc**: exit theater mode, then go back to the rows (live TV in the Cinema interface, the channel stops) or to the details
-- **F11**: full screen
+- MultiView: **1 to 4** sound, **G** enlarge, **A** add, **Del** remove, **F** full screen, **Esc** leave
 - **Ctrl+Alt+L**: playback log
 
-## Right-click on a channel, movie or series
+## Settings
 
-Watch or open details, Play (movies), add to or remove from favorites, channel theme (live TV), copy the name. Horizontal rows scroll with Shift + mouse wheel, the touchpad, or by dragging with the mouse.
+- **General**: language (on next launch), resume playback, stream relay, refresh at startup, clear recents, **simultaneous connections** (MultiView), **system notifications**, TV guide and fallback guide, adult content (hidden by default), TMDB key.
+- **Appearance**: theme, accent color, list density, thumbnail size, interfaces, featured banner.
+- **Sources**: add, refresh, delete, guide state.
+- **Categories**: order, hiding, names, keywords.
+- **Recordings**: folder, format, margins, downloads, timeshift, alerts.
+- **Backup**: export or import the configuration.
+
+## TMDB key (optional and free)
+
+Create an account on themoviedb.org, then **Settings > API** and request a key (personal use). Paste the "API key" (v3) or the "read access token" (v4) into Settings > General, then **Save**. Details become richer (posters, cast, trailers, summaries and episodes in your language).
+
+## Backup and transfer
+
+Settings > **Backup**: **Export configuration…** (sources and their guide, passwords if you wish, favorites, recents, categories, interfaces, appearance, number of connections, adult content, banner, TMDB key) and **Import configuration…**. The file is the same as Kastideo for Mac: you can move from one computer to the other in both directions. Nothing is deleted on import.
 
 ## Installation
 
-- **Windows**: unzip the “windows-x64.zip” archive and run **kastideo.exe**. The app is not signed: Windows SmartScreen shows “Windows protected your PC”; click **More info** then **Run anyway**.
-- **Zorin OS 17 / Ubuntu 22.04**: “ubuntu22.04_amd64.deb” package (double-click or `sudo apt install ./kastideo_…deb`).
-- **Zorin OS 18 / Ubuntu 24.04**: “ubuntu24.04_amd64.deb” package.
+- **Windows**: unzip the "windows-x64.zip" archive and run **kastideo.exe**. The app is not signed: if SmartScreen says "Windows protected your PC", click **More info** then **Run anyway**.
+- **Zorin OS 17 / Ubuntu 22.04**: "ubuntu22.04_amd64.deb" package (double-click or `sudo apt install ./kastideo_…deb`).
+- **Zorin OS 18 / Ubuntu 24.04**: "ubuntu24.04_amd64.deb" package.
 - **Any distribution, and Raspberry Pi (64-bit)**: AppImage file; make it executable (right-click > Properties > Allow executing, or `chmod +x`) and run it.
+
+## What's new
+
+- **1.2.0-desktop7**: MultiView (up to 4 channels, layouts, large view, saved groups), light or system theme, accent color, list density, thumbnail size, categories reordered from the sidebar, system notifications, full help.
+- **1.2.0-desktop6**: live timeshift, immediate and scheduled recording, downloads, programme alerts, channel editing.
+- **1.2.0-desktop5**: movie and series details in the interface language.
+- **1.2.0-desktop4**: TV guide grid, TV interface, Windows close fixed, single window.
+- **1.2.0-desktop3**: live in the Cinema interface, themes, featured banner.
 
 ## Next steps
 
-1. **MultiView** (several channels on screen) and **personalisation** (light theme, accent colour, tile size).
-2. System notifications for alerts and finished recordings.
-3. **Finishing**: Windows installer, built-in updates, full help.
+1. **Finishing touches**: Windows installer, built-in updates.
+2. Fixes from test feedback (Windows and Linux).
 
 ## Troubleshooting
 
-- **Empty recording**: the provider sent nothing (channel refused, connection already in use). Open the Playback log: “Enregistrement” lines give the details. If an MKV file stays empty, Kastideo switches to TS by itself.
-- **Timeshift does not go further back**: its depth depends on temporary disk space; without a disk cache (some libmpv versions on Linux) it is limited to 512 MB in memory, i.e. a few minutes.
-
-- **Details in another language**: Kastideo asks the provider for details in the interface language, but some providers only have one. With a **TMDB key** (Settings > General), overviews, genres and episodes come from TMDB in your language; the details page flags an overview left in another language.
-
-- **A single window**: Kastideo opens only once; launched again while running, it simply brings the existing window to the front. On closing, playback is stopped and the video engine released before quitting.
-
-- **A channel does not start**: open the **Playback log** (Ctrl+Alt+L). “Relais :” lines show the provider's exact answer (e.g. “HTTP 200 en 0,35 s” or “HTTP 403”).
-- **No picture on Linux**: check that the **libmpv** package is installed (the .deb installs it automatically; the AppImage bundles it).
-- **VPN**: an active VPN can prevent the provider from serving streams.
-- **No programmes in the guide**: Settings > Sources shows each source's guide status (“empty or unreadable guide”, HTTP code…). The fallback guide covers common French channels; Settings > General > TV guide > **Refresh guide** restarts all downloads.
+- **A channel won't start**: open the **Playback log** (Ctrl+Alt+L). "Relais :" lines give the provider's exact answer (e.g. "HTTP 200 en 0,35 s" or "HTTP 403").
+- **MultiView: a tile stays black**: the provider refuses an extra connection. Check your subscription's number of connections (Settings > General > Playback > Detect).
+- **No notification**: check Settings > General > Notifications, then the notification settings of Windows (Settings > System > Notifications) or of your Linux desktop. On Linux, the libnotify package is required (installed by the .deb, included in the AppImage).
+- **Empty recording**: the provider sent nothing (channel refused, connection already in use). "Enregistrement" lines in the log give details; if an MKV file stays empty, Kastideo switches to TS by itself.
+- **Timeshift doesn't go back further**: its depth depends on temporary disk space; without a disk cache (some libmpv versions on Linux), it is limited to 512 MB in memory.
+- **Details in another language**: some providers only have one language. With a **TMDB key**, summaries, genres and episodes come from TMDB in your language.
+- **Single window**: launched while already running, Kastideo just brings the existing window to the front.
+- **No picture on Linux**: make sure the **libmpv** package is installed (the .deb installs it; the AppImage bundles it).
+- **VPN**: an active VPN may prevent the provider from serving streams.
+- **No programmes in the guide**: Settings > Sources shows each source's guide state; the fallback guide fills in common French channels.
 - **Passwords on Linux**: without a keyring (GNOME Keyring or KWallet), Kastideo keeps passwords in its preferences and says so in the log.
+
+## Privacy
+
+Kastideo collects no data. It only contacts your IPTV providers, the TV guides you chose and, if you entered a key, TMDB. Your settings, favorites and passwords stay on your computer.

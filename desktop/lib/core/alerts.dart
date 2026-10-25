@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n.dart';
 import 'epg.dart';
+import 'notify.dart';
 import 'guide.dart';
 import 'library.dart';
 import 'models.dart';
@@ -71,6 +73,13 @@ class AlertCenter extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _fire(FiredAlert a) {
+    pending.add(a);
+    final p = a.programme;
+    final h = '${p.start.hour.toString().padLeft(2, '0')}:${p.start.minute.toString().padLeft(2, '0')}';
+    SystemNotifier.show('${tr('Ça commence')} · ${a.channel.displayName}', '$h  ${p.title}');
+  }
+
   void _check() {
     final now = nowSeconds();
     final lead = settings.alertLead * 60;
@@ -90,7 +99,7 @@ class AlertCenter extends ChangeNotifier {
         _fired.add(entry.key);
         _oneShots.remove(entry.key);
         changed = true;
-        if (channel != null && p != null) pending.add(FiredAlert(channel, p));
+        if (channel != null && p != null) _fire(FiredAlert(channel, p));
       }
     }
     // Mots-clés.
@@ -108,7 +117,7 @@ class AlertCenter extends ChangeNotifier {
           final title = p.title.searchKey;
           if (keywords.any(title.contains)) {
             _fired.add(key);
-            pending.add(FiredAlert(channel, p));
+            _fire(FiredAlert(channel, p));
             changed = true;
           }
         }

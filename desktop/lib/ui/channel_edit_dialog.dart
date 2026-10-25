@@ -75,7 +75,7 @@ class _ChannelEditDialogState extends State<_ChannelEditDialog> {
     final channels = context.guide.guideChannels;
     final preview = _logo.text.trim().isEmpty ? original.logo : _logo.text.trim();
     return AlertDialog(
-      backgroundColor: const Color(0xFF242426),
+      backgroundColor: KPalette.panel,
       title: Row(children: [
         LogoView(url: preview, name: _name.text.isEmpty ? original.name : _name.text, size: 44),
         const SizedBox(width: 12),
@@ -128,7 +128,7 @@ class _ChannelEditDialogState extends State<_ChannelEditDialog> {
           const SizedBox(height: 8),
           Text(
             tr('Les champs vides gardent la valeur du fournisseur. La correction s\'applique à cette version de la chaîne (HD, FHD…) et reste après chaque actualisation de la source.'),
-            style: kText(12, color: Colors.white54),
+            style: kText(12, color: KPalette.ink54),
           ),
         ]),
       ),

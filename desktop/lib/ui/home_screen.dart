@@ -12,6 +12,7 @@ import '../version.dart';
 import 'cinema_view.dart';
 import 'help_dialog.dart';
 import 'log_dialog.dart';
+import 'multiview_view.dart';
 import 'settings_dialog.dart';
 import 'widgets.dart';
 
@@ -58,7 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     final library = context.library;
     final playback = context.playback;
     return Scaffold(
@@ -94,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             _resumeRail(context),
                             if (library.lastError != null) ...[
                               const SizedBox(height: 18),
-                              Text(library.lastError!, style: kText(13, color: KPalette.orange)),
+                              Text(library.lastError!, style: kTextD(13, color: KPalette.orange)),
                             ],
                           ] else
                             _searchResults(context),
@@ -110,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
             right: 10,
             bottom: 10,
             child: Text('Kastideo $kVersion · ${tr('Aperçu Windows / Linux')}',
-                style: kText(11, color: Colors.white.withValues(alpha: 0.35))),
+                style: kTextD(11, color: Colors.white.withValues(alpha: 0.35))),
           ),
         ]);
       }),
@@ -162,10 +165,10 @@ class _HomeScreenState extends State<HomeScreen> {
       const SizedBox(width: 14),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Kastideo', style: kRounded(46, FontWeight.w900)),
+          Text('Kastideo', style: kRoundedD(46, FontWeight.w900)),
           const SizedBox(height: 2),
           Text(tr('Vos chaînes, vos films et vos séries au même endroit'),
-              style: kText(14, color: Colors.white.withValues(alpha: 0.7))),
+              style: kTextD(14, color: Colors.white.withValues(alpha: 0.7))),
         ]),
       ),
       if (context.library.isBusy)
@@ -202,12 +205,12 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {});
               _search(t);
             },
-            style: kText(18),
+            style: kTextD(18),
             cursorColor: Colors.white,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: tr('Rechercher une chaîne, un film ou une série'),
-              hintStyle: kText(18, color: Colors.white.withValues(alpha: 0.45)),
+              hintStyle: kTextD(18, color: Colors.white.withValues(alpha: 0.45)),
             ),
           ),
         ),
@@ -233,8 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tr('En cours de lecture'), style: kText(12, color: Colors.white.withValues(alpha: 0.65))),
-            Text(playback.current!.name, style: kText(15, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(tr('En cours de lecture'), style: kTextD(12, color: Colors.white.withValues(alpha: 0.65))),
+            Text(playback.current!.name, style: kTextD(15, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
           ]),
         ),
         FilledButton(
@@ -262,10 +265,10 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tr('Aucune source'), style: kText(16, weight: FontWeight.w700)),
+            Text(tr('Aucune source'), style: kTextD(16, weight: FontWeight.w700)),
             const SizedBox(height: 2),
             Text(tr('Ajoutez votre abonnement IPTV (Xtream Codes ou playlist M3U) pour commencer.'),
-                style: kText(13, color: Colors.white.withValues(alpha: 0.7))),
+                style: kTextD(13, color: Colors.white.withValues(alpha: 0.7))),
           ]),
         ),
         FilledButton(
@@ -340,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
       HomeSmallButton(title: tr('Récents'), icon: Icons.history_rounded, badge: library.recentIds.length,
           onTap: () => navigation.show(MediaKind.live, const RecentItems())),
       HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: () => navigation.go(Screen.guide)),
+      HomeSmallButton(title: tr('MultiVue'), icon: Icons.grid_view_rounded, badge: context.multiview.channels.length, onTap: () => openMultiView(context)),
       HomeSmallButton(
           title: tr('Enregistrements'),
           icon: Icons.radio_button_checked_rounded,
@@ -347,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => navigation.go(Screen.recordings)),
     ];
     return LayoutBuilder(builder: (context, c) {
-      final columns = math.max(1, math.min(4, (c.maxWidth / 224).floor()));
+      final columns = math.max(1, math.min(5, (c.maxWidth / 200).floor()));
       final width = (c.maxWidth - (columns - 1) * 14) / columns;
       return Wrap(spacing: 14, runSpacing: 14, children: [for (final b in buttons) SizedBox(width: width, child: b)]);
     });
@@ -361,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 26),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(tr('Reprendre la lecture'), style: kText(18, weight: FontWeight.w600)),
+        Text(tr('Reprendre la lecture'), style: kTextD(18, weight: FontWeight.w600)),
         const SizedBox(height: 10),
         SizedBox(
           height: kPosterWidth * 1.5 + 48,
@@ -380,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_results.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Center(child: Text(tr('Aucun résultat'), style: kText(15, color: Colors.white.withValues(alpha: 0.6)))),
+        child: Center(child: Text(tr('Aucun résultat'), style: kTextD(15, color: Colors.white.withValues(alpha: 0.6)))),
       );
     }
     return Column(children: [
@@ -400,8 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item.name, style: kText(14), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text(item.group, style: kText(12, color: Colors.white.withValues(alpha: 0.6)), maxLines: 1),
+                    Text(item.name, style: kTextD(14), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(item.group, style: kTextD(12, color: Colors.white.withValues(alpha: 0.6)), maxLines: 1),
                   ]),
                 ),
                 Icon(Icons.chevron_right_rounded, color: Colors.white.withValues(alpha: 0.4)),
@@ -477,11 +481,11 @@ class HomeBigTile extends StatelessWidget {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Icon(icon, size: 30, color: Colors.white),
                   const SizedBox(height: 4),
-                  Text(title, style: kRounded(32, FontWeight.w800)),
+                  Text(title, style: kRoundedD(32, FontWeight.w800)),
                   const SizedBox(height: 4),
                   SizedBox(
                     height: 18,
-                    child: Text(subtitle, style: kText(14, color: Colors.white.withValues(alpha: 0.8))),
+                    child: Text(subtitle, style: kTextD(14, color: Colors.white.withValues(alpha: 0.8))),
                   ),
                 ]),
               ),
@@ -517,12 +521,12 @@ class HomeSmallButton extends StatelessWidget {
           child: Row(children: [
             SizedBox(width: 26, child: Icon(icon, color: KPalette.orange, size: 22)),
             const SizedBox(width: 10),
-            Expanded(child: Text(title, style: kText(15, weight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+            Expanded(child: Text(title, style: kTextD(15, weight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
             if (badge > 0)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20)),
-                child: Text('$badge', style: kText(12, weight: FontWeight.w600)),
+                child: Text('$badge', style: kTextD(12, weight: FontWeight.w600)),
               ),
           ]),
         ),

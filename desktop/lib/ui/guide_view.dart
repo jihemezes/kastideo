@@ -73,7 +73,7 @@ Future<ChannelFilter?> pickChannelFilter(BuildContext context, Offset position) 
   final choice = await showMenu<String>(
     context: context,
     position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-    color: const Color(0xF02C2C2E),
+    color: KPalette.menu,
     items: [
       PopupMenuItem(value: 'all', child: Text(tr('Toutes les chaînes'), style: kText(13))),
       PopupMenuItem(value: 'fav', child: Text(tr('Favoris'), style: kText(13))),
@@ -82,7 +82,7 @@ Future<ChannelFilter?> pickChannelFilter(BuildContext context, Offset position) 
       for (final t in ContentTheme.browsable(showAdult: library.showAdult))
         PopupMenuItem(
           value: 't:${t.name}',
-          child: Row(children: [Icon(t.icon, size: 16, color: Colors.white60), const SizedBox(width: 8), Text(t.label, style: kText(13))]),
+          child: Row(children: [Icon(t.icon, size: 16, color: KPalette.ink60), const SizedBox(width: 8), Text(t.label, style: kText(13))]),
         ),
       if (library.categories(MediaKind.live).isNotEmpty) const PopupMenuDivider(),
       for (final name in library.categories(MediaKind.live))
@@ -105,7 +105,7 @@ class GuideScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         body: Row(children: [
           const SizedBox(width: 236, child: Sidebar(kind: MediaKind.live, guide: true)),
-          const VerticalDivider(width: 1, color: KPalette.separator),
+          VerticalDivider(width: 1, color: KPalette.separator),
           const Expanded(child: GuideView()),
         ]),
       );
@@ -185,7 +185,7 @@ class _GuideViewState extends State<GuideView> {
     final choice = await showMenu<int>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-      color: const Color(0xF02C2C2E),
+      color: KPalette.menu,
       items: [
         for (var i = 0; i < 7; i++)
           PopupMenuItem(
@@ -218,7 +218,7 @@ class _GuideViewState extends State<GuideView> {
           ];
           return Column(children: [
             _controls(context),
-            const Divider(height: 1, color: KPalette.separator),
+            Divider(height: 1, color: KPalette.separator),
             Expanded(
               child: rows.isEmpty
                   ? _empty(context)
@@ -262,7 +262,7 @@ class _GuideViewState extends State<GuideView> {
             const SizedBox(height: 14),
             Text(tr('Chargement du guide TV…'), style: kText(14, color: KPalette.secondaryText)),
           ] else ...[
-            Icon(Icons.calendar_month_rounded, size: 56, color: Colors.white.withValues(alpha: 0.3)),
+            Icon(Icons.calendar_month_rounded, size: 56, color: KPalette.ink.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
             Text(searching ? tr('Aucun résultat') : tr('Aucun programme'), style: kText(17, weight: FontWeight.w700)),
             const SizedBox(height: 6),
@@ -353,8 +353,8 @@ class _GuideHeader extends StatelessWidget {
     final count = spanS ~/ 1800;
     return Container(
       height: 30,
-      decoration: const BoxDecoration(
-        color: Color(0xFF242426),
+      decoration: BoxDecoration(
+        color: KPalette.panel,
         border: Border(bottom: BorderSide(color: KPalette.separator)),
       ),
       child: Row(children: [
@@ -368,7 +368,7 @@ class _GuideHeader extends StatelessWidget {
                   left: gridWidth * i * 1800 / spanS + 6,
                   top: 7,
                   child: Text(hm(DateTime.fromMillisecondsSinceEpoch((startS + i * 1800) * 1000)),
-                      style: kText(12, weight: i.isEven ? FontWeight.w600 : FontWeight.w400, color: i.isEven ? Colors.white : Colors.white54)
+                      style: kText(12, weight: i.isEven ? FontWeight.w600 : FontWeight.w400, color: i.isEven ? KPalette.ink : KPalette.ink54)
                           .copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
                 ),
               if (now >= startS && now <= startS + spanS)
@@ -403,7 +403,7 @@ class _GuideRow extends StatelessWidget {
     final end = startS + spanS;
     final programmes = context.guide.programmesOf(item).where((p) => p.stopS > startS && p.startS < end);
     return Container(
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: KPalette.separator))),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KPalette.separator))),
       child: Row(children: [
         GestureDetector(
           onSecondaryTapUp: (d) => showItemMenu(context, item, d.globalPosition),
@@ -412,7 +412,7 @@ class _GuideRow extends StatelessWidget {
             builder: (context, hovering) => Container(
               width: labelWidth,
               height: height,
-              color: hovering ? Colors.white.withValues(alpha: 0.06) : KPalette.list,
+              color: hovering ? KPalette.ink.withValues(alpha: 0.06) : KPalette.list,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(children: [
                 if (item.number != null)
@@ -482,7 +482,7 @@ class _GuideCell extends StatelessWidget {
             decoration: BoxDecoration(
               color: current
                   ? KPalette.accent.withValues(alpha: hovering ? 0.45 : 0.32)
-                  : Colors.white.withValues(alpha: (past ? 0.04 : 0.09) + (hovering ? 0.06 : 0)),
+                  : KPalette.ink.withValues(alpha: (past ? 0.04 : 0.09) + (hovering ? 0.06 : 0)),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -497,13 +497,13 @@ class _GuideCell extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(p.title,
-                      style: kText(12, weight: FontWeight.w600, color: past ? Colors.white54 : Colors.white),
+                      style: kText(12, weight: FontWeight.w600, color: past ? KPalette.ink54 : KPalette.ink),
                       maxLines: c.maxWidth > 80 ? 1 : 2,
                       overflow: TextOverflow.ellipsis),
                 ),
               ]),
               if (c.maxWidth > 80)
-                Text(timeRange(p), style: kText(11, color: Colors.white54), maxLines: 1, overflow: TextOverflow.clip),
+                Text(timeRange(p), style: kText(11, color: KPalette.ink54), maxLines: 1, overflow: TextOverflow.clip),
             ]),
           ),
         ),
@@ -521,7 +521,7 @@ Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Program
   return showDialog(
     context: context,
     builder: (c) => AlertDialog(
-      backgroundColor: const Color(0xFF242426),
+      backgroundColor: KPalette.panel,
       title: Row(children: [
         LogoView(url: channel.logo, name: channel.name, size: 40),
         const SizedBox(width: 12),
@@ -538,7 +538,7 @@ Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Program
           if (current)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: LinearProgressIndicator(value: p.progress(), color: KPalette.orange, backgroundColor: Colors.white12),
+              child: LinearProgressIndicator(value: p.progress(), color: KPalette.orange, backgroundColor: KPalette.ink12),
             ),
           if (p.category != null)
             Padding(
@@ -548,7 +548,7 @@ Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Program
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200),
             child: SingleChildScrollView(
-              child: Text(p.desc ?? tr('Pas de résumé dans le guide TV.'), style: kText(13, color: Colors.white70)),
+              child: Text(p.desc ?? tr('Pas de résumé dans le guide TV.'), style: kText(13, color: KPalette.ink70)),
             ),
           ),
         ]),

@@ -49,7 +49,7 @@ class _LogDialog extends StatelessWidget {
                         final l = lines[i];
                         final t = l.date;
                         String two(int v) => v.toString().padLeft(2, '0');
-                        final color = switch (l.level) { 0 => Colors.redAccent, 1 => Colors.orangeAccent, _ => Colors.white70 };
+                        final color = switch (l.level) { 0 => Colors.redAccent, 1 => Colors.orangeAccent, _ => KPalette.ink70 };
                         return SelectableText(
                           '${two(t.hour)}:${two(t.minute)}:${two(t.second)}  ${l.levelLabel.padRight(6)} ${l.text}',
                           style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: color),

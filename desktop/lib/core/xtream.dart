@@ -117,14 +117,15 @@ class XtreamClient {
     }
   }
 
-  /// Vérifie le compte (identifiants, statut).
-  Future<void> account() async {
+  /// Vérifie le compte (identifiants, statut) ; renvoie le nombre de connexions simultanées autorisées, s'il est indiqué.
+  Future<int?> account() async {
     final root = await _json(api());
     if (root is! Map || root['user_info'] is! Map) throw XtreamException('Réponse du serveur illisible.');
     final user = root['user_info'] as Map;
     if (str(user['auth']) == '0') throw XtreamException('Identifiant ou mot de passe refusé par le serveur.');
     final status = str(user['status']) ?? 'Active';
     if (status.toLowerCase() != 'active') throw XtreamException('Compte non actif (statut : $status).');
+    return int.tryParse(str(user['max_connections']) ?? '');
   }
 
   Future<Map<String, String>> _categories(String action) async {

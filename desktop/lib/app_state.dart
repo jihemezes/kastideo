@@ -7,20 +7,21 @@ import 'core/guide.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/models.dart';
+import 'core/multiview.dart';
 import 'core/playback.dart';
 import 'core/recording.dart';
 import 'core/settings.dart';
 import 'core/themes.dart';
 
 /// Écran affiché.
-enum Screen { home, live, movies, series, guide, recordings }
+enum Screen { home, live, movies, series, guide, recordings, multiview }
 
 extension ScreenKind on Screen {
   MediaKind? get kind => switch (this) {
         Screen.live => MediaKind.live,
         Screen.movies => MediaKind.movie,
         Screen.series => MediaKind.series,
-        Screen.home || Screen.guide || Screen.recordings => null,
+        Screen.home || Screen.guide || Screen.recordings || Screen.multiview => null,
       };
 }
 
@@ -171,6 +172,7 @@ class AppScope extends InheritedWidget {
     required this.recordings,
     required this.downloads,
     required this.alerts,
+    required this.multiview,
     required super.child,
   });
 
@@ -184,6 +186,7 @@ class AppScope extends InheritedWidget {
   final RecordingCenter recordings;
   final DownloadManager downloads;
   final AlertCenter alerts;
+  final MultiViewController multiview;
 
   static AppScope of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<AppScope>()!;
 
@@ -202,6 +205,7 @@ extension AppScopeContext on BuildContext {
   RecordingCenter get recordings => AppScope.of(this).recordings;
   DownloadManager get downloads => AppScope.of(this).downloads;
   AlertCenter get alerts => AppScope.of(this).alerts;
+  MultiViewController get multiview => AppScope.of(this).multiview;
 }
 
 /// Une seule connexion : lancer [item] arrêterait l'enregistrement en cours ? On demande d'abord.

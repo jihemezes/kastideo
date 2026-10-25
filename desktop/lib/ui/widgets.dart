@@ -51,7 +51,7 @@ class LogoView extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        color: Colors.white.withValues(alpha: 0.06),
+        color: KPalette.ink.withValues(alpha: 0.06),
         child: url == null
             ? fallback
             : url!.startsWith('file:')
@@ -152,12 +152,12 @@ class PosterImage extends StatelessWidget {
         gradient: LinearGradient(colors: [Color(0xFF383838), Color(0xFF1C1C1C)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
       ),
       child: width < 60
-          ? Text(initials(name), style: kRounded(width * 0.32, FontWeight.w800, color: Colors.white70))
+          ? Text(initials(name), style: kRounded(width * 0.32, FontWeight.w800, color: KPalette.ink70))
           : Text(cleanTitle(name).title,
               textAlign: TextAlign.center,
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
-              style: kRounded(width * 0.11, FontWeight.w800, color: Colors.white70)),
+              style: kRounded(width * 0.11, FontWeight.w800, color: KPalette.ink70)),
     );
     if (url == null) return fallback;
     return Image.network(

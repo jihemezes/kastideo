@@ -33,7 +33,7 @@ class _CinemaViewState extends State<CinemaView> {
   void initState() {
     super.initState();
     // Programmes en cours et barres d'avancement : mise à jour chaque minute.
-    if (widget.kind == MediaKind.live) _minute = Timer.periodic(const Duration(minutes: 1), (_) => mounted ? setState(() {}) : null);
+    if (widget.kind == MediaKind.live) _minute = Timer.periodic(Duration(minutes: 1), (_) => mounted ? setState(() {}) : null);
   }
 
   @override
@@ -58,24 +58,24 @@ class _CinemaViewState extends State<CinemaView> {
           if (searching) {
             body = CinemaGrid(title: '${tr('Résultats pour')} « ${navigation.search} »', items: filteredItems(context, widget.kind));
           } else if (filter is AllItems) {
-            body = widget.kind == MediaKind.live ? const _LiveHome() : _CinemaHome(kind: widget.kind);
+            body = widget.kind == MediaKind.live ? _LiveHome() : _CinemaHome(kind: widget.kind);
           } else if (filter is ThemesFilter) {
-            body = const _CinemaThemes();
+            body = _CinemaThemes();
           } else {
             body = CinemaGrid(title: filterTitle(context, widget.kind), items: filteredItems(context, widget.kind));
           }
           return Column(children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 10),
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 10),
               child: Row(children: [
                 Text(sectionTitle(widget.kind), style: kRounded(22, FontWeight.w800)),
                 if (widget.kind == MediaKind.live && context.guide.isLoading) ...[
-                  const SizedBox(width: 12),
-                  const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 12),
+                  SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+                  SizedBox(width: 8),
                   Text(tr('Guide TV…'), style: kText(12, color: KPalette.secondaryText)),
                 ],
-                const Spacer(),
+                Spacer(),
                 SizedBox(width: 300, child: SearchBox(controller: _search, onChanged: navigation.setSearch, height: 34)),
               ]),
             ),
@@ -88,9 +88,9 @@ class _CinemaViewState extends State<CinemaView> {
 }
 
 Widget _railList(List<Widget> rails) => ListView.builder(
-      padding: const EdgeInsets.only(bottom: 30),
+      padding: EdgeInsets.only(bottom: 30),
       itemCount: rails.length,
-      itemBuilder: (context, index) => Padding(padding: const EdgeInsets.only(bottom: 26), child: rails[index]),
+      itemBuilder: (context, index) => Padding(padding: EdgeInsets.only(bottom: 26), child: rails[index]),
     );
 
 /// Accueil Films / Séries.
@@ -114,9 +114,9 @@ class _CinemaHome extends StatelessWidget {
       if (started.isNotEmpty) CinemaRail.items(title: tr('Reprendre la lecture'), items: started),
       if (latest.isNotEmpty) CinemaRail.items(title: tr('Derniers ajouts'), items: latest),
       if (others.isNotEmpty)
-        CinemaRail.items(title: tr('Regardés récemment'), items: others, onSeeAll: () => context.navigation.show(kind, const RecentItems())),
+        CinemaRail.items(title: tr('Regardés récemment'), items: others, onSeeAll: () => context.navigation.show(kind, RecentItems())),
       if (favorites.isNotEmpty)
-        CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => context.navigation.show(kind, const FavoriteItems())),
+        CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => context.navigation.show(kind, FavoriteItems())),
       for (final name in library.categories(kind))
         CinemaRail.items(
           title: library.categoryName(kind, name),
@@ -149,7 +149,7 @@ class _LiveHome extends StatelessWidget {
     if (library.items(MediaKind.live).isEmpty) return _emptySection(context);
     // Ce qui passe : programmes du guide d'abord, puis les chaînes classées par leur nom.
     final rails = <Widget>[
-      if (context.settings.heroEnabled) const HeroCarousel(kind: MediaKind.live),
+      if (context.settings.heroEnabled) HeroCarousel(kind: MediaKind.live),
     ];
     for (final theme in ContentTheme.homeRails) {
       final entries = guide.now(theme: theme)..sort((a, b) => (a.$2 == null ? 1 : 0).compareTo(b.$2 == null ? 1 : 0));
@@ -164,12 +164,12 @@ class _LiveHome extends StatelessWidget {
     final favorites = library.favoritesOf(MediaKind.live);
     if (recents.isNotEmpty) {
       rails.add(CinemaRail.items(
-          title: tr('Regardées récemment'), items: recents, onSeeAll: () => navigation.show(MediaKind.live, const RecentItems())));
+          title: tr('Regardées récemment'), items: recents, onSeeAll: () => navigation.show(MediaKind.live, RecentItems())));
     }
     if (favorites.isNotEmpty) {
-      rails.add(CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => navigation.show(MediaKind.live, const FavoriteItems())));
+      rails.add(CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => navigation.show(MediaKind.live, FavoriteItems())));
     }
-    for (final theme in const [ContentTheme.movies, ContentTheme.sport, ContentTheme.series, ContentTheme.documentary, ContentTheme.entertainment, ContentTheme.kids]) {
+    for (final theme in [ContentTheme.movies, ContentTheme.sport, ContentTheme.series, ContentTheme.documentary, ContentTheme.entertainment, ContentTheme.kids]) {
       final entries = guide.tonight(theme: theme);
       if (entries.isEmpty) continue;
       rails.add(CinemaRail.tonight(
@@ -206,15 +206,15 @@ class _CinemaThemes extends StatelessWidget {
     return CustomScrollView(slivers: [
       SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
+          padding: EdgeInsets.fromLTRB(24, 0, 24, 6),
           child: Row(children: [
             Text(navigation.themeSelection?.label ?? tr('Thèmes'), style: kText(22, weight: FontWeight.w700)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text('${entries.length}', style: kText(13, color: KPalette.secondaryText)),
           ]),
         ),
       ),
-      const SliverToBoxAdapter(child: ThemesHeader(padding: EdgeInsets.fromLTRB(24, 6, 24, 12), compact: false)),
+      SliverToBoxAdapter(child: ThemesHeader(padding: EdgeInsets.fromLTRB(24, 6, 24, 12), compact: false)),
       if (entries.isEmpty)
         SliverFillRemaining(
           hasScrollBody: false,
@@ -222,9 +222,9 @@ class _CinemaThemes extends StatelessWidget {
         )
       else
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 30),
+          padding: EdgeInsets.fromLTRB(24, 0, 24, 30),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: kTileWidth + 24,
               mainAxisExtent: kTileHeight + 60,
               crossAxisSpacing: 16,
@@ -242,9 +242,10 @@ class _CinemaThemes extends StatelessWidget {
   }
 }
 
-const double kPosterWidth = 150;
-const double kTileWidth = 208;
-const double kTileHeight = kTileWidth * 9 / 16;
+/// Tailles des affiches et vignettes (Réglages > Apparence > Taille des vignettes).
+double get kPosterWidth => 150 * KPalette.cardScale;
+double get kTileWidth => 208 * KPalette.cardScale;
+double get kTileHeight => kTileWidth * 9 / 16;
 
 /// Rangée horizontale d'affiches ou de vignettes.
 class CinemaRail extends StatelessWidget {
@@ -255,8 +256,8 @@ class CinemaRail extends StatelessWidget {
     required this.builder,
     required this.height,
     this.onSeeAll,
-    this.seeAllSize = const Size(kPosterWidth * 0.8, kPosterWidth * 1.5),
-  });
+    Size? seeAllSize,
+  }) : _seeAllSize = seeAllSize; // ignore: prefer_initializing_formals
 
   /// Films, séries, épisodes ou chaînes (vignette adaptée au type).
   factory CinemaRail.items({required String title, required List<MediaItem> items, VoidCallback? onSeeAll}) {
@@ -266,7 +267,7 @@ class CinemaRail extends StatelessWidget {
       total: items.length,
       onSeeAll: onSeeAll,
       height: live ? kTileHeight + 64 : kPosterWidth * 1.5 + 48,
-      seeAllSize: live ? const Size(kTileWidth * 0.6, kTileHeight) : const Size(kPosterWidth * 0.8, kPosterWidth * 1.5),
+      seeAllSize: live ? Size(kTileWidth * 0.6, kTileHeight) : Size(kPosterWidth * 0.8, kPosterWidth * 1.5),
       builder: (context, i) => live ? LiveCard(item: items[i]) : MediaCard(item: items[i]),
     );
   }
@@ -278,7 +279,7 @@ class CinemaRail extends StatelessWidget {
         total: entries.length,
         onSeeAll: onSeeAll,
         height: kTileHeight + 64,
-        seeAllSize: const Size(kTileWidth * 0.6, kTileHeight),
+        seeAllSize: Size(kTileWidth * 0.6, kTileHeight),
         builder: (context, i) => LiveCard(item: entries[i].$1.preferred, programme: entries[i].$2, group: entries[i].$1),
       );
 
@@ -289,7 +290,7 @@ class CinemaRail extends StatelessWidget {
         total: entries.length,
         onSeeAll: onSeeAll,
         height: kTileHeight + 64,
-        seeAllSize: const Size(kTileWidth * 0.6, kTileHeight),
+        seeAllSize: Size(kTileWidth * 0.6, kTileHeight),
         builder: (context, i) => ProgrammeCard(group: entries[i].$1, programme: entries[i].$2),
       );
 
@@ -298,7 +299,8 @@ class CinemaRail extends StatelessWidget {
   final Widget Function(BuildContext context, int index) builder;
   final double height;
   final VoidCallback? onSeeAll;
-  final Size seeAllSize;
+  final Size? _seeAllSize;
+  Size get seeAllSize => _seeAllSize ?? Size(kPosterWidth * 0.8, kPosterWidth * 1.5);
   static const _limit = 40;
 
   @override
@@ -347,7 +349,7 @@ class _SeeAllCard extends StatelessWidget {
             width: size.width,
             height: size.height,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: hovering ? 0.14 : 0.07),
+              color: KPalette.ink.withValues(alpha: hovering ? 0.14 : 0.07),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -391,9 +393,9 @@ class CinemaGrid extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 30),
           sliver: SliverGrid(
             gridDelegate: live
-                ? const SliverGridDelegateWithMaxCrossAxisExtent(
+                ? SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: kTileWidth + 24, mainAxisExtent: kTileHeight + 60, crossAxisSpacing: 16, mainAxisSpacing: 16)
-                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                : SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: kPosterWidth + 20, mainAxisExtent: kPosterWidth * 1.5 + 52, crossAxisSpacing: 16, mainAxisSpacing: 16),
             delegate: SliverChildBuilderDelegate(
               (context, i) => live ? LiveCard(item: items[i]) : MediaCard(item: items[i]),
@@ -414,7 +416,7 @@ class MediaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fraction = context.watch.fraction(item.id);
     final favorite = context.library.isFavorite(item.id);
-    const width = kPosterWidth;
+    final width = kPosterWidth;
     return GestureDetector(
       onSecondaryTapUp: (d) => showItemMenu(context, item, d.globalPosition),
       child: Tooltip(
@@ -431,7 +433,7 @@ class MediaCard extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white.withValues(alpha: hovering ? 0.55 : 0.08), width: hovering ? 2 : 1),
+                    border: Border.all(color: KPalette.ink.withValues(alpha: hovering ? 0.55 : 0.08), width: hovering ? 2 : 1),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(9),
@@ -442,7 +444,7 @@ class MediaCard extends StatelessWidget {
                           left: 8,
                           right: 8,
                           bottom: 8,
-                          child: LinearProgressIndicator(value: fraction, minHeight: 3, color: Colors.white, backgroundColor: Colors.white24),
+                          child: LinearProgressIndicator(value: fraction, minHeight: 3, color: KPalette.ink, backgroundColor: KPalette.ink24),
                         ),
                       if (favorite)
                         const Positioned(top: 6, right: 6, child: Icon(Icons.star_rounded, size: 16, color: Colors.amber)),
@@ -478,7 +480,7 @@ class ChannelTile extends StatelessWidget {
       height: kTileHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: hovering ? 0.55 : 0.08), width: hovering ? 2 : 1),
+        border: Border.all(color: KPalette.ink.withValues(alpha: hovering ? 0.55 : 0.08), width: hovering ? 2 : 1),
         gradient: LinearGradient(
           colors: [HSLColor.fromColor(KPalette.indigo).withHue((248 + hue) % 360).withLightness(0.2).toColor(), KPalette.night],
           begin: Alignment.topLeft,
@@ -505,7 +507,7 @@ class ChannelTile extends StatelessWidget {
             bottom: 8,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(value: progress, minHeight: 3, color: KPalette.orange, backgroundColor: Colors.white24),
+              child: LinearProgressIndicator(value: progress, minHeight: 3, color: KPalette.orange, backgroundColor: KPalette.ink24),
             ),
           ),
       ]),
@@ -771,7 +773,9 @@ class _HeroCarouselState extends State<HeroCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     if (_slides.isEmpty) return const SizedBox(height: 8);
     final height = _settings.heroHeight.points;
     final slide = _slides[_index];
@@ -835,7 +839,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
       );
 }
 
-const _heroBottomFade = DecoratedBox(
+Widget get _heroBottomFade => DecoratedBox(
   decoration: BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topCenter,
@@ -846,7 +850,7 @@ const _heroBottomFade = DecoratedBox(
   ),
 );
 
-Widget _caption(String text) => Text(text, style: kText(11, weight: FontWeight.w800, color: KPalette.orange).copyWith(letterSpacing: 1.5));
+Widget _caption(String text) => Text(text, style: kTextD(11, weight: FontWeight.w800, color: KPalette.orange).copyWith(letterSpacing: 1.5));
 
 /// Diapositive film / série.
 class _HeroSlideView extends StatelessWidget {
@@ -906,14 +910,14 @@ class _HeroSlideView extends StatelessWidget {
                 _caption(slide.caption),
                 const SizedBox(height: 4),
                 Text(d?.title != null && d!.sources.contains('TMDB') ? d.title! : item.displayName,
-                    style: kText(height < 300 ? 26 : 32, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    style: kTextD(height < 300 ? 26 : 32, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
                 if (meta.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(meta, style: kText(13, weight: FontWeight.w500, color: Colors.white70)),
+                  Text(meta, style: kTextD(13, weight: FontWeight.w500, color: Colors.white70)),
                 ],
                 if (d?.plot != null && height >= 300) ...[
                   const SizedBox(height: 8),
-                  Text(d!.plot!, style: kText(13, color: Colors.white.withValues(alpha: 0.85)), maxLines: 3, overflow: TextOverflow.ellipsis),
+                  Text(d!.plot!, style: kTextD(13, color: Colors.white.withValues(alpha: 0.85)), maxLines: 3, overflow: TextOverflow.ellipsis),
                 ],
                 const SizedBox(height: 14),
                 Wrap(spacing: 10, children: [
@@ -997,11 +1001,11 @@ class _HeroLiveSlide extends StatelessWidget {
                 _caption('${slide.caption} · ${item.displayName.toUpperCase()}'),
                 const SizedBox(height: 6),
                 Text(p?.title ?? item.displayName,
-                    style: kText(height < 300 ? 26 : 32, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    style: kTextD(height < 300 ? 26 : 32, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
                 if (p != null) ...[
                   const SizedBox(height: 8),
                   Row(children: [
-                    Text(timeRange(p), style: kText(13, weight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.85))),
+                    Text(timeRange(p), style: kTextD(13, weight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.85))),
                     const SizedBox(width: 10),
                     SizedBox(
                       width: 180,
@@ -1013,13 +1017,13 @@ class _HeroLiveSlide extends StatelessWidget {
                   ]),
                   if (p.desc != null && height >= 300) ...[
                     const SizedBox(height: 8),
-                    Text(p.desc!, style: kText(13, color: Colors.white.withValues(alpha: 0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Text(p.desc!, style: kTextD(13, color: Colors.white.withValues(alpha: 0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
                   ],
                 ],
                 if (next != null) ...[
                   const SizedBox(height: 6),
                   Text('${tr('Ensuite à')} ${hm(next.start)} : ${next.title}',
-                      style: kText(12, color: Colors.white.withValues(alpha: 0.65)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      style: kTextD(12, color: Colors.white.withValues(alpha: 0.65)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
                 const SizedBox(height: 14),
                 FilledButton.icon(

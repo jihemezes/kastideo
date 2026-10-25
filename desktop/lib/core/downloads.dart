@@ -5,7 +5,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n.dart';
 import 'log.dart';
+import 'notify.dart';
 import 'models.dart';
 import 'paths.dart';
 import 'playback.dart';
@@ -279,6 +281,7 @@ class DownloadManager extends ChangeNotifier {
         ..status = DownloadStatus.done
         ..speed = 0;
       PlaybackLog.shared.note('Téléchargement terminé : ${t.path}');
+      SystemNotifier.show(tr('Téléchargement terminé'), t.group.isEmpty ? t.name : '${t.group} · ${t.name}');
     } catch (e) {
       if (_cancelRequested) {
         if (t.status == DownloadStatus.running) t.status = DownloadStatus.queued;
@@ -287,6 +290,7 @@ class DownloadManager extends ChangeNotifier {
           ..status = DownloadStatus.failed
           ..error = '$e';
         PlaybackLog.shared.note('Téléchargement de « ${t.name} » impossible : $e');
+        SystemNotifier.show(tr('Téléchargement impossible'), '${t.name} : $e');
       }
       t.speed = 0;
     } finally {

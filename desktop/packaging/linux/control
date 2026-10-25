@@ -4,7 +4,7 @@ Section: video
 Priority: optional
 Architecture: @ARCH@
 Installed-Size: @SIZE@
-Depends: @LIBMPV@, libgtk-3-0, libsecret-1-0
+Depends: @LIBMPV@, libgtk-3-0, libsecret-1-0, libnotify4
 Maintainer: Jean-Michel Ezes <noreply@github.com>
 Homepage: https://github.com/jihemezes/kastideo
 Description: Kastideo - lecteur IPTV (direct, films, séries)

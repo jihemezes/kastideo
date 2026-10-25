@@ -49,7 +49,9 @@ class _DetailsViewState extends State<DetailsView> {
   MediaItem get item => widget.item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     final info = context.info;
     return ListenableBuilder(
       listenable: Listenable.merge([info, context.library, context.watch, context.settings, context.downloads]),
@@ -67,7 +69,7 @@ class _DetailsViewState extends State<DetailsView> {
                 if (d?.plot != null)
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 820),
-                    child: SelectableText(d!.plot!, style: kText(14, color: Colors.white).copyWith(height: 1.45)),
+                    child: SelectableText(d!.plot!, style: kTextD(14, color: Colors.white).copyWith(height: 1.45)),
                   )
                 else if (info.isLoading(item.id))
                   const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -75,9 +77,9 @@ class _DetailsViewState extends State<DetailsView> {
                   const SizedBox(height: 16),
                   Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(item.kind == MediaKind.series ? tr('Création') : tr('Réalisation'),
-                        style: kText(13, weight: FontWeight.w600, color: Colors.white60)),
+                        style: kTextD(13, weight: FontWeight.w600, color: Colors.white60)),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(d.directors.join(', '), style: kText(13))),
+                    Expanded(child: Text(d.directors.join(', '), style: kTextD(13))),
                   ]),
                 ],
                 if (d != null && d.cast.isNotEmpty) ...[const SizedBox(height: 22), _cast(d)],
@@ -125,7 +127,7 @@ class _DetailsViewState extends State<DetailsView> {
         decoration: BoxDecoration(color: Colors.white.withValues(alpha: hovering ? 0.22 : 0.14), borderRadius: BorderRadius.circular(20)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.chevron_left_rounded, size: 18),
-          Text(label, style: kText(13, weight: FontWeight.w600)),
+          Text(label, style: kTextD(13, weight: FontWeight.w600)),
         ]),
       ),
     );
@@ -172,14 +174,14 @@ class _DetailsViewState extends State<DetailsView> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-            Text(title, style: kText(widget.page ? 36 : 28, weight: FontWeight.w700), maxLines: 3),
+            Text(title, style: kTextD(widget.page ? 36 : 28, weight: FontWeight.w700), maxLines: 3),
             if (d?.originalTitle != null && d!.originalTitle != title) ...[
               const SizedBox(height: 4),
-              Text(d.originalTitle!, style: kText(18, color: Colors.white60)),
+              Text(d.originalTitle!, style: kTextD(18, color: Colors.white60)),
             ],
             if (meta.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(meta, style: kText(13, weight: FontWeight.w500, color: Colors.white70)),
+              Text(meta, style: kTextD(13, weight: FontWeight.w500, color: Colors.white70)),
             ],
             if (d?.rating != null) ...[
               const SizedBox(height: 8),
@@ -187,12 +189,12 @@ class _DetailsViewState extends State<DetailsView> {
                 const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                 const SizedBox(width: 4),
                 Text('${d!.rating!.toStringAsFixed(1).replaceAll('.', L10n.english ? '.' : ',')} / 10',
-                    style: kText(13, weight: FontWeight.w600)),
+                    style: kTextD(13, weight: FontWeight.w600)),
               ]),
             ],
             if (d?.tagline != null) ...[
               const SizedBox(height: 8),
-              Text(d!.tagline!, style: kText(13, color: Colors.white70).copyWith(fontStyle: FontStyle.italic)),
+              Text(d!.tagline!, style: kTextD(13, color: Colors.white70).copyWith(fontStyle: FontStyle.italic)),
             ],
             const SizedBox(height: 14),
             _actions(context, d),
@@ -213,7 +215,7 @@ class _DetailsViewState extends State<DetailsView> {
             : tr('Lire');
     return Wrap(spacing: 10, runSpacing: 10, children: [
       FilledButton.icon(
-        style: FilledButton.styleFrom(backgroundColor: KPalette.accent, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16)),
+        style: FilledButton.styleFrom(backgroundColor: KPalette.accentDark, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16)),
         onPressed: isSeries
             ? () {
                 final target = _episodesKey.currentContext;
@@ -246,10 +248,10 @@ class _DetailsViewState extends State<DetailsView> {
   Widget _cast(MediaDetails d) {
     final withPhotos = d.cast.any((c) => c.photo != null);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(tr('Distribution'), style: kText(18, weight: FontWeight.w600)),
+      Text(tr('Distribution'), style: kTextD(18, weight: FontWeight.w600)),
       const SizedBox(height: 10),
       if (!withPhotos)
-        Text(d.cast.map((c) => c.name).join(', '), style: kText(13, color: Colors.white70))
+        Text(d.cast.map((c) => c.name).join(', '), style: kTextD(13, color: Colors.white70))
       else
         SizedBox(
           height: 150,
@@ -273,9 +275,9 @@ class _DetailsViewState extends State<DetailsView> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(c.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: kText(12, weight: FontWeight.w600)),
+                  Text(c.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: kTextD(12, weight: FontWeight.w600)),
                   if (c.role != null)
-                    Text(c.role!, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: kText(11, color: Colors.white54)),
+                    Text(c.role!, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(11, color: Colors.white54)),
                 ]),
               );
             },
@@ -291,13 +293,13 @@ class _DetailsViewState extends State<DetailsView> {
       if (info.isLoading(item.id)) {
         return const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2));
       }
-      return Text(tr('Cette source ne fournit pas de liste d\'épisodes.'), style: kText(13, color: Colors.white60));
+      return Text(tr('Cette source ne fournit pas de liste d\'épisodes.'), style: kTextD(13, color: Colors.white60));
     }
-    if (seasons.isEmpty) return Text(tr('Aucun épisode.'), style: kText(13, color: Colors.white60));
+    if (seasons.isEmpty) return Text(tr('Aucun épisode.'), style: kTextD(13, color: Colors.white60));
     final current = seasons.where((s) => s.number == _season).firstOrNull ?? seasons.first;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Text(tr('Épisodes'), style: kText(18, weight: FontWeight.w600)),
+        Text(tr('Épisodes'), style: kTextD(18, weight: FontWeight.w600)),
         const Spacer(),
         PopupMenuButton<bool>(
           tooltip: tr('Télécharger la saison'),
@@ -308,15 +310,15 @@ class _DetailsViewState extends State<DetailsView> {
             }
           },
           itemBuilder: (_) => [
-            PopupMenuItem(value: false, child: Text('${tr('Télécharger la saison')} ${current.number} (${current.episodes.length})', style: kText(13))),
-            PopupMenuItem(value: true, child: Text('${tr('Télécharger la saison')} ${current.number} ${tr('cette nuit')}', style: kText(13))),
+            PopupMenuItem(value: false, child: Text('${tr('Télécharger la saison')} ${current.number} (${current.episodes.length})', style: kTextD(13))),
+            PopupMenuItem(value: true, child: Text('${tr('Télécharger la saison')} ${current.number} ${tr('cette nuit')}', style: kTextD(13))),
           ],
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.download_rounded, size: 18, color: KPalette.accent),
+              Icon(Icons.download_rounded, size: 18, color: KPalette.accentDark),
               const SizedBox(width: 6),
-              Text(tr('Télécharger la saison'), style: kText(13, color: KPalette.accent)),
+              Text(tr('Télécharger la saison'), style: kTextD(13, color: KPalette.accentDark)),
             ]),
           ),
         ),
@@ -350,7 +352,7 @@ class _DetailsViewState extends State<DetailsView> {
     return Row(mainAxisSize: MainAxisSize.min, children: [
       const Icon(Icons.translate_rounded, size: 14, color: KPalette.orange),
       const SizedBox(width: 6),
-      Flexible(child: Text(text, style: kText(12, color: KPalette.orange))),
+      Flexible(child: Text(text, style: kTextD(12, color: KPalette.orange))),
     ]);
   }
 
@@ -365,16 +367,16 @@ class _DetailsViewState extends State<DetailsView> {
           child: Row(children: [
             const Icon(Icons.warning_amber_rounded, size: 14, color: Colors.orange),
             const SizedBox(width: 6),
-            Expanded(child: Text(error, style: kText(12, color: Colors.orange))),
+            Expanded(child: Text(error, style: kTextD(12, color: Colors.orange))),
           ]),
         ),
       if (sources.isNotEmpty)
         Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 10, children: [
           Text('${tr('Informations')} : ${sources.map((s) => s == 'IPTV' ? tr('fournisseur IPTV') : s).join(' + ')}',
-              style: kText(12, color: Colors.white54)),
+              style: kTextD(12, color: Colors.white54)),
           if (!context.settings.usesTMDB)
             Text(tr('· Ajoutez une clé TMDB dans Réglages > Général pour des fiches plus complètes.'),
-                style: kText(12, color: Colors.white54)),
+                style: kTextD(12, color: Colors.white54)),
           ?_languageNotice(context, d),
           TextButton(onPressed: () => info.load(item, force: true), child: Text(tr('Actualiser'))),
         ]),
@@ -399,7 +401,7 @@ class _EpisodeRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: hovering ? 0.14 : 0.07),
           borderRadius: BorderRadius.circular(10),
-          border: playing ? Border.all(color: KPalette.accent) : null,
+          border: playing ? Border.all(color: KPalette.accentDark) : null,
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           ClipRRect(
@@ -417,10 +419,10 @@ class _EpisodeRow extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('${episode.number != null ? '${episode.number}. ' : ''}${episode.name}',
-                  style: kText(14, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: kTextD(14, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
               if (episode.info != null) ...[
                 const SizedBox(height: 4),
-                Text(episode.info!, style: kText(12, color: Colors.white60), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(episode.info!, style: kTextD(12, color: Colors.white60), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               if (fraction != null) ...[
                 const SizedBox(height: 6),
@@ -464,7 +466,7 @@ Widget _downloadIcon(BuildContext context, MediaItem item, VoidCallback onDownlo
         child: CircularProgressIndicator(
           value: task.status == DownloadStatus.running ? task.fraction : 0,
           strokeWidth: 2.5,
-          color: KPalette.accent,
+          color: KPalette.accentDark,
           backgroundColor: Colors.white12,
         ),
       ),
@@ -508,16 +510,16 @@ class _DownloadButton extends StatelessWidget {
       color: const Color(0xF02C2C2E),
       onSelected: (night) => context.downloads.enqueue(item, nightOnly: night),
       itemBuilder: (_) => [
-        PopupMenuItem(value: false, child: Text(tr('Télécharger maintenant'), style: kText(13))),
-        PopupMenuItem(value: true, child: Text(tr('Télécharger cette nuit'), style: kText(13))),
+        PopupMenuItem(value: false, child: Text(tr('Télécharger maintenant'), style: kTextD(13))),
+        PopupMenuItem(value: true, child: Text(tr('Télécharger cette nuit'), style: kTextD(13))),
       ],
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(20)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.download_rounded, size: 20, color: KPalette.accent),
+          Icon(Icons.download_rounded, size: 20, color: KPalette.accentDark),
           const SizedBox(width: 8),
-          Text(tr('Télécharger'), style: kText(13, weight: FontWeight.w600, color: KPalette.accent)),
+          Text(tr('Télécharger'), style: kTextD(13, weight: FontWeight.w600, color: KPalette.accentDark)),
         ]),
       ),
     );

@@ -68,7 +68,9 @@ class _PlayerPaneState extends State<PlayerPane> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     final playback = context.playback;
     return CallbackShortcuts(
       bindings: {
@@ -159,7 +161,7 @@ class _Placeholder extends StatelessWidget {
             child: ClipRRect(borderRadius: BorderRadius.circular(21.5), child: Image.asset('assets/images/icon.png', width: 96, height: 96)),
           ),
           const SizedBox(height: 14),
-          Text(tr('Choisissez une chaîne'), style: kText(15, color: KPalette.secondaryText)),
+          Text(tr('Choisissez une chaîne'), style: kTextD(15, color: KPalette.secondaryDark)),
         ]),
       );
 }
@@ -204,7 +206,7 @@ class _StartupBadgeState extends State<_StartupBadge> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(20)),
           child: Text('${tr('Prête en')} ${(time.inMilliseconds / 1000).toStringAsFixed(1).replaceAll('.', L10n.english ? '.' : ',')} s',
-              style: kText(12, weight: FontWeight.w600)),
+              style: kTextD(12, weight: FontWeight.w600)),
         ),
       ),
     );
@@ -225,7 +227,7 @@ class _ErrorView extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.warning_amber_rounded, size: 46, color: Colors.white),
             const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center, style: kText(15, weight: FontWeight.w500)),
+            Text(message, textAlign: TextAlign.center, style: kTextD(15, weight: FontWeight.w500)),
             const SizedBox(height: 18),
             Row(mainAxisSize: MainAxisSize.min, children: [
               FilledButton.tonal(onPressed: context.playback.retry, child: Text(tr('Réessayer'))),
@@ -277,19 +279,19 @@ class ControlsBar extends StatelessWidget {
               _BarButton(icon: Icons.forward_30_rounded, tooltip: tr('Avancer de 30 s (→)'), onTap: () => playback.jump(30)),
               const SizedBox(width: 8),
               Text('${formatClock(playback.position)} / ${formatClock(playback.duration)}',
-                  style: kText(12, color: Colors.white.withValues(alpha: 0.85)).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+                  style: kTextD(12, color: Colors.white.withValues(alpha: 0.85)).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
             ],
             const SizedBox(width: 10),
             const _HealthPill(),
             const SizedBox(width: 12),
             if (playback.isLive && playback.isTimeshifted)
               Text('${tr('DIFFÉRÉ')} −${formatClock(Duration(seconds: playback.liveDelay.round()))}',
-                  style: kText(12, weight: FontWeight.w700, color: KPalette.orange).copyWith(fontFeatures: const [FontFeature.tabularFigures()]))
+                  style: kTextD(12, weight: FontWeight.w700, color: KPalette.orange).copyWith(fontFeatures: const [FontFeature.tabularFigures()]))
             else if (playback.isLive)
               Row(children: [
                 Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
                 const SizedBox(width: 6),
-                Text(tr('EN DIRECT'), style: kText(12, weight: FontWeight.w700)),
+                Text(tr('EN DIRECT'), style: kTextD(12, weight: FontWeight.w700)),
               ]),
             if (playback.isLive && playback.current != null) ...[
               const SizedBox(width: 8),
@@ -388,7 +390,7 @@ class _HealthPillState extends State<_HealthPill> {
           Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           if (_hovering || playback.health == HealthLevel.poor) ...[
             const SizedBox(width: 5),
-            Text(label, style: kText(12, weight: FontWeight.w600)),
+            Text(label, style: kTextD(12, weight: FontWeight.w600)),
           ],
           if (quality != null) ...[
             const SizedBox(width: 6),
@@ -398,7 +400,7 @@ class _HealthPillState extends State<_HealthPill> {
                 border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
                 borderRadius: BorderRadius.circular(3),
               ),
-              child: Text(quality, style: kText(10, weight: FontWeight.w800)),
+              child: Text(quality, style: kTextD(10, weight: FontWeight.w800)),
             ),
           ],
         ]),
@@ -427,7 +429,7 @@ class _BackChip extends StatelessWidget {
             decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(20)),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.chevron_left_rounded, size: 18, color: Colors.white),
-              Text(live ? tr('Retour') : tr('Retour à la fiche'), style: kText(13, weight: FontWeight.w600)),
+              Text(live ? tr('Retour') : tr('Retour à la fiche'), style: kTextD(13, weight: FontWeight.w600)),
             ]),
           ),
         ),
@@ -474,7 +476,7 @@ class _ResumeNoticeState extends State<_ResumeNotice> {
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.history_rounded, size: 16, color: KPalette.orange),
             const SizedBox(width: 8),
-            Text('${tr('Reprise à')} ${formatClock(at)}', style: kText(13, weight: FontWeight.w600)),
+            Text('${tr('Reprise à')} ${formatClock(at)}', style: kTextD(13, weight: FontWeight.w600)),
             const SizedBox(width: 10),
             TextButton(onPressed: context.playback.restartFromBeginning, child: Text(tr('Reprendre au début'))),
           ]),
@@ -553,7 +555,7 @@ class _ScrubBarState extends State<ScrubBar> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(10)),
                     child: Text(formatClock(Duration(milliseconds: (total * labelX / width).round())),
-                        style: kText(11, weight: FontWeight.w600)),
+                        style: kTextD(11, weight: FontWeight.w600)),
                   ),
                 ),
             ]),
@@ -572,7 +574,7 @@ class _NowTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = item;
-    final style = kText(13, color: Colors.white.withValues(alpha: 0.75));
+    final style = kTextD(13, color: Colors.white.withValues(alpha: 0.75));
     if (current == null) return const SizedBox();
     if (current.kind != MediaKind.live) return Text(current.displayName, style: style, maxLines: 1, overflow: TextOverflow.ellipsis);
     return ListenableBuilder(
@@ -626,7 +628,7 @@ class _TimeshiftBarState extends State<TimeshiftBar> {
     return SizedBox(
       width: 780,
       child: Row(children: [
-        Text('−${formatClock(Duration(seconds: depth.round()))}', style: kText(11, color: Colors.white54)),
+        Text('−${formatClock(Duration(seconds: depth.round()))}', style: kTextD(11, color: Colors.white54)),
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -657,7 +659,7 @@ class _TimeshiftBarState extends State<TimeshiftBar> {
           width: 64,
           child: Text(delay < 4.5 ? tr('Direct') : '−${formatClock(shownDelay)}',
               textAlign: TextAlign.right,
-              style: kText(12, weight: FontWeight.w600, color: delay < 4.5 ? Colors.white : KPalette.orange)
+              style: kTextD(12, weight: FontWeight.w600, color: delay < 4.5 ? Colors.white : KPalette.orange)
                   .copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
         ),
         const SizedBox(width: 8),
@@ -668,12 +670,12 @@ class _TimeshiftBarState extends State<TimeshiftBar> {
           onSelected: playback.setRate,
           itemBuilder: (_) => [
             for (final r in const [1.0, 1.25, 1.5, 2.0])
-              PopupMenuItem(value: r, child: Text('×${r.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kText(13))),
+              PopupMenuItem(value: r, child: Text('×${r.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kTextD(13))),
           ],
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-            child: Text('×${playback.rate.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kText(12, weight: FontWeight.w600)),
+            child: Text('×${playback.rate.toString().replaceAll('.0', '').replaceAll('.', ',')}', style: kTextD(12, weight: FontWeight.w600)),
           ),
         ),
         const SizedBox(width: 6),

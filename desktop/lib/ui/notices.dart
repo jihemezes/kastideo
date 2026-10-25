@@ -20,7 +20,9 @@ class _NoticeOverlayState extends State<NoticeOverlay> {
   int _seen = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+
+  Widget _buildDark(BuildContext context) {
     final alerts = context.alerts;
     final recordings = context.recordings;
     return ListenableBuilder(
@@ -60,7 +62,7 @@ class _NoticeOverlayState extends State<NoticeOverlay> {
                       children: [
                         const Icon(Icons.fiber_manual_record_rounded, size: 14, color: Colors.redAccent),
                         const SizedBox(width: 8),
-                        Flexible(child: Text(notice, style: kText(13))),
+                        Flexible(child: Text(notice, style: kTextD(13))),
                       ],
                     ),
                   ),
@@ -105,23 +107,23 @@ class _AlertCard extends StatelessWidget {
                       const SizedBox(width: 5),
                       Text(
                         p.start.isAfter(DateTime.now()) ? '${tr('À')} ${hm(p.start)}' : tr('Ça commence'),
-                        style: kText(11, weight: FontWeight.w700, color: KPalette.orange),
+                        style: kTextD(11, weight: FontWeight.w700, color: KPalette.orange),
                       ),
                     ],
                   ),
                   Text(
                     p.title,
-                    style: kText(14, weight: FontWeight.w700),
+                    style: kTextD(14, weight: FontWeight.w700),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(alert.channel.displayName, style: kText(12, color: KPalette.secondaryText), maxLines: 1),
+                  Text(alert.channel.displayName, style: kTextD(12, color: KPalette.secondaryDark), maxLines: 1),
                 ],
               ),
             ),
             const SizedBox(width: 6),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: KPalette.accent, visualDensity: VisualDensity.compact),
+              style: FilledButton.styleFrom(backgroundColor: KPalette.accentDark, visualDensity: VisualDensity.compact),
               onPressed: () {
                 context.alerts.dismiss(alert);
                 openItem(context, alert.channel);

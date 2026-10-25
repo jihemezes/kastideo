@@ -12,6 +12,7 @@ import 'channel_edit_dialog.dart';
 import 'cinema_view.dart';
 import 'details_view.dart';
 import 'player_pane.dart';
+import 'multiview_view.dart';
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'tv_view.dart';
@@ -58,7 +59,7 @@ class CatalogScreen extends StatelessWidget {
                   width: 340,
                   child: kind == MediaKind.live && navigation.filter(kind) is ThemesFilter ? const ThemesList() : ItemList(kind: kind),
                 ),
-                const VerticalDivider(width: 1, color: KPalette.separator),
+                VerticalDivider(width: 1, color: KPalette.separator),
               ],
               Expanded(child: right),
             ]);
@@ -66,7 +67,7 @@ class CatalogScreen extends StatelessWidget {
           return Row(children: [
             if (!navigation.theater) ...[
               SizedBox(width: 236, child: Sidebar(kind: kind)),
-              const VerticalDivider(width: 1, color: KPalette.separator),
+              VerticalDivider(width: 1, color: KPalette.separator),
             ],
             Expanded(child: content),
           ]);
@@ -86,7 +87,7 @@ class _EmptyPane extends StatelessWidget {
         alignment: Alignment.center,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(kind == MediaKind.movie ? Icons.movie_outlined : Icons.video_library_outlined,
-              size: 64, color: Colors.white.withValues(alpha: 0.35)),
+              size: 64, color: KPalette.ink.withValues(alpha: 0.35)),
           const SizedBox(height: 12),
           Text(kind == MediaKind.movie ? tr('Choisissez un film') : tr('Choisissez une série'),
               style: kText(15, color: KPalette.secondaryText)),
@@ -176,6 +177,14 @@ class Sidebar extends StatelessWidget {
                       selected: guide,
                       onTap: () => navigation.go(Screen.guide),
                     ),
+                  if (kind == MediaKind.live)
+                    _SidebarRow(
+                      icon: Icons.grid_view_rounded,
+                      label: tr('MultiVue'),
+                      count: context.multiview.channels.length,
+                      selected: false,
+                      onTap: () => openMultiView(context),
+                    ),
                   _SidebarRow(
                     icon: Icons.radio_button_checked_rounded,
                     label: tr('Enregistrements'),
@@ -191,7 +200,7 @@ class Sidebar extends StatelessWidget {
                       child: InkResponse(
                         onTap: () => showSettingsDialog(context, tab: SettingsTab.categories, categoryKind: kind),
                         radius: 14,
-                        child: Icon(Icons.tune_rounded, size: 15, color: Colors.white.withValues(alpha: 0.5)),
+                        child: Icon(Icons.tune_rounded, size: 15, color: KPalette.ink.withValues(alpha: 0.5)),
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -209,7 +218,7 @@ class Sidebar extends StatelessWidget {
               ),
             ),
             const ActivityIndicator(),
-            const Divider(height: 1, color: KPalette.separator),
+            Divider(height: 1, color: KPalette.separator),
             _SidebarRow(
               icon: Icons.settings_rounded,
               label: tr('Réglages'),
@@ -224,18 +233,81 @@ class Sidebar extends StatelessWidget {
   }
 
   Future<void> _categoryMenu(BuildContext context, String name, Offset position) async {
+    final library = context.library;
+    final visible = library.categories(kind);
+    final index = visible.indexOf(name);
     final choice = await showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-      color: const Color(0xF02C2C2E),
+      color: KPalette.menu,
       items: [
-        PopupMenuItem(value: 'hide', child: Text(tr('Masquer cette catégorie'), style: kText(13))),
-        PopupMenuItem(value: 'manage', child: Text(tr('Gérer les catégories…'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'rename', child: Text(tr('Renommer…'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'top', enabled: index > 0, child: Text(tr('Placer en haut'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'up', enabled: index > 0, child: Text(tr('Monter'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'down', enabled: index >= 0 && index < visible.length - 1, child: Text(tr('Descendre'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'bottom', enabled: index >= 0 && index < visible.length - 1, child: Text(tr('Placer en bas'), style: kText(13))),
+        const PopupMenuDivider(),
+        PopupMenuItem(height: 34, value: 'hide', child: Text(tr('Masquer cette catégorie'), style: kText(13))),
+        PopupMenuItem(height: 34, value: 'manage', child: Text(tr('Gérer les catégories…'), style: kText(13))),
       ],
     );
-    if (!context.mounted) return;
-    if (choice == 'hide') context.library.updateCategories(kind, (p) => p.hidden.add(name));
-    if (choice == 'manage') showSettingsDialog(context, tab: SettingsTab.categories, categoryKind: kind);
+    if (!context.mounted || choice == null) return;
+    void move(int Function(List<String> order, int from) target) {
+      library.updateCategories(kind, (p) {
+        final order = [...library.allCategories(kind)];
+        final from = order.indexOf(name);
+        if (from < 0) return;
+        // Position visée parmi les catégories visibles, convertie en position dans l'ordre complet.
+        final to = target(order, from).clamp(0, order.length - 1);
+        order.removeAt(from);
+        order.insert(to, name);
+        p.order = order;
+      });
+    }
+
+    switch (choice) {
+      case 'hide':
+        library.updateCategories(kind, (p) => p.hidden.add(name));
+      case 'manage':
+        showSettingsDialog(context, tab: SettingsTab.categories, categoryKind: kind);
+      case 'rename':
+        final controller = TextEditingController(text: library.prefs(kind).renames[name] ?? '');
+        final value = await showDialog<String>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: Text(tr('Renommer la catégorie')),
+            content: SizedBox(
+              width: 400,
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: InputDecoration(hintText: name, helperText: tr('Laisser vide pour revenir au nom du fournisseur')),
+                onSubmitted: (v) => Navigator.pop(c, v),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('Annuler'))),
+              FilledButton(onPressed: () => Navigator.pop(c, controller.text), child: Text(tr('Enregistrer'))),
+            ],
+          ),
+        );
+        if (value == null) return;
+        library.updateCategories(kind, (p) {
+          if (value.trim().isEmpty || value.trim() == name) {
+            p.renames.remove(name);
+          } else {
+            p.renames[name] = value.trim();
+          }
+        });
+      case 'top':
+        move((order, from) => order.indexOf(visible.first));
+      case 'bottom':
+        move((order, from) => order.indexOf(visible.last));
+      case 'up':
+        move((order, from) => order.indexOf(visible[index - 1]));
+      case 'down':
+        move((order, from) => order.indexOf(visible[index + 1]));
+    }
   }
 }
 
@@ -257,15 +329,15 @@ class SectionPicker extends StatelessWidget {
               duration: const Duration(milliseconds: 120),
               padding: const EdgeInsets.symmetric(vertical: 6),
               decoration: BoxDecoration(
-                color: selected ? Colors.white.withValues(alpha: 0.16) : (hovering ? Colors.white.withValues(alpha: 0.06) : null),
+                color: selected ? KPalette.ink.withValues(alpha: 0.16) : (hovering ? KPalette.ink.withValues(alpha: 0.06) : null),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Column(children: [
-                Icon(icon, size: 16, color: selected ? Colors.white : Colors.white.withValues(alpha: 0.6)),
+                Icon(icon, size: 16, color: selected ? KPalette.ink : KPalette.ink.withValues(alpha: 0.6)),
                 const SizedBox(height: 2),
                 Text(sectionTitle(kind),
                     style: kText(11, weight: selected ? FontWeight.w600 : FontWeight.w400,
-                        color: selected ? Colors.white : Colors.white.withValues(alpha: 0.6))),
+                        color: selected ? KPalette.ink : KPalette.ink.withValues(alpha: 0.6))),
               ]),
             ),
           ),
@@ -275,7 +347,7 @@ class SectionPicker extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: KPalette.light ? Colors.black.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(8)),
       child: Row(children: [
         segment(MediaKind.live, Icons.sensors_rounded),
         segment(MediaKind.movie, Icons.movie_outlined),
@@ -292,7 +364,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
-        child: Text(text, style: kText(11, weight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.45))),
+        child: Text(text, style: kText(11, weight: FontWeight.w700, color: KPalette.ink.withValues(alpha: 0.45))),
       );
 }
 
@@ -327,16 +399,16 @@ class _SidebarRow extends StatelessWidget {
             color: selected
                 ? KPalette.accent.withValues(alpha: 0.85)
                 : hovering
-                    ? Colors.white.withValues(alpha: 0.06)
+                    ? KPalette.ink.withValues(alpha: 0.06)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(children: [
-            Icon(icon, size: 16, color: selected ? Colors.white : KPalette.accent),
+            Icon(icon, size: 16, color: selected ? KPalette.ink : KPalette.accent),
             const SizedBox(width: 8),
             Expanded(child: Text(label, style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis)),
             if (count != null && count! > 0)
-              Text('$count', style: kText(11, color: Colors.white.withValues(alpha: selected ? 0.85 : 0.45))),
+              Text('$count', style: kText(11, color: KPalette.ink.withValues(alpha: selected ? 0.85 : 0.45))),
           ]),
         ),
       ),
@@ -417,13 +489,13 @@ class _ItemListState extends State<ItemList> {
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: SearchBox(controller: _search, onChanged: navigation.setSearch),
             ),
-            const Divider(height: 1, color: KPalette.separator),
+            Divider(height: 1, color: KPalette.separator),
             Expanded(
               child: items.isEmpty
                   ? Center(child: Text(tr('Aucun résultat'), style: kText(13, color: KPalette.secondaryText)))
                   : ListView.builder(
                       itemCount: items.length,
-                      itemExtent: widget.kind == MediaKind.live ? 56 : 64,
+                      itemExtent: (widget.kind == MediaKind.live ? 56 : 64) * KPalette.density,
                       itemBuilder: (context, index) => ItemRow(item: items[index], selected: selectedId == items[index].id),
                     ),
             ),
@@ -451,11 +523,11 @@ class SearchBox extends StatelessWidget {
           decoration: InputDecoration(
             isDense: true,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            prefixIcon: Icon(Icons.search_rounded, size: 16, color: Colors.white.withValues(alpha: 0.5)),
+            fillColor: KPalette.ink.withValues(alpha: 0.08),
+            prefixIcon: Icon(Icons.search_rounded, size: 16, color: KPalette.ink.withValues(alpha: 0.5)),
             prefixIconConstraints: const BoxConstraints(minWidth: 32),
             hintText: tr('Rechercher'),
-            hintStyle: kText(13, color: Colors.white.withValues(alpha: 0.4)),
+            hintStyle: kText(13, color: KPalette.ink.withValues(alpha: 0.4)),
             contentPadding: const EdgeInsets.symmetric(vertical: 8),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
           ),
@@ -487,15 +559,15 @@ class ItemRow extends StatelessWidget {
             color: selected
                 ? KPalette.accent.withValues(alpha: 0.85)
                 : hovering
-                    ? Colors.white.withValues(alpha: 0.06)
+                    ? KPalette.ink.withValues(alpha: 0.06)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(children: [
             if (isLive)
-              LogoView(url: item.logo, name: item.name, size: 34)
+              LogoView(url: item.logo, name: item.name, size: (34 * KPalette.density).clamp(26, 42))
             else
-              ClipRRect(borderRadius: BorderRadius.circular(4), child: PosterImage(url: item.logo, name: item.name, width: 36, height: 54)),
+              ClipRRect(borderRadius: BorderRadius.circular(4), child: PosterImage(url: item.logo, name: item.name, width: (54 * KPalette.density).clamp(40, 66) / 1.5, height: (54 * KPalette.density).clamp(40, 66))),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -510,7 +582,7 @@ class ItemRow extends StatelessWidget {
                         : item.number != null && isLive
                             ? '${item.number} · ${item.group}'
                             : item.group,
-                    style: kText(11, color: Colors.white.withValues(alpha: selected ? 0.8 : 0.5)),
+                    style: kText(11, color: KPalette.ink.withValues(alpha: selected ? 0.8 : 0.5)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -520,8 +592,8 @@ class ItemRow extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: programme.progress(),
                         minHeight: 2,
-                        color: selected ? Colors.white : KPalette.orange,
-                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        color: selected ? KPalette.ink : KPalette.orange,
+                        backgroundColor: KPalette.ink.withValues(alpha: 0.15),
                       ),
                     ),
                   if (fraction != null)
@@ -530,14 +602,14 @@ class ItemRow extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: fraction,
                         minHeight: 2,
-                        color: selected ? Colors.white : KPalette.orange,
-                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        color: selected ? KPalette.ink : KPalette.orange,
+                        backgroundColor: KPalette.ink.withValues(alpha: 0.15),
                       ),
                     ),
                 ],
               ),
             ),
-            if (favorite) Icon(Icons.star_rounded, size: 15, color: selected ? Colors.white : KPalette.orange),
+            if (favorite) Icon(Icons.star_rounded, size: 15, color: selected ? KPalette.ink : KPalette.orange),
           ]),
         ),
       ),
@@ -553,7 +625,7 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
   final choice = await showMenu<String>(
     context: context,
     position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-    color: const Color(0xF02C2C2E),
+    color: KPalette.menu,
     items: [
       PopupMenuItem(
         value: 'open',
@@ -567,6 +639,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
           value: 'record',
           child: Text(context.recordings.isRecording(item) ? tr('Arrêter l\'enregistrement') : tr('Enregistrer maintenant'), style: kText(13)),
         ),
+      if (isLive && context.settings.multiviewAvailable)
+        PopupMenuItem(value: 'multi', child: Text(tr('Ajouter à la MultiVue'), style: kText(13))),
       if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
         PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
@@ -598,6 +672,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         final p = context.guide.current(item);
         await recordings.recordNow(item, title: p?.title ?? '', stopS: p == null ? null : p.stopS + context.settings.marginAfter * 60);
       }
+    case 'multi':
+      await openMultiView(context, add: item);
     case 'edit':
       await showChannelEditor(context, item);
     case 'download':
@@ -629,7 +705,7 @@ class ActivityIndicator extends StatelessWidget {
               margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: hovering ? 0.1 : 0.06),
+                color: KPalette.ink.withValues(alpha: hovering ? 0.1 : 0.06),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -648,7 +724,7 @@ class ActivityIndicator extends StatelessWidget {
                     SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(value: dl.fraction, strokeWidth: 2.4, color: KPalette.accent, backgroundColor: Colors.white12),
+                      child: CircularProgressIndicator(value: dl.fraction, strokeWidth: 2.4, color: KPalette.accent, backgroundColor: KPalette.ink12),
                     ),
                     const SizedBox(width: 8),
                     Expanded(child: Text(dl.name, style: kText(12, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -660,7 +736,7 @@ class ActivityIndicator extends StatelessWidget {
                       if (dl.remaining != null) '${tr('reste')} ${durationText(dl.remaining!)}',
                       if (context.downloads.pendingCount > 1) '${context.downloads.pendingCount - 1} ${tr('en attente')}',
                     ].join(' · '),
-                    style: kText(11, color: Colors.white54),
+                    style: kText(11, color: KPalette.ink54),
                   ),
                 ],
               ]),

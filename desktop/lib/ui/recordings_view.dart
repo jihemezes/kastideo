@@ -34,15 +34,15 @@ class RecordingsScreen extends StatelessWidget {
           builder: (context, _) => Row(children: [
             if (!context.navigation.theater) ...[
               const SizedBox(width: 236, child: Sidebar(kind: MediaKind.live, recordings: true)),
-              const VerticalDivider(width: 1, color: KPalette.separator),
+              VerticalDivider(width: 1, color: KPalette.separator),
               const SizedBox(width: 470, child: RecordingsList()),
-              const VerticalDivider(width: 1, color: KPalette.separator),
+              VerticalDivider(width: 1, color: KPalette.separator),
             ],
             Expanded(
               child: PlayerPane(
                 placeholder: Center(
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.video_file_outlined, size: 64, color: Colors.white.withValues(alpha: 0.35)),
+                    Icon(Icons.video_file_outlined, size: 64, color: KPalette.ink.withValues(alpha: 0.35)),
                     const SizedBox(height: 12),
                     Text(tr('Choisissez un fichier à regarder'), style: kText(15, color: KPalette.secondaryText)),
                   ]),
@@ -73,7 +73,7 @@ class _RecordingsListState extends State<RecordingsList> {
   Widget _header(String text, {List<Widget> actions = const []}) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 18, 10, 6),
         child: Row(children: [
-          Expanded(child: Text(text, style: kText(12, weight: FontWeight.w700, color: Colors.white54))),
+          Expanded(child: Text(text, style: kText(12, weight: FontWeight.w700, color: KPalette.ink54))),
           ...actions,
         ]),
       );
@@ -105,7 +105,7 @@ class _RecordingsListState extends State<RecordingsList> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(recordings.folder, style: kText(11, color: Colors.white38), maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(recordings.folder, style: kText(11, color: KPalette.ink38), maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             if (active != null) ...[
               _header(tr('EN COURS')),
@@ -135,14 +135,14 @@ class _RecordingsListState extends State<RecordingsList> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(tr('Programmez un enregistrement depuis le guide TV ou les thèmes (fiche d\'un programme à venir).'),
-                    style: kText(12, color: Colors.white38)),
+                    style: kText(12, color: KPalette.ink38)),
               ),
             for (final s in scheduled) _ScheduleRow(schedule: s, date: _date(s.start)),
             _header('${tr('FICHIERS')} (${recordings.files.length})'),
             if (recordings.files.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(tr('Aucun fichier pour l\'instant.'), style: kText(12, color: Colors.white38)),
+                child: Text(tr('Aucun fichier pour l\'instant.'), style: kText(12, color: KPalette.ink38)),
               ),
             for (final f in recordings.files)
               _FileRow(file: f, playing: playingPath == f.path, date: _date(f.modified)),
@@ -230,9 +230,9 @@ class _DownloadRow extends StatelessWidget {
             if (t.status == DownloadStatus.running || (t.fraction != null && t.status != DownloadStatus.done))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
-                child: LinearProgressIndicator(value: t.fraction, minHeight: 3, color: KPalette.accent, backgroundColor: Colors.white12),
+                child: LinearProgressIndicator(value: t.fraction, minHeight: 3, color: KPalette.accent, backgroundColor: KPalette.ink12),
               ),
-            Text(status, style: kText(11, color: t.status == DownloadStatus.failed ? KPalette.orange : Colors.white54), maxLines: 2),
+            Text(status, style: kText(11, color: t.status == DownloadStatus.failed ? KPalette.orange : KPalette.ink54), maxLines: 2),
           ]),
         ),
         if (t.status == DownloadStatus.running || t.status == DownloadStatus.queued)
@@ -262,7 +262,7 @@ class _ScheduleRow extends StatelessWidget {
       ScheduleStatus.recording => (Icons.fiber_manual_record, Colors.red, tr('En cours')),
       ScheduleStatus.done => (Icons.check_circle_rounded, Colors.greenAccent, tr('Terminé')),
       ScheduleStatus.failed => (Icons.error_outline_rounded, KPalette.orange, tr('Échec')),
-      ScheduleStatus.missed => (Icons.event_busy_rounded, Colors.white38, tr('Manqué')),
+      ScheduleStatus.missed => (Icons.event_busy_rounded, KPalette.ink38, tr('Manqué')),
     };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -273,7 +273,7 @@ class _ScheduleRow extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(s.title, style: kText(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
             Text('$date – ${hm(s.stop)} · ${s.channelName} · $label${s.error != null ? ' · ${s.error}' : ''}',
-                style: kText(11, color: Colors.white54), maxLines: 2),
+                style: kText(11, color: KPalette.ink54), maxLines: 2),
           ]),
         ),
         if (s.path != null && File(s.path!).existsSync())
@@ -318,16 +318,16 @@ class _FileRow extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
           decoration: BoxDecoration(
-            color: playing ? KPalette.accent.withValues(alpha: 0.85) : (hovering ? Colors.white.withValues(alpha: 0.06) : Colors.transparent),
+            color: playing ? KPalette.accent.withValues(alpha: 0.85) : (hovering ? KPalette.ink.withValues(alpha: 0.06) : Colors.transparent),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(children: [
-            Icon(Icons.movie_outlined, size: 18, color: playing ? Colors.white : Colors.white54),
+            Icon(Icons.movie_outlined, size: 18, color: playing ? KPalette.ink : KPalette.ink54),
             const SizedBox(width: 10),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(file.name, style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text('${sizeText(file.size)} · $date', style: kText(11, color: Colors.white.withValues(alpha: playing ? 0.8 : 0.45))),
+                Text('${sizeText(file.size)} · $date', style: kText(11, color: KPalette.ink.withValues(alpha: playing ? 0.8 : 0.45))),
               ]),
             ),
           ]),
@@ -340,7 +340,7 @@ class _FileRow extends StatelessWidget {
     final choice = await showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-      color: const Color(0xF02C2C2E),
+      color: KPalette.menu,
       items: [
         PopupMenuItem(value: 'play', child: Text(tr('Regarder'), style: kText(13))),
         PopupMenuItem(value: 'folder', child: Text(tr('Afficher dans le dossier'), style: kText(13))),
