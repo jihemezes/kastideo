@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
 import '../core/details.dart';
+import '../core/guide.dart';
 import '../core/models.dart';
 import '../core/settings.dart';
 import '../l10n.dart';
@@ -182,6 +183,19 @@ class _GeneralTabState extends State<_GeneralTab> {
             OutlinedButton(onPressed: context.library.clearRecents, child: Text(tr('Effacer les récents'))),
           ]),
         ]),
+        const _GuideSection(),
+        _section(tr('Contenus adultes'), [
+          ListenableBuilder(
+            listenable: context.library,
+            builder: (context, _) => SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr('Afficher les contenus adultes'), style: kText(14)),
+              value: context.library.showAdult,
+              onChanged: context.library.setShowAdult,
+            ),
+          ),
+          _caption(tr('Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes) tant que l\'option est désactivée.')),
+        ]),
         _section(tr('Fiches des films et séries (TMDB)'), [
           Row(children: [
             Expanded(
@@ -221,7 +235,7 @@ class _AppearanceTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.settings;
     Widget row(MediaKind kind, String label, {bool cinemaAvailable = true}) {
-      final current = kind == MediaKind.live ? InterfaceStyle.classic : settings.interfaceFor(kind);
+      final current = settings.interfaceFor(kind);
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(children: [
@@ -244,12 +258,13 @@ class _AppearanceTab extends StatelessWidget {
       listenable: settings,
       builder: (context, _) => ListView(padding: const EdgeInsets.all(20), children: [
         _section(tr('Interface par type de contenu'), [
-          row(MediaKind.live, tr('Direct'), cinemaAvailable: false),
+          row(MediaKind.live, tr('Direct')),
           row(MediaKind.movie, tr('Films')),
           row(MediaKind.series, tr('Séries')),
-          _caption(tr('Classique : trois colonnes (catégories, liste, lecteur ou fiche). Cinéma : affiches, bandeau « à la une » et rangées par catégorie. '
-              'L\'interface Cinéma du direct et l\'interface TV arrivent dans les prochaines versions.')),
+          _caption(tr('Classique : trois colonnes (catégories, liste, lecteur ou fiche). Cinéma : bandeau « à la une », affiches ou vignettes et rangées '
+              '(ce qui passe par thème, ce soir, catégories). L\'interface TV arrive dans une prochaine version.')),
         ]),
+        const _HeroSection(),
       ]),
     );
   }
@@ -273,10 +288,11 @@ class _SourcesTabState extends State<_SourcesTab> {
   final _user = TextEditingController();
   final _pass = TextEditingController();
   final _address = TextEditingController();
+  final _epg = TextEditingController();
 
   @override
   void dispose() {
-    for (final c in [_name, _server, _user, _pass, _address]) {
+    for (final c in [_name, _server, _user, _pass, _address, _epg]) {
       c.dispose();
     }
     super.dispose();
@@ -290,9 +306,9 @@ class _SourcesTabState extends State<_SourcesTab> {
     final library = context.library;
     try {
       if (_xtream) {
-        await library.addXtream(name: _name.text, server: _server.text, username: _user.text, password: _pass.text);
+        await library.addXtream(name: _name.text, server: _server.text, username: _user.text, password: _pass.text, epgUrl: _epg.text);
       } else {
-        await library.addM3U(name: _name.text, address: _address.text);
+        await library.addM3U(name: _name.text, address: _address.text, epgUrl: _epg.text);
       }
       setState(() {
         _error = library.lastError;
@@ -370,6 +386,7 @@ class _SourcesTabState extends State<_SourcesTab> {
               '${count(MediaKind.movie)} ${tr('films')} · ${count(MediaKind.series)} ${tr('séries')}',
               style: kText(12, color: KPalette.secondaryText),
             ),
+            _SourceGuideLine(source: source),
           ]),
         ),
         if (library.isBusy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -430,6 +447,11 @@ class _SourcesTabState extends State<_SourcesTab> {
           const SizedBox(width: 8),
           OutlinedButton(onPressed: _pickFile, child: Text(tr('Choisir un fichier…'))),
         ]),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _epg,
+        decoration: _field(tr('Guide TV (XMLTV) — facultatif'), hint: tr('Laisser vide : guide indiqué par le fournisseur')),
+      ),
       if (_error != null) ...[
         const SizedBox(height: 12),
         Text(_error!, style: kText(13, color: KPalette.orange)),
@@ -709,4 +731,225 @@ class _BackupTabState extends State<_BackupTab> {
           if (_message != null) ...[const SizedBox(height: 10), Text(_message!, style: kText(13, color: Colors.white70))],
         ]),
       ]);
+}
+
+/// Guide TV d'une source (nombre de programmes ou erreur).
+class _SourceGuideLine extends StatelessWidget {
+  const _SourceGuideLine({required this.source});
+  final Source source;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: context.guide,
+        builder: (context, _) {
+          final s = context.guide.status[source.id];
+          final String text;
+          if (s?.loading ?? false) {
+            text = tr('Guide TV : chargement…');
+          } else if (s?.error != null) {
+            text = '${tr('Guide TV')} : ${s!.error}';
+          } else if ((s?.programmes ?? 0) > 0) {
+            text = '${tr('Guide TV')} : ${s!.programmes} ${tr('programmes')}';
+          } else {
+            text = tr('Guide TV : pas encore chargé');
+          }
+          return Text(text,
+              style: kText(12, color: s?.error != null ? KPalette.orange : Colors.white38), maxLines: 2, overflow: TextOverflow.ellipsis);
+        },
+      );
+}
+
+/// Réglages : guide TV (fournisseurs et guide de secours).
+class _GuideSection extends StatefulWidget {
+  const _GuideSection();
+
+  @override
+  State<_GuideSection> createState() => _GuideSectionState();
+}
+
+class _GuideSectionState extends State<_GuideSection> {
+  late final TextEditingController _url = TextEditingController(text: context.guide.fallbackUrlText);
+
+  @override
+  void dispose() {
+    _url.dispose();
+    super.dispose();
+  }
+
+  String _ago(DateTime date) {
+    final d = DateTime.now().difference(date);
+    if (d.inMinutes < 1) return tr('à l\'instant');
+    final (n, unit) = d.inHours < 1 ? (d.inMinutes, 'min') : d.inDays < 1 ? (d.inHours, 'h') : (d.inDays, L10n.english ? 'd' : 'j');
+    return L10n.english ? '$n $unit ago' : 'il y a $n $unit';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final guide = context.guide;
+    return ListenableBuilder(
+      listenable: guide,
+      builder: (context, _) {
+        final f = guide.fallbackStatus;
+        final String status;
+        if (f.error != null) {
+          status = f.error!;
+        } else if (f.updated != null) {
+          status = '${f.channelCount} ${tr('chaînes')}, ${f.matchedChannels} ${tr('reliées à vos chaînes')} · ${tr('mis à jour')} ${_ago(f.updated!)}';
+        } else {
+          status = f.loading ? tr('Chargement…') : tr('Pas encore chargé.');
+        }
+        return _section(tr('Guide TV'), [
+          Row(children: [
+            Expanded(
+              child: Text('${guide.epg.channelCount} ${tr('chaînes ont un programme')} · ${guide.groups.length} ${tr('chaînes classées par thème')}',
+                  style: kText(13, color: Colors.white70)),
+            ),
+            if (guide.isLoading) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: guide.isLoading ? null : guide.refreshAll,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(tr('Actualiser le guide')),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Compléter le guide du fournisseur avec un guide de secours'), style: kText(14)),
+            value: guide.fallbackEnabled,
+            onChanged: guide.setFallbackEnabled,
+          ),
+          if (guide.fallbackEnabled) ...[
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: _url,
+                  style: kText(13),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: const OutlineInputBorder(),
+                    labelText: tr('Adresse du guide (XMLTV, .xml ou .xml.gz)'),
+                  ),
+                  onSubmitted: guide.setFallbackUrl,
+                ),
+              ),
+              const SizedBox(width: 8),
+              PopupMenuButton<String>(
+                tooltip: tr('Choisir'),
+                color: const Color(0xF02C2C2E),
+                onSelected: (url) {
+                  _url.text = url;
+                  guide.setFallbackUrl(url);
+                },
+                itemBuilder: (_) => [
+                  for (final p in GuideStore.presets) PopupMenuItem(value: p.url, child: Text(p.label, style: kText(13))),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(children: [Text(tr('Choisir'), style: kText(13)), const Icon(Icons.arrow_drop_down_rounded)]),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 6),
+            Row(children: [
+              Expanded(child: Text(status, style: kText(12, color: f.error != null ? KPalette.orange : Colors.white54))),
+              TextButton(
+                onPressed: f.loading ? null : () => guide.setFallbackUrl(_url.text),
+                child: Text(tr('Actualiser maintenant')),
+              ),
+            ]),
+          ],
+          _caption(tr('Les chaînes sans programme dans le guide de votre fournisseur sont complétées automatiquement, en les rapprochant '
+              'par leur nom (« |FR| TF1 FHD » → TF1). Guide gratuit et communautaire de xmltvfr.fr, mis à jour chaque jour, rechargé toutes les 12 heures.')),
+        ]);
+      },
+    );
+  }
+}
+
+/// Réglages : bandeau « à la une » de l'interface Cinéma.
+class _HeroSection extends StatelessWidget {
+  const _HeroSection();
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: Listenable.merge([context.settings, context.library]),
+        builder: (context, _) => _content(context),
+      );
+
+  Widget _content(BuildContext context) {
+    final settings = context.settings;
+    final library = context.library;
+    Widget toggle(String label, bool value, ValueChanged<bool>? onChanged) => SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          dense: true,
+          title: Text(label, style: kText(14, color: onChanged == null ? Colors.white38 : Colors.white)),
+          value: value,
+          onChanged: onChanged,
+        );
+    Widget categoryPicker(String label, MediaKind kind) {
+      final names = library.categories(kind);
+      final current = settings.heroCategory(kind);
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(children: [
+          SizedBox(width: 190, child: Text(label, style: kText(13))),
+          Expanded(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: names.contains(current) ? current : '',
+              items: [
+                DropdownMenuItem(value: '', child: Text(tr('Tout le catalogue (au hasard)'), style: kText(13))),
+                for (final n in names)
+                  DropdownMenuItem(value: n, child: Text(library.categoryName(kind, n), style: kText(13), overflow: TextOverflow.ellipsis)),
+              ],
+              onChanged: (v) => settings.setHeroCategory(kind, v ?? ''),
+            ),
+          ),
+        ]),
+      );
+    }
+
+    return _section(tr('Bandeau « à la une » (Cinéma)'), [
+      toggle(tr('Afficher le bandeau « à la une »'), settings.heroEnabled, (v) => settings.setHero(enabled: v)),
+      if (settings.heroEnabled) ...[
+        Row(children: [
+          SizedBox(width: 120, child: Text(tr('Hauteur'), style: kText(13))),
+          SegmentedButton<HeroHeight>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: HeroHeight.compact, label: Text(tr('Compact'))),
+              ButtonSegment(value: HeroHeight.normal, label: Text(tr('Normal'))),
+              ButtonSegment(value: HeroHeight.large, label: Text(tr('Grand'))),
+            ],
+            selected: {settings.heroHeight},
+            onSelectionChanged: (v) => settings.setHero(height: v.first),
+          ),
+        ]),
+        const SizedBox(height: 6),
+        Row(children: [
+          SizedBox(width: 120, child: Text(tr('Défilement'), style: kText(13))),
+          DropdownButton<double>(
+            value: const [6.0, 8.0, 12.0, 20.0].contains(settings.heroInterval) ? settings.heroInterval : 8.0,
+            items: [
+              for (final s in const [6.0, 8.0, 12.0, 20.0])
+                DropdownMenuItem(value: s, child: Text('${tr('Toutes les')} ${s.round()} s', style: kText(13))),
+            ],
+            onChanged: (v) => settings.setHero(interval: v),
+          ),
+        ]),
+        toggle(tr('Tendances de la semaine (TMDB) disponibles dans votre catalogue'), settings.heroUseTrending,
+            settings.usesTMDB ? (v) => settings.setHero(trending: v) : null),
+        toggle(tr('Derniers ajouts du fournisseur'), settings.heroUseRecent, (v) => settings.setHero(recent: v)),
+        toggle(tr('Sélection d\'une catégorie'), settings.heroUseCategory, (v) => settings.setHero(category: v)),
+        if (settings.heroUseCategory) ...[
+          categoryPicker(tr('Catégorie des films'), MediaKind.movie),
+          categoryPicker(tr('Catégorie des séries'), MediaKind.series),
+        ],
+      ],
+      _caption(tr('Le bandeau fait défiler les films ou séries choisis, avec image de fond, résumé et note ; il s\'arrête quand la souris le survole. '
+          'En Direct, il montre le programme en cours de vos chaînes favorites et récentes (à défaut, des grandes chaînes d\'info et de sport). '
+          'Les tendances nécessitent une clé TMDB (Réglages > Général).')),
+    ]);
+  }
 }

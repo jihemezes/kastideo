@@ -1,10 +1,12 @@
 import 'package:flutter/widgets.dart';
 
+import 'core/guide.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/models.dart';
 import 'core/playback.dart';
 import 'core/settings.dart';
+import 'core/themes.dart';
 
 /// Écran affiché.
 enum Screen { home, live, movies, series }
@@ -41,6 +43,14 @@ class RecentItems extends CatalogFilter {
   const RecentItems();
 }
 
+/// Vue « Thèmes » du direct (En ce moment, Ce soir, Chaînes).
+class ThemesFilter extends CatalogFilter {
+  const ThemesFilter();
+}
+
+/// Mode de la vue Thèmes.
+enum ThemeView { now, tonight, channels }
+
 class CategoryFilter extends CatalogFilter {
   const CategoryFilter(this.name);
   final String name;
@@ -60,6 +70,34 @@ class NavigationModel extends ChangeNotifier {
 
   /// Recherche dans la section affichée.
   String search = '';
+
+  /// Vue Thèmes : mode, thème et discipline choisis.
+  ThemeView themeMode = ThemeView.now;
+  ContentTheme? themeSelection;
+  SportKind? sportKind;
+
+  void showThemes({ContentTheme? theme, ThemeView mode = ThemeView.now}) {
+    themeSelection = theme;
+    themeMode = mode;
+    sportKind = null;
+    show(MediaKind.live, const ThemesFilter());
+  }
+
+  void setThemeMode(ThemeView mode) {
+    themeMode = mode;
+    notifyListeners();
+  }
+
+  void setThemeSelection(ContentTheme? theme) {
+    themeSelection = theme;
+    if (theme != ContentTheme.sport) sportKind = null;
+    notifyListeners();
+  }
+
+  void setSportKind(SportKind? kind) {
+    sportKind = kind;
+    notifyListeners();
+  }
 
   CatalogFilter filter(MediaKind kind) => _filters[kind] ?? const AllItems();
   MediaItem? selected(MediaKind kind) => _selected[kind];
@@ -125,6 +163,7 @@ class AppScope extends InheritedWidget {
     required this.settings,
     required this.watch,
     required this.info,
+    required this.guide,
     required super.child,
   });
 
@@ -134,6 +173,7 @@ class AppScope extends InheritedWidget {
   final AppSettings settings;
   final WatchProgressStore watch;
   final MediaInfoStore info;
+  final GuideStore guide;
 
   static AppScope of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<AppScope>()!;
 
@@ -148,6 +188,7 @@ extension AppScopeContext on BuildContext {
   AppSettings get settings => AppScope.of(this).settings;
   WatchProgressStore get watch => AppScope.of(this).watch;
   MediaInfoStore get info => AppScope.of(this).info;
+  GuideStore get guide => AppScope.of(this).guide;
 }
 
 /// Ouvre un contenu : chaîne → lecture ; film ou série → fiche (comme sur Mac).
@@ -158,6 +199,8 @@ void openItem(BuildContext context, MediaItem item) {
       context.playback.play(item);
       context.library.noteRecent(item);
       if (navigation.screen != Screen.live) navigation.go(Screen.live);
+      // Interface Cinéma : lecteur en plein cadre avec un bouton de retour.
+      navigation.openPlayer();
     case MediaKind.movie:
     case MediaKind.series:
       if (navigation.screen != screenFor(item.kind)) navigation.go(screenFor(item.kind));

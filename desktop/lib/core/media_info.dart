@@ -6,6 +6,7 @@ import 'library.dart';
 import 'log.dart';
 import 'models.dart';
 import 'settings.dart';
+import 'text.dart';
 
 /// Fiches des films et séries (fournisseur IPTV, complétées par TMDB si une clé est saisie) et saisons des séries.
 class MediaInfoStore extends ChangeNotifier {
@@ -71,6 +72,46 @@ class MediaInfoStore extends ChangeNotifier {
 
   void clear() {
     _cache.clear();
+    _trending.clear();
     notifyListeners();
+  }
+
+  final Map<bool, (DateTime, List<TMDBTrend>)> _trending = {};
+  final Map<MediaKind, (int, Map<String, MediaItem>)> _titleIndex = {};
+
+  /// Tendances TMDB de la semaine (mises en cache 6 h).
+  Future<List<TMDBTrend>> trending({required bool series}) async {
+    if (!settings.usesTMDB) return const [];
+    final cached = _trending[series];
+    if (cached != null && DateTime.now().difference(cached.$1) < const Duration(hours: 6)) return cached.$2;
+    try {
+      final list = await TMDBClient(settings.tmdbKey, _language).trending(series: series);
+      _trending[series] = (DateTime.now(), list);
+      return list;
+    } catch (e) {
+      PlaybackLog.shared.note('TMDB : tendances indisponibles ($e)');
+      return const [];
+    }
+  }
+
+  /// Retrouve les tendances dans le catalogue (titre nettoyé, puis titre original).
+  List<(MediaItem, TMDBTrend)> match(List<TMDBTrend> trends, MediaKind kind) {
+    final items = library.items(kind);
+    var index = _titleIndex[kind];
+    if (index == null || index.$1 != items.length) {
+      final map = <String, MediaItem>{};
+      for (final item in items) {
+        final key = titleKey(item.name);
+        if (key.isNotEmpty) map.putIfAbsent(key, () => item);
+      }
+      index = (items.length, map);
+      _titleIndex[kind] = index;
+    }
+    return [
+      for (final t in trends)
+        if ([titleKey(t.title), if (t.originalTitle != null) titleKey(t.originalTitle!)].map((k) => index!.$2[k]).nonNulls.firstOrNull
+            case final item?)
+          (item, t),
+    ];
   }
 }

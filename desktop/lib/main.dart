@@ -4,6 +4,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app_state.dart';
+import 'core/guide.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/settings.dart';
@@ -14,6 +15,7 @@ import 'ui/home_screen.dart';
 import 'ui/catalog_screen.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
+import 'ui/widgets.dart';
 import 'core/models.dart';
 
 Future<void> main() async {
@@ -44,6 +46,7 @@ Future<void> main() async {
     ..watchProgress = watch;
   final navigation = NavigationModel();
   final info = MediaInfoStore(library, settings);
+  final guide = GuideStore(library);
   runApp(KastideoApp(
     library: library,
     playback: playback,
@@ -51,8 +54,11 @@ Future<void> main() async {
     settings: settings,
     watch: watch,
     info: info,
+    guide: guide,
   ));
   await library.start(autoRefresh: settings.autoRefresh);
+  library.onSourceRemoved = guide.forgetSource;
+  await guide.start();
 }
 
 class KastideoApp extends StatelessWidget {
@@ -64,6 +70,7 @@ class KastideoApp extends StatelessWidget {
     required this.settings,
     required this.watch,
     required this.info,
+    required this.guide,
   });
 
   final LibraryStore library;
@@ -72,6 +79,7 @@ class KastideoApp extends StatelessWidget {
   final AppSettings settings;
   final WatchProgressStore watch;
   final MediaInfoStore info;
+  final GuideStore guide;
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +90,12 @@ class KastideoApp extends StatelessWidget {
       settings: settings,
       watch: watch,
       info: info,
+      guide: guide,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
+        scrollBehavior: const KastideoScrollBehavior(),
         home: const RootView(),
       ),
     );
@@ -109,7 +119,18 @@ class RootView extends StatelessWidget {
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
-        const SingleActivator(LogicalKeyboardKey.escape): navigation.exitTheater,
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          // Échap : quitte le mode cinéma, sinon referme le lecteur (le direct s'arrête, comme sur Mac).
+          if (navigation.theater) {
+            navigation.exitTheater();
+            return;
+          }
+          final kind = navigation.screen.kind;
+          if (kind == null || !navigation.showPlayer) return;
+          if (kind == MediaKind.live && context.settings.interfaceFor(kind) != InterfaceStyle.cinema) return;
+          if (playback.isLive) playback.stop();
+          navigation.closePlayer();
+        },
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): playback.togglePause,
       },
       child: Focus(

@@ -298,4 +298,35 @@ class TMDBClient {
     d.sources = ['TMDB'];
     return d;
   }
+
+  /// Tendances de la semaine (`/trending/{movie|tv}/week`, deux pages).
+  Future<List<TMDBTrend>> trending({required bool series}) async {
+    final all = <TMDBTrend>[];
+    final s = XtreamClient.str;
+    for (final page in [1, 2]) {
+      final root = await _request('trending/${series ? 'tv' : 'movie'}/week', {'page': '$page'});
+      if (root is! Map || root['results'] is! List) continue;
+      for (final e in (root['results'] as List).whereType<Map>()) {
+        final id = s(e['id']);
+        final title = s(e[series ? 'name' : 'title']);
+        if (id == null || title == null) continue;
+        final backdrop = s(e['backdrop_path']);
+        all.add(TMDBTrend(id, title,
+            originalTitle: s(e[series ? 'original_name' : 'original_title']),
+            year: yearIn(s(e[series ? 'first_air_date' : 'release_date'])),
+            backdrop: backdrop == null ? null : '${_images}w1280$backdrop'));
+      }
+    }
+    return all;
+  }
+}
+
+/// Film ou série en tendance sur TMDB.
+class TMDBTrend {
+  TMDBTrend(this.tmdbId, this.title, {this.originalTitle, this.year, this.backdrop});
+  final String tmdbId;
+  final String title;
+  final String? originalTitle;
+  final int? year;
+  final String? backdrop;
 }

@@ -67,3 +67,8 @@ String initials(String name) {
   if (words.length == 1) return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
   return (words[0][0] + words[1][0]).toUpperCase();
 }
+
+final RegExp _nonAlnum = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+
+/// Clé de comparaison d'un titre (catalogue IPTV ou TMDB) : sans étiquettes, accents ni ponctuation.
+String titleKey(String raw) => cleanTitle(raw).title.searchKey.split(_nonAlnum).where((w) => w.isNotEmpty).join();

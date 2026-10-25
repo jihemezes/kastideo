@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../core/text.dart';
@@ -167,4 +168,43 @@ class PosterImage extends StatelessWidget {
       frameBuilder: (context, child, frame, sync) => frame == null && !sync ? fallback : child,
     );
   }
+}
+
+/// Défilement à la souris : les rangées horizontales se font aussi glisser avec la souris.
+class KastideoScrollBehavior extends MaterialScrollBehavior {
+  const KastideoScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices =>
+      {PointerDeviceKind.touch, PointerDeviceKind.mouse, PointerDeviceKind.trackpad, PointerDeviceKind.stylus};
+}
+
+/// Ligne horizontale qui défile aussi avec la molette verticale (pastilles de filtres).
+class WheelRow extends StatefulWidget {
+  const WheelRow({super.key, required this.children});
+  final List<Widget> children;
+
+  @override
+  State<WheelRow> createState() => _WheelRowState();
+}
+
+class _WheelRowState extends State<WheelRow> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Listener(
+        onPointerSignal: (event) {
+          if (event is! PointerScrollEvent || !_controller.hasClients) return;
+          final delta = event.scrollDelta.dy.abs() > event.scrollDelta.dx.abs() ? event.scrollDelta.dy : event.scrollDelta.dx;
+          final position = _controller.position;
+          _controller.jumpTo((position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent));
+        },
+        child: SingleChildScrollView(controller: _controller, scrollDirection: Axis.horizontal, child: Row(children: widget.children)),
+      );
 }

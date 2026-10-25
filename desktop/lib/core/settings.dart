@@ -11,6 +11,16 @@ import 'secrets.dart';
 /// Interface d'affichage d'une section (mêmes valeurs que sur Mac : classic, cinema, tv).
 enum InterfaceStyle { classic, cinema, tv }
 
+/// Hauteur du bandeau « à la une ».
+enum HeroHeight {
+  compact(280),
+  normal(360),
+  large(460);
+
+  const HeroHeight(this.points);
+  final double points;
+}
+
 /// Réglages de l'application (équivalent des @AppStorage de la version Mac).
 class AppSettings extends ChangeNotifier {
   late SharedPreferences _prefs;
@@ -40,10 +50,65 @@ class AppSettings extends ChangeNotifier {
 
   bool get usesTMDB => tmdbKey.trim().isNotEmpty;
 
+  // MARK: Bandeau « à la une » (mêmes clés que sur Mac)
+
+  bool get heroEnabled => _prefs.getBool('hero.enabled') ?? true;
+  HeroHeight get heroHeight => HeroHeight.values.where((h) => h.name == _prefs.getString('hero.height')).firstOrNull ?? HeroHeight.normal;
+  double get heroInterval => _prefs.getDouble('hero.interval') ?? 8;
+  bool get heroUseTrending => _prefs.getBool('hero.useTrending') ?? true;
+  bool get heroUseRecent => _prefs.getBool('hero.useRecent') ?? true;
+  bool get heroUseCategory => _prefs.getBool('hero.useCategory') ?? true;
+  String heroCategory(MediaKind kind) => _prefs.getString(kind == MediaKind.series ? 'hero.category.series' : 'hero.category.movie') ?? '';
+
+  void setHero({bool? enabled, HeroHeight? height, double? interval, bool? trending, bool? recent, bool? category}) {
+    if (enabled != null) _prefs.setBool('hero.enabled', enabled);
+    if (height != null) _prefs.setString('hero.height', height.name);
+    if (interval != null) _prefs.setDouble('hero.interval', interval);
+    if (trending != null) _prefs.setBool('hero.useTrending', trending);
+    if (recent != null) _prefs.setBool('hero.useRecent', recent);
+    if (category != null) _prefs.setBool('hero.useCategory', category);
+    heroGeneration++;
+    notifyListeners();
+  }
+
+  void setHeroCategory(MediaKind kind, String name) {
+    _prefs.setString(kind == MediaKind.series ? 'hero.category.series' : 'hero.category.movie', name);
+    heroGeneration++;
+    notifyListeners();
+  }
+
+  /// Change quand les réglages du bandeau changent (le bandeau se recompose).
+  int heroGeneration = 0;
+
+  static const _heroBools = ['hero.enabled', 'hero.useTrending', 'hero.useRecent', 'hero.useCategory'];
+  static const _heroStrings = ['hero.height', 'hero.category.movie', 'hero.category.series'];
+
+  Map<String, String> exportedHero() => {
+        for (final k in _heroBools)
+          if (_prefs.getBool(k) case final v?) k: v ? '1' : '0',
+        for (final k in _heroStrings) k: ?_prefs.getString(k),
+        if (_prefs.getDouble('hero.interval') case final v?) 'hero.interval': '$v',
+      };
+
+  void importHero(Map<String, dynamic> s) {
+    for (final k in _heroBools) {
+      if (s[k] case final String v) _prefs.setBool(k, v == '1' || v == 'true');
+    }
+    for (final k in _heroStrings) {
+      if (s[k] case final String v) _prefs.setString(k, v);
+    }
+    if (s['hero.interval'] case final String v) {
+      final d = double.tryParse(v);
+      if (d != null) _prefs.setDouble('hero.interval', d);
+    }
+    heroGeneration++;
+    notifyListeners();
+  }
+
   InterfaceStyle interfaceFor(MediaKind kind) {
     final raw = _prefs.getString('interface.${kind.name}');
     final style = InterfaceStyle.values.where((s) => s.name == raw).firstOrNull ?? InterfaceStyle.classic;
-    return style == InterfaceStyle.tv ? InterfaceStyle.classic : style; // l'interface TV arrive à l'étape 2c
+    return style == InterfaceStyle.tv ? InterfaceStyle.classic : style; // l'interface TV arrive à l'étape suivante
   }
 
   void setInterface(MediaKind kind, InterfaceStyle style) {

@@ -239,7 +239,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
-          onPressed: () => context.navigation.go(Screen.live),
+          onPressed: () {
+            final kind = playback.current!.kind == MediaKind.episode ? MediaKind.series : playback.current!.kind;
+            context.navigation
+              ..go(screenFor(kind))
+              ..openPlayer();
+          },
           child: Text(tr('Retourner à la lecture')),
         ),
         const SizedBox(width: 8),

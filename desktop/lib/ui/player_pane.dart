@@ -6,10 +6,12 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../app_state.dart';
+import '../core/models.dart';
 import '../core/playback.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import 'log_dialog.dart';
+import 'themes_view.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
 class PlayerPane extends StatefulWidget {
@@ -42,6 +44,14 @@ class _PlayerPaneState extends State<PlayerPane> {
     });
   }
 
+  /// Retour : la fiche (films, épisodes, la lecture continue) ou le catalogue du direct (la chaîne s'arrête).
+  void _back() {
+    final navigation = context.navigation;
+    if (navigation.theater) navigation.toggleTheater();
+    if (context.playback.isLive) context.playback.stop();
+    navigation.closePlayer();
+  }
+
   Future<void> _toggleFullScreen() async {
     final full = await windowManager.isFullScreen();
     await windowManager.setFullScreen(!full);
@@ -59,6 +69,14 @@ class _PlayerPaneState extends State<PlayerPane> {
         const SingleActivator(LogicalKeyboardKey.space): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          final navigation = context.navigation;
+          if (navigation.theater) {
+            navigation.exitTheater();
+          } else if (widget.showBack) {
+            _back();
+          }
+        },
         const SingleActivator(LogicalKeyboardKey.arrowLeft): () => playback.jump(-10),
         const SingleActivator(LogicalKeyboardKey.arrowRight): () => playback.jump(30),
         const SingleActivator(LogicalKeyboardKey.bracketLeft, control: true): () => playback.jump(-10),
@@ -97,10 +115,7 @@ class _PlayerPaneState extends State<PlayerPane> {
                         child: AnimatedOpacity(
                           opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
                           duration: const Duration(milliseconds: 250),
-                          child: _BackChip(onTap: () {
-                            if (context.navigation.theater) context.navigation.toggleTheater();
-                            context.navigation.closePlayer();
-                          }),
+                          child: _BackChip(live: playback.isLive, onTap: _back),
                         ),
                       ),
                     Positioned(
@@ -261,10 +276,7 @@ class ControlsBar extends StatelessWidget {
                 Text(tr('EN DIRECT'), style: kText(12, weight: FontWeight.w700)),
               ]),
             const SizedBox(width: 14),
-            Flexible(
-              child: Text(playback.current?.displayName ?? '',
-                  style: kText(13, color: Colors.white.withValues(alpha: 0.75)), maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
+            Flexible(child: _NowTitle(playback.current)),
             const SizedBox(width: 14),
             _BarButton(
               icon: playback.muted || playback.volume == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
@@ -372,12 +384,15 @@ class _HealthPillState extends State<_HealthPill> {
 
 /// Bouton « Retour à la fiche » en haut à gauche du lecteur (films, épisodes).
 class _BackChip extends StatelessWidget {
-  const _BackChip({required this.onTap});
+  const _BackChip({required this.onTap, required this.live});
   final VoidCallback onTap;
+  final bool live;
 
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: tr('Revenir à la fiche (la lecture continue en arrière-plan jusqu\'au choix d\'un autre contenu)'),
+        message: live
+            ? tr('Revenir aux chaînes (Échap)')
+            : tr('Revenir à la fiche (la lecture continue en arrière-plan jusqu\'au choix d\'un autre contenu)'),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
@@ -386,7 +401,7 @@ class _BackChip extends StatelessWidget {
             decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(20)),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.chevron_left_rounded, size: 18, color: Colors.white),
-              Text(tr('Retour à la fiche'), style: kText(13, weight: FontWeight.w600)),
+              Text(live ? tr('Retour') : tr('Retour à la fiche'), style: kText(13, weight: FontWeight.w600)),
             ]),
           ),
         ),
@@ -518,5 +533,30 @@ class _ScrubBarState extends State<ScrubBar> {
         ),
       );
     });
+  }
+}
+
+/// Titre de la barre : chaîne et programme en cours (direct), sinon le titre du contenu.
+class _NowTitle extends StatelessWidget {
+  const _NowTitle(this.item);
+  final MediaItem? item;
+
+  @override
+  Widget build(BuildContext context) {
+    final current = item;
+    final style = kText(13, color: Colors.white.withValues(alpha: 0.75));
+    if (current == null) return const SizedBox();
+    if (current.kind != MediaKind.live) return Text(current.displayName, style: style, maxLines: 1, overflow: TextOverflow.ellipsis);
+    return ListenableBuilder(
+      listenable: context.guide,
+      builder: (context, _) {
+        final p = context.guide.current(current);
+        return Tooltip(
+          message: p == null ? current.name : '${p.title} · ${timeRange(p)}${p.desc == null ? '' : '\n\n${p.desc}'}',
+          child: Text(p == null ? current.displayName : '${current.displayName} · ${p.title}',
+              style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+        );
+      },
+    );
   }
 }

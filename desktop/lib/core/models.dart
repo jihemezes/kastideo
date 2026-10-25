@@ -80,6 +80,8 @@ class Source {
     this.username,
     this.enabled = true,
     this.lastRefresh,
+    this.epgUrl,
+    this.guideUrl,
   });
 
   final String id;
@@ -92,6 +94,12 @@ class Source {
   bool enabled;
   DateTime? lastRefresh;
 
+  /// Adresse du guide TV choisie par l'utilisateur (sinon celle du fournisseur).
+  String? epgUrl;
+
+  /// Adresse du guide TV indiquée par le fournisseur (xmltv.php, url-tvg de la playlist).
+  String? guideUrl;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
@@ -100,6 +108,8 @@ class Source {
         if (username != null) 'username': username,
         'enabled': enabled,
         if (lastRefresh != null) 'lastRefresh': lastRefresh!.toIso8601String(),
+        'epgUrl': ?epgUrl,
+        'guideUrl': ?guideUrl,
       };
 
   factory Source.fromJson(Map<String, dynamic> j) => Source(
@@ -110,6 +120,8 @@ class Source {
         username: j['username'] as String?,
         enabled: j['enabled'] as bool? ?? true,
         lastRefresh: j['lastRefresh'] == null ? null : DateTime.tryParse(j['lastRefresh'] as String),
+        epgUrl: j['epgUrl'] as String?,
+        guideUrl: j['guideUrl'] as String?,
       );
 }
 

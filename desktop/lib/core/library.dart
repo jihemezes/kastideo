@@ -11,6 +11,7 @@ import 'm3u.dart';
 import 'models.dart';
 import 'secrets.dart';
 import 'settings.dart';
+import 'themes.dart';
 import 'xtream.dart';
 
 /// Bibliothèque : sources, contenus (mis en cache sur disque), favoris, récents et catégories personnalisées.
@@ -31,6 +32,16 @@ class LibraryStore extends ChangeNotifier {
   bool isBusy = false;
   String? lastError;
 
+  /// Contenus adultes (« |XX| », catégorie adulte) : masqués partout tant que l'option est désactivée.
+  bool showAdult = false;
+
+  /// Change à chaque reconstruction de l'index (le guide TV recalcule alors ses chaînes).
+  int liveGeneration = 0;
+
+  /// Appelé après l'actualisation réussie d'une source (rechargement de son guide TV).
+  void Function(Source source)? onSourceRefreshed;
+  void Function(String sourceId)? onSourceRemoved;
+
   late SharedPreferences _prefs;
   final _secrets = Secrets.shared;
   late Directory _cacheDir;
@@ -48,6 +59,7 @@ class LibraryStore extends ChangeNotifier {
         sources.add(Source.fromJson(Map<String, dynamic>.from(e as Map)));
       }
     }
+    showAdult = _prefs.getBool('adult.show') ?? false;
     favoriteIds = _prefs.getStringList('favorites.v1') ?? [];
     recentIds = _prefs.getStringList('recents.v1') ?? [];
     for (final kind in categoryKinds) {
@@ -177,6 +189,7 @@ class LibraryStore extends ChangeNotifier {
           list.add(item);
         }
         _byId[item.id] = item;
+        if (!showAdult && item.kind != MediaKind.episode && ThemeClassifier.isAdult(item.name, group: item.group)) continue;
         // Une catégorie masquée l'est partout (listes, recherche, accueil), comme sur Mac.
         if (prefs != null && prefs.isHidden(item.group)) continue;
         (_byKind[item.kind] ??= []).add(item);
@@ -186,9 +199,18 @@ class LibraryStore extends ChangeNotifier {
       final prefs = _categoryPrefs[kind] ?? CategoryPrefs();
       final ordered = prefs.apply(names);
       _allCategories[kind] = ordered;
-      _categories[kind] = ordered.where((n) => !prefs.isHidden(n)).toList();
+      _categories[kind] = ordered
+          .where((n) => !prefs.isHidden(n) && (showAdult || !ThemeClassifier.isAdult('', group: n)))
+          .toList();
     });
+    liveGeneration++;
     notifyListeners();
+  }
+
+  void setShowAdult(bool value) {
+    showAdult = value;
+    _prefs.setBool('adult.show', value);
+    _rebuild();
   }
 
   // MARK: Sources
@@ -205,9 +227,26 @@ class LibraryStore extends ChangeNotifier {
     return XtreamClient(XtreamCredentials(Uri.parse(source.address), source.username ?? '', pass), sourceId);
   }
 
+  /// Toutes les chaînes d'une source (masquées comprises), pour filtrer son guide TV.
+  List<MediaItem> allLiveItems(String sourceId) =>
+      (_contentBySource[sourceId] ?? const <MediaItem>[]).where((i) => i.kind == MediaKind.live).toList();
+
+  /// Adresse du guide TV d'une source : choisie par l'utilisateur, indiquée par le fournisseur, ou xmltv.php (Xtream).
+  Future<String?> guideUrlFor(Source source) async {
+    if (source.epgUrl?.isNotEmpty ?? false) return source.epgUrl;
+    if (source.guideUrl?.isNotEmpty ?? false) return source.guideUrl;
+    final client = await xtreamClient(source.id);
+    return client?.xmltvUrl;
+  }
+
   /// Ajoute une source Xtream (le mot de passe va dans le coffre du système).
   Future<Source> addXtream(
-      {required String name, required String server, required String username, required String password, bool refreshNow = true}) async {
+      {required String name,
+      required String server,
+      required String username,
+      required String password,
+      String? epgUrl,
+      bool refreshNow = true}) async {
     final normalized = XtreamCredentials.normalizeServer(server);
     if (normalized == null) throw XtreamException('Adresse du serveur invalide.');
     final source = Source(
@@ -216,6 +255,7 @@ class LibraryStore extends ChangeNotifier {
       kind: SourceKind.xtream,
       address: normalized.toString(),
       username: username.trim(),
+      epgUrl: (epgUrl?.trim().isEmpty ?? true) ? null : epgUrl!.trim(),
     );
     await _secrets.write('password.${source.id}', password);
     sources.add(source);
@@ -226,11 +266,16 @@ class LibraryStore extends ChangeNotifier {
   }
 
   /// Ajoute une playlist M3U (URL ou fichier). Une URL « get.php » devient une source Xtream, plus rapide.
-  Future<Source> addM3U({required String name, required String address, bool refreshNow = true}) async {
+  Future<Source> addM3U({required String name, required String address, String? epgUrl, bool refreshNow = true}) async {
     final xtream = XtreamCredentials.fromPlaylistUrl(address);
     if (xtream != null) {
       return addXtream(
-          name: name, server: xtream.server.toString(), username: xtream.username, password: xtream.password, refreshNow: refreshNow);
+          name: name,
+          server: xtream.server.toString(),
+          username: xtream.username,
+          password: xtream.password,
+          epgUrl: epgUrl,
+          refreshNow: refreshNow);
     }
     final isFile = !address.trim().toLowerCase().startsWith('http');
     final source = Source(
@@ -238,6 +283,7 @@ class LibraryStore extends ChangeNotifier {
       name: name.trim().isEmpty ? 'Playlist' : name.trim(),
       kind: isFile ? SourceKind.m3uFile : SourceKind.m3uUrl,
       address: address.trim(),
+      epgUrl: (epgUrl?.trim().isEmpty ?? true) ? null : epgUrl!.trim(),
     );
     sources.add(source);
     await _saveSources();
@@ -254,6 +300,7 @@ class LibraryStore extends ChangeNotifier {
     if (await file.exists()) await file.delete();
     await _saveSources();
     _rebuild();
+    onSourceRemoved?.call(source.id);
   }
 
   Future<void> refreshAll() async {
@@ -263,30 +310,34 @@ class LibraryStore extends ChangeNotifier {
   }
 
   Future<void> refresh(Source source) async {
+    var refreshed = false;
     isBusy = true;
     lastError = null;
     notifyListeners();
     try {
       final id = source.id;
-      List<MediaItem> items;
+      SourceContent content;
       switch (source.kind) {
         case SourceKind.xtream:
           final pass = await password(id) ?? '';
           final server = source.address;
           final user = source.username ?? '';
-          items = await Isolate.run(() async {
+          content = await Isolate.run(() async {
             final client = XtreamClient(XtreamCredentials(Uri.parse(server), user, pass), id);
-            return (await client.fetchLibrary()).items;
+            return client.fetchLibrary();
           });
         case SourceKind.m3uUrl:
           final url = source.address;
-          items = await Isolate.run(() async => M3UParser.parse(await httpGetText(Uri.parse(url)), id).items);
+          content = await Isolate.run(() async => M3UParser.parse(await httpGetText(Uri.parse(url)), id));
         case SourceKind.m3uFile:
           final path = source.address;
-          items = await Isolate.run(() => M3UParser.parse(File(path).readAsStringSync(), id).items);
+          content = await Isolate.run(() => M3UParser.parse(File(path).readAsStringSync(), id));
       }
+      final items = content.items;
       _contentBySource[id] = items;
       source.lastRefresh = DateTime.now();
+      source.guideUrl = content.epgUrl;
+      refreshed = true;
       await _saveSources();
       final path = _cacheFile(id).path;
       final encoded = [for (final i in items) i.toJson()];
@@ -299,6 +350,7 @@ class LibraryStore extends ChangeNotifier {
       isBusy = false;
       _rebuild();
     }
+    if (refreshed) onSourceRefreshed?.call(source);
   }
 
   // MARK: Exportation / importation (format commun avec la version Mac)
@@ -323,12 +375,15 @@ class LibraryStore extends ChangeNotifier {
         'address': s.address,
         'username': ?s.username,
         if (includePasswords && s.kind == SourceKind.xtream) 'password': ?await password(s.id),
+        'epgUrl': ?s.epgUrl,
         'enabled': s.enabled,
       });
     }
     final settingsMap = <String, String>{
       for (final kind in categoryKinds)
-        if (settings.rawSetting('interface.${kind.name}') case final v?) 'interface.${kind.name}': v,
+        'interface.${kind.name}': ?settings.rawSetting('interface.${kind.name}'),
+      'adult.show': showAdult ? '1' : '0',
+      ...settings.exportedHero(),
       if (includePasswords && settings.usesTMDB) 'tmdbKey': settings.tmdbKey,
     };
     return {
@@ -371,8 +426,9 @@ class LibraryStore extends ChangeNotifier {
               server: address,
               username: e['username'] as String? ?? '',
               password: e['password'] as String? ?? '',
+              epgUrl: e['epgUrl'] as String?,
               refreshNow: false)
-          : await addM3U(name: e['name'] as String? ?? '', address: address, refreshNow: false);
+          : await addM3U(name: e['name'] as String? ?? '', address: address, epgUrl: e['epgUrl'] as String?, refreshNow: false);
       source.enabled = e['enabled'] as bool? ?? true;
       newIds[i] = source.id;
       toRefresh.add(source);
@@ -418,6 +474,12 @@ class LibraryStore extends ChangeNotifier {
         final style = InterfaceStyle.values.where((x) => x.name == v).firstOrNull;
         if (style != null) settings.setInterface(kind, style);
       }
+      final adult = s['adult.show'];
+      if (adult is String) {
+        showAdult = adult == '1' || adult == 'true';
+        _prefs.setBool('adult.show', showAdult);
+      }
+      settings.importHero(Map<String, dynamic>.from(s));
       final key = s['tmdbKey'];
       if (key is String && key.isNotEmpty && !settings.usesTMDB) await settings.setTMDBKey(key);
     }

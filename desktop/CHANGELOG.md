@@ -2,6 +2,20 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop3] - 2026-10-25
+
+**Aperçu 3 — Direct en interface Cinéma, guide TV et thèmes.**
+
+- **Guide TV** : guide du fournisseur (xmltv.php, url-tvg de la playlist ou adresse saisie) téléchargé en arrière-plan, analysé en flux (gzip reconnu), gardé sur le disque et rechargé quand il se termine bientôt ; **guide de secours** xmltvfr.fr pour les chaînes sans programme, rapprochées par leur nom (« |FR| TF1 FHD » → TF1). Réglages > Général > Guide TV ; état par source dans Réglages > Sources.
+- **Direct en interface Cinéma** : bandeau « à la une » (programme en cours de vos favoris et récents, ou des grandes chaînes d'info, de sport et généralistes), rangées « en ce moment » par thème, Regardées récemment, Favoris, rangées **« Ce soir »** par thème, catégories ; vignettes 16/9 avec programme et avancement ; lecteur plein cadre avec **Retour** (ou Échap) qui arrête la chaîne.
+- **Thèmes** : vue En ce moment / Ce soir / Chaînes, filtres par thème et par discipline sportive, chaînes regroupées par versions (FHD, HD, SD), fiche des programmes à venir, **thème de la chaîne** modifiable (clic droit).
+- **Interface Classique du direct** : programme en cours sous chaque chaîne, entrée **Thèmes** dans la barre latérale.
+- **Lecteur** : programme en cours dans la barre de contrôles (résumé en info-bulle).
+- **Bandeau « à la une »** (films et séries) : réglages comme sur Mac — hauteur, rythme, **tendances de la semaine TMDB**, derniers ajouts, catégorie choisie.
+- **Contenus adultes** masqués par défaut (Réglages > Général), comme sur Mac.
+- Sauvegarde : guide TV des sources, contenus adultes et réglages du bandeau inclus.
+- Rangées horizontales : défilement en faisant glisser à la souris.
+
 ## [1.2.0-desktop2] - 2026-10-25
 
 **Aperçu 2 — Films et Séries.** (La construction 1.2.0-desktop1 a échoué sous Linux : d'anciens fichiers de la maquette restaient dans le dépôt.)

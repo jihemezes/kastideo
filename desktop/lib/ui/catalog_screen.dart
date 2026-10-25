@@ -11,6 +11,7 @@ import 'cinema_view.dart';
 import 'details_view.dart';
 import 'player_pane.dart';
 import 'settings_dialog.dart';
+import 'themes_view.dart';
 import 'widgets.dart';
 
 /// Une section (Direct, Films ou Séries) dans l'interface choisie : Classique (trois colonnes) ou Cinéma (affiches).
@@ -26,10 +27,13 @@ class CatalogScreen extends StatelessWidget {
       body: ListenableBuilder(
         listenable: Listenable.merge([navigation, settings]),
         builder: (context, _) {
-          final style = kind == MediaKind.live ? InterfaceStyle.classic : settings.interfaceFor(kind);
+          final style = settings.interfaceFor(kind);
           final selected = navigation.selected(kind);
           final Widget content;
-          if (style == InterfaceStyle.cinema) {
+          if (style == InterfaceStyle.cinema && kind == MediaKind.live) {
+            // Direct en Cinéma : lecteur plein cadre ; le retour arrête la chaîne et revient au catalogue.
+            content = navigation.showPlayer ? const PlayerPane(showBack: true) : const CinemaView(kind: MediaKind.live);
+          } else if (style == InterfaceStyle.cinema) {
             content = navigation.showPlayer
                 ? const PlayerPane(showBack: true)
                 : selected != null
@@ -45,7 +49,10 @@ class CatalogScreen extends StatelessWidget {
                         : _EmptyPane(kind: kind);
             content = Row(children: [
               if (!navigation.theater) ...[
-                SizedBox(width: 340, child: ItemList(kind: kind)),
+                SizedBox(
+                  width: 340,
+                  child: kind == MediaKind.live && navigation.filter(kind) is ThemesFilter ? const ThemesList() : ItemList(kind: kind),
+                ),
                 const VerticalDivider(width: 1, color: KPalette.separator),
               ],
               Expanded(child: right),
@@ -142,6 +149,13 @@ class Sidebar extends StatelessWidget {
                     selected: filter is RecentItems,
                     onTap: () => navigation.show(kind, const RecentItems()),
                   ),
+                  if (kind == MediaKind.live)
+                    _SidebarRow(
+                      icon: Icons.category_outlined,
+                      label: tr('Thèmes'),
+                      selected: filter is ThemesFilter,
+                      onTap: () => navigation.showThemes(theme: navigation.themeSelection, mode: navigation.themeMode),
+                    ),
                   const SizedBox(height: 10),
                   Row(children: [
                     Expanded(child: _SectionHeader(tr('Catégories'))),
@@ -307,7 +321,7 @@ List<MediaItem> filteredItems(BuildContext context, MediaKind kind) {
   final library = context.library;
   final navigation = context.navigation;
   final base = switch (navigation.filter(kind)) {
-    AllItems() => library.items(kind),
+    AllItems() || ThemesFilter() => library.items(kind),
     FavoriteItems() => library.favoritesOf(kind),
     RecentItems() => library.recentsOf(kind),
     CategoryFilter(:final name) => library.itemsInCategory(kind, name),
@@ -325,6 +339,7 @@ String filterTitle(BuildContext context, MediaKind kind) => switch (context.navi
         },
       FavoriteItems() => tr('Favoris'),
       RecentItems() => tr('Récents'),
+      ThemesFilter() => tr('Thèmes'),
       CategoryFilter(:final name) => context.library.categoryName(kind, name),
     };
 
@@ -355,7 +370,7 @@ class _ItemListState extends State<ItemList> {
     return Container(
       color: KPalette.list,
       child: ListenableBuilder(
-        listenable: Listenable.merge([library, navigation, playback, context.watch]),
+        listenable: Listenable.merge([library, navigation, playback, context.watch, if (widget.kind == MediaKind.live) context.guide]),
         builder: (context, _) {
           final items = filteredItems(context, widget.kind);
           final selectedId = widget.kind == MediaKind.live ? playback.current?.id : navigation.selected(widget.kind)?.id;
@@ -380,7 +395,7 @@ class _ItemListState extends State<ItemList> {
                   ? Center(child: Text(tr('Aucun résultat'), style: kText(13, color: KPalette.secondaryText)))
                   : ListView.builder(
                       itemCount: items.length,
-                      itemExtent: widget.kind == MediaKind.live ? 52 : 64,
+                      itemExtent: widget.kind == MediaKind.live ? 56 : 64,
                       itemBuilder: (context, index) => ItemRow(item: items[index], selected: selectedId == items[index].id),
                     ),
             ),
@@ -432,6 +447,7 @@ class ItemRow extends StatelessWidget {
     final favorite = library.isFavorite(item.id);
     final isLive = item.kind == MediaKind.live;
     final fraction = isLive ? null : context.watch.fraction(item.id);
+    final programme = isLive ? context.guide.current(item) : null;
     return GestureDetector(
       onSecondaryTapUp: (details) => showItemMenu(context, item, details.globalPosition),
       child: Hover(
@@ -461,11 +477,25 @@ class ItemRow extends StatelessWidget {
                   Text(isLive ? item.name : item.displayName,
                       style: kText(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
                   Text(
-                    item.number != null && isLive ? '${item.number} · ${item.group}' : item.group,
+                    programme != null
+                        ? '${hm(programme.start)} · ${programme.title}'
+                        : item.number != null && isLive
+                            ? '${item.number} · ${item.group}'
+                            : item.group,
                     style: kText(11, color: Colors.white.withValues(alpha: selected ? 0.8 : 0.5)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (programme != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 3, right: 30),
+                      child: LinearProgressIndicator(
+                        value: programme.progress(),
+                        minHeight: 2,
+                        color: selected ? Colors.white : KPalette.orange,
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
                   if (fraction != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 4, right: 30),
@@ -504,6 +534,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       ),
       if (item.kind == MediaKind.movie) PopupMenuItem(value: 'play', child: Text(tr('Lire'), style: kText(13))),
       PopupMenuItem(value: 'fav', child: Text(favorite ? tr('Retirer des favoris') : tr('Ajouter aux favoris'), style: kText(13))),
+      if (isLive && context.guide.groupOf(item) != null)
+        PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
       PopupMenuItem(value: 'copy', child: Text(tr('Copier le nom'), style: kText(13))),
     ],
   );
@@ -516,6 +548,9 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       playItem(context, item);
     case 'fav':
       library.toggleFavorite(item.id);
+    case 'theme':
+      final group = context.guide.groupOf(item);
+      if (group != null) await chooseChannelTheme(context, group);
     case 'copy':
       await Clipboard.setData(ClipboardData(text: isLive ? item.name : item.displayName));
   }
