@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Aperçu 3 — version 1.2.0-desktop3. Cette préversion reprend l'accueil, le direct (interfaces Classique et Cinéma, guide TV, thèmes), les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
+> Aperçu 4 — version 1.2.0-desktop4. Cette préversion reprend l'accueil, le direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes), les films et les séries (interfaces Classique et Cinéma), le lecteur et les réglages de la version Mac. Les autres fonctions arrivent par étapes.
 
 ## Ce que contient cet aperçu
 
@@ -8,8 +8,10 @@
 - **Direct** : deux interfaces au choix (Réglages > Apparence).
   - **Classique** : barre latérale (toutes les chaînes, favoris, récents, **thèmes**, catégories), liste avec recherche et **programme en cours** (titre, heure, barre d'avancement), lecteur à droite.
   - **Cinéma** : bandeau « à la une » avec le programme en cours de vos chaînes favorites et récentes (à défaut, des grandes chaînes d'info, de sport et généralistes), rangées **« Sport en ce moment »**, « Info en direct », « Films en cours »… (une version par chaîne), Regardées récemment, Favoris, rangées **« Ce soir »** par thème (films, sport, séries, documentaires…) puis une rangée par catégorie. Un clic sur une chaîne l'ouvre en plein cadre ; **Retour** (ou Échap) arrête la chaîne et revient aux rangées.
+  - **TV** : la chaîne en plein cadre, comme sur un téléviseur. **↑ / ↓** : chaîne précédente / suivante ; **tapez un numéro** (jusqu'à 4 chiffres, validé seul ou avec Entrée) ; **←** ou bord gauche de la fenêtre : **panneau des chaînes** (filtre Toutes / Favoris / Récents / thème / catégorie, recherche, programme en cours ; il se referme seul) ; **→** ou **I** : **bandeau d'information** (numéro, nom, heure, programme en cours et suivant, affiché à chaque changement de chaîne) ; **B** : chaîne précédemment regardée ; **F** : favori ; **M** : son ; **Espace** : pause ; **G** : guide TV ; **H** : accueil. La barre du haut (accueil, chaînes, guide, sections, réglages) apparaît quand la souris bouge.
+- **Guide TV** (accueil, barre latérale du direct, Ctrl+7 ou touche G en interface TV) : grille des programmes, chaînes en lignes et heures en colonnes, trait rouge sur l'heure actuelle ; **‹ Maintenant ›** pour se déplacer, choix du jour (aujourd'hui, demain… les autres jours s'ouvrent à 19 h), durée affichée 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thème, catégorie) et recherche. Un clic sur une chaîne la lance ; un clic sur un programme ouvre sa fiche (horaires, durée, résumé) avec **Regarder** ou **Aller sur la chaîne**.
 - **Thèmes** (barre latérale du direct, ou « Tout voir » d'une rangée) : **En ce moment**, **Ce soir** (programmes de 20 h à 23 h) ou **Chaînes**, filtrés par thème (Sport, Info, Films, Jeunesse, Documentaires…) et, pour le sport, par discipline (football, rugby, tennis…). Les chaînes sans programme dans le guide restent proposées quand leur nom suffit à les classer. Un programme à venir ouvre sa fiche (résumé, horaires) avec « Regarder la chaîne ». Clic droit : version de la chaîne (FHD, HD, SD), **thème de la chaîne** (pour corriger le classement automatique), favoris.
-- **Guide TV** : guide du fournisseur (XMLTV) chargé en arrière-plan et gardé sur le disque, complété par un **guide de secours** (xmltvfr.fr) pour les chaînes sans programme. Le programme en cours apparaît aussi dans la barre du lecteur.
+- **Guide TV (données)** : guide du fournisseur (XMLTV) chargé en arrière-plan et gardé sur le disque, complété par un **guide de secours** (xmltvfr.fr) pour les chaînes sans programme. Le programme en cours apparaît aussi dans la barre du lecteur.
 - **Films et Séries** : deux interfaces au choix (Réglages > Apparence).
   - **Classique** : catégories, liste avec affiches, fiche à droite ; « Lire » affiche le lecteur à la place de la fiche.
   - **Cinéma** : bandeau « à la une » qui défile (flèches au survol ; tendances de la semaine sur TMDB, derniers ajouts, sélection d'une catégorie), rangées Reprendre la lecture, Derniers ajouts, Regardés récemment, Favoris puis une rangée par catégorie (« Tout voir »), fiche en page entière.
@@ -29,7 +31,7 @@ Les sources sont actualisées au démarrage si leur dernière mise à jour date 
 ## Réglages (Ctrl+,)
 
 - **Général** : langue (système, français, anglais — au prochain lancement), reprise de lecture, relais de flux, actualisation au démarrage, effacer les récents ; **Guide TV** (nombre de chaînes avec programme, Actualiser le guide, **guide de secours** : activation, adresse ou choix parmi les guides xmltvfr.fr, état du chargement) ; **contenus adultes** (masqués par défaut) ; **clé TMDB**.
-- **Apparence** : interface Classique ou Cinéma pour le direct, les films et les séries (l'interface TV arrive plus tard) ; **bandeau « à la une »** : afficher ou non, hauteur (compact, normal, grand), défilement (6 à 20 s), sources (tendances TMDB, derniers ajouts, catégorie choisie pour les films et pour les séries).
+- **Apparence** : interface Classique ou Cinéma pour le direct, les films et les séries, et interface **TV** pour le direct ; **bandeau « à la une »** : afficher ou non, hauteur (compact, normal, grand), défilement (6 à 20 s), sources (tendances TMDB, derniers ajouts, catégorie choisie pour les films et pour les séries).
 - **Sources** : ajouter, actualiser, supprimer ; état du guide TV de chaque source.
 - **Catégories** : pour le direct, les films ou les séries — glissez pour changer l'ordre, décochez pour masquer partout, double-clic ou crayon pour renommer, mots-clés pour masquer d'un coup toutes les catégories qui les contiennent (ex. « PAKISTAN »), Trier de A à Z, Rétablir. Clic droit sur une catégorie de la barre latérale : Masquer cette catégorie.
 - **Sauvegarde** : **Exporter la configuration…** (sources et leur guide TV, mots de passe si vous le souhaitez, favoris, récents, catégories, interfaces, contenus adultes, bandeau, clé TMDB) et **Importer une configuration…**. Le fichier est le même que celui de Kastideo pour Mac (Réglages > Général > Sauvegarde et transfert) : vous pouvez passer d'un ordinateur à l'autre dans les deux sens. Rien n'est supprimé à l'importation.
@@ -40,7 +42,8 @@ Créez un compte sur themoviedb.org, puis **Paramètres > API** et demandez une 
 
 ## Raccourcis clavier
 
-- **Ctrl+0** : accueil — **Ctrl+1** : direct — **Ctrl+2** : films — **Ctrl+3** : séries — **Ctrl+,** : réglages
+- **Ctrl+0** : accueil — **Ctrl+1** : direct — **Ctrl+2** : films — **Ctrl+3** : séries — **Ctrl+7** : guide TV — **Ctrl+,** : réglages
+- Interface TV : **↑ / ↓** zapping, **chiffres** numéro de chaîne, **←** panneau, **→ / I** bandeau, **B** chaîne précédente, **G** guide, **H** accueil
 - **Espace** : lecture / pause — **M** : couper le son — **F** : favori — **←** / **→** : −10 s / +30 s (films et épisodes)
 - **Ctrl+Entrée** ou double-clic sur l'image : mode cinéma — **Échap** : quitter le mode cinéma, puis revenir aux rangées (direct en interface Cinéma, la chaîne s'arrête) ou à la fiche
 - **F11** : plein écran
@@ -59,11 +62,13 @@ Regarder ou ouvrir la fiche, Lire (films), ajouter aux favoris ou les retirer, t
 
 ## Prochaines étapes
 
-1. **Interface TV** du direct (zapping par numéro).
-2. **Fonctions avancées** : grille du guide TV, enregistrement, différé, alertes de programme, MultiVue, correction des chaînes.
+1. **Fonctions avancées** : enregistrement, différé (pause du direct et rattrapage), alertes de programme, MultiVue, correction des chaînes.
+2. **Personnalisation** : thème clair, couleur d'accent, taille des vignettes.
 3. **Finitions** : installateur Windows, mises à jour intégrées, aide complète.
 
 ## Dépannage
+
+- **Une seule fenêtre** : Kastideo ne s'ouvre qu'une fois ; relancé alors qu'il tourne déjà, il ramène simplement la fenêtre existante au premier plan. À la fermeture, la lecture est arrêtée et le moteur vidéo libéré avant de quitter.
 
 - **Une chaîne ne démarre pas** : ouvrez le **Journal de lecture** (Ctrl+Alt+L). Les lignes « Relais : » donnent la réponse exacte du fournisseur (par exemple « HTTP 200 en 0,35 s » ou « HTTP 403 »).
 - **Pas d'image sous Linux** : vérifiez que le paquet **libmpv** est installé (le paquet .deb l'installe automatiquement ; l'AppImage l'embarque).

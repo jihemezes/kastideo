@@ -9,14 +9,14 @@ import 'core/settings.dart';
 import 'core/themes.dart';
 
 /// Écran affiché.
-enum Screen { home, live, movies, series }
+enum Screen { home, live, movies, series, guide }
 
 extension ScreenKind on Screen {
   MediaKind? get kind => switch (this) {
         Screen.live => MediaKind.live,
         Screen.movies => MediaKind.movie,
         Screen.series => MediaKind.series,
-        Screen.home => null,
+        Screen.home || Screen.guide => null,
       };
 }
 

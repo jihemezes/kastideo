@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
@@ -13,15 +16,69 @@ import 'core/playback.dart';
 import 'theme.dart';
 import 'ui/home_screen.dart';
 import 'ui/catalog_screen.dart';
+import 'ui/guide_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
 import 'ui/widgets.dart';
 import 'core/models.dart';
 
+/// Port local qui sert de verrou : une seule instance de Kastideo à la fois.
+const _instancePort = 47819;
+const _instanceHello = 'kastideo-instance';
+
+/// Vrai si cette instance est la seule ; sinon l'instance déjà ouverte est mise au premier plan.
+Future<bool> _claimSingleInstance() async {
+  try {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, _instancePort);
+    server.listen((socket) async {
+      socket.write(_instanceHello);
+      await socket.flush();
+      socket.destroy();
+      await windowManager.show();
+      await windowManager.restore();
+      await windowManager.focus();
+    });
+    return true;
+  } catch (_) {
+    // Port occupé : est-ce une autre instance de Kastideo ?
+    try {
+      final socket = await Socket.connect(InternetAddress.loopbackIPv4, _instancePort, timeout: const Duration(seconds: 2));
+      final answer = await socket.cast<List<int>>().transform(const SystemEncoding().decoder).join().timeout(const Duration(seconds: 2));
+      socket.destroy();
+      return !answer.contains(_instanceHello);
+    } catch (_) {
+      return true;
+    }
+  }
+}
+
+/// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
+class _CloseHandler with WindowListener {
+  _CloseHandler(this.playback, this.watch);
+  final PlaybackController playback;
+  final WatchProgressStore watch;
+  bool _closing = false;
+
+  @override
+  Future<void> onWindowClose() async {
+    if (_closing) return;
+    _closing = true;
+    try {
+      await windowManager.hide();
+    } catch (_) {}
+    try {
+      await watch.flush().timeout(const Duration(seconds: 1));
+    } catch (_) {}
+    await playback.shutdown();
+    exit(0);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
   await windowManager.ensureInitialized();
+  if (!await _claimSingleInstance()) exit(0);
+  MediaKit.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
       title: 'Kastideo',
@@ -44,6 +101,8 @@ Future<void> main() async {
   final playback = PlaybackController()
     ..settings = settings
     ..watchProgress = watch;
+  await windowManager.setPreventClose(true);
+  windowManager.addListener(_CloseHandler(playback, watch));
   final navigation = NavigationModel();
   final info = MediaInfoStore(library, settings);
   final guide = GuideStore(library);
@@ -116,6 +175,7 @@ class RootView extends StatelessWidget {
         const SingleActivator(LogicalKeyboardKey.digit1, control: true): () => navigation.go(Screen.live),
         const SingleActivator(LogicalKeyboardKey.digit2, control: true): () => navigation.go(Screen.movies),
         const SingleActivator(LogicalKeyboardKey.digit3, control: true): () => navigation.go(Screen.series),
+        const SingleActivator(LogicalKeyboardKey.digit7, control: true): () => navigation.go(Screen.guide),
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
@@ -142,6 +202,7 @@ class RootView extends StatelessWidget {
             Screen.live => const CatalogScreen(kind: MediaKind.live),
             Screen.movies => const CatalogScreen(kind: MediaKind.movie),
             Screen.series => const CatalogScreen(kind: MediaKind.series),
+            Screen.guide => const GuideScreen(),
           },
         ),
       ),

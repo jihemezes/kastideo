@@ -245,7 +245,7 @@ class _AppearanceTab extends StatelessWidget {
               ButtonSegment(value: InterfaceStyle.classic, label: Text(tr('Classique')), icon: const Icon(Icons.view_list_rounded)),
               ButtonSegment(
                   value: InterfaceStyle.cinema, label: Text(tr('Cinéma')), icon: const Icon(Icons.view_module_rounded), enabled: cinemaAvailable),
-              ButtonSegment(value: InterfaceStyle.tv, label: Text(tr('TV')), icon: const Icon(Icons.tv_rounded), enabled: false),
+              ButtonSegment(value: InterfaceStyle.tv, label: Text(tr('TV')), icon: const Icon(Icons.tv_rounded), enabled: kind == MediaKind.live),
             ],
             selected: {current},
             onSelectionChanged: (v) => settings.setInterface(kind, v.first),
@@ -262,7 +262,7 @@ class _AppearanceTab extends StatelessWidget {
           row(MediaKind.movie, tr('Films')),
           row(MediaKind.series, tr('Séries')),
           _caption(tr('Classique : trois colonnes (catégories, liste, lecteur ou fiche). Cinéma : bandeau « à la une », affiches ou vignettes et rangées '
-              '(ce qui passe par thème, ce soir, catégories). L\'interface TV arrive dans une prochaine version.')),
+              '(ce qui passe par thème, ce soir, catégories). TV (direct seulement) : chaîne en plein cadre, zapping par numéro ou ↑ / ↓, panneau des chaînes (←) et bandeau d\'information.')),
         ]),
         const _HeroSection(),
       ]),

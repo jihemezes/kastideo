@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => navigation.show(MediaKind.live, const FavoriteItems())),
       HomeSmallButton(title: tr('Récents'), icon: Icons.history_rounded, badge: library.recentIds.length,
           onTap: () => navigation.show(MediaKind.live, const RecentItems())),
-      HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: null),
+      HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: () => navigation.go(Screen.guide)),
       HomeSmallButton(title: tr('Enregistrements'), icon: Icons.radio_button_checked_rounded, badge: 0, onTap: null),
     ];
     return LayoutBuilder(builder: (context, c) {

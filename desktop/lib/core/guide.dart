@@ -312,6 +312,14 @@ class GuideStore extends ChangeNotifier {
     return g == null ? null : epg.current(g.epgId);
   }
 
+  /// Programmes d'une chaîne (ceux de sa clé de guide, sinon ceux d'une autre version de la chaîne).
+  List<Programme> programmesOf(MediaItem item) {
+    final own = epg.programmes(guideKey(item));
+    if (own.isNotEmpty) return own;
+    final g = _groupByItem[item.id];
+    return g == null ? const [] : epg.programmes(g.epgId);
+  }
+
   Programme? next(MediaItem item) {
     final key = epg.hasProgrammes(guideKey(item)) ? guideKey(item) : _groupByItem[item.id]?.epgId;
     final list = epg.upcoming(key, limit: 1);

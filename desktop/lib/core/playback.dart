@@ -233,6 +233,23 @@ class PlaybackController extends ChangeNotifier {
     await player.stop();
   }
 
+  /// Fermeture de l'application : coupe la lecture et libère mpv (sinon mpv peut ouvrir ses propres fenêtres sous Windows).
+  Future<void> shutdown() async {
+    _flushProgress();
+    _watchdog?.cancel();
+    _openTimer?.cancel();
+    _healthTimer?.cancel();
+    current = null;
+    _retries = 999;
+    StreamRelay.shared.closeAll();
+    try {
+      await player.stop().timeout(const Duration(seconds: 1));
+    } catch (_) {}
+    try {
+      await player.dispose().timeout(const Duration(seconds: 2));
+    } catch (_) {}
+  }
+
   void togglePause() => player.playOrPause();
 
   Future<void> setVolume(double value) async {

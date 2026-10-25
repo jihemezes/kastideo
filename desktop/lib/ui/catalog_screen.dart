@@ -12,6 +12,7 @@ import 'details_view.dart';
 import 'player_pane.dart';
 import 'settings_dialog.dart';
 import 'themes_view.dart';
+import 'tv_view.dart';
 import 'widgets.dart';
 
 /// Une section (Direct, Films ou Séries) dans l'interface choisie : Classique (trois colonnes) ou Cinéma (affiches).
@@ -28,6 +29,8 @@ class CatalogScreen extends StatelessWidget {
         listenable: Listenable.merge([navigation, settings]),
         builder: (context, _) {
           final style = settings.interfaceFor(kind);
+          // Interface TV du direct : plein cadre, sans barre latérale.
+          if (style == InterfaceStyle.tv && kind == MediaKind.live) return const TVView();
           final selected = navigation.selected(kind);
           final Widget content;
           if (style == InterfaceStyle.cinema && kind == MediaKind.live) {
@@ -97,8 +100,11 @@ String sectionTitle(MediaKind kind) => switch (kind) {
 
 /// Barre latérale : sections, accueil, favoris, récents et catégories.
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key, required this.kind});
+  const Sidebar({super.key, required this.kind, this.guide = false});
   final MediaKind kind;
+
+  /// Le guide TV est affiché (entrée sélectionnée).
+  final bool guide;
 
   @override
   Widget build(BuildContext context) {
@@ -132,29 +138,36 @@ class Sidebar extends StatelessWidget {
                     icon: kind == MediaKind.live ? Icons.sensors_rounded : Icons.grid_view_rounded,
                     label: allLabel,
                     count: library.count(kind),
-                    selected: filter is AllItems,
+                    selected: filter is AllItems && !guide,
                     onTap: () => navigation.show(kind, const AllItems()),
                   ),
                   _SidebarRow(
                     icon: Icons.star_rounded,
                     label: tr('Favoris'),
                     count: library.favoritesOf(kind).length,
-                    selected: filter is FavoriteItems,
+                    selected: filter is FavoriteItems && !guide,
                     onTap: () => navigation.show(kind, const FavoriteItems()),
                   ),
                   _SidebarRow(
                     icon: Icons.history_rounded,
                     label: tr('Récents'),
                     count: library.recentsOf(kind).length,
-                    selected: filter is RecentItems,
+                    selected: filter is RecentItems && !guide,
                     onTap: () => navigation.show(kind, const RecentItems()),
                   ),
                   if (kind == MediaKind.live)
                     _SidebarRow(
                       icon: Icons.category_outlined,
                       label: tr('Thèmes'),
-                      selected: filter is ThemesFilter,
+                      selected: filter is ThemesFilter && !guide,
                       onTap: () => navigation.showThemes(theme: navigation.themeSelection, mode: navigation.themeMode),
+                    ),
+                  if (kind == MediaKind.live)
+                    _SidebarRow(
+                      icon: Icons.calendar_month_rounded,
+                      label: tr('Guide TV'),
+                      selected: guide,
+                      onTap: () => navigation.go(Screen.guide),
                     ),
                   const SizedBox(height: 10),
                   Row(children: [
@@ -174,7 +187,7 @@ class Sidebar extends StatelessWidget {
                       icon: Icons.folder_outlined,
                       label: library.categoryName(kind, name),
                       count: library.itemsInCategory(kind, name).length,
-                      selected: filter is CategoryFilter && filter.name == name,
+                      selected: filter is CategoryFilter && filter.name == name && !guide,
                       onTap: () => navigation.show(kind, CategoryFilter(name)),
                       onSecondaryTap: (pos) => _categoryMenu(context, name, pos),
                     ),

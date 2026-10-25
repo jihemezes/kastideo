@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop4] - 2026-10-25
+
+**Aperçu 4 — interface TV et guide TV en grille.**
+
+- **Correction (Windows)** : à la fermeture, des fenêtres Kastideo s'ouvraient en série. Le moteur vidéo mpv continuait de tourner après la fermeture de la fenêtre et ouvrait ses propres fenêtres. Désormais la fermeture arrête la lecture, libère mpv puis quitte le processus. Kastideo ne s'ouvre plus qu'une fois : une seconde ouverture ramène la fenêtre existante.
+- **Guide TV en grille** (accueil, barre latérale du direct, Ctrl+7) : chaînes en lignes, heures en colonnes, trait de l'heure actuelle, navigation ‹ Maintenant ›, choix du jour, 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thèmes, catégories), recherche, fiche des programmes avec Regarder / Aller sur la chaîne.
+- **Interface TV du direct** (Réglages > Apparence) : chaîne en plein cadre, zapping ↑ / ↓, numéro de chaîne au clavier, panneau des chaînes (← ou bord gauche, filtres et recherche, fermeture automatique), bandeau d'information (→ ou I), chaîne précédente (B), favori (F), guide (G), accueil (H), barre du haut qui se cache seule.
+
 ## [1.2.0-desktop3] - 2026-10-25
 
 **Aperçu 3 — Direct en interface Cinéma, guide TV et thèmes.**

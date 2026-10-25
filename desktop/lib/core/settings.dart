@@ -108,7 +108,8 @@ class AppSettings extends ChangeNotifier {
   InterfaceStyle interfaceFor(MediaKind kind) {
     final raw = _prefs.getString('interface.${kind.name}');
     final style = InterfaceStyle.values.where((s) => s.name == raw).firstOrNull ?? InterfaceStyle.classic;
-    return style == InterfaceStyle.tv ? InterfaceStyle.classic : style; // l'interface TV arrive à l'étape suivante
+    // L'interface TV n'existe que pour le direct (comme sur Mac).
+    return style == InterfaceStyle.tv && kind != MediaKind.live ? InterfaceStyle.classic : style;
   }
 
   void setInterface(MediaKind kind, InterfaceStyle style) {

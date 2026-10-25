@@ -15,10 +15,16 @@ import 'themes_view.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
 class PlayerPane extends StatefulWidget {
-  const PlayerPane({super.key, this.showBack = false});
+  const PlayerPane({super.key, this.showBack = false, this.tvMode = false, this.placeholder});
 
   /// Bouton « Retour à la fiche » (films et épisodes).
   final bool showBack;
+
+  /// Interface TV : les flèches et Échap sont laissées à l'interface TV (zapping, panneau).
+  final bool tvMode;
+
+  /// Affiché quand rien n'est en lecture.
+  final Widget? placeholder;
 
   @override
   State<PlayerPane> createState() => _PlayerPaneState();
@@ -69,16 +75,18 @@ class _PlayerPaneState extends State<PlayerPane> {
         const SingleActivator(LogicalKeyboardKey.space): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
-        const SingleActivator(LogicalKeyboardKey.escape): () {
-          final navigation = context.navigation;
-          if (navigation.theater) {
-            navigation.exitTheater();
-          } else if (widget.showBack) {
-            _back();
-          }
+        if (!widget.tvMode) ...{
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+            final navigation = context.navigation;
+            if (navigation.theater) {
+              navigation.exitTheater();
+            } else if (widget.showBack) {
+              _back();
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () => playback.jump(-10),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () => playback.jump(30),
         },
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => playback.jump(-10),
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () => playback.jump(30),
         const SingleActivator(LogicalKeyboardKey.bracketLeft, control: true): () => playback.jump(-10),
         const SingleActivator(LogicalKeyboardKey.bracketRight, control: true): () => playback.jump(30),
         const SingleActivator(LogicalKeyboardKey.keyF): () {
@@ -100,13 +108,13 @@ class _PlayerPaneState extends State<PlayerPane> {
               child: ListenableBuilder(
                 listenable: playback,
                 builder: (context, _) {
-                  if (playback.current == null) return const _Placeholder();
+                  if (playback.current == null) return widget.placeholder ?? const _Placeholder();
                   return Stack(fit: StackFit.expand, children: [
                     Video(controller: playback.video, controls: NoVideoControls, fill: Colors.black),
                     if (playback.isLoading && playback.errorMessage == null)
                       const Center(child: CircularProgressIndicator(color: Colors.white)),
                     if (playback.errorMessage != null) _ErrorView(message: playback.errorMessage!),
-                    if (playback.startupTime != null && playback.isLive) const _StartupBadge(),
+                    if (playback.startupTime != null && playback.isLive && !widget.tvMode) const _StartupBadge(),
                     if (playback.resumedAt != null) const _ResumeNotice(),
                     if (widget.showBack)
                       Positioned(
