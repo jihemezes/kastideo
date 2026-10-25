@@ -40,7 +40,7 @@ ThemeData buildTheme() {
     brightness: Brightness.dark,
     useMaterial3: true,
     fontFamily: 'Inter',
-    colorScheme: ColorScheme.fromSeed(seedColor: KPalette.magenta, brightness: Brightness.dark)
+    colorScheme: ColorScheme.fromSeed(seedColor: KPalette.accent, brightness: Brightness.dark)
         .copyWith(primary: KPalette.accent, secondary: KPalette.orange, surface: KPalette.window),
     scaffoldBackgroundColor: KPalette.window,
     splashFactory: NoSplash.splashFactory,
@@ -58,6 +58,23 @@ ThemeData buildTheme() {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(foregroundColor: Colors.white, textStyle: kText(13, weight: FontWeight.w600)),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.all(Colors.white),
+      trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? KPalette.accent : Colors.white24),
+      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+    ),
+    chipTheme: ChipThemeData(
+      selectedColor: Colors.white.withValues(alpha: 0.18),
+      backgroundColor: Colors.transparent,
+      side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+      labelStyle: kText(13),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white.withValues(alpha: 0.18) : null),
+        foregroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.disabled) ? Colors.white30 : Colors.white),
+      ),
     ),
     dividerColor: KPalette.separator,
     scrollbarTheme: ScrollbarThemeData(

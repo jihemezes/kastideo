@@ -126,3 +126,45 @@ class KastideoBackground extends StatelessWidget {
     ]);
   }
 }
+
+/// Affiche (film, série) : image du fournisseur ou de TMDB, sinon dégradé avec le titre.
+class PosterImage extends StatelessWidget {
+  const PosterImage({super.key, required this.url, required this.name, required this.width, required this.height, this.fit = BoxFit.cover});
+  final String? url;
+  final String name;
+  final double width;
+  final double height;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Container(
+      width: width,
+      height: height,
+      padding: EdgeInsets.all(width * 0.08),
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(colors: [Color(0xFF383838), Color(0xFF1C1C1C)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+      ),
+      child: width < 60
+          ? Text(initials(name), style: kRounded(width * 0.32, FontWeight.w800, color: Colors.white70))
+          : Text(cleanTitle(name).title,
+              textAlign: TextAlign.center,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: kRounded(width * 0.11, FontWeight.w800, color: Colors.white70)),
+    );
+    if (url == null) return fallback;
+    return Image.network(
+      url!,
+      width: width,
+      height: height,
+      fit: fit,
+      cacheWidth: (width * 2).round(),
+      filterQuality: FilterQuality.medium,
+      headers: const {'User-Agent': 'VLC/3.0.20 LibVLC/3.0.20'},
+      errorBuilder: (_, _, _) => fallback,
+      frameBuilder: (context, child, frame, sync) => frame == null && !sync ? fallback : child,
+    );
+  }
+}

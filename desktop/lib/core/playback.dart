@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'log.dart';
 import 'models.dart';
 import 'relay.dart';
+import 'settings.dart';
 import 'xtream.dart';
 
 /// Santé du flux (pastille de couleur, comme sur Mac).
@@ -41,7 +42,14 @@ class PlaybackController extends ChangeNotifier {
       }),
       player.stream.width.listen((w) => videoWidth = w),
       player.stream.position.listen((p) {
+        position = p;
         if (p > Duration.zero) _markStarted();
+        _trackProgress();
+        if (!isLive) notifyListeners();
+      }),
+      player.stream.duration.listen((d) {
+        duration = d;
+        notifyListeners();
       }),
       player.stream.error.listen(_onError),
       player.stream.log.listen((log) {
@@ -49,9 +57,12 @@ class PlaybackController extends ChangeNotifier {
         PlaybackLog.shared.engine('[${log.prefix}] ${log.text.trim()}', level: level);
       }),
       player.stream.completed.listen((done) {
-        if (done && current?.kind == MediaKind.live) {
+        if (!done) return;
+        if (current?.kind == MediaKind.live) {
           errorMessage = 'Le flux s\'est interrompu. Le serveur a peut-être coupé la connexion.';
           notifyListeners();
+        } else if (current != null) {
+          watchProgress?.clear(current!.id); // film terminé : plus de reprise
         }
       }),
     ]);
@@ -74,6 +85,15 @@ class PlaybackController extends ChangeNotifier {
   double volume = 100;
   bool muted = false;
   HealthLevel health = HealthLevel.unknown;
+  Duration position = Duration.zero;
+  Duration duration = Duration.zero;
+
+  /// Position à laquelle la lecture a repris (affichée quelques secondes).
+  Duration? resumedAt;
+  WatchProgressStore? watchProgress;
+  AppSettings? settings;
+  Duration? _pendingResume;
+  DateTime _lastProgressSave = DateTime.fromMillisecondsSinceEpoch(0);
 
   final List<DateTime> _stalls = [];
   DateTime? _startedAt;
@@ -107,6 +127,60 @@ class PlaybackController extends ChangeNotifier {
   }
 
   bool get isLive => current?.kind == MediaKind.live;
+  bool get isSeekable => !isLive && duration > Duration.zero;
+
+  void seek(double fraction) {
+    if (!isSeekable) return;
+    player.seek(duration * fraction.clamp(0.0, 1.0));
+  }
+
+  void jump(int seconds) {
+    if (!isSeekable) return;
+    var target = position + Duration(seconds: seconds);
+    if (target < Duration.zero) target = Duration.zero;
+    if (target > duration) target = duration;
+    player.seek(target);
+  }
+
+  void restartFromBeginning() {
+    if (!isSeekable) return;
+    player.seek(Duration.zero);
+    resumedAt = null;
+    if (current != null) watchProgress?.clear(current!.id);
+    notifyListeners();
+  }
+
+  void dismissResume() {
+    resumedAt = null;
+    notifyListeners();
+  }
+
+  /// Reprise à la dernière position, puis mémorisation régulière (toutes les 5 s).
+  void _trackProgress() {
+    final item = current;
+    if (item == null || item.kind == MediaKind.live || !didStart) return;
+    final pending = _pendingResume;
+    if (pending != null) {
+      if (duration <= Duration.zero) return;
+      _pendingResume = null;
+      player.seek(pending);
+      resumedAt = pending;
+      notifyListeners();
+      return;
+    }
+    if (DateTime.now().difference(_lastProgressSave) > const Duration(seconds: 5) && position > const Duration(seconds: 2)) {
+      _lastProgressSave = DateTime.now();
+      watchProgress?.update(item.id, position.inMilliseconds / 1000, duration.inMilliseconds / 1000);
+    }
+  }
+
+  void _flushProgress() {
+    final item = current;
+    if (item != null && item.kind != MediaKind.live && duration > Duration.zero && position > const Duration(seconds: 2) && _pendingResume == null) {
+      watchProgress?.update(item.id, position.inMilliseconds / 1000, duration.inMilliseconds / 1000);
+    }
+    watchProgress?.flush();
+  }
 
   int get recentStalls {
     final now = DateTime.now();
@@ -122,8 +196,17 @@ class PlaybackController extends ChangeNotifier {
       if (!isPlaying) player.play();
       return;
     }
+    _flushProgress();
     current = item;
     _retries = 0;
+    resumedAt = null;
+    _pendingResume = null;
+    position = Duration.zero;
+    duration = Duration.zero;
+    if (item.kind != MediaKind.live && (settings?.resumePlayback ?? true)) {
+      final point = watchProgress?.resumePoint(item.id);
+      if (point != null) _pendingResume = Duration(milliseconds: (point * 1000).round());
+    }
     _start(url);
   }
 
@@ -135,6 +218,7 @@ class PlaybackController extends ChangeNotifier {
   }
 
   Future<void> stop() async {
+    _flushProgress();
     _watchdog?.cancel();
     _openTimer?.cancel();
     _healthTimer?.cancel();
@@ -201,7 +285,7 @@ class PlaybackController extends ChangeNotifier {
 
   Future<void> _open(String url) async {
     _startedAt = DateTime.now();
-    final source = StreamRelay.shared.playbackUrl(url, live: isLive);
+    final source = StreamRelay.shared.playbackUrl(url, live: isLive && (settings?.relayEnabled ?? true));
     PlaybackLog.shared.note('Ouverture de $url${source == url ? '' : ' (via le relais)'}');
     _watchdog = Timer(startTimeout, () {
       if (_currentUrl == url && !didStart && errorMessage == null) {

@@ -1,100 +1,118 @@
-# Kastideo
+<p align="center">
+  <img src="docs/branding/kastideo-icon-1024.png" width="140" alt="Icône de Kastideo">
+</p>
 
-Kastideo est un lecteur multimédia moderne pour réunir, organiser et lire vos contenus vidéo provenant de vos propres sources : playlists IPTV, chaînes en direct, séries, films et vidéos à la demande.
+<h1 align="center">Kastideo</h1>
 
-Kastideo n'est pas un fournisseur de contenus : c'est un lecteur. Vous ajoutez vos listes de lecture ou abonnements compatibles, et Kastideo les transforme en une expérience de télévision claire et agréable.
+<p align="center">
+  <b>Vos chaînes, vos films et vos séries au même endroit.</b><br>
+  Un lecteur IPTV rapide et élégant pour Mac, Windows et Linux.
+</p>
 
-## Fonctions (version 1.1.7)
+<p align="center">
+  <a href="https://github.com/jihemezes/kastideo/releases/latest"><b>Télécharger pour Mac</b></a> ·
+  <a href="https://github.com/jihemezes/kastideo/releases"><b>Toutes les versions (Windows, Linux)</b></a>
+</p>
 
-- Sources **Xtream Codes** (serveur, identifiant, mot de passe) et playlists **M3U / M3U8** (URL ou fichier)
-- **Guide TV** XMLTV : programme en cours et à venir
-- **Écran d'accueil** (Direct, Films, Séries, accès rapides, recherche globale), suppression d'éléments dans les **Récents**, application en **français et anglais**
-- **Guide TV en grille** (chaînes × heures), **reprise de lecture** des films et épisodes, **indicateur de téléchargement** permanent avec temps restant
-- Navigation **Direct / Films / Séries / Favoris / Récents**, catégories, recherche
-- Trois interfaces au choix par type de contenu : **Classique** (trois colonnes), **Cinéma** (affiches et rangées) et **TV** pour le direct (panneau de chaînes, zapping par numéro) ; couleur d'accent, densité et taille des vignettes réglables
-- Moteur de lecture **VLC** (VLCKit) : direct MPEG-TS, HLS, MP4, MKV… ; mode cinéma, mesure du temps de démarrage
-- **Enregistrement** du direct (immédiat ou programmé), **téléchargement** des films et séries (file d'attente, la nuit), conversion MP4, **direct en différé**
-- **Mises à jour automatiques** (Sparkle) avec canal bêta facultatif
-- Aide intégrée : voir [docs/AIDE.md](docs/AIDE.md)
+---
 
-## Installation
+Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans une seule application claire, rapide et personnalisable : un accueil soigné, un guide TV, des fiches détaillées pour les films, l'enregistrement du direct et bien plus.
 
-Téléchargez le fichier `Kastideo-X.Y.Z.dmg` de la dernière version dans les [Releases](https://github.com/jihemezes/kastideo/releases), ouvrez-le et glissez Kastideo dans **Applications**. L'application est signée et notarisée par Apple.
+> **Kastideo est un lecteur, pas un fournisseur de contenus.** Il ne contient aucune chaîne ni aucun film : vous y ajoutez votre propre abonnement IPTV (Xtream Codes) ou vos playlists M3U.
 
-Configuration requise : macOS 14 Sonoma ou plus récent.
+## Fonctionnalités
 
-## Organisation du projet
+### Regarder
+- **Direct, Films et Séries** dans une même application, avec favoris, récents et recherche globale.
+- **Trois interfaces au choix** : *Classique* (listes), *Cinéma* (affiches, carrousel « à la une ») et *TV* (zapping par numéro, comme sur un téléviseur).
+- **Démarrage rapide des chaînes** (moins d'une seconde en général) et indicateur de **santé du flux** (qualité de réception, définition SD / HD / Full HD / 4K).
+- **Direct en différé** : mettez en pause, reprenez plus tard, accélérez pour rattraper le direct.
+- **Reprise de lecture** des films et des épisodes là où vous vous êtes arrêté.
+- **MultiVue** : jusqu'à quatre chaînes à l'écran, si votre abonnement le permet.
 
-```
-kastideo/
-├── project.yml                 Définition du projet Xcode (XcodeGen)
-├── App/
-│   ├── Sources/                Application SwiftUI macOS
-│   ├── Resources/              Icône et couleurs (Assets.xcassets)
-│   ├── Info.plist
-│   └── Kastideo.entitlements   Bac à sable : réseau, fichiers choisis, ~/Movies
-├── Packages/KastideoCore/      Logique partagée (M3U, Xtream, XMLTV) + tests
-│                               réutilisable pour iOS, iPadOS et tvOS
-├── docs/AIDE.md                Aide intégrée à l'application
-├── docs/branding/              Icône source en 1024 × 1024
-├── scripts/kastideo-release.sh Publication d'une version
-├── scripts/appcast.py          Mise à jour du flux Sparkle (utilisé par la CI)
-├── .github/workflows/
-│   ├── build.yml               Tests + compilation à la demande (Run workflow)
-│   └── release.yml             Tests, DMG signé et notarisé, flux Sparkle à chaque tag vX.Y.Z
-└── CHANGELOG.md                Notes de version (reprises dans les Releases)
-```
+### S'y retrouver
+- **Guide TV** en grille, avec un guide de secours quand celui du fournisseur est incomplet.
+- **Chaînes classées par thème** (Sport et disciplines, Info, Films, Jeunesse, Documentaires…) et vue « En ce moment » / « Ce soir ».
+- **Alertes de programme** : Kastideo vous prévient quand votre match ou votre émission commence.
+- **Fiches films et séries** : affiche, résumé, distribution, note et bande-annonce (via TMDB).
+- **Catégories personnalisables** : réordonner, masquer, renommer ; **correction des chaînes** mal nommées (nom, numéro, logo, guide TV).
 
-## Publier une version
+### Enregistrer
+- **Enregistrement du direct**, immédiat ou programmé, converti en MP4.
+- **Téléchargement** des films et des séries pour les regarder sans connexion, éventuellement la nuit.
 
-Chaque livraison arrive sous forme de zip `kastideo-vX.Y.Z.zip` dans `~/Downloads`. Depuis `~/Documents/kastideo` :
+### Et aussi
+- **Sauvegarde et transfert** : un fichier pour retrouver sources, favoris et réglages sur un autre ordinateur, Mac, Windows ou Linux.
+- Français et anglais, thème sombre ou clair, couleur d'accent au choix.
+- Aide intégrée et journal de lecture pour comprendre un problème de chaîne.
+- Mots de passe rangés dans le coffre sécurisé du système ; aucune donnée n'est envoyée ailleurs que chez votre fournisseur (et TMDB pour les fiches, si vous l'activez).
 
-```bash
-./scripts/kastideo-release.sh X.Y.Z "Descriptif"
-```
+## Les versions de Kastideo
 
-Le push du tag `vX.Y.Z` déclenche le workflow **Release**. Il compile l'app, la signe avec le certificat Developer ID, crée le DMG, le fait notariser par Apple et publie la GitHub Release.
+| Plateforme | État | Ce qui est disponible |
+|---|---|---|
+| **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
+| **Windows** | 🧪 Aperçu | Accueil, direct, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), réglages, catégories, sauvegarde. Les autres fonctions arrivent par étapes |
+| **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
 
-### Secrets GitHub nécessaires
+Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (numéros se terminant par `-desktop1`, `-desktop2`…).
 
-| Secret | Contenu |
+## Quelle version télécharger ?
+
+### 🍎 Mac
+
+| Votre Mac | Fichier à télécharger |
 |---|---|
-| `APPLE_CERTIFICATE` | Certificat « Developer ID Application » exporté en `.p12`, encodé en base64 |
-| `APPLE_CERTIFICATE_PASSWORD` | Mot de passe du `.p12` |
-| `APPLE_TEAM_ID` | Identifiant d'équipe Apple |
-| `APPLE_API_KEY` | Contenu du fichier `AuthKey_XXXX.p8` (App Store Connect) |
-| `APPLE_API_KEY_ID` | Identifiant de la clé API |
-| `APPLE_API_ISSUER_ID` | Identifiant d'émetteur (Issuer ID) |
-| `SPARKLE_PRIVATE_KEY` | Clé privée EdDSA Sparkle (`generate_keys --account kastideo -x fichier`) |
+| macOS 14 Sonoma ou plus récent, processeur Apple (M1, M2, M3, M4…) ou Intel | `Kastideo-X.Y.Z.dmg` |
 
-### Mises à jour (Sparkle)
+*Pour connaître votre version de macOS : menu Pomme > **À propos de ce Mac**.*
 
-Après chaque publication, le workflow signe le DMG avec la clé Sparkle et met à jour `appcast.xml` sur la branche **`appcast`** du dépôt. Cette branche est gérée automatiquement : ne la modifiez pas et ne la fusionnez pas dans `main`. L'application lit ce flux à l'adresse `https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml`.
+Ouvrez le fichier `.dmg` et glissez Kastideo dans **Applications**. L'application est signée et vérifiée par Apple ; elle se met ensuite à jour toute seule.
 
-Pour publier une **version de test**, utilisez un numéro `X.Y.Z-betaN` (par exemple `0.3.0-beta1`). Elle sera publiée en pré-version GitHub et proposée seulement aux utilisateurs qui ont activé le canal bêta.
+### 🪟 Windows
 
-La clé publique correspondante est inscrite dans `project.yml` (`SUPublicEDKey`). **Ne perdez jamais la clé privée** : sans elle, les copies installées n'accepteront plus de mise à jour.
+| Votre PC | Fichier à télécharger |
+|---|---|
+| Windows 10 ou 11, 64 bits (processeur Intel ou AMD) | `Kastideo-…-windows-x64.zip` |
 
-## Licences
+*Pour vérifier : **Paramètres > Système > Informations > Type du système** doit indiquer « système d'exploitation 64 bits, processeur x64 ».*
 
-- [VLCKit](https://code.videolan.org/videolan/VLCKit) (VideoLAN) — LGPL 2.1+, intégré via [vlckit-spm](https://github.com/tylerjonesio/vlckit-spm) 3.6.0 (bibliothèque dynamique non modifiée)
-- [Sparkle](https://sparkle-project.org) — MIT
+Décompressez l'archive, puis lancez **kastideo.exe**. L'aperçu n'est pas encore signé : Windows affiche « Windows a protégé votre ordinateur » ; cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
 
-## Développer en local (facultatif)
+### 🐧 Linux
 
-Il faut Xcode 16 et XcodeGen :
+| Votre système | Fichier à télécharger |
+|---|---|
+| **Zorin OS 17** ou **Ubuntu 22.04** (PC 64 bits) | `kastideo_…_ubuntu22.04_amd64.deb` |
+| **Zorin OS 18** ou **Ubuntu 24.04** (PC 64 bits) | `kastideo_…_ubuntu24.04_amd64.deb` |
+| **Raspberry Pi 4 ou 5** avec un système 64 bits | `Kastideo-…-linux-aarch64.AppImage` |
+| Toute autre distribution (PC 64 bits) | `Kastideo-…-linux-x86_64.AppImage` |
+
+*Pour connaître votre système, tapez dans un terminal :*
 
 ```bash
-brew install xcodegen
-cd ~/Documents/kastideo
-xcodegen generate
-open Kastideo.xcodeproj
+lsb_release -d   # nom et version (par exemple « Zorin OS 17.3 » ou « Ubuntu 24.04 »)
+uname -m         # x86_64 = PC 64 bits, aarch64 = Raspberry Pi 64 bits
 ```
 
-Dans Xcode, choisissez votre équipe dans **Signing & Capabilities** pour lancer l'app. Les tests du module partagé se lancent avec `swift test --package-path Packages/KastideoCore`.
+- **Paquet `.deb`** : double-cliquez dessus pour l'installer avec la Logithèque, ou tapez `sudo apt install ./kastideo_…deb` dans le dossier de téléchargement. Kastideo apparaît ensuite dans le menu des applications.
+- **AppImage** : un seul fichier, sans installation. Rendez-le exécutable (clic droit > **Propriétés** > **Autoriser l'exécution**, ou `chmod +x Kastideo-…AppImage`) puis double-cliquez dessus. S'il ne démarre pas, installez `libfuse2` (`libfuse2t64` sur Ubuntu 24.04 et Zorin OS 18).
 
-Le fichier `Kastideo.xcodeproj` est généré : il n'est pas versionné.
+## Premiers pas
 
-## Windows et Linux (préversion)
+1. Lancez Kastideo et ouvrez **Sources** (Réglages sur Mac, bouton antenne sur Windows et Linux).
+2. Ajoutez votre abonnement : **Xtream Codes** (adresse du serveur, identifiant, mot de passe) ou **playlist M3U** (adresse ou fichier). Une adresse de playlist du type `get.php?username=…&password=…` est reconnue automatiquement.
+3. Vos chaînes, films et séries apparaissent sur l'accueil : choisissez **Direct** et lancez une chaîne.
 
-Une version Windows / Linux (Flutter + moteur mpv) est en cours dans le dossier `desktop/`. Ses préversions sont publiées avec les tags `vX.Y.Z-desktopN` (workflow `desktop.yml`), sans toucher aux versions Mac ni aux mises à jour Sparkle.
+Tout le reste est expliqué dans l'aide intégrée de l'application (menu **Aide** sur Mac, bouton **?** sur Windows et Linux).
+
+## Besoin d'aide ?
+
+- **Une chaîne ne démarre pas ou n'a pas de son** : ouvrez le **Journal de lecture** (⌥⌘L sur Mac, Ctrl+Alt+L sur Windows et Linux) ; il indique la réponse exacte du fournisseur. Pensez aussi à couper un éventuel VPN.
+- **Un problème ou une idée ?** Ouvrez un ticket dans l'onglet [Issues](https://github.com/jihemezes/kastideo/issues).
+
+## Remerciements
+
+Kastideo s'appuie sur des logiciels libres : [VLC / VLCKit](https://www.videolan.org/vlc/libvlc.html) (VideoLAN, LGPL 2.1+) et [Sparkle](https://sparkle-project.org) (MIT) sur Mac ; [Flutter](https://flutter.dev) (BSD), [mpv](https://mpv.io) (LGPL) via [media_kit](https://github.com/media-kit/media-kit) (MIT) sur Windows et Linux ; les polices [Nunito](https://fonts.google.com/specimen/Nunito) et [Inter](https://rsms.me/inter/) (OFL). Les fiches de films et de séries utilisent l'API [TMDB](https://www.themoviedb.org) mais ne sont ni approuvées ni certifiées par TMDB.
+
+<sub>Notes de développement et de publication : [docs/DEVELOPPEMENT.md](docs/DEVELOPPEMENT.md).</sub>

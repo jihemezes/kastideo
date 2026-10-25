@@ -860,3 +860,110 @@ struct GuideChannelChoice: Identifiable, Hashable {
     let name: String
     let source: String
 }
+
+// MARK: - Exportation / importation de la configuration (commune au Mac, à Windows et à Linux)
+
+extension LibraryStore {
+    /// Identifiant relatif à la source : « numéro de source|reste de l'identifiant ».
+    private func relativeID(_ id: String, sourceIndex: [UUID: Int]) -> String? {
+        guard let item = item(id: id) ?? extraItem(id: id),
+              let index = sourceIndex[item.sourceID] else { return nil }
+        let prefix = item.sourceID.uuidString + ":"
+        guard id.hasPrefix(prefix) else { return nil }
+        return "\(index)|\(id.dropFirst(prefix.count))"
+    }
+
+    private func extraItem(id: String) -> MediaItem? { extraItems[id] }
+
+    func makeExport(includePasswords: Bool) -> KastideoExport {
+        var export = KastideoExport()
+        var sourceIndex: [UUID: Int] = [:]
+        for source in sources {
+            switch source.kind {
+            case .xtream(let server, let username):
+                sourceIndex[source.id] = export.sources.count
+                export.sources.append(.init(name: source.name, kind: "xtream", address: server.absoluteString, username: username,
+                                            password: includePasswords ? Keychain.get(account: source.id.uuidString) : nil,
+                                            epgUrl: source.epgURL?.absoluteString, enabled: source.isEnabled))
+            case .m3uURL(let url):
+                sourceIndex[source.id] = export.sources.count
+                export.sources.append(.init(name: source.name, kind: "m3uUrl", address: url.absoluteString, username: nil,
+                                            password: nil, epgUrl: source.epgURL?.absoluteString, enabled: source.isEnabled))
+            case .m3uFile:
+                continue
+            }
+        }
+        export.favorites = favoriteIDs.compactMap { relativeID($0, sourceIndex: sourceIndex) }
+        export.recents = recentIDs.compactMap { relativeID($0, sourceIndex: sourceIndex) }
+        for kind in CategoryPrefs.kinds {
+            guard let prefs = categoryPrefs[kind], let name = KastideoExport.kindNames[kind] else { continue }
+            export.categories[name] = .init(order: prefs.order, hidden: Array(prefs.hidden), renames: prefs.renames, keywords: prefs.keywords)
+        }
+        let defaults = UserDefaults.standard
+        for key in ["interface.live", "interface.movie", "interface.series", "adult.show", "buffering"] {
+            if let value = defaults.object(forKey: key) { export.settings[key] = "\(value)" }
+        }
+        if includePasswords, let key = MediaInfoStore.storedTMDBKey, !key.isEmpty { export.settings["tmdbKey"] = key }
+        return export
+    }
+
+    /// Ajoute les sources absentes (même type, même adresse et même identifiant = déjà présente), les favoris,
+    /// les récents, les catégories et les réglages du fichier. Rien n'est supprimé.
+    func importConfig(_ export: KastideoExport) -> ImportSummary {
+        var summary = ImportSummary()
+        var newIDs: [Int: UUID] = [:]
+        for (index, entry) in export.sources.enumerated() {
+            guard let url = URL(string: entry.address) else { continue }
+            let kind: SourceKind
+            switch entry.kind {
+            case "xtream": kind = .xtream(server: url, username: entry.username ?? "")
+            case "m3uUrl": kind = .m3uURL(url)
+            default: continue
+            }
+            if let existing = sources.first(where: { $0.kind == kind }) {
+                newIDs[index] = existing.id
+                summary.sourcesSkipped += 1
+                if let password = entry.password, !password.isEmpty, Keychain.get(account: existing.id.uuidString) == nil {
+                    Keychain.set(password, account: existing.id.uuidString)
+                }
+                continue
+            }
+            let source = Source(name: entry.name, kind: kind, epgURL: entry.epgUrl.flatMap(URL.init(string:)), isEnabled: entry.enabled)
+            newIDs[index] = source.id
+            addSource(source, password: entry.password)
+            summary.sourcesAdded += 1
+        }
+        func absolute(_ relative: String) -> String? {
+            let parts = relative.split(separator: "|", maxSplits: 1)
+            guard parts.count == 2, let index = Int(parts[0]), let id = newIDs[index] else { return nil }
+            return "\(id.uuidString):\(parts[1])"
+        }
+        for id in export.favorites.compactMap(absolute) where !favoriteIDs.contains(id) {
+            favoriteIDs.append(id)
+            summary.favoritesAdded += 1
+        }
+        UserDefaults.standard.set(favoriteIDs, forKey: "favorites.v1")
+        for id in export.recents.compactMap(absolute) where !recentIDs.contains(id) {
+            recentIDs.append(id)
+        }
+        if recentIDs.count > 60 { recentIDs.removeLast(recentIDs.count - 60) }
+        UserDefaults.standard.set(recentIDs, forKey: "recents.v1")
+        for kind in CategoryPrefs.kinds {
+            guard let name = KastideoExport.kindNames[kind], let imported = export.categories[name] else { continue }
+            updateCategories(kind) { prefs in
+                prefs.order = imported.order
+                prefs.hidden = Set(imported.hidden)
+                prefs.renames = imported.renames
+                prefs.keywords = imported.keywords
+            }
+            summary.categoriesImported += 1
+        }
+        let defaults = UserDefaults.standard
+        for key in ["interface.live", "interface.movie", "interface.series"] {
+            if let value = export.settings[key], InterfaceStyle(rawValue: value) != nil { defaults.set(value, forKey: key) }
+        }
+        if let value = export.settings["adult.show"] { defaults.set(value == "1" || value == "true", forKey: "adult.show") }
+        rebuildIndex()
+        return summary
+    }
+}

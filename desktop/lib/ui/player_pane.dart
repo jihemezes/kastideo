@@ -13,7 +13,10 @@ import 'log_dialog.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
 class PlayerPane extends StatefulWidget {
-  const PlayerPane({super.key});
+  const PlayerPane({super.key, this.showBack = false});
+
+  /// Bouton « Retour à la fiche » (films et épisodes).
+  final bool showBack;
 
   @override
   State<PlayerPane> createState() => _PlayerPaneState();
@@ -56,6 +59,10 @@ class _PlayerPaneState extends State<PlayerPane> {
         const SingleActivator(LogicalKeyboardKey.space): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => playback.jump(-10),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => playback.jump(30),
+        const SingleActivator(LogicalKeyboardKey.bracketLeft, control: true): () => playback.jump(-10),
+        const SingleActivator(LogicalKeyboardKey.bracketRight, control: true): () => playback.jump(30),
         const SingleActivator(LogicalKeyboardKey.keyF): () {
           final item = playback.current;
           if (item != null) context.library.toggleFavorite(item.id);
@@ -81,7 +88,21 @@ class _PlayerPaneState extends State<PlayerPane> {
                     if (playback.isLoading && playback.errorMessage == null)
                       const Center(child: CircularProgressIndicator(color: Colors.white)),
                     if (playback.errorMessage != null) _ErrorView(message: playback.errorMessage!),
-                    if (playback.startupTime != null) const _StartupBadge(),
+                    if (playback.startupTime != null && playback.isLive) const _StartupBadge(),
+                    if (playback.resumedAt != null) const _ResumeNotice(),
+                    if (widget.showBack)
+                      Positioned(
+                        top: 14,
+                        left: 14,
+                        child: AnimatedOpacity(
+                          opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
+                          duration: const Duration(milliseconds: 250),
+                          child: _BackChip(onTap: () {
+                            if (context.navigation.theater) context.navigation.toggleTheater();
+                            context.navigation.closePlayer();
+                          }),
+                        ),
+                      ),
                     Positioned(
                       left: 0,
                       right: 0,
@@ -214,12 +235,22 @@ class ControlsBar extends StatelessWidget {
         ),
         child: ListenableBuilder(
           listenable: Listenable.merge([playback, navigation]),
-          builder: (context, _) => Row(mainAxisSize: MainAxisSize.min, children: [
+          builder: (context, _) => Column(mainAxisSize: MainAxisSize.min, children: [
+            if (playback.isSeekable) ...[const ScrubBar(), const SizedBox(height: 4)],
+            Row(mainAxisSize: MainAxisSize.min, children: [
             _BarButton(
               icon: playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
               tooltip: tr('Lecture / pause (Espace)'),
               onTap: playback.togglePause,
             ),
+            if (playback.isSeekable) ...[
+              const SizedBox(width: 8),
+              _BarButton(icon: Icons.replay_10_rounded, tooltip: tr('Reculer de 10 s (←)'), onTap: () => playback.jump(-10)),
+              _BarButton(icon: Icons.forward_30_rounded, tooltip: tr('Avancer de 30 s (→)'), onTap: () => playback.jump(30)),
+              const SizedBox(width: 8),
+              Text('${formatClock(playback.position)} / ${formatClock(playback.duration)}',
+                  style: kText(12, color: Colors.white.withValues(alpha: 0.85)).copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
+            ],
             const SizedBox(width: 10),
             const _HealthPill(),
             const SizedBox(width: 12),
@@ -256,6 +287,7 @@ class ControlsBar extends StatelessWidget {
               onTap: navigation.toggleTheater,
             ),
             _BarButton(icon: Icons.fullscreen_rounded, tooltip: '${tr('Plein écran')} (F11)', onTap: onFullScreen),
+          ]),
           ]),
         ),
       ),
@@ -334,5 +366,157 @@ class _HealthPillState extends State<_HealthPill> {
         ]),
       ),
     );
+  }
+}
+
+
+/// Bouton « Retour à la fiche » en haut à gauche du lecteur (films, épisodes).
+class _BackChip extends StatelessWidget {
+  const _BackChip({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: tr('Revenir à la fiche (la lecture continue en arrière-plan jusqu\'au choix d\'un autre contenu)'),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(20)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.chevron_left_rounded, size: 18, color: Colors.white),
+              Text(tr('Retour à la fiche'), style: kText(13, weight: FontWeight.w600)),
+            ]),
+          ),
+        ),
+      );
+}
+
+/// « Reprise à 12:34 » avec « Reprendre au début » (comme sur Mac).
+class _ResumeNotice extends StatefulWidget {
+  const _ResumeNotice();
+
+  @override
+  State<_ResumeNotice> createState() => _ResumeNoticeState();
+}
+
+class _ResumeNoticeState extends State<_ResumeNotice> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(const Duration(seconds: 8), () {
+      if (mounted) context.playback.dismissResume();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final at = context.playback.resumedAt;
+    if (at == null) return const SizedBox.shrink();
+    return Positioned(
+      top: 16,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(22)),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.history_rounded, size: 16, color: KPalette.orange),
+            const SizedBox(width: 8),
+            Text('${tr('Reprise à')} ${formatClock(at)}', style: kText(13, weight: FontWeight.w600)),
+            const SizedBox(width: 10),
+            TextButton(onPressed: context.playback.restartFromBeginning, child: Text(tr('Reprendre au début'))),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// « 1:23:45 » ou « 12:34 ».
+String formatClock(Duration d) {
+  final total = d.inSeconds;
+  final h = total ~/ 3600, m = (total % 3600) ~/ 60, s = total % 60;
+  String two(int v) => v.toString().padLeft(2, '0');
+  return h > 0 ? '$h:${two(m)}:${two(s)}' : '$m:${two(s)}';
+}
+
+/// Mini-timeline des films et épisodes : fine, plus épaisse au survol, avec l'heure visée.
+class ScrubBar extends StatefulWidget {
+  const ScrubBar({super.key});
+
+  @override
+  State<ScrubBar> createState() => _ScrubBarState();
+}
+
+class _ScrubBarState extends State<ScrubBar> {
+  double? _hoverX;
+  double? _drag;
+
+  @override
+  Widget build(BuildContext context) {
+    final playback = context.playback;
+    return LayoutBuilder(builder: (context, c) {
+      final width = c.maxWidth;
+      final total = playback.duration.inMilliseconds;
+      final progress = _drag ?? (total > 0 ? playback.position.inMilliseconds / total : 0.0);
+      final active = _hoverX != null || _drag != null;
+      final labelX = _hoverX ?? (_drag != null ? _drag! * width : null);
+      return MouseRegion(
+        onHover: (e) => setState(() => _hoverX = e.localPosition.dx.clamp(0, width)),
+        onExit: (_) => setState(() => _hoverX = null),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragUpdate: (e) => setState(() => _drag = (e.localPosition.dx / width).clamp(0.0, 1.0)),
+          onHorizontalDragEnd: (_) {
+            if (_drag != null) playback.seek(_drag!);
+            setState(() => _drag = null);
+          },
+          onTapUp: (e) => playback.seek((e.localPosition.dx / width).clamp(0.0, 1.0)),
+          child: SizedBox(
+            height: 18,
+            child: Stack(clipBehavior: Clip.none, alignment: Alignment.centerLeft, children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                height: active ? 7 : 3,
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(4)),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                height: active ? 7 : 3,
+                width: width * progress.clamp(0.0, 1.0),
+                decoration: BoxDecoration(color: KPalette.orange, borderRadius: BorderRadius.circular(4)),
+              ),
+              if (active)
+                Positioned(
+                  left: width * progress.clamp(0.0, 1.0) - 6,
+                  child: Container(width: 12, height: 12, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                ),
+              if (labelX != null && total > 0)
+                Positioned(
+                  left: (labelX - 24).clamp(0.0, (width - 56).clamp(0.0, double.infinity)),
+                  top: -22,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(10)),
+                    child: Text(formatClock(Duration(milliseconds: (total * labelX / width).round())),
+                        style: kText(11, weight: FontWeight.w600)),
+                  ),
+                ),
+            ]),
+          ),
+        ),
+      );
+    });
   }
 }

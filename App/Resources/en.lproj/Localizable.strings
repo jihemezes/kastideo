@@ -674,3 +674,15 @@
 "Image seule (sans le son)" = "Picture only (no sound)";
 "Image seule : le son de cette chaîne est inutilisable chez le fournisseur. Clic droit sur la chaîne > « Image seule » pour réessayer avec le son." = "Picture only: this channel's sound is unusable at the provider. Right-click the channel > “Picture only” to try again with sound.";
 "Kastideo mémorise les chaînes dont l'horloge envoyée par le fournisseur est incohérente (ouvertes en se calant sur le son et l'image, ou en image seule si le son est inutilisable). « Réinitialiser » revient à la lecture normale pour toutes." = "Kastideo remembers channels whose provider clock is inconsistent (opened synced on sound and picture, or picture only when the sound is unusable). “Reset” returns to normal playback for all of them.";
+
+/* 1.2.0 */
+"Sauvegarde et transfert" = "Backup and transfer";
+"Inclure les mots de passe dans le fichier" = "Include passwords in the file";
+"Le fichier permet de retrouver vos sources, favoris, récents, catégories et réglages sur un autre Mac, ou dans Kastideo pour Windows et Linux. S'il contient les mots de passe, gardez-le en lieu sûr." = "The file restores your sources, favorites, recents, categories and settings on another Mac, or in Kastideo for Windows and Linux. If it contains passwords, keep it somewhere safe.";
+"Exporter la configuration…" = "Export configuration…";
+"Importer une configuration…" = "Import configuration…";
+"Configuration exportée : %lld source(s), %lld favori(s)." = "Configuration exported: %lld source(s), %lld favorite(s).";
+"Exportation impossible : %@" = "Export failed: %@";
+"Ce fichier n'est pas une configuration Kastideo." = "This file is not a Kastideo configuration.";
+"Importation terminée : %lld source(s) ajoutée(s), %lld déjà présente(s), %lld favori(s), catégories de %lld section(s)." = "Import complete: %lld source(s) added, %lld already present, %lld favorite(s), categories for %lld section(s).";
+"Fichier illisible : %@" = "Unreadable file: %@";

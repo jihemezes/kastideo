@@ -5,12 +5,16 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app_state.dart';
 import 'core/library.dart';
+import 'core/media_info.dart';
+import 'core/settings.dart';
+import 'l10n.dart';
 import 'core/playback.dart';
 import 'theme.dart';
 import 'ui/home_screen.dart';
-import 'ui/live_screen.dart';
+import 'ui/catalog_screen.dart';
 import 'ui/log_dialog.dart';
-import 'ui/placeholder_screen.dart';
+import 'ui/settings_dialog.dart';
+import 'core/models.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,19 +33,45 @@ Future<void> main() async {
       await windowManager.focus();
     },
   );
+  final settings = AppSettings();
+  await settings.load();
+  L10n.apply(settings.language);
+  final watch = WatchProgressStore();
+  await watch.load();
   final library = LibraryStore();
-  final playback = PlaybackController();
+  final playback = PlaybackController()
+    ..settings = settings
+    ..watchProgress = watch;
   final navigation = NavigationModel();
-  runApp(KastideoApp(library: library, playback: playback, navigation: navigation));
-  await library.start();
+  final info = MediaInfoStore(library, settings);
+  runApp(KastideoApp(
+    library: library,
+    playback: playback,
+    navigation: navigation,
+    settings: settings,
+    watch: watch,
+    info: info,
+  ));
+  await library.start(autoRefresh: settings.autoRefresh);
 }
 
 class KastideoApp extends StatelessWidget {
-  const KastideoApp({super.key, required this.library, required this.playback, required this.navigation});
+  const KastideoApp({
+    super.key,
+    required this.library,
+    required this.playback,
+    required this.navigation,
+    required this.settings,
+    required this.watch,
+    required this.info,
+  });
 
   final LibraryStore library;
   final PlaybackController playback;
   final NavigationModel navigation;
+  final AppSettings settings;
+  final WatchProgressStore watch;
+  final MediaInfoStore info;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +79,9 @@ class KastideoApp extends StatelessWidget {
       library: library,
       playback: playback,
       navigation: navigation,
+      settings: settings,
+      watch: watch,
+      info: info,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
@@ -71,6 +104,9 @@ class RootView extends StatelessWidget {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.digit0, control: true): () => navigation.go(Screen.home),
         const SingleActivator(LogicalKeyboardKey.digit1, control: true): () => navigation.go(Screen.live),
+        const SingleActivator(LogicalKeyboardKey.digit2, control: true): () => navigation.go(Screen.movies),
+        const SingleActivator(LogicalKeyboardKey.digit3, control: true): () => navigation.go(Screen.series),
+        const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
         const SingleActivator(LogicalKeyboardKey.escape): navigation.exitTheater,
@@ -82,9 +118,9 @@ class RootView extends StatelessWidget {
           listenable: navigation,
           builder: (context, _) => switch (navigation.screen) {
             Screen.home => const HomeScreen(),
-            Screen.live => const LiveScreen(),
-            Screen.movies => const PlaceholderScreen(title: 'Films', icon: Icons.movie_outlined),
-            Screen.series => const PlaceholderScreen(title: 'Séries', icon: Icons.video_library_outlined),
+            Screen.live => const CatalogScreen(kind: MediaKind.live),
+            Screen.movies => const CatalogScreen(kind: MediaKind.movie),
+            Screen.series => const CatalogScreen(kind: MediaKind.series),
           },
         ),
       ),

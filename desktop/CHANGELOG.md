@@ -2,6 +2,18 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop1] - 2026-10-25
+
+**Aperçu 2 — Films et Séries.**
+
+- **Films et Séries** en interface **Classique** (catégories, liste avec affiches, fiche à droite) ou **Cinéma** (bandeau « à la une » en carrousel, rangées Reprendre / Derniers ajouts / Récents / Favoris puis une par catégorie, grilles d'affiches, fiche en page entière) — au choix dans Réglages > Apparence.
+- **Fiches** des films et séries : affiche, fond, résumé, année, durée, genres, note, réalisation, distribution, bande-annonce ; informations du fournisseur complétées par **TMDB** si une clé est saisie (Réglages > Général).
+- **Séries** : saisons et épisodes (vignette, résumé, progression), lecture d'un clic.
+- **Lecteur** pour les films et épisodes : mini-timeline avec l'heure visée, −10 s / +30 s (flèches ← →), durée ; **reprise de lecture** (« Reprise à 12:34 », Reprendre au début) ; bouton **Retour à la fiche**.
+- **Réglages** complets (Ctrl+,) : Général (langue, reprise, relais, actualisation, TMDB), Apparence (interface par type), Sources, **Catégories** (ordre par glisser-déposer, masquage, renommage, mots-clés, tri A→Z), **Sauvegarde** (exporter / importer la configuration, compatible avec la version Mac 1.2.0).
+- Accueil : rangée « Reprendre la lecture » ; raccourcis Ctrl+1 / Ctrl+2 / Ctrl+3 pour Direct / Films / Séries.
+- Mots de passe : repli sur les préférences locales si le système n'a pas de coffre (certains Raspberry Pi).
+
 ## [1.1.7-desktop1] - 2026-10-24
 
 **Aperçu 1 — maquette.** Première version de Kastideo pour Windows et Linux (Flutter, moteur de lecture mpv), pour valider la fidélité visuelle avec la version Mac.

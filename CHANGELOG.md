@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.2.0] - 2026-10-25
+
+- **Sauvegarde et transfert de la configuration** (Réglages > Général) : **Exporter la configuration…** crée un fichier avec vos sources (mots de passe compris si vous le souhaitez), favoris, récents, catégories personnalisées et interfaces choisies ; **Importer une configuration…** les ajoute sur un autre Mac — ou dans Kastideo pour Windows et Linux, qui lit et écrit le même fichier. Rien n'est supprimé à l'importation : les sources déjà présentes sont reconnues.
+
 ## [1.1.7] - 2026-10-24
 
 - **Image seule (sans le son)** : quand le son d'une chaîne est inutilisable et fige l'image (horloge incohérente même après réouverture), Kastideo passe automatiquement en **image seule** : l'image ne se fige plus. Le choix est mémorisé pour la chaîne. Il est aussi disponible à la main : clic droit sur une chaîne du direct > **Image seule (sans le son)** (coché = actif ; décocher pour réessayer avec le son).

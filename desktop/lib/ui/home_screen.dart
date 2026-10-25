@@ -9,9 +9,10 @@ import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import 'cinema_view.dart';
 import 'help_dialog.dart';
 import 'log_dialog.dart';
-import 'sources_dialog.dart';
+import 'settings_dialog.dart';
 import 'widgets.dart';
 
 /// Écran d'accueil : reproduction de l'accueil de la version Mac (en-tête, recherche, trois grands pavés,
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const Positioned.fill(child: KastideoBackground()),
           _watermark(size),
           ListenableBuilder(
-            listenable: Listenable.merge([library, playback]),
+            listenable: Listenable.merge([library, playback, context.watch]),
             builder: (context, _) => SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: size.height),
@@ -90,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             _bigTiles(context, tileHeight),
                             const SizedBox(height: 26),
                             _quickButtons(context),
+                            _resumeRail(context),
                             if (library.lastError != null) ...[
                               const SizedBox(height: 18),
                               Text(library.lastError!, style: kText(13, color: KPalette.orange)),
@@ -173,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       _toolbarButton(Icons.help_outline_rounded, tr('Aide'), () => showHelpDialog(context)),
       _toolbarButton(Icons.receipt_long_outlined, tr('Journal de lecture'), () => showLogDialog(context)),
-      _toolbarButton(Icons.settings_input_antenna_rounded, tr('Sources'), () => showSourcesDialog(context)),
+      _toolbarButton(Icons.settings_rounded, '${tr('Réglages')} (Ctrl+,)', () => showSettingsDialog(context)),
     ]);
   }
 
@@ -263,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
-          onPressed: () => showSourcesDialog(context, startAdding: true),
+          onPressed: () => showSettingsDialog(context, tab: SettingsTab.sources, startAdding: true),
           child: Text(tr('Ajouter une source')),
         ),
       ]),
@@ -296,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
           subtitle: _count(MediaKind.live, 'chaîne', 'chaînes'),
           colors: const [KPalette.magenta, KPalette.orange],
           height: height,
-          onTap: () => navigation.showLive(const AllChannels()),
+          onTap: () => navigation.show(MediaKind.live, const AllItems()),
         ),
       ),
       const SizedBox(width: 18),
@@ -329,9 +331,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final navigation = context.navigation;
     final buttons = [
       HomeSmallButton(title: tr('Favoris'), icon: Icons.star_rounded, badge: library.favoriteIds.length,
-          onTap: () => navigation.showLive(const FavoriteChannels())),
+          onTap: () => navigation.show(MediaKind.live, const FavoriteItems())),
       HomeSmallButton(title: tr('Récents'), icon: Icons.history_rounded, badge: library.recentIds.length,
-          onTap: () => navigation.showLive(const RecentChannels())),
+          onTap: () => navigation.show(MediaKind.live, const RecentItems())),
       HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: null),
       HomeSmallButton(title: tr('Enregistrements'), icon: Icons.radio_button_checked_rounded, badge: 0, onTap: null),
     ];
@@ -340,6 +342,29 @@ class _HomeScreenState extends State<HomeScreen> {
       final width = (c.maxWidth - (columns - 1) * 14) / columns;
       return Wrap(spacing: 14, runSpacing: 14, children: [for (final b in buttons) SizedBox(width: width, child: b)]);
     });
+  }
+
+  /// « Reprendre la lecture » : films et épisodes entamés.
+  Widget _resumeRail(BuildContext context) {
+    final watch = context.watch;
+    final started = context.library.recents.where((i) => i.kind != MediaKind.live && watch.fraction(i.id) != null).take(14).toList();
+    if (started.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 26),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tr('Reprendre la lecture'), style: kText(18, weight: FontWeight.w600)),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: kPosterWidth * 1.5 + 48,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: started.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => MediaCard(item: started[i]),
+          ),
+        ),
+      ]),
+    );
   }
 
   Widget _searchResults(BuildContext context) {
