@@ -518,7 +518,7 @@ Future<void> showGuideProgramme(BuildContext context, MediaItem channel, Program
   final current = p.isAiring(now);
   final minutes = (p.stopS - p.startS) ~/ 60;
   final duration = minutes >= 60 ? '${minutes ~/ 60} h ${(minutes % 60).toString().padLeft(2, '0')}' : '$minutes min';
-  return showDialog(
+  return showKDialog(
     context: context,
     builder: (c) => AlertDialog(
       backgroundColor: KPalette.panel,

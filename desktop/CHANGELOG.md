@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.0-desktop8] - 2026-10-25
+
+**Aperçu 7 — installateur Windows et mises à jour intégrées.**
+
+- **Installateur Windows** (Kastideo-…-windows-x64-setup.exe) : installation pour vous seul sans droits administrateur (ou pour tous les utilisateurs), menu Démarrer, icône sur le bureau en option, désinstallation depuis les Paramètres de Windows. Options facultatives : ouvrir les fichiers .m3u / .m3u8 avec Kastideo, lancer Kastideo à l'ouverture de session. L'archive portable (zip) reste disponible.
+- **Mises à jour intégrées** : Kastideo recherche les nouvelles pré-versions Windows / Linux sur GitHub au lancement puis toutes les 12 heures, et les propose en dehors du visionnage (bandeau en haut à droite). La fenêtre de mise à jour affiche les nouveautés ; **Installer et relancer** télécharge le bon fichier et l'installe selon votre installation : installateur silencieux (Windows), remplacement des fichiers (version portable), nouvelle AppImage, ou paquet .deb installé par apt (mot de passe demandé). « Ignorer cette version » et « Plus tard » sont possibles. Réglages > Général > **Mises à jour** : rechercher maintenant, recherche automatique, version installée.
+- **Nouveautés** affichées au premier lancement après une mise à jour (journal des versions), et à tout moment depuis Réglages > Général > Mises à jour.
+- **Lancer Kastideo à l'ouverture de session**, réduit dans la barre des tâches si vous le souhaitez (Windows et Linux) : utile pour les enregistrements programmés et les alertes.
+- **Fichiers .m3u / .m3u8** (facultatif) : un double-clic sur une playlist propose de l'ajouter comme source ; si Kastideo est déjà ouvert, la fenêtre existante la reçoit.
+
 ## [1.2.0-desktop7] - 2026-10-25
 
 **Aperçu 6 — MultiVue et personnalisation.**

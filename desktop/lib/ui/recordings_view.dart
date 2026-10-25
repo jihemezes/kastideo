@@ -351,7 +351,7 @@ class _FileRow extends StatelessWidget {
     if (choice == 'play') playLocalFile(context, file.path);
     if (choice == 'folder') openFolder(File(file.path).parent.path);
     if (choice == 'delete') {
-      final ok = await showDialog<bool>(
+      final ok = await showKDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
           title: Text(tr('Supprimer ce fichier ?')),

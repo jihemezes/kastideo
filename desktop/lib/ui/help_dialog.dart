@@ -6,7 +6,7 @@ import '../l10n.dart';
 import '../theme.dart';
 
 /// Aide intégrée (fichier Markdown simple, en français ou en anglais) : sommaire à gauche, recherche, texte à droite.
-Future<void> showHelpDialog(BuildContext context) => showDialog(context: context, builder: (_) => const _HelpDialog());
+Future<void> showHelpDialog(BuildContext context) => showKDialog(context: context, builder: (_) => const _HelpDialog());
 
 /// Section de l'aide (titre de niveau 2 et ses lignes).
 class _Section {

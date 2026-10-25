@@ -52,7 +52,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 | Plateforme | État | Ce qui est disponible |
 |---|---|---|
 | **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
-| **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète. Restent : installateur Windows et mises à jour intégrées |
+| **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète, installateur Windows et mises à jour intégrées |
 | **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
 
 Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (numéros se terminant par `-desktop1`, `-desktop2`…).
@@ -73,11 +73,12 @@ Ouvrez le fichier `.dmg` et glissez Kastideo dans **Applications**. L'applicatio
 
 | Votre PC | Fichier à télécharger |
 |---|---|
-| Windows 10 ou 11, 64 bits (processeur Intel ou AMD) | `Kastideo-…-windows-x64.zip` |
+| Windows 10 ou 11, 64 bits (processeur Intel ou AMD) — **installateur** (recommandé) | `Kastideo-…-windows-x64-setup.exe` |
+| Windows 10 ou 11, 64 bits — **version portable** (sans installation) | `Kastideo-…-windows-x64.zip` |
 
 *Pour vérifier : **Paramètres > Système > Informations > Type du système** doit indiquer « système d'exploitation 64 bits, processeur x64 ».*
 
-Décompressez l'archive, puis lancez **kastideo.exe**. L'aperçu n'est pas encore signé : Windows affiche « Windows a protégé votre ordinateur » ; cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
+Lancez l'installateur (installation pour vous seul, sans droits administrateur), ou décompressez l'archive portable et lancez **kastideo.exe**. Kastideo se met ensuite à jour tout seul. L'aperçu n'est pas encore signé : Windows affiche « Windows a protégé votre ordinateur » ; cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
 
 ### 🐧 Linux
 

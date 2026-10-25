@@ -13,7 +13,7 @@ import 'widgets.dart';
 /// « Modifier la chaîne… » (comme ChannelEditSheet sur Mac) : nom, numéro, logo et chaîne du guide TV,
 /// pour cette version de la chaîne seulement.
 Future<void> showChannelEditor(BuildContext context, MediaItem item) =>
-    showDialog(context: context, builder: (_) => _ChannelEditDialog(item: item));
+    showKDialog(context: context, builder: (_) => _ChannelEditDialog(item: item));
 
 class _ChannelEditDialog extends StatefulWidget {
   const _ChannelEditDialog({required this.item});

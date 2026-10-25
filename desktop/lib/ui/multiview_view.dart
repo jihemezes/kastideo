@@ -26,7 +26,7 @@ bool _mainDucked = false;
 Future<void> openMultiView(BuildContext context, {MediaItem? add}) async {
   final settings = context.settings;
   if (!settings.multiviewAvailable) {
-    final open = await showDialog<bool>(
+    final open = await showKDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('MultiVue')),
@@ -190,7 +190,7 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
     final multiview = context.multiview;
     if (multiview.channels.isEmpty) return;
     final controller = TextEditingController(text: multiview.channels.map((c) => c.displayName).take(2).join(' + '));
-    final name = await showDialog<String>(
+    final name = await showKDialog<String>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('Mémoriser ce groupe')),
@@ -630,7 +630,7 @@ class _SlotTileState extends State<_SlotTile> {
 
 /// Choix d'une chaîne pour la MultiVue : favoris, récents, ou recherche dans toutes les chaînes.
 Future<MediaItem?> pickMultiViewChannel(BuildContext context) =>
-    showDialog<MediaItem>(context: context, builder: (_) => const DarkZone(child: _ChannelPicker()));
+    showKDialog<MediaItem>(context: context, builder: (_) => const DarkZone(child: _ChannelPicker()));
 
 class _ChannelPicker extends StatefulWidget {
   const _ChannelPicker();

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,8 @@ import 'core/downloads.dart';
 import 'core/guide.dart';
 import 'core/multiview.dart';
 import 'core/notify.dart';
+import 'core/system_integration.dart';
+import 'core/updater.dart';
 import 'core/recording.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
@@ -28,20 +31,44 @@ import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
+import 'ui/update_view.dart';
 import 'core/models.dart';
 
 /// Port local qui sert de verrou : une seule instance de Kastideo à la fois.
 const _instancePort = 47819;
 const _instanceHello = 'kastideo-instance';
 
-/// Vrai si cette instance est la seule ; sinon l'instance déjà ouverte est mise au premier plan.
-Future<bool> _claimSingleInstance() async {
+/// Fichier .m3u / .m3u8 à ouvrir (double-clic dans l'explorateur), transmis aussi par une seconde instance.
+final pendingOpen = ValueNotifier<String?>(null);
+
+/// Fichier de playlist passé en argument (ou null).
+String? _playlistArgument(List<String> args) {
+  for (final a in args) {
+    final lower = a.toLowerCase();
+    if (!a.startsWith('--') && (lower.endsWith('.m3u') || lower.endsWith('.m3u8'))) return a;
+  }
+  return null;
+}
+
+/// Vrai si cette instance est la seule ; sinon l'instance déjà ouverte est mise au premier plan
+/// (et reçoit le fichier à ouvrir, s'il y en a un).
+Future<bool> _claimSingleInstance(String? openPath) async {
   try {
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, _instancePort);
     server.listen((socket) async {
       socket.write(_instanceHello);
       await socket.flush();
+      // Message éventuel de la seconde instance : « open:<chemin> ».
+      final buffer = StringBuffer();
+      try {
+        await for (final data in socket.cast<List<int>>().transform(const Utf8Decoder(allowMalformed: true)).timeout(const Duration(seconds: 2))) {
+          buffer.write(data);
+          if (buffer.toString().contains('\n')) break;
+        }
+      } catch (_) {}
       socket.destroy();
+      final line = buffer.toString().split('\n').first;
+      if (line.startsWith('open:')) pendingOpen.value = line.substring(5);
       await windowManager.show();
       await windowManager.restore();
       await windowManager.focus();
@@ -51,7 +78,10 @@ Future<bool> _claimSingleInstance() async {
     // Port occupé : est-ce une autre instance de Kastideo ?
     try {
       final socket = await Socket.connect(InternetAddress.loopbackIPv4, _instancePort, timeout: const Duration(seconds: 2));
-      final answer = await socket.cast<List<int>>().transform(const SystemEncoding().decoder).join().timeout(const Duration(seconds: 2));
+      if (openPath != null) socket.write('open:${File(openPath).absolute.path}\n');
+      socket.write('hello\n');
+      await socket.flush();
+      final answer = await socket.cast<List<int>>().transform(const SystemEncoding().decoder).join().timeout(const Duration(seconds: 3));
       socket.destroy();
       return !answer.contains(_instanceHello);
     } catch (_) {
@@ -60,19 +90,15 @@ Future<bool> _claimSingleInstance() async {
   }
 }
 
-/// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
-class _CloseHandler with WindowListener {
-  _CloseHandler(this.playback, this.watch, this.recordings, this.multiview);
+/// Arrêt propre (fermeture de la fenêtre ou mise à jour) : lecture coupée, enregistrement terminé, mpv libéré.
+class AppShutdown {
+  AppShutdown(this.playback, this.watch, this.recordings, this.multiview);
   final MultiViewController multiview;
   final PlaybackController playback;
   final WatchProgressStore watch;
   final RecordingCenter recordings;
-  bool _closing = false;
 
-  @override
-  Future<void> onWindowClose() async {
-    if (_closing) return;
-    _closing = true;
+  Future<void> run() async {
     try {
       await windowManager.hide();
     } catch (_) {}
@@ -86,14 +112,31 @@ class _CloseHandler with WindowListener {
       await recordings.shutdown().timeout(const Duration(seconds: 3));
     } catch (_) {}
     await playback.shutdown();
+  }
+}
+
+late AppShutdown appShutdown;
+
+/// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
+class _CloseHandler with WindowListener {
+  bool _closing = false;
+
+  @override
+  Future<void> onWindowClose() async {
+    if (_closing) return;
+    _closing = true;
+    await appShutdown.run();
     exit(0);
   }
 }
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
-  if (!await _claimSingleInstance()) exit(0);
+  final openPath = _playlistArgument(args);
+  final minimized = args.contains('--minimized');
+  if (!await _claimSingleInstance(openPath)) exit(0);
+  if (openPath != null) pendingOpen.value = File(openPath).absolute.path;
   MediaKit.ensureInitialized();
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
@@ -105,7 +148,12 @@ Future<void> main() async {
     ),
     () async {
       await windowManager.show();
-      await windowManager.focus();
+      // Lancement à l'ouverture de session : fenêtre réduite dans la barre des tâches.
+      if (minimized) {
+        await windowManager.minimize();
+      } else {
+        await windowManager.focus();
+      }
     },
   );
   final settings = AppSettings();
@@ -127,8 +175,10 @@ Future<void> main() async {
   final downloads = DownloadManager(settings, playback);
   final alerts = AlertCenter(settings, library, guide);
   final multiview = MultiViewController(settings, playback);
+  final updates = UpdateService();
+  appShutdown = AppShutdown(playback, watch, recordings, multiview);
   await windowManager.setPreventClose(true);
-  windowManager.addListener(_CloseHandler(playback, watch, recordings, multiview));
+  windowManager.addListener(_CloseHandler());
   runApp(
     KastideoApp(
       library: library,
@@ -142,6 +192,7 @@ Future<void> main() async {
       downloads: downloads,
       alerts: alerts,
       multiview: multiview,
+      updates: updates,
     ),
   );
   await library.start(autoRefresh: settings.autoRefresh);
@@ -149,6 +200,8 @@ Future<void> main() async {
   await recordings.start();
   await downloads.start();
   await alerts.start();
+  await updates.start();
+  unawaited(SystemIntegration.refreshAutostartPath());
   await guide.start();
 }
 
@@ -166,8 +219,10 @@ class KastideoApp extends StatefulWidget {
     required this.downloads,
     required this.alerts,
     required this.multiview,
+    required this.updates,
   });
 
+  final UpdateService updates;
   final LibraryStore library;
   final PlaybackController playback;
   final NavigationModel navigation;
@@ -247,6 +302,7 @@ class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
       downloads: widget.downloads,
       alerts: widget.alerts,
       multiview: widget.multiview,
+      updates: widget.updates,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
@@ -259,8 +315,71 @@ class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
 }
 
 /// Fenêtre principale : écran choisi + raccourcis clavier (Ctrl à la place de ⌘).
-class RootView extends StatelessWidget {
+class RootView extends StatefulWidget {
   const RootView({super.key});
+
+  @override
+  State<RootView> createState() => _RootViewState();
+}
+
+class _RootViewState extends State<RootView> {
+  @override
+  void initState() {
+    super.initState();
+    pendingOpen.addListener(_openPending);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await showWhatsNewIfUpdated(context);
+      _openPending();
+    });
+  }
+
+  @override
+  void dispose() {
+    pendingOpen.removeListener(_openPending);
+    super.dispose();
+  }
+
+  /// Fichier .m3u ouvert depuis l'explorateur : proposé comme nouvelle source (ou déjà présent : on va au direct).
+  Future<void> _openPending() async {
+    final path = pendingOpen.value;
+    if (path == null || !mounted) return;
+    pendingOpen.value = null;
+    final library = context.library;
+    await library.whenReady;
+    if (!mounted) return;
+    if (library.sources.any((s) => s.address == path)) {
+      context.navigation.go(Screen.live);
+      return;
+    }
+    final name = path.split(RegExp(r'[\\/]')).last.replaceAll(RegExp(r'\.m3u8?$', caseSensitive: false), '');
+    final controller = TextEditingController(text: name);
+    final ok = await showKDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(tr('Ajouter cette playlist ?')),
+        content: SizedBox(
+          width: 460,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SelectableText(path, style: kText(12, color: KPalette.secondaryText)),
+            const SizedBox(height: 12),
+            TextField(controller: controller, autofocus: true, decoration: InputDecoration(labelText: tr('Nom'))),
+            const SizedBox(height: 8),
+            Text(tr('La playlist devient une source de Kastideo (Réglages > Sources) : ses chaînes rejoignent le direct.'),
+                style: kText(12, color: KPalette.secondaryText)),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Annuler'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('Ajouter'))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final navigation = context.navigation;
+    await library.addM3U(name: controller.text.trim().isEmpty ? name : controller.text.trim(), address: path);
+    navigation.go(Screen.live);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -310,6 +429,8 @@ class RootView extends StatelessWidget {
               ),
             ),
             const Positioned(top: 14, right: 14, child: NoticeOverlay()),
+            // Mise à jour disponible : en bas à droite, pour ne pas cacher les boutons du haut.
+            const Positioned(bottom: 14, right: 14, child: Material(type: MaterialType.transparency, child: UpdateBanner())),
           ],
         ),
       ),

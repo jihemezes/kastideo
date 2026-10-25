@@ -272,7 +272,7 @@ class Sidebar extends StatelessWidget {
         showSettingsDialog(context, tab: SettingsTab.categories, categoryKind: kind);
       case 'rename':
         final controller = TextEditingController(text: library.prefs(kind).renames[name] ?? '');
-        final value = await showDialog<String>(
+        final value = await showKDialog<String>(
           context: context,
           builder: (c) => AlertDialog(
             title: Text(tr('Renommer la catégorie')),

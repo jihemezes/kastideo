@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'l10n.dart';
+import 'theme.dart';
 import 'core/alerts.dart';
 import 'core/downloads.dart';
 import 'core/guide.dart';
@@ -8,6 +9,7 @@ import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/models.dart';
 import 'core/multiview.dart';
+import 'core/updater.dart';
 import 'core/playback.dart';
 import 'core/recording.dart';
 import 'core/settings.dart';
@@ -173,6 +175,7 @@ class AppScope extends InheritedWidget {
     required this.downloads,
     required this.alerts,
     required this.multiview,
+    required this.updates,
     required super.child,
   });
 
@@ -187,6 +190,7 @@ class AppScope extends InheritedWidget {
   final DownloadManager downloads;
   final AlertCenter alerts;
   final MultiViewController multiview;
+  final UpdateService updates;
 
   static AppScope of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<AppScope>()!;
 
@@ -206,6 +210,7 @@ extension AppScopeContext on BuildContext {
   DownloadManager get downloads => AppScope.of(this).downloads;
   AlertCenter get alerts => AppScope.of(this).alerts;
   MultiViewController get multiview => AppScope.of(this).multiview;
+  UpdateService get updates => AppScope.of(this).updates;
 }
 
 /// Une seule connexion : lancer [item] arrêterait l'enregistrement en cours ? On demande d'abord.
@@ -224,7 +229,7 @@ Future<bool> confirmConnection(BuildContext context, MediaItem item) async {
     }
     return false;
   }
-  final ok = await showDialog<bool>(
+  final ok = await showKDialog<bool>(
     context: context,
     builder: (c) => AlertDialog(
       title: Text(tr('Enregistrement en cours')),

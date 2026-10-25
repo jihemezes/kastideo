@@ -3,7 +3,8 @@
 # (release.yml ignore ces tags) ni avec les mises à jour Sparkle.
 #
 # Paquets produits :
-#   Windows x64  : Kastideo-<version>-windows-x64.zip (dossier portable, kastideo.exe)
+#   Windows x64  : Kastideo-<version>-windows-x64-setup.exe (installateur Inno Setup) et
+#                  Kastideo-<version>-windows-x64.zip (dossier portable, kastideo.exe)
 #   Linux x64    : .deb pour Zorin OS 17 / Ubuntu 22.04 (libmpv1), .deb pour Zorin OS 18 / Ubuntu 24.04 (libmpv2),
 #                  AppImage (toutes distributions, moteur mpv inclus)
 #   Linux ARM64  : AppImage (Raspberry Pi 4/5 sous un système 64 bits) et .deb Ubuntu 22.04 ARM
@@ -43,6 +44,8 @@ jobs:
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "name=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
+          N="${VERSION##*-desktop}"; [[ "$N" =~ ^[0-9]+$ ]] || N=0
+          echo "numeric=${VERSION%%-*}.$N" >> "$GITHUB_OUTPUT"
       - name: Dépendances et tests
         shell: bash
         run: |
@@ -61,10 +64,23 @@ jobs:
           New-Item -ItemType Directory -Force -Path "dist/$out" | Out-Null
           Copy-Item -Recurse -Force "build/windows/x64/runner/Release/*" "dist/$out/"
           Compress-Archive -Path "dist/$out" -DestinationPath "dist/$out.zip" -Force
+      - name: Installateur (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+            $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
+          }
+          & $iscc "/DAppVersion=${{ steps.version.outputs.version }}" "/DNumericVersion=${{ steps.version.outputs.numeric }}" "packaging\windows\kastideo.iss"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem dist
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64
-          path: desktop/dist/*.zip
+          path: |
+            desktop/dist/*.zip
+            desktop/dist/*-setup.exe
 
   linux:
     name: Linux ${{ matrix.arch }} (${{ matrix.distro }})

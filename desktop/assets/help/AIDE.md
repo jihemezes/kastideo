@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.2.0-desktop7 (aperçu 6) — MultiVue, thème clair et couleur d'accent, densité des listes et taille des vignettes, catégories réorganisables depuis la barre latérale, notifications du système. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
+> Version 1.2.0-desktop8 (aperçu 7) — installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
 ## Premiers pas
 
@@ -158,9 +158,33 @@ Les changements s'appliquent tout de suite, sans redémarrer.
 - MultiVue : **1 à 4** son, **G** en grand, **A** ajouter, **Suppr** retirer, **F** plein écran, **Échap** quitter
 - **Ctrl+Alt+L** : journal de lecture
 
+## Démarrage et fichiers .m3u
+
+Réglages > Général > **Démarrage et fichiers** :
+
+- **Lancer Kastideo à l'ouverture de session** (Windows et Linux), et **Démarrer réduit** dans la barre des tâches : les enregistrements programmés et les alertes n'ont lieu que si Kastideo est ouvert.
+- **Ouvrir les fichiers .m3u et .m3u8 avec Kastideo** (facultatif) : un double-clic sur une playlist propose de l'ajouter comme source (Réglages > Sources) ; si Kastideo est déjà ouvert, la fenêtre existante la reçoit. Si Windows continue d'ouvrir un autre programme, faites clic droit sur le fichier > Ouvrir avec > Choisir une autre application > Kastideo.
+
+Ces deux options sont aussi proposées par l'installateur Windows (décochées par défaut).
+
+## Mises à jour
+
+Kastideo recherche les nouvelles versions sur GitHub au lancement puis toutes les 12 heures (pré-versions Windows / Linux, tant que ces versions sont en aperçu).
+
+- Une nouvelle version est annoncée par un **bandeau en bas à droite**, seulement quand vous ne regardez rien. **Voir** ouvre la fenêtre de mise à jour avec ses nouveautés ; la croix la remet à plus tard.
+- **Installer et relancer** télécharge le fichier qui correspond à votre installation puis :
+  - **Windows, installé** : lance le nouvel installateur en silencieux, puis relance Kastideo ;
+  - **Windows, version portable** : remplace les fichiers du dossier après la fermeture, puis relance Kastideo ;
+  - **AppImage** : enregistre la nouvelle AppImage à côté de l'ancienne, supprime l'ancienne et la lance ;
+  - **Paquet .deb** : l'installe avec apt (votre mot de passe est demandé), puis relance Kastideo.
+- Un enregistrement en cours est terminé proprement avant la fermeture.
+- **Ignorer cette version** : elle ne sera plus proposée (une recherche manuelle la propose de nouveau).
+- Réglages > Général > **Mises à jour** : version installée et type d'installation, **Rechercher maintenant**, recherche automatique, **Nouveautés des dernières versions**, page des versions sur GitHub.
+- Au premier lancement après une mise à jour, la fenêtre **Nouveautés** résume ce qui a changé.
+
 ## Réglages
 
-- **Général** : langue (au prochain lancement), reprise de lecture, relais de flux, actualisation au démarrage, effacer les récents, **connexions simultanées** (MultiVue), **notifications du système**, guide TV et guide de secours, contenus adultes (masqués par défaut), clé TMDB.
+- **Général** : langue (au prochain lancement), reprise de lecture, relais de flux, actualisation au démarrage, effacer les récents, **connexions simultanées** (MultiVue), **notifications du système**, guide TV et guide de secours, contenus adultes (masqués par défaut), clé TMDB, **démarrage et fichiers .m3u**, **mises à jour**.
 - **Apparence** : thème, couleur d'accent, densité des listes, taille des vignettes, interfaces, bandeau « à la une ».
 - **Sources** : ajouter, actualiser, supprimer, état du guide.
 - **Catégories** : ordre, masquage, noms, mots-clés.
@@ -177,13 +201,16 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Installation
 
-- **Windows** : décompressez l'archive « windows-x64.zip » et lancez **kastideo.exe**. L'application n'est pas signée : si SmartScreen affiche « Windows a protégé votre ordinateur », cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
+- **Windows (recommandé)** : lancez **Kastideo-…-windows-x64-setup.exe**. Par défaut, Kastideo s'installe pour vous seul, sans droits administrateur (dans votre dossier AppData) ; l'installateur propose aussi de l'installer pour tous les utilisateurs, une icône sur le bureau, l'ouverture des fichiers .m3u et le lancement à l'ouverture de session. Désinstallation : Paramètres de Windows > Applications > Kastideo.
+- **Windows, version portable** : décompressez l'archive « windows-x64.zip » où vous voulez et lancez **kastideo.exe** (rien n'est installé ; les mises à jour remplacent les fichiers du dossier).
+- L'application n'est pas signée : si SmartScreen affiche « Windows a protégé votre ordinateur », cliquez sur **Informations complémentaires** puis **Exécuter quand même**.
 - **Zorin OS 17 / Ubuntu 22.04** : paquet « ubuntu22.04_amd64.deb » (double-clic ou `sudo apt install ./kastideo_…deb`).
 - **Zorin OS 18 / Ubuntu 24.04** : paquet « ubuntu24.04_amd64.deb ».
 - **Toute distribution, et Raspberry Pi (64 bits)** : fichier AppImage ; rendez-le exécutable (clic droit > Propriétés > Autoriser l'exécution, ou `chmod +x`) puis lancez-le.
 
 ## Nouveautés
 
+- **1.2.0-desktop8** : installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u.
 - **1.2.0-desktop7** : MultiVue (jusqu'à 4 chaînes, dispositions, grande image, groupes mémorisés), thème clair ou comme le système, couleur d'accent, densité des listes, taille des vignettes, catégories réorganisables depuis la barre latérale, notifications du système, aide complète.
 - **1.2.0-desktop6** : différé du direct, enregistrement immédiat et programmé, téléchargements, alertes de programme, correction des chaînes.
 - **1.2.0-desktop5** : fiches des films et séries dans la langue de l'interface.
@@ -192,12 +219,13 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Prochaines étapes
 
-1. **Finitions** : installateur Windows, mises à jour intégrées.
-2. Corrections des retours de test (Windows et Linux).
+1. Corrections des retours de test (Windows et Linux).
+2. Version stable pour Windows et Linux.
 
 ## Dépannage
 
 - **Une chaîne ne démarre pas** : ouvrez le **Journal de lecture** (Ctrl+Alt+L). Les lignes « Relais : » donnent la réponse exacte du fournisseur (par exemple « HTTP 200 en 0,35 s » ou « HTTP 403 »).
+- **La mise à jour ne s'installe pas** : le journal de lecture (Ctrl+Alt+L) donne la raison. Paquet .deb : si la fenêtre de mot de passe n'apparaît pas, la commande à taper dans un terminal s'affiche dans la fenêtre de mise à jour. Vous pouvez toujours télécharger la nouvelle version sur la page des versions GitHub.
 - **MultiVue : une vignette reste noire** : le fournisseur refuse une connexion de plus. Vérifiez le nombre de connexions de votre abonnement (Réglages > Général > Lecture > Détecter).
 - **Pas de notification** : vérifiez Réglages > Général > Notifications, puis les réglages de notification de Windows (Paramètres > Système > Notifications) ou de votre bureau Linux. Sous Linux, le paquet libnotify est nécessaire (installé par le .deb, inclus dans l'AppImage).
 - **Enregistrement vide** : le fournisseur n'a rien envoyé (chaîne refusée, connexion déjà utilisée). Les lignes « Enregistrement » du journal donnent le détail ; si un fichier MKV reste vide, Kastideo repasse seul en TS.
@@ -211,4 +239,4 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Confidentialité
 
-Kastideo ne collecte aucune donnée. Il contacte seulement vos fournisseurs IPTV, les guides TV que vous avez choisis et, si vous avez saisi une clé, TMDB. Vos réglages, favoris et mots de passe restent sur votre ordinateur.
+Kastideo ne collecte aucune donnée. Il contacte seulement vos fournisseurs IPTV, les guides TV que vous avez choisis, GitHub pour les mises à jour et, si vous avez saisi une clé, TMDB. Vos réglages, favoris et mots de passe restent sur votre ordinateur.

@@ -193,3 +193,11 @@ class DarkZone extends StatelessWidget {
     );
   }
 }
+
+/// Dialogue au thème de l'application (clair ou sombre), même ouvert depuis une zone toujours sombre (lecteur, accueil…).
+Future<T?> showKDialog<T>({required BuildContext context, required WidgetBuilder builder, bool barrierDismissible = true}) =>
+    showDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (c) => Theme(data: buildTheme(), child: Builder(builder: builder)),
+    );

@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.2.0-desktop7 (preview 6) — MultiView, light theme and accent color, list density and thumbnail size, categories reordered from the sidebar, system notifications. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
+> Version 1.2.0-desktop8 (preview 7) — Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
 
 ## Getting started
 
@@ -158,9 +158,33 @@ Changes apply immediately, without restarting.
 - MultiView: **1 to 4** sound, **G** enlarge, **A** add, **Del** remove, **F** full screen, **Esc** leave
 - **Ctrl+Alt+L**: playback log
 
+## Startup and .m3u files
+
+Settings > General > **Startup and files**:
+
+- **Start Kastideo when I sign in** (Windows and Linux), and **Start minimized** in the taskbar: scheduled recordings and alerts only happen while Kastideo is open.
+- **Open .m3u and .m3u8 files with Kastideo** (optional): double-clicking a playlist offers to add it as a source (Settings > Sources); if Kastideo is already open, the existing window receives it. If Windows keeps opening another program, right-click the file > Open with > Choose another app > Kastideo.
+
+Both options are also offered by the Windows installer (unticked by default).
+
+## Updates
+
+Kastideo checks GitHub for new versions at launch and then every 12 hours (Windows / Linux pre-releases, while these versions are in preview).
+
+- A new version is announced by a **banner at the bottom right**, only when you are not watching anything. **View** opens the update window with its release notes; the cross postpones it.
+- **Install and restart** downloads the file matching your installation, then:
+  - **Windows, installed**: runs the new installer silently, then restarts Kastideo;
+  - **Windows, portable**: replaces the folder's files after closing, then restarts Kastideo;
+  - **AppImage**: saves the new AppImage next to the old one, deletes the old one and launches it;
+  - **.deb package**: installs it with apt (your password is asked), then restarts Kastideo.
+- A recording in progress is finished cleanly before closing.
+- **Skip this version**: it won't be offered again (a manual check offers it again).
+- Settings > General > **Updates**: installed version and installation type, **Check now**, automatic checks, **What's new in recent versions**, releases page on GitHub.
+- On the first launch after an update, the **What's new** window sums up the changes.
+
 ## Settings
 
-- **General**: language (on next launch), resume playback, stream relay, refresh at startup, clear recents, **simultaneous connections** (MultiView), **system notifications**, TV guide and fallback guide, adult content (hidden by default), TMDB key.
+- **General**: language (on next launch), resume playback, stream relay, refresh at startup, clear recents, **simultaneous connections** (MultiView), **system notifications**, TV guide and fallback guide, adult content (hidden by default), TMDB key, **startup and .m3u files**, **updates**.
 - **Appearance**: theme, accent color, list density, thumbnail size, interfaces, featured banner.
 - **Sources**: add, refresh, delete, guide state.
 - **Categories**: order, hiding, names, keywords.
@@ -177,13 +201,16 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## Installation
 
-- **Windows**: unzip the "windows-x64.zip" archive and run **kastideo.exe**. The app is not signed: if SmartScreen says "Windows protected your PC", click **More info** then **Run anyway**.
+- **Windows (recommended)**: run **Kastideo-…-windows-x64-setup.exe**. By default Kastideo installs for you only, without administrator rights (in your AppData folder); the installer also offers to install for all users, a desktop icon, opening .m3u files and starting at sign-in. Uninstall: Windows Settings > Apps > Kastideo.
+- **Windows, portable**: unzip the "windows-x64.zip" archive anywhere and run **kastideo.exe** (nothing is installed; updates replace the folder's files).
+- The app is not signed: if SmartScreen says "Windows protected your PC", click **More info** then **Run anyway**.
 - **Zorin OS 17 / Ubuntu 22.04**: "ubuntu22.04_amd64.deb" package (double-click or `sudo apt install ./kastideo_…deb`).
 - **Zorin OS 18 / Ubuntu 24.04**: "ubuntu24.04_amd64.deb" package.
 - **Any distribution, and Raspberry Pi (64-bit)**: AppImage file; make it executable (right-click > Properties > Allow executing, or `chmod +x`) and run it.
 
 ## What's new
 
+- **1.2.0-desktop8**: Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files.
 - **1.2.0-desktop7**: MultiView (up to 4 channels, layouts, large view, saved groups), light or system theme, accent color, list density, thumbnail size, categories reordered from the sidebar, system notifications, full help.
 - **1.2.0-desktop6**: live timeshift, immediate and scheduled recording, downloads, programme alerts, channel editing.
 - **1.2.0-desktop5**: movie and series details in the interface language.
@@ -192,12 +219,13 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## Next steps
 
-1. **Finishing touches**: Windows installer, built-in updates.
-2. Fixes from test feedback (Windows and Linux).
+1. Fixes from test feedback (Windows and Linux).
+2. Stable release for Windows and Linux.
 
 ## Troubleshooting
 
 - **A channel won't start**: open the **Playback log** (Ctrl+Alt+L). "Relais :" lines give the provider's exact answer (e.g. "HTTP 200 en 0,35 s" or "HTTP 403").
+- **The update doesn't install**: the playback log (Ctrl+Alt+L) gives the reason. .deb package: if the password window doesn't appear, the command to type in a terminal is shown in the update window. You can always download the new version from the GitHub releases page.
 - **MultiView: a tile stays black**: the provider refuses an extra connection. Check your subscription's number of connections (Settings > General > Playback > Detect).
 - **No notification**: check Settings > General > Notifications, then the notification settings of Windows (Settings > System > Notifications) or of your Linux desktop. On Linux, the libnotify package is required (installed by the .deb, included in the AppImage).
 - **Empty recording**: the provider sent nothing (channel refused, connection already in use). "Enregistrement" lines in the log give details; if an MKV file stays empty, Kastideo switches to TS by itself.
@@ -211,4 +239,4 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## Privacy
 
-Kastideo collects no data. It only contacts your IPTV providers, the TV guides you chose and, if you entered a key, TMDB. Your settings, favorites and passwords stay on your computer.
+Kastideo collects no data. It only contacts your IPTV providers, the TV guides you chose, GitHub for updates and, if you entered a key, TMDB. Your settings, favorites and passwords stay on your computer.

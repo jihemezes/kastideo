@@ -24,7 +24,7 @@ void openProgramme(BuildContext context, MediaItem channel, Programme? programme
 }
 
 /// Fiche d'un programme du guide.
-Future<void> showProgrammeInfo(BuildContext context, MediaItem channel, Programme p) => showDialog(
+Future<void> showProgrammeInfo(BuildContext context, MediaItem channel, Programme p) => showKDialog(
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: KPalette.panel,
@@ -115,7 +115,7 @@ Future<void> chooseChannelTheme(BuildContext context, LiveChannelGroup group) as
   final guide = context.guide;
   final library = context.library;
   const auto = '__auto__';
-  final choice = await showDialog<String>(
+  final choice = await showKDialog<String>(
     context: context,
     builder: (c) => SimpleDialog(
       backgroundColor: KPalette.panel,

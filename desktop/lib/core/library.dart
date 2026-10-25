@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -118,7 +119,13 @@ class LibraryStore extends ChangeNotifier {
         (_contentBySource[s.id] == null ||
             (autoRefresh && (s.lastRefresh == null || DateTime.now().difference(s.lastRefresh!) > const Duration(hours: 6)))));
     if (stale.isNotEmpty) refreshAll();
+    if (!_ready.isCompleted) _ready.complete();
   }
+
+  final _ready = Completer<void>();
+
+  /// Terminé quand les sources et le contenu en cache sont chargés.
+  Future<void> get whenReady => _ready.future;
 
   File _cacheFile(String id) => File('${_cacheDir.path}${Platform.pathSeparator}$id.json');
 

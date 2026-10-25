@@ -7,7 +7,7 @@ import '../theme.dart';
 import '../version.dart';
 
 /// Fenêtre « Journal de lecture » (Ctrl+Alt+L), avec bouton Copier.
-Future<void> showLogDialog(BuildContext context) => showDialog(context: context, builder: (_) => const _LogDialog());
+Future<void> showLogDialog(BuildContext context) => showKDialog(context: context, builder: (_) => const _LogDialog());
 
 class _LogDialog extends StatelessWidget {
   const _LogDialog();

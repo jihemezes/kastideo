@@ -10,16 +10,19 @@ import '../core/details.dart';
 import '../core/guide.dart';
 import '../core/models.dart';
 import '../core/settings.dart';
+import '../core/system_integration.dart';
+import '../core/updater.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import 'update_view.dart';
 
 enum SettingsTab { general, appearance, sources, categories, recordings, backup }
 
 /// Fenêtre Réglages (Ctrl+,) : Général, Apparence, Sources, Catégories, Sauvegarde.
 Future<void> showSettingsDialog(BuildContext context,
         {SettingsTab tab = SettingsTab.general, MediaKind categoryKind = MediaKind.live, bool startAdding = false}) =>
-    showDialog(
+    showKDialog(
       context: context,
       builder: (_) => _SettingsDialog(initial: tab, categoryKind: categoryKind, startAdding: startAdding),
     );
@@ -233,11 +236,154 @@ class _GeneralTabState extends State<_GeneralTab> {
             child: Text(tr('Obtenir une clé TMDB')),
           ),
         ]),
-        _section(tr('À propos'), [
-          Text('Kastideo $kVersion · ${Platform.operatingSystem}', style: kText(13, color: KPalette.ink70)),
-        ]),
+        const _StartupSection(),
+        const _UpdatesSection(),
       ]),
     );
+  }
+}
+
+/// Mises à jour intégrées (pré-versions Windows / Linux publiées sur GitHub) et version installée.
+class _UpdatesSection extends StatelessWidget {
+  const _UpdatesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final updates = context.updates;
+    return ListenableBuilder(
+      listenable: updates,
+      builder: (context, _) {
+        final String status;
+        switch (updates.state) {
+          case UpdateState.checking:
+            status = tr('Recherche en cours…');
+          case UpdateState.upToDate:
+            status = updates.isDevBuild ? tr('Version de développement : pas de mise à jour.') : tr('Kastideo est à jour.');
+          case UpdateState.available:
+            status = '${tr('Nouvelle version disponible')} : ${updates.latest!.version}';
+          case UpdateState.downloading:
+            status = '${tr('Téléchargement')} ${((updates.progress ?? 0) * 100).round()} %';
+          case UpdateState.installing:
+            status = tr('Installation…');
+          case UpdateState.failed:
+            status = '${tr('Recherche impossible')} : ${updates.error ?? ''}';
+          case UpdateState.idle:
+            status = tr('Pas encore vérifié pendant cette séance.');
+        }
+        final kind = switch (UpdateService.installKind) {
+          InstallKind.windowsSetup => tr('installée avec l\'installateur'),
+          InstallKind.windowsPortable => tr('version portable'),
+          InstallKind.appImage => 'AppImage',
+          InstallKind.deb => tr('paquet .deb'),
+          InstallKind.other => tr('construction locale'),
+        };
+        return _section(tr('Mises à jour'), [
+          Text('Kastideo $kVersion · ${Platform.operatingSystem} · $kind', style: kText(13, color: KPalette.ink70)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(child: Text(status, style: kText(13))),
+            if (updates.state == UpdateState.available)
+              FilledButton(onPressed: () => showUpdateDialog(context), child: Text(tr('Voir la mise à jour')))
+            else
+              OutlinedButton(
+                onPressed: updates.state == UpdateState.checking ? null : () => updates.check(manual: true),
+                child: Text(tr('Rechercher maintenant')),
+              ),
+          ]),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Rechercher les mises à jour automatiquement (au lancement, puis toutes les 12 h)'), style: kText(14)),
+            value: updates.autoCheck,
+            onChanged: updates.setAutoCheck,
+          ),
+          Row(children: [
+            TextButton(onPressed: () => showWhatsNew(context), child: Text(tr('Nouveautés des dernières versions'))),
+            TextButton(onPressed: () => launchUrl(Uri.parse(UpdateService.releasesPage)), child: Text(tr('Page des versions sur GitHub'))),
+          ]),
+          _caption(tr('Les aperçus Windows et Linux sont publiés en pré-version. Une nouvelle version est proposée en dehors du visionnage ; '
+              'Kastideo la télécharge, se ferme, s\'installe puis se relance.')),
+        ]);
+      },
+    );
+  }
+}
+
+/// Lancement à l'ouverture de session et ouverture des fichiers .m3u.
+class _StartupSection extends StatefulWidget {
+  const _StartupSection();
+
+  @override
+  State<_StartupSection> createState() => _StartupSectionState();
+}
+
+class _StartupSectionState extends State<_StartupSection> {
+  bool? _autostart;
+  bool _minimized = true;
+  bool? _m3u;
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final a = await SystemIntegration.autostartEnabled();
+    final m = a ? await SystemIntegration.autostartMinimized() : true;
+    final f = await SystemIntegration.m3uAssociated();
+    if (mounted) {
+      setState(() {
+        _autostart = a;
+        _minimized = m;
+        _m3u = f;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _section(tr('Démarrage et fichiers'), [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(tr('Lancer Kastideo à l\'ouverture de session'), style: kText(14)),
+        value: _autostart ?? false,
+        onChanged: _autostart == null
+            ? null
+            : (v) async {
+                await SystemIntegration.setAutostart(v, minimized: _minimized);
+                await _load();
+              },
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(tr('Démarrer réduit dans la barre des tâches'), style: kText(14)),
+        value: _minimized,
+        onChanged: _autostart != true
+            ? null
+            : (v) async {
+                await SystemIntegration.setAutostart(true, minimized: v);
+                await _load();
+              },
+      ),
+      _caption(tr('Utile pour les enregistrements programmés et les alertes : ils n\'ont lieu que si Kastideo est ouvert.')),
+      const SizedBox(height: 6),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(tr('Ouvrir les fichiers .m3u et .m3u8 avec Kastideo'), style: kText(14)),
+        value: _m3u ?? false,
+        onChanged: _m3u == null
+            ? null
+            : (v) async {
+                final error = await SystemIntegration.setM3uAssociation(v);
+                setState(() => _message = error);
+                await _load();
+              },
+      ),
+      _caption(_message ??
+          tr('Facultatif. Un double-clic sur une playlist propose de l\'ajouter comme source. Si Windows continue d\'ouvrir un autre programme, '
+              'choisissez Kastideo avec clic droit > Ouvrir avec > Choisir une autre application.')),
+    ]);
   }
 }
 
@@ -551,7 +697,7 @@ class _SourcesTabState extends State<_SourcesTab> {
         IconButton(
           tooltip: tr('Supprimer'),
           onPressed: () async {
-            final ok = await showDialog<bool>(
+            final ok = await showKDialog<bool>(
               context: context,
               builder: (c) => AlertDialog(
                 title: Text(tr('Supprimer cette source ?')),
@@ -647,7 +793,7 @@ class _CategoryManagerState extends State<CategoryManager> {
   Future<void> _rename(String name) async {
     final library = context.library;
     final controller = TextEditingController(text: library.prefs(_kind).renames[name] ?? '');
-    final result = await showDialog<String>(
+    final result = await showKDialog<String>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('Renommer la catégorie')),
