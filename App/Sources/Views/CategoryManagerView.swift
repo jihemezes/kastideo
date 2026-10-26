@@ -108,15 +108,54 @@ struct CategoryManagerView: View {
                 ContentUnavailableView("Aucune catégorie", systemImage: "folder",
                                        description: Text("Les catégories apparaissent une fois les sources chargées."))
             } else {
-                List {
-                    ForEach(filtered, id: \.self) { name in
-                        row(name)
+                VStack(spacing: 0) {
+                    selectAllBar(filtered)
+                    Divider()
+                    List {
+                        ForEach(filtered, id: \.self) { name in
+                            row(name)
+                        }
+                        .onMove(perform: move)
                     }
-                    .onMove(perform: move)
+                    .listStyle(.inset(alternatesRowBackgrounds: true))
                 }
-                .listStyle(.inset(alternatesRowBackgrounds: true))
             }
         }
+    }
+
+    /// Case « tout sélectionner / désélectionner » (catégories listées, donc celles de la recherche s'il y en a une).
+    private func selectAllBar(_ names: [String]) -> some View {
+        let editable = names.filter { !prefs.isHiddenByKeyword($0) }
+        let shown = editable.filter { !prefs.isHidden($0) }.count
+        let allShown = !editable.isEmpty && shown == editable.count
+        let none = shown == 0
+        let symbol = allShown ? "checkmark.square.fill" : (none ? "square" : "minus.square.fill")
+        return HStack(spacing: 10) {
+            Button {
+                let showAll = !allShown
+                store.updateCategories(kind) { prefs in
+                    if showAll { prefs.hidden.subtract(editable) } else { prefs.hidden.formUnion(editable) }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: symbol)
+                        .foregroundStyle(none ? Color.secondary : Color.accentColor)
+                        .font(.body)
+                    Text(search.isEmpty ? String(localized: "Tout sélectionner / désélectionner")
+                                        : String(localized: "Sélectionner / désélectionner les catégories trouvées"))
+                        .fontWeight(.medium)
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(editable.isEmpty)
+            .help("Coche ou décoche d'un coup toutes les catégories listées (celles de la recherche, s'il y en a une).")
+            Spacer()
+            Text("\(shown) / \(editable.count)")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
     }
 
     private func row(_ name: String) -> some View {

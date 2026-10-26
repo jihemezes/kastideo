@@ -12,6 +12,7 @@ import '../core/guide.dart';
 import '../core/models.dart';
 import '../core/settings.dart';
 import '../core/system_integration.dart';
+import '../core/text.dart';
 import '../core/updater.dart';
 import '../l10n.dart';
 import '../theme.dart';
@@ -920,6 +921,7 @@ class CategoryManager extends StatefulWidget {
 class _CategoryManagerState extends State<CategoryManager> {
   late MediaKind _kind = widget.initialKind == MediaKind.episode ? MediaKind.series : widget.initialKind;
   final _keyword = TextEditingController();
+  String _filter = '';
 
   @override
   void dispose() {
@@ -964,7 +966,15 @@ class _CategoryManagerState extends State<CategoryManager> {
       listenable: library,
       builder: (context, _) {
         final prefs = library.prefs(_kind);
-        final names = library.allCategories(_kind);
+        final allNames = library.allCategories(_kind);
+        final query = _filter.trim().searchKey;
+        // Recherche : seules les catégories correspondantes sont listées (et cochées / décochées ensemble).
+        final names = query.isEmpty
+            ? allNames
+            : allNames.where((n) => n.searchKey.contains(query) || prefs.displayName(n).searchKey.contains(query)).toList();
+        final editable = names.where((n) => !prefs.isHiddenByKeyword(n)).toList();
+        final shown = editable.where((n) => !prefs.isHidden(n)).length;
+        final bool? allState = editable.isEmpty || shown == editable.length ? (editable.isEmpty ? false : true) : (shown == 0 ? false : null);
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1020,6 +1030,44 @@ class _CategoryManagerState extends State<CategoryManager> {
             Text(tr('Glissez pour changer l\'ordre ; décochez pour masquer partout ; double-clic pour renommer.'),
                 style: kText(12, color: KPalette.ink54)),
             const SizedBox(height: 6),
+            Row(children: [
+              const SizedBox(width: 34),
+              Checkbox(
+                tristate: true,
+                value: allState,
+                onChanged: editable.isEmpty
+                    ? null
+                    : (_) {
+                        // Tout coché → tout décocher ; sinon tout cocher.
+                        final showAll = allState != true;
+                        library.updateCategories(_kind, (p) => showAll ? p.hidden.removeAll(editable) : p.hidden.addAll(editable));
+                      },
+              ),
+              Expanded(
+                child: Text(
+                  query.isEmpty
+                      ? '${tr('Tout sélectionner / désélectionner')} ($shown / ${editable.length})'
+                      : '${tr('Sélectionner / désélectionner les catégories trouvées')} ($shown / ${editable.length})',
+                  style: kText(13, weight: FontWeight.w600),
+                ),
+              ),
+              SizedBox(
+                width: 240,
+                height: 34,
+                child: TextField(
+                  onChanged: (v) => setState(() => _filter = v),
+                  style: kText(13),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    prefixIcon: const Icon(Icons.search_rounded, size: 16),
+                    hintText: tr('Rechercher une catégorie'),
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 4),
             Expanded(
               child: names.isEmpty
                   ? Center(child: Text(tr('Aucune catégorie'), style: kText(13, color: KPalette.ink54)))
@@ -1027,6 +1075,7 @@ class _CategoryManagerState extends State<CategoryManager> {
                       buildDefaultDragHandles: false,
                       itemCount: names.length,
                       onReorderItem: (from, to) {
+                        if (query.isNotEmpty) return; // l'ordre se change sur la liste complète
                         final list = [...names];
                         final moved = list.removeAt(from);
                         list.insert(to, moved);
@@ -1041,10 +1090,13 @@ class _CategoryManagerState extends State<CategoryManager> {
                           margin: const EdgeInsets.only(bottom: 2),
                           decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(6)),
                           child: Row(children: [
-                            ReorderableDragStartListener(
-                              index: i,
-                              child: Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_indicator_rounded, size: 18, color: KPalette.ink38)),
-                            ),
+                            if (query.isEmpty)
+                              ReorderableDragStartListener(
+                                index: i,
+                                child: Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_indicator_rounded, size: 18, color: KPalette.ink38)),
+                              )
+                            else
+                              const SizedBox(width: 34),
                             Checkbox(
                               value: visible,
                               onChanged: byKeyword

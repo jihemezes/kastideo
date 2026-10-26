@@ -19,6 +19,17 @@ import 'xtream.dart';
 
 enum ScheduleStatus { scheduled, recording, done, failed, missed }
 
+/// Répétition d'un enregistrement programmé.
+enum ScheduleRepeat {
+  none(0),
+  daily(1),
+  weekdays(1),
+  weekly(7);
+
+  const ScheduleRepeat(this.days);
+  final int days;
+}
+
 /// Enregistrement programmé depuis le guide TV.
 class ScheduledRecording {
   ScheduledRecording({
@@ -31,6 +42,7 @@ class ScheduledRecording {
     this.status = ScheduleStatus.scheduled,
     this.path,
     this.error,
+    this.repeat = ScheduleRepeat.none,
   });
 
   final String id;
@@ -42,6 +54,7 @@ class ScheduledRecording {
   ScheduleStatus status;
   String? path;
   String? error;
+  final ScheduleRepeat repeat;
 
   DateTime get start => DateTime.fromMillisecondsSinceEpoch(startS * 1000);
   DateTime get stop => DateTime.fromMillisecondsSinceEpoch(stopS * 1000);
@@ -56,6 +69,7 @@ class ScheduledRecording {
         'status': status.name,
         'path': ?path,
         'error': ?error,
+        if (repeat != ScheduleRepeat.none) 'repeat': repeat.name,
       };
 
   static ScheduledRecording fromJson(Map<String, dynamic> j) => ScheduledRecording(
@@ -68,7 +82,30 @@ class ScheduledRecording {
         status: ScheduleStatus.values.where((s) => s.name == j['status']).firstOrNull ?? ScheduleStatus.scheduled,
         path: j['path'] as String?,
         error: j['error'] as String?,
+        repeat: ScheduleRepeat.values.where((r) => r.name == j['repeat']).firstOrNull ?? ScheduleRepeat.none,
       );
+
+  /// Prochaine occurrence d'un enregistrement répété (du lundi au vendredi : le week-end est sauté).
+  ScheduledRecording? next() {
+    if (repeat == ScheduleRepeat.none) return null;
+    var startDate = start;
+    final duration = stopS - startS;
+    final now = DateTime.now();
+    do {
+      startDate = DateTime(startDate.year, startDate.month, startDate.day + repeat.days, startDate.hour, startDate.minute);
+    } while ((repeat == ScheduleRepeat.weekdays && startDate.weekday > DateTime.friday) ||
+        startDate.add(Duration(seconds: duration)).isBefore(now));
+    final nextStart = startDate.millisecondsSinceEpoch ~/ 1000;
+    return ScheduledRecording(
+      id: '$channelId|$nextStart',
+      channelId: channelId,
+      channelName: channelName,
+      title: title,
+      startS: nextStart,
+      stopS: nextStart + duration,
+      repeat: repeat,
+    );
+  }
 }
 
 /// Enregistrement en cours (un seul à la fois : l'abonnement n'a qu'une connexion).
@@ -561,6 +598,48 @@ class RecordingCenter extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Plage horaire choisie à la main (chaîne sans guide TV, ou émission régulière), répétée ou non.
+  void scheduleManual(MediaItem channel, {required DateTime start, required DateTime stop, String title = '', ScheduleRepeat repeat = ScheduleRepeat.none}) {
+    final startS = start.millisecondsSinceEpoch ~/ 1000;
+    final stopS = stop.millisecondsSinceEpoch ~/ 1000;
+    if (stopS <= startS) return;
+    final id = '${channel.id}|$startS';
+    if (schedules.any((s) => s.id == id && s.status == ScheduleStatus.scheduled)) return;
+    schedules.add(ScheduledRecording(
+      id: id,
+      channelId: channel.id,
+      channelName: channel.displayName,
+      title: title.trim().isEmpty ? channel.displayName : title.trim(),
+      startS: startS,
+      stopS: stopS,
+      repeat: repeat,
+    ));
+    schedules.sort((a, b) => a.startS.compareTo(b.startS));
+    _save();
+    _say('Enregistrement programmé : ${title.trim().isEmpty ? channel.displayName : title.trim()}');
+    notifyListeners();
+  }
+
+  /// Enregistrement répété : la prochaine occurrence est ajoutée dès que celle-ci commence ou est manquée.
+  void _planNext(ScheduledRecording s) {
+    final next = s.next();
+    if (next == null || schedules.any((x) => x.id == next.id)) return;
+    schedules.add(next);
+    schedules.sort((a, b) => a.startS.compareTo(b.startS));
+  }
+
+  /// Arrête la répétition (l'occurrence en cours ou passée reste dans l'historique).
+  void stopRepeating(ScheduledRecording s) {
+    schedules.removeWhere((x) => x.status == ScheduleStatus.scheduled && x.repeat != ScheduleRepeat.none && x.channelId == s.channelId && x.title == s.title && x.id != s.id && x.startS > s.startS);
+    final i = schedules.indexOf(s);
+    if (i >= 0 && s.status == ScheduleStatus.scheduled) {
+      schedules[i] = ScheduledRecording(
+          id: s.id, channelId: s.channelId, channelName: s.channelName, title: s.title, startS: s.startS, stopS: s.stopS, status: s.status);
+    }
+    _save();
+    notifyListeners();
+  }
+
   void cancel(ScheduledRecording s) {
     if (s.status == ScheduleStatus.recording && active?.scheduleId == s.id) stop();
     schedules.remove(s);
@@ -579,7 +658,7 @@ class RecordingCenter extends ChangeNotifier {
     final a = active;
     if (a?.stopS != null && now >= a!.stopS!) await stop();
     var changed = false;
-    for (final s in schedules) {
+    for (final s in List.of(schedules)) {
       if (s.status != ScheduleStatus.scheduled) continue;
       final from = s.startS - settings.marginBefore * 60;
       final to = s.stopS + settings.marginAfter * 60;
@@ -587,6 +666,7 @@ class RecordingCenter extends ChangeNotifier {
         s
           ..status = ScheduleStatus.missed
           ..error = 'Kastideo n\'était pas ouvert à l\'heure prévue.';
+        _planNext(s);
         changed = true;
       } else if (now >= from && active == null) {
         final channel = library.item(s.channelId);
@@ -601,6 +681,7 @@ class RecordingCenter extends ChangeNotifier {
           continue;
         }
         s.status = ScheduleStatus.recording;
+        _planNext(s);
         changed = true;
         final ok = await recordNow(channel, title: s.title, stopS: to, scheduleId: s.id);
         if (!ok) {

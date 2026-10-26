@@ -381,8 +381,9 @@ class LiveChannelGroup {
   var start = DateTime(now.year, now.month, now.day, 20);
   var end = DateTime(now.year, now.month, now.day, 23);
   if (now.isAfter(end)) {
-    start = start.add(const Duration(days: 1));
-    end = end.add(const Duration(days: 1));
+    // Constructeur de date (et non +24 h) : juste aux changements d'heure.
+    start = DateTime(now.year, now.month, now.day + 1, 20);
+    end = DateTime(now.year, now.month, now.day + 1, 23);
   }
   return (start: start.millisecondsSinceEpoch ~/ 1000, end: end.millisecondsSinceEpoch ~/ 1000);
 }

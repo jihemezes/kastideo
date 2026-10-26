@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.2.1-desktop1 — enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
+> Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition), modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
 
 ## Premiers pas
 
@@ -113,7 +113,12 @@ Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une ch
 
 ### Programmer un enregistrement
 
-Depuis la fiche d'un programme à venir (guide TV, thèmes) : **Programmer l'enregistrement**, avec les marges avant et après (Réglages > Enregistrements). Kastideo doit être ouvert à l'heure prévue.
+- **Clic droit sur une chaîne du direct > Programmer un enregistrement…**, ou bouton **Programmer…** de l'écran Enregistrements (choisissez alors la chaîne : favoris, récents ou recherche).
+  - **Programmes du guide** : les prochains programmes de la chaîne, avec **Programmer** (ou **Enregistrer** pour celui en cours). Une coche indique ceux déjà programmés.
+  - **Plage horaire** : jour, heure de début et de fin, titre facultatif — pour une chaîne sans guide TV ou une émission précise. Une fin plus tôt que le début se termine le lendemain.
+  - **Répétition** (liste en haut à droite) : **une seule fois**, **tous les jours**, **du lundi au vendredi** ou **chaque semaine**. La prochaine occurrence est ajoutée automatiquement ; le bouton ⟲ d'un enregistrement répété dans la liste arrête la répétition.
+- Depuis la fiche d'un programme à venir (guide TV, thèmes) : **Programmer l'enregistrement**.
+- Les marges avant et après (Réglages > Enregistrements) s'ajoutent. Kastideo doit être ouvert à l'heure prévue : activez au besoin **Lancer Kastideo à l'ouverture de session** (Réglages > Général).
 
 ### Fiches dans votre langue
 
@@ -142,12 +147,17 @@ Clic droit sur une chaîne > **Modifier la chaîne…** : nom, numéro, logo (ad
 
 - **Clic droit sur une catégorie** de la barre latérale : **Renommer…**, **Placer en haut**, **Monter**, **Descendre**, **Placer en bas**, **Masquer cette catégorie**, **Gérer les catégories…**.
 - **Réglages > Catégories** (ou l'icône à droite de « Catégories ») : pour le direct, les films ou les séries — glissez pour changer l'ordre, décochez pour masquer partout, double-clic pour renommer, **mots-clés** pour masquer d'un coup toutes les catégories qui les contiennent (ex. « PAKISTAN »), **Trier de A à Z**, **Rétablir**.
+- **Tout sélectionner / désélectionner** : la case au-dessus de la liste coche ou décoche d'un coup toutes les catégories listées. Avec la **recherche** (par exemple « PT »), elle ne concerne que les catégories trouvées : masquez tout un pays en deux clics, puis recochez seulement celles que vous voulez.
 
 Une catégorie masquée l'est partout : listes, recherche, accueil, rangées.
 
 ## Favoris et récents
 
-Étoile de la barre du lecteur, touche **F** ou clic droit > Ajouter aux favoris. Les récents gardent les 60 derniers contenus ouverts ; Réglages > Général > **Effacer les récents**.
+Étoile de la barre du lecteur, touche **F** ou clic droit > Ajouter aux favoris. Les récents gardent les 60 derniers contenus ouverts.
+
+- **Modifier** (à droite du titre « Récents ») : cochez des éléments puis **Retirer la sélection**, ou la croix d'une ligne pour la retirer seule ; **Tout sélectionner** et **Tout effacer** (pour la section affichée). **Terminé** revient à la liste.
+- Clic droit sur un contenu > **Retirer des récents**.
+- Réglages > Général > **Effacer les récents** les efface tous, toutes sections confondues.
 
 ## Apparence
 
@@ -222,6 +232,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.2.2-desktop1** : programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition quotidienne, en semaine ou hebdomadaire), modifier les récents, case « Tout sélectionner » des catégories.
 - **1.2.1-desktop1** : enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma.
 - **1.2.0-desktop8** : installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u.
 - **1.2.0-desktop7** : MultiVue (jusqu'à 4 chaînes, dispositions, grande image, groupes mémorisés), thème clair ou comme le système, couleur d'accent, densité des listes, taille des vignettes, catégories réorganisables depuis la barre latérale, notifications du système, aide complète.

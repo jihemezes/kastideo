@@ -13,6 +13,7 @@ import '../theme.dart';
 import 'catalog_screen.dart';
 import 'player_pane.dart';
 import 'themes_view.dart';
+import 'schedule_dialog.dart';
 import 'widgets.dart';
 
 /// Ouvre un dossier dans l'explorateur de fichiers.
@@ -95,6 +96,11 @@ class _RecordingsListState extends State<RecordingsList> {
               padding: const EdgeInsets.fromLTRB(16, 14, 10, 0),
               child: Row(children: [
                 Expanded(child: Text(tr('Enregistrements'), style: kRounded(22, FontWeight.w800))),
+                FilledButton.icon(
+                  onPressed: () => showScheduleDialog(context),
+                  icon: const Icon(Icons.add_alarm_rounded, size: 16),
+                  label: Text(tr('Programmer…')),
+                ),
                 IconButton(
                   tooltip: tr('Ouvrir le dossier'),
                   onPressed: () => openFolder(recordings.folder),
@@ -134,7 +140,7 @@ class _RecordingsListState extends State<RecordingsList> {
             if (scheduled.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(tr('Programmez un enregistrement depuis le guide TV ou les thèmes (fiche d\'un programme à venir).'),
+                child: Text(tr('Programmez un enregistrement avec « Programmer… », un clic droit sur une chaîne du direct, ou depuis le guide TV et les thèmes.'),
                     style: kText(12, color: KPalette.ink38)),
               ),
             for (final s in scheduled) _ScheduleRow(schedule: s, date: _date(s.start)),
@@ -272,12 +278,18 @@ class _ScheduleRow extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(s.title, style: kText(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('$date – ${hm(s.stop)} · ${s.channelName} · $label${s.error != null ? ' · ${s.error}' : ''}',
+            Text('$date – ${hm(s.stop)} · ${s.channelName} · $label${s.repeat != ScheduleRepeat.none ? ' · ${repeatLabel(s.repeat)}' : ''}${s.error != null ? ' · ${s.error}' : ''}',
                 style: kText(11, color: KPalette.ink54), maxLines: 2),
           ]),
         ),
         if (s.path != null && File(s.path!).existsSync())
           IconButton(tooltip: tr('Regarder'), onPressed: () => playLocalFile(context, s.path!), icon: const Icon(Icons.play_arrow_rounded, size: 18)),
+        if (s.repeat != ScheduleRepeat.none && s.status == ScheduleStatus.scheduled)
+          IconButton(
+            tooltip: tr('Arrêter la répétition'),
+            onPressed: () => context.recordings.stopRepeating(s),
+            icon: const Icon(Icons.repeat_one_rounded, size: 18),
+          ),
         IconButton(
           tooltip: s.status == ScheduleStatus.scheduled || s.status == ScheduleStatus.recording ? tr('Annuler') : tr('Retirer de la liste'),
           onPressed: () => context.recordings.cancel(s),

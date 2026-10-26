@@ -723,3 +723,8 @@
 "Ex-Yougoslavie" = "Ex-Yugoslavia";
 "Afrique" = "Africa";
 "Mexique" = "Mexico";
+
+/* 1.2.2 — catégories */
+"Tout sélectionner / désélectionner" = "Select / deselect all";
+"Sélectionner / désélectionner les catégories trouvées" = "Select / deselect the categories found";
+"Coche ou décoche d'un coup toutes les catégories listées (celles de la recherche, s'il y en a une)." = "Ticks or unticks all listed categories at once (those matching the search, if any).";

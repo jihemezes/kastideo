@@ -13,6 +13,8 @@ import 'cinema_view.dart';
 import 'details_view.dart';
 import 'player_pane.dart';
 import 'multiview_view.dart';
+import 'recents_editor.dart';
+import 'schedule_dialog.dart';
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'tv_view.dart';
@@ -474,6 +476,7 @@ class _ItemListState extends State<ItemList> {
         builder: (context, _) {
           final items = filteredItems(context, widget.kind);
           final selectedId = widget.kind == MediaKind.live ? playback.current?.id : navigation.selected(widget.kind)?.id;
+          final recents = navigation.filter(widget.kind) is RecentItems && navigation.search.trim().isEmpty;
           return Column(children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
@@ -483,6 +486,7 @@ class _ItemListState extends State<ItemList> {
                       style: kRounded(20, FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
                 Text('${items.length}', style: kText(12, color: KPalette.secondaryText)),
+                if (recents) RecentsEditButton(kind: widget.kind),
               ]),
             ),
             Padding(
@@ -491,7 +495,9 @@ class _ItemListState extends State<ItemList> {
             ),
             Divider(height: 1, color: KPalette.separator),
             Expanded(
-              child: items.isEmpty
+              child: recents && navigation.editingRecents
+                  ? RecentsEditor(kind: widget.kind)
+                  : items.isEmpty
                   ? Center(child: Text(tr('Aucun résultat'), style: kText(13, color: KPalette.secondaryText)))
                   : ListView.builder(
                       itemCount: items.length,
@@ -641,6 +647,7 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         ),
       if (isLive && context.settings.multiviewAvailable)
         PopupMenuItem(value: 'multi', child: Text(tr('Ajouter à la MultiVue'), style: kText(13))),
+      if (isLive) PopupMenuItem(value: 'schedule', child: Text(tr('Programmer un enregistrement…'), style: kText(13))),
       if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
         PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
@@ -652,6 +659,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         ),
       if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
         PopupMenuItem(value: 'night', enabled: !context.downloads.contains(item.id), child: Text(tr('Télécharger cette nuit'), style: kText(13))),
+      if (library.recentIds.contains(item.id))
+        PopupMenuItem(value: 'unrecent', child: Text(tr('Retirer des récents'), style: kText(13))),
       PopupMenuItem(value: 'copy', child: Text(tr('Copier le nom'), style: kText(13))),
     ],
   );
@@ -672,6 +681,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         final p = context.guide.current(item);
         await recordings.recordNow(item, title: p?.title ?? '', stopS: p == null ? null : p.stopS + context.settings.marginAfter * 60);
       }
+    case 'schedule':
+      await showScheduleDialog(context, channel: item);
     case 'multi':
       await openMultiView(context, add: item);
     case 'edit':
@@ -683,6 +694,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
     case 'theme':
       final group = context.guide.groupOf(item);
       if (group != null) await chooseChannelTheme(context, group);
+    case 'unrecent':
+      library.removeRecents([item.id]);
     case 'copy':
       await Clipboard.setData(ClipboardData(text: isLive ? item.name : item.displayName));
   }

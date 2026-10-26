@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.2.2] - 2026-10-25
+
+- **Gérer les catégories** : une case **Tout sélectionner / désélectionner** au-dessus de la liste coche ou décoche d'un coup toutes les catégories listées (Direct, Films ou Séries). Avec une recherche, elle ne concerne que les catégories trouvées : masquer tout un pays se fait en deux clics. Le nombre de catégories affichées est indiqué à côté.
+
 ## [1.2.1] - 2026-10-25
 
 - **Pays et langues des rangées Cinéma** (Réglages > Apparence) : Kastideo repère les pays dans les noms de vos catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…) et vous laisse choisir ceux à montrer. Les derniers ajouts du bandeau « à la une », les tendances TMDB, la sélection au hasard et les rangées par catégorie de l'interface Cinéma ne montrent plus que ces pays (option pour garder les catégories sans pays, comme « Action »). Les listes et la recherche restent complètes. Le choix est repris par la sauvegarde de la configuration, comme dans Kastideo pour Windows et Linux.

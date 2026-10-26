@@ -15,6 +15,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import 'catalog_screen.dart';
 import 'themes_view.dart';
+import 'recents_editor.dart';
 import 'widgets.dart';
 
 /// Interface Cinéma d'une section : bandeau « à la une », rangées (thèmes, catégories), grilles d'affiches ou de vignettes.
@@ -62,8 +63,24 @@ class _CinemaViewState extends State<CinemaView> {
             body = widget.kind == MediaKind.live ? _LiveHome() : _CinemaHome(kind: widget.kind);
           } else if (filter is ThemesFilter) {
             body = _CinemaThemes();
+          } else if (filter is RecentItems && navigation.editingRecents) {
+            body = Column(children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(24, 8, 24, 8),
+                child: Row(children: [
+                  Text(tr('Récents'), style: kText(22, weight: FontWeight.w700)),
+                  Spacer(),
+                  RecentsEditButton(kind: widget.kind),
+                ]),
+              ),
+              Expanded(child: RecentsEditor(kind: widget.kind)),
+            ]);
           } else {
-            body = CinemaGrid(title: filterTitle(context, widget.kind), items: filteredItems(context, widget.kind));
+            body = CinemaGrid(
+              title: filterTitle(context, widget.kind),
+              items: filteredItems(context, widget.kind),
+              trailing: filter is RecentItems ? RecentsEditButton(kind: widget.kind) : null,
+            );
           }
           return Column(children: [
             Container(
@@ -368,9 +385,12 @@ class _SeeAllCard extends StatelessWidget {
 
 /// Grille d'affiches ou de vignettes (catégorie, favoris, récents, recherche).
 class CinemaGrid extends StatelessWidget {
-  const CinemaGrid({super.key, required this.title, required this.items});
+  const CinemaGrid({super.key, required this.title, required this.items, this.trailing});
   final String title;
   final List<MediaItem> items;
+
+  /// Bouton à droite du titre (ex. « Modifier » pour les récents).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +403,7 @@ class CinemaGrid extends StatelessWidget {
             Flexible(child: Text(title, style: kText(22, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
             const SizedBox(width: 8),
             Text('${items.length}', style: kText(13, color: KPalette.secondaryText)),
+            if (trailing != null) ...[const Spacer(), trailing!],
           ]),
         ),
       ),

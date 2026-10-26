@@ -78,6 +78,14 @@ class NavigationModel extends ChangeNotifier {
   /// Recherche dans la section affichée.
   String search = '';
 
+  /// Mode « Modifier » des récents (cases à cocher, retirer, tout effacer).
+  bool editingRecents = false;
+
+  void setEditingRecents(bool value) {
+    editingRecents = value;
+    notifyListeners();
+  }
+
   /// Vue Thèmes : mode, thème et discipline choisis.
   ThemeView themeMode = ThemeView.now;
   ContentTheme? themeSelection;
@@ -111,6 +119,7 @@ class NavigationModel extends ChangeNotifier {
 
   void go(Screen value) {
     screen = value;
+    editingRecents = false;
     if (value != Screen.live) theater = false;
     showPlayer = false;
     search = '';
@@ -119,6 +128,7 @@ class NavigationModel extends ChangeNotifier {
 
   void show(MediaKind kind, CatalogFilter filter) {
     _filters[kind] = filter;
+    editingRecents = false;
     screen = screenFor(kind);
     _selected[kind] = null;
     showPlayer = false;

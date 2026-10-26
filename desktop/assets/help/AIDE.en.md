@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.2.1-desktop1 — more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
+> Version 1.2.2-desktop1 — schedule a recording from live TV (guide programmes or time slot, repetition), edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
 
 ## Getting started
 
@@ -113,7 +113,12 @@ Red round button in the player bar, **R** key, or right-click a channel > **Reco
 
 ### Scheduling a recording
 
-From the details of an upcoming programme (TV guide, themes): **Schedule recording**, with margins before and after (Settings > Recordings). Kastideo must be open at the scheduled time.
+- **Right-click a live channel > Schedule a recording…**, or the **Schedule…** button of the Recordings screen (then choose the channel: favorites, recents or search).
+  - **Guide programmes**: the channel's next programmes, with **Schedule** (or **Record** for the current one). A check mark shows those already scheduled.
+  - **Time slot**: day, start and end time, optional title — for a channel without TV guide or a specific show. An end earlier than the start finishes the next day.
+  - **Repetition** (list at the top right): **once**, **every day**, **Monday to Friday** or **every week**. The next occurrence is added automatically; the ⟲ button of a repeated recording in the list stops repeating.
+- From the details of an upcoming programme (TV guide, themes): **Schedule recording**.
+- Margins before and after (Settings > Recordings) are added. Kastideo must be open at the scheduled time: turn on **Start Kastideo when I sign in** if needed (Settings > General).
 
 ### Details in your language
 
@@ -142,12 +147,17 @@ Right-click a channel > **Edit channel…**: name, number, logo (image address o
 
 - **Right-click a category** in the sidebar: **Rename…**, **Move to top**, **Move up**, **Move down**, **Move to bottom**, **Hide this category**, **Manage categories…**.
 - **Settings > Categories** (or the icon next to "Categories"): for live TV, movies or series — drag to reorder, untick to hide everywhere, double-click to rename, **keywords** to hide every category containing them at once (e.g. "PAKISTAN"), **Sort A to Z**, **Restore**.
+- **Select / deselect all**: the box above the list ticks or unticks all listed categories at once. With the **search** (e.g. "PT"), it only affects the categories found: hide a whole country in two clicks, then tick only the ones you want.
 
 A hidden category is hidden everywhere: lists, search, home, rows.
 
 ## Favorites and recents
 
-Star in the player bar, **F** key or right-click > Add to favorites. Recents keep the last 60 items opened; Settings > General > **Clear recents**.
+Star in the player bar, **F** key or right-click > Add to favorites. Recents keep the last 60 items opened.
+
+- **Edit** (next to the "Recents" title): tick items then **Remove selection**, or a row's cross to remove it alone; **Select all** and **Clear all** (for the section shown). **Done** goes back to the list.
+- Right-click an item > **Remove from recents**.
+- Settings > General > **Clear recents** clears them all, every section.
 
 ## Appearance
 
@@ -222,6 +232,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.2.2-desktop1**: schedule a recording from live TV (guide programmes or time slot, daily, weekday or weekly repetition), edit recents, "Select all" box for categories.
 - **1.2.1-desktop1**: more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface.
 - **1.2.0-desktop8**: Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files.
 - **1.2.0-desktop7**: MultiView (up to 4 channels, layouts, large view, saved groups), light or system theme, accent color, list density, thumbnail size, categories reordered from the sidebar, system notifications, full help.

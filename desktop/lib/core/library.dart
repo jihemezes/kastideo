@@ -229,6 +229,15 @@ class LibraryStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Retire des contenus des récents (mode « Modifier » des récents, clic droit).
+  void removeRecents(Iterable<String> ids) {
+    final remove = ids.toSet();
+    recentIds = recentIds.where((id) => !remove.contains(id)).toList();
+    _prefs.setStringList('recents.v1', recentIds);
+    _saveExtras();
+    notifyListeners();
+  }
+
   void clearRecents() {
     recentIds = [];
     _prefs.setStringList('recents.v1', recentIds);

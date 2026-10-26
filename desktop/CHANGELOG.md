@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.2.2-desktop1] - 2026-10-25
+
+**Corrections des retours de test (suite).**
+
+- **Programmer un enregistrement depuis le direct** : clic droit sur une chaîne > **Programmer un enregistrement…**, ou bouton **Programmer…** de l'écran Enregistrements. Choix parmi les **prochains programmes du guide**, ou **plage horaire** manuelle (jour, début, fin, titre) pour une chaîne sans guide. **Répétition** : tous les jours, du lundi au vendredi ou chaque semaine (la prochaine occurrence est ajoutée seule ; bouton pour arrêter la répétition).
+- **Récents** : mode **Modifier** comme sur Mac (cases à cocher, Tout sélectionner, Retirer la sélection, Tout effacer), et clic droit > **Retirer des récents**.
+- **Gérer les catégories** : case **Tout sélectionner / désélectionner** et **recherche** ; la case ne concerne que les catégories trouvées (masquer tout un pays en deux clics). Même case sur Mac (1.2.2).
+- Calendrier et sélecteur d'heure en français (éléments standard traduits).
+- Correction : le jour du changement d'heure, « Ce soir » et les plages horaires après minuit étaient décalés d'une heure.
+
 ## [1.2.1-desktop1] - 2026-10-25
 
 **Corrections des retours de test.**

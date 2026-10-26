@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -307,6 +308,10 @@ class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
+        // Textes des éléments standard (calendrier, heure, boutons) dans la langue de l'interface.
+        locale: Locale(L10n.english ? 'en' : 'fr'),
+        supportedLocales: const [Locale('fr'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         scrollBehavior: const KastideoScrollBehavior(),
         home: const RootView(),
       ),
