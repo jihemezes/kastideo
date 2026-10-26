@@ -1,13 +1,13 @@
 # Kastideo Help
 
-Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist).
+Kastideo is a media player that brings your live channels, movies and series from IPTV together in a simple, fast interface. Kastideo provides no content: you add your own sources (an Xtream Codes subscription or an M3U playlist, video folders on a disk, USB drive or NAS, a Jellyfin, Emby or Plex server).
 
-> Version 1.2.2 — “Select / deselect all” box for categories; version 1.2.1 — countries and languages of Cinema rows and the banner; version 1.2.0 — configuration backup and transfer (Mac, Windows, Linux); version 1.1.7 — picture only (no sound) for channels with faulty sound; version 1.1.6 — refused channels explained, streams with an inconsistent clock handled better; version 1.1.5 — sound fixed on channels with a shifted clock; version 1.1.4 — stream relay fixed (local network permission); version 1.1.3 — stream relay for live TV (a single connection to the provider); version 1.1.2 — 1.1.1 fix; version 1.1.1 — automatic repair of missing sound on some channels; version 1.1.0 — timeshift: timeline, playback speed, Catch up, Back to live, maximum duration; version 1.0.3 — live: more reliable channel switching (waits for the connection to be released, retries), stream closed on quit; version 1.0.1 — themes: channels recognised by name are listed even without TV guide data; first stable release; channel fixing (name, number, logo, TV guide); new themes (Auto & Moto, Food & Home, Nature, Regional, International, Religion, Radio, Adult), sports disciplines; live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
+> Version 1.3.0 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos; version 1.2.2 — “Select / deselect all” box for categories; version 1.2.1 — countries and languages of Cinema rows and the banner; version 1.2.0 — configuration backup and transfer (Mac, Windows, Linux); version 1.1.7 — picture only (no sound) for channels with faulty sound; version 1.1.6 — refused channels explained, streams with an inconsistent clock handled better; version 1.1.5 — sound fixed on channels with a shifted clock; version 1.1.4 — stream relay fixed (local network permission); version 1.1.3 — stream relay for live TV (a single connection to the provider); version 1.1.2 — 1.1.1 fix; version 1.1.1 — automatic repair of missing sound on some channels; version 1.1.0 — timeshift: timeline, playback speed, Catch up, Back to live, maximum duration; version 1.0.3 — live: more reliable channel switching (waits for the connection to be released, retries), stream closed on quit; version 1.0.1 — themes: channels recognised by name are listed even without TV guide data; first stable release; channel fixing (name, number, logo, TV guide); new themes (Auto & Moto, Food & Home, Nature, Regional, International, Religion, Radio, Adult), sports disciplines; live TV by theme (on now, tonight, channels), one version per channel based on the connection, program alerts; update check at launch, offered outside playback; version number on the home screen; MultiView (up to 4 channels, depending on your subscription); redesigned player: auto-hiding bar, mini-timeline, information panel (audio tracks, subtitles), stream health; fast switch from Live (Classic) to Movies (Cinema); redesigned home, banner framing; featured banner fixed; categories can be reordered, hidden and renamed; “featured” banner carousel (TMDB trends, latest additions, chosen category, what's on now); instant switch from live TV to other sections; freeze fixed when leaving live TV, recording audio converted to AAC; more reliable start of live recording; xmltvfr.fr backup TV guide; TMDB key procedure in the help; movie/series page layout fixed; black screen fixed when returning to playback and in full screen; Movie and series details pages (Xtream + TMDB) in the Cinema interface, recordings visible while being written, more reliable MP4 conversion; full screen fixed, live recording made more reliable; Home screen, removing items from Recents, app available in French and English; TV Guide grid, resume playback, download indicator; new icon; TV interface for live (channel panel, information banner, zapping by number), alongside the Classic and Cinema interfaces.
 
 ## Getting started
 
 1. On first launch, click **Add a Source**.
-2. Choose the source type: **Xtream Codes**, **Playlist (URL)** or **Playlist (file)**.
+2. Choose the source type: **Xtream Codes**, **Playlist (URL)**, **Playlist (file)**, **Folders (disk, USB, NAS)**, **Jellyfin**, **Emby** or **Plex**.
 3. Fill in the requested information, then click **Add**.
 4. Kastideo loads the list of channels, movies and series, then the TV guide.
 
@@ -29,6 +29,46 @@ This is the most common format among IPTV providers. You need three pieces of in
 - **By file**: choose an `.m3u` or `.m3u8` file on your Mac. Kastideo keeps the permission to access it so that it can refresh it.
 - Categories come from the `group-title` attribute, logos from `tvg-logo` and the link to the TV guide from `tvg-id`.
 - Kastideo automatically sorts entries into Live, Movies or Series based on their address.
+
+### Folders (disk, USB drive, NAS)
+
+To watch videos stored on the Mac, an external disk, a USB drive or a NAS:
+
+1. Settings > Sources > **Add** > type **Folders (disk, USB, NAS)**.
+2. **Add a folder…**: choose one or more folders (for example “Movies” and “Series”). For a **NAS**, first mount the share in the Finder (**Go > Connect to Server…**, for example `smb://nas.local/Videos`), then choose it among the volumes.
+3. **Add**: Kastideo scans the folders and their subfolders.
+
+Videos are recognized from their names:
+
+- **Movies**: “Inception (2010).mkv”, “The.Matrix.1999.1080p.BluRay.mkv”, or a folder “Amélie (2001)” containing the movie. They appear in **Movies**, category “Movies · folder name”.
+- **Series**: “Breaking.Bad.S01E02.mkv”, “Friends 1x05.mp4”, or a folder “Kaamelott/Season 3/12 - Le Tourment.avi”. Episodes are grouped into one series, with its seasons, in **Series**.
+- **Other videos** (holidays, camera…): category **Videos · folder name**, in Movies.
+
+Folders are scanned at each launch and then every 20 minutes: a new video shows up by itself. If the disk is unplugged or the share disconnected, a message says so under the source and the previous list is kept. **Subtitles** placed next to a video (“Inception (2010).srt”, “Inception (2010).en.srt”) are loaded on playback.
+
+With a **TMDB key** (Settings > General), movies and series automatically get a **poster and summary**. If the file name misleads the search, right-click the poster (or the link at the bottom of the details page) > **Fix details…**: search for the right title and pick it; the choice is remembered.
+
+### Jellyfin and Emby
+
+1. Settings > Sources > **Add** > **Jellyfin** or **Emby**.
+2. **Search the network** finds the servers at home; click yours to fill in the address. Otherwise type it (for example `192.168.1.10`: port 8096 is added).
+3. Your Jellyfin / Emby **username** and **password** (an **API key** from the dashboard can replace the password). **Test Connection** checks the address.
+4. **Add**: the username is checked, then the server's movie, series and video libraries appear in **Movies** and **Series** (categories “library name · server name”), with the server's posters and details.
+
+Playback is **direct**, without transcoding by the server. The password and session are stored in the keychain.
+
+### Plex
+
+1. Settings > Sources > **Add** > **Plex**.
+2. **Sign in with Plex** opens plex.tv in the browser: sign in and authorize Kastideo. Back in Kastideo, choose the server from your account.
+3. You can also type the server address (port 32400) and its **token** (X-Plex-Token).
+4. **Add**: the movie and series libraries appear in **Movies** and **Series**.
+
+### Resume and “watched” shared with servers
+
+With Jellyfin, Emby and Plex, the playback position is sent to the server while you watch: a movie started in Kastideo can be resumed on the TV, and the other way round. A movie watched to the end is marked **watched** on the server. Right-click a movie or an episode > **Mark as watched / unwatched** (also for files from folders). A **Watched** badge appears on posters, and a check mark in the episode list.
+
+> Network search: the first time, macOS asks for permission to access the **local network**; accept it (otherwise System Settings > Privacy & Security > Local Network).
 
 ### TV guide (XMLTV)
 
@@ -349,7 +389,7 @@ Settings > General > **Backup and transfer**:
 - **Export configuration…** saves a `Kastideo-configuration.json` file: sources (Xtream and M3U playlists by address), favorites, recents, custom categories (order, hidden, names, keywords), chosen interfaces and TMDB key. Tick **Include passwords** so nothing has to be typed again; keep the file somewhere safe.
 - **Import configuration…** adds the content of a file: on a new Mac, or from Kastideo for Windows and Linux (same format). Sources already present are recognised and nothing is deleted.
 
-M3U playlists added as local files are not exported (the file does not exist on the other computer).
+Jellyfin, Emby and Plex servers are exported (with their password or token if you tick **Include passwords**). M3U playlists added as local files and folders are not imported on another Mac (the files do not exist there or must be chosen again).
 
 ## Troubleshooting
 

@@ -105,6 +105,9 @@ final class NavigationModel {
     /// Chaîne en cours de modification (feuille « Modifier la chaîne »).
     var editingChannel: MediaItem?
 
+    /// Fichier local dont on corrige la fiche TMDB (feuille « Corriger la fiche »).
+    var fixingItem: MediaItem?
+
     /// Panneau « Contexte » du lecteur (chaîne, programme, pistes, qualité).
     var showContextPanel = false
 

@@ -181,6 +181,7 @@ struct LogoView: View {
 struct ItemActionsMenu: View {
     @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
+    @Environment(WatchProgressStore.self) private var watch
     @Environment(RecordingCenter.self) private var recordings
     @Environment(MultiViewModel.self) private var multiView
     @Environment(PlaybackController.self) private var playback
@@ -214,6 +215,17 @@ struct ItemActionsMenu: View {
             Divider()
             Button("Télécharger") { recordings.download(item, tonight: false) }
             Button("Télécharger cette nuit") { recordings.download(item, tonight: true) }
+        }
+        if item.kind == .movie || item.kind == .episode, !(store.source(id: item.sourceID)?.kind.isIPTV ?? true) {
+            Divider()
+            let seen = watch.isWatched(item.id)
+            Button(seen ? String(localized: "Marquer comme non vu") : String(localized: "Marquer comme vu")) {
+                watch.setWatched(item.id, !seen)
+                store.setPlayedOnServer(item, !seen)
+            }
+        }
+        if store.isLocalFile(item), item.kind == .movie || item.kind == .series {
+            Button("Corriger la fiche…") { navigation.fixingItem = item }
         }
         if store.recentIDs.contains(item.id) {
             Divider()

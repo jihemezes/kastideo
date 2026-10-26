@@ -8,8 +8,8 @@ struct KastideoApp: App {
     @State private var playback: PlaybackController
     @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
-    @State private var watchProgress = WatchProgressStore()
-    @State private var mediaInfo = MediaInfoStore()
+    @State private var watchProgress: WatchProgressStore
+    @State private var mediaInfo: MediaInfoStore
     @State private var multiView = MultiViewModel()
     @State private var alerts = ProgramAlertCenter()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
@@ -19,8 +19,23 @@ struct KastideoApp: App {
         _ = AppLanguage.effectiveCode
         let store = LibraryStore()
         let playback = PlaybackController()
+        let watch = WatchProgressStore()
+        let info = MediaInfoStore()
         _store = State(initialValue: store)
         _playback = State(initialValue: playback)
+        _watchProgress = State(initialValue: watch)
+        _mediaInfo = State(initialValue: info)
+        playback.watchProgress = watch
+        // Jellyfin, Emby, Plex : reprise de lecture et contenus vus partagés dans les deux sens.
+        store.onServerProgress = { [weak watch] progress in watch?.apply(progress) }
+        playback.onProgress = { [weak store] item, position, duration, event in
+            store?.reportPlayback(item, position: position, duration: duration, event: event)
+        }
+        // Dossiers : affiches et résumés TMDB pour les films et séries reconnus.
+        store.onContentLoaded = { [weak store, weak info] source in
+            guard let store, let info else { return }
+            info.enrichLocal(source, store: store)
+        }
         _recordings = State(initialValue: RecordingCenter(store: store, playback: playback))
     }
 

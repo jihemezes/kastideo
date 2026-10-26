@@ -1,11 +1,11 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition), modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
+> Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
 1. Ouvrez les **Réglages** (roue dentée de l'accueil, bas de la barre latérale, ou **Ctrl+,**) > **Sources** > **Ajouter une source**.
-2. Saisissez votre abonnement **Xtream Codes** (serveur, identifiant, mot de passe) ou l'adresse d'une **playlist M3U**.
+2. Choisissez le type : abonnement **Xtream Codes** (serveur, identifiant, mot de passe), **playlist M3U**, **Dossiers** de vidéos (disque, clé USB, NAS), ou serveur **Jellyfin**, **Emby** ou **Plex**.
 3. Kastideo charge les chaînes, les films, les séries et le guide TV. Revenez à l'**accueil** et choisissez **Direct**, **Films** ou **Séries**.
 
 > Astuce : vous avez déjà Kastideo sur Mac ? Exportez sa configuration (Réglages > Général > Sauvegarde et transfert) et importez-la ici (Réglages > Sauvegarde).
@@ -19,6 +19,28 @@ Adresse du serveur (ex. http://exemple.com:8080), identifiant et mot de passe. L
 ### Playlist M3U / M3U8
 
 Adresse de la playlist ou fichier sur le disque (**Choisir un fichier…**). Une adresse « get.php?username=…&password=… » est reconnue et transformée en source Xtream, bien plus rapide et plus complète (fiches, épisodes, derniers ajouts).
+
+### Dossiers (disque, clé USB, NAS)
+
+Réglages > Sources > **Ajouter une source** > **Dossiers**, puis **Ajouter un dossier…** (disque interne, disque ou clé USB) ou saisissez un **chemin réseau** et cliquez sur **+** : `\\NAS\Vidéos` ou un lecteur réseau (`Z:\`) sous Windows, un partage monté (`/mnt/nas/videos`, `/media/…`) sous Linux. Plusieurs dossiers peuvent former une même source.
+
+- **Films** reconnus par leur nom : « Inception (2010).mkv », « The.Matrix.1999.1080p.BluRay.mkv », dossier « Le Fabuleux Destin (2001) ». Rubrique « Films · nom du dossier ».
+- **Séries** : « Breaking.Bad.S01E02.mkv », « Friends 1x05.mp4 », dossiers « Série/Saison 1/… ». Les épisodes sont regroupés par série et par saison dans **Séries**.
+- **Autres vidéos** : rubrique **Vidéos · nom du dossier** dans Films.
+- Examen à chaque lancement puis toutes les 20 minutes. Disque débranché : un message l'indique et la liste précédente est gardée. Les sous-dossiers illisibles (« System Volume Information »…) sont ignorés.
+- **Sous-titres** placés à côté (« Film.srt », « Film.fr.srt ») chargés à la lecture.
+- Avec une **clé TMDB**, **affiches et résumés** sont ajoutés automatiquement ; clic droit > **Corriger la fiche…** pour choisir le bon titre quand le nom du fichier trompe la recherche.
+
+### Jellyfin, Emby et Plex
+
+Réglages > Sources > **Ajouter une source** > **Jellyfin**, **Emby** ou **Plex**. **Rechercher sur le réseau** trouve les serveurs de la maison : cliquez sur le vôtre pour remplir le formulaire (sinon saisissez l'adresse ; sans port, 8096 ou 32400 est ajouté).
+
+- **Jellyfin / Emby** : identifiant et mot de passe (ou une **clé d'API** du tableau de bord). **Tester** vérifie l'adresse.
+- **Plex** : **Se connecter avec Plex** ouvre plex.tv dans le navigateur ; autorisez Kastideo, puis choisissez le serveur de votre compte. Ou saisissez l'adresse et le **jeton** (X-Plex-Token).
+- Les bibliothèques apparaissent dans **Films** et **Séries** (« nom de la bibliothèque · nom du serveur »), avec les affiches, fiches, saisons et épisodes du serveur. Lecture directe, sans conversion.
+- **Reprise et « vu » partagés dans les deux sens** : la position est transmise au serveur pendant la lecture et celle de vos autres appareils est reprise. Clic droit > **Marquer comme vu / non vu** ; pastille **Vu** sur les affiches.
+
+> Pare-feu Windows : à la première recherche, autorisez Kastideo sur les réseaux privés pour que les serveurs puissent répondre.
 
 ### Guide TV (XMLTV)
 
@@ -219,7 +241,7 @@ Créez un compte sur themoviedb.org, puis **Paramètres > API** et demandez une 
 
 ## Sauvegarde et transfert
 
-Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur guide, mots de passe si vous le souhaitez, favoris, récents, catégories, interfaces, apparence, nombre de connexions, contenus adultes, bandeau, clé TMDB) et **Importer une configuration…**. Le fichier est le même que celui de Kastideo pour Mac : vous pouvez passer d'un ordinateur à l'autre dans les deux sens. Rien n'est supprimé à l'importation.
+Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur guide, mots de passe si vous le souhaitez, favoris, récents, catégories, interfaces, apparence, nombre de connexions, contenus adultes, bandeau, clé TMDB) et **Importer une configuration…**. Le fichier est le même que celui de Kastideo pour Mac : vous pouvez passer d'un ordinateur à l'autre dans les deux sens. Rien n'est supprimé à l'importation. Les serveurs Jellyfin, Emby et Plex sont repris (mot de passe ou jeton compris si demandé) ; les dossiers aussi, avec leurs chemins (à corriger s'ils diffèrent sur cet ordinateur).
 
 ## Installation
 
@@ -232,6 +254,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.3.0-desktop1** : nouvelles sources — dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex — avec recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB et correction des fiches des fichiers, sous-titres placés à côté.
 - **1.2.2-desktop1** : programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition quotidienne, en semaine ou hebdomadaire), modifier les récents, case « Tout sélectionner » des catégories.
 - **1.2.1-desktop1** : enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma.
 - **1.2.0-desktop8** : installateur Windows, mises à jour intégrées, nouveautés après une mise à jour, lancement à l'ouverture de session, ouverture des fichiers .m3u.

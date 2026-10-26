@@ -241,6 +241,40 @@ public enum TMDB {
     }
 }
 
+/// Résultat d'une recherche TMDB (correction d'une fiche).
+public struct TMDBMatch: Sendable, Hashable, Identifiable {
+    public var tmdbID: String
+    public var title: String
+    public var year: Int?
+    public var posterURL: URL?
+    public var overview: String?
+    public var id: String { tmdbID }
+
+    public init(tmdbID: String, title: String, year: Int? = nil, posterURL: URL? = nil, overview: String? = nil) {
+        self.tmdbID = tmdbID
+        self.title = title
+        self.year = year
+        self.posterURL = posterURL
+        self.overview = overview
+    }
+}
+
+extension TMDB {
+    /// Résultats d'une réponse de `/search/{movie|tv}` (12 au plus).
+    public static func parseMatches(_ data: Data, isSeries: Bool) -> [TMDBMatch] {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = root["results"] as? [[String: Any]] else { return [] }
+        let s = XtreamAPI.string
+        return results.prefix(12).compactMap { r in
+            guard let id = s(r["id"]) else { return nil }
+            return TMDBMatch(tmdbID: id, title: s(r[isSeries ? "name" : "title"]) ?? "?",
+                             year: s(r[isSeries ? "first_air_date" : "release_date"]).flatMap(XtreamAPI.year(in:)),
+                             posterURL: s(r["poster_path"]).flatMap { URL(string: images + "w342" + $0) },
+                             overview: s(r["overview"]))
+        }
+    }
+}
+
 /// Film ou série en tendance sur TMDB.
 public struct TMDBTrend: Sendable, Hashable {
     public var tmdbID: String
@@ -329,6 +363,21 @@ public struct TMDBClient: Sendable {
                                                             URLQueryItem(name: "include_video_language",
                                                                          value: "\(language.prefix(2)),en,null")])
         return try TMDB.parseDetails(data, isSeries: isSeries)
+    }
+
+    /// Recherche par titre (et année), pour choisir la bonne fiche à la main.
+    public func search(title: String, isSeries: Bool, year: Int? = nil) async throws -> [TMDBMatch] {
+        let kind = isSeries ? "tv" : "movie"
+        let cleaned = TMDB.cleanTitle(title)
+        let wanted = year ?? cleaned.year
+        var query = [URLQueryItem(name: "query", value: cleaned.title)]
+        if let wanted { query.append(URLQueryItem(name: isSeries ? "first_air_date_year" : "year", value: String(wanted))) }
+        var matches = TMDB.parseMatches(try await request("search/\(kind)", query), isSeries: isSeries)
+        if matches.isEmpty, wanted != nil {
+            matches = TMDB.parseMatches(try await request("search/\(kind)", [URLQueryItem(name: "query", value: cleaned.title)]),
+                                        isSeries: isSeries)
+        }
+        return matches
     }
 
     /// Films ou séries en tendance cette semaine (2 pages, ~40 titres).

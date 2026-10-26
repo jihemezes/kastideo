@@ -1,7 +1,7 @@
 import SwiftUI
 import KastideoCore
 
-/// Fiche d'une série Xtream : saisons, épisodes et lecteur intégré.
+/// Fiche d'une série (Xtream, dossiers, Jellyfin, Emby, Plex) : saisons, épisodes et lecteur intégré.
 struct SeriesDetailView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
@@ -54,7 +54,7 @@ struct SeriesDetailView: View {
                 HStack {
                     Text(series.name).font(.title2.weight(.semibold))
                     Spacer()
-                    if !seasons.isEmpty {
+                    if !seasons.isEmpty, !store.isLocalFile(series) {
                         Menu {
                             let season = seasons.first { $0.number == selectedSeason } ?? seasons[0]
                             Section("Saison \(season.number) (\(season.episodes.count) épisodes)") {
@@ -128,14 +128,27 @@ struct SeriesDetailView: View {
                         Text("à reprendre")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    } else if watch.isWatched(episode.id) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                            .help("Vu")
                     }
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .contextMenu {
-                Button("Télécharger l'épisode") { recordings.download(episode, tonight: false) }
-                Button("Télécharger l'épisode cette nuit") { recordings.download(episode, tonight: true) }
+                if !store.isLocalFile(episode) {
+                    Button("Télécharger l'épisode") { recordings.download(episode, tonight: false) }
+                    Button("Télécharger l'épisode cette nuit") { recordings.download(episode, tonight: true) }
+                }
+                if !(store.source(id: episode.sourceID)?.kind.isIPTV ?? true) {
+                    let seen = watch.isWatched(episode.id)
+                    Button(seen ? String(localized: "Marquer comme non vu") : String(localized: "Marquer comme vu")) {
+                        watch.setWatched(episode.id, !seen)
+                        store.setPlayedOnServer(episode, !seen)
+                    }
+                }
             }
         }
         .listStyle(.inset)

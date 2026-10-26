@@ -317,6 +317,34 @@ class TMDBClient {
         series);
   }
 
+  /// Résultats d'une recherche (fichiers locaux : affiche automatique, ou correction à la main).
+  Future<List<TMDBMatch>> search(String title, {required bool series, int? year}) async {
+    final kind = series ? 'tv' : 'movie';
+    final cleaned = cleanTitle(title);
+    final wanted = year ?? cleaned.year;
+    var root = await _request('search/$kind', {
+      'query': cleaned.title,
+      if (wanted != null) (series ? 'first_air_date_year' : 'year'): '$wanted',
+    });
+    var results = root is Map && root['results'] is List ? (root['results'] as List).whereType<Map>().toList() : <Map>[];
+    if (results.isEmpty && wanted != null) {
+      root = await _request('search/$kind', {'query': cleaned.title});
+      results = root is Map && root['results'] is List ? (root['results'] as List).whereType<Map>().toList() : <Map>[];
+    }
+    final s = XtreamClient.str;
+    return [
+      for (final r in results.take(12))
+        if (s(r['id']) case final id?)
+          TMDBMatch(
+            id,
+            s(r[series ? 'name' : 'title']) ?? cleaned.title,
+            year: yearIn(s(r[series ? 'first_air_date' : 'release_date'])),
+            poster: s(r['poster_path']) == null ? null : '${_images}w342${s(r['poster_path'])}',
+            overview: s(r['overview']),
+          ),
+    ];
+  }
+
   /// Épisodes d'une saison (titre, résumé, image) dans la langue choisie.
   Future<Map<int, TMDBEpisode>> season(String tvId, int number) async {
     final root = await _request('tv/$tvId/season/$number');
@@ -362,6 +390,16 @@ class TMDBTrend {
   final String? originalTitle;
   final int? year;
   final String? backdrop;
+}
+
+/// Résultat d'une recherche TMDB.
+class TMDBMatch {
+  TMDBMatch(this.tmdbId, this.title, {this.year, this.poster, this.overview});
+  final String tmdbId;
+  final String title;
+  final int? year;
+  final String? poster;
+  final String? overview;
 }
 
 /// Épisode d'une série sur TMDB.

@@ -415,6 +415,17 @@ struct MediaCard: View {
                                 .padding(6)
                         }
                     }
+                    .overlay(alignment: .topLeading) {
+                        if item.kind == .movie, watch.isWatched(item.id) {
+                            Label("Vu", systemImage: "checkmark")
+                                .font(.caption2.weight(.bold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(.black.opacity(0.65), in: Capsule())
+                                .foregroundStyle(.white)
+                                .padding(6)
+                        }
+                    }
                     .overlay(shape.strokeBorder(Color.white.opacity(hovering ? 0.55 : 0.08),
                                                 lineWidth: hovering ? 2 : 1))
                 Text(isLive ? item.name : TMDB.cleanTitle(item.name).title)

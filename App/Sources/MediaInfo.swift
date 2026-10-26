@@ -22,6 +22,7 @@ final class MediaInfoStore {
 
     init() {
         tmdbKey = Keychain.get(account: Self.keychainAccount) ?? ""
+        tmdbFixes = UserDefaults.standard.dictionary(forKey: Self.fixesKey) as? [String: String] ?? [:]
     }
 
     var usesTMDB: Bool { !tmdbKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -43,8 +44,30 @@ final class MediaInfoStore {
         details.title = item.name
         if let plot = item.info { details.plot = plot }
         details.posterURL = item.logoURL
+        let source = store.source(id: item.sourceID)
+        let isLocal = store.isLocalFile(item)
+        // Vidéos personnelles (dossiers) : pas de recherche TMDB.
+        let isPersonal = isLocal && item.group.hasPrefix(String(localized: "Vidéos") + " · ")
+        if isLocal {
+            let cleaned = TMDB.cleanTitle(item.name)
+            details.title = cleaned.title
+            details.year = cleaned.year
+            details.sources = [String(localized: "Fichier local")]
+            details.tmdbID = tmdbFixes[item.id]
+        }
 
-        if let client = store.xtreamClient(for: item.sourceID) {
+        if source?.kind.serverType != nil {
+            do {
+                if var server = try await store.serverDetails(item) {
+                    if server.title == nil { server.title = item.name }
+                    if server.plot == nil { server.plot = details.plot }
+                    if server.posterURL == nil { server.posterURL = item.logoURL }
+                    details = server
+                }
+            } catch {
+                PlaybackLog.shared.note("Fiche du serveur indisponible pour « \(item.name) » : \(error.localizedDescription)")
+            }
+        } else if let client = store.xtreamClient(for: item.sourceID) {
             do {
                 let iptv: MediaDetails?
                 if isSeries, let id = item.seriesID {
@@ -66,10 +89,10 @@ final class MediaInfoStore {
             }
         }
 
-        if usesTMDB {
+        if usesTMDB, !isPersonal {
             let client = TMDBClient(apiKey: tmdbKey, language: language)
             do {
-                if let tmdb = try await client.details(title: item.name, isSeries: isSeries,
+                if let tmdb = try await client.details(title: isLocal ? (details.title ?? item.name) : item.name, isSeries: isSeries,
                                                        tmdbID: details.tmdbID, year: details.year) {
                     var merged = details.merged(with: tmdb)
                     // Le titre affiché reste celui de votre catalogue s'il n'y a pas de traduction.
@@ -134,6 +157,72 @@ final class MediaInfoStore {
     func reload(_ item: MediaItem, store: LibraryStore) async {
         cache[item.id] = nil
         await load(item, store: store)
+    }
+
+    // MARK: Fichiers locaux : fiches TMDB
+
+    private static let fixesKey = "local.tmdbFixes.v1"
+    /// Fiches choisies à la main (« Corriger la fiche… ») : identifiant du contenu → identifiant TMDB.
+    @ObservationIgnored private var tmdbFixes: [String: String] = [:]
+    @ObservationIgnored private var enriching: Set<UUID> = []
+    @ObservationIgnored private var enrichTried: Set<String> = []
+
+    /// Résultats TMDB pour corriger la fiche d'un fichier local.
+    func searchTMDB(title: String, isSeries: Bool, year: Int?) async throws -> [TMDBMatch] {
+        try await TMDBClient(apiKey: tmdbKey, language: language).search(title: title, isSeries: isSeries, year: year)
+    }
+
+    /// Retient la fiche choisie, met à jour l'affiche et le résumé, puis recharge la fiche.
+    func applyFix(_ item: MediaItem, match: TMDBMatch, store: LibraryStore) async {
+        tmdbFixes[item.id] = match.tmdbID
+        UserDefaults.standard.set(tmdbFixes, forKey: Self.fixesKey)
+        store.applyEnrichment(item.sourceID, [item.id: (logo: match.posterURL, info: match.overview)])
+        await reload(item, store: store)
+    }
+
+    /// Affiches et résumés TMDB des films et séries d'une source « Dossiers » qui n'en ont pas encore
+    /// (300 au plus par passage, 4 recherches à la fois).
+    func enrichLocal(_ source: Source, store: LibraryStore) {
+        guard usesTMDB, case .folders = source.kind, !enriching.contains(source.id),
+              let content = store.content(of: source.id) else { return }
+        let personal = String(localized: "Vidéos") + " · "
+        let todo = content.items.filter {
+            ($0.kind == .movie || $0.kind == .series) && $0.logoURL == nil && !$0.group.hasPrefix(personal) && !enrichTried.contains($0.id)
+        }.prefix(300)
+        guard !todo.isEmpty else { return }
+        enriching.insert(source.id)
+        let client = TMDBClient(apiKey: tmdbKey, language: language)
+        let fixes = tmdbFixes
+        let items = Array(todo)
+        for item in items { enrichTried.insert(item.id) }
+        Task {
+            var found: [String: (logo: URL?, info: String?)] = [:]
+            var index = 0
+            while index < items.count {
+                let batch = items[index..<min(index + 4, items.count)]
+                index += 4
+                await withTaskGroup(of: (String, URL?, String?).self) { group in
+                    for item in batch {
+                        group.addTask {
+                            let cleaned = TMDB.cleanTitle(item.name)
+                            let tmdb = try? await client.details(title: cleaned.title, isSeries: item.kind == .series,
+                                                                 tmdbID: fixes[item.id], year: cleaned.year)
+                            return (item.id, tmdb?.posterURL, tmdb?.plot)
+                        }
+                    }
+                    for await (id, poster, plot) in group where poster != nil || plot != nil {
+                        found[id] = (logo: poster, info: plot)
+                    }
+                }
+                if found.count >= 24 {
+                    store.applyEnrichment(source.id, found)
+                    found = [:]
+                }
+            }
+            store.applyEnrichment(source.id, found)
+            enriching.remove(source.id)
+            PlaybackLog.shared.note("Fiches TMDB de « \(source.name) » : \(items.count) titre(s) examiné(s)")
+        }
     }
 }
 
@@ -389,6 +478,10 @@ struct MediaInfoView: View {
                     }
                     Button("Actualiser") { Task { await info.reload(item, store: store) } }
                         .buttonStyle(.link)
+                    if store.isLocalFile(item) {
+                        Button("Corriger la fiche…") { navigation.fixingItem = item }
+                            .buttonStyle(.link)
+                    }
                 }
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))

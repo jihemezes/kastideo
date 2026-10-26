@@ -1,11 +1,11 @@
 # Kastideo for Windows and Linux
 
-> Version 1.2.2-desktop1 — schedule a recording from live TV (guide programmes or time slot, repetition), edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist).
+> Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
 1. Open **Settings** (gear on the home screen, bottom of the sidebar, or **Ctrl+,**) > **Sources** > **Add a source**.
-2. Enter your **Xtream Codes** subscription (server, username, password) or the address of an **M3U playlist**.
+2. Choose the type: **Xtream Codes** subscription (server, username, password), **M3U playlist**, video **Folders** (disk, USB drive, NAS), or a **Jellyfin**, **Emby** or **Plex** server.
 3. Kastideo loads channels, movies, series and the TV guide. Go back **home** and choose **Live**, **Movies** or **Series**.
 
 > Tip: already using Kastideo on Mac? Export its configuration (Settings > General > Backup and transfer) and import it here (Settings > Backup).
@@ -19,6 +19,28 @@ Server address (e.g. http://example.com:8080), username and password. The passwo
 ### M3U / M3U8 playlist
 
 Playlist address or file on disk (**Choose a file…**). A "get.php?username=…&password=…" address is recognized and turned into an Xtream source, much faster and more complete (details, episodes, latest additions).
+
+### Folders (disk, USB drive, NAS)
+
+Settings > Sources > **Add a source** > **Folders**, then **Add a folder…** (internal disk, USB disk or stick) or type a **network path** and click **+**: `\\NAS\Videos` or a network drive (`Z:\`) on Windows, a mounted share (`/mnt/nas/videos`, `/media/…`) on Linux. Several folders can make up one source.
+
+- **Movies** recognized from their names: “Inception (2010).mkv”, “The.Matrix.1999.1080p.BluRay.mkv”, folder “Amélie (2001)”. Category “Movies · folder name”.
+- **Series**: “Breaking.Bad.S01E02.mkv”, “Friends 1x05.mp4”, folders “Show/Season 1/…”. Episodes are grouped by series and season in **Series**.
+- **Other videos**: category **Videos · folder name** in Movies.
+- Scanned at each launch and then every 20 minutes. Disk unplugged: a message says so and the previous list is kept. Unreadable subfolders (“System Volume Information”…) are skipped.
+- **Subtitles** placed next to a video (“Movie.srt”, “Movie.en.srt”) are loaded on playback.
+- With a **TMDB key**, **posters and summaries** are added automatically; right-click > **Fix details…** to pick the right title when the file name misleads the search.
+
+### Jellyfin, Emby and Plex
+
+Settings > Sources > **Add a source** > **Jellyfin**, **Emby** or **Plex**. **Search the network** finds the servers at home: click yours to fill in the form (otherwise type the address; without a port, 8096 or 32400 is added).
+
+- **Jellyfin / Emby**: username and password (or an **API key** from the dashboard). **Test** checks the address.
+- **Plex**: **Sign in with Plex** opens plex.tv in the browser; authorize Kastideo, then choose the server from your account. Or type the address and the **token** (X-Plex-Token).
+- Libraries appear in **Movies** and **Series** (“library name · server name”), with the server's posters, details, seasons and episodes. Direct playback, no transcoding.
+- **Resume and “watched” shared both ways**: the position is sent to the server while you watch, and the one from your other devices is picked up. Right-click > **Mark as watched / unwatched**; **Watched** badge on posters.
+
+> Windows firewall: on the first search, allow Kastideo on private networks so that servers can answer.
 
 ### TV guide (XMLTV)
 
@@ -219,7 +241,7 @@ Create an account on themoviedb.org, then **Settings > API** and request a key (
 
 ## Backup and transfer
 
-Settings > **Backup**: **Export configuration…** (sources and their guide, passwords if you wish, favorites, recents, categories, interfaces, appearance, number of connections, adult content, banner, TMDB key) and **Import configuration…**. The file is the same as Kastideo for Mac: you can move from one computer to the other in both directions. Nothing is deleted on import.
+Settings > **Backup**: **Export configuration…** (sources and their guide, passwords if you wish, favorites, recents, categories, interfaces, appearance, number of connections, adult content, banner, TMDB key) and **Import configuration…**. The file is the same as Kastideo for Mac: you can move from one computer to the other in both directions. Nothing is deleted on import. Jellyfin, Emby and Plex servers are included (password or token too, if requested); folders as well, with their paths (to fix if they differ on this computer).
 
 ## Installation
 
@@ -232,6 +254,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.3.0-desktop1**: new sources — folders (disk, USB drive, NAS), Jellyfin, Emby and Plex — with network search for servers, resume and “watched” shared with servers, TMDB details and detail fixing for files, subtitles placed next to videos.
 - **1.2.2-desktop1**: schedule a recording from live TV (guide programmes or time slot, daily, weekday or weekly repetition), edit recents, "Select all" box for categories.
 - **1.2.1-desktop1**: more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface.
 - **1.2.0-desktop8**: Windows installer, built-in updates, what's new after an update, start at sign-in, opening .m3u files.

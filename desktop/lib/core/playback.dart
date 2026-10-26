@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'log.dart';
+import 'media_servers.dart' show PlaybackEvent;
 import 'models.dart';
 import 'relay.dart';
 import 'settings.dart';
@@ -62,6 +63,7 @@ class PlaybackController extends ChangeNotifier {
           errorMessage = 'Le flux s\'est interrompu. Le serveur a peut-être coupé la connexion.';
           notifyListeners();
         } else if (current != null) {
+          onProgress?.call(current!, duration.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.stop);
           watchProgress?.clear(current!.id); // film terminé : plus de reprise
         }
       }),
@@ -91,6 +93,9 @@ class PlaybackController extends ChangeNotifier {
   /// Position à laquelle la lecture a repris (affichée quelques secondes).
   Duration? resumedAt;
   WatchProgressStore? watchProgress;
+
+  /// Lecture d'un contenu d'un serveur (Jellyfin, Emby, Plex) : début, progression, pause, fin — transmis au serveur.
+  void Function(MediaItem item, double position, double duration, PlaybackEvent event)? onProgress;
   AppSettings? settings;
   Duration? _pendingResume;
   DateTime _lastProgressSave = DateTime.fromMillisecondsSinceEpoch(0);
@@ -122,6 +127,8 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('demuxer-readahead-secs', '2');
       await native.setProperty('hwdec', 'auto-safe');
       await native.setProperty('ytdl', 'no');
+      // Sous-titres placés à côté d'un fichier local (« film.srt », « film.fr.srt »…) chargés automatiquement.
+      await native.setProperty('sub-auto', 'fuzzy');
     }
     await applyCacheSettings();
     await StreamRelay.shared.start();
@@ -319,6 +326,7 @@ class PlaybackController extends ChangeNotifier {
     if (DateTime.now().difference(_lastProgressSave) > const Duration(seconds: 5) && position > const Duration(seconds: 2)) {
       _lastProgressSave = DateTime.now();
       watchProgress?.update(item.id, position.inMilliseconds / 1000, duration.inMilliseconds / 1000);
+      onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, isPlaying ? PlaybackEvent.progress : PlaybackEvent.pause);
     }
   }
 
@@ -326,6 +334,7 @@ class PlaybackController extends ChangeNotifier {
     final item = current;
     if (item != null && item.kind != MediaKind.live && duration > Duration.zero && position > const Duration(seconds: 2) && _pendingResume == null) {
       watchProgress?.update(item.id, position.inMilliseconds / 1000, duration.inMilliseconds / 1000);
+      onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.stop);
     }
     watchProgress?.flush();
   }
@@ -492,6 +501,8 @@ class PlaybackController extends ChangeNotifier {
     _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) => _evaluateHealth());
     _evaluateHealth();
     _startShiftTimer();
+    final item = current!;
+    if (item.kind != MediaKind.live) onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.start);
   }
 
   void _evaluateHealth() {

@@ -3,6 +3,19 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.3.0] - 2026-10-26
+
+**Nouvelles sources : vos vidéos et les serveurs de la maison.**
+
+- **Dossiers (disque, clé USB, NAS)** : Réglages > Sources > **Ajouter** > **Dossiers**, puis **Ajouter un dossier…** (un ou plusieurs). Pour un NAS, montez d'abord le partage dans le Finder (Aller > Se connecter au serveur…). Kastideo reconnaît les films (« Titre (2020).mkv », « Titre.2020.1080p… », dossier « Titre (2020) »), les séries (« Série S01E02 », « 1x02 », dossiers « Saison 1 »), regroupées avec leurs saisons, et range les autres vidéos dans une rubrique **Vidéos · nom du dossier**. Les dossiers sont examinés à chaque lancement puis toutes les 20 minutes.
+- **Fiches TMDB automatiques** des films et séries trouvés dans les dossiers (avec une clé TMDB) : affiche et résumé, et clic droit > **Corriger la fiche…** pour choisir le bon titre quand le nom du fichier trompe la recherche.
+- **Sous-titres placés à côté** des vidéos (« Film.srt », « Film.fr.srt ») chargés à la lecture.
+- **Jellyfin et Emby** : adresse, identifiant et mot de passe (ou clé d'API). Les bibliothèques de films, séries et vidéos apparaissent dans Films et Séries (rubriques « Films · nom du serveur »), avec affiches, fiches, saisons et épisodes du serveur. Lecture directe, sans conversion.
+- **Plex** : **Se connecter avec Plex** (autorisation dans plex.tv, choix du serveur du compte) ou jeton saisi à la main.
+- **Recherche sur le réseau** : bouton **Rechercher sur le réseau** pour trouver les serveurs Jellyfin, Emby et Plex de la maison et remplir l'adresse (macOS demande l'autorisation d'accès au réseau local).
+- **Reprise et « vu » partagés dans les deux sens** avec Jellyfin, Emby et Plex : la position de lecture est transmise au serveur pendant la lecture, et celle des autres appareils est reprise dans Kastideo. Clic droit > **Marquer comme vu / non vu** ; pastille **Vu** sur les affiches et coche dans la liste des épisodes.
+- Sauvegarde de la configuration : les serveurs (et leur mot de passe ou jeton, si demandé) sont exportés et importés, comme dans Kastideo pour Windows et Linux.
+
 ## [1.2.2] - 2026-10-25
 
 - **Gérer les catégories** : une case **Tout sélectionner / désélectionner** au-dessus de la liste coche ou décoche d'un coup toutes les catégories listées (Direct, Films ou Séries). Avec une recherche, elle ne concerne que les catégories trouvées : masquer tout un pays se fait en deux clics. Le nombre de catégories affichées est indiqué à côté.

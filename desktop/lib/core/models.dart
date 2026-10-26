@@ -18,6 +18,7 @@ class MediaItem {
     this.number,
     this.info,
     this.added,
+    this.season,
   }) : searchKey = name.searchKey;
 
   final String id;
@@ -32,6 +33,9 @@ class MediaItem {
   final int? number;
   final String? info;
   final DateTime? added;
+
+  /// Saison d'un épisode (dossiers locaux, serveurs Jellyfin / Emby / Plex).
+  final int? season;
   final String searchKey;
 
   String get displayName => cleanTitle(name).title;
@@ -49,6 +53,7 @@ class MediaItem {
         number: number ?? this.number,
         info: info ?? this.info,
         added: added,
+        season: season,
       );
 
   Map<String, dynamic> toJson() => {
@@ -64,6 +69,7 @@ class MediaItem {
         if (number != null) 'no': number,
         if (info != null) 'i': info,
         if (added != null) 'a': added!.millisecondsSinceEpoch ~/ 1000,
+        if (season != null) 'se': season,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -79,11 +85,32 @@ class MediaItem {
         number: j['no'] as int?,
         info: j['i'] as String?,
         added: j['a'] == null ? null : DateTime.fromMillisecondsSinceEpoch((j['a'] as int) * 1000),
+        season: j['se'] as int?,
       );
 }
 
-/// Type de source.
-enum SourceKind { xtream, m3uUrl, m3uFile }
+/// Type de source : abonnement IPTV, dossiers de vidéos (disque, clé USB, NAS monté) ou serveur multimédia.
+enum SourceKind {
+  xtream,
+  m3uUrl,
+  m3uFile,
+  folder,
+  jellyfin,
+  emby,
+  plex;
+
+  bool get isMediaServer => this == jellyfin || this == emby || this == plex;
+  bool get isIptv => this == xtream || this == m3uUrl || this == m3uFile;
+
+  String get label => switch (this) {
+        xtream => 'Xtream Codes',
+        m3uUrl || m3uFile => 'Playlist M3U',
+        folder => 'Dossiers',
+        jellyfin => 'Jellyfin',
+        emby => 'Emby',
+        plex => 'Plex',
+      };
+}
 
 /// Source configurée par l'utilisateur (le mot de passe Xtream est rangé dans le coffre du système).
 class Source {
@@ -142,9 +169,13 @@ class Source {
 
 /// Contenu chargé d'une source.
 class SourceContent {
-  SourceContent(this.items, {this.epgUrl});
+  SourceContent(this.items, {this.epgUrl, this.progress = const {}});
   final List<MediaItem> items;
   final String? epgUrl;
+
+  /// Position de lecture connue du serveur (Jellyfin, Emby, Plex) : identifiant → (position, durée) en secondes.
+  /// Une position égale à la durée signifie « vu ».
+  final Map<String, (double, double)> progress;
 }
 
 /// Correction d'une chaîne par l'utilisateur (nom, numéro, logo, chaîne du guide TV), comme ChannelEdit sur Mac.

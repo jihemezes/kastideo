@@ -472,6 +472,19 @@ class MediaCard extends StatelessWidget {
                         ),
                       if (favorite)
                         const Positioned(top: 6, right: 6, child: Icon(Icons.star_rounded, size: 16, color: Colors.amber)),
+                      if (context.watch.isWatched(item.id))
+                        Positioned(
+                          top: 6,
+                          left: 6,
+                          child: Tooltip(
+                            message: tr('Vu'),
+                            child: Container(
+                              decoration: const BoxDecoration(color: Color(0xCC000000), shape: BoxShape.circle),
+                              padding: const EdgeInsets.all(2),
+                              child: const Icon(Icons.check_circle_rounded, size: 18, color: Colors.greenAccent),
+                            ),
+                          ),
+                        ),
                     ]),
                   ),
                 ),

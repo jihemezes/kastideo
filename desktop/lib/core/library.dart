@@ -7,14 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'details.dart';
+import 'local_media.dart';
 import 'log.dart';
 import 'm3u.dart';
+import 'media_servers.dart';
 import 'countries.dart';
 import 'models.dart';
 import 'secrets.dart';
 import 'settings.dart';
 import 'themes.dart';
 import 'xtream.dart';
+import '../l10n.dart';
 
 /// Bibliothèque : sources, contenus (mis en cache sur disque), favoris, récents et catégories personnalisées.
 class LibraryStore extends ChangeNotifier {
@@ -67,6 +71,26 @@ class LibraryStore extends ChangeNotifier {
   void Function(Source source)? onSourceRefreshed;
   void Function(String sourceId)? onSourceRemoved;
 
+  /// Positions de lecture reçues d'un serveur (Jellyfin, Emby, Plex) : reprises dans la mémoire de reprise.
+  void Function(Map<String, (double, double)> progress)? onUserData;
+
+  /// Contenu d'une source chargé (fiches TMDB automatiques des fichiers locaux).
+  void Function(Source source)? onContentLoaded;
+
+  /// Épisodes des séries trouvées dans les dossiers locaux (identifiant de la série → épisodes).
+  final Map<String, List<MediaItem>> _localEpisodes = {};
+
+  Timer? _rescan;
+
+  @override
+  void dispose() {
+    _rescan?.cancel();
+    super.dispose();
+  }
+
+  /// Clients des serveurs multimédias (un par source).
+  final Map<String, MediaServerClient> _servers = {};
+
   late SharedPreferences _prefs;
   final _secrets = Secrets.shared;
   late Directory _cacheDir;
@@ -116,11 +140,33 @@ class LibraryStore extends ChangeNotifier {
       }
     }
     _rebuild();
-    final stale = sources.where((s) =>
-        s.enabled &&
-        (_contentBySource[s.id] == null ||
-            (autoRefresh && (s.lastRefresh == null || DateTime.now().difference(s.lastRefresh!) > const Duration(hours: 6)))));
-    if (stale.isNotEmpty) refreshAll();
+    bool isStale(Source s) {
+      if (!s.enabled) return false;
+      if (_contentBySource[s.id] == null) return true;
+      final age = s.lastRefresh == null ? const Duration(days: 365) : DateTime.now().difference(s.lastRefresh!);
+      // Dossiers : examinés à chaque lancement (rapide) ; serveurs : toutes les heures (positions de lecture).
+      return switch (s.kind) {
+        SourceKind.folder => true,
+        SourceKind.jellyfin || SourceKind.emby || SourceKind.plex => age > const Duration(hours: 1),
+        _ => autoRefresh && age > const Duration(hours: 6),
+      };
+    }
+
+    final stale = sources.where(isStale).toList();
+    if (stale.isNotEmpty) {
+      unawaited(() async {
+        for (final s in stale) {
+          await refresh(s);
+        }
+      }());
+    }
+    // Nouveaux fichiers et positions de lecture des serveurs : examen régulier en arrière-plan.
+    _rescan = Timer.periodic(const Duration(minutes: 20), (_) async {
+      if (isBusy) return;
+      for (final s in sources.where((s) => s.enabled && (s.kind == SourceKind.folder || s.kind.isMediaServer)).toList()) {
+        await refresh(s);
+      }
+    });
     if (!_ready.isCompleted) _ready.complete();
   }
 
@@ -269,9 +315,16 @@ class LibraryStore extends ChangeNotifier {
     _allCategories.clear();
     _byCategory.clear();
     _byId.clear();
+    _localEpisodes.clear();
     final providerOrder = <MediaKind, List<String>>{};
     for (final source in sources.where((s) => s.enabled)) {
       for (final original in _contentBySource[source.id] ?? const <MediaItem>[]) {
+        // Épisodes des dossiers locaux : rangés sous leur série (fiche de la série), pas dans les listes.
+        if (original.kind == MediaKind.episode) {
+          (_localEpisodes[original.seriesId ?? ''] ??= []).add(original);
+          _byId[original.id] = original;
+          continue;
+        }
         final edit = original.kind == MediaKind.live ? channelEdits[original.id] : null;
         final item = edit == null ? original : edit.apply(original);
         final prefs = _categoryPrefs[item.kind];
@@ -393,24 +446,44 @@ class LibraryStore extends ChangeNotifier {
   /// Modifie une source (nom, adresse, identifiant, mot de passe, guide TV). Le contenu est rechargé si l'accès a changé.
   /// [password] null : mot de passe inchangé. Ses favoris, récents et corrections de chaînes sont gardés (même identifiant).
   Future<void> updateSource(Source source,
-      {required String name, required String address, String? username, String? password, String? epgUrl, bool enabled = true}) async {
+      {required String name,
+      required String address,
+      String? username,
+      String? password,
+      String? epgUrl,
+      String? token,
+      bool enabled = true}) async {
     var newAddress = address.trim();
     if (source.kind == SourceKind.xtream) {
       final normalized = XtreamCredentials.normalizeServer(newAddress);
       if (normalized == null) throw XtreamException('Adresse du serveur invalide.');
       newAddress = normalized.toString();
+    } else if (source.kind.isMediaServer) {
+      newAddress = MediaServerClient.normalizeFor(source.kind, newAddress);
     }
+    final oldSession = ServerSession.decode(await _secrets.read('session.${source.id}'));
     final accessChanged = newAddress != source.address ||
         (username != null && username.trim() != (source.username ?? '')) ||
-        (password != null && password != (await this.password(source.id) ?? ''));
+        (password != null && password != (await this.password(source.id) ?? '')) ||
+        (token != null && token.trim().isNotEmpty && token.trim() != oldSession?.token);
     final guideChanged = (epgUrl?.trim() ?? '') != (source.epgUrl ?? '');
     source
       ..name = name.trim().isEmpty ? source.name : name.trim()
       ..address = newAddress
       ..enabled = enabled
       ..epgUrl = (epgUrl?.trim().isEmpty ?? true) ? null : epgUrl!.trim();
-    if (username != null) source.username = username.trim();
+    if (username != null) source.username = username.trim().isEmpty ? null : username.trim();
     if (password != null) await _secrets.write('password.${source.id}', password);
+    if (source.kind.isMediaServer && accessChanged) {
+      _servers.remove(source.id);
+      if (source.kind == SourceKind.plex) {
+        if (token != null && token.trim().isNotEmpty) await _secrets.write('session.${source.id}', ServerSession(token.trim()).encode());
+      } else {
+        // Nouvelle connexion avec les nouveaux identifiants (vérifiée tout de suite).
+        final session = await _signIn(source.kind, newAddress, source.username ?? '', password ?? await this.password(source.id) ?? '');
+        await _secrets.write('session.${source.id}', session.encode());
+      }
+    }
     await _saveSources();
     _rebuild();
     if (accessChanged) await refresh(source);
@@ -421,6 +494,8 @@ class LibraryStore extends ChangeNotifier {
     sources.removeWhere((s) => s.id == source.id);
     _contentBySource.remove(source.id);
     await _secrets.delete('password.${source.id}');
+    await _secrets.delete('session.${source.id}');
+    _servers.remove(source.id);
     final file = _cacheFile(source.id);
     if (await file.exists()) await file.delete();
     await _saveSources();
@@ -457,6 +532,34 @@ class LibraryStore extends ChangeNotifier {
         case SourceKind.m3uFile:
           final path = source.address;
           content = await Isolate.run(() => M3UParser.parse(File(path).readAsStringSync(), id));
+        case SourceKind.folder:
+          final roots = folderPaths(source);
+          final missing = roots.where((r) => !Directory(r).existsSync()).toList();
+          if (missing.length == roots.length) {
+            throw MediaServerException('Dossier introuvable (${missing.join(', ')}) : disque débranché ou partage réseau non connecté ?');
+          }
+          final (movies, series, videos) = (tr('Films'), tr('Séries'), tr('Vidéos'));
+          content = await Isolate.run(() => scanFolders(roots, id, moviesLabel: movies, seriesLabel: series, videosLabel: videos));
+          // Affiches et résumés déjà trouvés (TMDB) gardés d'un examen à l'autre.
+          final known = {for (final i in _contentBySource[id] ?? const <MediaItem>[]) i.id: i};
+          content = SourceContent([
+            for (final i in content.items)
+              if (known[i.id] case final k? when k.logo != null || k.info != null) i.copyWith(logo: k.logo, info: k.info) else i,
+          ]);
+        case SourceKind.jellyfin:
+        case SourceKind.emby:
+        case SourceKind.plex:
+          final client = await serverClient(source, forceSignIn: false);
+          if (client == null) throw MediaServerException('Connexion au serveur impossible.');
+          try {
+            content = await client.fetchLibrary();
+          } on MediaServerException catch (e) {
+            // Jeton expiré (Jellyfin / Emby) : nouvelle connexion avec le mot de passe.
+            if (!e.message.contains('Accès refusé') || source.kind == SourceKind.plex) rethrow;
+            final again = await serverClient(source, forceSignIn: true);
+            if (again == null) rethrow;
+            content = await again.fetchLibrary();
+          }
       }
       var items = content.items;
       // Une section qui revient vide (serveur qui hoquette) ne doit pas effacer celle déjà connue.
@@ -474,6 +577,7 @@ class LibraryStore extends ChangeNotifier {
         if (kept.isNotEmpty) items = [...items, ...kept];
       }
       _contentBySource[id] = items;
+      if (content.progress.isNotEmpty) onUserData?.call(content.progress);
       source.lastRefresh = DateTime.now();
       source.guideUrl = content.epgUrl;
       refreshed = true;
@@ -489,8 +593,166 @@ class LibraryStore extends ChangeNotifier {
       isBusy = false;
       _rebuild();
     }
-    if (refreshed) onSourceRefreshed?.call(source);
+    if (refreshed) {
+      if (source.kind.isIptv) onSourceRefreshed?.call(source);
+      onContentLoaded?.call(source);
+    }
   }
+
+  // MARK: Dossiers locaux et serveurs multimédias
+
+  /// Dossiers d'une source « Dossiers » (un par ligne).
+  static List<String> folderPaths(Source source) =>
+      source.address.split('\n').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+
+  Future<Source> addFolders({required String name, required List<String> paths}) async {
+    final clean = paths.map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+    if (clean.isEmpty) throw MediaServerException('Choisissez au moins un dossier.');
+    final source = Source(
+      id: '${DateTime.now().microsecondsSinceEpoch}',
+      name: name.trim().isEmpty ? clean.first.split(RegExp(r'[\\/]')).where((p) => p.isNotEmpty).last : name.trim(),
+      kind: SourceKind.folder,
+      address: clean.join('\n'),
+    );
+    sources.add(source);
+    await _saveSources();
+    notifyListeners();
+    await refresh(source);
+    return source;
+  }
+
+  /// Ajoute un serveur Jellyfin, Emby ou Plex. Jellyfin / Emby : identifiant et mot de passe (ou clé d'API) ;
+  /// Plex : jeton (connexion plex.tv ou jeton saisi).
+  Future<Source> addMediaServer({
+    required SourceKind kind,
+    required String name,
+    required String address,
+    String username = '',
+    String password = '',
+    String? token,
+  }) async {
+    final server = MediaServerClient.normalizeFor(kind, address);
+    final source = Source(
+      id: '${DateTime.now().microsecondsSinceEpoch}',
+      name: name.trim().isEmpty ? (Uri.tryParse(server)?.host ?? kind.label) : name.trim(),
+      kind: kind,
+      address: server,
+      username: username.trim().isEmpty ? null : username.trim(),
+    );
+    // Vérification avant l'ajout : une erreur d'identifiant est signalée tout de suite.
+    final ServerSession session;
+    if (kind == SourceKind.plex) {
+      final t = (token ?? password).trim();
+      if (t.isEmpty) throw MediaServerException('Connectez-vous à Plex ou saisissez le jeton du serveur.');
+      session = ServerSession(t);
+      await PlexClient(server, source.id, token: t).identity();
+    } else {
+      session = await _signIn(kind, server, username, password);
+      await _secrets.write('password.${source.id}', password);
+    }
+    await _secrets.write('session.${source.id}', session.encode());
+    sources.add(source);
+    await _saveSources();
+    notifyListeners();
+    await refresh(source);
+    return source;
+  }
+
+  static Future<ServerSession> _signIn(SourceKind kind, String server, String username, String password) async {
+    try {
+      return await JellyfinClient.signIn(server, username, password);
+    } on MediaServerException {
+      // Une clé d'API (Tableau de bord > Clés API) peut remplacer le mot de passe.
+      if (password.length >= 24 && !password.contains(' ')) {
+        try {
+          return await JellyfinClient.withApiKey(server, password, username);
+        } catch (_) {}
+      }
+      rethrow;
+    }
+  }
+
+  /// Client du serveur d'une source (session gardée dans le coffre du système).
+  Future<MediaServerClient?> serverClient(Source source, {bool forceSignIn = false}) async {
+    if (!source.kind.isMediaServer) return null;
+    final cached = _servers[source.id];
+    if (!forceSignIn && cached != null) return cached..label = source.name;
+    var session = ServerSession.decode(await _secrets.read('session.${source.id}'));
+    if (source.kind != SourceKind.plex && (session == null || forceSignIn)) {
+      final password = await this.password(source.id) ?? '';
+      session = await _signIn(source.kind, source.address, source.username ?? '', password);
+      await _secrets.write('session.${source.id}', session.encode());
+    }
+    if (session == null) return null;
+    final client = source.kind == SourceKind.plex
+        ? PlexClient(source.address, source.id, token: session.token)
+        : JellyfinClient(source.address, source.id, session: session, emby: source.kind == SourceKind.emby);
+    client.label = source.name;
+    _servers[source.id] = client;
+    return client;
+  }
+
+  Source? sourceOf(MediaItem item) => sources.where((s) => s.id == item.sourceId).firstOrNull;
+
+  /// Saisons d'une série venue d'un dossier local ou d'un serveur (null : série IPTV, chargée par la fiche).
+  Future<List<SeriesSeason>?> seasonsFor(MediaItem series) async {
+    final source = sourceOf(series);
+    if (source == null) return null;
+    if (source.kind == SourceKind.folder) {
+      final episodes = _localEpisodes[series.seriesId ?? series.id] ?? const <MediaItem>[];
+      final bySeason = <int, List<MediaItem>>{};
+      for (final e in episodes) {
+        (bySeason[e.season ?? 1] ??= []).add(e);
+      }
+      return [
+        for (final n in (bySeason.keys.toList()..sort()))
+          SeriesSeason(n, bySeason[n]!..sort((a, b) => (a.number ?? 0).compareTo(b.number ?? 0))),
+      ];
+    }
+    final client = await serverClient(source);
+    if (client == null) return null;
+    final (seasons, progress) = switch (client) {
+      JellyfinClient c => await c.episodes(series),
+      PlexClient c => await c.episodes(series),
+      _ => (<SeriesSeason>[], <String, (double, double)>{}),
+    };
+    if (progress.isNotEmpty) onUserData?.call(progress);
+    for (final s in seasons) {
+      for (final e in s.episodes) {
+        _extras[e.id] = e;
+      }
+    }
+    return seasons;
+  }
+
+  /// Fiche fournie par un serveur multimédia (résumé, distribution, image de fond…).
+  Future<MediaDetails?> serverDetails(MediaItem item) async {
+    final source = sourceOf(item);
+    if (source == null || !source.kind.isMediaServer) return null;
+    final client = await serverClient(source);
+    return client?.details(item);
+  }
+
+  /// Fichier local d'une source « Dossiers » : ses sous-titres voisins sont chargés à la lecture.
+  bool isLocalFile(MediaItem item) => sourceOf(item)?.kind == SourceKind.folder;
+
+  /// Affiches et résumés trouvés sur TMDB pour les fichiers locaux (gardés dans le cache de la source).
+  Future<void> applyEnrichment(String sourceId, Map<String, (String?, String?)> found) async {
+    final list = _contentBySource[sourceId];
+    if (list == null || found.isEmpty) return;
+    _contentBySource[sourceId] = [
+      for (final i in list)
+        if (found[i.id] case (final logo, final info)) i.copyWith(logo: logo ?? i.logo, info: info ?? i.info) else i,
+    ];
+    final path = _cacheFile(sourceId).path;
+    final encoded = [for (final i in _contentBySource[sourceId]!) i.toJson()];
+    await Isolate.run(() => File(path).writeAsStringSync(jsonEncode(encoded)));
+    _rebuild();
+  }
+
+  /// Contenus d'une source (fiches automatiques).
+  List<MediaItem> contentOf(String sourceId) => _contentBySource[sourceId] ?? const [];
+
 
   // MARK: Exportation / importation (format commun avec la version Mac)
 
@@ -510,10 +772,12 @@ class LibraryStore extends ChangeNotifier {
       index[s.id] = exported.length;
       exported.add({
         'name': s.name,
-        'kind': s.kind == SourceKind.xtream ? 'xtream' : 'm3uUrl',
+        'kind': s.kind.name,
         'address': s.address,
         'username': ?s.username,
-        if (includePasswords && s.kind == SourceKind.xtream) 'password': ?await password(s.id),
+        if (includePasswords && (s.kind == SourceKind.xtream || s.kind == SourceKind.jellyfin || s.kind == SourceKind.emby))
+          'password': ?await password(s.id),
+        if (includePasswords && s.kind == SourceKind.plex) 'token': ?ServerSession.decode(await _secrets.read('session.${s.id}'))?.token,
         'epgUrl': ?s.epgUrl,
         'enabled': s.enabled,
       });
@@ -550,16 +814,38 @@ class LibraryStore extends ChangeNotifier {
     final toRefresh = <Source>[];
     for (var i = 0; i < list.length; i++) {
       final e = list[i];
-      final kind = e['kind'] == 'xtream' ? SourceKind.xtream : e['kind'] == 'm3uUrl' ? SourceKind.m3uUrl : null;
+      final kind = SourceKind.values.where((k) => k.name == e['kind'] && k != SourceKind.m3uFile).firstOrNull;
       final address = e['address'] as String?;
       if (kind == null || address == null) continue;
-      final normalized = kind == SourceKind.xtream ? XtreamCredentials.normalizeServer(address)?.toString() ?? address : address;
+      final normalized = kind == SourceKind.xtream
+          ? XtreamCredentials.normalizeServer(address)?.toString() ?? address
+          : kind.isMediaServer
+              ? MediaServerClient.normalizeFor(kind, address)
+              : address;
       final existing = sources
           .where((s) => s.kind == kind && s.address == normalized && (kind != SourceKind.xtream || s.username == e['username']))
           .firstOrNull;
       if (existing != null) {
         newIds[i] = existing.id;
         skipped++;
+        continue;
+      }
+      if (!kind.isIptv) {
+        // Dossiers et serveurs : ajoutés tels quels, la connexion se fait au chargement.
+        final source = Source(
+          id: '${DateTime.now().microsecondsSinceEpoch}$i',
+          name: e['name'] as String? ?? kind.label,
+          kind: kind,
+          address: normalized,
+          username: e['username'] as String?,
+        );
+        if (e['password'] case final String p) await _secrets.write('password.${source.id}', p);
+        if (e['token'] case final String t) await _secrets.write('session.${source.id}', ServerSession(t).encode());
+        source.enabled = e['enabled'] as bool? ?? true;
+        sources.add(source);
+        newIds[i] = source.id;
+        toRefresh.add(source);
+        added++;
         continue;
       }
       final source = kind == SourceKind.xtream

@@ -38,6 +38,8 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
     public var info: String?
     /// Date d'ajout au catalogue du fournisseur (Xtream), si connue.
     public var added: Date?
+    /// Saison d'un épisode (dossiers locaux, Jellyfin, Emby, Plex).
+    public var season: Int?
 
     public init(id: String, sourceID: UUID, kind: MediaKind, name: String, group: String,
                 logoURL: URL? = nil, streamURL: URL? = nil, epgID: String? = nil,
@@ -71,14 +73,49 @@ public enum SourceKind: Codable, Hashable, Sendable {
     case m3uFile(bookmark: Data, displayName: String)
     /// Connexion Xtream Codes (serveur + identifiant ; le mot de passe est dans le trousseau).
     case xtream(server: URL, username: String)
+    /// Dossiers de vidéos : disque, clé USB, partage d'un NAS (signets de sécurité et chemins affichés).
+    case folders(bookmarks: [Data], paths: [String])
+    /// Serveur Jellyfin, Emby ou Plex (mot de passe, jeton et session dans le trousseau).
+    case mediaServer(type: MediaServerType, server: URL, username: String)
 
     public var typeLabel: String {
         switch self {
         case .m3uURL: return "Playlist M3U (URL)"
         case .m3uFile: return "Playlist M3U (fichier)"
         case .xtream: return "Xtream Codes"
+        case .folders: return "Dossiers"
+        case .mediaServer(let type, _, _): return type.label
         }
     }
+
+    /// Abonnement IPTV (chaînes, guide TV) plutôt que bibliothèque de fichiers.
+    public var isIPTV: Bool {
+        switch self {
+        case .m3uURL, .m3uFile, .xtream: return true
+        case .folders, .mediaServer: return false
+        }
+    }
+
+    public var serverType: MediaServerType? {
+        if case .mediaServer(let type, _, _) = self { return type }
+        return nil
+    }
+}
+
+/// Serveur multimédia de la maison.
+public enum MediaServerType: String, Codable, CaseIterable, Sendable {
+    case jellyfin, emby, plex
+
+    public var label: String {
+        switch self {
+        case .jellyfin: return "Jellyfin"
+        case .emby: return "Emby"
+        case .plex: return "Plex"
+        }
+    }
+
+    /// Port habituel, ajouté quand l'adresse saisie n'en a pas.
+    public var defaultPort: Int { self == .plex ? 32400 : 8096 }
 }
 
 /// Source de contenus configurée par l'utilisateur.
@@ -108,12 +145,26 @@ public struct SourceContent: Codable, Sendable {
     /// URL de guide TV annoncée par la playlist ou le serveur.
     public var epgURL: URL?
     public var loadedAt: Date
+    /// Positions de lecture connues du serveur (Jellyfin, Emby, Plex) : identifiant → (position, durée) en secondes.
+    public var progress: [String: ServerProgress]?
 
-    public init(items: [MediaItem], epgURL: URL?, loadedAt: Date = Date()) {
+    public init(items: [MediaItem], epgURL: URL?, loadedAt: Date = Date(), progress: [String: ServerProgress]? = nil) {
         self.items = items
         self.epgURL = epgURL
         self.loadedAt = loadedAt
+        self.progress = progress
     }
+}
+
+/// Position de lecture d'un contenu chez un serveur multimédia.
+public struct ServerProgress: Codable, Hashable, Sendable {
+    public var position: Double
+    public var duration: Double
+    public init(position: Double, duration: Double) {
+        self.position = position
+        self.duration = duration
+    }
+    public var isPlayed: Bool { duration > 0 && position >= duration }
 }
 
 /// Saison d'une série Xtream.

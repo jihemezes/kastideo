@@ -13,6 +13,7 @@ import 'core/alerts.dart';
 import 'core/downloads.dart';
 import 'core/guide.dart';
 import 'core/multiview.dart';
+import 'core/media_sync.dart';
 import 'core/notify.dart';
 import 'core/system_integration.dart';
 import 'core/updater.dart';
@@ -118,6 +119,9 @@ class AppShutdown {
 
 late AppShutdown appShutdown;
 
+/// Synchronisation de lecture avec les serveurs (menu « Marquer comme vu »).
+late MediaSync mediaSync;
+
 /// Fermeture de la fenêtre : la lecture est coupée et mpv libéré avant de quitter, puis le processus s'arrête.
 class _CloseHandler with WindowListener {
   bool _closing = false;
@@ -177,6 +181,12 @@ Future<void> main(List<String> args) async {
   final alerts = AlertCenter(settings, library, guide);
   final multiview = MultiViewController(settings, playback);
   final updates = UpdateService();
+  // Serveurs Jellyfin, Emby, Plex : positions de lecture partagées, fiches TMDB des fichiers locaux.
+  final sync = MediaSync(library, watch);
+  library.onUserData = sync.receive;
+  library.onContentLoaded = info.enrichLocal;
+  playback.onProgress = sync.report;
+  mediaSync = sync;
   appShutdown = AppShutdown(playback, watch, recordings, multiview);
   await windowManager.setPreventClose(true);
   windowManager.addListener(_CloseHandler());

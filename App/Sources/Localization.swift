@@ -20,6 +20,8 @@ extension SourceKind {
         case .m3uURL: return String(localized: "Playlist M3U (URL)")
         case .m3uFile: return String(localized: "Playlist M3U (fichier)")
         case .xtream: return String(localized: "Xtream Codes")
+        case .folders: return String(localized: "Dossiers")
+        case .mediaServer(let type, _, _): return type.label
         }
     }
 }

@@ -1,0 +1,2 @@
+/* Textes de l'Info.plist en anglais. */
+"NSLocalNetworkUsageDescription" = "Kastideo looks for Jellyfin, Emby and Plex servers on your network and plays their videos.";

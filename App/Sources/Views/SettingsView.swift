@@ -120,7 +120,16 @@ struct SourceSettingsRow: View {
             let live = items.filter { $0.kind == .live }.count
             let movies = items.filter { $0.kind == .movie }.count
             let series = items.filter { $0.kind == .series }.count
-            parts.append(String(localized: "\(live) chaînes · \(movies) films · \(series) séries"))
+            if source.kind.isIPTV {
+                parts.append(String(localized: "\(live) chaînes · \(movies) films · \(series) séries"))
+            } else {
+                parts.append(String(localized: "\(movies) films et vidéos · \(series) séries"))
+            }
+        }
+        switch source.kind {
+        case .folders(_, let paths): parts.append(paths.joined(separator: ", "))
+        case .mediaServer(_, let server, _): parts.append(server.host ?? server.absoluteString)
+        default: break
         }
         if let count = store.epgCounts[source.id], count > 0 {
             parts.append(String(localized: "\(count) programmes"))

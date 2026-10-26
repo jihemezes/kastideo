@@ -1,13 +1,13 @@
 # Aide de Kastideo
 
-Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U).
+Kastideo est un lecteur multimédia qui réunit vos chaînes en direct, films et séries IPTV dans une interface simple et rapide. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos sur un disque, une clé USB ou un NAS, serveur Jellyfin, Emby ou Plex).
 
-> Version 1.2.2 — case « Tout sélectionner / désélectionner » des catégories ; version 1.2.1 — pays et langues des rangées Cinéma et du bandeau ; version 1.2.0 — sauvegarde et transfert de la configuration (Mac, Windows, Linux) ; version 1.1.7 — image seule (sans le son) pour les chaînes au son défectueux ; version 1.1.6 — chaînes refusées expliquées, flux à l'horloge incohérente mieux gérés ; version 1.1.5 — son réparé sur les chaînes à l'horloge décalée ; version 1.1.4 — relais de flux corrigé (autorisation réseau locale) ; version 1.1.3 — relais de flux pour le direct (une seule connexion au fournisseur) ; version 1.1.2 — correctif de la 1.1.1 ; version 1.1.1 — réparation automatique du son absent sur certaines chaînes ; version 1.1.0 — différé : timeline, vitesse de lecture, Rattraper, Retour au direct, durée maximale ; version 1.0.3 — direct : changement de chaîne fiabilisé (attente de libération de la connexion, nouveaux essais), flux fermé en quittant ; version 1.0.1 — thèmes : chaînes reconnues par leur nom proposées même sans guide TV ; première version stable ; correction des chaînes (nom, numéro, logo, guide TV) ; nouveaux thèmes (Auto-Moto, Cuisine & Maison, Nature, Régional, International, Religion, Radio, Adulte), disciplines du sport ; Direct par thème (en ce moment, ce soir, chaînes), une version par chaîne selon la connexion, alertes de programme ; recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
+> Version 1.3.0 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté ; version 1.2.2 — case « Tout sélectionner / désélectionner » des catégories ; version 1.2.1 — pays et langues des rangées Cinéma et du bandeau ; version 1.2.0 — sauvegarde et transfert de la configuration (Mac, Windows, Linux) ; version 1.1.7 — image seule (sans le son) pour les chaînes au son défectueux ; version 1.1.6 — chaînes refusées expliquées, flux à l'horloge incohérente mieux gérés ; version 1.1.5 — son réparé sur les chaînes à l'horloge décalée ; version 1.1.4 — relais de flux corrigé (autorisation réseau locale) ; version 1.1.3 — relais de flux pour le direct (une seule connexion au fournisseur) ; version 1.1.2 — correctif de la 1.1.1 ; version 1.1.1 — réparation automatique du son absent sur certaines chaînes ; version 1.1.0 — différé : timeline, vitesse de lecture, Rattraper, Retour au direct, durée maximale ; version 1.0.3 — direct : changement de chaîne fiabilisé (attente de libération de la connexion, nouveaux essais), flux fermé en quittant ; version 1.0.1 — thèmes : chaînes reconnues par leur nom proposées même sans guide TV ; première version stable ; correction des chaînes (nom, numéro, logo, guide TV) ; nouveaux thèmes (Auto-Moto, Cuisine & Maison, Nature, Régional, International, Religion, Radio, Adulte), disciplines du sport ; Direct par thème (en ce moment, ce soir, chaînes), une version par chaîne selon la connexion, alertes de programme ; recherche de mise à jour au démarrage, proposée hors visionnage ; numéro de version sur l'accueil ; MultiVue (jusqu'à 4 chaînes, selon votre abonnement) ; lecteur repensé : barre rétractable, mini-timeline, panneau d'informations (pistes audio, sous-titres), santé du flux ; passage rapide du Direct (Classique) aux Films (Cinéma) ; accueil redessiné, cadrage du bandeau ; bandeau « à la une » corrigé ; catégories réordonnables, masquables et renommables ; bandeau « à la une » en carrousel (tendances TMDB, derniers ajouts, catégorie au choix, programmes en cours) ; passage instantané du direct aux autres sections ; blocage corrigé en quittant le direct, son des enregistrements en AAC ; démarrage de l'enregistrement du direct fiabilisé ; guide TV de secours xmltvfr.fr ; procédure pour la clé TMDB dans l'aide ; fiche film/série remise en page ; écran noir corrigé au retour à la lecture et en plein écran ; fiches des films et séries (Xtream + TMDB) en interface Cinéma, enregistrement visible pendant son écriture, conversion MP4 fiabilisée ; plein écran corrigé, enregistrement du direct fiabilisé ; écran d'accueil, suppression dans les Récents, application disponible en français et en anglais ; Guide TV en grille, reprise de lecture, indicateur de téléchargement ; nouvelle icône (monogramme K) ; interface TV pour le direct (panneau de chaînes, bandeau d'information, zapping par numéro), en plus des interfaces Classique et Cinéma.
 
 ## Premiers pas
 
 1. Au premier lancement, cliquez sur **Ajouter une source**.
-2. Choisissez le type de source : **Xtream Codes**, **Playlist (URL)** ou **Playlist (fichier)**.
+2. Choisissez le type de source : **Xtream Codes**, **Playlist (URL)**, **Playlist (fichier)**, **Dossiers (disque, USB, NAS)**, **Jellyfin**, **Emby** ou **Plex**.
 3. Renseignez les informations demandées puis cliquez sur **Ajouter**.
 4. Kastideo charge la liste des chaînes, films et séries, puis le guide TV.
 
@@ -29,6 +29,46 @@ C'est le format le plus courant chez les fournisseurs IPTV. Il faut trois inform
 - **Par fichier** : choisissez un fichier `.m3u` ou `.m3u8` sur votre Mac. Kastideo garde l'autorisation d'y accéder pour pouvoir l'actualiser.
 - Les catégories proviennent de l'attribut `group-title`, les logos de `tvg-logo` et l'association au guide TV de `tvg-id`.
 - Kastideo classe automatiquement les entrées en Direct, Films ou Séries d'après leur adresse.
+
+### Dossiers (disque, clé USB, NAS)
+
+Pour regarder les vidéos rangées sur le Mac, un disque externe, une clé USB ou un NAS :
+
+1. Réglages > Sources > **Ajouter** > type **Dossiers (disque, USB, NAS)**.
+2. **Ajouter un dossier…** : choisissez un ou plusieurs dossiers (par exemple « Films » et « Séries »). Pour un **NAS**, montez d'abord le partage dans le Finder (**Aller > Se connecter au serveur…**, par exemple `smb://nas.local/Vidéos`), puis choisissez-le dans la liste des volumes.
+3. **Ajouter** : Kastideo examine les dossiers et leurs sous-dossiers.
+
+Les vidéos sont reconnues d'après leur nom :
+
+- **Films** : « Inception (2010).mkv », « The.Matrix.1999.1080p.BluRay.mkv », ou un dossier « Le Fabuleux Destin (2001) » qui contient le film. Ils apparaissent dans **Films**, rubrique « Films · nom du dossier ».
+- **Séries** : « Breaking.Bad.S01E02.mkv », « Friends 1x05.mp4 », ou un dossier « Kaamelott/Saison 3/12 - Le Tourment.avi ». Les épisodes sont regroupés en une série, avec ses saisons, dans **Séries**.
+- **Autres vidéos** (vacances, caméra…) : rubrique **Vidéos · nom du dossier**, dans Films.
+
+Les dossiers sont examinés à chaque lancement puis toutes les 20 minutes : une vidéo ajoutée apparaît toute seule. Si le disque est débranché ou le partage déconnecté, un message l'indique sous la source et la liste précédente est gardée. Les **sous-titres** placés à côté d'une vidéo (« Inception (2010).srt », « Inception (2010).fr.srt ») sont chargés à la lecture.
+
+Avec une **clé TMDB** (Réglages > Général), les films et séries reçoivent automatiquement **affiche et résumé**. Si le nom du fichier trompe la recherche, clic droit sur l'affiche (ou lien en bas de la fiche) > **Corriger la fiche…** : cherchez le bon titre et choisissez-le ; le choix est retenu.
+
+### Jellyfin et Emby
+
+1. Réglages > Sources > **Ajouter** > **Jellyfin** ou **Emby**.
+2. **Rechercher sur le réseau** trouve les serveurs de la maison ; cliquez sur le vôtre pour remplir l'adresse. Sinon saisissez-la (par exemple `192.168.1.10` : le port 8096 est ajouté).
+3. Votre **identifiant** et votre **mot de passe** Jellyfin / Emby (une **clé d'API** du tableau de bord peut remplacer le mot de passe). **Tester la connexion** vérifie l'adresse.
+4. **Ajouter** : l'identifiant est vérifié, puis les bibliothèques de films, séries et vidéos apparaissent dans **Films** et **Séries** (rubriques « nom de la bibliothèque · nom du serveur »), avec les affiches et les fiches du serveur.
+
+La lecture est **directe**, sans conversion par le serveur. Le mot de passe et la session sont rangés dans le trousseau.
+
+### Plex
+
+1. Réglages > Sources > **Ajouter** > **Plex**.
+2. **Se connecter avec Plex** ouvre plex.tv dans le navigateur : connectez-vous et autorisez Kastideo. De retour dans Kastideo, choisissez le serveur de votre compte.
+3. Vous pouvez aussi saisir l'adresse du serveur (port 32400) et son **jeton** (X-Plex-Token).
+4. **Ajouter** : les bibliothèques de films et de séries apparaissent dans **Films** et **Séries**.
+
+### Reprise et « vu » partagés avec les serveurs
+
+Avec Jellyfin, Emby et Plex, la position de lecture est transmise au serveur pendant la lecture : un film commencé dans Kastideo se reprend sur la télévision, et inversement. Un film vu jusqu'au bout est marqué **vu** sur le serveur. Clic droit sur un film ou un épisode > **Marquer comme vu / non vu** (aussi pour les fichiers des dossiers). Une pastille **Vu** s'affiche sur les affiches, une coche dans la liste des épisodes.
+
+> Recherche sur le réseau : au premier usage, macOS demande l'autorisation d'accéder au **réseau local** ; acceptez-la (Réglages Système > Confidentialité et sécurité > Réseau local, sinon).
 
 ### Guide TV (XMLTV)
 
@@ -350,7 +390,7 @@ Réglages > Général > **Sauvegarde et transfert** :
 - **Exporter la configuration…** enregistre un fichier `Kastideo-configuration.json` : sources (Xtream et playlists M3U par adresse), favoris, récents, catégories personnalisées (ordre, masquage, noms, mots-clés), interfaces choisies et clé TMDB. Cochez **Inclure les mots de passe** pour ne rien avoir à ressaisir ; gardez alors le fichier en lieu sûr.
 - **Importer une configuration…** ajoute le contenu d'un fichier : sur un nouveau Mac, ou depuis Kastideo pour Windows et Linux (même format). Les sources déjà présentes sont reconnues et rien n'est supprimé.
 
-Les playlists M3U ajoutées comme fichiers locaux ne sont pas exportées (le fichier n'existe pas sur l'autre ordinateur).
+Les serveurs Jellyfin, Emby et Plex sont exportés (avec leur mot de passe ou leur jeton si vous cochez **Inclure les mots de passe**). Les playlists M3U ajoutées comme fichiers locaux et les dossiers ne sont pas importés sur un autre Mac (les fichiers n'y existent pas ou doivent être choisis à nouveau).
 
 ## Dépannage
 

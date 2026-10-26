@@ -6,13 +6,44 @@ enum LibraryError: LocalizedError {
     case missingPassword
     case emptyPlaylist
     case notXtream
+    case folderMissing(String)
+    case noFolder
 
     var errorDescription: String? {
         switch self {
         case .missingPassword: return String(localized: "Mot de passe introuvable dans le trousseau. Modifiez la source pour le saisir à nouveau.")
         case .emptyPlaylist: return String(localized: "La playlist ne contient aucun flux lisible.")
         case .notXtream: return String(localized: "Cette source ne fournit pas de liste d'épisodes.")
+        case .folderMissing(let paths):
+            return String(localized: "Dossier introuvable (\(paths)) : disque débranché ou partage réseau non connecté ?")
+        case .noFolder: return String(localized: "Choisissez au moins un dossier.")
         }
+    }
+}
+
+/// Accès aux dossiers choisis (bac à sable) : ouvert une fois et gardé pendant toute la session,
+/// pour que la lecture et les sous-titres placés à côté des vidéos restent lisibles.
+enum FolderAccess {
+    private static let lock = NSLock()
+    private static var opened: [String: URL] = [:]
+
+    static func resolve(_ bookmarks: [Data]) -> [URL] {
+        bookmarks.compactMap { data in
+            var stale = false
+            guard let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil,
+                                     bookmarkDataIsStale: &stale) else { return nil }
+            lock.lock()
+            defer { lock.unlock() }
+            if opened[url.path] == nil, url.startAccessingSecurityScopedResource() { opened[url.path] = url }
+            return url
+        }
+    }
+
+    /// Signet d'un dossier choisi dans le panneau d'ouverture.
+    static func bookmark(for url: URL) throws -> Data {
+        let granted = url.startAccessingSecurityScopedResource()
+        defer { if granted { url.stopAccessingSecurityScopedResource() } }
+        return try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 }
 
@@ -60,6 +91,14 @@ final class LibraryStore {
     @ObservationIgnored private var epgGeneration = 0
     @ObservationIgnored private var lastEPGAttempt: [UUID: Date] = [:]
     @ObservationIgnored private var epgTicker: Task<Void, Never>?
+    /// Clients des serveurs Jellyfin, Emby et Plex (session ouverte).
+    @ObservationIgnored private var serverClients: [UUID: any MediaServerClient] = [:]
+    @ObservationIgnored private var rescanTicker: Task<Void, Never>?
+    @ObservationIgnored private var lastReport: [String: Date] = [:]
+    /// Positions de lecture et contenus vus reçus d'un serveur (transmis au suivi de lecture).
+    @ObservationIgnored var onServerProgress: (([String: ServerProgress]) -> Void)?
+    /// Source chargée (dossiers : affiches et résumés TMDB à compléter).
+    @ObservationIgnored var onContentLoaded: ((Source) -> Void)?
 
     private let defaults = UserDefaults.standard
     private enum Keys {
@@ -196,12 +235,25 @@ final class LibraryStore {
 
         let staleLimit = Date().addingTimeInterval(-6 * 3600)
         for source in sources where source.isEnabled {
-            if contents[source.id] == nil || (autoRefresh && (source.lastRefresh ?? .distantPast) < staleLimit) {
+            switch source.kind {
+            case .folders:
+                // Dossiers : examinés à chaque lancement (fichiers ajoutés ou retirés entre-temps).
                 refresh(source)
-            } else if epgNeedsRefresh(source.id) {
-                Task { await refreshEPG(for: source.id) }
+            case .mediaServer:
+                if contents[source.id] == nil || (source.lastRefresh ?? .distantPast) < Date().addingTimeInterval(-3600) {
+                    refresh(source)
+                } else {
+                    onContentLoaded?(source)
+                }
+            default:
+                if contents[source.id] == nil || (autoRefresh && (source.lastRefresh ?? .distantPast) < staleLimit) {
+                    refresh(source)
+                } else if epgNeedsRefresh(source.id) {
+                    Task { await refreshEPG(for: source.id) }
+                }
             }
         }
+        startRescanTicker()
         Task { await refreshFallbackEPG(force: false) }
     }
 
@@ -217,6 +269,7 @@ final class LibraryStore {
     func updateSource(_ source: Source, password: String?) {
         if let password, !password.isEmpty { Keychain.set(password, account: source.id.uuidString) }
         guard let index = sources.firstIndex(where: { $0.id == source.id }) else { return }
+        serverClients[source.id] = nil
         sources[index] = source
         saveSources()
         refresh(source)
@@ -229,6 +282,8 @@ final class LibraryStore {
         errors[id] = nil
         epgErrors[id] = nil
         Keychain.delete(account: id.uuidString)
+        Keychain.delete(account: "session.\(id.uuidString)")
+        serverClients[id] = nil
         Storage.delete(name: "content-\(id.uuidString)")
         Storage.delete(name: "epg-\(id.uuidString)")
         saveSources()
@@ -267,8 +322,10 @@ final class LibraryStore {
                 }
                 rebuildIndex()
                 loading.remove(source.id)
+                if let progress = content.progress, !progress.isEmpty { onServerProgress?(progress) }
                 let id = source.id
                 Task.detached(priority: .utility) { Storage.save(content, name: "content-\(id.uuidString)") }
+                if !source.kind.isIPTV { onContentLoaded?(source) }
                 await refreshEPG(for: source.id)
             } catch {
                 errors[source.id] = Self.describe(error)
@@ -396,6 +453,22 @@ final class LibraryStore {
     }
 
     func seasons(for series: MediaItem) async throws -> [SeriesSeason] {
+        guard let found = self.source(id: series.sourceID) else { throw LibraryError.notXtream }
+        switch found.kind {
+        case .folders:
+            // Épisodes trouvés dans les dossiers, rangés par saison.
+            let episodes = (contents[found.id]?.items ?? []).filter { $0.kind == .episode && $0.seriesID == series.seriesID }
+            let bySeason = Dictionary(grouping: episodes) { $0.season ?? 1 }
+            return bySeason.keys.sorted().map { number in
+                SeriesSeason(number: number, episodes: (bySeason[number] ?? []).sorted { ($0.number ?? 0, $0.name) < ($1.number ?? 0, $1.name) })
+            }
+        case .mediaServer:
+            let result = try await withServer(found) { try await $0.episodes(of: series) }
+            onServerProgress?(result.progress)
+            return result.seasons
+        default:
+            break
+        }
         guard let source = self.source(id: series.sourceID), case .xtream(let server, let username) = source.kind else {
             throw LibraryError.notXtream
         }
@@ -714,7 +787,42 @@ final class LibraryStore {
             let client = XtreamClient(credentials: XtreamCredentials(server: server, username: username, password: password),
                                       sourceID: source.id)
             return try await client.fetchLibrary()
+        case .folders(let bookmarks, let paths):
+            guard !bookmarks.isEmpty else { throw LibraryError.noFolder }
+            let roots = FolderAccess.resolve(bookmarks).filter { FileManager.default.fileExists(atPath: $0.path) }
+            guard !roots.isEmpty else { throw LibraryError.folderMissing(paths.joined(separator: ", ")) }
+            let labels = FolderScanner.Labels(movies: String(localized: "Films"), series: String(localized: "Séries"),
+                                              videos: String(localized: "Vidéos"))
+            return FolderScanner.scan(roots: roots, sourceID: source.id, labels: labels)
+        case .mediaServer(let type, _, _):
+            let client = try await makeServerClient(source, forceSignIn: false)
+            do {
+                return try await client.fetchLibrary()
+            } catch let error as MediaServerError where error.isAccessDenied && type != .plex {
+                // Session expirée (Jellyfin / Emby) : nouvelle connexion avec le mot de passe.
+                return try await makeServerClient(source, forceSignIn: true).fetchLibrary()
+            }
         }
+    }
+
+    /// Ouvre (ou rouvre) la session d'un serveur multimédia. Jellyfin / Emby : identifiant et mot de passe (ou clé d'API) ;
+    /// Plex : jeton enregistré.
+    nonisolated static func makeServerClient(_ source: Source, forceSignIn: Bool) async throws -> any MediaServerClient {
+        guard case .mediaServer(let type, let server, let username) = source.kind else { throw LibraryError.notXtream }
+        let account = "session.\(source.id.uuidString)"
+        var session = ServerSession.decode(Keychain.get(account: account))
+        if type == .plex {
+            guard let session else { throw MediaServerError.missingToken }
+            return PlexClient(server: server, sourceID: source.id, token: session.token, label: source.name)
+        }
+        if session == nil || forceSignIn {
+            let password = Keychain.get(account: source.id.uuidString) ?? ""
+            let opened = try await JellyfinClient.signIn(server: server, username: username, password: password)
+            Keychain.set(opened.encoded(), account: account)
+            session = opened
+        }
+        guard let session else { throw MediaServerError.unreadable }
+        return JellyfinClient(server: server, sourceID: source.id, session: session, emby: type == .emby, label: source.name)
     }
 
     nonisolated static func parseM3U(_ data: Data, sourceID: UUID) throws -> SourceContent {
@@ -861,6 +969,145 @@ struct GuideChannelChoice: Identifiable, Hashable {
     let source: String
 }
 
+// MARK: - Dossiers de vidéos et serveurs multimédias
+
+extension LibraryStore {
+    /// Vrai pour un fichier d'un dossier local (disque, clé USB, NAS).
+    func isLocalFile(_ item: MediaItem) -> Bool {
+        if case .folders = source(id: item.sourceID)?.kind { return true }
+        return false
+    }
+
+    /// Vrai pour un contenu d'un serveur Jellyfin, Emby ou Plex.
+    func isServerItem(_ item: MediaItem) -> Bool {
+        source(id: item.sourceID)?.kind.serverType != nil
+    }
+
+    /// Client du serveur d'une source (session gardée en mémoire).
+    func serverClient(for source: Source, forceSignIn: Bool = false) async throws -> any MediaServerClient {
+        if !forceSignIn, let client = serverClients[source.id] { return client }
+        let client = try await Self.makeServerClient(source, forceSignIn: forceSignIn)
+        serverClients[source.id] = client
+        return client
+    }
+
+    /// Exécute une requête sur le serveur ; une session expirée (Jellyfin / Emby) est rouverte une fois.
+    func withServer<T>(_ source: Source, _ operation: (any MediaServerClient) async throws -> T) async throws -> T {
+        do {
+            return try await operation(try await serverClient(for: source))
+        } catch let error as MediaServerError where error.isAccessDenied && source.kind.serverType != .plex {
+            return try await operation(try await serverClient(for: source, forceSignIn: true))
+        }
+    }
+
+    /// Ajoute un serveur Jellyfin / Emby (identifiant et mot de passe vérifiés) ou Plex (jeton vérifié).
+    func addMediaServer(_ source: Source, password: String, token: String?) async throws {
+        try await openServerSession(source, password: password, token: token)
+        addSource(source, password: nil)
+    }
+
+    /// Modifie un serveur : nouvelle connexion si l'adresse, l'identifiant, le mot de passe ou le jeton changent.
+    func updateMediaServer(_ source: Source, password: String, token: String?, accessChanged: Bool) async throws {
+        if accessChanged || !password.isEmpty || !(token ?? "").isEmpty {
+            var pass = password
+            if pass.isEmpty { pass = Keychain.get(account: source.id.uuidString) ?? "" }
+            var plexToken = token
+            if (plexToken ?? "").isEmpty { plexToken = ServerSession.decode(Keychain.get(account: "session.\(source.id.uuidString)"))?.token }
+            try await openServerSession(source, password: pass, token: plexToken)
+        }
+        updateSource(source, password: nil)
+    }
+
+    private func openServerSession(_ source: Source, password: String, token: String?) async throws {
+        guard case .mediaServer(let type, let server, let username) = source.kind else { return }
+        let session: ServerSession
+        if type == .plex {
+            let value = (token ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !value.isEmpty else { throw MediaServerError.missingToken }
+            _ = try await PlexClient(server: server, sourceID: source.id, token: value).identity()
+            session = ServerSession(token: value)
+        } else {
+            session = try await JellyfinClient.signIn(server: server, username: username, password: password)
+            Keychain.set(password, account: source.id.uuidString)
+        }
+        Keychain.set(session.encoded(), account: "session.\(source.id.uuidString)")
+        serverClients[source.id] = nil
+    }
+
+    /// Fiche d'un film ou d'une série d'un serveur.
+    func serverDetails(_ item: MediaItem) async throws -> MediaDetails? {
+        guard let source = source(id: item.sourceID), source.kind.serverType != nil else { return nil }
+        return try await withServer(source) { try await $0.details(of: item) }
+    }
+
+    /// Signale au serveur la lecture en cours (reprise partagée avec ses autres appareils).
+    func reportPlayback(_ item: MediaItem, position: Double, duration: Double, event: PlaybackEvent) {
+        guard item.kind != .live, let source = source(id: item.sourceID), source.kind.serverType != nil else { return }
+        if event == .progress, let last = lastReport[item.id], Date().timeIntervalSince(last) < 15 { return }
+        lastReport[item.id] = Date()
+        Task {
+            do {
+                try await withServer(source) { try await $0.report(item, position: position, duration: duration, event: event) }
+                if event == .stop, duration > 0, position / duration >= 0.92 {
+                    try await withServer(source) { try await $0.setPlayed(item, played: true) }
+                }
+            } catch {
+                PlaybackLog.shared.note("Serveur « \(source.name) » : position non transmise (\(error.localizedDescription))")
+            }
+        }
+    }
+
+    /// « Marquer comme vu / non vu » : transmis au serveur.
+    func setPlayedOnServer(_ item: MediaItem, _ played: Bool) {
+        guard let source = source(id: item.sourceID), source.kind.serverType != nil else { return }
+        Task {
+            do {
+                try await withServer(source) { try await $0.setPlayed(item, played: played) }
+            } catch {
+                PlaybackLog.shared.note("Serveur « \(source.name) » : état « vu » non transmis (\(error.localizedDescription))")
+            }
+        }
+    }
+
+    /// Affiches et résumés trouvés sur TMDB pour les fichiers locaux (gardés dans le cache de la source).
+    func applyEnrichment(_ sourceID: UUID, _ found: [String: (logo: URL?, info: String?)]) {
+        guard var content = contents[sourceID], !found.isEmpty else { return }
+        for index in content.items.indices {
+            guard let update = found[content.items[index].id] else { continue }
+            if let logo = update.logo { content.items[index].logoURL = logo }
+            if let info = update.info, !info.isEmpty { content.items[index].info = info }
+        }
+        contents[sourceID] = content
+        rebuildIndex()
+        let snapshot = content
+        Task.detached(priority: .utility) { Storage.save(snapshot, name: "content-\(sourceID.uuidString)") }
+    }
+
+    /// Contenu chargé d'une source.
+    func content(of sourceID: UUID) -> SourceContent? { contents[sourceID] }
+
+    /// Examine à nouveau les dossiers toutes les 20 minutes et les serveurs toutes les heures (application laissée ouverte).
+    fileprivate func startRescanTicker() {
+        rescanTicker?.cancel()
+        rescanTicker = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(20 * 60))
+                guard let self else { return }
+                for source in self.sources where source.isEnabled && !self.loading.contains(source.id) {
+                    switch source.kind {
+                    case .folders:
+                        self.refresh(source)
+                    case .mediaServer:
+                        if (source.lastRefresh ?? .distantPast) < Date().addingTimeInterval(-3600) { self.refresh(source) }
+                    default:
+                        break
+                    }
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Exportation / importation de la configuration (commune au Mac, à Windows et à Linux)
 
 extension LibraryStore {
@@ -891,6 +1138,18 @@ extension LibraryStore {
                                             password: nil, epgUrl: source.epgURL?.absoluteString, enabled: source.isEnabled))
             case .m3uFile:
                 continue
+            case .folders(_, let paths):
+                sourceIndex[source.id] = export.sources.count
+                export.sources.append(.init(name: source.name, kind: "folder", address: paths.joined(separator: "\n"), username: nil,
+                                            password: nil, epgUrl: nil, enabled: source.isEnabled))
+            case .mediaServer(let type, let server, let username):
+                sourceIndex[source.id] = export.sources.count
+                let session = ServerSession.decode(Keychain.get(account: "session.\(source.id.uuidString)"))
+                export.sources.append(.init(name: source.name, kind: type.rawValue, address: server.absoluteString,
+                                            username: username.isEmpty ? nil : username,
+                                            password: includePasswords && type != .plex ? Keychain.get(account: source.id.uuidString) : nil,
+                                            token: includePasswords && type == .plex ? session?.token : nil,
+                                            epgUrl: nil, enabled: source.isEnabled))
             }
         }
         export.favorites = favoriteIDs.compactMap { relativeID($0, sourceIndex: sourceIndex) }
@@ -918,7 +1177,28 @@ extension LibraryStore {
             switch entry.kind {
             case "xtream": kind = .xtream(server: url, username: entry.username ?? "")
             case "m3uUrl": kind = .m3uURL(url)
-            default: continue
+            case "jellyfin", "emby", "plex":
+                // Serveur : ajouté tel quel, la connexion se fait au chargement.
+                guard let type = MediaServerType(rawValue: entry.kind),
+                      let server = try? MediaServerHTTP.normalize(entry.address, type: type) else { continue }
+                kind = .mediaServer(type: type, server: server, username: entry.username ?? "")
+                if let existing = sources.first(where: { $0.kind == kind }) {
+                    newIDs[index] = existing.id
+                    summary.sourcesSkipped += 1
+                    continue
+                }
+                let source = Source(name: entry.name, kind: kind, isEnabled: entry.enabled)
+                if let password = entry.password, !password.isEmpty { Keychain.set(password, account: source.id.uuidString) }
+                if let token = entry.token, !token.isEmpty {
+                    Keychain.set(ServerSession(token: token).encoded(), account: "session.\(source.id.uuidString)")
+                }
+                newIDs[index] = source.id
+                addSource(source, password: nil)
+                summary.sourcesAdded += 1
+                continue
+            default:
+                // Dossiers d'un autre ordinateur : à choisir à nouveau sur ce Mac (accès du bac à sable).
+                continue
             }
             if let existing = sources.first(where: { $0.kind == kind }) {
                 newIDs[index] = existing.id

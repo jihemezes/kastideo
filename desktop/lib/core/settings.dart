@@ -255,6 +255,15 @@ class WatchProgressStore extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Position et durée mémorisées (secondes), quelle que soit la fraction lue.
+  (double, double)? fractionRaw(String id) => _entries[id];
+
+  /// Contenu vu jusqu'au bout (ou marqué comme vu).
+  bool isWatched(String id) {
+    final e = _entries[id];
+    return e != null && e.$2 > 0 && e.$1 / e.$2 >= 0.92;
+  }
+
   /// Fraction lue (entre 2 % et 95 %), sinon null.
   double? fraction(String id) {
     final e = _entries[id];

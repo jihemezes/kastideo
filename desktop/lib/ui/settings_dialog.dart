@@ -17,6 +17,8 @@ import '../core/updater.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import '../core/library.dart';
+import 'source_form.dart';
 import 'update_view.dart';
 
 enum SettingsTab { general, appearance, sources, categories, recordings, backup }
@@ -637,109 +639,14 @@ class _SourcesTab extends StatefulWidget {
 
 class _SourcesTabState extends State<_SourcesTab> {
   late bool _adding = widget.startAdding;
-  bool _xtream = true;
-  bool _showPassword = false;
 
   /// Source en cours de modification (null : ajout d'une source).
   Source? _editing;
-  bool _saving = false;
-  String? _error;
-  final _name = TextEditingController();
-  final _server = TextEditingController();
-  final _user = TextEditingController();
-  final _pass = TextEditingController();
-  final _address = TextEditingController();
-  final _epg = TextEditingController();
 
-  @override
-  void dispose() {
-    for (final c in [_name, _server, _user, _pass, _address, _epg]) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    final library = context.library;
-    try {
-      final editing = _editing;
-      if (editing != null) {
-        await library.updateSource(
-          editing,
-          name: _name.text,
-          address: editing.kind == SourceKind.xtream ? _server.text : _address.text,
-          username: editing.kind == SourceKind.xtream ? _user.text : null,
-          password: editing.kind == SourceKind.xtream ? _pass.text : null,
-          epgUrl: _epg.text,
-        );
-        setState(() {
-          _error = library.lastError;
-          if (_error == null) {
-            _adding = false;
-            _editing = null;
-          }
-        });
-        return;
-      }
-      if (_xtream) {
-        await library.addXtream(name: _name.text, server: _server.text, username: _user.text, password: _pass.text, epgUrl: _epg.text);
-      } else {
-        await library.addM3U(name: _name.text, address: _address.text, epgUrl: _epg.text);
-      }
-      setState(() {
-        _error = library.lastError;
-        if (_error == null) _adding = false;
+  void _close() => setState(() {
+        _adding = false;
+        _editing = null;
       });
-    } catch (e) {
-      setState(() => _error = '$e');
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  void _startAdding() {
-    for (final c in [_name, _server, _user, _pass, _address, _epg]) {
-      c.clear();
-    }
-    setState(() {
-      _editing = null;
-      _error = null;
-      _showPassword = false;
-      _adding = true;
-    });
-  }
-
-  Future<void> _startEditing(Source source) async {
-    final password = source.kind == SourceKind.xtream ? await context.library.password(source.id) ?? '' : '';
-    if (!mounted) return;
-    setState(() {
-      _editing = source;
-      _xtream = source.kind == SourceKind.xtream;
-      _name.text = source.name;
-      _server.text = source.kind == SourceKind.xtream ? source.address : '';
-      _user.text = source.username ?? '';
-      _pass.text = password;
-      _address.text = source.kind == SourceKind.xtream ? '' : source.address;
-      _epg.text = source.epgUrl ?? '';
-      _error = null;
-      _showPassword = false;
-      _adding = true;
-    });
-  }
-
-  Future<void> _pickFile() async {
-    final file = await openFile(acceptedTypeGroups: [
-      const XTypeGroup(label: 'M3U', extensions: ['m3u', 'm3u8', 'txt']),
-    ]);
-    if (file != null) setState(() => _address.text = file.path);
-  }
-
-  InputDecoration _field(String label, {String? hint}) =>
-      InputDecoration(labelText: label, hintText: hint, isDense: true, border: const OutlineInputBorder());
 
   @override
   Widget build(BuildContext context) {
@@ -751,7 +658,8 @@ class _SourcesTabState extends State<_SourcesTab> {
           if (library.sources.isEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text(tr('Ajoutez votre abonnement IPTV (Xtream Codes ou playlist M3U) pour commencer.'),
+              child: Text(
+                  tr('Ajoutez un abonnement IPTV (Xtream Codes ou playlist M3U), des dossiers de vidéos (disque, clé USB, NAS) ou un serveur Jellyfin, Emby ou Plex pour commencer.'),
                   style: kText(13, color: KPalette.secondaryText)),
             ),
           for (final source in library.sources) _sourceRow(source),
@@ -759,7 +667,10 @@ class _SourcesTabState extends State<_SourcesTab> {
           Row(children: [
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
-              onPressed: _startAdding,
+              onPressed: () => setState(() {
+                _editing = null;
+                _adding = true;
+              }),
               icon: const Icon(Icons.add_rounded),
               label: Text(tr('Ajouter une source')),
             ),
@@ -773,7 +684,7 @@ class _SourcesTabState extends State<_SourcesTab> {
           ]),
           if (library.lastError != null) _caption(library.lastError!),
         ] else
-          _addForm(),
+          SourceForm(key: ValueKey(_editing?.id ?? 'new'), source: _editing, onDone: _close),
       ]),
     );
   }
@@ -781,28 +692,37 @@ class _SourcesTabState extends State<_SourcesTab> {
   Widget _sourceRow(Source source) {
     final library = context.library;
     int count(MediaKind k) => library.items(k).where((i) => i.sourceId == source.id).length;
+    final counts = source.kind.isIptv
+        ? '${count(MediaKind.live)} ${tr('chaînes')} · ${count(MediaKind.movie)} ${tr('films')} · ${count(MediaKind.series)} ${tr('séries')}'
+        : '${count(MediaKind.movie)} ${tr('films et vidéos')} · ${count(MediaKind.series)} ${tr('séries')}';
+    final where = source.kind == SourceKind.folder
+        ? LibraryStore.folderPaths(source).join(' · ')
+        : source.kind.isMediaServer
+            ? (Uri.tryParse(source.address)?.authority ?? source.address)
+            : null;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(10)),
       child: Row(children: [
-        Icon(source.kind == SourceKind.xtream ? Icons.dns_rounded : Icons.playlist_play_rounded, color: KPalette.orange),
+        Icon(sourceIcon(source.kind), color: KPalette.orange),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(source.name, style: kText(14, weight: FontWeight.w600)),
-            Text(
-              '${source.kind == SourceKind.xtream ? 'Xtream Codes' : 'Playlist M3U'} · ${count(MediaKind.live)} ${tr('chaînes')} · '
-              '${count(MediaKind.movie)} ${tr('films')} · ${count(MediaKind.series)} ${tr('séries')}',
-              style: kText(12, color: KPalette.secondaryText),
-            ),
-            _SourceGuideLine(source: source),
+            Text('${tr(source.kind.label)} · $counts', style: kText(12, color: KPalette.secondaryText)),
+            if (where != null && where.isNotEmpty)
+              Text(where, style: kText(11, color: KPalette.secondaryText), maxLines: 1, overflow: TextOverflow.ellipsis),
+            if (source.kind.isIptv) _SourceGuideLine(source: source),
           ]),
         ),
         if (library.isBusy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
         IconButton(
           tooltip: tr('Modifier'),
-          onPressed: () => _startEditing(source),
+          onPressed: () => setState(() {
+            _editing = source;
+            _adding = true;
+          }),
           icon: const Icon(Icons.edit_outlined),
         ),
         IconButton(
@@ -830,82 +750,6 @@ class _SourcesTabState extends State<_SourcesTab> {
         ),
       ]),
     );
-  }
-
-  Widget _addForm() {
-    final editing = _editing;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      if (editing != null)
-        Text('${tr('Modifier la source')} « ${editing.name} »', style: kText(16, weight: FontWeight.w700))
-      else
-        SegmentedButton<bool>(
-          segments: const [
-            ButtonSegment(value: true, label: Text('Xtream Codes'), icon: Icon(Icons.dns_rounded)),
-            ButtonSegment(value: false, label: Text('Playlist M3U'), icon: Icon(Icons.playlist_play_rounded)),
-          ],
-          selected: {_xtream},
-          onSelectionChanged: (v) => setState(() => _xtream = v.first),
-        ),
-      const SizedBox(height: 16),
-      TextField(controller: _name, decoration: _field(tr('Nom'), hint: tr('Mon abonnement'))),
-      const SizedBox(height: 12),
-      if (_xtream) ...[
-        TextField(controller: _server, decoration: _field(tr('Serveur'), hint: 'http://exemple.com:8080')),
-        const SizedBox(height: 12),
-        TextField(controller: _user, decoration: _field(tr('Identifiant'))),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _pass,
-          obscureText: !_showPassword,
-          decoration: _field(tr('Mot de passe')).copyWith(
-            suffixIcon: IconButton(
-              tooltip: _showPassword ? tr('Masquer') : tr('Afficher'),
-              icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
-              onPressed: () => setState(() => _showPassword = !_showPassword),
-            ),
-          ),
-        ),
-      ] else
-        Row(children: [
-          Expanded(
-            child: TextField(
-              controller: _address,
-              decoration: _field(tr('Adresse de la playlist ou chemin du fichier'), hint: 'http://…/get.php?username=…&password=…'),
-            ),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton(onPressed: _pickFile, child: Text(tr('Choisir un fichier…'))),
-        ]),
-      const SizedBox(height: 12),
-      TextField(
-        controller: _epg,
-        decoration: _field(tr('Guide TV (XMLTV) — facultatif'), hint: tr('Laisser vide : guide indiqué par le fournisseur')),
-      ),
-      if (_error != null) ...[
-        const SizedBox(height: 12),
-        Text(_error!, style: kText(13, color: KPalette.orange)),
-      ],
-      const SizedBox(height: 18),
-      Row(children: [
-        if (_saving) const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-        const Spacer(),
-        TextButton(
-          onPressed: _saving
-              ? null
-              : () => setState(() {
-                    _adding = false;
-                    _editing = null;
-                  }),
-          child: Text(tr('Annuler')),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: KPalette.magenta),
-          onPressed: _saving ? null : _save,
-          child: Text(editing != null ? tr('Enregistrer') : tr('Ajouter')),
-        ),
-      ]),
-    ]);
   }
 }
 

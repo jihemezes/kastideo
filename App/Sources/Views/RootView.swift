@@ -8,6 +8,7 @@ struct RootView: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
     @Environment(RecordingCenter.self) private var recordings
+    @Environment(MediaInfoStore.self) private var mediaInfo
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @State private var showAddSource = false
     @AppStorage(AppLanguage.storageKey) private var appLanguage = ""
@@ -42,6 +43,11 @@ struct RootView: View {
         .sheet(item: $navigation.editingChannel) { item in
             ChannelEditSheet(item: item)
                 .environment(store)
+        }
+        .sheet(item: $navigation.fixingItem) { item in
+            FixDetailsSheet(item: item)
+                .environment(store)
+                .environment(mediaInfo)
         }
         .sheet(item: $recordings.scheduleSheetItem) { item in
             ScheduleRecordingSheet(item: item)

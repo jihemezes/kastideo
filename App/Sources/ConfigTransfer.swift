@@ -20,11 +20,14 @@ struct KastideoExport: Codable {
 
     struct ExportedSource: Codable {
         var name: String
-        /// « xtream » ou « m3uUrl » (les fichiers M3U locaux ne sont pas exportables).
+        /// « xtream », « m3uUrl », « folder » (chemins, un par ligne), « jellyfin », « emby » ou « plex »
+        /// (les fichiers M3U locaux ne sont pas exportables).
         var kind: String
         var address: String
         var username: String?
         var password: String?
+        /// Jeton d'un serveur Plex.
+        var token: String?
         var epgUrl: String?
         var enabled: Bool
     }

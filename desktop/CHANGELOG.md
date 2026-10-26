@@ -2,6 +2,19 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.3.0-desktop1] - 2026-10-26
+
+**Nouvelles sources : vos vidéos et les serveurs de la maison** (comme Kastideo 1.3.0 pour Mac).
+
+- **Dossiers (disque, clé USB, NAS)** : Réglages > Sources > **Ajouter une source** > **Dossiers**, puis **Ajouter un dossier…** ou un **chemin réseau** (`\\NAS\Vidéos` sous Windows, partage monté sous Linux). Films (« Titre (2020).mkv », « Titre.2020.1080p… »), séries (« Série S01E02 », « 1x02 », dossiers « Saison 1 ») regroupées par saison, et autres vidéos dans **Vidéos · nom du dossier**. Examen à chaque lancement puis toutes les 20 minutes ; un sous-dossier illisible (« System Volume Information » d'une clé USB) est ignoré.
+- **Fiches TMDB automatiques** des films et séries des dossiers (avec une clé TMDB), et clic droit > **Corriger la fiche…**.
+- **Sous-titres placés à côté** des vidéos chargés à la lecture.
+- **Jellyfin et Emby** (identifiant et mot de passe ou clé d'API, bouton **Tester**) et **Plex** (**Se connecter avec Plex** ou jeton) : bibliothèques dans Films et Séries (« Films · nom du serveur »), fiches, saisons et épisodes du serveur, lecture directe.
+- **Rechercher sur le réseau** : trouve les serveurs Jellyfin, Emby et Plex de la maison et remplit le formulaire.
+- **Reprise et « vu » partagés dans les deux sens** avec les serveurs ; clic droit > **Marquer comme vu / non vu**, pastille **Vu** sur les affiches.
+- Les boutons de téléchargement sont masqués pour les fichiers déjà sur l'ordinateur.
+- Affiches de secours lisibles en thème clair.
+
 ## [1.2.2-desktop1] - 2026-10-25
 
 **Corrections des retours de test (suite).**

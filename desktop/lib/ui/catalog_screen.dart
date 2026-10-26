@@ -14,7 +14,9 @@ import 'details_view.dart';
 import 'player_pane.dart';
 import 'multiview_view.dart';
 import 'recents_editor.dart';
+import 'fix_dialog.dart';
 import 'schedule_dialog.dart';
+import '../main.dart' show mediaSync;
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'tv_view.dart';
@@ -651,14 +653,21 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
         PopupMenuItem(value: 'theme', child: Text(tr('Thème de la chaîne…'), style: kText(13))),
-      if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
+      if ((item.kind == MediaKind.movie || item.kind == MediaKind.episode) && !library.isLocalFile(item))
         PopupMenuItem(
           value: 'download',
           enabled: !context.downloads.contains(item.id),
           child: Text(context.downloads.contains(item.id) ? tr('Dans les téléchargements') : tr('Télécharger'), style: kText(13)),
         ),
-      if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
+      if ((item.kind == MediaKind.movie || item.kind == MediaKind.episode) && !library.isLocalFile(item))
         PopupMenuItem(value: 'night', enabled: !context.downloads.contains(item.id), child: Text(tr('Télécharger cette nuit'), style: kText(13))),
+      if ((item.kind == MediaKind.movie || item.kind == MediaKind.episode) && !(library.sourceOf(item)?.kind.isIptv ?? true))
+        PopupMenuItem(
+          value: context.watch.isWatched(item.id) ? 'unwatched' : 'watched',
+          child: Text(context.watch.isWatched(item.id) ? tr('Marquer comme non vu') : tr('Marquer comme vu'), style: kText(13)),
+        ),
+      if ((item.kind == MediaKind.movie || item.kind == MediaKind.series) && library.sourceOf(item)?.kind == SourceKind.folder)
+        PopupMenuItem(value: 'fix', child: Text(tr('Corriger la fiche…'), style: kText(13))),
       if (library.recentIds.contains(item.id))
         PopupMenuItem(value: 'unrecent', child: Text(tr('Retirer des récents'), style: kText(13))),
       PopupMenuItem(value: 'copy', child: Text(tr('Copier le nom'), style: kText(13))),
@@ -694,6 +703,12 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
     case 'theme':
       final group = context.guide.groupOf(item);
       if (group != null) await chooseChannelTheme(context, group);
+    case 'watched':
+      await mediaSync.setPlayed(item, true);
+    case 'unwatched':
+      await mediaSync.setPlayed(item, false);
+    case 'fix':
+      await showFixDialog(context, item);
     case 'unrecent':
       library.removeRecents([item.id]);
     case 'copy':

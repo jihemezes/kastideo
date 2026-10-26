@@ -114,6 +114,9 @@ final class PlaybackController {
     private(set) var resumedAt: TimeInterval?
     /// Mémoire des positions de lecture (injectée au démarrage).
     @ObservationIgnored var watchProgress: WatchProgressStore?
+    /// Position de lecture d'un film ou d'un épisode (début, toutes les 5 s, pause, arrêt) : transmise aux serveurs
+    /// Jellyfin, Emby et Plex.
+    @ObservationIgnored var onProgress: ((MediaItem, TimeInterval, TimeInterval, PlaybackEvent) -> Void)?
     /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
     @ObservationIgnored var onRecordingStopped: ((String?) -> Void)?
     @ObservationIgnored var onRecordingStarted: (() -> Void)?
@@ -394,6 +397,7 @@ final class PlaybackController {
         if player.isPlaying {
             guard canPause || !isLive else { return }
             player.pause()
+            if let item = current, item.kind != .live, duration > 0 { onProgress?(item, elapsed, duration, .pause) }
             if isLive {
                 pausedAt = Date()
                 startTimeshiftTicker()
@@ -473,6 +477,7 @@ final class PlaybackController {
         if let item = current, item.kind != .live, pendingResume == nil, duration > 0, elapsed > 1,
            Date() >= ignoreProgressUntil {
             watchProgress?.update(id: item.id, position: elapsed, duration: duration)
+            onProgress?(item, elapsed, duration, .stop)
         }
         watchProgress?.flush()
     }
@@ -676,6 +681,11 @@ final class PlaybackController {
         case .ended:
             isLoading = false
             isPlaying = false
+            if let item = current, item.kind != .live, duration > 0, elapsed >= duration * 0.9 {
+                // Fin du film ou de l'épisode : vu jusqu'au bout.
+                watchProgress?.update(id: item.id, position: duration, duration: duration)
+                onProgress?(item, duration, duration, .stop)
+            }
             if current?.kind == .live {
                 errorMessage = String(localized: "Le flux s'est interrompu. Le serveur a peut-être coupé la connexion.")
             }
@@ -696,6 +706,26 @@ final class PlaybackController {
             PlaybackLog.shared.note(String(format: "Lecture démarrée en %.2f s", startupTime ?? 0))
         }
         startHealthSampling()
+        if let item = current, item.kind != .live {
+            onProgress?(item, elapsed, duration, .start)
+            loadSidecarSubtitles(for: item)
+        }
+    }
+
+    /// Fichier local : sous-titres placés à côté (« Film.srt », « Film.fr.srt »). VLC les trouve en général seul ;
+    /// sinon, ils sont ajoutés ici.
+    private func loadSidecarSubtitles(for item: MediaItem) {
+        guard let url = item.streamURL, url.isFileURL else { return }
+        let subtitles = FolderScanner.sidecarSubtitles(for: url)
+        guard !subtitles.isEmpty else { return }
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard let self, self.current?.id == item.id, self.player.numberOfSubtitlesTracks <= 1 else { return }
+            for (index, subtitle) in subtitles.enumerated() {
+                _ = self.player.addPlaybackSlave(subtitle, type: .subtitle, enforce: index == 0)
+            }
+            PlaybackLog.shared.note("Sous-titres ajoutés : \(subtitles.map(\.lastPathComponent).joined(separator: ", "))")
+        }
     }
 
     // MARK: - Santé du flux et pistes
@@ -1010,6 +1040,7 @@ final class PlaybackController {
               now.timeIntervalSince(lastProgressSave) >= 5 else { return }
         lastProgressSave = now
         watchProgress?.update(id: item.id, position: elapsed, duration: duration)
+        onProgress?(item, elapsed, duration, .progress)
     }
 
     /// Variantes à tenter si le flux échoue (.ts ↔ .m3u8 pour le direct).

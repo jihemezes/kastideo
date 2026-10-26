@@ -112,6 +112,8 @@ struct SourceStatusRow: View {
         case .xtream: return "server.rack"
         case .m3uURL: return "link"
         case .m3uFile: return "doc.text"
+        case .folders: return "folder"
+        case .mediaServer(let type, _, _): return type == .plex ? "play.rectangle.on.rectangle" : "server.rack"
         }
     }
 
