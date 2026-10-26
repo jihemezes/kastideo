@@ -6,6 +6,25 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.3.0</title>
+      <pubDate>Mon, 26 Oct 2026 18:55:21 GMT</pubDate>
+      <sparkle:version>51</sparkle:version>
+      <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Nouvelles sources : vos vidéos et les serveurs de la maison.&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Dossiers (disque, clé USB, NAS)&lt;/b&gt; : Réglages &amp;gt; Sources &amp;gt; &lt;b&gt;Ajouter&lt;/b&gt; &amp;gt; &lt;b&gt;Dossiers&lt;/b&gt;, puis &lt;b&gt;Ajouter un dossier…&lt;/b&gt; (un ou plusieurs). Pour un NAS, montez d&amp;#x27;abord le partage dans le Finder (Aller &amp;gt; Se connecter au serveur…). Kastideo reconnaît les films (« Titre (2020).mkv », « Titre.2020.1080p… », dossier « Titre (2020) »), les séries (« Série S01E02 », « 1x02 », dossiers « Saison 1 »), regroupées avec leurs saisons, et range les autres vidéos dans une rubrique &lt;b&gt;Vidéos · nom du dossier&lt;/b&gt;. Les dossiers sont examinés à chaque lancement puis toutes les 20 minutes.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Fiches TMDB automatiques&lt;/b&gt; des films et séries trouvés dans les dossiers (avec une clé TMDB) : affiche et résumé, et clic droit &amp;gt; &lt;b&gt;Corriger la fiche…&lt;/b&gt; pour choisir le bon titre quand le nom du fichier trompe la recherche.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Sous-titres placés à côté&lt;/b&gt; des vidéos (« Film.srt », « Film.fr.srt ») chargés à la lecture.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Jellyfin et Emby&lt;/b&gt; : adresse, identifiant et mot de passe (ou clé d&amp;#x27;API). Les bibliothèques de films, séries et vidéos apparaissent dans Films et Séries (rubriques « Films · nom du serveur »), avec affiches, fiches, saisons et épisodes du serveur. Lecture directe, sans conversion.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Plex&lt;/b&gt; : &lt;b&gt;Se connecter avec Plex&lt;/b&gt; (autorisation dans plex.tv, choix du serveur du compte) ou jeton saisi à la main.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Recherche sur le réseau&lt;/b&gt; : bouton &lt;b&gt;Rechercher sur le réseau&lt;/b&gt; pour trouver les serveurs Jellyfin, Emby et Plex de la maison et remplir l&amp;#x27;adresse (macOS demande l&amp;#x27;autorisation d&amp;#x27;accès au réseau local).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Reprise et « vu » partagés dans les deux sens&lt;/b&gt; avec Jellyfin, Emby et Plex : la position de lecture est transmise au serveur pendant la lecture, et celle des autres appareils est reprise dans Kastideo. Clic droit &amp;gt; &lt;b&gt;Marquer comme vu / non vu&lt;/b&gt; ; pastille &lt;b&gt;Vu&lt;/b&gt; sur les affiches et coche dans la liste des épisodes.&lt;/li&gt;
+&lt;li&gt;Sauvegarde de la configuration : les serveurs (et leur mot de passe ou jeton, si demandé) sont exportés et importés, comme dans Kastideo pour Windows et Linux.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.0/Kastideo-1.3.0.dmg" length="46428664" type="application/octet-stream" sparkle:edSignature="RnTLTSqkbRb+jFFwdUVV56UlwDXKuoLKMPTraYXZIU1lHouioTtHaJscXjKfYJlVHGn8d0ewUv0rLOW60KeVCA==" />
+    </item>
+    <item>
       <title>Kastideo 1.2.2</title>
       <pubDate>Mon, 26 Oct 2026 06:13:06 GMT</pubDate>
       <sparkle:version>50</sparkle:version>
@@ -491,24 +510,6 @@
 &lt;li&gt;Le détail de l&amp;#x27;erreur VLC (par exemple un refus du serveur) est affiché sous le message d&amp;#x27;erreur&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.3.1/Kastideo-0.3.1.dmg" length="41317061" type="application/octet-stream" sparkle:edSignature="J1jh4vxRARjF7nVexGJUnPQugjW1uwuF7qK6ZhzXIDRCgAkDpw8myN25xN9YlPPnSVr2vIhXDHiL2z81/soqBQ==" />
-    </item>
-    <item>
-      <title>Kastideo 0.3.0</title>
-      <pubDate>Sun, 18 Oct 2026 18:51:32 GMT</pubDate>
-      <sparkle:version>6</sparkle:version>
-      <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Nouveau moteur de lecture &lt;b&gt;VLC&lt;/b&gt; (VLCKit) pour tous les contenus : direct &lt;b&gt;MPEG-TS (.ts)&lt;/b&gt;, HLS, MP4, &lt;b&gt;MKV&lt;/b&gt;, AVI…&lt;/li&gt;
-&lt;li&gt;Direct Xtream lu en .ts comme le lecteur de référence (certains fournisseurs refusent le .m3u8), avec bascule automatique .ts ↔ .m3u8&lt;/li&gt;
-&lt;li&gt;Une seule connexion au fournisseur à la fois : le flux précédent est fermé avant d&amp;#x27;ouvrir le suivant&lt;/li&gt;
-&lt;li&gt;Nouveaux contrôles : lecture / pause, recul 10 s / avance 30 s, barre de progression, volume jusqu&amp;#x27;à 200 %&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Mode cinéma&lt;/b&gt; (double-clic, ⌘↩, Échap pour sortir) et écran de chargement avec logo de la chaîne&lt;/li&gt;
-&lt;li&gt;Badge &lt;b&gt;« Prête en x s »&lt;/b&gt; : temps de démarrage mesuré à chaque chaîne&lt;/li&gt;
-&lt;li&gt;Réglage de la &lt;b&gt;mémoire tampon&lt;/b&gt; : Rapide (par défaut), Équilibré, Stable&lt;/li&gt;
-&lt;li&gt;Publication : cache des paquets Swift dans GitHub Actions pour des compilations plus rapides&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.3.0/Kastideo-0.3.0.dmg" length="41271931" type="application/octet-stream" sparkle:edSignature="mOq3H5eIYkv/xtsvWGrcHNXlg856CcQg55sOPgcUoHs63HbOUaDUX0/+M2a+n7nvjljTZ8drKYUnLh6LjmZQCQ==" />
     </item>
   </channel>
 </rss>
