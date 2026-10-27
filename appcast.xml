@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.3.2</title>
+      <pubDate>Tue, 27 Oct 2026 13:48:55 GMT</pubDate>
+      <sparkle:version>53</sparkle:version>
+      <sparkle:shortVersionString>1.3.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Correctif de compilation de la 1.3.1 (Mac).&lt;/b&gt; Aucun changement de fonctionnement : la 1.3.2 contient tout ce que la 1.3.1 apportait (tuile « Mes vidéos », sélecteur Tout / IPTV / Mes vidéos, mot de passe facultatif, connexion Emby corrigée).&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.2/Kastideo-1.3.2.dmg" length="46763315" type="application/octet-stream" sparkle:edSignature="cvakuj5gn7prlBQfSCXAXMNV2yfsKFUoZCKHaEAMz76D0WpScrNVCZdukC8dS+CCzYGeTYcHKFsnRcKpr/GIBg==" />
+    </item>
+    <item>
       <title>Kastideo 1.3.0</title>
       <pubDate>Mon, 26 Oct 2026 18:55:21 GMT</pubDate>
       <sparkle:version>51</sparkle:version>
@@ -496,20 +505,6 @@
 &lt;li&gt;Notifications macOS, blocage de la mise en veille pendant l&amp;#x27;activité, alerte d&amp;#x27;espace disque faible&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.4.0/Kastideo-0.4.0.dmg" length="41667871" type="application/octet-stream" sparkle:edSignature="Z6rLdSXjlPd8GqXRn031YKdAN28R3xVqg5Sy+yyvFN35vFEi5IMvayKGCKwF40jn4j7OdnE5Qu7mxFI6Hq3jAA==" />
-    </item>
-    <item>
-      <title>Kastideo 0.3.1</title>
-      <pubDate>Sun, 18 Oct 2026 21:14:43 GMT</pubDate>
-      <sparkle:version>7</sparkle:version>
-      <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correction : une chaîne qui ne répond pas ne laisse plus le chargement tourner indéfiniment ; après 20 s sans image, Kastideo essaie la variante .ts / .m3u8 puis affiche une erreur explicite&lt;/li&gt;
-&lt;li&gt;Le démarrage est désormais détecté dès que VLC passe en lecture&lt;/li&gt;
-&lt;li&gt;Nouveau &lt;b&gt;Journal de lecture&lt;/b&gt; (menu Lecture, ⌥⌘L, ou bouton dans le message d&amp;#x27;erreur) : messages du moteur VLC, identifiants et mots de passe masqués, copiable pour le diagnostic&lt;/li&gt;
-&lt;li&gt;Le détail de l&amp;#x27;erreur VLC (par exemple un refus du serveur) est affiché sous le message d&amp;#x27;erreur&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.3.1/Kastideo-0.3.1.dmg" length="41317061" type="application/octet-stream" sparkle:edSignature="J1jh4vxRARjF7nVexGJUnPQugjW1uwuF7qK6ZhzXIDRCgAkDpw8myN25xN9YlPPnSVr2vIhXDHiL2z81/soqBQ==" />
     </item>
   </channel>
 </rss>
