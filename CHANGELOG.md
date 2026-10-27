@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.3.2] - 2026-10-27
+
+**Correctif de compilation de la 1.3.1 (Mac).** Aucun changement de fonctionnement : la 1.3.2 contient tout ce que la 1.3.1 apportait (tuile « Mes vidéos », sélecteur Tout / IPTV / Mes vidéos, mot de passe facultatif, connexion Emby corrigée).
+
 ## [1.3.1] - 2026-10-27
 
 **Corrections des premiers essais avec un NAS et Emby.**

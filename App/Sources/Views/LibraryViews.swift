@@ -268,6 +268,7 @@ struct LibraryStatusBanner: View {
     }
 }
 
+@MainActor
 private func libraryScopeTitle(_ store: LibraryStore, _ navigation: NavigationModel) -> String {
     if let id = navigation.librarySource, let source = store.source(id: id) {
         return String(localized: "Mes vidéos") + " · " + source.name
