@@ -775,3 +775,36 @@
 "Vidéos" = "Videos";
 "Fichier local" = "Local file";
 "%lld films et vidéos · %lld séries" = "%lld movies and videos · %lld series";
+
+/* 1.3.1 — Mes vidéos */
+"%@ vidéos" = "%@ videos";
+"1 vidéo" = "1 video";
+"Dossiers et serveurs" = "Folders and servers";
+"IPTV" = "IPTV";
+"Ajouts récents" = "Recently added";
+"Aucune erreur." = "No error.";
+"Aucune vidéo pour l'instant." = "No video yet.";
+"Chargement des bibliothèques… %@" = "Loading libraries… %@";
+"Copier" = "Copy";
+"Diagnostic — %@" = "Diagnostics — %@";
+"Dossier vide" = "Empty folder";
+"Détails" = "Details";
+"Détails de l'erreur…" = "Error details…";
+"Examen des dossiers… %@" = "Scanning folders… %@";
+"Films à voir" = "Movies to watch";
+"Genre" = "Genre";
+"Kastideo reconnaît les fichiers vidéo (.mkv, .mp4, .avi…) des dossiers choisis et de leurs sous-dossiers. Vérifiez le dossier de la source, ou ouvrez le journal de lecture pour voir ce qui a été examiné." = "Kastideo recognizes video files (.mkv, .mp4, .avi…) in the chosen folders and their subfolders. Check the source's folder, or open the playback log to see what was scanned.";
+"Modifier la source…" = "Edit source…";
+"Non vus" = "Unwatched";
+"Réponse du serveur" = "Server response";
+"Tous les dossiers" = "All folders";
+"Tous les genres" = "All genres";
+"Toutes les années" = "All years";
+"Toutes les sources" = "All sources";
+"Tri" = "Sort";
+"Vérifiez l'adresse (sans « /web/… »), l'identifiant et le mot de passe dans Réglages > Sources. Le journal de lecture garde le détail de chaque échange." = "Check the address (without “/web/…”), the username and the password in Settings > Sources. The playback log keeps the details of each exchange.";
+"Vérifiez que le disque est branché ou que le partage réseau est monté dans le Finder, puis Actualiser." = "Check that the disk is plugged in or that the network share is mounted in the Finder, then Refresh.";
+"À la une" = "Featured";
+"Ajout récent" = "Recently added";
+"Films et séries de l'abonnement IPTV, de vos dossiers et serveurs (Mes vidéos), ou des deux" = "Movies and series from the IPTV subscription, from your folders and servers (My videos), or both";
+"Mot de passe (ou clé d'API) — facultatif" = "Password (or API key) — optional";

@@ -215,7 +215,7 @@ struct HomeView: View {
                         .lineLimit(1)
                 }
                 Spacer()
-                Button("Retourner à la lecture") { navigation.open(current) }
+                Button("Retourner à la lecture") { navigation.open(current, inLibrary: store.isLibraryItem(current)) }
                     .buttonStyle(.borderedProminent)
                     .tint(KastideoPalette.magenta)
                 Button("Arrêter") { recordings.requestStop() }
@@ -246,7 +246,21 @@ struct HomeView: View {
                         colors: [KastideoPalette.indigo, KastideoPalette.violet], height: height) {
                 navigation.go(.all(.series))
             }
+            // Vidéothèque : seulement avec des dossiers ou un serveur Jellyfin, Emby, Plex.
+            if store.hasLibrary {
+                HomeBigTile(title: "Mes vidéos", icon: "photo.stack",
+                            subtitle: libraryCount,
+                            colors: [KastideoPalette.orange, KastideoPalette.violet], height: height) {
+                    navigation.showLibrary(.home)
+                }
+            }
         }
+    }
+
+    private var libraryCount: String {
+        let n = store.libraryItems().count
+        if n == 0 { return store.isBusy ? String(localized: "Chargement…") : String(localized: "Dossiers et serveurs") }
+        return n == 1 ? String(localized: "1 vidéo") : String(localized: "\(n.formatted()) vidéos")
     }
 
     private func count(_ kind: MediaKind, one: LocalizedStringResource, many: LocalizedStringResource) -> String {
@@ -326,7 +340,7 @@ struct HomeView: View {
                     LazyHStack(alignment: .top, spacing: 14) {
                         ForEach(Array(started)) { item in
                             HomeResumeCard(item: item, fraction: watch.fraction(for: item.id) ?? 0) {
-                                navigation.open(item)
+                                navigation.open(item, inLibrary: store.isLibraryItem(item))
                             }
                         }
                     }
@@ -349,6 +363,13 @@ struct HomeView: View {
                 if perKind >= 25 { break }
             }
         }
+        // Vidéothèque (dossiers, serveurs).
+        var inLibrary = 0
+        for item in store.libraryItems() where item.searchKey.contains(key) {
+            found.append(item)
+            inLibrary += 1
+            if inLibrary >= 25 { break }
+        }
         return found
     }
 
@@ -360,8 +381,26 @@ struct HomeView: View {
                 .padding(.top, 30)
         } else {
             VStack(alignment: .leading, spacing: 18) {
+                let library = results.filter { store.isLibraryItem($0) }
+                if !library.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Mes vidéos")
+                            .font(.headline)
+                            .foregroundStyle(.white.opacity(0.75))
+                        ForEach(library) { item in
+                            HomeResultRow(item: item) {
+                                if item.kind == .movie || item.kind == .series {
+                                    navigation.showLibrary(.home)
+                                    navigation.infoItemID = item.id
+                                } else {
+                                    navigation.open(item, inLibrary: true)
+                                }
+                            }
+                        }
+                    }
+                }
                 ForEach([MediaKind.live, .movie, .series], id: \.self) { kind in
-                    let group = results.filter { $0.kind == kind }
+                    let group = results.filter { $0.kind == kind && !store.isLibraryItem($0) }
                     if !group.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(kind.title)

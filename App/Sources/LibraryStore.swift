@@ -21,6 +21,30 @@ enum LibraryError: LocalizedError {
     }
 }
 
+/// Origine des films et séries affichés dans Films et Séries.
+enum CatalogOrigin: String, CaseIterable, Identifiable {
+    case all, iptv, library
+    static let key = "catalog.origin"
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .all: return String(localized: "Tout")
+        case .iptv: return String(localized: "IPTV")
+        case .library: return String(localized: "Mes vidéos")
+        }
+    }
+    /// Par défaut : l'IPTV seul (« Mes vidéos » a sa propre tuile).
+    static var stored: CatalogOrigin { CatalogOrigin(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .iptv }
+}
+
+/// Fiche trouvée sur TMDB pour un fichier local (affiche, résumé, année, genres).
+struct LocalFiche {
+    var logo: URL?
+    var info: String?
+    var year: Int?
+    var genres: [String] = []
+}
+
 /// Accès aux dossiers choisis (bac à sable) : ouvert une fois et gardé pendant toute la session,
 /// pour que la lecture et les sous-titres placés à côté des vidéos restent lisibles.
 enum FolderAccess {
@@ -93,6 +117,20 @@ final class LibraryStore {
     @ObservationIgnored private var epgTicker: Task<Void, Never>?
     /// Clients des serveurs Jellyfin, Emby et Plex (session ouverte).
     @ObservationIgnored private var serverClients: [UUID: any MediaServerClient] = [:]
+    /// Vidéothèque : films, séries et vidéos des dossiers et serveurs, par source.
+    private(set) var libraryBySource: [UUID: [MediaItem]] = [:]
+    /// Catégories de Films et Séries qui viennent de « Mes vidéos » (jamais filtrées par pays).
+    private(set) var libraryCategories: [MediaKind: Set<String>] = [:]
+    /// Films et séries affichés dans Films et Séries : tout, l'IPTV seul ou « Mes vidéos » seules.
+    var catalogOrigin: CatalogOrigin = CatalogOrigin.stored {
+        didSet {
+            guard catalogOrigin != oldValue else { return }
+            UserDefaults.standard.set(catalogOrigin.rawValue, forKey: CatalogOrigin.key)
+            rebuildIndex()
+        }
+    }
+    /// Diagnostic du dernier chargement d'une source (requête et réponse exacte du serveur).
+    private(set) var errorDetails: [UUID: String] = [:]
     @ObservationIgnored private var rescanTicker: Task<Void, Never>?
     @ObservationIgnored private var lastReport: [String: Date] = [:]
     /// Positions de lecture et contenus vus reçus d'un serveur (transmis au suivi de lecture).
@@ -193,7 +231,7 @@ final class LibraryStore {
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
             return recentIDs.compactMap { item(id: $0) }
-        case .home, .recordings, .guide, .themes:
+        case .home, .recordings, .guide, .themes, .library:
             return []
         }
     }
@@ -313,22 +351,40 @@ final class LibraryStore {
         let password = Keychain.get(account: source.id.uuidString)
         Task {
             do {
-                let content = try await Self.fetch(source, password: password)
+                var content = try await Self.fetch(source, password: password)
                 guard sources.contains(where: { $0.id == source.id }) else { loading.remove(source.id); return }
+                if case .folders = source.kind, let previous = contents[source.id] {
+                    // Affiches et résumés déjà trouvés (TMDB) gardés d'un examen à l'autre.
+                    let known = Dictionary(previous.items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+                    for index in content.items.indices {
+                        guard let old = known[content.items[index].id] else { continue }
+                        if content.items[index].logoURL == nil { content.items[index].logoURL = old.logoURL }
+                        if content.items[index].info == nil { content.items[index].info = old.info }
+                        if content.items[index].year == nil { content.items[index].year = old.year }
+                        if content.items[index].genres == nil { content.items[index].genres = old.genres }
+                    }
+                }
                 contents[source.id] = content
                 if let index = sources.firstIndex(where: { $0.id == source.id }) {
                     sources[index].lastRefresh = Date()
                     saveSources()
                 }
+                errorDetails[source.id] = nil
                 rebuildIndex()
                 loading.remove(source.id)
+                if !source.kind.isIPTV {
+                    PlaybackLog.shared.note("Source « \(source.name) » chargée : \(content.items.count) éléments")
+                }
                 if let progress = content.progress, !progress.isEmpty { onServerProgress?(progress) }
                 let id = source.id
-                Task.detached(priority: .utility) { Storage.save(content, name: "content-\(id.uuidString)") }
+                let snapshot = content
+                Task.detached(priority: .utility) { Storage.save(snapshot, name: "content-\(id.uuidString)") }
                 if !source.kind.isIPTV { onContentLoaded?(source) }
                 await refreshEPG(for: source.id)
             } catch {
                 errors[source.id] = Self.describe(error)
+                errorDetails[source.id] = (error as? MediaServerError)?.detail
+                PlaybackLog.shared.note("Source « \(source.name) » : \(Self.describe(error))\((error as? MediaServerError)?.detail.map { " — \($0)" } ?? "")")
                 loading.remove(source.id)
             }
         }
@@ -581,9 +637,12 @@ final class LibraryStore {
         // 1. Catégories du fournisseur, dans l'ordre d'origine, avec leur nombre d'éléments.
         var providerOrder: [MediaKind: [String]] = [:]
         var counts: [MediaKind: [String: Int]] = [:]
-        for source in sources where source.isEnabled {
+        // Origine des films et séries (Tout / IPTV / Mes vidéos) : le direct reste toujours celui de l'IPTV.
+        let origin = catalogOrigin
+        for source in sources where source.isEnabled && (source.kind.isIPTV || origin != .iptv) {
             guard let content = contents[source.id] else { continue }
             for item in content.items where item.kind != .episode {
+                if source.kind.isIPTV, origin == .library, item.kind != .live { continue }
                 if counts[item.kind, default: [:]][item.group] == nil { providerOrder[item.kind, default: []].append(item.group) }
                 counts[item.kind, default: [:]][item.group, default: 0] += 1
             }
@@ -602,9 +661,33 @@ final class LibraryStore {
         var byKind: [MediaKind: [MediaItem]] = [:]
         var byID: [String: MediaItem] = [:]
         var byCategory: [MediaKind: [String: [MediaItem]]] = [:]
+        var library: [UUID: [MediaItem]] = [:]
+        var libraryGroups: [MediaKind: Set<String>] = [:]
         for source in sources where source.isEnabled {
             guard let content = contents[source.id] else { continue }
+            if !source.kind.isIPTV {
+                // Dossiers et serveurs de la maison : toujours dans « Mes vidéos » ; dans Films et Séries selon le filtre.
+                for original in content.items {
+                    byID[original.id] = original
+                    guard original.kind != .episode else { continue }
+                    library[source.id, default: []].append(original)
+                    guard origin != .iptv else { continue }
+                    var item = original
+                    if let prefs = categoryPrefs[item.kind] {
+                        if hidden[item.kind]?.contains(item.group) == true { continue }
+                        item.group = prefs.displayName(item.group)
+                    }
+                    byKind[item.kind, default: []].append(item)
+                    byCategory[item.kind, default: [:]][item.group, default: []].append(item)
+                    libraryGroups[item.kind, default: []].insert(item.group)
+                }
+                continue
+            }
             for original in content.items {
+                if origin == .library, original.kind == .movie || original.kind == .series {
+                    byID[original.id] = original
+                    continue
+                }
                 var item = original
                 if let edit = channelEdits[item.id] { edit.apply(to: &item) }
                 // Chaîne sans identifiant de guide : clé dérivée du nom, pour le guide de secours.
@@ -642,6 +725,8 @@ final class LibraryStore {
         categoryCounts = counts
         itemsByID = byID
         itemsByCategory = byCategory
+        libraryBySource = library
+        libraryCategories = libraryGroups
         rebuildEPG()
     }
 
@@ -812,17 +897,18 @@ final class LibraryStore {
         let account = "session.\(source.id.uuidString)"
         var session = ServerSession.decode(Keychain.get(account: account))
         if type == .plex {
-            guard let session else { throw MediaServerError.missingToken }
-            return PlexClient(server: server, sourceID: source.id, token: session.token, label: source.name)
+            // Sans jeton : serveur ouvert au réseau local.
+            return PlexClient(server: server, sourceID: source.id, token: session?.token ?? "", label: source.name)
         }
         if session == nil || forceSignIn {
             let password = Keychain.get(account: source.id.uuidString) ?? ""
-            let opened = try await JellyfinClient.signIn(server: server, username: username, password: password)
+            let opened = try await JellyfinClient.signIn(server: server, username: username, password: password, emby: type == .emby)
             Keychain.set(opened.encoded(), account: account)
             session = opened
         }
         guard let session else { throw MediaServerError.unreadable }
-        return JellyfinClient(server: server, sourceID: source.id, session: session, emby: type == .emby, label: source.name)
+        return JellyfinClient(server: server, sourceID: source.id, session: session, emby: type == .emby, label: source.name,
+                              videosLabel: String(localized: "Vidéos"))
     }
 
     nonisolated static func parseM3U(_ data: Data, sourceID: UUID) throws -> SourceContent {
@@ -978,6 +1064,21 @@ extension LibraryStore {
         return false
     }
 
+    /// Vrai pour un contenu de la vidéothèque (dossiers, serveurs).
+    func isLibraryItem(_ item: MediaItem) -> Bool {
+        !(source(id: item.sourceID)?.kind.isIPTV ?? true)
+    }
+
+    /// Sources de la vidéothèque (actives).
+    var librarySources: [Source] { sources.filter { $0.isEnabled && !$0.kind.isIPTV } }
+    var hasLibrary: Bool { sources.contains { !$0.kind.isIPTV } }
+
+    /// Films, séries et vidéos de la vidéothèque (d'une source, ou de toutes).
+    func libraryItems(source: UUID? = nil) -> [MediaItem] {
+        if let source { return libraryBySource[source] ?? [] }
+        return sources.flatMap { libraryBySource[$0.id] ?? [] }
+    }
+
     /// Vrai pour un contenu d'un serveur Jellyfin, Emby ou Plex.
     func isServerItem(_ item: MediaItem) -> Bool {
         source(id: item.sourceID)?.kind.serverType != nil
@@ -1022,12 +1123,12 @@ extension LibraryStore {
         guard case .mediaServer(let type, let server, let username) = source.kind else { return }
         let session: ServerSession
         if type == .plex {
+            // Jeton facultatif : un serveur peut être ouvert au réseau local sans authentification.
             let value = (token ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !value.isEmpty else { throw MediaServerError.missingToken }
             _ = try await PlexClient(server: server, sourceID: source.id, token: value).identity()
             session = ServerSession(token: value)
         } else {
-            session = try await JellyfinClient.signIn(server: server, username: username, password: password)
+            session = try await JellyfinClient.signIn(server: server, username: username, password: password, emby: type == .emby)
             Keychain.set(password, account: source.id.uuidString)
         }
         Keychain.set(session.encoded(), account: "session.\(source.id.uuidString)")
@@ -1070,12 +1171,14 @@ extension LibraryStore {
     }
 
     /// Affiches et résumés trouvés sur TMDB pour les fichiers locaux (gardés dans le cache de la source).
-    func applyEnrichment(_ sourceID: UUID, _ found: [String: (logo: URL?, info: String?)]) {
+    func applyEnrichment(_ sourceID: UUID, _ found: [String: LocalFiche]) {
         guard var content = contents[sourceID], !found.isEmpty else { return }
         for index in content.items.indices {
             guard let update = found[content.items[index].id] else { continue }
             if let logo = update.logo { content.items[index].logoURL = logo }
             if let info = update.info, !info.isEmpty { content.items[index].info = info }
+            if let year = update.year { content.items[index].year = year }
+            if !update.genres.isEmpty { content.items[index].genres = update.genres }
         }
         contents[sourceID] = content
         rebuildIndex()

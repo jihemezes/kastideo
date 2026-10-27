@@ -2,6 +2,17 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.3.1-desktop1] - 2026-10-27
+
+**Corrections des premiers essais avec un NAS et Emby** (comme Kastideo 1.3.1 pour Mac).
+
+- **Tuile « Mes vidéos »** sur l'accueil (Ctrl+8), visible dès qu'une source Dossiers, Jellyfin, Emby ou Plex existe : à la une (reprendre, ajouts récents, films à voir), grilles Films / Séries / Vidéos avec filtres genre, année, non vus et tri, navigation par dossiers, choix de la source.
+- **Films et Séries** : sélecteur **Tout / IPTV / Mes vidéos** au-dessus des catégories (IPTV seul par défaut) ; les catégories de vos vidéos ne sont pas masquées par le réglage des pays.
+- **Mot de passe facultatif** (Jellyfin, Emby) et **jeton facultatif** (Plex).
+- **Emby** : connexion corrigée (erreur HTTP 400), adresse copiée depuis le navigateur acceptée.
+- **Diagnostic** : réponse exacte du serveur affichée en cas d'échec.
+- Correction : le cache des sources n'était pas relu au démarrage (listes rechargées à chaque lancement).
+
 ## [1.3.0-desktop1] - 2026-10-26
 
 **Nouvelles sources : vos vidéos et les serveurs de la maison** (comme Kastideo 1.3.0 pour Mac).

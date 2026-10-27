@@ -46,7 +46,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .recents: return .recents
         case .recordings: return .recordings
         case .guide: return .guide
-        case .themes: return .live
+        case .themes, .library: return .live
         }
     }
 
@@ -188,7 +188,7 @@ struct CinemaCatalog: View {
                     CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
                 case .recents:
                     CinemaRecents(items: items)
-                case .home, .recordings, .guide, .themes:
+                case .home, .recordings, .guide, .themes, .library:
                     EmptyView()
                 }
             }
@@ -226,7 +226,9 @@ struct CinemaHome: View {
         let recents = kind == .live ? allRecents : allRecents.filter { watch.fraction(for: $0.id) == nil }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         // Pays choisis (Réglages > Apparence) : seules leurs catégories ont une rangée.
-        let categories = (store.categoriesByKind[kind] ?? []).filter { countries.allows(category: $0) }
+        let categories = (store.categoriesByKind[kind] ?? []).filter {
+            countries.allows(category: $0) || store.libraryCategories[kind]?.contains($0) == true
+        }
         let _ = navigation.mark("Accueil Cinéma — \(categories.count) catégories")
 
         if all.isEmpty {
@@ -315,6 +317,12 @@ struct CinemaRail: View {
     let items: [MediaItem]
     var seeAll: (() -> Void)?
     private let limit = 40
+
+    init(title: String, items: [MediaItem], seeAll: (() -> Void)? = nil) {
+        self.title = title
+        self.items = items
+        self.seeAll = seeAll
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

@@ -248,20 +248,39 @@ public struct TMDBMatch: Sendable, Hashable, Identifiable {
     public var year: Int?
     public var posterURL: URL?
     public var overview: String?
+    public var genres: [String]
     public var id: String { tmdbID }
 
-    public init(tmdbID: String, title: String, year: Int? = nil, posterURL: URL? = nil, overview: String? = nil) {
+    public init(tmdbID: String, title: String, year: Int? = nil, posterURL: URL? = nil, overview: String? = nil, genres: [String] = []) {
         self.tmdbID = tmdbID
         self.title = title
         self.year = year
         self.posterURL = posterURL
         self.overview = overview
+        self.genres = genres
     }
 }
 
 extension TMDB {
+    /// Noms des genres TMDB (identifiants fixes de l'API), pour les filtres de la vidéothèque.
+    public static func genreNames(_ ids: [Int], english: Bool) -> [String] {
+        let fr: [Int: String] = [28: "Action", 12: "Aventure", 16: "Animation", 35: "Comédie", 80: "Crime", 99: "Documentaire",
+                                 18: "Drame", 10751: "Familial", 14: "Fantastique", 36: "Histoire", 27: "Horreur", 10402: "Musique",
+                                 9648: "Mystère", 10749: "Romance", 878: "Science-Fiction", 10770: "Téléfilm", 53: "Thriller",
+                                 10752: "Guerre", 37: "Western", 10759: "Action & Aventure", 10762: "Enfants", 10763: "Information",
+                                 10764: "Téléréalité", 10765: "Science-Fiction & Fantastique", 10766: "Feuilleton",
+                                 10767: "Talk-show", 10768: "Guerre & Politique"]
+        let en: [Int: String] = [28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime", 99: "Documentary",
+                                 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+                                 9648: "Mystery", 10749: "Romance", 878: "Science Fiction", 10770: "TV Movie", 53: "Thriller",
+                                 10752: "War", 37: "Western", 10759: "Action & Adventure", 10762: "Kids", 10763: "News",
+                                 10764: "Reality", 10765: "Sci-Fi & Fantasy", 10766: "Soap", 10767: "Talk", 10768: "War & Politics"]
+        let names = english ? en : fr
+        return ids.compactMap { names[$0] }
+    }
+
     /// Résultats d'une réponse de `/search/{movie|tv}` (12 au plus).
-    public static func parseMatches(_ data: Data, isSeries: Bool) -> [TMDBMatch] {
+    public static func parseMatches(_ data: Data, isSeries: Bool, english: Bool = false) -> [TMDBMatch] {
         guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let results = root["results"] as? [[String: Any]] else { return [] }
         let s = XtreamAPI.string
@@ -270,7 +289,8 @@ extension TMDB {
             return TMDBMatch(tmdbID: id, title: s(r[isSeries ? "name" : "title"]) ?? "?",
                              year: s(r[isSeries ? "first_air_date" : "release_date"]).flatMap(XtreamAPI.year(in:)),
                              posterURL: s(r["poster_path"]).flatMap { URL(string: images + "w342" + $0) },
-                             overview: s(r["overview"]))
+                             overview: s(r["overview"]),
+                             genres: genreNames((r["genre_ids"] as? [Any] ?? []).compactMap { MediaServerHTTP.int($0) }, english: english))
         }
     }
 }
@@ -372,10 +392,11 @@ public struct TMDBClient: Sendable {
         let wanted = year ?? cleaned.year
         var query = [URLQueryItem(name: "query", value: cleaned.title)]
         if let wanted { query.append(URLQueryItem(name: isSeries ? "first_air_date_year" : "year", value: String(wanted))) }
-        var matches = TMDB.parseMatches(try await request("search/\(kind)", query), isSeries: isSeries)
+        let english = !language.hasPrefix("fr")
+        var matches = TMDB.parseMatches(try await request("search/\(kind)", query), isSeries: isSeries, english: english)
         if matches.isEmpty, wanted != nil {
             matches = TMDB.parseMatches(try await request("search/\(kind)", [URLQueryItem(name: "query", value: cleaned.title)]),
-                                        isSeries: isSeries)
+                                        isSeries: isSeries, english: english)
         }
         return matches
     }

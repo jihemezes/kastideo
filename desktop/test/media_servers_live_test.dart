@@ -31,6 +31,19 @@ void main() {
     expect(d!.directors, ['Denis Villeneuve']);
   }, skip: skip);
 
+  test('emby et adresses', () async {
+    // Adresse copiée depuis le navigateur.
+    expect(MediaServerClient.normalizeFor(SourceKind.emby, 'http://127.0.0.1:8798/web/index.html#!/home'), 'http://127.0.0.1:8798');
+    final s = MediaServerClient.normalizeFor(SourceKind.emby, '127.0.0.1:8798');
+    final session = await JellyfinClient.signIn(s, 'jm', 'secret', emby: true);
+    final c = JellyfinClient(s, 'E', session: session, emby: true);
+    expect((await c.fetchLibrary()).items, isNotEmpty);
+    // Utilisateur sans mot de passe.
+    final guest = await JellyfinClient.signIn(MediaServerClient.normalizeFor(SourceKind.jellyfin, '127.0.0.1:8796'), 'guest', '');
+    expect(guest.token, isNotEmpty);
+    expect(KastideoDevice.asciiOnly('Mac mini de Jérôme’s "x"'), "Mac mini de Jerome's x");
+  }, skip: skip);
+
   test('plex', () async {
     final s = MediaServerClient.normalizeFor(SourceKind.plex, 'localhost');
     expect(s, 'http://localhost:32400');

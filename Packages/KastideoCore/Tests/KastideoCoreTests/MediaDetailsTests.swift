@@ -62,11 +62,12 @@ final class TrendingTests: XCTestCase {
 
 final class TMDBMatchTests: XCTestCase {
     func testParseMatches() {
-        let json = #"{"results":[{"id":438631,"title":"Dune","release_date":"2021-09-15","poster_path":"/d.jpg","overview":"Paul"},{"title":"sans id"}]}"#
+        let json = #"{"results":[{"id":438631,"title":"Dune","release_date":"2021-09-15","poster_path":"/d.jpg","overview":"Paul","genre_ids":[878,12]},{"title":"sans id"}]}"#
         let matches = TMDB.parseMatches(Data(json.utf8), isSeries: false)
         XCTAssertEqual(matches.count, 1)
         XCTAssertEqual(matches[0].tmdbID, "438631")
         XCTAssertEqual(matches[0].year, 2021)
         XCTAssertEqual(matches[0].posterURL?.absoluteString, "https://image.tmdb.org/t/p/w342/d.jpg")
+        XCTAssertEqual(matches[0].genres, ["Science-Fiction", "Aventure"])
     }
 }

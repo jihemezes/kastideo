@@ -143,24 +143,24 @@ class Sidebar extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
                 children: [
-                  _SidebarRow(icon: Icons.home_rounded, label: tr('Accueil'), selected: false, onTap: () => navigation.go(Screen.home)),
+                  SidebarRow(icon: Icons.home_rounded, label: tr('Accueil'), selected: false, onTap: () => navigation.go(Screen.home)),
                   const SizedBox(height: 10),
-                  _SectionHeader(sectionTitle(kind)),
-                  _SidebarRow(
+                  SidebarHeader(sectionTitle(kind)),
+                  SidebarRow(
                     icon: kind == MediaKind.live ? Icons.sensors_rounded : Icons.grid_view_rounded,
                     label: allLabel,
                     count: library.count(kind),
                     selected: filter is AllItems && !_other,
                     onTap: () => navigation.show(kind, const AllItems()),
                   ),
-                  _SidebarRow(
+                  SidebarRow(
                     icon: Icons.star_rounded,
                     label: tr('Favoris'),
                     count: library.favoritesOf(kind).length,
                     selected: filter is FavoriteItems && !_other,
                     onTap: () => navigation.show(kind, const FavoriteItems()),
                   ),
-                  _SidebarRow(
+                  SidebarRow(
                     icon: Icons.history_rounded,
                     label: tr('Récents'),
                     count: library.recentsOf(kind).length,
@@ -168,37 +168,58 @@ class Sidebar extends StatelessWidget {
                     onTap: () => navigation.show(kind, const RecentItems()),
                   ),
                   if (kind == MediaKind.live)
-                    _SidebarRow(
+                    SidebarRow(
                       icon: Icons.category_outlined,
                       label: tr('Thèmes'),
                       selected: filter is ThemesFilter && !_other,
                       onTap: () => navigation.showThemes(theme: navigation.themeSelection, mode: navigation.themeMode),
                     ),
                   if (kind == MediaKind.live)
-                    _SidebarRow(
+                    SidebarRow(
                       icon: Icons.calendar_month_rounded,
                       label: tr('Guide TV'),
                       selected: guide,
                       onTap: () => navigation.go(Screen.guide),
                     ),
                   if (kind == MediaKind.live)
-                    _SidebarRow(
+                    SidebarRow(
                       icon: Icons.grid_view_rounded,
                       label: tr('MultiVue'),
                       count: context.multiview.channels.length,
                       selected: false,
                       onTap: () => openMultiView(context),
                     ),
-                  _SidebarRow(
+                  SidebarRow(
                     icon: Icons.radio_button_checked_rounded,
                     label: tr('Enregistrements'),
                     count: context.downloads.pendingCount + (context.recordings.active != null ? 1 : 0),
                     selected: recordings,
                     onTap: () => navigation.go(Screen.recordings),
                   ),
+                  if (library.hasLibrary && kind != MediaKind.live) ...[
+                    const SizedBox(height: 10),
+                    // Films et séries de l'IPTV, de « Mes vidéos » (dossiers, serveurs), ou des deux.
+                    Tooltip(
+                      message: tr('Films et séries de l\'abonnement IPTV, de vos dossiers et serveurs (Mes vidéos), ou des deux'),
+                      child: SegmentedButton<CatalogOrigin>(
+                        showSelectedIcon: false,
+                        style: const ButtonStyle(
+                          visualDensity: VisualDensity.compact,
+                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 4)),
+                        ),
+                        segments: [
+                          ButtonSegment(value: CatalogOrigin.all, label: Text(tr('Tout'), style: kText(11))),
+                          ButtonSegment(value: CatalogOrigin.iptv, label: Text('IPTV', style: kText(11))),
+                          ButtonSegment(value: CatalogOrigin.library, label: Text(tr('Mes vidéos'), style: kText(11), maxLines: 1, softWrap: false)),
+                        ],
+                        selected: {library.catalogOrigin},
+                        onSelectionChanged: (v) => library.setCatalogOrigin(v.first),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   Row(children: [
-                    Expanded(child: _SectionHeader(tr('Catégories'))),
+                    Expanded(child: SidebarHeader(tr('Catégories'))),
                     Tooltip(
                       message: tr('Gérer les catégories'),
                       child: InkResponse(
@@ -210,7 +231,7 @@ class Sidebar extends StatelessWidget {
                     const SizedBox(width: 6),
                   ]),
                   for (final name in categories)
-                    _SidebarRow(
+                    SidebarRow(
                       icon: Icons.folder_outlined,
                       label: library.categoryName(kind, name),
                       count: library.itemsInCategory(kind, name).length,
@@ -223,7 +244,7 @@ class Sidebar extends StatelessWidget {
             ),
             const ActivityIndicator(),
             Divider(height: 1, color: KPalette.separator),
-            _SidebarRow(
+            SidebarRow(
               icon: Icons.settings_rounded,
               label: tr('Réglages'),
               selected: false,
@@ -361,8 +382,8 @@ class SectionPicker extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.text);
+class SidebarHeader extends StatelessWidget {
+  const SidebarHeader(this.text, {super.key});
   final String text;
 
   @override
@@ -372,8 +393,9 @@ class _SectionHeader extends StatelessWidget {
       );
 }
 
-class _SidebarRow extends StatelessWidget {
-  const _SidebarRow({
+class SidebarRow extends StatelessWidget {
+  const SidebarRow({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,

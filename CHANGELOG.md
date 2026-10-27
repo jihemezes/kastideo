@@ -3,6 +3,17 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.3.1] - 2026-10-27
+
+**Corrections des premiers essais avec un NAS et Emby.**
+
+- **Tuile « Mes vidéos »** sur l'accueil (et dans la barre latérale, ⌘8), visible dès qu'une source Dossiers, Jellyfin, Emby ou Plex existe : vos vidéos sont réunies à part de l'IPTV. **À la une** (reprendre la lecture, ajouts récents, films à voir, films, séries, vidéos), grilles **Films / Séries / Vidéos** avec filtres **genre, année, non vus** et **tri**, **navigation par dossiers** (sous-dossiers du NAS, fil d'Ariane) et choix de la **source**.
+- **Films et Séries** : sélecteur **Tout / IPTV / Mes vidéos** au-dessus des catégories (IPTV seul par défaut). Les catégories de vos vidéos ne sont plus masquées par le réglage des pays (cause probable des fichiers du NAS invisibles).
+- **Mot de passe facultatif** pour Jellyfin et Emby (compte sans mot de passe), **jeton facultatif** pour Plex (serveur ouvert au réseau local).
+- **Emby** : connexion corrigée (erreur HTTP 400). Identification de l'appareil au format attendu par Emby (en-tête « Emby », paramètres d'adresse, nom de l'ordinateur sans accents ni apostrophe typographique), corps réduit à identifiant / mot de passe, second essai sous « /emby ». Une adresse copiée depuis le navigateur (« …/web/index.html#!/home ») est ramenée à celle du serveur.
+- **Diagnostic des erreurs** : en cas d'échec, la requête et la **réponse exacte du serveur** s'affichent (ajout de la source, **Détails de l'erreur…** dans Mes vidéos, journal de lecture).
+- Fiches TMDB des fichiers : année et genres retenus pour les filtres ; affiches et résumés gardés d'un examen des dossiers à l'autre.
+
 ## [1.3.0] - 2026-10-26
 
 **Nouvelles sources : vos vidéos et les serveurs de la maison.**

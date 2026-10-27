@@ -160,7 +160,7 @@ class MediaInfoStore extends ChangeNotifier {
     _tmdbFixes[item.id] = match.tmdbId;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('local.tmdbFixes.v1', jsonEncode(_tmdbFixes));
-    await library.applyEnrichment(item.sourceId, {item.id: (match.poster, match.overview)});
+    await library.applyEnrichment(item.sourceId, {item.id: (logo: match.poster, info: match.overview, year: match.year, genres: match.genres)});
     _cache.remove(item.id);
     await load(library.item(item.id) ?? item, force: true);
   }
@@ -182,7 +182,7 @@ class MediaInfoStore extends ChangeNotifier {
           .toList();
       if (todo.isEmpty) return;
       PlaybackLog.shared.note('Fiches TMDB des fichiers locaux : ${todo.length} à chercher');
-      final found = <String, (String?, String?)>{};
+      final found = <String, LocalFiche>{};
       for (var i = 0; i < todo.length; i += 4) {
         await Future.wait([
           for (final item in todo.skip(i).take(4))
@@ -190,7 +190,7 @@ class MediaInfoStore extends ChangeNotifier {
               try {
                 final matches = await client.search(item.name, series: item.kind == MediaKind.series);
                 final m = matches.firstOrNull;
-                if (m != null && m.poster != null) found[item.id] = (m.poster, m.overview);
+                if (m != null && m.poster != null) found[item.id] = (logo: m.poster, info: m.overview, year: m.year, genres: m.genres);
               } catch (_) {}
             }(),
         ]);

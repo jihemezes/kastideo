@@ -7,8 +7,9 @@ import FoundationNetworking
 public enum MediaServerError: LocalizedError, Equatable {
     case missingAddress
     case invalidAddress
-    case accessDenied(Int)
-    case badResponse(Int)
+    /// Code HTTP et diagnostic (requête sans jeton et réponse exacte du serveur).
+    case accessDenied(Int, detail: String = "")
+    case badResponse(Int, detail: String = "")
     case unreadable
     case noUser
     case plexUnavailable
@@ -18,8 +19,11 @@ public enum MediaServerError: LocalizedError, Equatable {
         switch self {
         case .missingAddress: return "Adresse du serveur manquante."
         case .invalidAddress: return "Adresse du serveur invalide."
-        case .accessDenied(let code): return "Accès refusé par le serveur (HTTP \(code)) : vérifiez l'identifiant, le mot de passe ou le jeton."
-        case .badResponse(let code): return "Le serveur a répondu HTTP \(code)."
+        case .accessDenied(let code, _): return "Accès refusé par le serveur (HTTP \(code)) : vérifiez l'identifiant, le mot de passe ou le jeton."
+        case .badResponse(let code, let detail):
+            let reply = detail.components(separatedBy: " : ").dropFirst().joined(separator: " : ")
+            return reply.isEmpty ? "Le serveur a répondu HTTP \(code)." : "Le serveur a répondu HTTP \(code) : \(reply.prefix(160))"
+
         case .unreadable: return "Réponse du serveur illisible."
         case .noUser: return "Aucun utilisateur sur ce serveur."
         case .plexUnavailable: return "plex.tv n'a pas répondu."
@@ -31,18 +35,43 @@ public enum MediaServerError: LocalizedError, Equatable {
         if case .accessDenied = self { return true }
         return false
     }
+
+    /// Code HTTP renvoyé par le serveur, s'il y en a un.
+    public var status: Int? {
+        switch self {
+        case .accessDenied(let code, _), .badResponse(let code, _): return code
+        default: return nil
+        }
+    }
+
+    /// Diagnostic : requête (sans jeton) et réponse exacte du serveur.
+    public var detail: String? {
+        switch self {
+        case .accessDenied(_, let detail), .badResponse(_, let detail): return detail.isEmpty ? nil : detail
+        default: return nil
+        }
+    }
 }
 
 /// Identité de Kastideo auprès des serveurs (un appareil par ordinateur).
 public enum KastideoDevice {
     public static var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3.0" }
-    /// Nom de l'ordinateur (lu une fois : la résolution du nom peut être lente).
+    /// Nom de l'ordinateur (lu une fois : la résolution du nom peut être lente), réduit aux caractères ASCII :
+    /// un accent ou une apostrophe typographique dans un en-tête HTTP fait répondre « 400 » à certains serveurs.
     public static let name: String = {
         #if os(macOS)
-        if let name = Host.current().localizedName, !name.isEmpty { return name }
+        if let name = Host.current().localizedName, !name.isEmpty { return asciiOnly(name) }
         #endif
-        return ProcessInfo.processInfo.hostName.replacingOccurrences(of: ".local", with: "")
+        return asciiOnly(ProcessInfo.processInfo.hostName.replacingOccurrences(of: ".local", with: ""))
     }()
+
+    public static func asciiOnly(_ text: String) -> String {
+        let folded = text.replacingOccurrences(of: "’", with: "'").replacingOccurrences(of: "‘", with: "'")
+            .folding(options: [.diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+        let kept = folded.unicodeScalars.filter { $0.value >= 32 && $0.value < 127 && $0 != "\"" }
+        let result = String(String.UnicodeScalarView(kept)).trimmingCharacters(in: .whitespaces)
+        return result.isEmpty ? "Kastideo" : result
+    }
     #if os(macOS)
     public static let platform = "macOS"
     #else
@@ -82,6 +111,11 @@ public enum MediaServerHTTP {
     public static func normalize(_ address: String, type: MediaServerType) throws -> URL {
         var text = address.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw MediaServerError.missingAddress }
+        // Adresse copiée depuis le navigateur (« …:8096/web/index.html#!/home ») : seule la racine du serveur compte.
+        if let cut = text.firstIndex(where: { $0 == "#" || $0 == "?" }) { text = String(text[..<cut]) }
+        if let web = text.range(of: #"/(web|emby/web)(/.*)?$"#, options: [.regularExpression, .caseInsensitive]) {
+            text = String(text[..<web.lowerBound])
+        }
         let bare = !text.contains("://")
         if bare { text = "http://" + text }
         while text.hasSuffix("/") { text.removeLast() }
@@ -114,19 +148,34 @@ public enum MediaServerHTTP {
         let data: Data = try await withCheckedThrowingContinuation { continuation in
             session.dataTask(with: request) { data, response, error in
                 if let error { continuation.resume(throwing: error); return }
-                if let http = response as? HTTPURLResponse {
+                if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                    let detail = diagnostic(method: method, url: url, status: http.statusCode, body: data)
                     if http.statusCode == 401 || http.statusCode == 403 {
-                        continuation.resume(throwing: MediaServerError.accessDenied(http.statusCode)); return
+                        continuation.resume(throwing: MediaServerError.accessDenied(http.statusCode, detail: detail)); return
                     }
-                    if !(200..<300).contains(http.statusCode) {
-                        continuation.resume(throwing: MediaServerError.badResponse(http.statusCode)); return
-                    }
+                    continuation.resume(throwing: MediaServerError.badResponse(http.statusCode, detail: detail)); return
                 }
                 continuation.resume(returning: data ?? Data())
             }.resume()
         }
         guard !data.isEmpty else { return nil }
         return try? JSONSerialization.jsonObject(with: data)
+    }
+
+    /// « POST http://…/Users/AuthenticateByName → HTTP 400 : réponse » (jetons masqués).
+    static func diagnostic(method: String, url: URL, status: Int, body: Data?) -> String {
+        var shown = url.absoluteString
+        if var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+            components.queryItems = components.queryItems?.map {
+                $0.name.lowercased().contains("token") || $0.name.lowercased() == "api_key" ? URLQueryItem(name: $0.name, value: "…") : $0
+            }
+            shown = components.url?.absoluteString ?? shown
+        }
+        let reply = String(decoding: body ?? Data(), as: UTF8.self)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+        let short = reply.count > 400 ? String(reply.prefix(400)) + "…" : reply
+        return "\(method) \(shown) → HTTP \(status)" + (short.isEmpty ? "" : " : \(short)")
     }
 
     static func int(_ any: Any?) -> Int? {
@@ -185,24 +234,28 @@ public struct JellyfinClient: MediaServerClient {
     public let emby: Bool
     /// Nom de la source, ajouté aux rubriques (« Films · Salon »).
     public var label: String
+    /// Rubrique des vidéos personnelles (« Vidéos »), dans la langue de l'interface.
+    public var videosLabel: String
 
-    public init(server: URL, sourceID: UUID, session: ServerSession, emby: Bool = false, label: String = "") {
+    public init(server: URL, sourceID: UUID, session: ServerSession, emby: Bool = false, label: String = "",
+                videosLabel: String = "Vidéos") {
         self.server = server
         self.sourceID = sourceID
         self.session = session
         self.emby = emby
         self.label = label
+        self.videosLabel = videosLabel
     }
 
-    static func authorization(token: String?) -> String {
-        let device = KastideoDevice.name.replacingOccurrences(of: "\"", with: "")
-        var text = "MediaBrowser Client=\"Kastideo\", Device=\"\(device)\", DeviceId=\"\(KastideoDevice.id)\", Version=\"\(KastideoDevice.version)\""
+    static func authorization(token: String?, scheme: String = "MediaBrowser") -> String {
+        var text = "\(scheme) Client=\"Kastideo\", Device=\"\(KastideoDevice.name)\", DeviceId=\"\(KastideoDevice.id)\", Version=\"\(KastideoDevice.version)\""
         if let token { text += ", Token=\"\(token)\"" }
         return text
     }
 
-    static func headers(token: String?) -> [String: String] {
-        var h = ["Authorization": authorization(token: token), "X-Emby-Authorization": authorization(token: token)]
+    static func headers(token: String?, emby: Bool = false) -> [String: String] {
+        var h = ["Authorization": authorization(token: token),
+                 "X-Emby-Authorization": authorization(token: token, scheme: emby ? "Emby" : "MediaBrowser")]
         if let token {
             h["X-Emby-Token"] = token
             h["X-MediaBrowser-Token"] = token
@@ -210,12 +263,39 @@ public struct JellyfinClient: MediaServerClient {
         return h
     }
 
-    /// Connexion avec un identifiant et un mot de passe (ou une clé d'API à la place du mot de passe).
-    public static func signIn(server: URL, username: String, password: String) async throws -> ServerSession {
+    /// Identification de l'appareil en paramètres d'adresse (forme attendue par Emby).
+    static var embyQuery: [URLQueryItem] {
+        [URLQueryItem(name: "X-Emby-Client", value: "Kastideo"), URLQueryItem(name: "X-Emby-Device-Name", value: KastideoDevice.name),
+         URLQueryItem(name: "X-Emby-Device-Id", value: KastideoDevice.id),
+         URLQueryItem(name: "X-Emby-Client-Version", value: KastideoDevice.version)]
+    }
+
+    /// Ouverture de session : Jellyfin, ou Emby (identification en paramètres et en-tête « Emby », corps réduit
+    /// à Username / Pw ; certains serveurs Emby ne répondent qu'avec le préfixe /emby).
+    static func authenticate(server: URL, username: String, password: String, emby: Bool) async throws -> Any? {
+        guard emby else {
+            return try await MediaServerHTTP.json("POST", server.appendingPathComponent("Users/AuthenticateByName"),
+                                                  headers: headers(token: nil), body: ["Username": username, "Pw": password])
+        }
+        var last: Error = MediaServerError.unreadable
+        for prefix in ["", "emby/"] {
+            var components = URLComponents(url: server.appendingPathComponent(prefix + "Users/AuthenticateByName"),
+                                           resolvingAgainstBaseURL: false)!
+            components.queryItems = embyQuery
+            do {
+                return try await MediaServerHTTP.json("POST", components.url!, headers: headers(token: nil, emby: true),
+                                                      body: ["Username": username, "Pw": password])
+            } catch let error as MediaServerError where error.status == 400 || error.status == 404 {
+                last = error
+            }
+        }
+        throw last
+    }
+
+    /// Connexion avec un identifiant et un mot de passe (vide si l'utilisateur n'en a pas ; une clé d'API peut le remplacer).
+    public static func signIn(server: URL, username: String, password: String, emby: Bool = false) async throws -> ServerSession {
         do {
-            let root = try await MediaServerHTTP.json("POST", server.appendingPathComponent("Users/AuthenticateByName"),
-                                                      headers: headers(token: nil),
-                                                      body: ["Username": username, "Pw": password, "Password": password])
+            let root = try await authenticate(server: server, username: username, password: password, emby: emby)
             guard let map = root as? [String: Any], let token = map["AccessToken"] as? String else { throw MediaServerError.unreadable }
             return ServerSession(token: token, userID: (map["User"] as? [String: Any])?["Id"] as? String)
         } catch let error as MediaServerError where error.isAccessDenied && password.count >= 24 && !password.contains(" ") {
@@ -242,7 +322,7 @@ public struct JellyfinClient: MediaServerClient {
     private func get(_ path: String, _ query: [String: String] = [:]) async throws -> Any? {
         var components = URLComponents(url: server.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { components.queryItems = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) } }
-        return try await MediaServerHTTP.json("GET", components.url!, headers: Self.headers(token: session.token))
+        return try await MediaServerHTTP.json("GET", components.url!, headers: Self.headers(token: session.token, emby: emby))
     }
 
     public func image(_ id: String, type: String = "Primary", height: Int = 450, tag: String? = nil) -> URL? {
@@ -289,12 +369,16 @@ public struct JellyfinClient: MediaServerClient {
                 let year = MediaServerHTTP.int(e["ProductionYear"])
                 let name = e["Name"] as? String ?? "?"
                 let tag = (e["ImageTags"] as? [String: Any])?["Primary"] as? String
-                let item = MediaItem(id: "\(prefix):\(isSeries ? "series" : "movie"):\(id)", sourceID: sourceID,
+                // Vidéos personnelles (bibliothèque « Vidéos personnelles », éléments de type Video) : rubrique « Vidéos ».
+                let personal = e["Type"] as? String == "Video" || type == "homevideos"
+                var item = MediaItem(id: "\(prefix):\(isSeries ? "series" : "movie"):\(id)", sourceID: sourceID,
                                      kind: isSeries ? .series : .movie,
                                      name: year != nil && !isSeries ? "\(name) (\(year!))" : name,
-                                     group: group(viewName), logoURL: tag != nil ? image(id, tag: tag) : nil,
+                                     group: group(personal ? videosLabel : viewName), logoURL: tag != nil ? image(id, tag: tag) : nil,
                                      streamURL: isSeries ? nil : stream(id), seriesID: isSeries ? id : nil,
                                      info: e["Overview"] as? String, added: MediaServerHTTP.date(e["DateCreated"]))
+                item.year = year
+                item.genres = (e["Genres"] as? [Any])?.map { "\($0)" }
                 items.append(item)
                 Self.userData(item.id, e, into: &progress)
             }
@@ -359,7 +443,7 @@ public struct JellyfinClient: MediaServerClient {
         case .progress, .pause: path = "Sessions/Playing/Progress"
         case .stop: path = "Sessions/Playing/Stopped"
         }
-        _ = try await MediaServerHTTP.json("POST", server.appendingPathComponent(path), headers: Self.headers(token: session.token),
+        _ = try await MediaServerHTTP.json("POST", server.appendingPathComponent(path), headers: Self.headers(token: session.token, emby: emby),
                                            body: ["ItemId": MediaServerHTTP.serverID(item), "PositionTicks": Int(position * 1e7),
                                                   "IsPaused": event == .pause, "CanSeek": true, "PlayMethod": "DirectStream"])
     }
@@ -367,7 +451,7 @@ public struct JellyfinClient: MediaServerClient {
     public func setPlayed(_ item: MediaItem, played: Bool) async throws {
         _ = try await MediaServerHTTP.json(played ? "POST" : "DELETE",
                                            server.appendingPathComponent("Users/\(user)/PlayedItems/\(MediaServerHTTP.serverID(item))"),
-                                           headers: Self.headers(token: session.token))
+                                           headers: Self.headers(token: session.token, emby: emby))
     }
 }
 
@@ -397,7 +481,7 @@ public struct PlexClient: MediaServerClient {
     public static func headers(token: String? = nil) -> [String: String] {
         var h = ["X-Plex-Product": "Kastideo", "X-Plex-Version": KastideoDevice.version, "X-Plex-Client-Identifier": KastideoDevice.id,
                  "X-Plex-Device-Name": KastideoDevice.name, "X-Plex-Platform": KastideoDevice.platform]
-        if let token { h["X-Plex-Token"] = token }
+        if let token, !token.isEmpty { h["X-Plex-Token"] = token }
         return h
     }
 
@@ -429,7 +513,8 @@ public struct PlexClient: MediaServerClient {
             throw MediaServerError.invalidAddress
         }
         var items = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) }
-        items.append(URLQueryItem(name: "X-Plex-Token", value: token))
+        // Sans jeton : serveur ouvert au réseau local (Plex > Réseau > « Adresses autorisées sans authentification »).
+        if !token.isEmpty { items.append(URLQueryItem(name: "X-Plex-Token", value: token)) }
         components.queryItems = items
         return try await MediaServerHTTP.json("GET", components.url!, headers: Self.headers(token: token))
     }
@@ -441,13 +526,13 @@ public struct PlexClient: MediaServerClient {
 
     private func image(_ thumb: String?, width: Int = 300, height: Int = 450) -> URL? {
         guard let thumb, let encoded = thumb.addingPercentEncoding(withAllowedCharacters: .alphanumerics) else { return nil }
-        return URL(string: "\(server.absoluteString)/photo/:/transcode?width=\(width)&height=\(height)&minSize=1&upscale=1&url=\(encoded)&X-Plex-Token=\(token)")
+        return URL(string: "\(server.absoluteString)/photo/:/transcode?width=\(width)&height=\(height)&minSize=1&upscale=1&url=\(encoded)\(token.isEmpty ? "" : "&X-Plex-Token=\(token)")")
     }
 
     private func stream(_ m: [String: Any]) -> URL? {
         guard let media = (m["Media"] as? [[String: Any]])?.first, let part = (media["Part"] as? [[String: Any]])?.first,
               let key = part["key"] as? String else { return nil }
-        return URL(string: "\(server.absoluteString)\(key)?X-Plex-Token=\(token)")
+        return URL(string: "\(server.absoluteString)\(key)\(token.isEmpty ? "" : "?X-Plex-Token=\(token)")")
     }
 
     private static func metadata(_ root: Any?) -> [[String: Any]] {
@@ -479,11 +564,14 @@ public struct PlexClient: MediaServerClient {
                 let show = type == "show"
                 let year = MediaServerHTTP.int(m["year"])
                 let name = m["title"] as? String ?? "?"
-                let item = MediaItem(id: "\(sourceID.uuidString):\(show ? "series" : "movie"):\(id)", sourceID: sourceID,
+                var item = MediaItem(id: "\(sourceID.uuidString):\(show ? "series" : "movie"):\(id)", sourceID: sourceID,
                                      kind: show ? .series : .movie, name: year != nil && !show ? "\(name) (\(year!))" : name,
                                      group: label.isEmpty ? title : "\(title) · \(label)", logoURL: image(m["thumb"] as? String),
                                      streamURL: show ? nil : stream(m), seriesID: show ? id : nil, info: m["summary"] as? String,
                                      added: MediaServerHTTP.int(m["addedAt"]).map { Date(timeIntervalSince1970: TimeInterval($0)) })
+                item.year = year
+                let genres = (m["Genre"] as? [[String: Any]] ?? []).compactMap { MediaServerHTTP.string($0["tag"]) }
+                item.genres = genres.isEmpty ? nil : genres
                 items.append(item)
                 Self.userData(item.id, m, into: &progress)
             }

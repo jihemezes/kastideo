@@ -135,7 +135,11 @@ class _DetailsViewState extends State<DetailsView> {
   }
 
   Widget _backButton(BuildContext context) {
-    final label = item.kind == MediaKind.series ? tr('Retour aux séries') : tr('Retour aux films');
+    final label = context.navigation.screen == Screen.library
+        ? tr('Retour à Mes vidéos')
+        : item.kind == MediaKind.series
+            ? tr('Retour aux séries')
+            : tr('Retour aux films');
     return Hover(
       onTap: () => context.navigation.select(item.kind == MediaKind.episode ? MediaKind.series : item.kind, null),
       builder: (context, hovering) => Container(

@@ -25,6 +25,7 @@ import 'l10n.dart';
 import 'core/playback.dart';
 import 'theme.dart';
 import 'ui/home_screen.dart';
+import 'ui/library_view.dart';
 import 'ui/catalog_screen.dart';
 import 'ui/guide_view.dart';
 import 'ui/multiview_view.dart';
@@ -406,6 +407,7 @@ class _RootViewState extends State<RootView> {
         const SingleActivator(LogicalKeyboardKey.digit1, control: true): () => navigation.go(Screen.live),
         const SingleActivator(LogicalKeyboardKey.digit2, control: true): () => navigation.go(Screen.movies),
         const SingleActivator(LogicalKeyboardKey.digit3, control: true): () => navigation.go(Screen.series),
+        const SingleActivator(LogicalKeyboardKey.digit8, control: true): () => navigation.go(Screen.library),
         const SingleActivator(LogicalKeyboardKey.digit7, control: true): () => navigation.go(Screen.guide),
         const SingleActivator(LogicalKeyboardKey.keyM, control: true, alt: true): () => openMultiView(context),
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
@@ -415,6 +417,10 @@ class _RootViewState extends State<RootView> {
           // Échap : quitte le mode cinéma, sinon referme le lecteur (le direct s'arrête, comme sur Mac).
           if (navigation.theater) {
             navigation.exitTheater();
+            return;
+          }
+          if (navigation.screen == Screen.library && navigation.showPlayer) {
+            navigation.closePlayer();
             return;
           }
           final kind = navigation.screen.kind;
@@ -440,6 +446,7 @@ class _RootViewState extends State<RootView> {
                   Screen.guide => const GuideScreen(),
                   Screen.recordings => const RecordingsScreen(),
                   Screen.multiview => const MultiViewScreen(),
+                  Screen.library => const LibraryScreen(),
                 },
               ),
             ),

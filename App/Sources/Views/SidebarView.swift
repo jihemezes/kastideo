@@ -20,11 +20,25 @@ struct SidebarView: View {
                 row(.favorites, icon: "star", count: store.favoriteIDs.count)
                 row(.recents, icon: "clock.arrow.circlepath", count: nil)
                 row(.guide, icon: "calendar", count: nil)
+                if store.hasLibrary {
+                    row(.library, icon: "photo.stack", count: store.libraryItems().count)
+                }
                 row(.recordings, icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
                     count: recordings.activityCount)
             }
 
             let kind = navigation.lastKind
+            if store.hasLibrary, kind == .movie || kind == .series {
+                // Films et séries de l'IPTV, de « Mes vidéos » (dossiers, serveurs), ou des deux.
+                Section {
+                    Picker("Afficher", selection: Binding(get: { store.catalogOrigin }, set: { store.catalogOrigin = $0 })) {
+                        ForEach(CatalogOrigin.allCases) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .help("Films et séries de l'abonnement IPTV, de vos dossiers et serveurs (Mes vidéos), ou des deux")
+                }
+            }
             let categories = store.categoriesByKind[kind] ?? []
             if !categories.isEmpty {
                 Section {

@@ -19,6 +19,8 @@ class MediaItem {
     this.info,
     this.added,
     this.season,
+    this.year,
+    this.genres = const [],
   }) : searchKey = name.searchKey;
 
   final String id;
@@ -36,11 +38,16 @@ class MediaItem {
 
   /// Saison d'un épisode (dossiers locaux, serveurs Jellyfin / Emby / Plex).
   final int? season;
+
+  /// Année (serveurs, fiches TMDB des fichiers) et genres : filtres de la vidéothèque.
+  final int? year;
+  final List<String> genres;
   final String searchKey;
 
   String get displayName => cleanTitle(name).title;
 
-  MediaItem copyWith({String? name, String? logo, String? epgId, int? number, String? info}) => MediaItem(
+  MediaItem copyWith({String? name, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres}) =>
+      MediaItem(
         id: id,
         sourceId: sourceId,
         kind: kind,
@@ -54,6 +61,8 @@ class MediaItem {
         info: info ?? this.info,
         added: added,
         season: season,
+        year: year ?? this.year,
+        genres: genres ?? this.genres,
       );
 
   Map<String, dynamic> toJson() => {
@@ -70,6 +79,8 @@ class MediaItem {
         if (info != null) 'i': info,
         if (added != null) 'a': added!.millisecondsSinceEpoch ~/ 1000,
         if (season != null) 'se': season,
+        if (year != null) 'y': year,
+        if (genres.isNotEmpty) 'gn': genres,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -86,10 +97,15 @@ class MediaItem {
         info: j['i'] as String?,
         added: j['a'] == null ? null : DateTime.fromMillisecondsSinceEpoch((j['a'] as int) * 1000),
         season: j['se'] as int?,
+        year: j['y'] as int?,
+        genres: [for (final g in (j['gn'] as List? ?? const [])) '$g'],
       );
 }
 
 /// Type de source : abonnement IPTV, dossiers de vidéos (disque, clé USB, NAS monté) ou serveur multimédia.
+/// Origine des films et séries affichés dans Films et Séries.
+enum CatalogOrigin { all, iptv, library }
+
 enum SourceKind {
   xtream,
   m3uUrl,

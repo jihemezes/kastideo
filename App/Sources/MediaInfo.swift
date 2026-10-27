@@ -176,7 +176,8 @@ final class MediaInfoStore {
     func applyFix(_ item: MediaItem, match: TMDBMatch, store: LibraryStore) async {
         tmdbFixes[item.id] = match.tmdbID
         UserDefaults.standard.set(tmdbFixes, forKey: Self.fixesKey)
-        store.applyEnrichment(item.sourceID, [item.id: (logo: match.posterURL, info: match.overview)])
+        store.applyEnrichment(item.sourceID, [item.id: LocalFiche(logo: match.posterURL, info: match.overview, year: match.year,
+                                                                   genres: match.genres)])
         await reload(item, store: store)
     }
 
@@ -196,22 +197,23 @@ final class MediaInfoStore {
         let items = Array(todo)
         for item in items { enrichTried.insert(item.id) }
         Task {
-            var found: [String: (logo: URL?, info: String?)] = [:]
+            var found: [String: LocalFiche] = [:]
             var index = 0
             while index < items.count {
                 let batch = items[index..<min(index + 4, items.count)]
                 index += 4
-                await withTaskGroup(of: (String, URL?, String?).self) { group in
+                await withTaskGroup(of: (String, MediaDetails?).self) { group in
                     for item in batch {
                         group.addTask {
                             let cleaned = TMDB.cleanTitle(item.name)
                             let tmdb = try? await client.details(title: cleaned.title, isSeries: item.kind == .series,
                                                                  tmdbID: fixes[item.id], year: cleaned.year)
-                            return (item.id, tmdb?.posterURL, tmdb?.plot)
+                            return (item.id, tmdb)
                         }
                     }
-                    for await (id, poster, plot) in group where poster != nil || plot != nil {
-                        found[id] = (logo: poster, info: plot)
+                    for await (id, tmdb) in group {
+                        guard let tmdb, tmdb.posterURL != nil || tmdb.plot != nil else { continue }
+                        found[id] = LocalFiche(logo: tmdb.posterURL, info: tmdb.plot, year: tmdb.year, genres: tmdb.genres)
                     }
                 }
                 if found.count >= 24 {

@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
+> Version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
@@ -35,8 +35,8 @@ Settings > Sources > **Add a source** > **Folders**, then **Add a folder…** (i
 
 Settings > Sources > **Add a source** > **Jellyfin**, **Emby** or **Plex**. **Search the network** finds the servers at home: click yours to fill in the form (otherwise type the address; without a port, 8096 or 32400 is added).
 
-- **Jellyfin / Emby**: username and password (or an **API key** from the dashboard). **Test** checks the address.
-- **Plex**: **Sign in with Plex** opens plex.tv in the browser; authorize Kastideo, then choose the server from your account. Or type the address and the **token** (X-Plex-Token).
+- **Jellyfin / Emby**: username and password — **optional** if the account has none (or an **API key** from the dashboard). **Test** checks the address; on failure, the exact server response is shown.
+- **Plex**: **Sign in with Plex** opens plex.tv in the browser; authorize Kastideo, then choose the server from your account. Or type the address and the **token** (X-Plex-Token), optional if the server allows the local network without authentication.
 - Libraries appear in **Movies** and **Series** (“library name · server name”), with the server's posters, details, seasons and episodes. Direct playback, no transcoding.
 - **Resume and “watched” shared both ways**: the position is sent to the server while you watch, and the one from your other devices is picked up. Right-click > **Mark as watched / unwatched**; **Watched** badge on posters.
 
@@ -59,6 +59,17 @@ Settings > **Sources**: **edit** a source (pencil button: name, server, username
 ### Home screen
 
 Global search (channels, movies, series), **Live**, **Movies** and **Series** tiles, quick access to **Favorites**, **Recents**, **TV Guide**, **MultiView** and **Recordings**, and the **Continue watching** row.
+
+### My videos
+
+As soon as a **Folders**, **Jellyfin**, **Emby** or **Plex** source exists, a **My videos** tile appears on the home screen (shortcut **Ctrl+8**). It gathers your videos, apart from IPTV:
+
+- **Featured**: **Resume playback** (started movies and episodes), **Recently added**, **Movies to watch**, then a Movies, Series and Videos row;
+- **Movies**, **Series**, **Videos**: grids with search, filters (**genre**, **year**, **unwatched**) and sorting (title, recently added, year);
+- **Folders**: browse your folders and subfolders as in the file explorer (breadcrumb to go back up), and the servers' libraries;
+- **Sources**: all, or just one (NAS, Emby, Plex…). An orange triangle flags an error: right-click > **Error details…** shows the request and the **exact server response**, then **Retry**.
+
+In **Movies** and **Series**, the **All / IPTV / My videos** selector (sidebar, above the categories) chooses what is shown: IPTV only (default), your videos only, or both mixed. The categories of your videos are never hidden by the countries setting.
 
 ### Sidebar
 
@@ -254,6 +265,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.3.1-desktop1**: “My videos” tile (resume, recently added, genre / year / unwatched filters, sorting, folder browsing, error diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed, source cache read correctly at startup.
 - **1.3.0-desktop1**: new sources — folders (disk, USB drive, NAS), Jellyfin, Emby and Plex — with network search for servers, resume and “watched” shared with servers, TMDB details and detail fixing for files, subtitles placed next to videos.
 - **1.2.2-desktop1**: schedule a recording from live TV (guide programmes or time slot, daily, weekday or weekly repetition), edit recents, "Select all" box for categories.
 - **1.2.1-desktop1**: more reliable recording (direct stream copy, MKV conversion), timeshift fixed, source editing, “eye” button, details in your language, countries and languages of the Cinema interface.

@@ -16,14 +16,14 @@ import 'core/settings.dart';
 import 'core/themes.dart';
 
 /// Écran affiché.
-enum Screen { home, live, movies, series, guide, recordings, multiview }
+enum Screen { home, live, movies, series, guide, recordings, multiview, library }
 
 extension ScreenKind on Screen {
   MediaKind? get kind => switch (this) {
         Screen.live => MediaKind.live,
         Screen.movies => MediaKind.movie,
         Screen.series => MediaKind.series,
-        Screen.home || Screen.guide || Screen.recordings || Screen.multiview => null,
+        Screen.home || Screen.guide || Screen.recordings || Screen.multiview || Screen.library => null,
       };
 }
 
@@ -63,6 +63,12 @@ class CategoryFilter extends CatalogFilter {
   final String name;
 }
 
+/// Vues de la vidéothèque.
+enum LibraryView { home, movies, series, videos, folders }
+
+/// Tri de la vidéothèque.
+enum LibrarySort { title, added, year }
+
 /// Navigation (équivalent du NavigationModel de la version Mac).
 class NavigationModel extends ChangeNotifier {
   Screen screen = Screen.home;
@@ -70,7 +76,49 @@ class NavigationModel extends ChangeNotifier {
   bool theater = false;
 
   /// Film ou série affiché (fiche) — interface Classique : panneau de droite ; Cinéma : page entière.
-  final Map<MediaKind, MediaItem?> _selected = {};
+  /// La vidéothèque a sa propre fiche ouverte.
+  final Map<Object, MediaItem?> _selected = {};
+  Object _key(MediaKind kind) => screen == Screen.library ? 'library' : kind;
+
+  // MARK: Vidéothèque
+
+  /// Source affichée (null : toutes), vue, dossier ouvert (navigation par dossiers), filtres et tri.
+  String? librarySource;
+  LibraryView libraryView = LibraryView.home;
+  List<String> libraryFolder = const [];
+  String? libraryGenre;
+  int? libraryYear;
+  bool libraryUnwatched = false;
+  LibrarySort librarySort = LibrarySort.title;
+
+  void setLibrary({
+    Object? source = _keep,
+    LibraryView? view,
+    List<String>? folder,
+    Object? genre = _keep,
+    Object? year = _keep,
+    bool? unwatched,
+    LibrarySort? sort,
+  }) {
+    if (source != _keep) {
+      librarySource = source as String?;
+      libraryFolder = const [];
+    }
+    if (view != null) {
+      libraryView = view;
+      if (view != LibraryView.folders) libraryFolder = const [];
+    }
+    if (folder != null) libraryFolder = folder;
+    if (genre != _keep) libraryGenre = genre as String?;
+    if (year != _keep) libraryYear = year as int?;
+    if (unwatched != null) libraryUnwatched = unwatched;
+    if (sort != null) librarySort = sort;
+    _selected['library'] = null;
+    showPlayer = false;
+    notifyListeners();
+  }
+
+  static const _keep = Object();
 
   /// Le lecteur est affiché (au lieu de la fiche) pour un film ou un épisode.
   bool showPlayer = false;
@@ -115,7 +163,7 @@ class NavigationModel extends ChangeNotifier {
   }
 
   CatalogFilter filter(MediaKind kind) => _filters[kind] ?? const AllItems();
-  MediaItem? selected(MediaKind kind) => _selected[kind];
+  MediaItem? selected(MediaKind kind) => _selected[_key(kind)];
 
   void go(Screen value) {
     screen = value;
@@ -130,14 +178,14 @@ class NavigationModel extends ChangeNotifier {
     _filters[kind] = filter;
     editingRecents = false;
     screen = screenFor(kind);
-    _selected[kind] = null;
+    _selected[_key(kind)] = null;
     showPlayer = false;
     search = '';
     notifyListeners();
   }
 
   void select(MediaKind kind, MediaItem? item) {
-    _selected[kind] = item;
+    _selected[_key(kind)] = item;
     showPlayer = false;
     notifyListeners();
   }
@@ -269,7 +317,8 @@ Future<void> openItem(BuildContext context, MediaItem item) async {
       navigation.openPlayer();
     case MediaKind.movie:
     case MediaKind.series:
-      if (navigation.screen != screenFor(item.kind)) navigation.go(screenFor(item.kind));
+      final target = context.library.isLibraryItem(item) ? Screen.library : screenFor(item.kind);
+      if (navigation.screen != target) navigation.go(target);
       navigation.select(item.kind, item);
     case MediaKind.episode:
       playItem(context, item);
@@ -283,11 +332,12 @@ Future<void> playItem(BuildContext context, MediaItem item) async {
   final navigation = context.navigation;
   final library = context.library;
   final kind = item.kind == MediaKind.episode ? MediaKind.series : item.kind;
-  if (navigation.screen != screenFor(kind)) navigation.go(screenFor(kind));
+  final target = library.isLibraryItem(item) ? Screen.library : screenFor(kind);
+  if (navigation.screen != target) navigation.go(target);
   final selected = navigation.selected(kind);
   if (item.kind == MediaKind.episode) {
     if (selected == null || selected.name != item.group) {
-      final series = library.items(MediaKind.series).where((s) => s.name == item.group).firstOrNull;
+      final series = library.seriesOf(item);
       if (series != null) navigation.select(kind, series);
     }
   } else if (selected?.id != item.id) {

@@ -72,6 +72,9 @@ final class LocalMediaTests: XCTestCase {
         XCTAssertEqual(try MediaServerHTTP.normalize("nas.local/", type: .jellyfin).absoluteString, "http://nas.local:8096")
         XCTAssertEqual(try MediaServerHTTP.normalize("https://jf.example.com", type: .jellyfin).absoluteString, "https://jf.example.com")
         XCTAssertThrowsError(try MediaServerHTTP.normalize("  ", type: .emby))
+        XCTAssertEqual(try MediaServerHTTP.normalize("http://192.168.1.10:8096/web/index.html#!/home", type: .emby).absoluteString,
+                       "http://192.168.1.10:8096")
+        XCTAssertEqual(KastideoDevice.asciiOnly("Mac mini de Jérôme’s \"x\""), "Mac mini de Jerome's x")
         let session = ServerSession(token: "t", userID: "u")
         XCTAssertEqual(ServerSession.decode(session.encoded()), session)
     }
@@ -105,6 +108,20 @@ final class LocalMediaTests: XCTestCase {
         XCTAssertEqual(v3, [1, 2])
         let v4 = try await jf.details(of: dune)?.directors
         XCTAssertEqual(v4, ["Denis Villeneuve"])
+
+        // Emby : connexion acceptée seulement sous /emby avec l'identification en paramètres (serveur simulé).
+        let embyServer = try MediaServerHTTP.normalize("127.0.0.1:8798", type: .emby)
+        let embySession = try await JellyfinClient.signIn(server: embyServer, username: "jm", password: "secret", emby: true)
+        XCTAssertFalse(embySession.token.isEmpty)
+        // Utilisateur sans mot de passe.
+        let guest = try await JellyfinClient.signIn(server: server, username: "guest", password: "")
+        XCTAssertFalse(guest.token.isEmpty)
+        do {
+            _ = try await JellyfinClient.signIn(server: server, username: "jm", password: "bad")
+        } catch let error as MediaServerError {
+            XCTAssertEqual(error.status, 401)
+            XCTAssertTrue(error.detail?.contains("AuthenticateByName") ?? false)
+        }
 
         let plex = PlexClient(server: URL(string: "http://127.0.0.1:8797")!, sourceID: UUID(), token: "ptok")
         let v5 = try await plex.identity()

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'details.dart';
+import 'log.dart';
 import 'models.dart';
 
 /// Événement de lecture transmis au serveur (reprise et « vu » partagés avec ses autres appareils).
@@ -11,13 +12,32 @@ enum PlaybackEvent { start, progress, pause, stop }
 /// Identité de Kastideo auprès des serveurs (même appareil d'un lancement à l'autre).
 class KastideoDevice {
   KastideoDevice._();
-  static String version = '1.3.0';
+  static String version = '1.3.1';
+
+  /// Nom de l'ordinateur, réduit aux caractères ASCII : un accent ou une apostrophe typographique dans un en-tête HTTP
+  /// fait répondre « 400 Bad Request » à certains serveurs.
   static String get name {
+    String raw;
     try {
-      return Platform.localHostname;
+      raw = Platform.localHostname;
     } catch (_) {
-      return 'Kastideo';
+      raw = 'Kastideo';
     }
+    return asciiOnly(raw);
+  }
+
+  static String asciiOnly(String text) {
+    const from = 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿÀÂÄÁÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝ’‘';
+    const to = 'aaaaaaceeeeiiiinooooouuuuyyAAAAAACEEEEIIIINOOOOOUUUUY\'\'';
+    final b = StringBuffer();
+    for (final ch in text.split('')) {
+      final i = from.indexOf(ch);
+      final c = i >= 0 ? to[i] : ch;
+      final code = c.codeUnitAt(0);
+      if (code >= 32 && code < 127 && c != '"') b.write(c);
+    }
+    final out = b.toString().trim();
+    return out.isEmpty ? 'Kastideo' : out;
   }
 
   /// Identifiant stable de l'appareil (empreinte FNV-1a du nom de l'ordinateur et du système).
@@ -33,8 +53,12 @@ class KastideoDevice {
 }
 
 class MediaServerException implements Exception {
-  MediaServerException(this.message);
+  MediaServerException(this.message, {this.detail, this.status});
   final String message;
+
+  /// Réponse exacte du serveur (diagnostic de connexion).
+  final String? detail;
+  final int? status;
   @override
   String toString() => message;
 }
@@ -70,6 +94,9 @@ abstract class MediaServerClient {
 
   /// Nom de la source, ajouté aux rubriques (« Films · Salon ») pour les distinguer de celles des autres sources.
   String label = '';
+
+  /// Nom de la rubrique des vidéos personnelles (« Vidéos »), dans la langue de l'interface.
+  String videosLabel = 'Vidéos';
   String groupName(String library) => label.isEmpty ? library : '$library · $label';
 
   Future<SourceContent> fetchLibrary();
@@ -85,6 +112,11 @@ abstract class MediaServerClient {
   static String normalize(String address, {int? defaultPort}) {
     var a = address.trim();
     if (a.isEmpty) throw MediaServerException('Adresse du serveur manquante.');
+    // Adresse copiée depuis le navigateur (« …:8096/web/index.html#!/home ») : seule la racine du serveur compte.
+    final cut = RegExp(r'[#?]').firstMatch(a);
+    if (cut != null) a = a.substring(0, cut.start);
+    final web = RegExp(r'/(web|emby/web)(/.*)?$', caseSensitive: false).firstMatch(a);
+    if (web != null) a = a.substring(0, web.start);
     if (!a.contains('://')) {
       a = 'http://$a';
       final bare = Uri.tryParse(a);
@@ -123,10 +155,23 @@ abstract class MediaServerClient {
       }
       final response = await request.close().timeout(timeout);
       final text = await response.transform(utf8.decoder).join().timeout(timeout);
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        throw MediaServerException('Accès refusé par le serveur (HTTP ${response.statusCode}) : vérifiez l\'identifiant, le mot de passe ou le jeton.');
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        // Diagnostic : requête (sans jeton) et réponse exacte du serveur dans le journal.
+        final shown = url.replace(queryParameters: url.queryParameters.isEmpty
+            ? null
+            : {for (final e in url.queryParameters.entries) e.key: RegExp('token|api_key', caseSensitive: false).hasMatch(e.key) ? '…' : e.value});
+        final reply = text.trim().replaceAll(RegExp(r'\s+'), ' ');
+        final detail = '$method $shown → HTTP ${response.statusCode}${reply.isEmpty ? '' : ' : ${reply.length > 400 ? '${reply.substring(0, 400)}…' : reply}'}';
+        PlaybackLog.shared.note('Serveur : $detail');
+        if (response.statusCode == 401 || response.statusCode == 403) {
+          throw MediaServerException('Accès refusé par le serveur (HTTP ${response.statusCode}) : vérifiez l\'identifiant, le mot de passe ou le jeton.',
+              detail: detail, status: response.statusCode);
+        }
+        throw MediaServerException(
+            'Le serveur a répondu HTTP ${response.statusCode}${reply.isEmpty ? '.' : ' : ${reply.length > 160 ? '${reply.substring(0, 160)}…' : reply}'}',
+            detail: detail,
+            status: response.statusCode);
       }
-      if (response.statusCode < 200 || response.statusCode >= 300) throw MediaServerException('Le serveur a répondu HTTP ${response.statusCode}.');
       if (text.trim().isEmpty) return null;
       try {
         return jsonDecode(text);
@@ -157,26 +202,54 @@ class JellyfinClient extends MediaServerClient {
   String get _token => session.token;
   String get _user => session.userId ?? '';
 
-  static String authHeader({String? token}) =>
-      'MediaBrowser Client="Kastideo", Device="${KastideoDevice.name.replaceAll('"', '')}", DeviceId="${KastideoDevice.id}", '
+  static String authHeader({String? token, String scheme = 'MediaBrowser'}) =>
+      '$scheme Client="Kastideo", Device="${KastideoDevice.name}", DeviceId="${KastideoDevice.id}", '
       'Version="${KastideoDevice.version}"${token == null ? '' : ', Token="$token"'}';
 
-  static Map<String, String> headers({String? token}) => {
+  static Map<String, String> headers({String? token, bool emby = false}) => {
     'Authorization': authHeader(token: token),
-    'X-Emby-Authorization': authHeader(token: token),
+    'X-Emby-Authorization': authHeader(token: token, scheme: emby ? 'Emby' : 'MediaBrowser'),
     'X-Emby-Token': ?token,
     'X-MediaBrowser-Token': ?token,
   };
 
-  /// Connexion avec un identifiant et un mot de passe (une clé d'API peut remplacer le mot de passe : voir [withApiKey]).
-  static Future<ServerSession> signIn(String server, String username, String password) async {
+  /// Identification de l'appareil en paramètres d'adresse (forme attendue par Emby).
+  static Map<String, String> embyQuery() => {
+    'X-Emby-Client': 'Kastideo',
+    'X-Emby-Device-Name': KastideoDevice.name,
+    'X-Emby-Device-Id': KastideoDevice.id,
+    'X-Emby-Client-Version': KastideoDevice.version,
+  };
+
+  /// Connexion avec un identifiant et un mot de passe (vide si l'utilisateur n'en a pas ; une clé d'API peut le remplacer :
+  /// voir [withApiKey]).
+  static Future<ServerSession> signIn(String server, String username, String password, {bool emby = false}) async {
     final probe = JellyfinClient(server, '', session: ServerSession(''));
-    final root = await probe.requestJson(
-      'POST',
-      Uri.parse('$server/Users/AuthenticateByName'),
-      headers: headers(),
-      body: {'Username': username, 'Pw': password, 'Password': password},
-    );
+    dynamic root;
+    if (emby) {
+      // Emby : identification en paramètres et en-tête « Emby », corps réduit à Username / Pw ; certains serveurs
+      // ne répondent qu'avec le préfixe /emby.
+      MediaServerException? last;
+      for (final prefix in ['', '/emby']) {
+        try {
+          root = await probe.requestJson('POST', Uri.parse('$server$prefix/Users/AuthenticateByName').replace(queryParameters: embyQuery()),
+              headers: headers(emby: true), body: {'Username': username, 'Pw': password});
+          last = null;
+          break;
+        } on MediaServerException catch (e) {
+          last = e;
+          if (e.status != 400 && e.status != 404) rethrow;
+        }
+      }
+      if (last != null) throw last;
+    } else {
+      root = await probe.requestJson(
+        'POST',
+        Uri.parse('$server/Users/AuthenticateByName'),
+        headers: headers(),
+        body: {'Username': username, 'Pw': password},
+      );
+    }
     if (root is! Map || root['AccessToken'] == null) throw MediaServerException('Réponse du serveur illisible.');
     final user = root['User'] is Map ? (root['User'] as Map)['Id'] as String? : null;
     return ServerSession(root['AccessToken'] as String, userId: user);
@@ -204,7 +277,7 @@ class JellyfinClient extends MediaServerClient {
   Future<dynamic> _get(String path, [Map<String, String> query = const {}]) => requestJson(
     'GET',
     Uri.parse('$server$path').replace(queryParameters: query.isEmpty ? null : query),
-    headers: headers(token: _token),
+    headers: headers(token: _token, emby: emby),
   );
 
   String image(String id, {String type = 'Primary', int height = 450, String? tag}) =>
@@ -249,12 +322,15 @@ class JellyfinClient extends MediaServerClient {
           sourceId: sourceId,
           kind: series ? MediaKind.series : MediaKind.movie,
           name: year != null && !series ? '$name ($year)' : name,
-          group: groupName(viewName),
+          // Vidéos personnelles (bibliothèque « Vidéos personnelles », éléments de type Video) : rubrique « Vidéos ».
+          group: e['Type'] == 'Video' || type == 'homevideos' ? groupName(videosLabel) : groupName(viewName),
           logo: tags['Primary'] != null ? image(id, tag: tags['Primary'] as String) : null,
           stream: series ? null : stream(id),
           seriesId: series ? id : null,
           info: e['Overview'] as String?,
           added: DateTime.tryParse(e['DateCreated'] as String? ?? ''),
+          year: year,
+          genres: [for (final g in (e['Genres'] as List? ?? const [])) '$g'],
         );
         items.add(item);
         _userData(item.id, e, progress);
@@ -353,7 +429,7 @@ class JellyfinClient extends MediaServerClient {
     await requestJson(
       'POST',
       Uri.parse('$server$path'),
-      headers: headers(token: _token),
+      headers: headers(token: _token, emby: emby),
       body: {
         'ItemId': MediaServerClient.serverId(item),
         'PositionTicks': (position * 1e7).round(),
@@ -368,7 +444,7 @@ class JellyfinClient extends MediaServerClient {
   Future<void> setPlayed(MediaItem item, bool played) => requestJson(
     played ? 'POST' : 'DELETE',
     Uri.parse('$server/Users/$_user/PlayedItems/${MediaServerClient.serverId(item)}'),
-    headers: headers(token: _token),
+    headers: headers(token: _token, emby: emby),
   );
 }
 
@@ -377,6 +453,7 @@ class JellyfinClient extends MediaServerClient {
 class PlexClient extends MediaServerClient {
   PlexClient(super.server, super.sourceId, {required this.token});
   final String token;
+  String get _tokenParam => token.isEmpty ? '' : '&X-Plex-Token=$token';
 
   static Map<String, String> headers({String? token}) => {
     'X-Plex-Product': 'Kastideo',
@@ -384,7 +461,7 @@ class PlexClient extends MediaServerClient {
     'X-Plex-Client-Identifier': KastideoDevice.id,
     'X-Plex-Device-Name': KastideoDevice.name,
     'X-Plex-Platform': KastideoDevice.platform,
-    'X-Plex-Token': ?token,
+    if (token != null && token.isNotEmpty) 'X-Plex-Token': token,
   };
 
   /// Connexion par code (plex.tv/link) : [PlexPin.url] s'ouvre dans le navigateur, puis [PlexPin.poll] rend le jeton.
@@ -418,19 +495,19 @@ class PlexClient extends MediaServerClient {
 
   Future<dynamic> _get(String path, [Map<String, String> query = const {}]) => requestJson(
     'GET',
-    Uri.parse('$server$path').replace(queryParameters: {...query, 'X-Plex-Token': token}),
+    Uri.parse('$server$path').replace(queryParameters: {...query, if (token.isNotEmpty) 'X-Plex-Token': token}),
     headers: headers(token: token),
   );
 
   String _image(String? thumb, {int width = 300, int height = 450}) => thumb == null
       ? ''
-      : '$server/photo/:/transcode?width=$width&height=$height&minSize=1&upscale=1&url=${Uri.encodeQueryComponent(thumb)}&X-Plex-Token=$token';
+      : '$server/photo/:/transcode?width=$width&height=$height&minSize=1&upscale=1&url=${Uri.encodeQueryComponent(thumb)}$_tokenParam';
 
   String? _stream(Map m) {
     final media = (m['Media'] as List? ?? const []).whereType<Map>().firstOrNull;
     final part = (media?['Part'] as List? ?? const []).whereType<Map>().firstOrNull;
     final key = part?['key'] as String?;
-    return key == null ? null : '$server$key?X-Plex-Token=$token';
+    return key == null ? null : '$server$key${token.isEmpty ? '' : '?X-Plex-Token=$token'}';
   }
 
   static List<Map> _metadata(dynamic root) {
@@ -478,6 +555,8 @@ class PlexClient extends MediaServerClient {
           seriesId: show ? id : null,
           info: m['summary'] as String?,
           added: added == null ? null : DateTime.fromMillisecondsSinceEpoch(added * 1000),
+          year: year,
+          genres: [for (final g in (m['Genre'] as List? ?? const []).whereType<Map>()) '${g['tag']}'],
         );
         items.add(item);
         _userData(item.id, m, progress);

@@ -20,6 +20,9 @@ import 'themes.dart';
 import 'xtream.dart';
 import '../l10n.dart';
 
+/// Fiche trouvée sur TMDB pour un fichier local (affiche, résumé, année, genres).
+typedef LocalFiche = ({String? logo, String? info, int? year, List<String> genres});
+
 /// Bibliothèque : sources, contenus (mis en cache sur disque), favoris, récents et catégories personnalisées.
 class LibraryStore extends ChangeNotifier {
   final List<Source> sources = [];
@@ -134,9 +137,10 @@ class LibraryStore extends ChangeNotifier {
       final file = _cacheFile(source.id);
       if (await file.exists()) {
         try {
-          final path = file.path;
-          _contentBySource[source.id] = await Isolate.run(() => _decodeCache(path));
-        } catch (_) {}
+          _contentBySource[source.id] = await _loadCache(file.path);
+        } catch (e) {
+          PlaybackLog.shared.note('Cache de « ${source.name} » illisible : $e');
+        }
       }
     }
     _rebuild();
@@ -177,6 +181,13 @@ class LibraryStore extends ChangeNotifier {
 
   File _cacheFile(String id) => File('${_cacheDir.path}${Platform.pathSeparator}$id.json');
 
+  /// Lecture du cache dans un autre fil. Fonction statique : la fermeture n'emporte que le chemin (une fermeture créée
+  /// dans une méthode asynchrone peut emporter son contexte, que l'autre fil refuse).
+  static Future<List<MediaItem>> _loadCache(String path) => Isolate.run(() => _decodeCache(path));
+
+  static Future<void> _writeCache(String path, List<Map<String, dynamic>> encoded) =>
+      Isolate.run(() => File(path).writeAsStringSync(jsonEncode(encoded)));
+
   static List<MediaItem> _decodeCache(String path) {
     final list = jsonDecode(File(path).readAsStringSync()) as List;
     return [for (final e in list) MediaItem.fromJson(Map<String, dynamic>.from(e as Map))];
@@ -185,6 +196,34 @@ class LibraryStore extends ChangeNotifier {
   // MARK: Accès
 
   int count(MediaKind kind) => _byKind[kind]?.length ?? 0;
+
+  // MARK: Vidéothèque (dossiers, Jellyfin, Emby, Plex)
+
+  final Map<String, List<MediaItem>> _library = {};
+
+  /// Sources en cours de chargement.
+  final Set<String> loadingSources = {};
+
+  /// Erreur du dernier chargement de chaque source (diagnostic) : message court et détail (réponse du serveur).
+  final Map<String, (String, String?)> sourceErrors = {};
+
+  /// Sources de la vidéothèque (actives).
+  List<Source> get librarySources => sources.where((s) => s.enabled && !s.kind.isIptv).toList();
+  bool get hasLibrary => sources.any((s) => !s.kind.isIptv);
+
+  /// Films, séries et vidéos de la vidéothèque (d'une source, ou de toutes).
+  List<MediaItem> libraryItems({String? sourceId}) =>
+      sourceId != null ? (_library[sourceId] ?? const []) : [for (final list in _library.values) ...list];
+
+  bool isLibraryItem(MediaItem item) => !(sourceOf(item)?.kind.isIptv ?? true);
+
+  /// Série d'un épisode (vidéothèque ou IPTV).
+  MediaItem? seriesOf(MediaItem episode) {
+    for (final s in libraryItems(sourceId: episode.sourceId)) {
+      if (s.kind == MediaKind.series && s.seriesId == episode.seriesId) return s;
+    }
+    return items(MediaKind.series).where((s) => s.name == episode.group).firstOrNull;
+  }
   List<MediaItem> items(MediaKind kind) => _byKind[kind] ?? const [];
 
   /// Catégories visibles, dans l'ordre choisi (noms d'origine).
@@ -236,8 +275,22 @@ class LibraryStore extends ChangeNotifier {
   String? countryOf(MediaItem item) => countryOfCategory(item.group) ?? Countries.of(item.name);
 
   bool _countryAllowed(String? code) => countries.isEmpty || (code == null ? countryNeutral : countries.contains(code));
-  bool inCountries(MediaItem item) => countries.isEmpty || _countryAllowed(countryOf(item));
-  bool categoryInCountries(String name) => countries.isEmpty || _countryAllowed(countryOfCategory(name));
+  // Les films et séries de « Mes vidéos » ne sont jamais filtrés par pays.
+  bool inCountries(MediaItem item) => countries.isEmpty || isLibraryItemId(item) || _countryAllowed(countryOf(item));
+  bool categoryInCountries(String name) => countries.isEmpty || _libraryGroups.contains(name) || _countryAllowed(countryOfCategory(name));
+  bool isLibraryItemId(MediaItem item) => !(sources.where((s) => s.id == item.sourceId).firstOrNull?.kind.isIptv ?? true);
+
+  // MARK: Origine des films et séries (Tout / IPTV / Mes vidéos)
+
+  /// Films et séries affichés dans Films et Séries : tout, l'IPTV seul (par défaut) ou « Mes vidéos » seules.
+  CatalogOrigin get catalogOrigin => CatalogOrigin.values.where((o) => o.name == _prefs.getString('catalog.origin')).firstOrNull ?? CatalogOrigin.iptv;
+  final Set<String> _libraryGroups = {};
+
+  void setCatalogOrigin(CatalogOrigin value) {
+    _prefs.setString('catalog.origin', value.name);
+    countriesGeneration++;
+    _rebuild();
+  }
 
   /// Pays repérés dans les catégories (nombre de contenus), du plus fréquent au moins fréquent.
   List<(String, int)> detectedCountries() {
@@ -316,12 +369,26 @@ class LibraryStore extends ChangeNotifier {
     _byCategory.clear();
     _byId.clear();
     _localEpisodes.clear();
+    _library.clear();
+    _libraryGroups.clear();
+    final origin = catalogOrigin;
     final providerOrder = <MediaKind, List<String>>{};
     for (final source in sources.where((s) => s.enabled)) {
+      final iptv = source.kind.isIptv;
       for (final original in _contentBySource[source.id] ?? const <MediaItem>[]) {
         // Épisodes des dossiers locaux : rangés sous leur série (fiche de la série), pas dans les listes.
         if (original.kind == MediaKind.episode) {
           (_localEpisodes[original.seriesId ?? ''] ??= []).add(original);
+          _byId[original.id] = original;
+          continue;
+        }
+        // Dossiers et serveurs de la maison : toujours dans « Mes vidéos » ; dans Films et Séries selon le filtre.
+        if (!iptv) {
+          _byId[original.id] = original;
+          (_library[source.id] ??= []).add(original);
+          if (origin == CatalogOrigin.iptv) continue;
+          _libraryGroups.add(original.group);
+        } else if (origin == CatalogOrigin.library && original.kind != MediaKind.live) {
           _byId[original.id] = original;
           continue;
         }
@@ -512,6 +579,7 @@ class LibraryStore extends ChangeNotifier {
   Future<void> refresh(Source source) async {
     var refreshed = false;
     isBusy = true;
+    loadingSources.add(source.id);
     lastError = null;
     notifyListeners();
     try {
@@ -544,7 +612,10 @@ class LibraryStore extends ChangeNotifier {
           final known = {for (final i in _contentBySource[id] ?? const <MediaItem>[]) i.id: i};
           content = SourceContent([
             for (final i in content.items)
-              if (known[i.id] case final k? when k.logo != null || k.info != null) i.copyWith(logo: k.logo, info: k.info) else i,
+              if (known[i.id] case final k? when k.logo != null || k.info != null || k.genres.isNotEmpty)
+            i.copyWith(logo: k.logo, info: k.info, year: k.year, genres: k.genres)
+          else
+            i,
           ]);
         case SourceKind.jellyfin:
         case SourceKind.emby:
@@ -581,16 +652,19 @@ class LibraryStore extends ChangeNotifier {
       source.lastRefresh = DateTime.now();
       source.guideUrl = content.epgUrl;
       refreshed = true;
+      sourceErrors.remove(source.id);
       await _saveSources();
       final path = _cacheFile(id).path;
       final encoded = [for (final i in items) i.toJson()];
-      await Isolate.run(() => File(path).writeAsStringSync(jsonEncode(encoded)));
+      await _writeCache(path, encoded);
       PlaybackLog.shared.note('Source « ${source.name} » chargée : ${items.length} éléments');
     } catch (e) {
       lastError = '${source.name} : $e';
+      sourceErrors[source.id] = ('$e', e is MediaServerException ? e.detail : null);
       PlaybackLog.shared.note('Source « ${source.name} » : $e');
     } finally {
-      isBusy = false;
+      loadingSources.remove(source.id);
+      isBusy = loadingSources.isNotEmpty;
       _rebuild();
     }
     if (refreshed) {
@@ -642,8 +716,8 @@ class LibraryStore extends ChangeNotifier {
     // Vérification avant l'ajout : une erreur d'identifiant est signalée tout de suite.
     final ServerSession session;
     if (kind == SourceKind.plex) {
+      // Sans jeton : serveur ouvert au réseau local (Plex > Réseau > « Adresses autorisées sans authentification »).
       final t = (token ?? password).trim();
-      if (t.isEmpty) throw MediaServerException('Connectez-vous à Plex ou saisissez le jeton du serveur.');
       session = ServerSession(t);
       await PlexClient(server, source.id, token: t).identity();
     } else {
@@ -660,7 +734,7 @@ class LibraryStore extends ChangeNotifier {
 
   static Future<ServerSession> _signIn(SourceKind kind, String server, String username, String password) async {
     try {
-      return await JellyfinClient.signIn(server, username, password);
+      return await JellyfinClient.signIn(server, username, password, emby: kind == SourceKind.emby);
     } on MediaServerException {
       // Une clé d'API (Tableau de bord > Clés API) peut remplacer le mot de passe.
       if (password.length >= 24 && !password.contains(' ')) {
@@ -676,7 +750,11 @@ class LibraryStore extends ChangeNotifier {
   Future<MediaServerClient?> serverClient(Source source, {bool forceSignIn = false}) async {
     if (!source.kind.isMediaServer) return null;
     final cached = _servers[source.id];
-    if (!forceSignIn && cached != null) return cached..label = source.name;
+    if (!forceSignIn && cached != null) {
+      return cached
+        ..label = source.name
+        ..videosLabel = tr('Vidéos');
+    }
     var session = ServerSession.decode(await _secrets.read('session.${source.id}'));
     if (source.kind != SourceKind.plex && (session == null || forceSignIn)) {
       final password = await this.password(source.id) ?? '';
@@ -687,7 +765,9 @@ class LibraryStore extends ChangeNotifier {
     final client = source.kind == SourceKind.plex
         ? PlexClient(source.address, source.id, token: session.token)
         : JellyfinClient(source.address, source.id, session: session, emby: source.kind == SourceKind.emby);
-    client.label = source.name;
+    client
+      ..label = source.name
+      ..videosLabel = tr('Vidéos');
     _servers[source.id] = client;
     return client;
   }
@@ -737,16 +817,19 @@ class LibraryStore extends ChangeNotifier {
   bool isLocalFile(MediaItem item) => sourceOf(item)?.kind == SourceKind.folder;
 
   /// Affiches et résumés trouvés sur TMDB pour les fichiers locaux (gardés dans le cache de la source).
-  Future<void> applyEnrichment(String sourceId, Map<String, (String?, String?)> found) async {
+  Future<void> applyEnrichment(String sourceId, Map<String, LocalFiche> found) async {
     final list = _contentBySource[sourceId];
     if (list == null || found.isEmpty) return;
     _contentBySource[sourceId] = [
       for (final i in list)
-        if (found[i.id] case (final logo, final info)) i.copyWith(logo: logo ?? i.logo, info: info ?? i.info) else i,
+        if (found[i.id] case final f?)
+          i.copyWith(logo: f.logo ?? i.logo, info: f.info ?? i.info, year: f.year ?? i.year, genres: f.genres.isEmpty ? i.genres : f.genres)
+        else
+          i,
     ];
     final path = _cacheFile(sourceId).path;
     final encoded = [for (final i in _contentBySource[sourceId]!) i.toJson()];
-    await Isolate.run(() => File(path).writeAsStringSync(jsonEncode(encoded)));
+    await _writeCache(path, encoded);
     _rebuild();
   }
 

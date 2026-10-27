@@ -136,7 +136,7 @@ struct SourceEditorView: View {
                         serverAddressRow(prompt: "http://192.168.1.10:8096")
                         TextField("Identifiant", text: $username)
                             .textContentType(.username)
-                        passwordField(String(localized: "Mot de passe (ou clé d'API)"))
+                        passwordField(String(localized: "Mot de passe (ou clé d'API) — facultatif"))
                     } header: {
                         Text("Connexion au serveur")
                     } footer: {
@@ -366,6 +366,13 @@ struct SourceEditorView: View {
 
     // MARK: - Logique
 
+    /// Message d'erreur, avec la requête et la réponse exacte du serveur (diagnostic de connexion).
+    static func describeWithDetail(_ error: Error) -> String {
+        let message = LibraryStore.describe(error)
+        guard let detail = (error as? MediaServerError)?.detail else { return message }
+        return message + "\n" + detail
+    }
+
     private var playlistTypes: [UTType] {
         var types: [UTType] = [.m3uPlaylist, .plainText]
         if let m3u8 = UTType(filenameExtension: "m3u8") { types.append(m3u8) }
@@ -407,9 +414,11 @@ struct SourceEditorView: View {
         case .folders:
             return !folders.isEmpty
         case .jellyfin, .emby:
-            return serverURL != nil && !username.trimmingCharacters(in: .whitespaces).isEmpty && (!password.isEmpty || existing != nil)
+            // Mot de passe facultatif : sur le réseau de la maison, un compte n'en a pas toujours.
+            return serverURL != nil && !username.trimmingCharacters(in: .whitespaces).isEmpty
         case .plex:
-            return serverURL != nil && (!token.trimmingCharacters(in: .whitespaces).isEmpty || existing != nil)
+            // Jeton facultatif : un serveur Plex peut être ouvert au réseau local sans authentification.
+            return serverURL != nil
         }
     }
 
@@ -497,7 +506,7 @@ struct SourceEditorView: View {
                 plexPin = nil
             } catch {
                 plexPin = nil
-                testResult = (false, LibraryStore.describe(error))
+                testResult = (false, Self.describeWithDetail(error))
             }
         }
     }
@@ -539,7 +548,7 @@ struct SourceEditorView: View {
                 testResult = (true, message)
             }
         } catch {
-            testResult = (false, LibraryStore.describe(error))
+            testResult = (false, Self.describeWithDetail(error))
         }
     }
 
@@ -582,7 +591,7 @@ struct SourceEditorView: View {
                 }
                 dismiss()
             } catch {
-                testResult = (false, LibraryStore.describe(error))
+                testResult = (false, Self.describeWithDetail(error))
             }
             return
         }

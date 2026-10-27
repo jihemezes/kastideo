@@ -20,6 +20,8 @@ struct RootView: View {
             if store.hasSources {
                 if navigation.browse == .home {
                     HomeView()
+                } else if navigation.browse == .library {
+                    LibraryRootView()
                 } else {
                     MainSplitView()
                 }
@@ -225,7 +227,7 @@ struct MainToolbar: ToolbarContent {
 
 /// Passe la fenêtre principale en plein écran (ou en sort) pour le mode cinéma.
 @MainActor
-private func setFullScreen(_ enabled: Bool) {
+func setFullScreen(_ enabled: Bool) {
     guard let window = NSApp.keyWindow ?? NSApp.mainWindow
             ?? NSApp.windows.first(where: { $0.isVisible && $0.canBecomeMain }) else { return }
     let isFull = window.styleMask.contains(.fullScreen)

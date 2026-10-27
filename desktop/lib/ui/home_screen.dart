@@ -53,6 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           }
         }
+        // Vidéothèque (dossiers, serveurs).
+        var inLibrary = 0;
+        for (final item in library.libraryItems()) {
+          if (item.searchKey.contains(key)) {
+            found.add(item);
+            if (++inLibrary >= 25) break;
+          }
+        }
       }
       setState(() => _results = found);
     });
@@ -286,6 +294,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${_formatNumber(n)} ${tr(n == 1 ? one : many)}';
   }
 
+  String _libraryCount() {
+    final library = context.library;
+    final n = library.libraryItems().length;
+    if (n == 0) return library.loadingSources.isNotEmpty ? tr('Chargement…') : tr('Dossiers et serveurs');
+    return '${_formatNumber(n)} ${tr(n == 1 ? 'vidéo' : 'vidéos')}';
+  }
+
   static String _formatNumber(int n) {
     final s = n.toString();
     final b = StringBuffer();
@@ -331,6 +346,20 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => navigation.go(Screen.series),
         ),
       ),
+      // Vidéothèque : seulement avec des dossiers ou un serveur Jellyfin, Emby, Plex.
+      if (context.library.hasLibrary) ...[
+        const SizedBox(width: 18),
+        Expanded(
+          child: HomeBigTile(
+            title: tr('Mes vidéos'),
+            icon: Icons.perm_media_outlined,
+            subtitle: _libraryCount(),
+            colors: const [KPalette.orange, KPalette.violet],
+            height: height,
+            onTap: () => navigation.go(Screen.library),
+          ),
+        ),
+      ],
     ]);
   }
 

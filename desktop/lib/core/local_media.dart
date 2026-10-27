@@ -164,6 +164,7 @@ SourceContent scanFolders(List<String> roots, String sourceId, {String videosLab
               sourceId: sourceId,
               kind: MediaKind.movie,
               name: entry.year == null ? entry.title : '${entry.title} (${entry.year})',
+            year: entry.year,
               group: '$moviesLabel · $rootName',
               stream: path,
               added: modified,

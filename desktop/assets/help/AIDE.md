@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
+> Version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
@@ -35,8 +35,8 @@ Réglages > Sources > **Ajouter une source** > **Dossiers**, puis **Ajouter un d
 
 Réglages > Sources > **Ajouter une source** > **Jellyfin**, **Emby** ou **Plex**. **Rechercher sur le réseau** trouve les serveurs de la maison : cliquez sur le vôtre pour remplir le formulaire (sinon saisissez l'adresse ; sans port, 8096 ou 32400 est ajouté).
 
-- **Jellyfin / Emby** : identifiant et mot de passe (ou une **clé d'API** du tableau de bord). **Tester** vérifie l'adresse.
-- **Plex** : **Se connecter avec Plex** ouvre plex.tv dans le navigateur ; autorisez Kastideo, puis choisissez le serveur de votre compte. Ou saisissez l'adresse et le **jeton** (X-Plex-Token).
+- **Jellyfin / Emby** : identifiant et mot de passe — **facultatif** si le compte n'en a pas (ou une **clé d'API** du tableau de bord). **Tester** vérifie l'adresse ; en cas d'échec, la réponse exacte du serveur s'affiche.
+- **Plex** : **Se connecter avec Plex** ouvre plex.tv dans le navigateur ; autorisez Kastideo, puis choisissez le serveur de votre compte. Ou saisissez l'adresse et le **jeton** (X-Plex-Token), facultatif si le serveur autorise le réseau local sans authentification.
 - Les bibliothèques apparaissent dans **Films** et **Séries** (« nom de la bibliothèque · nom du serveur »), avec les affiches, fiches, saisons et épisodes du serveur. Lecture directe, sans conversion.
 - **Reprise et « vu » partagés dans les deux sens** : la position est transmise au serveur pendant la lecture et celle de vos autres appareils est reprise. Clic droit > **Marquer comme vu / non vu** ; pastille **Vu** sur les affiches.
 
@@ -59,6 +59,17 @@ Réglages > **Sources** : **modifier** une source (bouton crayon : nom, serveur,
 ### L'écran d'accueil
 
 Recherche globale (chaînes, films, séries), pavés **Direct**, **Films** et **Séries**, accès rapides **Favoris**, **Récents**, **Guide TV**, **MultiVue** et **Enregistrements**, rangée **Reprendre la lecture**.
+
+### Mes vidéos
+
+Dès qu'une source **Dossiers**, **Jellyfin**, **Emby** ou **Plex** existe, une tuile **Mes vidéos** apparaît sur l'accueil (raccourci **Ctrl+8**). Elle réunit vos vidéos, à part de l'IPTV :
+
+- **À la une** : **Reprendre la lecture** (films et épisodes entamés), **Ajouts récents**, **Films à voir**, puis une rangée Films, Séries et Vidéos ;
+- **Films**, **Séries**, **Vidéos** : grilles avec recherche, filtres (**genre**, **année**, **non vus**) et tri (titre, ajout récent, année) ;
+- **Dossiers** : parcourez vos dossiers et sous-dossiers comme dans l'explorateur de fichiers (fil d'Ariane pour remonter), et les bibliothèques des serveurs ;
+- **Sources** : toutes, ou une seule (NAS, Emby, Plex…). Un triangle orange signale une erreur : clic droit > **Détails de l'erreur…** (ou bouton **Détails**) affiche la requête et la **réponse exacte du serveur**, puis **Réessayer**.
+
+Dans **Films** et **Séries**, le sélecteur **Tout / IPTV / Mes vidéos** (barre latérale, au-dessus des catégories) choisit ce qui est affiché : l'IPTV seul (par défaut), vos vidéos seules, ou les deux mélangés. Les catégories de vos vidéos ne sont jamais masquées par le réglage des pays.
 
 ### La barre latérale
 
@@ -254,6 +265,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.3.1-desktop1** : tuile « Mes vidéos » (reprise, ajouts récents, filtres genre / année / non vus, tri, navigation par dossiers, diagnostic des erreurs), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée, cache des sources relu correctement au démarrage.
 - **1.3.0-desktop1** : nouvelles sources — dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex — avec recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB et correction des fiches des fichiers, sous-titres placés à côté.
 - **1.2.2-desktop1** : programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition quotidienne, en semaine ou hebdomadaire), modifier les récents, case « Tout sélectionner » des catégories.
 - **1.2.1-desktop1** : enregistrement fiabilisé (copie directe du flux, conversion en MKV), différé corrigé, modification des sources, bouton « œil », fiches dans votre langue, pays et langues de l'interface Cinéma.

@@ -215,9 +215,11 @@ public enum FolderScanner {
                 let key = stableHash(path)
                 switch entry.kind {
                 case .movie:
-                    items.append(MediaItem(id: "\(prefix):movie:\(key)", sourceID: sourceID, kind: .movie,
-                                           name: entry.year.map { "\(entry.title) (\($0))" } ?? entry.title,
-                                           group: "\(labels.movies) · \(rootName)", streamURL: url, added: modified))
+                    var movie = MediaItem(id: "\(prefix):movie:\(key)", sourceID: sourceID, kind: .movie,
+                                          name: entry.year.map { "\(entry.title) (\($0))" } ?? entry.title,
+                                          group: "\(labels.movies) · \(rootName)", streamURL: url, added: modified)
+                    movie.year = entry.year
+                    items.append(movie)
                 case .episode:
                     let name = entry.series ?? "Série"
                     let seriesKey = name.lowercased()

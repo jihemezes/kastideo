@@ -40,6 +40,9 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
     public var added: Date?
     /// Saison d'un épisode (dossiers locaux, Jellyfin, Emby, Plex).
     public var season: Int?
+    /// Année et genres (serveurs, fiches TMDB des fichiers) : filtres de la vidéothèque.
+    public var year: Int?
+    public var genres: [String]?
 
     public init(id: String, sourceID: UUID, kind: MediaKind, name: String, group: String,
                 logoURL: URL? = nil, streamURL: URL? = nil, epgID: String? = nil,

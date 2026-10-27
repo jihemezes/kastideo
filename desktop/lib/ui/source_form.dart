@@ -110,6 +110,9 @@ class _SourceFormState extends State<SourceForm> {
 
   // MARK: Actions
 
+  /// Message d'erreur, avec la réponse exacte du serveur (diagnostic de connexion).
+  static String _describe(Object e) => e is MediaServerException && e.detail != null ? '$e\n${e.detail}' : '$e';
+
   Future<void> _save() async {
     // Chemin saisi sans avoir cliqué sur « + » : ajouté quand même.
     if (_networkPath.text.trim().isNotEmpty) _addNetworkPath();
@@ -154,7 +157,7 @@ class _SourceFormState extends State<SourceForm> {
         widget.onDone();
       }
     } catch (e) {
-      setState(() => _error = '$e');
+      setState(() => _error = _describe(e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -214,7 +217,7 @@ class _SourceFormState extends State<SourceForm> {
     } catch (e) {
       setState(() {
         _info = null;
-        _error = '$e';
+        _error = _describe(e);
       });
     }
   }
@@ -255,7 +258,7 @@ class _SourceFormState extends State<SourceForm> {
     } catch (e) {
       setState(() {
         _info = null;
-        _error = '$e';
+        _error = _describe(e);
       });
     }
   }

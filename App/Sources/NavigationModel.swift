@@ -2,6 +2,25 @@ import Foundation
 import Observation
 import KastideoCore
 
+/// Vues de la vidéothèque.
+enum LibraryView: String, CaseIterable, Identifiable {
+    case home, movies, series, videos, folders
+    var id: String { rawValue }
+}
+
+/// Tri de la vidéothèque.
+enum LibrarySort: String, CaseIterable, Identifiable {
+    case title, added, year
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .title: return String(localized: "Titre")
+        case .added: return String(localized: "Ajout récent")
+        case .year: return String(localized: "Année")
+        }
+    }
+}
+
 /// Ce que l'utilisateur parcourt dans la barre latérale.
 enum Browse: Hashable {
     case home
@@ -13,11 +32,13 @@ enum Browse: Hashable {
     case guide
     /// Direct par thème (Sport, Info…) : en ce moment, ce soir, chaînes.
     case themes
+    /// Vidéothèque : dossiers (disque, clé USB, NAS) et serveurs Jellyfin, Emby, Plex.
+    case library
 
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .home, .favorites, .recents, .recordings, .guide, .themes: return nil
+        case .home, .favorites, .recents, .recordings, .guide, .themes, .library: return nil
         }
     }
 
@@ -31,6 +52,7 @@ enum Browse: Hashable {
         case .recordings: return String(localized: "Enregistrements")
         case .guide: return String(localized: "Guide TV")
         case .themes: return String(localized: "Thèmes")
+        case .library: return String(localized: "Mes vidéos")
         }
     }
 
@@ -95,6 +117,29 @@ final class NavigationModel {
     var themeSelection: ContentTheme?
     var themeMode: ThemeMode = .now
 
+    // MARK: Vidéothèque
+
+    /// Source affichée (nil : toutes), vue, dossier ouvert (navigation par dossiers), filtres et tri.
+    var librarySource: UUID? {
+        didSet { libraryFolder = [] }
+    }
+    var libraryView: LibraryView = .home {
+        didSet { if libraryView != .folders { libraryFolder = [] } }
+    }
+    var libraryFolder: [String] = []
+    var libraryGenre: String?
+    var libraryYear: Int?
+    var libraryUnwatched = false
+    var librarySort: LibrarySort = .title
+
+    /// Ouvre une vue de la vidéothèque (la fiche ou le lecteur ouverts se referment).
+    func showLibrary(_ view: LibraryView) {
+        if browse != .library { browse = .library }
+        libraryView = view
+        infoItemID = nil
+        selectedItemID = nil
+    }
+
     /// Ouvre la vue Thèmes sur un thème et un mode.
     func showThemes(_ theme: ContentTheme?, mode: ThemeMode) {
         themeSelection = theme
@@ -116,9 +161,9 @@ final class NavigationModel {
     }
 
     /// Ouvre un contenu dans sa section (depuis l'accueil, par exemple).
-    func open(_ item: MediaItem) {
+    func open(_ item: MediaItem, inLibrary: Bool = false) {
         let kind: MediaKind = item.kind == .episode ? .series : item.kind
-        browse = .all(kind)
+        browse = inLibrary ? .library : .all(kind)
         selectedItemID = item.id
     }
 
