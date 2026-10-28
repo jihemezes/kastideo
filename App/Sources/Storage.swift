@@ -41,7 +41,7 @@ enum Storage {
     static func clear() {
         let files = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
         // Les logos choisis par l'utilisateur ne font pas partie du cache.
-        for file in files where file.lastPathComponent != "logos" { try? FileManager.default.removeItem(at: file) }
+        for file in files where file.lastPathComponent != "logos" && file.lastPathComponent != "Logs" { try? FileManager.default.removeItem(at: file) }
     }
 }
 

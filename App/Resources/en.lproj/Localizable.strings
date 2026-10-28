@@ -808,3 +808,27 @@
 "Ajout récent" = "Recently added";
 "Films et séries de l'abonnement IPTV, de vos dossiers et serveurs (Mes vidéos), ou des deux" = "Movies and series from the IPTV subscription, from your folders and servers (My videos), or both";
 "Mot de passe (ou clé d'API) — facultatif" = "Password (or API key) — optional";
+
+/* 1.3.3 — Journal par sujets, guide TV */
+"Lecture et relais" = "Playback and relay";
+"Sources et catalogues" = "Sources and catalogues";
+"Fiches TMDB" = "TMDB details";
+"Affichage et divers" = "Display and other";
+"Détaillé" = "Detailed";
+"Débogage" = "Debug";
+"Session en cours" = "Current session";
+"Session précédente" = "Previous session";
+"Rechercher dans le journal" = "Search the log";
+"Erreurs et alertes" = "Errors and warnings";
+"Copier l'affichage" = "Copy what is shown";
+"%lld ligne(s) affichée(s) sur %lld. Identifiants et mots de passe masqués : le journal peut être copié pour être partagé." = "%lld line(s) shown out of %lld. Usernames and passwords are hidden: the log can be copied to share it.";
+"Afficher le dossier du journal" = "Show the log folder";
+"Sujets" = "Topics";
+"Tous" = "All";
+"Niveau de détail" = "Level of detail";
+"« Débogage » écrit davantage de lignes : à réserver à la recherche d'un problème." = "“Debug” writes more lines: use it only when hunting a problem.";
+"Guide TV du fournisseur : %lld programmes" = "Provider TV guide: %lld programmes";
+"Guide TV du fournisseur : aucun programme reçu (voir le Journal, sujet « Guide TV »)" = "Provider TV guide: no programme received (see the Log, topic “TV Guide”)";
+"Recharger le guide TV (résultat détaillé dans le Journal, sujet « Guide TV »)" = "Reload the TV guide (detailed result in the Log, topic “TV Guide”)";
+"Aucune adresse de guide connue pour cette source." = "No guide address is known for this source.";
+"Le fournisseur a refusé la demande du guide (HTTP %lld)." = "The provider refused the guide request (HTTP %lld).";

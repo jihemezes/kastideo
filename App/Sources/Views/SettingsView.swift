@@ -93,6 +93,11 @@ struct SourceSettingsRow: View {
                     Text(error).font(.caption).foregroundStyle(.red)
                 } else if let epgError = store.epgErrors[source.id] {
                     Text("Guide TV : \(epgError)").font(.caption).foregroundStyle(.orange)
+                } else if source.kind.isIPTV, let count = store.epgCounts[source.id] {
+                    Text(count > 0 ? String(localized: "Guide TV du fournisseur : \(count) programmes")
+                                   : String(localized: "Guide TV du fournisseur : aucun programme reçu (voir le Journal, sujet « Guide TV »)"))
+                        .font(.caption)
+                        .foregroundStyle(count > 0 ? Color.secondary : Color.orange)
                 }
             }
             Spacer()
@@ -102,6 +107,12 @@ struct SourceSettingsRow: View {
                 Button { store.refresh(source) } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.borderless)
                     .help("Actualiser")
+                if source.kind.isIPTV {
+                    Button { store.reloadGuide(for: source.id) } label: { Image(systemName: "calendar.badge.clock") }
+                        .buttonStyle(.borderless)
+                        .disabled(store.epgLoadingCount > 0)
+                        .help("Recharger le guide TV (résultat détaillé dans le Journal, sujet « Guide TV »)")
+                }
             }
             Button { onEdit() } label: { Image(systemName: "pencil") }
                 .buttonStyle(.borderless)

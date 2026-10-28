@@ -22,10 +22,12 @@ final class UpdaterDelegate: NSObject, SPUUpdaterDelegate {
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         let version = item.displayVersionString
+        PlaybackLog.shared.note("Mise à jour : version \(version) disponible", topic: .updates)
         DispatchQueue.main.async { [weak self] in self?.onFound?(version) }
     }
 
     func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        PlaybackLog.shared.note("Mise à jour : aucune version plus récente", topic: .updates)
         DispatchQueue.main.async { [weak self] in self?.onNotFound?() }
     }
 }
@@ -103,6 +105,7 @@ final class UpdaterController {
     private func probe() {
         guard controller.updater.canCheckForUpdates else { return }
         lastProbe = Date()
+        PlaybackLog.shared.note("Mise à jour : recherche discrète d'une nouvelle version", topic: .updates, detail: .detailed)
         controller.updater.checkForUpdateInformation()
     }
 

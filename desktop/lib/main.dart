@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app_state.dart';
@@ -14,6 +16,7 @@ import 'core/downloads.dart';
 import 'core/guide.dart';
 import 'core/multiview.dart';
 import 'core/media_sync.dart';
+import 'core/log.dart';
 import 'core/notify.dart';
 import 'core/system_integration.dart';
 import 'core/updater.dart';
@@ -164,6 +167,9 @@ Future<void> main(List<String> args) async {
   );
   final settings = AppSettings();
   await settings.load();
+  try {
+    await PlaybackLog.shared.attach(await getApplicationSupportDirectory(), await SharedPreferences.getInstance());
+  } catch (_) {}
   await SystemNotifier.setup();
   SystemNotifier.enabled = settings.systemNotifications;
   settings.addListener(() => SystemNotifier.enabled = settings.systemNotifications);

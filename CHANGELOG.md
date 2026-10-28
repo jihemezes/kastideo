@@ -3,6 +3,18 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.3.3] - 2026-10-28
+
+**Diagnostic : comprendre ce que fait Kastideo, en particulier avec le guide TV.**
+
+- **Journal par sujets** (⌥⌘L) : *Guide TV*, *Lecture et relais*, *Sources et catalogues*, *Enregistrements*, *Fiches TMDB*, *Mises à jour*, *Affichage et divers*. Filtre par sujet (avec le nombre de lignes), **recherche**, erreurs et alertes seulement, **Copier l'affichage** (uniquement ce qui est filtré).
+- **Niveau de détail par sujet** : Normal, Détaillé (par défaut pour le Guide TV) ou Débogage.
+- **Journal conservé sur disque** : choix entre la **session en cours** et la **session précédente** (utile pour les problèmes au démarrage).
+- **Guide TV détaillé** : chaque tentative est journalisée — adresse demandée, réponse du fournisseur (code HTTP, taille, durée, compression), chaînes et programmes reçus, période couverte, nombre de vos chaînes reliées au guide du fournisseur, au guide de secours ou à aucun, début de la réponse quand elle est inutilisable. Les refus du fournisseur (HTTP 4xx/5xx) et les pannes réseau sont désormais notés dans le journal. Au démarrage, le journal indique aussi si le guide a été conservé ou rechargé.
+- **Bouton « Recharger le guide TV »** par source (Réglages > Sources) et nombre de programmes reçus affiché sous la source.
+- Sources : chargement journalisé (chaînes, films, séries, chaînes ayant un identifiant de guide, adresse du guide connue ou non).
+- Contient le correctif de compilation de la 1.3.2.
+
 ## [1.3.2] - 2026-10-27
 
 **Correctif de compilation de la 1.3.1 (Mac).** Aucun changement de fonctionnement : la 1.3.2 contient tout ce que la 1.3.1 apportait (tuile « Mes vidéos », sélecteur Tout / IPTV / Mes vidéos, mot de passe facultatif, connexion Emby corrigée).

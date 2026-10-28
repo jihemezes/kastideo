@@ -73,7 +73,7 @@ struct KastideoApp: App {
             PlaybackLogView()
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
         }
-        .defaultSize(width: 900, height: 520)
+        .defaultSize(width: 1180, height: 560)
 
         Window("MultiVue", id: "multiview") {
             MultiViewWindow()

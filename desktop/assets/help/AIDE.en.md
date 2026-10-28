@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
+> Version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
@@ -48,7 +48,7 @@ The guide provided by your provider loads in the background and is kept on disk.
 
 ### Fallback TV guide (xmltvfr.fr)
 
-Settings > General > **TV guide**: a fallback guide fills in channels without programmes in your provider's guide, matching them by name. Pick an xmltvfr.fr guide or type an address; **Refresh the guide** downloads everything again.
+Settings > General > **TV guide**: a fallback guide fills in channels without programmes in your provider's guide, matching them by name. Pick an xmltvfr.fr guide or type an address; **Reload the guide** downloads everything again. The **TV guide log** button opens the Log on the *TV Guide* topic: address requested, provider response (code, size, time), channels and programmes received, period covered, how many of your channels are linked to the provider, the backup or no guide, and — if the guide is unusable — the beginning of the server's answer. The provider's programmes are filtered on your channels' identifiers: if the guide holds programmes but none for your channels, the log shows the identifiers on both sides.
 
 ### Managing sources
 
@@ -134,6 +134,16 @@ Most subscriptions allow a single connection. Kastideo closes the previous chann
 
 > A recording or a download also uses a connection: an ⓘ icon reminds you in the MultiView bar. If a tile says "The channel is not responding", the provider is probably refusing an extra connection: remove a channel or lower the number of connections.
 
+### The Log (diagnostics)
+
+The **Log** (**Ctrl+Alt+L**, or the button on the home screen and in error messages) is Kastideo's diagnostic tool. User names and passwords are **hidden** in it: you can copy it to share it.
+
+- **Topics**: *TV Guide*, *Playback and relay*, *Sources and catalogues*, *Recordings*, *TMDB details*, *Updates*, *Display and other*. Click one or more topics to see only those (the number of lines per topic is shown).
+- **Search** a word, or show only **errors and warnings**.
+- **Copy what is shown** copies only what is displayed, with the filter at the top.
+- **Level of detail** (per topic): *Normal*, *Detailed* (default for the TV Guide) or *Debug* (everything). The setting applies to lines written afterwards; errors and warnings are always kept.
+- **Current session / Previous session**: the log is kept on disk (the folder path is shown at the bottom of the window), so you can read what happened at startup in the previous session.
+
 ## Recordings and downloads
 
 ### Recording live TV
@@ -211,7 +221,7 @@ Changes apply immediately, without restarting.
 - **Ctrl+Enter** or double-click the picture: cinema mode — **F11**: full screen — **Esc**: leave cinema mode, back to details or rows
 - TV interface: **↑ / ↓** zapping, **digits** channel number, **←** panel, **→ / I** banner, **B** previous channel, **G** guide, **H** home
 - MultiView: **1 to 4** sound, **G** enlarge, **A** add, **Del** remove, **F** full screen, **Esc** leave
-- **Ctrl+Alt+L**: playback log
+- **Ctrl+Alt+L**: log
 
 ## Startup and .m3u files
 
@@ -265,6 +275,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.3.3-desktop1**: Log sorted by topic (TV Guide, Playback and relay, Sources…, search, levels of detail, previous session kept), detailed TV guide entries in the log, “Reload the guide” button.
 - **1.3.1-desktop1**: “My videos” tile (resume, recently added, genre / year / unwatched filters, sorting, folder browsing, error diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed, source cache read correctly at startup.
 - **1.3.0-desktop1**: new sources — folders (disk, USB drive, NAS), Jellyfin, Emby and Plex — with network search for servers, resume and “watched” shared with servers, TMDB details and detail fixing for files, subtitles placed next to videos.
 - **1.2.2-desktop1**: schedule a recording from live TV (guide programmes or time slot, daily, weekday or weekly repetition), edit recents, "Select all" box for categories.
@@ -283,7 +294,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## Troubleshooting
 
-- **A channel won't start**: open the **Playback log** (Ctrl+Alt+L). "Relais :" lines give the provider's exact answer (e.g. "HTTP 200 en 0,35 s" or "HTTP 403").
+- **A channel won't start**: open the **Log** (Ctrl+Alt+L, topic *Playback and relay*). "Relais :" lines give the provider's exact answer (e.g. "HTTP 200 en 0,35 s" or "HTTP 403").
 - **The update doesn't install**: the playback log (Ctrl+Alt+L) gives the reason. .deb package: if the password window doesn't appear, the command to type in a terminal is shown in the update window. You can always download the new version from the GitHub releases page.
 - **MultiView: a tile stays black**: the provider refuses an extra connection. Check your subscription's number of connections (Settings > General > Playback > Detect).
 - **No notification**: check Settings > General > Notifications, then the notification settings of Windows (Settings > System > Notifications) or of your Linux desktop. On Linux, the libnotify package is required (installed by the .deb, included in the AppImage).

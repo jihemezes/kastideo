@@ -330,6 +330,38 @@ public enum HTTP {
         return URLSession(configuration: configuration)
     }()
 
+    /// Réponse HTTP avec les éléments utiles au diagnostic (journal par sujets).
+    public struct Reply: Sendable {
+        public var data: Data
+        public var status: Int?
+        public var contentType: String?
+        public var finalHost: String?
+        public var seconds: Double
+    }
+
+    /// Comme `get`, mais renvoie aussi code HTTP, type de contenu, serveur final et durée.
+    /// Un code hors 200–299 n'est pas une erreur ici : l'appelant décide (et journalise le corps reçu).
+    public static func getDetailed(_ url: URL, timeout: TimeInterval = 60) async throws -> Reply {
+        let started = Date()
+        if url.isFileURL {
+            return Reply(data: try Data(contentsOf: url), status: nil, contentType: nil, finalHost: nil,
+                         seconds: Date().timeIntervalSince(started))
+        }
+        var request = URLRequest(url: url, timeoutInterval: timeout)
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue("*/*", forHTTPHeaderField: "Accept")
+        return try await withCheckedThrowingContinuation { continuation in
+            session.dataTask(with: request) { data, response, error in
+                if let error { continuation.resume(throwing: error); return }
+                let http = response as? HTTPURLResponse
+                continuation.resume(returning: Reply(
+                    data: data ?? Data(), status: http?.statusCode,
+                    contentType: http?.value(forHTTPHeaderField: "Content-Type"),
+                    finalHost: http?.url?.host, seconds: Date().timeIntervalSince(started)))
+            }.resume()
+        }
+    }
+
     public static func get(_ url: URL, timeout: TimeInterval = 60) async throws -> Data {
         if url.isFileURL { return try Data(contentsOf: url) }
         var request = URLRequest(url: url, timeoutInterval: timeout)

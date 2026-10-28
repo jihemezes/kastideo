@@ -2,6 +2,15 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.3.3-desktop1] - 2026-10-28
+
+**Diagnostic** (comme Kastideo 1.3.3 pour Mac).
+
+- **Journal par sujets** (Ctrl+Alt+L) : Guide TV, Lecture et relais, Sources et catalogues, Enregistrements, Fiches TMDB, Mises à jour, Affichage et divers. Filtre par sujet, recherche, erreurs et alertes seulement, **Copier l'affichage**.
+- **Niveau de détail par sujet** (Normal, Détaillé, Débogage) et **journal conservé sur disque** (session en cours et précédente).
+- **Guide TV détaillé** : adresse, réponse du fournisseur (code HTTP, taille, durée), programmes dans le document / dans les 48 h / gardés pour vos chaînes, exemples d'identifiants des deux côtés quand rien ne correspond, période couverte, couverture de vos chaînes (fournisseur, secours, aucune). Un refus HTTP ou une page d'erreur du fournisseur n'est plus silencieux.
+- Réglages > Guide TV : boutons **Journal du guide** et **Recharger le guide**.
+
 ## [1.3.1-desktop1] - 2026-10-27
 
 **Corrections des premiers essais avec un NAS et Emby** (comme Kastideo 1.3.1 pour Mac).

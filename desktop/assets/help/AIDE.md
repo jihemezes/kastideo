@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
+> Version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
@@ -48,7 +48,7 @@ Le guide indiqué par le fournisseur est chargé en arrière-plan et gardé sur 
 
 ### Guide TV de secours (xmltvfr.fr)
 
-Réglages > Général > **Guide TV** : un guide de secours complète les chaînes sans programme dans le guide du fournisseur, en les rapprochant par leur nom. Choisissez un guide xmltvfr.fr ou saisissez une adresse ; **Actualiser le guide** relance tous les téléchargements.
+Réglages > Général > **Guide TV** : un guide de secours complète les chaînes sans programme dans le guide du fournisseur, en les rapprochant par leur nom. Choisissez un guide xmltvfr.fr ou saisissez une adresse ; **Recharger le guide** relance tous les téléchargements. Le bouton **Journal du guide** ouvre le Journal sur le sujet *Guide TV* : adresse demandée, réponse du fournisseur (code, taille, durée), chaînes et programmes reçus, période couverte, nombre de vos chaînes reliées au fournisseur, au secours ou à aucun guide, et — si le guide est inutilisable — le début de la réponse du serveur. Les programmes du fournisseur sont filtrés sur les identifiants de vos chaînes : si le guide contient des programmes mais aucun pour vos chaînes, le journal montre les identifiants des deux côtés.
 
 ### Gérer les sources
 
@@ -134,6 +134,16 @@ La **MultiVue** affiche jusqu'à **4 chaînes en direct** sur un même écran. L
 
 > Un enregistrement ou un téléchargement occupe aussi une connexion : une icône ⓘ le rappelle dans la barre de la MultiVue. Si une vignette affiche « La chaîne ne répond pas », le fournisseur refuse sans doute une connexion de plus : retirez une chaîne ou baissez le nombre de connexions.
 
+### Le Journal (diagnostic)
+
+Le **Journal** (**Ctrl+Alt+L**, ou bouton dans l'accueil et dans les messages d'erreur) est l'outil de diagnostic de Kastideo. Les identifiants et mots de passe y sont **masqués** : vous pouvez le copier pour le partager.
+
+- **Sujets** : *Guide TV*, *Lecture et relais*, *Sources et catalogues*, *Enregistrements*, *Fiches TMDB*, *Mises à jour*, *Affichage et divers*. Cliquez sur un ou plusieurs sujets pour ne voir que ceux-là (le nombre de lignes de chaque sujet est indiqué).
+- **Rechercher** un mot, ou n'afficher que les **erreurs et alertes**.
+- **Copier l'affichage** copie uniquement ce qui est affiché, avec le filtre en tête.
+- **Niveau de détail** (par sujet) : *Normal*, *Détaillé* (par défaut pour le Guide TV) ou *Débogage* (tout). Le réglage s'applique aux lignes écrites ensuite ; les erreurs et alertes sont toujours gardées.
+- **Session en cours / Session précédente** : le journal est conservé sur disque (le chemin du dossier est indiqué en bas de la fenêtre), pour relire ce qui s'est passé au démarrage de la session précédente.
+
 ## Enregistrements et téléchargements
 
 ### Enregistrer le direct
@@ -211,7 +221,7 @@ Les changements s'appliquent tout de suite, sans redémarrer.
 - **Ctrl+Entrée** ou double-clic sur l'image : mode cinéma — **F11** : plein écran — **Échap** : quitter le mode cinéma, revenir à la fiche ou aux rangées
 - Interface TV : **↑ / ↓** zapping, **chiffres** numéro, **←** panneau, **→ / I** bandeau, **B** chaîne précédente, **G** guide, **H** accueil
 - MultiVue : **1 à 4** son, **G** en grand, **A** ajouter, **Suppr** retirer, **F** plein écran, **Échap** quitter
-- **Ctrl+Alt+L** : journal de lecture
+- **Ctrl+Alt+L** : journal
 
 ## Démarrage et fichiers .m3u
 
@@ -265,6 +275,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.3.3-desktop1** : Journal par sujets (Guide TV, Lecture et relais, Sources…, recherche, niveaux de détail, session précédente conservée), guide TV détaillé dans le journal, bouton « Recharger le guide ».
 - **1.3.1-desktop1** : tuile « Mes vidéos » (reprise, ajouts récents, filtres genre / année / non vus, tri, navigation par dossiers, diagnostic des erreurs), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée, cache des sources relu correctement au démarrage.
 - **1.3.0-desktop1** : nouvelles sources — dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex — avec recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB et correction des fiches des fichiers, sous-titres placés à côté.
 - **1.2.2-desktop1** : programmer un enregistrement depuis le direct (programmes du guide ou plage horaire, répétition quotidienne, en semaine ou hebdomadaire), modifier les récents, case « Tout sélectionner » des catégories.
@@ -283,7 +294,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Dépannage
 
-- **Une chaîne ne démarre pas** : ouvrez le **Journal de lecture** (Ctrl+Alt+L). Les lignes « Relais : » donnent la réponse exacte du fournisseur (par exemple « HTTP 200 en 0,35 s » ou « HTTP 403 »).
+- **Une chaîne ne démarre pas** : ouvrez le **Journal** (Ctrl+Alt+L, sujet *Lecture et relais*). Les lignes « Relais : » donnent la réponse exacte du fournisseur (par exemple « HTTP 200 en 0,35 s » ou « HTTP 403 »).
 - **La mise à jour ne s'installe pas** : le journal de lecture (Ctrl+Alt+L) donne la raison. Paquet .deb : si la fenêtre de mot de passe n'apparaît pas, la commande à taper dans un terminal s'affiche dans la fenêtre de mise à jour. Vous pouvez toujours télécharger la nouvelle version sur la page des versions GitHub.
 - **MultiVue : une vignette reste noire** : le fournisseur refuse une connexion de plus. Vérifiez le nombre de connexions de votre abonnement (Réglages > Général > Lecture > Détecter).
 - **Pas de notification** : vérifiez Réglages > Général > Notifications, puis les réglages de notification de Windows (Paramètres > Système > Notifications) ou de votre bureau Linux. Sous Linux, le paquet libnotify est nécessaire (installé par le .deb, inclus dans l'AppImage).

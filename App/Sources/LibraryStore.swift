@@ -287,7 +287,12 @@ final class LibraryStore {
                 if contents[source.id] == nil || (autoRefresh && (source.lastRefresh ?? .distantPast) < staleLimit) {
                     refresh(source)
                 } else if epgNeedsRefresh(source.id) {
+                    PlaybackLog.shared.note("Guide « \(source.name) » : à recharger au démarrage (absent ou presque terminé)", topic: .guide)
                     Task { await refreshEPG(for: source.id) }
+                } else {
+                    let end = (epgBySource[source.id] ?? []).map(\.stop).max()
+                    let until = end?.formatted(date: .abbreviated, time: .shortened) ?? "?"
+                    PlaybackLog.shared.note("Guide « \(source.name) » : conservé tel quel (valable jusqu'à \(until))", topic: .guide)
                 }
             }
         }
@@ -349,6 +354,8 @@ final class LibraryStore {
         loading.insert(source.id)
         errors[source.id] = nil
         let password = Keychain.get(account: source.id.uuidString)
+        let started = Date()
+        PlaybackLog.shared.note("Source « \(source.name) » (\(source.kind.title)) : chargement…", topic: .sources, detail: .detailed)
         Task {
             do {
                 var content = try await Self.fetch(source, password: password)
@@ -372,8 +379,19 @@ final class LibraryStore {
                 errorDetails[source.id] = nil
                 rebuildIndex()
                 loading.remove(source.id)
-                if !source.kind.isIPTV {
-                    PlaybackLog.shared.note("Source « \(source.name) » chargée : \(content.items.count) éléments")
+                let seconds = String(format: "%.1f", Date().timeIntervalSince(started))
+                if source.kind.isIPTV {
+                    let live = content.items.filter { $0.kind == .live }.count
+                    let withID = content.items.filter { $0.kind == .live && !($0.epgID ?? "").isEmpty }.count
+                    let movies = content.items.filter { $0.kind == .movie }.count
+                    let series = content.items.filter { $0.kind == .series }.count
+                    let guideAddress = source.epgURL != nil ? "choisie dans la source"
+                        : (content.epgURL != nil ? "fournie par le fournisseur" : "inconnue")
+                    var loaded = "Source « \(source.name) » chargée en \(seconds) s : \(live) chaînes (\(withID) avec un identifiant de guide), "
+                    loaded += "\(movies) films, \(series) séries — adresse du guide : \(guideAddress)"
+                    PlaybackLog.shared.note(loaded, topic: .sources)
+                } else {
+                    PlaybackLog.shared.note("Source « \(source.name) » chargée en \(seconds) s : \(content.items.count) éléments", topic: .sources)
                 }
                 if let progress = content.progress, !progress.isEmpty { onServerProgress?(progress) }
                 let id = source.id
@@ -384,36 +402,84 @@ final class LibraryStore {
             } catch {
                 errors[source.id] = Self.describe(error)
                 errorDetails[source.id] = (error as? MediaServerError)?.detail
-                PlaybackLog.shared.note("Source « \(source.name) » : \(Self.describe(error))\((error as? MediaServerError)?.detail.map { " — \($0)" } ?? "")")
+                PlaybackLog.shared.error("Source « \(source.name) » : \(Self.describe(error))\((error as? MediaServerError)?.detail.map { " — \($0)" } ?? "")", topic: .sources)
                 loading.remove(source.id)
             }
         }
     }
 
-    func refreshEPG(for id: UUID) async {
-        guard let source = self.source(id: id), source.isEnabled,
-              let url = source.epgURL ?? contents[id]?.epgURL else { return }
+    /// Recharge le guide du fournisseur d'une source. `manual` : demande de l'utilisateur (bouton « Recharger le guide »).
+    func refreshEPG(for id: UUID, manual: Bool = false) async {
+        guard let source = self.source(id: id), source.isEnabled else { return }
+        guard let url = source.epgURL ?? contents[id]?.epgURL else {
+            PlaybackLog.shared.note("Guide « \(source.name) » : aucune adresse de guide connue pour cette source (rien à télécharger)",
+                                    topic: .guide, level: 1)
+            if manual { epgErrors[id] = String(localized: "Aucune adresse de guide connue pour cette source.") }
+            return
+        }
         epgLoadingCount += 1
         defer { epgLoadingCount -= 1 }
         lastEPGAttempt[id] = Date()
+        let log = PlaybackLog.shared
+        let origin = (source.epgURL != nil) ? "adresse choisie dans la source" : "adresse donnée par le fournisseur"
+        log.note("Guide « \(source.name) » : demande\(manual ? " manuelle" : "") à \(url.host ?? "?") (\(origin)) — \(url.absoluteString)",
+                 topic: .guide)
         do {
-            let guide = try await Self.loadGuide(url, timeout: 180)
+            let report = try await EPGLoader.loadGuideReport(from: url, timeout: 180)
+            let guide = report.guide
+            let size = ByteCountFormatter.string(fromByteCount: Int64(report.byteCount), countStyle: .file)
+            let http = report.status.map { "HTTP \($0)" } ?? "fichier local"
+            let host = report.finalHost.map { $0 == url.host ? "" : " via \($0)" } ?? ""
+            var answer = "Guide « \(source.name) » : réponse \(http)\(host) en \(String(format: "%.1f", report.seconds)) s, \(size)"
+            if report.gzip { answer += " (compressé)" }
+            if let type = report.contentType { answer += ", type « \(type) »" }
+            log.note(answer, topic: .guide, detail: .detailed)
+            if let status = report.status, !(200..<300).contains(status) {
+                let message = String(localized: "Le fournisseur a refusé la demande du guide (HTTP \(status)).")
+                epgErrors[id] = message
+                var refused = "Guide « \(source.name) » : refusé par le fournisseur (HTTP \(status))"
+                if let excerpt = report.bodyExcerpt { refused += " — réponse : « \(excerpt) »" }
+                log.error(refused, topic: .guide)
+                return
+            }
             // Réponse vide ou illisible : on garde les programmes déjà connus (le guide de secours prend le relais).
             guard guide.isValid, !guide.programmes.isEmpty else {
-                let size = ByteCountFormatter.string(fromByteCount: Int64(guide.byteCount), countStyle: .file)
                 epgErrors[id] = guide.isValid
                     ? String(localized: "Le fournisseur a envoyé un guide sans programme pour les prochains jours (\(size)).")
                     : String(localized: "Le fournisseur a envoyé un guide vide ou illisible (\(size)).")
-                PlaybackLog.shared.note("Guide TV du fournisseur inutilisable (\(size), valide : \(guide.isValid), programmes : \(guide.programmes.count))")
+                var unusable = "Guide « \(source.name) » : inutilisable (\(size), document XMLTV valide : \(guide.isValid ? "oui" : "non"), "
+                unusable += "chaînes : \(guide.channels.count), programmes : \(guide.programmes.count))"
+                if let excerpt = report.bodyExcerpt { unusable += " — début de la réponse : « \(excerpt) »" }
+                log.error(unusable, topic: .guide)
                 return
             }
             let programmes = guide.programmes
             epgBySource[id] = programmes
             epgErrors[id] = nil
+            let ids = report.channelIDsWithProgrammes
+            let days = ((report.lastStop ?? Date()).timeIntervalSince(report.firstStart ?? Date())) / 86400
+            let stamp = Date.FormatStyle(date: .abbreviated, time: .shortened)
+            let first = (report.firstStart ?? Date()).formatted(stamp)
+            let last = (report.lastStop ?? Date()).formatted(stamp)
+            var summary = "Guide « \(source.name) » : \(programmes.count) programmes pour \(ids.count) chaîne(s) "
+            summary += "(\(guide.channels.count) déclarée(s)), du \(first) au \(last) — \(String(format: "%.1f", days)) jour(s)"
+            log.note(summary, topic: .guide)
+            log.note("Guide « \(source.name) » : exemples d'identifiants du guide : \(ids.sorted().prefix(8).joined(separator: ", "))",
+                     topic: .guide, detail: .detailed)
             rebuildEPG()
             Task.detached(priority: .utility) { Storage.save(programmes, name: "epg-\(id.uuidString)") }
         } catch {
             epgErrors[id] = Self.describe(error)
+            log.error("Guide « \(source.name) » : échec du téléchargement (\(Self.describe(error))) — \(error.localizedDescription)",
+                      topic: .guide)
+        }
+    }
+
+    /// Recharge à la main le guide d'une source (réglages) et celui de secours, avec résultat dans le journal.
+    func reloadGuide(for id: UUID) {
+        Task {
+            await refreshEPG(for: id, manual: true)
+            await refreshFallbackEPG(force: true)
         }
     }
 
@@ -447,19 +513,35 @@ final class LibraryStore {
     func refreshFallbackEPG(force: Bool) async {
         guard EPGKeys.fallbackEnabled, let url = EPGKeys.fallbackURL, !fallbackStatus.isLoading else { return }
         if !force, let updated = fallbackStatus.updated, Date().timeIntervalSince(updated) < 12 * 3600,
-           !fallbackProgrammes.isEmpty { return }
+           !fallbackProgrammes.isEmpty {
+            let hours = Int(Date().timeIntervalSince(updated) / 3600)
+            PlaybackLog.shared.note("Guide de secours : conservé (mis à jour il y a \(hours) h, \(fallbackProgrammes.count) programmes)",
+                                    topic: .guide, detail: .debug)
+            return
+        }
         fallbackStatus.isLoading = true
         epgLoadingCount += 1
         defer {
             fallbackStatus.isLoading = false
             epgLoadingCount -= 1
         }
+        let log = PlaybackLog.shared
+        log.note("Guide de secours : demande\(force ? " manuelle" : "") à \(url.host ?? "?") — \(url.absoluteString)", topic: .guide)
         do {
-            let guide = try await Self.loadGuide(url, timeout: 300)
+            let report = try await EPGLoader.loadGuideReport(from: url, timeout: 300)
+            let guide = report.guide
+            let size = ByteCountFormatter.string(fromByteCount: Int64(report.byteCount), countStyle: .file)
+            let fbStatus = report.status.map { "HTTP \($0)" } ?? "fichier"
+            log.note("Guide de secours : réponse \(fbStatus) en \(String(format: "%.1f", report.seconds)) s, \(size)",
+                     topic: .guide, detail: .detailed)
             guard guide.isValid, !guide.programmes.isEmpty else {
                 fallbackStatus.error = String(localized: "Guide de secours vide ou illisible.")
+                var fbBad = "Guide de secours : inutilisable (\(size), HTTP \(report.status.map(String.init) ?? "?"))"
+                if let excerpt = report.bodyExcerpt { fbBad += " — début de la réponse : « \(excerpt) »" }
+                log.error(fbBad, topic: .guide)
                 return
             }
+            log.note("Guide de secours : \(guide.programmes.count) programmes, \(guide.channels.count) chaîne(s)", topic: .guide)
             fallbackProgrammes = guide.programmes
             fallbackChannels = guide.channels
             let date = Date()
@@ -477,6 +559,7 @@ final class LibraryStore {
             rebuildEPG()
         } catch {
             fallbackStatus.error = Self.describe(error)
+            log.error("Guide de secours : échec du téléchargement (\(Self.describe(error)))", topic: .guide)
         }
     }
 
@@ -773,6 +856,15 @@ final class LibraryStore {
             guard generation == self.epgGeneration else { return }
             self.epg = result.index
             self.fallbackStatus.matchedChannels = result.matched
+            let c = result.coverage
+            var cover = "Guide : \(c.live) chaîne(s) en direct — \(c.provider) avec le guide du fournisseur, "
+            cover += "\(result.matched) complétée(s) par le secours, \(c.none) sans programme"
+            if c.auto > 0 { cover += " (dont \(c.auto) sans identifiant de guide, rapprochées par leur nom)" }
+            PlaybackLog.shared.note(cover, topic: .guide)
+            if !c.sampleUnmatched.isEmpty {
+                PlaybackLog.shared.note("Guide : exemples de chaînes sans programme : \(c.sampleUnmatched.joined(separator: " · "))",
+                                        topic: .guide, detail: .detailed)
+            }
             self.rebuildLiveGroups()
         }
     }
@@ -826,31 +918,56 @@ final class LibraryStore {
         rebuildLiveGroups()
     }
 
+    /// Couverture du guide pour les chaînes en direct (journal « Guide TV »).
+    struct EPGCoverage: Sendable {
+        var live = 0
+        var provider = 0
+        var none = 0
+        var auto = 0
+        var sampleUnmatched: [String] = []
+    }
+
     nonisolated static func buildEPG(provider: [Programme], live: [MediaItem], fallback: [Programme],
-                                     channels: [XMLTVChannel]) -> (index: EPGIndex, matched: Int) {
+                                     channels: [XMLTVChannel]) -> (index: EPGIndex, matched: Int, coverage: EPGCoverage) {
         var index = EPGIndex(programmes: provider)
-        guard !fallback.isEmpty, !channels.isEmpty else { return (index, 0) }
-        let matcher = ChannelMatcher(channels: channels)
+        var coverage = EPGCoverage()
+        coverage.live = live.count
+        let matcher = channels.isEmpty ? nil : ChannelMatcher(channels: channels)
         let byChannel = Dictionary(grouping: fallback, by: \.channel)
         var extra: [Programme] = []
-        var done = Set<String>()
+        var outcome: [String: Int] = [:]   // 0 : fournisseur, 1 : secours, 2 : rien (par identifiant, minuscules)
         var matched = 0
+        func tally(_ code: Int) {
+            switch code {
+            case 0: coverage.provider += 1
+            case 2: coverage.none += 1
+            default: break
+            }
+        }
         for item in live {
-            guard let key = item.epgID, !key.isEmpty else { continue }
+            guard let key = item.epgID, !key.isEmpty else { coverage.none += 1; continue }
+            if key.hasPrefix("auto:") { coverage.auto += 1 }
             let lower = key.lowercased()
-            if done.contains(lower) || index.hasProgrammes(for: key) { continue }
-            done.insert(lower)
-            let id = matcher.match(name: item.name, epgID: key.hasPrefix("auto:") ? nil : key)
-            guard let id, let list = byChannel[id], !list.isEmpty else { continue }
-            matched += 1
-            extra += list.map { programme in
-                var copy = programme
-                copy.channel = key
-                return copy
+            if let known = outcome[lower] { tally(known); continue }
+            if index.hasProgrammes(for: key) { outcome[lower] = 0; tally(0); continue }
+            if let matcher, !fallback.isEmpty,
+               let id = matcher.match(name: item.name, epgID: key.hasPrefix("auto:") ? nil : key),
+               let list = byChannel[id], !list.isEmpty {
+                matched += 1
+                outcome[lower] = 1
+                extra += list.map { programme in
+                    var copy = programme
+                    copy.channel = key
+                    return copy
+                }
+            } else {
+                outcome[lower] = 2
+                tally(2)
+                if coverage.sampleUnmatched.count < 6 { coverage.sampleUnmatched.append("\(item.name) [\(key)]") }
             }
         }
         index.merge(extra)
-        return (index, matched)
+        return (index, matched, coverage)
     }
 
     // MARK: - Chargement (hors du fil principal)

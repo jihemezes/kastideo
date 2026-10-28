@@ -283,8 +283,55 @@ public enum EPGLoader {
         return XMLTVParser.parseGuide(data: data, window: window)
     }
 
+    /// Téléchargement + analyse, avec le détail de ce qui a été reçu (pour le journal « Guide TV »).
+    public static func loadGuideReport(from url: URL, window: DateInterval = XMLTVParser.defaultWindow(),
+                                       timeout: TimeInterval = 180) async throws -> GuideReport {
+        let reply = try await HTTP.getDetailed(url, timeout: timeout)
+        let ok = reply.status.map { (200..<300).contains($0) } ?? true
+        let guide = ok ? XMLTVParser.parseGuide(data: reply.data, window: window)
+                       : XMLTVGuide(programmes: [], channels: [], isValid: false, byteCount: reply.data.count)
+        return GuideReport(guide: guide, status: reply.status, contentType: reply.contentType,
+                           finalHost: reply.finalHost, seconds: reply.seconds,
+                           byteCount: reply.data.count, gzip: Gzip.isGzip(reply.data),
+                           bodyExcerpt: ok && guide.isValid ? nil : GuideReport.excerpt(of: reply.data))
+    }
+
     public static func load(from url: URL, window: DateInterval = XMLTVParser.defaultWindow()) async throws -> [Programme] {
         let data = try await HTTP.get(url, timeout: 180)
         return XMLTVParser.parse(data: data, window: window)
+    }
+}
+
+
+/// Ce qu'un téléchargement de guide a rapporté : de quoi diagnostiquer sans deviner.
+public struct GuideReport: Sendable {
+    public var guide: XMLTVGuide
+    public var status: Int?
+    public var contentType: String?
+    public var finalHost: String?
+    public var seconds: Double
+    public var byteCount: Int
+    public var gzip: Bool
+    /// Début du corps reçu quand il n'est pas un guide (page d'erreur, message du serveur…), ou nil.
+    public var bodyExcerpt: String?
+
+    public init(guide: XMLTVGuide, status: Int?, contentType: String?, finalHost: String?, seconds: Double,
+                byteCount: Int, gzip: Bool, bodyExcerpt: String?) {
+        self.guide = guide; self.status = status; self.contentType = contentType; self.finalHost = finalHost
+        self.seconds = seconds; self.byteCount = byteCount; self.gzip = gzip; self.bodyExcerpt = bodyExcerpt
+    }
+
+    /// Identifiants de chaînes qui ont au moins un programme.
+    public var channelIDsWithProgrammes: Set<String> { Set(guide.programmes.map(\.channel)) }
+    public var firstStart: Date? { guide.programmes.map(\.start).min() }
+    public var lastStop: Date? { guide.programmes.map(\.stop).max() }
+
+    /// 200 premiers caractères lisibles du corps (texte seulement), sur une ligne.
+    public static func excerpt(of data: Data) -> String? {
+        guard !data.isEmpty else { return nil }
+        let head = data.prefix(400)
+        guard let text = String(data: head, encoding: .utf8), !text.contains("\u{0}") else { return "(contenu binaire)" }
+        let flat = text.replacingOccurrences(of: "\n", with: " ").replacingOccurrences(of: "\r", with: " ")
+        return String(flat.prefix(200))
     }
 }

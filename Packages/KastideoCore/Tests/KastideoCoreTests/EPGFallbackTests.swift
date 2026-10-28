@@ -38,4 +38,11 @@ final class EPGFallbackTests: XCTestCase {
         XCTAssertFalse(XMLTVParser.parseGuide(data: Data("<html>error</html>".utf8)).isValid)
         XCTAssertFalse(XMLTVParser.parseGuide(data: Data()).isValid)
     }
+
+    func testGuideReportExcerpt() {
+        XCTAssertNil(GuideReport.excerpt(of: Data()))
+        XCTAssertEqual(GuideReport.excerpt(of: Data("<html>\n  Forbidden\n</html>".utf8)), "<html>   Forbidden </html>")
+        XCTAssertEqual(GuideReport.excerpt(of: Data([0, 1, 2, 3])), "(contenu binaire)")
+        XCTAssertEqual(GuideReport.excerpt(of: Data(String(repeating: "a", count: 500).utf8))?.count, 200)
+    }
 }

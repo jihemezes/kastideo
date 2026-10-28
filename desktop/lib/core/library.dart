@@ -657,11 +657,20 @@ class LibraryStore extends ChangeNotifier {
       final path = _cacheFile(id).path;
       final encoded = [for (final i in items) i.toJson()];
       await _writeCache(path, encoded);
-      PlaybackLog.shared.note('Source « ${source.name} » chargée : ${items.length} éléments');
+      final live = items.where((i) => i.kind == MediaKind.live).toList();
+      final withId = live.where((i) => (i.epgId ?? '').isNotEmpty).length;
+      final guideAddress = source.epgUrl?.isNotEmpty ?? false
+          ? 'choisie dans la source'
+          : ((content.epgUrl ?? '').isNotEmpty ? 'fournie par le fournisseur' : 'inconnue');
+      PlaybackLog.shared.note(source.kind.isIptv
+          ? 'Source « ${source.name} » chargée : ${live.length} chaînes ($withId avec un identifiant de guide), '
+              '${items.where((i) => i.kind == MediaKind.movie).length} films, ${items.where((i) => i.kind == MediaKind.series).length} séries'
+              ' — adresse du guide : $guideAddress'
+          : 'Source « ${source.name} » chargée : ${items.length} éléments', topic: LogTopic.sources);
     } catch (e) {
       lastError = '${source.name} : $e';
       sourceErrors[source.id] = ('$e', e is MediaServerException ? e.detail : null);
-      PlaybackLog.shared.note('Source « ${source.name} » : $e');
+      PlaybackLog.shared.error('Source « ${source.name} » : $e', topic: LogTopic.sources);
     } finally {
       loadingSources.remove(source.id);
       isBusy = loadingSources.isNotEmpty;

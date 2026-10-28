@@ -9,6 +9,7 @@ import '../app_state.dart';
 import '../core/countries.dart';
 import '../core/details.dart';
 import '../core/guide.dart';
+import '../core/log.dart';
 import '../core/models.dart';
 import '../core/settings.dart';
 import '../core/system_integration.dart';
@@ -18,6 +19,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
 import '../core/library.dart';
+import 'log_dialog.dart';
 import 'source_form.dart';
 import 'update_view.dart';
 
@@ -1138,10 +1140,16 @@ class _GuideSectionState extends State<_GuideSection> {
             ),
             if (guide.isLoading) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
             const SizedBox(width: 8),
+            TextButton.icon(
+              onPressed: () => showLogDialog(context, topic: LogTopic.guide),
+              icon: const Icon(Icons.receipt_long_outlined, size: 18),
+              label: Text(tr('Journal du guide')),
+            ),
+            const SizedBox(width: 8),
             OutlinedButton.icon(
               onPressed: guide.isLoading ? null : guide.refreshAll,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(tr('Actualiser le guide')),
+              label: Text(tr('Recharger le guide')),
             ),
           ]),
           const SizedBox(height: 6),

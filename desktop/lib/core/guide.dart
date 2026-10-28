@@ -140,10 +140,16 @@ class GuideStore extends ChangeNotifier {
   }
 
   Future<void> _refreshStale() async {
-    for (final source in List.of(library.sources.where((s) => s.enabled))) {
+    for (final source in List.of(library.sources.where((s) => s.enabled && s.kind.isIptv))) {
       final s = status[source.id];
       if (s?.lastAttempt != null && DateTime.now().difference(s!.lastAttempt!) < const Duration(hours: 3)) continue;
-      if (_needsRefresh(source.id)) await refreshSource(source);
+      if (_needsRefresh(source.id)) {
+        PlaybackLog.shared.note('Guide « ${source.name} » : à recharger (absent ou presque terminé)', topic: LogTopic.guide);
+        await refreshSource(source);
+      } else {
+        PlaybackLog.shared.note('Guide « ${source.name} » : conservé tel quel (${_bySource[source.id]?.length ?? 0} programmes)',
+            topic: LogTopic.guide, detail: LogDetail.detailed);
+      }
     }
     await refreshFallback();
   }
@@ -157,10 +163,18 @@ class GuideStore extends ChangeNotifier {
 
   // MARK: Téléchargements
 
-  Future<void> refreshSource(Source source, {bool force = false}) async {
+  Future<void> refreshSource(Source source, {bool force = false, bool manual = false}) async {
     if (!_started || !source.enabled) return;
+    final log = PlaybackLog.shared;
     final url = await library.guideUrlFor(source);
-    if (url == null || url.isEmpty) return;
+    if (url == null || url.isEmpty) {
+      if (manual) {
+        log.warn('Guide « ${source.name} » : aucune adresse de guide connue pour cette source (rien à télécharger)', topic: LogTopic.guide);
+        (status[source.id] ??= SourceGuideStatus()).error = tr('Aucune adresse de guide connue pour cette source.');
+        notifyListeners();
+      }
+      return;
+    }
     final s = status[source.id] ??= SourceGuideStatus();
     if (s.loading) return;
     if (!force && !_needsRefresh(source.id)) return;
@@ -168,32 +182,67 @@ class GuideStore extends ChangeNotifier {
       ..loading = true
       ..lastAttempt = DateTime.now();
     notifyListeners();
+    // Seules les chaînes de la source sont gardées (les guides des fournisseurs couvrent souvent des milliers de chaînes étrangères).
+    final wanted = <String>{
+      for (final item in library.allLiveItems(source.id))
+        if (item.epgId != null && item.epgId!.isNotEmpty) item.epgId!.toLowerCase().trim(),
+    };
+    log.note('Guide « ${source.name} » : demande${manual ? ' manuelle' : ''} à ${Uri.tryParse(url)?.host ?? '?'} — $url', topic: LogTopic.guide);
+    log.note('Guide « ${source.name} » : ${wanted.length} identifiant(s) de chaîne demandé(s), exemples : ${wanted.take(6).join(', ')}',
+        topic: LogTopic.guide, detail: LogDetail.detailed);
     try {
-      // Seules les chaînes de la source sont gardées (les guides des fournisseurs couvrent souvent des milliers de chaînes étrangères).
-      final wanted = <String>{
-        for (final item in library.allLiveItems(source.id))
-          if (item.epgId != null && item.epgId!.isNotEmpty) item.epgId!.toLowerCase().trim(),
-      };
       final filter = wanted.isEmpty ? null : wanted;
       final guide = await Isolate.run(() => downloadGuide(url, channels: filter));
+      final m = guide.meta;
       final size = _size(guide.byteCount);
-      if (!guide.isValid || guide.programmes.isEmpty) {
+      var answer = 'Guide « ${source.name} » : réponse ${m.status == null ? 'sans code HTTP' : 'HTTP ${m.status}'}'
+          '${m.finalHost != null && m.finalHost != Uri.tryParse(url)?.host ? ' via ${m.finalHost}' : ''}'
+          ' en ${m.seconds.toStringAsFixed(1)} s, $size';
+      if (m.gzip) answer += ' (compressé)';
+      if (m.contentType != null) answer += ', type « ${m.contentType} »';
+      log.note(answer, topic: LogTopic.guide, detail: LogDetail.detailed);
+      if (m.status != null && (m.status! < 200 || m.status! >= 300)) {
+        s.error = '${tr('Le fournisseur a refusé la demande du guide')} (HTTP ${m.status}).';
+        log.error('Guide « ${source.name} » : refusé par le fournisseur (HTTP ${m.status})'
+            '${m.excerpt == null ? '' : ' — réponse : « ${m.excerpt} »'}', topic: LogTopic.guide);
+      } else if (!guide.isValid || guide.programmes.isEmpty) {
         s.error = guide.isValid
             ? '${tr('Le fournisseur a envoyé un guide sans programme pour les prochains jours')} ($size).'
             : '${tr('Le fournisseur a envoyé un guide vide ou illisible')} ($size).';
-        PlaybackLog.shared.note('Guide TV de « ${source.name} » inutilisable ($size, programmes : ${guide.programmes.length})');
+        final b = StringBuffer('Guide « ${source.name} » : inutilisable ($size, document XMLTV valide : ${guide.isValid ? 'oui' : 'non'}, '
+            'chaînes déclarées : ${guide.channels.length}, programmes dans le document : ${m.seen}, '
+            'dans les prochaines 48 h : ${m.inWindow}, gardés pour vos chaînes : ${m.kept})');
+        if (m.excerpt != null) b.write(' — début de la réponse : « ${m.excerpt} »');
+        log.error(b.toString(), topic: LogTopic.guide);
+        if (m.inWindow > 0 && m.kept == 0) {
+          // Cas typique : le guide existe, mais ses identifiants ne ressemblent pas à ceux des chaînes.
+          log.error('Guide « ${source.name} » : le guide contient des programmes, mais aucun pour vos chaînes. '
+              'Identifiants du guide (exemples) : ${m.droppedSamples.take(6).join(', ')} — vos identifiants (exemples) : ${wanted.take(6).join(', ')}',
+              topic: LogTopic.guide);
+        }
       } else {
         _bySource[source.id] = guide.programmes;
         _channelsBySource[source.id] = guide.channels;
         s
           ..programmes = guide.programmes.length
           ..error = null;
-        PlaybackLog.shared.note('Guide TV de « ${source.name} » : ${guide.programmes.length} programmes ($size)');
+        String stamp(int? v) {
+          if (v == null) return '?';
+          final t = DateTime.fromMillisecondsSinceEpoch(v * 1000);
+          String two(int n) => n.toString().padLeft(2, '0');
+          return '${two(t.day)}/${two(t.month)} ${two(t.hour)}:${two(t.minute)}';
+        }
+        log.note('Guide « ${source.name} » : ${guide.programmes.length} programmes pour ${m.distinctChannels} chaîne(s) du guide '
+            '(${guide.channels.length} déclarée(s)), gardés : ${m.kept} sur ${m.inWindow} dans les prochaines 48 h, '
+            'du ${stamp(m.firstStart)} au ${stamp(m.lastStop)}', topic: LogTopic.guide);
+        log.note('Guide « ${source.name} » : exemples d\'identifiants gardés : ${m.keptSamples.join(', ')}'
+            '${m.droppedSamples.isEmpty ? '' : ' — écartés : ${m.droppedSamples.take(6).join(', ')}'}',
+            topic: LogTopic.guide, detail: LogDetail.detailed);
         await _writeCache('epg-${source.id}', guide.programmes, guide.channels);
       }
     } catch (e) {
       s.error = '$e';
-      PlaybackLog.shared.note('Guide TV de « ${source.name} » : $e');
+      log.error('Guide « ${source.name} » : échec du téléchargement ($e)', topic: LogTopic.guide);
     } finally {
       s.loading = false;
       await _rebuild();
@@ -202,7 +251,7 @@ class GuideStore extends ChangeNotifier {
 
   Future<void> refreshAll() async {
     for (final source in List.of(library.sources.where((s) => s.enabled))) {
-      await refreshSource(source, force: true);
+      await refreshSource(source, force: true, manual: true);
     }
     await refreshFallback(force: true);
   }
@@ -218,10 +267,17 @@ class GuideStore extends ChangeNotifier {
       ..loading = true
       ..error = null;
     notifyListeners();
+    final log = PlaybackLog.shared;
+    log.note('Guide de secours : demande${force ? ' manuelle' : ''} à ${Uri.tryParse(url)?.host ?? '?'} — $url', topic: LogTopic.guide);
     try {
       final guide = await Isolate.run(() => downloadGuide(url, timeout: const Duration(seconds: 300)));
+      final m = guide.meta;
+      log.note('Guide de secours : réponse ${m.status == null ? 'sans code HTTP' : 'HTTP ${m.status}'} en ${m.seconds.toStringAsFixed(1)} s, ${_size(guide.byteCount)}',
+          topic: LogTopic.guide, detail: LogDetail.detailed);
       if (!guide.isValid || guide.programmes.isEmpty) {
         fallbackStatus.error = tr('Guide de secours vide ou illisible.');
+        log.error('Guide de secours : inutilisable (${_size(guide.byteCount)}, HTTP ${m.status ?? '?'})'
+            '${m.excerpt == null ? '' : ' — début de la réponse : « ${m.excerpt} »'}', topic: LogTopic.guide);
       } else {
         _fallback = guide.programmes;
         _fallbackChannels = guide.channels;
@@ -230,12 +286,12 @@ class GuideStore extends ChangeNotifier {
           ..updated = now
           ..channelCount = guide.channels.length;
         _prefs.setInt('epg.fallback.date', now.millisecondsSinceEpoch ~/ 1000);
-        PlaybackLog.shared.note('Guide de secours : ${guide.channels.length} chaînes, ${guide.programmes.length} programmes (${_size(guide.byteCount)})');
+        log.note('Guide de secours : ${guide.channels.length} chaînes, ${guide.programmes.length} programmes (${_size(guide.byteCount)})', topic: LogTopic.guide);
         await _writeCache('fallback', guide.programmes, guide.channels);
       }
     } catch (e) {
       fallbackStatus.error = '$e';
-      PlaybackLog.shared.note('Guide de secours : $e');
+      log.error('Guide de secours : échec du téléchargement ($e)', topic: LogTopic.guide);
     } finally {
       fallbackStatus.loading = false;
       await _rebuild();
@@ -283,38 +339,70 @@ class GuideStore extends ChangeNotifier {
     final result = await Isolate.run(() {
       final index = EPGIndex(provider);
       var matched = 0;
-      if (fallback.isNotEmpty && channels.isNotEmpty) {
-        final matcher = ChannelMatcher(channels);
-        final byChannel = <String, List<Programme>>{};
+      var fromProvider = 0;
+      var none = 0;
+      var auto = 0;
+      final samples = <String>[];
+      final matcher = fallback.isNotEmpty && channels.isNotEmpty ? ChannelMatcher(channels) : null;
+      final byChannel = <String, List<Programme>>{};
+      if (matcher != null) {
         for (final p in fallback) {
           (byChannel[p.channel] ??= []).add(p);
         }
-        final extra = <Programme>[];
-        final done = <String>{};
-        for (final item in live) {
-          final key = guideKey(item);
-          final lower = key.toLowerCase();
-          if (done.contains(lower) || index.hasProgrammes(key)) continue;
-          done.add(lower);
-          final id = matcher.match(item.name, key.startsWith('auto:') ? null : key);
-          final list = id == null ? null : byChannel[id];
-          if (list == null || list.isEmpty) continue;
-          matched++;
-          extra.addAll(list.map((p) => p.withChannel(key)));
-        }
-        index.merge(extra);
       }
-      return (index, matched, LiveChannelGroup.build(live, index, overrides));
+      final extra = <Programme>[];
+      final outcome = <String, int>{}; // 0 : fournisseur, 1 : secours, 2 : rien
+      for (final item in live) {
+        final key = guideKey(item);
+        final lower = key.toLowerCase();
+        if (key.startsWith('auto:')) auto++;
+        var code = outcome[lower];
+        if (code == null) {
+          if (index.hasProgrammes(key)) {
+            code = 0;
+          } else {
+            final id = matcher?.match(item.name, key.startsWith('auto:') ? null : key);
+            final list = id == null ? null : byChannel[id];
+            if (list != null && list.isNotEmpty) {
+              matched++;
+              extra.addAll(list.map((p) => p.withChannel(key)));
+              code = 1;
+            } else {
+              code = 2;
+              if (samples.length < 6) samples.add('${item.name} [$key]');
+            }
+          }
+          outcome[lower] = code;
+        }
+        if (code == 0) fromProvider++;
+        if (code == 2) none++;
+      }
+      if (extra.isNotEmpty) index.merge(extra);
+      return (index, matched, LiveChannelGroup.build(live, index, overrides), (live.length, fromProvider, none, auto, samples));
     });
     if (generation != _generation) return;
     epg = result.$1;
     fallbackStatus.matchedChannels = result.$2;
     groups = result.$3;
+    final (total, fromProvider, none, auto, samples) = result.$4;
+    final cover = StringBuffer('Guide : $total chaîne(s) en direct — $fromProvider avec le guide du fournisseur, ${result.$2} complétée(s) par le secours, $none sans programme');
+    if (auto > 0) cover.write(' (dont $auto sans identifiant de guide, rapprochées par leur nom)');
+    if (isLoading) cover.write(' — guide en cours de chargement');
+    final summary = cover.toString();
+    if (summary != _lastCoverage) {
+      _lastCoverage = summary;
+      PlaybackLog.shared.note(summary, topic: LogTopic.guide);
+      if (samples.isNotEmpty) {
+        PlaybackLog.shared.note('Guide : exemples de chaînes sans programme : ${samples.join(' · ')}', topic: LogTopic.guide, detail: LogDetail.detailed);
+      }
+    }
     _groupByItem = {for (final g in groups) for (final v in g.variants) v.id: g};
     _airingCache = null;
     _tonightCache = null;
     notifyListeners();
   }
+
+  String _lastCoverage = '';
 
   LiveChannelGroup? groupOf(MediaItem item) => _groupByItem[item.id];
 

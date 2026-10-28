@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kastideo/core/epg.dart';
 import 'package:kastideo/core/models.dart';
@@ -86,5 +88,55 @@ void main() {
     final item = MediaItem(id: 'x', sourceId: 's', kind: MediaKind.live, name: '|FR| TF1 HD', group: 'FR', epgId: 'tf1.fr');
     expect(edit.apply(item).name, 'TF1');
     expect(edit.apply(item).epgId, 'tf1.fr');
+  });
+
+  test('XMLTV : constats pour le journal (programmes écartés, exemples d\'identifiants)', () {
+    const doc = '<tv>'
+        '<programme start="20261018203000 +0200" stop="20261018223000 +0200" channel="TF1.fr"><title>A</title></programme>'
+        '<programme start="20261018203000 +0200" stop="20261018223000 +0200" channel="M6.fr"><title>B</title></programme>'
+        '<programme start="20250101203000 +0200" stop="20250101223000 +0200" channel="Hors.fr"><title>C</title></programme>'
+        '</tv>';
+    final start = DateTime.utc(2026, 10, 18).millisecondsSinceEpoch ~/ 1000;
+    final parser = XmltvParser(windowStart: start, windowEnd: start + 86400 * 2, channels: {'tf1.fr'})..add(doc);
+    final guide = parser.close(doc.length);
+    expect(guide.meta.seen, 3);
+    expect(guide.meta.inWindow, 2);
+    expect(guide.meta.kept, 1);
+    expect(guide.meta.distinctChannels, 3);
+    expect(guide.meta.droppedSamples, ['M6.fr']);
+    expect(guide.meta.keptSamples, ['TF1.fr']);
+    expect(guide.meta.firstStart, isNotNull);
+  });
+
+  test('Téléchargement du guide : refus HTTP et page d\'erreur expliqués', () async {
+    final server = await HttpServer.bind('127.0.0.1', 0);
+    server.listen((request) {
+      if (request.uri.path == '/refuse') {
+        request.response
+          ..statusCode = 403
+          ..write('<html>Forbidden: too many connections</html>');
+      } else if (request.uri.path == '/html') {
+        request.response
+          ..headers.contentType = ContentType.html
+          ..write('<html><body>Maintenance en cours</body></html>');
+      } else {
+        request.response.write('');
+      }
+      request.response.close();
+    });
+    final base = 'http://127.0.0.1:${server.port}';
+    final refused = await downloadGuide('$base/refuse');
+    expect(refused.isValid, isFalse);
+    expect(refused.meta.status, 403);
+    expect(refused.meta.excerpt, contains('Forbidden'));
+    final html = await downloadGuide('$base/html');
+    expect(html.isValid, isFalse);
+    expect(html.meta.status, 200);
+    expect(html.meta.contentType, contains('text/html'));
+    expect(html.meta.excerpt, contains('Maintenance'));
+    final empty = await downloadGuide('$base/vide');
+    expect(empty.isValid, isFalse);
+    expect(empty.byteCount, 0);
+    await server.close(force: true);
   });
 }

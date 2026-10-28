@@ -110,13 +110,46 @@ class XmltvChannel {
 
 /// Résultat de l'analyse d'un guide XMLTV.
 class XmltvGuide {
-  XmltvGuide(this.programmes, this.channels, {required this.isValid, required this.byteCount});
+  XmltvGuide(this.programmes, this.channels, {required this.isValid, required this.byteCount, GuideMeta? meta})
+      : meta = meta ?? GuideMeta();
   final List<Programme> programmes;
   final List<XmltvChannel> channels;
+
+  /// Ce que le téléchargement et l'analyse ont constaté (journal « Guide TV »).
+  final GuideMeta meta;
 
   /// Faux si le document n'est pas un guide XMLTV (page d'erreur, réponse vide…).
   final bool isValid;
   final int byteCount;
+}
+
+/// Constats d'un téléchargement de guide : de quoi diagnostiquer sans deviner.
+class GuideMeta {
+  /// Code HTTP (null : fichier local ou pas de réponse).
+  int? status;
+  String? contentType;
+  String? finalHost;
+  double seconds = 0;
+  bool gzip = false;
+
+  /// Début du texte reçu quand ce n'est pas un guide (page d'erreur, message du serveur…).
+  String? excerpt;
+
+  /// Programmes présents dans le document, dans la fenêtre de temps, puis gardés (chaînes demandées).
+  int seen = 0;
+  int inWindow = 0;
+  int kept = 0;
+
+  /// Chaînes distinctes ayant des programmes dans le document.
+  int distinctChannels = 0;
+
+  /// Exemples d'identifiants de chaînes du guide écartées (absentes de la liste demandée).
+  List<String> droppedSamples = [];
+
+  /// Exemples d'identifiants gardés.
+  List<String> keptSamples = [];
+  int? firstStart;
+  int? lastStop;
 }
 
 /// Dates XMLTV : « 20261018203000 +0200 » (décalage facultatif, UTC par défaut). Renvoie des secondes UTC.
@@ -188,6 +221,10 @@ class XmltvParser {
   final Set<String>? channels;
   final programmes = <Programme>[];
   final _channels = <String, List<String>>{};
+  final meta = GuideMeta();
+  final _seenIds = <String>{};
+  final _dropped = <String>{};
+  final _keptIds = <String>{};
   var _buffer = '';
   var sawRoot = false;
   var _malformed = false;
@@ -204,11 +241,17 @@ class XmltvParser {
 
   XmltvGuide close(int byteCount) {
     _process();
+    meta
+      ..distinctChannels = _seenIds.length
+      ..kept = programmes.length
+      ..droppedSamples = _dropped.toList()
+      ..keptSamples = _keptIds.take(6).toList();
     return XmltvGuide(
       programmes,
       [for (final e in _channels.entries) XmltvChannel(e.key, e.value)],
       isValid: sawRoot && (!_malformed || programmes.isNotEmpty),
       byteCount: byteCount,
+      meta: meta,
     );
   }
 
@@ -302,9 +345,18 @@ class XmltvParser {
     final channel = attrs['channel'];
     final start = attrs['start'] == null ? null : parseXmltvDate(attrs['start']!);
     if (channel == null || start == null) return;
-    if (channels != null && !channels!.contains(channel.toLowerCase().trim())) return;
+    meta.seen++;
+    if (_seenIds.length < 20000) _seenIds.add(channel);
     final stop = (attrs['stop'] == null ? null : parseXmltvDate(attrs['stop']!)) ?? start + 3600;
     if (stop < windowStart || start > windowEnd) return;
+    meta.inWindow++;
+    if (channels != null && !channels!.contains(channel.toLowerCase().trim())) {
+      if (_dropped.length < 8) _dropped.add(channel);
+      return;
+    }
+    if (_keptIds.length < 6) _keptIds.add(channel);
+    if (meta.firstStart == null || start < meta.firstStart!) meta.firstStart = start;
+    if (meta.lastStop == null || stop > meta.lastStop!) meta.lastStop = stop;
     final title = _child(block, 'title');
     final desc = _child(block, 'desc');
     final category = _child(block, 'category');
@@ -339,21 +391,43 @@ class XmltvParser {
 }
 
 /// Télécharge et analyse un guide (gzip reconnu automatiquement). À appeler dans un isolat (Isolate.run).
+/// Une réponse HTTP hors 2xx ne lève pas d'exception : elle donne un guide invalide dont `meta` porte le code
+/// et le début du texte reçu (pour le journal).
 Future<XmltvGuide> downloadGuide(String url, {Duration timeout = const Duration(seconds: 180), Set<String>? channels}) async {
   final client = HttpClient()
     ..connectionTimeout = const Duration(seconds: 20)
     ..userAgent = 'VLC/3.0.20 LibVLC/3.0.20';
+  final started = DateTime.now();
+  double elapsed() => DateTime.now().difference(started).inMilliseconds / 1000;
   try {
     Future<XmltvGuide> run() async {
-      final request = await client.getUrl(Uri.parse(url));
+      final uri = Uri.parse(url);
+      final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.acceptHeader, '*/*');
       final response = await request.close();
+      final meta = GuideMeta()
+        ..status = response.statusCode
+        ..contentType = response.headers.contentType?.toString()
+        ..finalHost = response.redirects.isNotEmpty ? response.redirects.last.location.host : uri.host;
+      String? headText;
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw HttpException('code HTTP ${response.statusCode}', uri: Uri.parse(url));
+        final bytes = <int>[];
+        await for (final chunk in response) {
+          bytes.addAll(chunk);
+          if (bytes.length >= 400) break;
+        }
+        meta
+          ..seconds = elapsed()
+          ..excerpt = _excerpt(utf8.decode(bytes.take(400).toList(), allowMalformed: true));
+        return XmltvGuide([], [], isValid: false, byteCount: bytes.length, meta: meta);
       }
       final iterator = StreamIterator<List<int>>(response);
       final parser = XmltvParser(channels: channels);
-      if (!await iterator.moveNext()) return parser.close(0);
+      if (!await iterator.moveNext()) {
+        final empty = parser.close(0);
+        meta.seconds = elapsed();
+        return XmltvGuide(empty.programmes, empty.channels, isValid: false, byteCount: 0, meta: meta);
+      }
       final head = iterator.current;
       var bytes = 0;
       Stream<List<int>> rest() async* {
@@ -364,21 +438,40 @@ Future<XmltvGuide> downloadGuide(String url, {Duration timeout = const Duration(
       }
 
       Stream<List<int>> stream = rest();
-      if (head.length > 1 && head[0] == 0x1f && head[1] == 0x8b) stream = gzip.decoder.bind(stream);
+      if (head.length > 1 && head[0] == 0x1f && head[1] == 0x8b) {
+        meta.gzip = true;
+        stream = gzip.decoder.bind(stream);
+      }
       stream = stream.map((chunk) {
         bytes += chunk.length;
         return chunk;
       });
       await for (final text in stream.transform(const Utf8Decoder(allowMalformed: true))) {
+        headText ??= text.length > 400 ? text.substring(0, 400) : text;
         parser.add(text);
       }
-      return parser.close(bytes);
+      final guide = parser.close(bytes);
+      guide.meta
+        ..status = meta.status
+        ..contentType = meta.contentType
+        ..finalHost = meta.finalHost
+        ..gzip = meta.gzip
+        ..seconds = elapsed()
+        ..excerpt = (!guide.isValid || guide.programmes.isEmpty) && headText != null ? _excerpt(headText) : null;
+      return guide;
     }
 
     return await run().timeout(timeout);
   } finally {
     client.close(force: true);
   }
+}
+
+String? _excerpt(String text) {
+  if (text.contains('\u0000')) return '(contenu binaire)';
+  final flat = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (flat.isEmpty) return null;
+  return flat.length > 200 ? flat.substring(0, 200) : flat;
 }
 
 /// Rapprochement des chaînes d'un fournisseur avec celles d'un guide de secours (xmltvfr.fr…),
