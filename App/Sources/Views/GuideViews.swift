@@ -50,6 +50,14 @@ struct GuideView: View {
                 ForEach(0..<7, id: \.self) { offset in
                     Button(dayLabel(offset: offset)) { jump(toDayOffset: offset) }
                 }
+                if replayDayCount > 0 {
+                    Divider()
+                    Section("Revoir (replay)") {
+                        ForEach(1...replayDayCount, id: \.self) { back in
+                            Button(dayLabel(offset: -back)) { jump(toDayOffset: -back) }
+                        }
+                    }
+                }
             } label: {
                 Text(windowStart.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                     .font(.headline)
@@ -99,6 +107,13 @@ struct GuideView: View {
         .padding(10)
     }
 
+    /// Jours en arrière proposés : ceux que le guide a gardés pour les chaînes à replay.
+    private var replayDayCount: Int {
+        guard ReplaySettings.enabled else { return 0 }
+        let longest = store.items(for: .all(.live)).lazy.compactMap(\.archiveDays).max() ?? 0
+        return min(longest, ReplaySettings.guideDays)
+    }
+
     private var filterTitle: String {
         switch filter {
         case .all: return String(localized: "Toutes les chaînes")
@@ -115,6 +130,7 @@ struct GuideView: View {
         switch offset {
         case 0: return String(localized: "Aujourd'hui — \(text)")
         case 1: return String(localized: "Demain — \(text)")
+        case -1: return String(localized: "Hier — \(text)")
         default: return text
         }
     }
@@ -266,6 +282,12 @@ struct GuideRow: View {
                     .font(.callout)
                     .lineLimit(2)
                 Spacer(minLength: 0)
+                if store.replayDays(of: item) > 0 {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .help("Replay disponible : \(store.replayDays(of: item)) jours")
+                }
             }
             .padding(.horizontal, 8)
             .frame(width: labelWidth, height: 58, alignment: .leading)
@@ -303,6 +325,7 @@ struct GuideRow: View {
 
 /// Un programme dans la grille ; un clic ouvre la fiche avec les actions.
 struct GuideCell: View {
+    @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
     let item: MediaItem
     let programme: Programme
@@ -325,6 +348,11 @@ struct GuideCell: View {
                 Text(programme.title)
                     .font(.caption.weight(.medium))
                     .lineLimit(2)
+                if isPast, store.canReplay(item, programme: programme, now: now) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.caption2)
+                        .foregroundStyle(.tint)
+                }
             }
             if width > 80 {
                 Text("\(programme.start.formatted(date: .omitted, time: .shortened)) – \(programme.stop.formatted(date: .omitted, time: .shortened))")
@@ -362,6 +390,7 @@ struct GuideCell: View {
 
 /// Fiche d'un programme : description et actions (regarder, enregistrer, programmer).
 struct GuideProgrammePopover: View {
+    @Environment(LibraryStore.self) private var store
     @Environment(NavigationModel.self) private var navigation
     @Environment(RecordingCenter.self) private var recordings
     let item: MediaItem
@@ -372,6 +401,7 @@ struct GuideProgrammePopover: View {
         let now = Date()
         let isCurrent = programme.start <= now && now < programme.stop
         let isFuture = programme.start > now
+        let replayable = store.canReplay(item, programme: programme, now: now)
         VStack(alignment: .leading, spacing: 10) {
             Text(programme.title).font(.headline)
             Text("\(item.name) · \(programme.start.formatted(date: .abbreviated, time: .shortened)) – \(programme.stop.formatted(date: .omitted, time: .shortened)) (\(durationText))")
@@ -424,6 +454,30 @@ struct GuideProgrammePopover: View {
                             Label("Programmer l'enregistrement", systemImage: "calendar.badge.clock")
                         }
                     }
+                }
+            }
+            if replayable {
+                HStack {
+                    Button {
+                        if let replay = store.makeReplay(channel: item, programme: programme) {
+                            navigation.watchReplay(replay)
+                        }
+                        close()
+                    } label: {
+                        Label(isCurrent ? "Revoir depuis le début" : "Revoir", systemImage: "arrow.counterclockwise")
+                    }
+                    if !isCurrent {
+                        Button {
+                            if let replay = store.makeReplay(channel: item, programme: programme) {
+                                recordings.download(replay, tonight: false)
+                            }
+                            close()
+                        } label: {
+                            Label("Enregistrer ce replay", systemImage: "arrow.down.circle")
+                        }
+                        .help("Télécharge le programme depuis l'archive du fournisseur")
+                    }
+                    Spacer()
                 }
             }
         }

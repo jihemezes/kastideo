@@ -59,7 +59,10 @@ class PlaybackController extends ChangeNotifier {
       }),
       player.stream.completed.listen((done) {
         if (!done) return;
-        if (current?.kind == MediaKind.live) {
+        if (current?.isReplay ?? false) {
+          // Fin du replay : retour automatique au direct de la chaîne (si l'option est active).
+          onReplayEnded?.call(current!);
+        } else if (current?.kind == MediaKind.live) {
           errorMessage = 'Le flux s\'est interrompu. Le serveur a peut-être coupé la connexion.';
           notifyListeners();
         } else if (current != null) {
@@ -93,6 +96,9 @@ class PlaybackController extends ChangeNotifier {
   /// Position à laquelle la lecture a repris (affichée quelques secondes).
   Duration? resumedAt;
   WatchProgressStore? watchProgress;
+
+  /// Fin d'un replay (pour revenir au direct).
+  void Function(MediaItem item)? onReplayEnded;
 
   /// Lecture d'un contenu d'un serveur (Jellyfin, Emby, Plex) : début, progression, pause, fin — transmis au serveur.
   void Function(MediaItem item, double position, double duration, PlaybackEvent event)? onProgress;
@@ -313,7 +319,7 @@ class PlaybackController extends ChangeNotifier {
   /// Reprise à la dernière position, puis mémorisation régulière (toutes les 5 s).
   void _trackProgress() {
     final item = current;
-    if (item == null || item.kind == MediaKind.live || !didStart) return;
+    if (item == null || item.kind == MediaKind.live || item.isReplay || !didStart) return;
     final pending = _pendingResume;
     if (pending != null) {
       if (duration <= Duration.zero) return;
@@ -332,7 +338,7 @@ class PlaybackController extends ChangeNotifier {
 
   void _flushProgress() {
     final item = current;
-    if (item != null && item.kind != MediaKind.live && duration > Duration.zero && position > const Duration(seconds: 2) && _pendingResume == null) {
+    if (item != null && item.kind != MediaKind.live && !item.isReplay && duration > Duration.zero && position > const Duration(seconds: 2) && _pendingResume == null) {
       watchProgress?.update(item.id, position.inMilliseconds / 1000, duration.inMilliseconds / 1000);
       onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.stop);
     }
@@ -360,7 +366,9 @@ class PlaybackController extends ChangeNotifier {
     _pendingResume = null;
     position = Duration.zero;
     duration = Duration.zero;
-    if (item.kind != MediaKind.live && (settings?.resumePlayback ?? true)) {
+    if (item.kind != MediaKind.live &&
+        !item.isReplay &&
+        (settings?.resumePlayback ?? true)) {
       final point = watchProgress?.resumePoint(item.id);
       if (point != null) _pendingResume = Duration(milliseconds: (point * 1000).round());
     }
@@ -479,7 +487,7 @@ class PlaybackController extends ChangeNotifier {
 
   Future<void> _open(String url) async {
     _startedAt = DateTime.now();
-    final source = StreamRelay.shared.playbackUrl(url, live: isLive && (settings?.relayEnabled ?? true));
+    final source = StreamRelay.shared.playbackUrl(url, live: (isLive || (current?.isReplay ?? false)) && (settings?.relayEnabled ?? true));
     PlaybackLog.shared.note('Ouverture de $url${source == url ? '' : ' (via le relais)'}');
     _watchdog = Timer(startTimeout, () {
       if (_currentUrl == url && !didStart && errorMessage == null) {
@@ -502,7 +510,7 @@ class PlaybackController extends ChangeNotifier {
     _evaluateHealth();
     _startShiftTimer();
     final item = current!;
-    if (item.kind != MediaKind.live) onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.start);
+    if (item.kind != MediaKind.live && !item.isReplay) onProgress?.call(item, position.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.start);
   }
 
   void _evaluateHealth() {

@@ -3,6 +3,17 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.4.0] - 2026-10-29
+
+**Replay : revoir un programme déjà diffusé.** Les abonnements IPTV qui conservent les chaînes jusqu'à 14 jours (fonction « tv_archive » de Xtream Codes) sont maintenant exploités.
+
+- **Détection automatique** des chaînes à replay (icône ↺ dans les listes et le Guide TV).
+- **Guide TV** : les programmes passés des chaînes à replay sont conservés (nombre de jours réglable), le menu de la date propose les jours précédents ; la fiche d'un programme passé propose **Revoir** et **Enregistrer ce replay** ; sur le programme en cours, **Revoir depuis le début**.
+- **Clic droit sur une chaîne** > **Revoir (replay)** ; rangée **À revoir** dans l'interface Cinéma.
+- **Lecture** : timeline et pause comme pour un film, sans toucher aux « reprises » ; **retour automatique au direct** à la fin du programme ; passage par le relais de flux (une seule connexion).
+- **Heure du serveur** lue automatiquement (fuseau et heure d'été du fournisseur) ; **décalage manuel** dans Réglages > Général > Replay.
+- Adresses d'archive et décalage visibles dans le Journal (sujet « Lecture et relais », niveau détaillé).
+
 ## [1.3.4] - 2026-10-28
 
 **Guide TV : des chiffres plus justes et une liste plus propre.**

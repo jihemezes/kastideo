@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.4.0-desktop1] - 2026-10-29
+
+**Replay : revoir un programme déjà diffusé** (comme Kastideo 1.4.0 pour Mac).
+
+- Chaînes à replay détectées (icône ↺), programmes passés gardés dans le guide, jours précédents dans le menu de la date, **Revoir**, **Revoir depuis le début**, **Enregistrer ce replay**, clic droit > **Revoir (replay)…**, rangée **À revoir** en Cinéma, retour au direct à la fin.
+- Heure du serveur lue automatiquement (fuseau, heure d'été européenne) et décalage manuel dans Réglages > Général > Replay.
+- Tests : adresse d'archive, horloge du serveur, conservation du passé dans le guide.
+
 ## [1.3.4-desktop1] - 2026-10-28
 
 **Guide TV : chiffres plus justes** (comme Kastideo 1.3.4 pour Mac).

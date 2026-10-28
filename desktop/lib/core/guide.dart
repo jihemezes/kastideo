@@ -193,7 +193,9 @@ class GuideStore extends ChangeNotifier {
         topic: LogTopic.guide, detail: LogDetail.detailed);
     try {
       final filter = wanted.isEmpty ? null : wanted;
-      final guide = await Isolate.run(() => downloadGuide(url, channels: filter));
+      final retention = library.replayRetention(source.id);
+      final guide = await Isolate.run(() => downloadGuide(url, channels: filter,
+          retainChannels: retention?.$1, retainFromS: retention?.$2));
       final m = guide.meta;
       final size = _size(guide.byteCount);
       var answer = 'Guide « ${source.name} » : réponse ${m.status == null ? 'sans code HTTP' : 'HTTP ${m.status}'}'
@@ -448,6 +450,16 @@ class GuideStore extends ChangeNotifier {
     if (own.isNotEmpty) return own;
     final g = _groupByItem[item.id];
     return g == null ? const [] : epg.programmes(g.epgId);
+  }
+
+  /// Programmes que l'on peut revoir (le plus récent d'abord), y compris celui en cours.
+  List<Programme> replayProgrammes(MediaItem channel, {int limit = 14}) {
+    if (library.replayDays(channel) == 0) return const [];
+    final now = nowSeconds();
+    return [
+      for (final p in programmesOf(channel).reversed)
+        if (library.canReplay(channel, p.startS, nowS: now)) p,
+    ].take(limit).toList();
   }
 
   Programme? next(MediaItem item) {

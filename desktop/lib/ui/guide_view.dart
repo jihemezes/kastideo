@@ -180,6 +180,19 @@ class _GuideViewState extends State<GuideView> {
         : '${fr[d.weekday - 1]} ${d.day} ${frM[d.month - 1]}';
   }
 
+  /// Jours en arrière proposés : ceux que le guide a gardés pour les chaînes à replay.
+  int get _replayDays {
+    final library = context.library;
+    if (!(library.settings?.replayEnabled ?? true)) return 0;
+    var longest = 0;
+    for (final i in library.items(MediaKind.live)) {
+      final d = i.archiveDays ?? 0;
+      if (d > longest) longest = d;
+    }
+    final kept = library.settings?.replayGuideDays ?? 3;
+    return longest < kept ? longest : kept;
+  }
+
   Future<void> _pickDay(Offset position) async {
     final now = DateTime.now();
     final choice = await showMenu<int>(
@@ -199,6 +212,27 @@ class _GuideViewState extends State<GuideView> {
               style: kText(13),
             ),
           ),
+        if (_replayDays > 0) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(
+            enabled: false,
+            height: 28,
+            child: Text(
+              tr('Revoir (replay)'),
+              style: kText(12, color: KPalette.secondaryText),
+            ),
+          ),
+          for (var i = 1; i <= _replayDays; i++)
+            PopupMenuItem(
+              value: -i,
+              child: Text(
+                i == 1
+                    ? '${tr('Hier')} — ${_dayLabel(now.subtract(const Duration(days: 1)))}'
+                    : _dayLabel(now.subtract(Duration(days: i))),
+                style: kText(13),
+              ),
+            ),
+        ],
       ],
     );
     if (choice != null) _jumpToDay(choice);
@@ -424,6 +458,11 @@ class _GuideRow extends StatelessWidget {
                 LogoView(url: item.logo, name: item.name, size: 32),
                 const SizedBox(width: 8),
                 Expanded(child: Text(item.displayName, style: kText(13), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                if (context.library.replayDays(item) > 0)
+                  Tooltip(
+                    message: '${tr('Replay disponible')} : ${context.library.replayDays(item)} ${tr('jours')}',
+                    child: Icon(Icons.replay_rounded, size: 14, color: KPalette.secondaryText),
+                  ),
               ]),
             ),
           ),
@@ -495,6 +534,19 @@ class _GuideCell extends StatelessWidget {
                   const Icon(Icons.notifications_active_rounded, size: 11, color: KPalette.orange),
                   const SizedBox(width: 3),
                 ],
+                    if (past &&
+                        context.library.canReplay(
+                          item,
+                          p.startS,
+                          nowS: now,
+                        )) ...[
+                      Icon(
+                        Icons.replay_rounded,
+                        size: 11,
+                        color: KPalette.accent,
+                      ),
+                      const SizedBox(width: 3),
+                    ],
                 Expanded(
                   child: Text(p.title,
                       style: kText(12, weight: FontWeight.w600, color: past ? KPalette.ink54 : KPalette.ink),

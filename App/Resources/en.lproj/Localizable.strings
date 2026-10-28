@@ -835,3 +835,21 @@
 
 /* 1.3.4 */
 "Programme non disponible" = "Program not available";
+
+/* 1.4.0 */
+"Replay" = "Replay";
+"Proposer le replay des chaînes qui en ont un" = "Offer replay for channels that have one";
+"Jours de programmes passés gardés dans le guide" = "Days of past programmes kept in the guide";
+"%lld j" = "%lld d";
+"Décalage de l'heure du replay" = "Replay time offset";
+"Revenir au direct à la fin du programme revu" = "Return to live at the end of the replayed programme";
+"%lld chaîne(s) avec replay détectée(s). Plus vous gardez de jours, plus le guide pèse en mémoire : il est rechargé au prochain rafraîchissement. Si le programme revu ne correspond pas à celui choisi, corrigez l'heure avec le décalage (le fuseau du serveur est lu automatiquement)." = "%lld channel(s) with replay detected. The more days you keep, the more memory the guide uses: it is reloaded at the next refresh. If the replayed programme is not the one you chose, correct the time with the offset (the server time zone is read automatically).";
+"Revoir (replay)" = "Watch again (replay)";
+"Hier — %@" = "Yesterday — %@";
+"Replay disponible : %lld jours" = "Replay available: %lld days";
+"Revoir depuis le début" = "Watch from the start";
+"Revoir" = "Watch again";
+"Enregistrer ce replay" = "Save this replay";
+"Télécharge le programme depuis l'archive du fournisseur" = "Downloads the programme from the provider's archive";
+" (depuis le début)" = " (from the start)";
+"À revoir (replay)" = "To watch again (replay)";

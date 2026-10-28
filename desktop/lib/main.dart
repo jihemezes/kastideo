@@ -176,11 +176,16 @@ Future<void> main(List<String> args) async {
   L10n.apply(settings.language);
   final watch = WatchProgressStore();
   await watch.load();
-  final library = LibraryStore();
+  final library = LibraryStore()..settings = settings;
   final playback = PlaybackController()
     ..settings = settings
     ..watchProgress = watch;
   final navigation = NavigationModel();
+  // Fin d'un replay : retour au direct de la chaîne.
+  playback.onReplayEnded = (item) {
+    final channel = library.replayChannels[item.id];
+    if (channel != null && settings.replayReturnToLive) playback.play(channel);
+  };
   final info = MediaInfoStore(library, settings);
   final guide = GuideStore(library);
   final recordings = RecordingCenter(settings, playback, library);

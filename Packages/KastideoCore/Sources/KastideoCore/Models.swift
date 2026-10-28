@@ -43,10 +43,14 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
     /// Année et genres (serveurs, fiches TMDB des fichiers) : filtres de la vidéothèque.
     public var year: Int?
     public var genres: [String]?
+    /// Nombre de jours de replay (archive) proposés par le fournisseur pour cette chaîne ; `nil` ou 0 = aucun.
+    public var archiveDays: Int?
 
     public init(id: String, sourceID: UUID, kind: MediaKind, name: String, group: String,
                 logoURL: URL? = nil, streamURL: URL? = nil, epgID: String? = nil,
-                seriesID: String? = nil, number: Int? = nil, info: String? = nil, added: Date? = nil) {
+                seriesID: String? = nil, number: Int? = nil, info: String? = nil, added: Date? = nil,
+                archiveDays: Int? = nil) {
+        self.archiveDays = archiveDays
         self.id = id
         self.sourceID = sourceID
         self.kind = kind
@@ -150,8 +154,12 @@ public struct SourceContent: Codable, Sendable {
     public var loadedAt: Date
     /// Positions de lecture connues du serveur (Jellyfin, Emby, Plex) : identifiant → (position, durée) en secondes.
     public var progress: [String: ServerProgress]?
+    /// Horloge du serveur Xtream (fuseau et décalage), pour composer les adresses de replay.
+    public var serverClock: ServerClock?
 
-    public init(items: [MediaItem], epgURL: URL?, loadedAt: Date = Date(), progress: [String: ServerProgress]? = nil) {
+    public init(items: [MediaItem], epgURL: URL?, loadedAt: Date = Date(), progress: [String: ServerProgress]? = nil,
+                serverClock: ServerClock? = nil) {
+        self.serverClock = serverClock
         self.items = items
         self.epgURL = epgURL
         self.loadedAt = loadedAt

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_state.dart';
+import '../core/epg.dart';
 import '../core/models.dart';
 import '../core/paths.dart';
 import '../core/settings.dart';
@@ -639,6 +640,14 @@ class ItemRow extends StatelessWidget {
                 ],
               ),
             ),
+            if (context.library.replayDays(item) > 0)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Tooltip(
+                  message: '${tr('Replay disponible')} : ${context.library.replayDays(item)} ${tr('jours')}',
+                  child: Icon(Icons.replay_rounded, size: 14, color: selected ? KPalette.ink70 : KPalette.secondaryText),
+                ),
+              ),
             if (favorite) Icon(Icons.star_rounded, size: 15, color: selected ? KPalette.ink : KPalette.orange),
           ]),
         ),
@@ -671,6 +680,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         ),
       if (isLive && context.settings.multiviewAvailable)
         PopupMenuItem(value: 'multi', child: Text(tr('Ajouter à la MultiVue'), style: kText(13))),
+      if (isLive && context.guide.replayProgrammes(item).isNotEmpty)
+        PopupMenuItem(value: 'replay', child: Text(tr('Revoir (replay)…'), style: kText(13))),
       if (isLive) PopupMenuItem(value: 'schedule', child: Text(tr('Programmer un enregistrement…'), style: kText(13))),
       if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
@@ -712,6 +723,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         final p = context.guide.current(item);
         await recordings.recordNow(item, title: p?.title ?? '', stopS: p == null ? null : p.stopS + context.settings.marginAfter * 60);
       }
+    case 'replay':
+      await showReplayPicker(context, item);
     case 'schedule':
       await showScheduleDialog(context, channel: item);
     case 'multi':
@@ -794,4 +807,52 @@ class ActivityIndicator extends StatelessWidget {
           );
         },
       );
+}
+
+/// Liste des programmes récents d'une chaîne que l'on peut revoir (archive du fournisseur).
+Future<void> showReplayPicker(BuildContext context, MediaItem channel) async {
+  final programmes = context.guide.replayProgrammes(channel, limit: 30);
+  final now = nowSeconds();
+  String day(DateTime d) {
+    const fr = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
+    const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return (L10n.english ? en : fr)[d.weekday - 1];
+  }
+
+  final choice = await showKDialog<Programme>(
+    context: context,
+    builder: (c) => SimpleDialog(
+      backgroundColor: KPalette.panel,
+      title: Text(
+        '${tr('Revoir')} — ${channel.displayName}',
+        style: kText(16, weight: FontWeight.w700),
+      ),
+      children: [
+        SizedBox(
+          width: 460,
+          height: 360,
+          child: ListView(
+            children: [
+              for (final p in programmes)
+                ListTile(
+                  dense: true,
+                  title: Text(
+                    p.title,
+                    style: kText(13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    '${day(p.start)} ${timeRange(p)}${p.isAiring(now) ? ' — ${tr('depuis le début')}' : ''}',
+                    style: kText(11, color: KPalette.secondaryText),
+                  ),
+                  onTap: () => Navigator.pop(c, p),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+  if (choice != null && context.mounted) await watchReplay(context, channel, choice);
 }

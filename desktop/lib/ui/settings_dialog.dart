@@ -172,6 +172,7 @@ class _GeneralTabState extends State<_GeneralTab> {
           ),
           _caption(tr('Le changement s\'applique au prochain lancement de Kastideo.')),
         ]),
+          const _ReplaySection(),
         _section(tr('Lecture'), [
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
@@ -1430,5 +1431,96 @@ class _RecordingsTabState extends State<_RecordingsTab> {
         ]),
       ]),
     );
+  }
+}
+
+/// Réglages du replay : archive du fournisseur (jusqu'à 14 jours selon l'abonnement).
+class _ReplaySection extends StatelessWidget {
+  const _ReplaySection();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    final channels = context.library
+        .items(MediaKind.live)
+        .where((i) => (i.archiveDays ?? 0) > 0)
+        .length;
+    return _section(tr('Replay'), [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          tr('Proposer le replay des chaînes qui en ont un'),
+          style: kText(14),
+        ),
+        value: settings.replayEnabled,
+        onChanged: (v) => settings.setBool('replay.enabled', v),
+      ),
+      if (settings.replayEnabled) ...[
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                tr('Jours de programmes passés gardés dans le guide'),
+                style: kText(14),
+              ),
+            ),
+            DropdownButton<int>(
+              value: [1, 2, 3, 5, 7, 10, 14].contains(settings.replayGuideDays)
+                  ? settings.replayGuideDays
+                  : 3,
+              items: [
+                for (final d in [1, 2, 3, 5, 7, 10, 14])
+                  DropdownMenuItem(value: d, child: Text('$d ${tr('j')}')),
+              ],
+              onChanged: (v) => settings.setInt('replay.guideDays', v ?? 3),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                tr('Décalage de l\'heure du replay'),
+                style: kText(14),
+              ),
+            ),
+            IconButton(
+              onPressed: () => settings.setInt(
+                'replay.offsetMinutes',
+                (settings.replayOffset - 5).clamp(-180, 180),
+              ),
+              icon: const Icon(Icons.remove_rounded),
+            ),
+            SizedBox(
+              width: 70,
+              child: Text(
+                '${settings.replayOffset} min',
+                textAlign: TextAlign.center,
+                style: kText(14),
+              ),
+            ),
+            IconButton(
+              onPressed: () => settings.setInt(
+                'replay.offsetMinutes',
+                (settings.replayOffset + 5).clamp(-180, 180),
+              ),
+              icon: const Icon(Icons.add_rounded),
+            ),
+          ],
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            tr('Revenir au direct à la fin du programme revu'),
+            style: kText(14),
+          ),
+          value: settings.replayReturnToLive,
+          onChanged: (v) => settings.setBool('replay.returnToLive', v),
+        ),
+      ],
+      _caption(
+        '$channels ${tr('chaîne(s) avec replay détectée(s).')} ${tr('Plus vous gardez de jours, plus le guide pèse en mémoire : il est rechargé au prochain rafraîchissement. Si le programme revu ne correspond pas à celui choisi, corrigez l\'heure avec le décalage (le fuseau du serveur est lu automatiquement).')}',
+      ),
+    ]);
   }
 }

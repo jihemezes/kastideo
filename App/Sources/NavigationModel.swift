@@ -173,6 +173,12 @@ final class NavigationModel {
         selectedItemID = item.id
     }
 
+    /// Ouvre un replay dans le lecteur de la section Direct.
+    func watchReplay(_ item: MediaItem) {
+        browse = .all(.live)
+        selectedItemID = item.id
+    }
+
     func step(_ delta: Int) {
         guard !visibleIDs.isEmpty else { return }
         let current = selectedItemID.flatMap { visibleIDs.firstIndex(of: $0) }

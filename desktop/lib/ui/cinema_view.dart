@@ -188,6 +188,14 @@ class _LiveHome extends StatelessWidget {
     if (favorites.isNotEmpty) {
       rails.add(CinemaRail.items(title: tr('Favoris'), items: favorites, onSeeAll: () => navigation.show(MediaKind.live, FavoriteItems())));
     }
+    if (context.settings.replayEnabled) {
+      // Chaînes préférées qui ont un replay : clic droit > « Revoir (replay)… » ou fiche du guide TV.
+      final seen = <String>{};
+      final replayable = [for (final i in [...favorites, ...recents]) if ((i.archiveDays ?? 0) > 0 && seen.add(i.id)) i];
+      if (replayable.isNotEmpty) {
+        rails.add(CinemaRail.items(title: tr('À revoir (replay)'), items: replayable, onSeeAll: () => navigation.show(MediaKind.live, FavoriteItems())));
+      }
+    }
     for (final theme in [ContentTheme.movies, ContentTheme.sport, ContentTheme.series, ContentTheme.documentary, ContentTheme.entertainment, ContentTheme.kids]) {
       final entries = guide.tonight(theme: theme);
       if (entries.isEmpty) continue;

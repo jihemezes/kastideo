@@ -257,6 +257,14 @@ struct CinemaHome: View {
                         }
                     }
                 }
+                if kind == .live, ReplaySettings.enabled {
+                    // Chaînes préférées qui ont un replay : clic droit > « Revoir (replay) » ou fiche du guide TV.
+                    var seen = Set<String>()
+                    let replayable = (favorites + allRecents).filter { ($0.archiveDays ?? 0) > 0 && seen.insert($0.id).inserted }
+                    if !replayable.isEmpty {
+                        CinemaRail(title: String(localized: "À revoir (replay)"), items: replayable, seeAll: { navigation.go(.favorites) })
+                    }
+                }
                 if !started.isEmpty {
                     CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) })
                 }

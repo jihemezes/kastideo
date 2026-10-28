@@ -210,12 +210,21 @@ Map<String, String> _attributes(String tag) => {
 
 /// Analyseur XMLTV en flux (morceaux de texte), avec une fenêtre de temps pour limiter la mémoire.
 class XmltvParser {
-  XmltvParser({int? windowStart, int? windowEnd, this.channels})
-      : windowStart = windowStart ?? nowSeconds() - 6 * 3600,
-        windowEnd = windowEnd ?? nowSeconds() + 48 * 3600;
+  XmltvParser({
+    int? windowStart,
+    int? windowEnd,
+    this.channels,
+    this.retainChannels,
+    this.retainFromS,
+  }) : windowStart = windowStart ?? nowSeconds() - 6 * 3600,
+       windowEnd = windowEnd ?? nowSeconds() + 48 * 3600;
 
   final int windowStart;
   final int windowEnd;
+
+  /// Replay : chaînes (en minuscules) dont on garde les programmes passés, depuis `retainFromS`.
+  final Set<String>? retainChannels;
+  final int? retainFromS;
 
   /// Identifiants (en minuscules) des chaînes à garder ; null : toutes (guide de secours).
   final Set<String>? channels;
@@ -348,7 +357,11 @@ class XmltvParser {
     meta.seen++;
     if (_seenIds.length < 20000) _seenIds.add(channel);
     final stop = (attrs['stop'] == null ? null : parseXmltvDate(attrs['stop']!)) ?? start + 3600;
-    if (stop < windowStart || start > windowEnd) return;
+    if (start > windowEnd) return;
+    if (stop < windowStart) {
+      // Programme passé : conservé seulement pour les chaînes à replay, dans la période d'archive.
+      if (retainFromS == null || stop < retainFromS! || retainChannels == null || !retainChannels!.contains(channel.toLowerCase().trim())) return;
+    }
     meta.inWindow++;
     if (channels != null && !channels!.contains(channel.toLowerCase().trim())) {
       if (_dropped.length < 8) _dropped.add(channel);
@@ -393,7 +406,8 @@ class XmltvParser {
 /// Télécharge et analyse un guide (gzip reconnu automatiquement). À appeler dans un isolat (Isolate.run).
 /// Une réponse HTTP hors 2xx ne lève pas d'exception : elle donne un guide invalide dont `meta` porte le code
 /// et le début du texte reçu (pour le journal).
-Future<XmltvGuide> downloadGuide(String url, {Duration timeout = const Duration(seconds: 180), Set<String>? channels}) async {
+Future<XmltvGuide> downloadGuide(String url,
+    {Duration timeout = const Duration(seconds: 180), Set<String>? channels, Set<String>? retainChannels, int? retainFromS}) async {
   final client = HttpClient()
     ..connectionTimeout = const Duration(seconds: 20)
     ..userAgent = 'VLC/3.0.20 LibVLC/3.0.20';
@@ -422,7 +436,11 @@ Future<XmltvGuide> downloadGuide(String url, {Duration timeout = const Duration(
         return XmltvGuide([], [], isValid: false, byteCount: bytes.length, meta: meta);
       }
       final iterator = StreamIterator<List<int>>(response);
-      final parser = XmltvParser(channels: channels);
+      final parser = XmltvParser(
+        channels: channels,
+        retainChannels: retainChannels,
+        retainFromS: retainFromS,
+      );
       if (!await iterator.moveNext()) {
         final empty = parser.close(0);
         meta.seconds = elapsed();

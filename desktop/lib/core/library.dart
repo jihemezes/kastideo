@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'details.dart';
+import 'epg.dart';
+import 'replay.dart';
 import 'local_media.dart';
 import 'log.dart';
 import 'm3u.dart';
@@ -40,6 +42,9 @@ class LibraryStore extends ChangeNotifier {
   List<String> recentIds = [];
   bool isBusy = false;
   String? lastError;
+
+  /// Réglages de l'application (replay).
+  AppSettings? settings;
 
   /// Contenus adultes (« |XX| », catégorie adulte) : masqués partout tant que l'option est désactivée.
   bool showAdult = false;
@@ -449,6 +454,84 @@ class LibraryStore extends ChangeNotifier {
           if (i.kind == MediaKind.live) channelEdits[i.id]?.apply(i) ?? i,
       ];
 
+  // MARK: Replay
+
+  /// Jours de replay de la chaîne (0 : aucun, ou fonction désactivée).
+  int replayDays(MediaItem channel) {
+    if (!(settings?.replayEnabled ?? true) || channel.kind != MediaKind.live) return 0;
+    return channel.archiveDays ?? 0;
+  }
+
+  /// Ce programme peut-il être revu ? Déjà commencé, et assez récent pour l'archive de la chaîne.
+  bool canReplay(MediaItem channel, int startS, {int? nowS}) {
+    final days = replayDays(channel);
+    final now = nowS ?? DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    return days > 0 && startS <= now && startS >= now - days * 86400 + 600;
+  }
+
+  /// Programmes passés à garder dans le guide : (chaînes à archive en minuscules, date limite en secondes).
+  (Set<String>, int)? replayRetention(String sourceId) {
+    if (!(settings?.replayEnabled ?? true)) return null;
+    final channels = <String>{};
+    var longest = 0;
+    for (final i in allLiveItems(sourceId)) {
+      final d = i.archiveDays ?? 0;
+      if (d > 0 && (i.epgId ?? '').isNotEmpty) {
+        channels.add(i.epgId!.toLowerCase().trim());
+        if (d > longest) longest = d;
+      }
+    }
+    if (channels.isEmpty) return null;
+    final days = longest < settings!.replayGuideDays
+        ? longest
+        : settings!.replayGuideDays;
+    return (
+      channels,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 - days * 86400,
+    );
+  }
+
+  /// Élément lisible pour revoir un programme depuis l'archive du fournisseur.
+  MediaItem? makeReplay(MediaItem channel, Programme programme) {
+    final live = channel.stream;
+    if (live == null) return null;
+    final clock = sources
+        .where((s) => s.id == channel.sourceId)
+        .firstOrNull
+        ?.clock;
+    final offset = settings?.replayOffset ?? 0;
+    final url = ReplayUrl.make(
+      live,
+      startS: programme.startS,
+      stopS: programme.stopS,
+      clock: clock,
+      extraOffsetMinutes: offset,
+    );
+    if (url == null) return null;
+    final item = MediaItem(
+      id: '${ReplayUrl.idPrefix}${channel.id}|${programme.startS}',
+      sourceId: channel.sourceId,
+      kind: MediaKind.movie,
+      name: '${programme.title} — ${channel.name}',
+      group: channel.name,
+      logo: channel.logo,
+      stream: url,
+      epgId: channel.epgId,
+      info: programme.desc,
+    );
+    replayChannels[item.id] = channel;
+    PlaybackLog.shared.note(
+      'Replay « ${programme.title} » sur ${channel.name} : début ${programme.start}, décalage manuel $offset min, '
+      'horloge serveur : ${clock == null ? 'inconnue' : '${clock.timezone ?? '?'} / ${clock.offset == null ? '?' : '${clock.offset! ~/ 60} min'}'}',
+      topic: LogTopic.playback,
+      detail: LogDetail.detailed,
+    );
+    return item;
+  }
+
+  /// Chaîne d'origine des replays ouverts (retour au direct).
+  final Map<String, MediaItem> replayChannels = {};
+
   /// Adresse du guide TV d'une source : choisie par l'utilisateur, indiquée par le fournisseur, ou xmltv.php (Xtream).
   Future<String?> guideUrlFor(Source source) async {
     if (source.epgUrl?.isNotEmpty ?? false) return source.epgUrl;
@@ -651,6 +734,7 @@ class LibraryStore extends ChangeNotifier {
       if (content.progress.isNotEmpty) onUserData?.call(content.progress);
       source.lastRefresh = DateTime.now();
       source.guideUrl = content.epgUrl;
+      source.clock = content.clock ?? source.clock;
       refreshed = true;
       sourceErrors.remove(source.id);
       await _saveSources();

@@ -1,3 +1,4 @@
+import 'replay.dart';
 import 'text.dart';
 
 /// Type de contenu lisible.
@@ -21,6 +22,7 @@ class MediaItem {
     this.season,
     this.year,
     this.genres = const [],
+    this.archiveDays,
   }) : searchKey = name.searchKey;
 
   final String id;
@@ -44,6 +46,12 @@ class MediaItem {
   final List<String> genres;
   final String searchKey;
 
+  /// Jours de replay (archive) proposés par le fournisseur pour cette chaîne ; null ou 0 : aucun.
+  final int? archiveDays;
+
+  /// Programme déjà diffusé relu depuis l'archive du fournisseur.
+  bool get isReplay => id.startsWith('replay:');
+
   String get displayName => cleanTitle(name).title;
 
   MediaItem copyWith({String? name, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres}) =>
@@ -63,6 +71,7 @@ class MediaItem {
         season: season,
         year: year ?? this.year,
         genres: genres ?? this.genres,
+    archiveDays: archiveDays,
       );
 
   Map<String, dynamic> toJson() => {
@@ -81,6 +90,7 @@ class MediaItem {
         if (season != null) 'se': season,
         if (year != null) 'y': year,
         if (genres.isNotEmpty) 'gn': genres,
+    if (archiveDays != null) 'ad': archiveDays,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -99,6 +109,7 @@ class MediaItem {
         season: j['se'] as int?,
         year: j['y'] as int?,
         genres: [for (final g in (j['gn'] as List? ?? const [])) '$g'],
+    archiveDays: j['ad'] as int?,
       );
 }
 
@@ -140,6 +151,7 @@ class Source {
     this.lastRefresh,
     this.epgUrl,
     this.guideUrl,
+    this.clock,
   });
 
   final String id;
@@ -158,6 +170,9 @@ class Source {
   /// Adresse du guide TV indiquée par le fournisseur (xmltv.php, url-tvg de la playlist).
   String? guideUrl;
 
+  /// Horloge du serveur Xtream (replay).
+  ServerClock? clock;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
@@ -168,6 +183,7 @@ class Source {
         if (lastRefresh != null) 'lastRefresh': lastRefresh!.toIso8601String(),
         'epgUrl': ?epgUrl,
         'guideUrl': ?guideUrl,
+    'clock': ?clock?.toJson(),
       };
 
   factory Source.fromJson(Map<String, dynamic> j) => Source(
@@ -180,12 +196,21 @@ class Source {
         lastRefresh: j['lastRefresh'] == null ? null : DateTime.tryParse(j['lastRefresh'] as String),
         epgUrl: j['epgUrl'] as String?,
         guideUrl: j['guideUrl'] as String?,
+    clock: ServerClock.fromJson((j['clock'] as Map?)?.cast<String, dynamic>()),
       );
 }
 
 /// Contenu chargé d'une source.
 class SourceContent {
-  SourceContent(this.items, {this.epgUrl, this.progress = const {}});
+  SourceContent(
+    this.items, {
+    this.epgUrl,
+    this.progress = const {},
+    this.clock,
+  });
+
+  /// Horloge du serveur Xtream, pour composer les adresses de replay.
+  final ServerClock? clock;
   final List<MediaItem> items;
   final String? epgUrl;
 

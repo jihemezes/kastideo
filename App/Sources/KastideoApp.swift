@@ -4,7 +4,7 @@ import KastideoCore
 @main
 struct KastideoApp: App {
     @State private var store: LibraryStore
-    @State private var navigation = NavigationModel()
+    @State private var navigation: NavigationModel
     @State private var playback: PlaybackController
     @State private var recordings: RecordingCenter
     @State private var updater = UpdaterController()
@@ -18,6 +18,8 @@ struct KastideoApp: App {
     init() {
         _ = AppLanguage.effectiveCode
         let store = LibraryStore()
+        let nav = NavigationModel()
+        _navigation = State(initialValue: nav)
         let playback = PlaybackController()
         let watch = WatchProgressStore()
         let info = MediaInfoStore()
@@ -30,6 +32,11 @@ struct KastideoApp: App {
         store.onServerProgress = { [weak watch] progress in watch?.apply(progress) }
         playback.onProgress = { [weak store] item, position, duration, event in
             store?.reportPlayback(item, position: position, duration: duration, event: event)
+        }
+        // Fin d'un replay : retour au direct de la chaîne.
+        playback.onReplayEnded = { [weak store, weak nav] item in
+            guard ReplaySettings.returnToLive, let channel = store?.replayChannel(of: item) else { return }
+            nav?.watchLive(channel)
         }
         // Dossiers : affiches et résumés TMDB pour les films et séries reconnus.
         store.onContentLoaded = { [weak store, weak info] source in

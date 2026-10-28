@@ -77,6 +77,8 @@ public struct XtreamAccount: Sendable, Equatable {
     public var status: String
     public var expiration: Date?
     public var maxConnections: Int?
+    /// Horloge du serveur (server_info), si elle est annoncée.
+    public var clock: ServerClock?
 }
 
 /// Construction des URL et analyse des réponses de l'API Xtream Codes (player_api.php).
@@ -127,14 +129,15 @@ public enum XtreamAPI {
         catch { throw XtreamError.invalidData }
     }
 
-    public static func parseAccount(_ data: Data) throws -> XtreamAccount {
+    public static func parseAccount(_ data: Data, now: Date = Date()) throws -> XtreamAccount {
         guard let root = try json(data) as? [String: Any],
               let user = root["user_info"] as? [String: Any] else { throw XtreamError.invalidData }
         if let auth = string(user["auth"]), auth == "0" { throw XtreamError.invalidCredentials }
         let status = string(user["status"]) ?? "Active"
         let expiration = string(user["exp_date"]).flatMap { Double($0) }.map { Date(timeIntervalSince1970: $0) }
         let account = XtreamAccount(status: status, expiration: expiration,
-                                    maxConnections: string(user["max_connections"]).flatMap { Int($0) })
+                                    maxConnections: string(user["max_connections"]).flatMap { Int($0) },
+                                    clock: ServerClock.parse(root["server_info"] as? [String: Any], now: now))
         if status.lowercased() != "active" { throw XtreamError.accountInactive(status) }
         return account
     }
@@ -161,8 +164,16 @@ public enum XtreamAPI {
                              logoURL: url(entry["stream_icon"]),
                              streamURL: liveURL(c, streamID: streamID),
                              epgID: string(entry["epg_channel_id"]),
-                             number: string(entry["num"]).flatMap { Int($0) })
+                             number: string(entry["num"]).flatMap { Int($0) },
+                             archiveDays: archiveDays(entry))
         }
+    }
+
+    /// Jours de replay annoncés pour une chaîne (tv_archive = 1, tv_archive_duration = nombre de jours).
+    static func archiveDays(_ entry: [String: Any]) -> Int? {
+        guard string(entry["tv_archive"]).flatMap({ Int($0) }) == 1 else { return nil }
+        let days = string(entry["tv_archive_duration"]).flatMap { Int($0) } ?? 0
+        return days > 0 ? days : 1
     }
 
     public static func parseVOD(_ data: Data, categories: [String: String], sourceID: UUID, credentials c: XtreamCredentials) throws -> [MediaItem] {
@@ -279,7 +290,7 @@ public struct XtreamClient: Sendable {
 
     /// Charge chaînes, films et séries. Les sections en erreur sont ignorées si au moins une réussit.
     public func fetchLibrary() async throws -> SourceContent {
-        _ = try await account()
+        let account = try await account()
         let c = credentials
         let id = sourceID
 
@@ -304,7 +315,7 @@ public struct XtreamClient: Sendable {
             // Relance la section « Direct » pour remonter l'erreur réelle.
             _ = try await HTTP.get(XtreamAPI.apiURL(c, action: "get_live_streams"))
         }
-        return SourceContent(items: all, epgURL: XtreamAPI.xmltvURL(c))
+        return SourceContent(items: all, epgURL: XtreamAPI.xmltvURL(c), serverClock: account.clock)
     }
 
     public func seasons(for series: MediaItem) async throws -> [SeriesSeason] {

@@ -116,6 +116,8 @@ final class PlaybackController {
     @ObservationIgnored var watchProgress: WatchProgressStore?
     /// Position de lecture d'un film ou d'un épisode (début, toutes les 5 s, pause, arrêt) : transmise aux serveurs
     /// Jellyfin, Emby et Plex.
+    /// Fin d'un replay (pour revenir au direct).
+    @ObservationIgnored var onReplayEnded: ((MediaItem) -> Void)?
     @ObservationIgnored var onProgress: ((MediaItem, TimeInterval, TimeInterval, PlaybackEvent) -> Void)?
     /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
     @ObservationIgnored var onRecordingStopped: ((String?) -> Void)?
@@ -347,11 +349,12 @@ final class PlaybackController {
         current = item
         resumedAt = nil
         pendingResume = nil
-        if WatchProgressStore.isEnabled, item.kind != .live, let point = watchProgress?.resumePoint(for: item.id) {
+        if WatchProgressStore.isEnabled, item.kind != .live, !item.isReplay, let point = watchProgress?.resumePoint(for: item.id) {
             pendingResume = point
         }
-        fallbacks = Self.alternatives(for: url)
+        fallbacks = item.isReplay ? [] : Self.alternatives(for: url)
         sameURLRetries = 0
+        if item.isReplay { PlaybackLog.shared.note("Replay « \(item.name) » : adresse d'archive composée (\(url.host ?? "?"))", topic: .playback) }
         start(url)
     }
 
@@ -397,7 +400,7 @@ final class PlaybackController {
         if player.isPlaying {
             guard canPause || !isLive else { return }
             player.pause()
-            if let item = current, item.kind != .live, duration > 0 { onProgress?(item, elapsed, duration, .pause) }
+            if let item = current, item.kind != .live, !item.isReplay, duration > 0 { onProgress?(item, elapsed, duration, .pause) }
             if isLive {
                 pausedAt = Date()
                 startTimeshiftTicker()
@@ -419,8 +422,9 @@ final class PlaybackController {
             catchUp(toDelay: 0)
             return
         }
-        fallbacks = Self.alternatives(for: url)
+        fallbacks = item.isReplay ? [] : Self.alternatives(for: url)
         sameURLRetries = 0
+        if item.isReplay { PlaybackLog.shared.note("Replay « \(item.name) » : adresse d'archive composée (\(url.host ?? "?"))", topic: .playback) }
         start(url)
     }
 
@@ -474,7 +478,7 @@ final class PlaybackController {
 
     /// Enregistre la position courante (film ou épisode) avant de changer de contenu.
     private func flushProgress() {
-        if let item = current, item.kind != .live, pendingResume == nil, duration > 0, elapsed > 1,
+        if let item = current, item.kind != .live, !item.isReplay, pendingResume == nil, duration > 0, elapsed > 1,
            Date() >= ignoreProgressUntil {
             watchProgress?.update(id: item.id, position: elapsed, duration: duration)
             onProgress?(item, elapsed, duration, .stop)
@@ -561,7 +565,7 @@ final class PlaybackController {
         resetTimeline()
 
         let caching = BufferingMode.current.networkCaching
-        let source = StreamRelay.shared.playbackURL(for: url, live: current?.kind == .live)
+        let source = StreamRelay.shared.playbackURL(for: url, live: current?.kind == .live || current?.isReplay == true)
         PlaybackLog.shared.note("Ouverture de \(url.absoluteString) — tampon \(caching) ms\(source == url ? "" : " (via le relais)")")
         let media = VLCMedia(url: source)
         media.addOption(":network-caching=\(caching)")
@@ -681,7 +685,10 @@ final class PlaybackController {
         case .ended:
             isLoading = false
             isPlaying = false
-            if let item = current, item.kind != .live, duration > 0, elapsed >= duration * 0.9 {
+            if let item = current, item.isReplay {
+                // Fin du replay : retour automatique au direct de la chaîne (si l'option est active).
+                onReplayEnded?(item)
+            } else if let item = current, item.kind != .live, duration > 0, elapsed >= duration * 0.9 {
                 // Fin du film ou de l'épisode : vu jusqu'au bout.
                 watchProgress?.update(id: item.id, position: duration, duration: duration)
                 onProgress?(item, duration, duration, .stop)
@@ -706,7 +713,7 @@ final class PlaybackController {
             PlaybackLog.shared.note(String(format: "Lecture démarrée en %.2f s", startupTime ?? 0))
         }
         startHealthSampling()
-        if let item = current, item.kind != .live {
+        if let item = current, item.kind != .live, !item.isReplay {
             onProgress?(item, elapsed, duration, .start)
             loadSidecarSubtitles(for: item)
         }
@@ -1025,7 +1032,7 @@ final class PlaybackController {
 
     /// Reprise à la dernière position, puis mémorisation régulière de la position.
     private func trackProgress() {
-        guard let item = current, item.kind != .live else { return }
+        guard let item = current, item.kind != .live, !item.isReplay else { return }
         if let pending = pendingResume {
             guard isSeekable, duration > 0 else { return }
             let target = min(pending, max(duration - 10, 0))

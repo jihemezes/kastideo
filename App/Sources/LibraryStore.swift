@@ -77,6 +77,8 @@ enum FolderAccess {
 final class LibraryStore {
     private(set) var sources: [Source] = []
     private(set) var contents: [UUID: SourceContent] = [:]
+    /// Replays ouverts pendant cette session (élément lu + chaîne d'origine).
+    @ObservationIgnored var replays: [String: ReplayEntry] = [:]
     private(set) var epg = EPGIndex()
     private(set) var favoriteIDs: [String] = []
     private(set) var recentIDs: [String] = []
@@ -408,6 +410,20 @@ final class LibraryStore {
         }
     }
 
+    /// Programmes passés à garder pour le replay : chaînes à archive de la source, sur le nombre de jours choisi.
+    func replayRetention(for id: UUID) -> ArchiveRetention? {
+        guard ReplaySettings.enabled, let items = contents[id]?.items else { return nil }
+        var channels = Set<String>()
+        var longest = 0
+        for item in items where item.kind == .live && (item.archiveDays ?? 0) > 0 {
+            if let epg = item.epgID, !epg.isEmpty { channels.insert(epg) }
+            longest = max(longest, item.archiveDays ?? 0)
+        }
+        guard !channels.isEmpty else { return nil }
+        let days = min(ReplaySettings.guideDays, longest)
+        return ArchiveRetention(channels: channels, from: Date().addingTimeInterval(-Double(days) * 86400))
+    }
+
     /// Recharge le guide du fournisseur d'une source. `manual` : demande de l'utilisateur (bouton « Recharger le guide »).
     func refreshEPG(for id: UUID, manual: Bool = false) async {
         guard let source = self.source(id: id), source.isEnabled, source.kind.isIPTV else { return }
@@ -425,7 +441,8 @@ final class LibraryStore {
         log.note("Guide « \(source.name) » : demande\(manual ? " manuelle" : "") à \(url.host ?? "?") (\(origin)) — \(url.absoluteString)",
                  topic: .guide)
         do {
-            let report = try await EPGLoader.loadGuideReport(from: url, timeout: 180)
+            let retention = replayRetention(for: id)
+            let report = try await EPGLoader.loadGuideReport(from: url, retention: retention, timeout: 180)
             let guide = report.guide
             let size = ByteCountFormatter.string(fromByteCount: Int64(report.byteCount), countStyle: .file)
             let http = report.status.map { "HTTP \($0)" } ?? "fichier local"

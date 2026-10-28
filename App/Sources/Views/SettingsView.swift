@@ -185,6 +185,7 @@ struct GeneralSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            ReplaySettingsSection()
             Section("Lecture") {
                 Picker("Mémoire tampon", selection: $buffering) {
                     ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }

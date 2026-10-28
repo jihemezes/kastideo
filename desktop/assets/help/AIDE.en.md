@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.3.4-desktop1 — TV guide: category separators ignored, “Program not available”, French channel coverage in the log; version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
+> Version 1.4.0-desktop1 — replay: watch a programme that already aired (provider archive, up to 14 days) from the TV Guide or a channel, “Watch from the start”, saving a replay, return to live at the end; version 1.3.4-desktop1 — TV guide: category separators ignored, “Program not available”, French channel coverage in the log; version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
@@ -100,7 +100,7 @@ Providers often mix several countries (categories “FR| …”, “|PT| …”,
 
 ### TV guide grid
 
-Home, live sidebar, **Ctrl+7** or the G key in the TV interface. Channels in rows, hours in columns, a red line at the current time; **‹ Now ›**, day picker, 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. A click on a programme opens its details: **Watch**, **Record**, **Schedule recording** (red dot in the grid) or **Alert me when it starts** (bell).
+Home, live sidebar, **Ctrl+7** or the G key in the TV interface. Channels in rows, hours in columns, a red line at the current time; **‹ Now ›**, day picker, 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. A click on a programme opens its details: **Watch**, **Record**, **Schedule recording** (red dot in the grid) or **Alert me when it starts** (bell). On a past programme of a channel with replay (↺): **Watch again** or **Save this replay**; past days are in the date menu.
 
 ### Live by theme
 
@@ -113,6 +113,18 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 ### Live timeshift
 
 Pause a channel (or go back with ← or the bar): it keeps being buffered (up to 1 h by default, adjustable). Without any action from you, the channel stays “LIVE”. The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
+
+### Replay: watching a programme that already aired
+
+Some IPTV subscriptions keep channels for up to **14 days** (depending on the provider and the channel). Kastideo detects this by itself: channels with replay show a **↺** icon in lists and in the TV Guide.
+
+- **In the TV Guide**: click a **past** programme (marked ↺), then **Watch again**. On the **current** programme, **Watch from the start** replays it from the beginning. **Save this replay** downloads the programme from the provider's archive (recordings folder).
+- **Previous days**: the date menu of the TV Guide offers **Watch again (replay)** with the past days.
+- **From a channel**: right-click the channel > **Watch again (replay)…** (recent programmes of that channel). The Cinema interface also has a **To watch again** row (your favourite channels with replay).
+- **During a replay**, the player bar lets you pause and move within the programme. At the end, Kastideo **returns to the channel's live stream** (can be turned off).
+- **Settings > General > Replay**: turn replay on or off, number of **days of past programmes kept in the guide** (more days = more memory), **time offset** (if the replayed programme is shifted by a few minutes or an hour, fix it here; the server's time zone is read automatically), return to live.
+- A replay counts as **one connection**: it closes the current channel, like switching channels.
+- If a replay does not start, open the **Log** (button Log, topic “Playback and relay”): the archive address built and the offset used are listed there. The provider's guide must contain past programmes: reload it after increasing the number of days kept.
 
 ### One connection at a time
 
@@ -275,6 +287,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.4.0-desktop1**: replay — watch a programme that already aired from the provider's archive (up to 14 days): TV Guide (past programmes, previous days, “Watch from the start”), right-click a channel, saving a replay, “To watch again” row in Cinema, return to live at the end, settings (days kept in the guide, time offset).
 - **1.3.4-desktop1**: more accurate TV guide (category separators ignored, “Program not available”, French channels counted separately in the log).
 - **1.3.3-desktop1**: Log sorted by topic (TV Guide, Playback and relay, Sources…, search, levels of detail, previous session kept), detailed TV guide entries in the log, “Reload the guide” button.
 - **1.3.1-desktop1**: “My videos” tile (resume, recently added, genre / year / unwatched filters, sorting, folder browsing, error diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed, source cache read correctly at startup.

@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.3.4-desktop1 — guide TV : séparateurs de catégories ignorés, « Programme non disponible », couverture des chaînes françaises dans le journal ; version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
+> Version 1.4.0-desktop1 — replay : revoir un programme déjà diffusé (archive du fournisseur, jusqu'à 14 jours) depuis le Guide TV ou une chaîne, « Revoir depuis le début », enregistrement d'un replay, retour au direct à la fin ; version 1.3.4-desktop1 — guide TV : séparateurs de catégories ignorés, « Programme non disponible », couverture des chaînes françaises dans le journal ; version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
@@ -100,7 +100,7 @@ Votre fournisseur mélange souvent plusieurs pays (catégories « FR| … », «
 
 ### Le Guide TV en grille
 
-Accueil, barre latérale du direct, **Ctrl+7** ou touche G en interface TV. Chaînes en lignes, heures en colonnes, trait rouge sur l'heure actuelle ; **‹ Maintenant ›**, choix du jour, durée affichée 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thème, catégorie) et recherche. Un clic sur un programme ouvre sa fiche : **Regarder**, **Enregistrer**, **Programmer l'enregistrement** (point rouge dans la grille) ou **M'alerter au début** (cloche).
+Accueil, barre latérale du direct, **Ctrl+7** ou touche G en interface TV. Chaînes en lignes, heures en colonnes, trait rouge sur l'heure actuelle ; **‹ Maintenant ›**, choix du jour, durée affichée 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thème, catégorie) et recherche. Un clic sur un programme ouvre sa fiche : **Regarder**, **Enregistrer**, **Programmer l'enregistrement** (point rouge dans la grille) ou **M'alerter au début** (cloche). Sur un programme passé d'une chaîne à replay (↺) : **Revoir** ou **Enregistrer ce replay** ; les jours passés sont dans le menu de la date.
 
 ### Le Direct par thème
 
@@ -113,6 +113,18 @@ Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastil
 ### Direct en différé
 
 Mettez une chaîne en pause (ou revenez en arrière avec ← ou la barre) : elle continue d'être gardée (jusqu'à 1 h par défaut, réglable). Sans action de votre part, la chaîne reste « EN DIRECT ». La barre du différé affiche le retard, un curseur pour revenir en arrière ou rattraper en accéléré, la vitesse, **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s.
+
+### Replay : revoir un programme déjà diffusé
+
+Certains abonnements IPTV conservent les chaînes jusqu'à **14 jours** (selon le fournisseur et la chaîne). Kastideo le détecte tout seul : les chaînes concernées portent une icône **↺** dans les listes et dans le Guide TV.
+
+- **Dans le Guide TV** : cliquez sur un programme **passé** (marqué ↺) puis **Revoir**. Sur le programme **en cours**, **Revoir depuis le début** le relit depuis son commencement. **Enregistrer ce replay** télécharge le programme depuis l'archive du fournisseur (dossier des enregistrements).
+- **Jours précédents** : le menu de la date du Guide TV propose **Revoir (replay)** avec les jours passés.
+- **Depuis une chaîne** : clic droit sur la chaîne > **Revoir (replay)…** (programmes récents de cette chaîne). L'interface Cinéma propose aussi la rangée **À revoir** (vos chaînes préférées avec replay).
+- **Pendant le replay**, la barre du lecteur permet la pause et le déplacement dans le programme. À la fin, Kastideo **revient au direct** de la chaîne (désactivable).
+- **Réglages > Général > Replay** : activer ou non le replay, nombre de **jours de programmes passés gardés dans le guide** (plus de jours = plus de mémoire), **décalage de l'heure** (si le programme revu est décalé de quelques minutes ou d'une heure, corrigez-le ici ; le fuseau du serveur est lu automatiquement), retour au direct.
+- Le replay compte comme **une connexion** : il ferme la chaîne en cours, comme un changement de chaîne.
+- Si un replay ne démarre pas, ouvrez le **Journal** (bouton Journal, sujet « Lecture et relais ») : l'adresse d'archive composée et le décalage utilisé y sont indiqués. Le guide du fournisseur doit contenir les programmes passés : rechargez-le après avoir augmenté le nombre de jours conservés.
 
 ### Une seule connexion à la fois
 
@@ -275,6 +287,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.4.0-desktop1** : replay — revoir un programme déjà diffusé depuis l'archive du fournisseur (jusqu'à 14 jours) : Guide TV (programmes passés, jours précédents, « Revoir depuis le début »), clic droit sur une chaîne, enregistrement d'un replay, rangée « À revoir » en Cinéma, retour au direct à la fin, réglages (jours gardés dans le guide, décalage d'heure).
 - **1.3.4-desktop1** : guide TV plus juste (séparateurs de catégories ignorés, « Programme non disponible », chaînes françaises comptées à part dans le journal).
 - **1.3.3-desktop1** : Journal par sujets (Guide TV, Lecture et relais, Sources…, recherche, niveaux de détail, session précédente conservée), guide TV détaillé dans le journal, bouton « Recharger le guide ».
 - **1.3.1-desktop1** : tuile « Mes vidéos » (reprise, ajouts récents, filtres genre / année / non vus, tri, navigation par dossiers, diagnostic des erreurs), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée, cache des sources relu correctement au démarrage.

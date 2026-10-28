@@ -4,6 +4,7 @@ import 'l10n.dart';
 import 'theme.dart';
 import 'core/alerts.dart';
 import 'core/downloads.dart';
+import 'core/epg.dart';
 import 'core/guide.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
@@ -323,6 +324,22 @@ Future<void> openItem(BuildContext context, MediaItem item) async {
     case MediaKind.episode:
       playItem(context, item);
   }
+}
+
+/// Revoit un programme depuis l'archive du fournisseur : lecture dans le lecteur de la section Direct.
+Future<void> watchReplay(
+  BuildContext context,
+  MediaItem channel,
+  Programme programme,
+) async {
+  final replay = context.library.makeReplay(channel, programme);
+  if (replay == null) return;
+  if (!await confirmConnection(context, replay)) return;
+  if (!context.mounted) return;
+  final navigation = context.navigation;
+  context.playback.play(replay);
+  if (navigation.screen != Screen.live) navigation.go(Screen.live);
+  navigation.openPlayer();
 }
 
 /// Lance la lecture d'un film ou d'un épisode et affiche le lecteur (dans sa section, avec sa fiche derrière).

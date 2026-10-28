@@ -5,6 +5,7 @@ import '../l10n.dart';
 
 import 'models.dart';
 import 'm3u.dart';
+import 'replay.dart';
 
 /// En-tête d'un lecteur reconnu : les plateformes IPTV refusent souvent un client inconnu (comme sur Mac et Piboard).
 const String kUserAgent = 'VLC/3.0.20 LibVLC/3.0.20';
@@ -125,8 +126,12 @@ class XtreamClient {
     if (str(user['auth']) == '0') throw XtreamException('Identifiant ou mot de passe refusé par le serveur.');
     final status = str(user['status']) ?? 'Active';
     if (status.toLowerCase() != 'active') throw XtreamException('Compte non actif (statut : $status).');
+    clock = ServerClock.parse(root['server_info']);
     return int.tryParse(str(user['max_connections']) ?? '');
   }
+
+  /// Horloge du serveur lue lors de la dernière vérification du compte.
+  ServerClock? clock;
 
   Future<Map<String, String>> _categories(String action) async {
     try {
@@ -165,7 +170,7 @@ class XtreamClient {
     ]);
     final all = [...results[0], ...results[1], ...results[2]];
     if (all.isEmpty) await _live(); // remonte l'erreur réelle
-    return SourceContent(all, epgUrl: xmltvUrl);
+    return SourceContent(all, epgUrl: xmltvUrl, clock: clock);
   }
 
   Future<List<MediaItem>> _live() async {
@@ -185,8 +190,16 @@ class XtreamClient {
             stream: streamUrl('live', id, 'ts'),
             epgId: str(e['epg_channel_id']),
             number: int.tryParse(str(e['num']) ?? ''),
+            archiveDays: archiveDaysOf(e),
           ),
     ];
+  }
+
+  /// Jours de replay annoncés pour une chaîne (tv_archive = 1, tv_archive_duration = nombre de jours).
+  static int? archiveDaysOf(Map e) {
+    if (int.tryParse(str(e['tv_archive']) ?? '') != 1) return null;
+    final days = int.tryParse(str(e['tv_archive_duration']) ?? '') ?? 0;
+    return days > 0 ? days : 1;
   }
 
   Future<List<MediaItem>> _vod() async {

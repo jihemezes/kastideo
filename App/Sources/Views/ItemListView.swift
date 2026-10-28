@@ -104,6 +104,12 @@ struct ItemRow: View {
                 }
             }
             Spacer(minLength: 4)
+            if store.replayDays(of: item) > 0 {
+                Image(systemName: "arrow.counterclockwise")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+                    .help("Replay disponible : \(store.replayDays(of: item)) jours")
+            }
             if store.isFavorite(item.id) {
                 Image(systemName: "star.fill")
                     .foregroundStyle(.yellow)
@@ -203,6 +209,21 @@ struct ItemActionsMenu: View {
                 if recordings.isRecording(item) { recordings.stopLive() } else { recordings.recordNow(item) }
             }
             Button("Programmer un enregistrement…") { recordings.scheduleSheetItem = item }
+            let past = store.replayProgrammes(of: item)
+            if !past.isEmpty {
+                Menu("Revoir (replay)") {
+                    ForEach(past) { programme in
+                        Button {
+                            if let replay = store.makeReplay(channel: item, programme: programme) {
+                                navigation.watchReplay(replay)
+                            }
+                        } label: {
+                            let current = programme.start <= Date() && Date() < programme.stop
+                            Text("\(programme.start.formatted(.dateTime.weekday(.abbreviated).hour().minute())) — \(programme.title)\(current ? String(localized: " (depuis le début)") : "")")
+                        }
+                    }
+                }
+            }
             Button("Modifier la chaîne…") { navigation.editingChannel = item }
             let videoOnly = PlaybackController.videoOnlyIDs.contains(item.id)
             Button {

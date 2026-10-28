@@ -9,7 +9,7 @@ struct DetailView: View {
     @Environment(RecordingCenter.self) private var recordings
 
     var body: some View {
-        if let id = navigation.selectedItemID, let item = store.item(id: id) ?? recordings.fileItem(id: id) {
+        if let id = navigation.selectedItemID, let item = store.item(id: id) ?? recordings.fileItem(id: id) ?? store.replayItem(id: id) {
             if item.needsEpisodes {
                 SeriesDetailView(series: item)
                     .id(item.id)
@@ -53,7 +53,7 @@ struct PlayerPane: View {
                 // Lecture refusée (enregistrement prioritaire) : on revient à l'élément en cours.
                 navigation.selectedItemID = playback.current?.id
             })
-            store.recordPlay(item)
+            if !item.isReplay { store.recordPlay(item) }
         }
     }
 }

@@ -72,6 +72,18 @@ class AppSettings extends ChangeNotifier {
   String get alertScope => _prefs.getString('alerts.scope') ?? 'favorites';
   int get alertLead => _prefs.getInt('alerts.lead') ?? 1;
 
+  // MARK: Replay (archive du fournisseur)
+
+  bool get replayEnabled => _prefs.getBool('replay.enabled') ?? true;
+
+  /// Jours de programmes passés gardés dans le guide pour les chaînes à replay (1 à 14).
+  int get replayGuideDays =>
+      (_prefs.getInt('replay.guideDays') ?? 3).clamp(1, 14);
+
+  /// Correction manuelle de l'heure écrite dans l'adresse du replay (minutes).
+  int get replayOffset => _prefs.getInt('replay.offsetMinutes') ?? 0;
+  bool get replayReturnToLive => _prefs.getBool('replay.returnToLive') ?? true;
+
   void setInt(String key, int value) {
     _prefs.setInt(key, value);
     notifyListeners();

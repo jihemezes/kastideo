@@ -97,6 +97,26 @@ List<Widget> programmeActions(BuildContext context, BuildContext dialog, MediaIt
         icon: const Icon(Icons.fiber_manual_record_rounded, size: 18, color: Colors.redAccent),
         label: Text(recordings.isRecording(channel) ? tr('Enregistrement en cours') : tr('Enregistrer')),
       ),
+    if (context.library.canReplay(channel, p.startS, nowS: now)) ...[
+      if (!current)
+        TextButton.icon(
+          onPressed: () {
+            final replay = context.library.makeReplay(channel, p);
+            if (replay != null) context.downloads.enqueue(replay);
+            Navigator.pop(dialog);
+          },
+          icon: const Icon(Icons.download_rounded, size: 18),
+          label: Text(tr('Enregistrer ce replay')),
+        ),
+      TextButton.icon(
+        onPressed: () {
+          Navigator.pop(dialog);
+          watchReplay(context, channel, p);
+        },
+        icon: const Icon(Icons.replay_rounded, size: 18),
+        label: Text(current ? tr('Revoir depuis le début') : tr('Revoir')),
+      ),
+    ],
     if (p.stopS > now)
       FilledButton.icon(
         style: FilledButton.styleFrom(backgroundColor: KPalette.accent),

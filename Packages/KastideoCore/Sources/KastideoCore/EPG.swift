@@ -82,10 +82,22 @@ public struct EPGIndex: Sendable {
     }
 }
 
+/// Programmes passés à conserver pour le replay : seulement les chaînes qui ont une archive, jusqu'à une date.
+public struct ArchiveRetention: Sendable {
+    public var channels: Set<String>
+    public var from: Date
+
+    public init(channels: Set<String>, from: Date) {
+        self.channels = Set(channels.map { EPGIndex.key($0) })
+        self.from = from
+    }
+}
+
 /// Analyseur XMLTV (guide TV), en flux, avec filtrage sur une fenêtre de temps pour limiter la mémoire.
 public final class XMLTVParser: NSObject, XMLParserDelegate {
 
     private var window: DateInterval?
+    private var retention: ArchiveRetention?
     private var programmes: [Programme] = []
 
     private var currentChannel: String?
@@ -102,16 +114,19 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
     private var sawRoot = false
 
     /// Analyse un document XMLTV (gère aussi le .gz sur les plateformes Apple).
-    public static func parse(data: Data, window: DateInterval? = XMLTVParser.defaultWindow()) -> [Programme] {
-        parseGuide(data: data, window: window).programmes
+    public static func parse(data: Data, window: DateInterval? = XMLTVParser.defaultWindow(),
+                             retention: ArchiveRetention? = nil) -> [Programme] {
+        parseGuide(data: data, window: window, retention: retention).programmes
     }
 
     /// Analyse complète : programmes, chaînes (identifiant et noms) et validité du document.
-    public static func parseGuide(data: Data, window: DateInterval? = XMLTVParser.defaultWindow()) -> XMLTVGuide {
+    public static func parseGuide(data: Data, window: DateInterval? = XMLTVParser.defaultWindow(),
+                                  retention: ArchiveRetention? = nil) -> XMLTVGuide {
         var payload = data
         if Gzip.isGzip(data), let inflated = Gzip.decompress(data) { payload = inflated }
         let delegate = XMLTVParser()
         delegate.window = window
+        delegate.retention = retention
         let parser = XMLParser(data: payload)
         parser.delegate = delegate
         let ok = parser.parse()
@@ -166,7 +181,14 @@ public final class XMLTVParser: NSObject, XMLParserDelegate {
             inProgramme = false
             guard let channel = currentChannel, let start = currentStart else { return }
             let stop = currentStop ?? start.addingTimeInterval(3600)
-            if let window, stop < window.start || start > window.end { return }
+            if let window {
+                if start > window.end { return }
+                if stop < window.start {
+                    // Programme passé : conservé seulement pour les chaînes à replay, dans la période d'archive.
+                    guard let retention, stop >= retention.from,
+                          retention.channels.contains(EPGIndex.key(channel)) else { return }
+                }
+            }
             let title = currentTitle.trimmingCharacters(in: .whitespacesAndNewlines)
             let desc = currentDesc.trimmingCharacters(in: .whitespacesAndNewlines)
             programmes.append(Programme(channel: channel, start: start, stop: stop,
@@ -285,10 +307,11 @@ public enum EPGLoader {
 
     /// Téléchargement + analyse, avec le détail de ce qui a été reçu (pour le journal « Guide TV »).
     public static func loadGuideReport(from url: URL, window: DateInterval = XMLTVParser.defaultWindow(),
+                                       retention: ArchiveRetention? = nil,
                                        timeout: TimeInterval = 180) async throws -> GuideReport {
         let reply = try await HTTP.getDetailed(url, timeout: timeout)
         let ok = reply.status.map { (200..<300).contains($0) } ?? true
-        let guide = ok ? XMLTVParser.parseGuide(data: reply.data, window: window)
+        let guide = ok ? XMLTVParser.parseGuide(data: reply.data, window: window, retention: retention)
                        : XMLTVGuide(programmes: [], channels: [], isValid: false, byteCount: reply.data.count)
         return GuideReport(guide: guide, status: reply.status, contentType: reply.contentType,
                            finalHost: reply.finalHost, seconds: reply.seconds,
