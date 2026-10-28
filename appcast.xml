@@ -6,6 +6,22 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.3.4</title>
+      <pubDate>Wed, 28 Oct 2026 22:27:34 GMT</pubDate>
+      <sparkle:version>55</sparkle:version>
+      <sparkle:shortVersionString>1.3.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Guide TV : des chiffres plus justes et une liste plus propre.&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Séparateurs de catégories ignorés&lt;/b&gt; : les lignes du fournisseur comme « ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ » ne sont pas de vraies chaînes. Elles ne sont plus comptées « sans programme » ni proposées dans les listes par thème.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Versions d&amp;#x27;une même chaîne&lt;/b&gt; : une version 4K, FHD ou UHD sans programme propre reprend désormais celui de la version (HD, SD) qui en a un.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;« Programme non disponible »&lt;/b&gt; affiché sous les chaînes qui n&amp;#x27;ont aucun programme (au lieu du nom de la catégorie).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Journal « Guide TV »&lt;/b&gt; : couverture détaillée, avec les chaînes françaises à part (les chaînes étrangères n&amp;#x27;ont souvent pas de guide) et les exemples de chaînes françaises sans programme.&lt;/li&gt;
+&lt;li&gt;Plus d&amp;#x27;alerte « aucune adresse de guide connue » pour les sources Emby, Jellyfin, Plex et dossiers.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.4/Kastideo-1.3.4.dmg" length="46956014" type="application/octet-stream" sparkle:edSignature="aq1Q6leqdBBudImnb5E4xwGTb1Tu/wLHet2Iyk0scac3z4BAjd5Qf/QncMwYWZnGBNDeET9VHpqVyO/ioIJGAQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.3.3</title>
       <pubDate>Wed, 28 Oct 2026 20:14:32 GMT</pubDate>
       <sparkle:version>54</sparkle:version>
@@ -489,21 +505,6 @@
 &lt;li&gt;Nouvelle &lt;b&gt;icône&lt;/b&gt; de l&amp;#x27;application : monogramme K avec bouton lecture, sur fond violet, qui remplit toute la surface (plus de marge blanche autour dans le Dock et le Finder)&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.6.1/Kastideo-0.6.1.dmg" length="43953023" type="application/octet-stream" sparkle:edSignature="rUrahUHXNhs0rBhn3lNNqxXbrPzBSKv/74xCjcrjolxGs3Qf8uWVUHD6dw2CVite7+BNhDVLGZZ5K0BOKuz5CA==" />
-    </item>
-    <item>
-      <title>Kastideo 0.5.0</title>
-      <pubDate>Mon, 19 Oct 2026 17:11:23 GMT</pubDate>
-      <sparkle:version>9</sparkle:version>
-      <sparkle:shortVersionString>0.5.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Nouvelle interface &lt;b&gt;Cinéma&lt;/b&gt; : bandeau « à la une », rangées horizontales (reprise, favoris, une par catégorie), affiches pour les films et séries, vignettes avec programme en cours pour les chaînes, lecteur en plein cadre&lt;/li&gt;
-&lt;li&gt;Interface &lt;b&gt;au choix par type de contenu&lt;/b&gt; : Classique ou Cinéma séparément pour le direct, les films, les séries et les favoris / récents (bouton Interface de la barre d&amp;#x27;outils, ⌥⌘1 / ⌥⌘2, ou Réglages &amp;gt; Apparence)&lt;/li&gt;
-&lt;li&gt;Nouvel onglet &lt;b&gt;Réglages &amp;gt; Apparence&lt;/b&gt; : thème, couleur d&amp;#x27;accent, densité des listes, taille des vignettes&lt;/li&gt;
-&lt;li&gt;Les listes par catégorie s&amp;#x27;affichent plus vite&lt;/li&gt;
-&lt;li&gt;Publication : l&amp;#x27;agrafage du ticket de notarisation est retenté en cas d&amp;#x27;indisponibilité du service Apple (le DMG reste notarisé sans agrafe)&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.5.0/Kastideo-0.5.0.dmg" length="41763118" type="application/octet-stream" sparkle:edSignature="gWKTySGiV/6aeBLSixbQmea1WQVuchC5UC94B3to0/xxIJF5KT1NHatwrF8Q9toZcWgWVW6otozrdsiLLNeYCA==" />
     </item>
   </channel>
 </rss>
