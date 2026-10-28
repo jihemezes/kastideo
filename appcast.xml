@@ -6,6 +6,24 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.3.3</title>
+      <pubDate>Wed, 28 Oct 2026 20:14:32 GMT</pubDate>
+      <sparkle:version>54</sparkle:version>
+      <sparkle:shortVersionString>1.3.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Diagnostic : comprendre ce que fait Kastideo, en particulier avec le guide TV.&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Journal par sujets&lt;/b&gt; (⌥⌘L) : *Guide TV*, *Lecture et relais*, *Sources et catalogues*, *Enregistrements*, *Fiches TMDB*, *Mises à jour*, *Affichage et divers*. Filtre par sujet (avec le nombre de lignes), &lt;b&gt;recherche&lt;/b&gt;, erreurs et alertes seulement, &lt;b&gt;Copier l&amp;#x27;affichage&lt;/b&gt; (uniquement ce qui est filtré).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Niveau de détail par sujet&lt;/b&gt; : Normal, Détaillé (par défaut pour le Guide TV) ou Débogage.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Journal conservé sur disque&lt;/b&gt; : choix entre la &lt;b&gt;session en cours&lt;/b&gt; et la &lt;b&gt;session précédente&lt;/b&gt; (utile pour les problèmes au démarrage).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Guide TV détaillé&lt;/b&gt; : chaque tentative est journalisée — adresse demandée, réponse du fournisseur (code HTTP, taille, durée, compression), chaînes et programmes reçus, période couverte, nombre de vos chaînes reliées au guide du fournisseur, au guide de secours ou à aucun, début de la réponse quand elle est inutilisable. Les refus du fournisseur (HTTP 4xx/5xx) et les pannes réseau sont désormais notés dans le journal. Au démarrage, le journal indique aussi si le guide a été conservé ou rechargé.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Bouton « Recharger le guide TV »&lt;/b&gt; par source (Réglages &amp;gt; Sources) et nombre de programmes reçus affiché sous la source.&lt;/li&gt;
+&lt;li&gt;Sources : chargement journalisé (chaînes, films, séries, chaînes ayant un identifiant de guide, adresse du guide connue ou non).&lt;/li&gt;
+&lt;li&gt;Contient le correctif de compilation de la 1.3.2.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.3/Kastideo-1.3.3.dmg" length="46937237" type="application/octet-stream" sparkle:edSignature="vyyfllRlmlLvKh9OzC/jYOprJHCeXvo9gnYtviwOezWv2BtbOGVcRoakEThRsObkQDsFPRpNQb86CgA8sFZQBw==" />
+    </item>
+    <item>
       <title>Kastideo 1.3.2</title>
       <pubDate>Tue, 27 Oct 2026 13:48:55 GMT</pubDate>
       <sparkle:version>53</sparkle:version>
@@ -486,25 +504,6 @@
 &lt;li&gt;Publication : l&amp;#x27;agrafage du ticket de notarisation est retenté en cas d&amp;#x27;indisponibilité du service Apple (le DMG reste notarisé sans agrafe)&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.5.0/Kastideo-0.5.0.dmg" length="41763118" type="application/octet-stream" sparkle:edSignature="gWKTySGiV/6aeBLSixbQmea1WQVuchC5UC94B3to0/xxIJF5KT1NHatwrF8Q9toZcWgWVW6otozrdsiLLNeYCA==" />
-    </item>
-    <item>
-      <title>Kastideo 0.4.0</title>
-      <pubDate>Mon, 19 Oct 2026 05:17:33 GMT</pubDate>
-      <sparkle:version>8</sparkle:version>
-      <sparkle:shortVersionString>0.4.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Enregistrement du direct&lt;/b&gt; pendant la lecture (●, ⇧⌘R), sur la même connexion, arrêt automatique à la fin du programme&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Enregistrements programmés&lt;/b&gt; depuis le guide TV (double-clic ou clic droit) ou à horaires libres, avec marges avant / après&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Téléchargement des films et épisodes&lt;/b&gt; sans les regarder, saison ou série entière, en file d&amp;#x27;attente, &lt;b&gt;cette nuit&lt;/b&gt; à l&amp;#x27;heure choisie&lt;/li&gt;
-&lt;li&gt;Connexion unique respectée : Kastideo demande avant d&amp;#x27;arrêter un enregistrement ; les téléchargements se mettent en pause pendant la lecture&lt;/li&gt;
-&lt;li&gt;Conversion automatique des enregistrements en &lt;b&gt;MP4&lt;/b&gt; sans perte de qualité&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Direct en différé&lt;/b&gt; : pause sur une chaîne en direct, reprise en différé, bouton « Direct »&lt;/li&gt;
-&lt;li&gt;Section &lt;b&gt;Enregistrements&lt;/b&gt; (⌘6) : en cours, conversions, téléchargements, programmations, fichiers&lt;/li&gt;
-&lt;li&gt;Réglages &amp;gt; Enregistrements : dossier (~/Movies/Kastideo par défaut), marges, heure de nuit, MP4, nettoyage automatique, notifications&lt;/li&gt;
-&lt;li&gt;Notifications macOS, blocage de la mise en veille pendant l&amp;#x27;activité, alerte d&amp;#x27;espace disque faible&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.4.0/Kastideo-0.4.0.dmg" length="41667871" type="application/octet-stream" sparkle:edSignature="Z6rLdSXjlPd8GqXRn031YKdAN28R3xVqg5Sy+yyvFN35vFEi5IMvayKGCKwF40jn4j7OdnE5Qu7mxFI6Hq3jAA==" />
     </item>
   </channel>
 </rss>
