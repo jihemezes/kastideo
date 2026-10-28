@@ -340,7 +340,7 @@ class LiveChannelGroup {
     final byKey = <String, List<MediaItem>>{};
     for (final item in live) {
       final key = ChannelMatcher.variantKey(item.name);
-      if (key.isEmpty) continue;
+      if (key.isEmpty || ChannelMatcher.isSeparator(item.name)) continue;
       final list = byKey[key];
       if (list == null) {
         order.add(key);

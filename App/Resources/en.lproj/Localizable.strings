@@ -832,3 +832,6 @@
 "Recharger le guide TV (résultat détaillé dans le Journal, sujet « Guide TV »)" = "Reload the TV guide (detailed result in the Log, topic “TV Guide”)";
 "Aucune adresse de guide connue pour cette source." = "No guide address is known for this source.";
 "Le fournisseur a refusé la demande du guide (HTTP %lld)." = "The provider refused the guide request (HTTP %lld).";
+
+/* 1.3.4 */
+"Programme non disponible" = "Program not available";

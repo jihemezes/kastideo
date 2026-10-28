@@ -410,7 +410,7 @@ final class LibraryStore {
 
     /// Recharge le guide du fournisseur d'une source. `manual` : demande de l'utilisateur (bouton « Recharger le guide »).
     func refreshEPG(for id: UUID, manual: Bool = false) async {
-        guard let source = self.source(id: id), source.isEnabled else { return }
+        guard let source = self.source(id: id), source.isEnabled, source.kind.isIPTV else { return }
         guard let url = source.epgURL ?? contents[id]?.epgURL else {
             PlaybackLog.shared.note("Guide « \(source.name) » : aucune adresse de guide connue pour cette source (rien à télécharger)",
                                     topic: .guide, level: 1)
@@ -858,11 +858,15 @@ final class LibraryStore {
             self.fallbackStatus.matchedChannels = result.matched
             let c = result.coverage
             var cover = "Guide : \(c.live) chaîne(s) en direct — \(c.provider) avec le guide du fournisseur, "
-            cover += "\(result.matched) complétée(s) par le secours, \(c.none) sans programme"
+            cover += "\(result.matched) complétée(s) par le secours, \(c.inherited) reprenant le programme d'une autre version (4K, FHD…), "
+            cover += "\(c.none) sans programme"
             if c.auto > 0 { cover += " (dont \(c.auto) sans identifiant de guide, rapprochées par leur nom)" }
+            if c.separators > 0 { cover += " ; \(c.separators) séparateur(s) de catégorie ignoré(s)" }
             PlaybackLog.shared.note(cover, topic: .guide)
+            PlaybackLog.shared.note("Guide : chaînes françaises — \(c.french - c.frenchNone) avec programme sur \(c.french) (\(c.frenchNone) sans programme)",
+                                    topic: .guide)
             if !c.sampleUnmatched.isEmpty {
-                PlaybackLog.shared.note("Guide : exemples de chaînes sans programme : \(c.sampleUnmatched.joined(separator: " · "))",
+                PlaybackLog.shared.note("Guide : exemples de chaînes françaises sans programme : \(c.sampleUnmatched.joined(separator: " · "))",
                                         topic: .guide, detail: .detailed)
             }
             self.rebuildLiveGroups()
@@ -893,7 +897,7 @@ final class LibraryStore {
         var byKey: [String: [MediaItem]] = [:]
         for item in live {
             let key = ChannelMatcher.variantKey(item.name)
-            guard !key.isEmpty else { continue }
+            guard !key.isEmpty, !ChannelMatcher.isSeparator(item.name) else { continue }
             if byKey[key] == nil { order.append(key) }
             byKey[key, default: []].append(item)
         }
@@ -924,32 +928,35 @@ final class LibraryStore {
         var provider = 0
         var none = 0
         var auto = 0
+        /// Chaînes qui n'ont pas de programme propre mais reprennent celui d'une autre version (4K, FHD…).
+        var inherited = 0
+        /// Séparateurs de catégories du fournisseur (ignorés).
+        var separators = 0
+        /// Chaînes françaises : total et sans programme (les chaînes étrangères sont souvent sans guide).
+        var french = 0
+        var frenchNone = 0
         var sampleUnmatched: [String] = []
     }
 
-    nonisolated static func buildEPG(provider: [Programme], live: [MediaItem], fallback: [Programme],
+    nonisolated static func buildEPG(provider: [Programme], live allLive: [MediaItem], fallback: [Programme],
                                      channels: [XMLTVChannel]) -> (index: EPGIndex, matched: Int, coverage: EPGCoverage) {
         var index = EPGIndex(programmes: provider)
         var coverage = EPGCoverage()
+        // Les séparateurs de catégories (« ♣♦♣---|FR| FRANCE FHD |FR|---♣♦♣ ») ne sont pas de vraies chaînes.
+        let live = allLive.filter { !ChannelMatcher.isSeparator($0.name) }
+        coverage.separators = allLive.count - live.count
         coverage.live = live.count
         let matcher = channels.isEmpty ? nil : ChannelMatcher(channels: channels)
         let byChannel = Dictionary(grouping: fallback, by: \.channel)
         var extra: [Programme] = []
         var outcome: [String: Int] = [:]   // 0 : fournisseur, 1 : secours, 2 : rien (par identifiant, minuscules)
         var matched = 0
-        func tally(_ code: Int) {
-            switch code {
-            case 0: coverage.provider += 1
-            case 2: coverage.none += 1
-            default: break
-            }
-        }
         for item in live {
-            guard let key = item.epgID, !key.isEmpty else { coverage.none += 1; continue }
+            guard let key = item.epgID, !key.isEmpty else { continue }
             if key.hasPrefix("auto:") { coverage.auto += 1 }
             let lower = key.lowercased()
-            if let known = outcome[lower] { tally(known); continue }
-            if index.hasProgrammes(for: key) { outcome[lower] = 0; tally(0); continue }
+            if outcome[lower] != nil { continue }
+            if index.hasProgrammes(for: key) { outcome[lower] = 0; continue }
             if let matcher, !fallback.isEmpty,
                let id = matcher.match(name: item.name, epgID: key.hasPrefix("auto:") ? nil : key),
                let list = byChannel[id], !list.isEmpty {
@@ -962,11 +969,49 @@ final class LibraryStore {
                 }
             } else {
                 outcome[lower] = 2
-                tally(2)
-                if coverage.sampleUnmatched.count < 6 { coverage.sampleUnmatched.append("\(item.name) [\(key)]") }
             }
         }
         index.merge(extra)
+
+        // Les autres versions d'une chaîne (4K, FHD, UHD…) reprennent le programme de la version qui en a un.
+        var variants: [String: [MediaItem]] = [:]
+        for item in live {
+            let key = ChannelMatcher.variantKey(item.name)
+            if !key.isEmpty { variants[key, default: []].append(item) }
+        }
+        var inherited: [Programme] = []
+        var inheritedKeys = Set<String>()
+        for (_, items) in variants where items.count > 1 {
+            guard let donor = items.first(where: { index.hasProgrammes(for: $0.epgID) }),
+                  let donorList = Optional(index.programmes(for: donor.epgID)), !donorList.isEmpty else { continue }
+            for item in items {
+                guard let key = item.epgID, !key.isEmpty, !index.hasProgrammes(for: key),
+                      inheritedKeys.insert(key.lowercased()).inserted else { continue }
+                inherited += donorList.map { programme in
+                    var copy = programme
+                    copy.channel = key
+                    return copy
+                }
+            }
+        }
+        index.merge(inherited)
+
+        // Couverture finale, chaîne par chaîne.
+        for item in live {
+            let hasGuide = index.hasProgrammes(for: item.epgID)
+            let isFrench = CountryDetector.code(for: item) == "FR"
+            if isFrench { coverage.french += 1 }
+            if hasGuide {
+                if let key = item.epgID, outcome[key.lowercased()] == 0 { coverage.provider += 1 }
+                else if let key = item.epgID, inheritedKeys.contains(key.lowercased()) { coverage.inherited += 1 }
+            } else {
+                coverage.none += 1
+                if isFrench {
+                    coverage.frenchNone += 1
+                    if coverage.sampleUnmatched.count < 8 { coverage.sampleUnmatched.append("\(item.name) [\(item.epgID ?? "—")]") }
+                }
+            }
+        }
         return (index, matched, coverage)
     }
 

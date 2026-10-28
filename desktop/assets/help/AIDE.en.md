@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
+> Version 1.3.4-desktop1 — TV guide: category separators ignored, “Program not available”, French channel coverage in the log; version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
@@ -275,6 +275,7 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 
 ## What's new
 
+- **1.3.4-desktop1**: more accurate TV guide (category separators ignored, “Program not available”, French channels counted separately in the log).
 - **1.3.3-desktop1**: Log sorted by topic (TV Guide, Playback and relay, Sources…, search, levels of detail, previous session kept), detailed TV guide entries in the log, “Reload the guide” button.
 - **1.3.1-desktop1**: “My videos” tile (resume, recently added, genre / year / unwatched filters, sorting, folder browsing, error diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed, source cache read correctly at startup.
 - **1.3.0-desktop1**: new sources — folders (disk, USB drive, NAS), Jellyfin, Emby and Plex — with network search for servers, resume and “watched” shared with servers, TMDB details and detail fixing for files, subtitles placed next to videos.

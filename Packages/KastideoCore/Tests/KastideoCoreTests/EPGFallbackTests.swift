@@ -45,4 +45,13 @@ final class EPGFallbackTests: XCTestCase {
         XCTAssertEqual(GuideReport.excerpt(of: Data([0, 1, 2, 3])), "(contenu binaire)")
         XCTAssertEqual(GuideReport.excerpt(of: Data(String(repeating: "a", count: 500).utf8))?.count, 200)
     }
+
+    func testSeparatorChannels() {
+        XCTAssertTrue(ChannelMatcher.isSeparator("♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣"))
+        XCTAssertTrue(ChannelMatcher.isSeparator("•●★---|FR| CANAL PLAY FHD |FR|---★●•"))
+        XCTAssertTrue(ChannelMatcher.isSeparator("===== SPORT ====="))
+        XCTAssertFalse(ChannelMatcher.isSeparator("|FR| TF1 4K"))
+        XCTAssertFalse(ChannelMatcher.isSeparator("Canal+ Sport 360"))
+        XCTAssertFalse(ChannelMatcher.isSeparator("France 3 - Régions"))
+    }
 }

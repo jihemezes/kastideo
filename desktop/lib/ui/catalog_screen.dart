@@ -609,8 +609,8 @@ class ItemRow extends StatelessWidget {
                   Text(
                     programme != null
                         ? '${hm(programme.start)} · ${programme.title}'
-                        : item.number != null && isLive
-                            ? '${item.number} · ${item.group}'
+                        : isLive
+                            ? tr('Programme non disponible')
                             : item.group,
                     style: kText(11, color: KPalette.ink.withValues(alpha: selected ? 0.8 : 0.5)),
                     maxLines: 1,

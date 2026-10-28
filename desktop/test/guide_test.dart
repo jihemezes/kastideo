@@ -139,4 +139,13 @@ void main() {
     expect(empty.byteCount, 0);
     await server.close(force: true);
   });
+
+  test('Séparateurs de catégories du fournisseur', () {
+    expect(ChannelMatcher.isSeparator('♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣'), isTrue);
+    expect(ChannelMatcher.isSeparator('•●★---|FR| CANAL PLAY FHD |FR|---★●•'), isTrue);
+    expect(ChannelMatcher.isSeparator('===== SPORT ====='), isTrue);
+    expect(ChannelMatcher.isSeparator('|FR| TF1 4K'), isFalse);
+    expect(ChannelMatcher.isSeparator('Canal+ Sport 360'), isFalse);
+    expect(ChannelMatcher.isSeparator('France 3 - Régions'), isFalse);
+  });
 }

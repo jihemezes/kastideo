@@ -12,6 +12,7 @@ class L10n {
 
   static const Map<String, String> _en = {
     'Accueil': 'Home',
+    'Programme non disponible': 'Program not available',
     'Journal du guide': 'TV guide log',
     'Recharger le guide': 'Reload the guide',
     'Journal': 'Log',

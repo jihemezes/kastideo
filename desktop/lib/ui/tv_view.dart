@@ -704,7 +704,7 @@ class _TVBanner extends StatelessWidget {
                       style: kTextD(12, color: KPalette.secondaryDark), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ] else
-                Text(tr('Pas de programme disponible'), style: kTextD(13, color: KPalette.secondaryDark)),
+                Text(tr('Programme non disponible'), style: kTextD(13, color: KPalette.secondaryDark)),
             ]),
           ),
         ]),

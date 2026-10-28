@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
+> Version 1.3.4-desktop1 — guide TV : séparateurs de catégories ignorés, « Programme non disponible », couverture des chaînes françaises dans le journal ; version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
@@ -275,6 +275,7 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 
 ## Nouveautés
 
+- **1.3.4-desktop1** : guide TV plus juste (séparateurs de catégories ignorés, « Programme non disponible », chaînes françaises comptées à part dans le journal).
 - **1.3.3-desktop1** : Journal par sujets (Guide TV, Lecture et relais, Sources…, recherche, niveaux de détail, session précédente conservée), guide TV détaillé dans le journal, bouton « Recharger le guide ».
 - **1.3.1-desktop1** : tuile « Mes vidéos » (reprise, ajouts récents, filtres genre / année / non vus, tri, navigation par dossiers, diagnostic des erreurs), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée, cache des sources relu correctement au démarrage.
 - **1.3.0-desktop1** : nouvelles sources — dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex — avec recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB et correction des fiches des fichiers, sous-titres placés à côté.

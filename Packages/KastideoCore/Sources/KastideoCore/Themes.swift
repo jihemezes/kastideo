@@ -183,6 +183,19 @@ public enum ChannelQuality: Int, CaseIterable, Codable, Sendable, Comparable {
 extension ChannelMatcher {
     /// Clé commune aux versions d'une même chaîne (« |FR| TF1 FHD », « TF1 HD », « TF1 4K » → « tf1 »).
     public static func variantKey(_ name: String) -> String { normalize(name) }
+
+    private static let decoration: Set<Character> = Set("-=_*~•●★☆♣♦♠♥◆◇■□▬═─━▪▫◦·✦✧⚡")
+
+    /// Vrai pour une « chaîne » qui n'est qu'un séparateur de catégorie des fournisseurs IPTV
+    /// (par exemple « ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ » ou « •●★---|FR| CINEMA FHD |FR|---★●• »).
+    public static func isSeparator(_ name: String) -> Bool {
+        var run = 0
+        var best = 0
+        for character in name {
+            if decoration.contains(character) { run += 1; best = max(best, run) } else { run = 0 }
+        }
+        return best >= 3
+    }
 }
 
 /// Discipline d'un programme ou d'une chaîne de sport.

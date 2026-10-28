@@ -3,6 +3,16 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.3.4] - 2026-10-28
+
+**Guide TV : des chiffres plus justes et une liste plus propre.**
+
+- **Séparateurs de catégories ignorés** : les lignes du fournisseur comme « ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ » ne sont pas de vraies chaînes. Elles ne sont plus comptées « sans programme » ni proposées dans les listes par thème.
+- **Versions d'une même chaîne** : une version 4K, FHD ou UHD sans programme propre reprend désormais celui de la version (HD, SD) qui en a un.
+- **« Programme non disponible »** affiché sous les chaînes qui n'ont aucun programme (au lieu du nom de la catégorie).
+- **Journal « Guide TV »** : couverture détaillée, avec les chaînes françaises à part (les chaînes étrangères n'ont souvent pas de guide) et les exemples de chaînes françaises sans programme.
+- Plus d'alerte « aucune adresse de guide connue » pour les sources Emby, Jellyfin, Plex et dossiers.
+
 ## [1.3.3] - 2026-10-28
 
 **Diagnostic : comprendre ce que fait Kastideo, en particulier avec le guide TV.**

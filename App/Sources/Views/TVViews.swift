@@ -617,7 +617,7 @@ struct TVBanner: View {
                                 .lineLimit(1)
                         }
                     } else {
-                        Text("Pas de programme disponible")
+                        Text("Programme non disponible")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }

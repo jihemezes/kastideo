@@ -545,4 +545,21 @@ class ChannelMatcher {
 
   /// Clé commune aux versions d'une même chaîne (« |FR| TF1 FHD », « TF1 HD », « TF1 4K » → « tf1 »).
   static String variantKey(String name) => normalize(name);
+
+  static const _decoration = '-=_*~•●★☆♣♦♠♥◆◇■□▬═─━▪▫◦·✦✧⚡';
+
+  /// Vrai pour une « chaîne » qui n'est qu'un séparateur de catégorie des fournisseurs IPTV
+  /// (par exemple « ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ » ou « •●★---|FR| CINEMA FHD |FR|---★●• »).
+  static bool isSeparator(String name) {
+    var run = 0;
+    for (final r in name.runes) {
+      if (_decoration.contains(String.fromCharCode(r))) {
+        run++;
+        if (run >= 3) return true;
+      } else {
+        run = 0;
+      }
+    }
+    return false;
+  }
 }

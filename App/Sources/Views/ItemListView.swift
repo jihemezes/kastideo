@@ -134,6 +134,11 @@ struct ItemRow: View {
                         .frame(maxWidth: 160)
                 }
             }
+        } else if item.kind == .live {
+            Text("Programme non disponible")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
         } else {
             Text(item.group)
                 .font(.caption)

@@ -2,6 +2,15 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.3.4-desktop1] - 2026-10-28
+
+**Guide TV : chiffres plus justes** (comme Kastideo 1.3.4 pour Mac).
+
+- **Séparateurs de catégories ignorés** (« ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ »…) : plus comptés « sans programme », plus proposés dans les listes par thème.
+- Une version 4K / FHD / UHD sans programme propre reprend celui de l'autre version de la chaîne (déjà le cas à l'affichage, désormais aussi dans le comptage).
+- **« Programme non disponible »** sous les chaînes sans programme dans les listes.
+- **Journal « Guide TV »** : chaînes françaises comptées à part, avec exemples de chaînes françaises sans programme.
+
 ## [1.3.3-desktop1] - 2026-10-28
 
 **Diagnostic** (comme Kastideo 1.3.3 pour Mac).

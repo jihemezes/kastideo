@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n.dart';
+import 'countries.dart';
 import 'epg.dart';
 import 'library.dart';
 import 'log.dart';
@@ -332,7 +333,9 @@ class GuideStore extends ChangeNotifier {
     final provider = <Programme>[
       for (final source in library.sources.where((s) => s.enabled)) ...?_bySource[source.id],
     ];
-    final live = library.items(MediaKind.live);
+    final allLive = library.items(MediaKind.live);
+    final live = [for (final i in allLive) if (!ChannelMatcher.isSeparator(i.name)) i];
+    final separators = allLive.length - live.length;
     final fallback = fallbackEnabled ? _fallback : const <Programme>[];
     final channels = _fallbackChannels;
     final overrides = Map.of(themeOverrides);
@@ -378,22 +381,48 @@ class GuideStore extends ChangeNotifier {
         if (code == 2) none++;
       }
       if (extra.isNotEmpty) index.merge(extra);
-      return (index, matched, LiveChannelGroup.build(live, index, overrides), (live.length, fromProvider, none, auto, samples));
+      final built = LiveChannelGroup.build(live, index, overrides);
+      // Couverture finale : une version (4K, FHD…) sans programme propre reprend celui d'une autre version de la chaîne.
+      final guideOf = <String, String?>{for (final g in built) for (final v in g.variants) v.id: g.epgId};
+      var french = 0;
+      var frenchNone = 0;
+      var inherited = 0;
+      var withGuide = 0;
+      final frenchSamples = <String>[];
+      for (final item in live) {
+        final own = index.hasProgrammes(guideKey(item));
+        final viaGroup = !own && index.hasProgrammes(guideOf[item.id]);
+        if (own || viaGroup) withGuide++;
+        if (viaGroup) inherited++;
+        final isFrench = Countries.of(item.group) == 'FR' || Countries.of(item.name) == 'FR';
+        if (isFrench) french++;
+        if (isFrench && !own && !viaGroup) {
+          frenchNone++;
+          if (frenchSamples.length < 8) frenchSamples.add('${item.name} [${guideKey(item)}]');
+        }
+      }
+      return (index, matched, built, (live.length, fromProvider, none, auto, samples), (french, frenchNone, inherited, withGuide, frenchSamples));
     });
     if (generation != _generation) return;
     epg = result.$1;
     fallbackStatus.matchedChannels = result.$2;
     groups = result.$3;
-    final (total, fromProvider, none, auto, samples) = result.$4;
-    final cover = StringBuffer('Guide : $total chaîne(s) en direct — $fromProvider avec le guide du fournisseur, ${result.$2} complétée(s) par le secours, $none sans programme');
+    final (total, fromProvider, _, auto, _) = result.$4;
+    final (french, frenchNone, inherited, withGuide, frenchSamples) = result.$5;
+    final cover = StringBuffer('Guide : $total chaîne(s) en direct — $fromProvider avec le guide du fournisseur, ${result.$2} complétée(s) par le secours, '
+        '$inherited reprenant le programme d\'une autre version (4K, FHD…), ${total - withGuide} sans programme');
     if (auto > 0) cover.write(' (dont $auto sans identifiant de guide, rapprochées par leur nom)');
+    if (separators > 0) cover.write(' ; $separators séparateur(s) de catégorie ignoré(s)');
     if (isLoading) cover.write(' — guide en cours de chargement');
     final summary = cover.toString();
     if (summary != _lastCoverage) {
       _lastCoverage = summary;
       PlaybackLog.shared.note(summary, topic: LogTopic.guide);
-      if (samples.isNotEmpty) {
-        PlaybackLog.shared.note('Guide : exemples de chaînes sans programme : ${samples.join(' · ')}', topic: LogTopic.guide, detail: LogDetail.detailed);
+      PlaybackLog.shared.note('Guide : chaînes françaises — ${french - frenchNone} avec programme sur $french ($frenchNone sans programme)',
+          topic: LogTopic.guide);
+      if (frenchSamples.isNotEmpty) {
+        PlaybackLog.shared.note('Guide : exemples de chaînes françaises sans programme : ${frenchSamples.join(' · ')}',
+            topic: LogTopic.guide, detail: LogDetail.detailed);
       }
     }
     _groupByItem = {for (final g in groups) for (final v in g.variants) v.id: g};
