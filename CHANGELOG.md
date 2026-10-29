@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.4.1] - 2026-10-29
+
+**Correctif de compilation de la 1.4.0** (Mac uniquement) : « Retour au direct » du lecteur référençait un élément non défini. Aucun changement de fonctionnement.
+
 ## [1.4.0] - 2026-10-29
 
 **Replay : revoir un programme déjà diffusé.** Les abonnements IPTV qui conservent les chaînes jusqu'à 14 jours (fonction « tv_archive » de Xtream Codes) sont maintenant exploités.

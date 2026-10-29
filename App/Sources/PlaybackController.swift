@@ -416,7 +416,7 @@ final class PlaybackController {
 
     /// Revient au direct (rouvre le flux) après une pause.
     func goLive() {
-        guard isLive, let url = current?.streamURL else { return }
+        guard isLive, let item = current, let url = item.streamURL else { return }
         if timeshiftSeekable, isTimeshifted, player.media != nil {
             // Le moteur sait se déplacer dans le différé : on saute au direct en gardant ce qui est en mémoire.
             catchUp(toDelay: 0)
