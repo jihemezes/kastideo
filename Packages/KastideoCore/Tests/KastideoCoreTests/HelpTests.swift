@@ -79,7 +79,7 @@ final class HelpTests: XCTestCase {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("docs/help")
         for lang in ["fr", "en"] {
-            let source = try String(contentsOf: root.appendingPathComponent("aide.\(lang).md"), encoding: .utf8)
+            let source = try String(contentsOf: root.appendingPathComponent("aide-\(lang).md"), encoding: .utf8)
             for platform in [HelpPlatform.mac, .pc] {
                 let groups = HelpDocument.parse(source, platform: platform)
                 let ids = Set(groups.flatMap(\.pages).map(\.id))

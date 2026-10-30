@@ -11,7 +11,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "1.6.0"
+    MARKETING_VERSION: "1.6.1"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -37,9 +37,9 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources
-      - path: docs/help/aide.fr.md
+      - path: docs/help/aide-fr.md
         buildPhase: resources
-      - path: docs/help/aide.en.md
+      - path: docs/help/aide-en.md
         buildPhase: resources
       - path: docs/help/img/help-home-en.png
         buildPhase: resources

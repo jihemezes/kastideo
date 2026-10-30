@@ -14,12 +14,24 @@ public struct HelpPage: Identifiable, Hashable, Sendable {
     public let title: String
     public let group: String
     public let body: String
+
+    public init(id: String, title: String, group: String, body: String) {
+        self.id = id
+        self.title = title
+        self.group = group
+        self.body = body
+    }
 }
 
 public struct HelpGroup: Identifiable, Hashable, Sendable {
     public var id: String { title }
     public let title: String
     public let pages: [HelpPage]
+
+    public init(title: String, pages: [HelpPage]) {
+        self.title = title
+        self.pages = pages
+    }
 }
 
 /// Élément de contenu d'une page.

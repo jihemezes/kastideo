@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.6.1-desktop1] - 2026-10-30
+
+**Correctif de la 1.6.0-desktop1** : fichiers d'aide renommés (aide-fr.md, aide-en.md) pour éviter une collision de noms sur les systèmes de fichiers qui ignorent la casse.
+
 ## [1.6.0-desktop1] - 2026-10-30
 
 **Une aide refaite de A à Z** (comme Kastideo 1.6.0 pour Mac). Même contenu que sur Mac, partagé : sommaire par rubriques, **recherche** dans toutes les pages (extraits, mots surlignés), liens entre pages, pages précédente / suivante, schémas. **F1** ouvre l'aide à la page de l'écran affiché. Nouveaux pas-à-pas : **importer ses abonnements YouTube** (Google Takeout, avec un lien « Comment obtenir mon fichier ? » dans l'écran d'import), clé API Google, publicités et confidentialité, questions fréquentes.

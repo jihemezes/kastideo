@@ -60,7 +60,7 @@ class _HelpDialogState extends State<_HelpDialog> {
   @override
   void initState() {
     super.initState();
-    rootBundle.loadString(L10n.english ? 'assets/help/aide.en.md' : 'assets/help/aide.fr.md').then((text) {
+    rootBundle.loadString(L10n.english ? 'assets/help/aide-en.md' : 'assets/help/aide-fr.md').then((text) {
       if (!mounted) return;
       final groups = parseHelp(text);
       final pages = [for (final g in groups) ...g.pages];

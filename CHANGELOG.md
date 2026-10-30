@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.6.1] - 2026-10-30
+
+**Correctif de compilation de la 1.6.0** (aide). Aucune autre nouveauté.
+
 ## [1.6.0] - 2026-10-30
 
 **Une aide refaite de A à Z.**

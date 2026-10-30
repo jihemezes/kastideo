@@ -76,7 +76,7 @@ void main() {
 
   for (final lang in ['fr', 'en']) {
     test('aide embarquée ($lang) : liens internes valides, pas de marqueur, copie identique à docs/help', () {
-      final source = File('assets/help/aide.$lang.md').readAsStringSync();
+      final source = File('assets/help/aide-$lang.md').readAsStringSync();
       final groups = parseHelp(source);
       final pages = [for (final g in groups) ...g.pages];
       final ids = pages.map((p) => p.id).toSet();
@@ -91,7 +91,7 @@ void main() {
           expect(File('assets/help/img/help-${m.group(1)}-$lang.png').existsSync(), isTrue, reason: '${page.id} image ${m.group(1)}');
         }
       }
-      final shared = File('../docs/help/aide.$lang.md');
+      final shared = File('../docs/help/aide-$lang.md');
       if (shared.existsSync()) {
         expect(shared.readAsStringSync(), source, reason: 'lancez scripts/sync-help.sh');
       }
