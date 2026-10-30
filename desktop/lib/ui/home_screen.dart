@@ -378,6 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () => navigation.show(MediaKind.live, const RecentItems())),
       HomeSmallButton(title: tr('Guide TV'), icon: Icons.calendar_month_rounded, badge: 0, onTap: () => navigation.go(Screen.guide)),
       HomeSmallButton(title: tr('MultiVue'), icon: Icons.grid_view_rounded, badge: context.multiview.channels.length, onTap: () => openMultiView(context)),
+      HomeSmallButton(title: 'YouTube', icon: Icons.smart_display_rounded, badge: 0, onTap: () => navigation.go(Screen.youtube)),
       HomeSmallButton(
           title: tr('Enregistrements'),
           icon: Icons.radio_button_checked_rounded,

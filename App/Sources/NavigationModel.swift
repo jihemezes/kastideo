@@ -34,11 +34,13 @@ enum Browse: Hashable {
     case themes
     /// Vidéothèque : dossiers (disque, clé USB, NAS) et serveurs Jellyfin, Emby, Plex.
     case library
+    /// YouTube : navigateur puis lecteur officiel (mode confidentialité avancée).
+    case youtube
 
     var kind: MediaKind? {
         switch self {
         case .all(let kind), .category(let kind, _): return kind
-        case .home, .favorites, .recents, .recordings, .guide, .themes, .library: return nil
+        case .home, .favorites, .recents, .recordings, .guide, .themes, .library, .youtube: return nil
         }
     }
 
@@ -53,6 +55,7 @@ enum Browse: Hashable {
         case .guide: return String(localized: "Guide TV")
         case .themes: return String(localized: "Thèmes")
         case .library: return String(localized: "Mes vidéos")
+        case .youtube: return "YouTube"
         }
     }
 

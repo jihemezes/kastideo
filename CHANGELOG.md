@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.5.0] - 2026-10-30
+
+**YouTube dans Kastideo.** Une nouvelle section **YouTube** (barre latérale, accueil, ⌘9) : on commence par un navigateur, puis la vidéo choisie bascule sur le lecteur.
+
+- **Navigateur** : chaînes suivies (collez un lien ou un @pseudo ; leurs dernières vidéos par flux RSS, sans clé), **recherche** en vignettes avec votre propre clé API Google gratuite (Réglages > Général > YouTube), liens de vidéos, playlists et chaînes collés, favoris et historique.
+- **Lecteur** : le lecteur officiel de YouTube en « mode confidentialité avancée » (youtube-nocookie.com), sans cookie de suivi, donc le plus souvent sans publicité personnalisée. Précédente / Suivante, enchaînement, boucle, muet. **Ce n'est pas un bloqueur de publicités** : YouTube reste libre d'y diffuser des annonces.
+- La lecture IPTV s'arrête pendant que YouTube joue (sauf enregistrement en cours).
+
 ## [1.4.2] - 2026-10-29
 
 **Soutenir Kastideo (facultatif).** L'application reste gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos** et l'entrée **Aide > Soutenir Kastideo (Ko-fi)**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.

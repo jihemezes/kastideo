@@ -28,6 +28,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 - **Démarrage rapide des chaînes** (moins d'une seconde en général) et indicateur de **santé du flux** (qualité de réception, définition SD / HD / Full HD / 4K).
 - **Direct en différé** : mettez en pause, reprenez plus tard, accélérez pour rattraper le direct.
 - **Reprise de lecture** des films et des épisodes là où vous vous êtes arrêté.
+- **YouTube intégré** : chaînes suivies, recherche (avec votre clé Google gratuite), liens collés, favoris et historique, lus avec le lecteur officiel en « mode confidentialité avancée » (ce n'est pas un bloqueur de publicités).
 - **MultiVue** : jusqu'à quatre chaînes à l'écran, si votre abonnement le permet.
 
 ### S'y retrouver

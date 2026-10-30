@@ -108,7 +108,7 @@ String sectionTitle(MediaKind kind) => switch (kind) {
 
 /// Barre latérale : sections, accueil, favoris, récents et catégories.
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key, required this.kind, this.guide = false, this.recordings = false});
+  const Sidebar({super.key, required this.kind, this.guide = false, this.recordings = false, this.youtube = false});
   final MediaKind kind;
 
   /// Le guide TV est affiché (entrée sélectionnée).
@@ -117,7 +117,10 @@ class Sidebar extends StatelessWidget {
   /// L'écran Enregistrements est affiché.
   final bool recordings;
 
-  bool get _other => guide || recordings;
+  /// L'écran YouTube est affiché.
+  final bool youtube;
+
+  bool get _other => guide || recordings || youtube;
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +199,12 @@ class Sidebar extends StatelessWidget {
                     count: context.downloads.pendingCount + (context.recordings.active != null ? 1 : 0),
                     selected: recordings,
                     onTap: () => navigation.go(Screen.recordings),
+                  ),
+                  SidebarRow(
+                    icon: Icons.smart_display_rounded,
+                    label: 'YouTube',
+                    selected: youtube,
+                    onTap: () => navigation.go(Screen.youtube),
                   ),
                   if (library.hasLibrary && kind != MediaKind.live) ...[
                     const SizedBox(height: 10),

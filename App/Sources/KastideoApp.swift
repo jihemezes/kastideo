@@ -225,6 +225,7 @@ struct KastideoCommands: Commands {
             Button("Enregistrements") { navigation.go(.recordings) }.keyboardShortcut("6", modifiers: .command)
             Button("Guide TV") { navigation.go(.guide) }.keyboardShortcut("7", modifiers: .command)
             Button("Mes vidéos") { navigation.showLibrary(.home) }.keyboardShortcut("8", modifiers: .command)
+            Button("YouTube") { navigation.go(.youtube) }.keyboardShortcut("9", modifiers: .command)
         }
 
         CommandGroup(replacing: .help) {

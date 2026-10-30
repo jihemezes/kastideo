@@ -213,6 +213,7 @@ struct GeneralSettingsView: View {
                     .foregroundStyle(.secondary)
             }
             MediaInfoSettingsSection()
+            YouTubeSettingsSection()
             EPGFallbackSettingsSection()
             ConfigTransferSection()
             Toggle("Actualiser les sources au démarrage (si plus de 6 h)", isOn: $autoRefresh)

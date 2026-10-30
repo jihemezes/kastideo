@@ -38,6 +38,7 @@ import 'ui/settings_dialog.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
 import 'ui/update_view.dart';
+import 'ui/youtube_view.dart';
 import 'core/models.dart';
 
 /// Port local qui sert de verrou : une seule instance de Kastideo à la fois.
@@ -419,6 +420,7 @@ class _RootViewState extends State<RootView> {
         const SingleActivator(LogicalKeyboardKey.digit2, control: true): () => navigation.go(Screen.movies),
         const SingleActivator(LogicalKeyboardKey.digit3, control: true): () => navigation.go(Screen.series),
         const SingleActivator(LogicalKeyboardKey.digit8, control: true): () => navigation.go(Screen.library),
+        const SingleActivator(LogicalKeyboardKey.digit9, control: true): () => navigation.go(Screen.youtube),
         const SingleActivator(LogicalKeyboardKey.digit7, control: true): () => navigation.go(Screen.guide),
         const SingleActivator(LogicalKeyboardKey.keyM, control: true, alt: true): () => openMultiView(context),
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
@@ -458,6 +460,7 @@ class _RootViewState extends State<RootView> {
                   Screen.recordings => const RecordingsScreen(),
                   Screen.multiview => const MultiViewScreen(),
                   Screen.library => const LibraryScreen(),
+                  Screen.youtube => const YouTubeScreen(),
                 },
               ),
             ),

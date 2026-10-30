@@ -46,7 +46,7 @@ enum CinemaSection: String, CaseIterable, Identifiable, Hashable {
         case .recents: return .recents
         case .recordings: return .recordings
         case .guide: return .guide
-        case .themes, .library: return .live
+        case .themes, .library, .youtube: return .live
         }
     }
 
@@ -188,7 +188,7 @@ struct CinemaCatalog: View {
                     CinemaGrid(title: browse.title, items: items, emptyText: browse.emptyMessage)
                 case .recents:
                     CinemaRecents(items: items)
-                case .home, .recordings, .guide, .themes, .library:
+                case .home, .recordings, .guide, .themes, .library, .youtube:
                     EmptyView()
                 }
             }

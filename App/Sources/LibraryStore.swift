@@ -233,7 +233,7 @@ final class LibraryStore {
             return favoriteIDs.compactMap { item(id: $0) }
         case .recents:
             return recentIDs.compactMap { item(id: $0) }
-        case .home, .recordings, .guide, .themes, .library:
+        case .home, .recordings, .guide, .themes, .library, .youtube:
             return []
         }
     }

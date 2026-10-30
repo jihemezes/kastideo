@@ -22,6 +22,8 @@ struct RootView: View {
                     HomeView()
                 } else if navigation.browse == .library {
                     LibraryRootView()
+                } else if navigation.browse == .youtube {
+                    YouTubeRootView()
                 } else {
                     MainSplitView()
                 }

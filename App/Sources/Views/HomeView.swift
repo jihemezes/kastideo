@@ -283,6 +283,9 @@ struct HomeView: View {
             HomeSmallButton(title: "Guide TV", icon: "calendar", badge: 0) {
                 navigation.go(.guide)
             }
+            HomeSmallButton(title: "YouTube", icon: "play.rectangle.fill", badge: 0) {
+                navigation.go(.youtube)
+            }
             HomeSmallButton(title: "Enregistrements",
                             icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
                             badge: recordings.activityCount) {

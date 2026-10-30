@@ -15,6 +15,7 @@ import '../core/settings.dart';
 import '../core/system_integration.dart';
 import '../core/text.dart';
 import '../core/updater.dart';
+import '../core/youtube.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
@@ -255,6 +256,7 @@ class _GeneralTabState extends State<_GeneralTab> {
             child: Text(tr('Obtenir une clé TMDB')),
           ),
         ]),
+        const _YouTubeSection(),
         const _StartupSection(),
         const _UpdatesSection(),
       ]),
@@ -1570,4 +1572,84 @@ class _AboutTab extends StatelessWidget {
       ]),
     );
   }
+}
+
+
+/// Réglages > Général > YouTube : clé API Google (facultative, pour la recherche).
+class _YouTubeSection extends StatefulWidget {
+  const _YouTubeSection();
+
+  @override
+  State<_YouTubeSection> createState() => _YouTubeSectionState();
+}
+
+class _YouTubeSectionState extends State<_YouTubeSection> {
+  final _store = YouTubeStore.shared;
+  final _controller = TextEditingController();
+  bool _show = false;
+  String? _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _store.load().then((_) {
+      if (mounted) _controller.text = _store.apiKey;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final key = _controller.text.trim();
+    await _store.setApiKey(key);
+    if (key.isEmpty) {
+      setState(() => _status = null);
+      return;
+    }
+    setState(() => _status = tr('Vérification…'));
+    try {
+      await YouTubeClient(key).search('kastideo');
+      if (mounted) setState(() => _status = tr('Clé valide ✓'));
+    } on YouTubeApiError catch (e) {
+      if (mounted) setState(() => _status = '${tr('Clé refusée :')} ${e.message}');
+    } catch (e) {
+      if (mounted) setState(() => _status = '${tr('Vérification impossible :')} $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => _section('YouTube', [
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              obscureText: !_show,
+              decoration: InputDecoration(
+                isDense: true,
+                border: const OutlineInputBorder(),
+                labelText: tr('Clé API Google (facultative, pour la recherche)'),
+                suffixIcon: IconButton(
+                  tooltip: _show ? tr('Masquer') : tr('Afficher'),
+                  icon: Icon(_show ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+                  onPressed: () => setState(() => _show = !_show),
+                ),
+              ),
+              onSubmitted: (_) => _save(),
+            ),
+          ),
+          const SizedBox(width: 10),
+          FilledButton(style: FilledButton.styleFrom(backgroundColor: KPalette.accent), onPressed: _save, child: Text(tr('Enregistrer'))),
+        ]),
+        if (_status != null) _caption(_status!),
+        _caption(tr('Sans clé, vous pouvez suivre des chaînes (collez leur lien ou @pseudo) et lire des vidéos ou playlists collées. La recherche demande une clé API Google, gratuite (environ 100 recherches par jour) :\n1. Ouvrez console.cloud.google.com, créez un projet.\n2. Activez « YouTube Data API v3 ».\n3. Créez des identifiants > Clé API, puis collez-la ici.\nLa clé reste dans le coffre du système et n\'est jamais publiée.')),
+        TextButton(
+          onPressed: () => launchUrl(Uri.parse('https://console.cloud.google.com/apis/library/youtube.googleapis.com')),
+          child: Text(tr('Ouvrir la console Google Cloud')),
+        ),
+        _caption(tr('La lecture utilise le lecteur officiel de YouTube en « mode confidentialité avancée » : pas de cookie de suivi, donc le plus souvent aucune publicité personnalisée. Ce n\'est pas un bloqueur de publicités et rien n\'est garanti : YouTube reste libre d\'y diffuser des annonces, qui financent les créateurs. La vidéo s\'ouvre dans une fenêtre dédiée de votre navigateur (Edge, Chrome ou Chromium).')),
+      ]);
 }

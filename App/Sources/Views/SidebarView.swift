@@ -23,6 +23,7 @@ struct SidebarView: View {
                 if store.hasLibrary {
                     row(.library, icon: "photo.stack", count: store.libraryItems().count)
                 }
+                row(.youtube, icon: "play.rectangle", count: nil)
                 row(.recordings, icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
                     count: recordings.activityCount)
             }
