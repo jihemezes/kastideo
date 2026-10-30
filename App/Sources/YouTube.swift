@@ -13,11 +13,25 @@ final class YouTubeStore {
     private static let channelsKey = "youtube.channels.v1"
     private static let favoritesKey = "youtube.favorites.v1"
     private static let historyKey = "youtube.history.v1"
+    private static let laterKey = "youtube.later.v1"
+    private static let progressKey = "youtube.progress.v1"
+    private static let progressLimit = 300
     private static let historyLimit = 80
 
     private(set) var channels: [YouTubeChannel] = []
     private(set) var favorites: [YouTubeVideo] = []
     private(set) var history: [YouTubeVideo] = []
+    /// « À regarder plus tard » : vidéos mises de côté, retirées automatiquement une fois vues jusqu'au bout.
+    private(set) var watchLater: [YouTubeVideo] = []
+    /// Position de reprise (secondes) et durée, par vidéo.
+    private(set) var progress: [String: ProgressPoint] = [:]
+
+    struct ProgressPoint: Codable {
+        var t: Double
+        var d: Double
+        var at: Date
+        var fraction: Double { d > 0 ? min(t / d, 1) : 0 }
+    }
     /// Dernières vidéos de chaque chaîne suivie (flux RSS), rechargées à l'ouverture.
     private(set) var feeds: [String: [YouTubeVideo]] = [:]
     private(set) var feedErrors: [String: String] = [:]
@@ -58,6 +72,9 @@ final class YouTubeStore {
         channels = Self.load(Self.channelsKey)
         favorites = Self.load(Self.favoritesKey)
         history = Self.load(Self.historyKey)
+        watchLater = Self.load(Self.laterKey)
+        if let data = UserDefaults.standard.data(forKey: Self.progressKey),
+           let saved = try? JSONDecoder().decode([String: ProgressPoint].self, from: data) { progress = saved }
     }
 
     private static func load<T: Decodable>(_ key: String) -> [T] {
@@ -70,6 +87,57 @@ final class YouTubeStore {
         defaults.set(try? JSONEncoder().encode(channels), forKey: Self.channelsKey)
         defaults.set(try? JSONEncoder().encode(favorites), forKey: Self.favoritesKey)
         defaults.set(try? JSONEncoder().encode(history), forKey: Self.historyKey)
+        defaults.set(try? JSONEncoder().encode(watchLater), forKey: Self.laterKey)
+        defaults.set(try? JSONEncoder().encode(progress), forKey: Self.progressKey)
+    }
+
+    // MARK: Plus tard et reprise
+
+    func isLater(_ video: YouTubeVideo) -> Bool { watchLater.contains { $0.id == video.id } }
+
+    func toggleLater(_ video: YouTubeVideo) {
+        if let i = watchLater.firstIndex(where: { $0.id == video.id }) { watchLater.remove(at: i) } else { watchLater.append(video) }
+        save()
+    }
+
+    func fraction(of video: YouTubeVideo) -> Double { progress[video.id]?.fraction ?? 0 }
+
+    /// Positions de reprise des vidéos de la file (au moins 10 s déjà vues).
+    func resumePoints(for videos: [YouTubeVideo]) -> [String: Double] {
+        var out: [String: Double] = [:]
+        for video in videos { if let p = progress[video.id], p.t >= 10 { out[video.id] = p.t } }
+        return out
+    }
+
+    /// Progression remontée par la page de lecture (toutes les 5 s). À 95 %, la vidéo est considérée comme vue :
+    /// la reprise est oubliée et la vidéo quitte « À regarder plus tard ».
+    func didProgress(index: Int, t: Double, d: Double) {
+        guard queue.indices.contains(index), d > 0 else { return }
+        let id = queue[index].id
+        if t / d >= 0.95 {
+            progress[id] = nil
+            watchLater.removeAll { $0.id == id }
+        } else if t >= 10 {
+            progress[id] = ProgressPoint(t: t, d: d, at: Date())
+            if progress.count > Self.progressLimit {
+                for key in progress.sorted(by: { $0.value.at < $1.value.at }).prefix(progress.count - Self.progressLimit).map(\.key) { progress[key] = nil }
+            }
+        }
+        save()
+    }
+
+    // MARK: Import des abonnements
+
+    /// Ajoute les chaînes d'un export Google Takeout (ou d'une liste de liens) ; renvoie le nombre de chaînes ajoutées.
+    @discardableResult
+    func importSubscriptions(_ text: String) -> Int {
+        var added = 0
+        for channel in YouTube.parseSubscriptions(text) where !channels.contains(where: { $0.id == channel.id }) {
+            channels.append(channel)
+            added += 1
+        }
+        if added > 0 { save(); lastFeedLoad = nil }
+        return added
     }
 
     var client: YouTubeClient { YouTubeClient(apiKey: apiKey) }
@@ -157,20 +225,25 @@ final class YouTubeStore {
         loadingFeeds = true
         defer { loadingFeeds = false; lastFeedLoad = Date() }
         let client = self.client
-        await withTaskGroup(of: (String, Result<[YouTubeVideo], Error>).self) { group in
-            for channel in channels {
-                group.addTask {
-                    do { return (channel.id, .success(try await client.channelFeed(channel.id).videos)) }
-                    catch { return (channel.id, .failure(error)) }
+        // Par lots de 8 : un import peut apporter des centaines de chaînes.
+        let all = channels
+        for start in stride(from: 0, to: all.count, by: 8) {
+            let batch = all[start..<min(start + 8, all.count)]
+            await withTaskGroup(of: (String, Result<[YouTubeVideo], Error>).self) { group in
+                for channel in batch {
+                    group.addTask {
+                        do { return (channel.id, .success(try await client.channelFeed(channel.id).videos)) }
+                        catch { return (channel.id, .failure(error)) }
+                    }
                 }
-            }
-            for await (id, result) in group {
-                switch result {
-                case .success(let videos):
-                    feeds[id] = videos
-                    feedErrors[id] = nil
-                case .failure(let error):
-                    feedErrors[id] = error.localizedDescription
+                for await (id, result) in group {
+                    switch result {
+                    case .success(let videos):
+                        feeds[id] = videos
+                        feedErrors[id] = nil
+                    case .failure(let error):
+                        feedErrors[id] = error.localizedDescription
+                    }
                 }
             }
         }

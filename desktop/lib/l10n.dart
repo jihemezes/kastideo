@@ -11,6 +11,14 @@ class L10n {
   }
 
   static const Map<String, String> _en = {
+    'À regarder': 'Watch later',
+    'Importer mes abonnements…': 'Import my subscriptions…',
+    'Mettez des vidéos de côté avec le clic droit. Une vidéo entamée reprend là où vous l\'avez laissée ; elle quitte cette liste quand vous l\'avez vue jusqu\'au bout.': 'Set videos aside with a right-click. A video you started resumes where you left off; it leaves this list once you have watched it to the end.',
+    'Aucune vidéo mise de côté.': 'No video set aside.',
+    'Chaînes importées :': 'Channels imported:',
+    'Aucune nouvelle chaîne trouvée dans ce fichier.': 'No new channel found in this file.',
+    'Retirer de « À regarder »': 'Remove from “Watch later”',
+    'À regarder plus tard': 'Watch later',
     'Suivante': 'Next',
     'Clé valide ✓': 'Key valid ✓',
     'Clé refusée :': 'Key refused:',

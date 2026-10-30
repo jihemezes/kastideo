@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.5.1] - 2026-10-30
+
+**YouTube : plus pratique.**
+
+- **À regarder plus tard** : clic droit sur une vidéo (ou bouton dans le lecteur) ; une vidéo entamée **reprend là où vous l'avez laissée**, avec une barre d'avancement sur la vignette, et quitte la liste une fois vue jusqu'au bout.
+- **Importer mes abonnements** : lit le fichier d'abonnements de votre export Google Takeout (CSV ou JSON) ou une liste de liens de chaînes. Les flux sont chargés par lots.
+
 ## [1.5.0] - 2026-10-30
 
 **YouTube dans Kastideo.** Une nouvelle section **YouTube** (barre latérale, accueil, ⌘9) : on commence par un navigateur, puis la vidéo choisie bascule sur le lecteur.

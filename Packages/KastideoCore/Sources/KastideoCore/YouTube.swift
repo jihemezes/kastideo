@@ -156,6 +156,61 @@ public enum YouTube {
             ?? firstMatch("youtube\\.com/channel/(UC[A-Za-z0-9_-]{22})", in: html)
     }
 
+    // MARK: Import des abonnements (Google Takeout)
+
+    /// Découpe une ligne CSV (guillemets doublés acceptés).
+    static func csvFields(_ line: String) -> [String] {
+        var fields: [String] = []
+        var current = ""
+        var quoted = false
+        var chars = Array(line)
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            if quoted {
+                if c == "\"" {
+                    if i + 1 < chars.count, chars[i + 1] == "\"" { current.append("\""); i += 1 } else { quoted = false }
+                } else { current.append(c) }
+            } else if c == "\"" { quoted = true }
+            else if c == "," { fields.append(current); current = "" }
+            else { current.append(c) }
+            i += 1
+        }
+        chars.removeAll()
+        fields.append(current)
+        return fields.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+    }
+
+    /// Abonnements lus dans un export Google Takeout (CSV « abonnements.csv » ou JSON), ou une simple liste de liens / @pseudos.
+    /// Les chaînes données par @pseudo (sans identifiant) sont ignorées : elles demandent un accès réseau pour être résolues.
+    public static func parseSubscriptions(_ text: String) -> [YouTubeChannel] {
+        var out: [YouTubeChannel] = []
+        var seen = Set<String>()
+        func add(_ id: String, _ title: String) {
+            guard matches(channelID, id), seen.insert(id).inserted else { return }
+            out.append(YouTubeChannel(id: id, title: title.isEmpty ? id : title))
+        }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("["), let data = trimmed.data(using: .utf8),
+           let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+            for entry in array {
+                let snippet = entry["snippet"] as? [String: Any] ?? [:]
+                let id = (snippet["resourceId"] as? [String: Any])?["channelId"] as? String ?? ""
+                add(id, snippet["title"] as? String ?? "")
+            }
+            return out
+        }
+        for line in trimmed.components(separatedBy: .newlines) {
+            let fields = csvFields(line)
+            if let id = fields.first(where: { matches(channelID, $0) }) {
+                add(id, fields.count > 1 ? fields[fields.count - 1] : "")
+            } else if case .channel(let id)? = parseSource(line.trimmingCharacters(in: .whitespaces)) {
+                add(id, "")
+            }
+        }
+        return out
+    }
+
     // MARK: Recherche (API Data v3, clé de l'utilisateur)
 
     public static func searchURL(query: String, apiKey: String, order: YouTubeOrder = .relevance, pageToken: String? = nil,
@@ -223,7 +278,7 @@ public enum YouTube {
     /// `eventPath` : adresse relative appelée (`GET <eventPath>?type=…&index=…`) pour prévenir l'application ;
     /// sur Mac, les mêmes événements passent par le gestionnaire de messages WebKit « kastideo ».
     public static func playerHTML(queue: [YouTubeVideo], index: Int, chain: Bool = true, loop: Bool = false, muted: Bool = false,
-                                  labels: PlayerLabels, eventPath: String? = nil) -> String {
+                                  resume: [String: Double] = [:], labels: PlayerLabels, eventPath: String? = nil) -> String {
         struct Entry: Encodable { var id: String; var title: String; var channel: String }
         let entries = queue.map { Entry(id: $0.id, title: $0.title, channel: $0.channel) }
         let encoder = JSONEncoder()
@@ -234,6 +289,11 @@ public enum YouTube {
                         "mute": labels.mute, "open": labels.openOnYouTube, "unavailable": labels.unavailable]
             let data = (try? JSONSerialization.data(withJSONObject: dict)) ?? Data("{}".utf8)
             return (String(data: data, encoding: .utf8) ?? "{}").replacingOccurrences(of: "<", with: "\\u003c")
+        }()
+        let resumeJSON: String = {
+            let clean = resume.filter { $0.value >= 1 && isVideoID($0.key) }.mapValues { Int($0) }
+            let data = (try? JSONSerialization.data(withJSONObject: clean)) ?? Data("{}".utf8)
+            return String(data: data, encoding: .utf8) ?? "{}"
         }()
         let eventLiteral = eventPath.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"" } ?? "null"
         return """
@@ -258,13 +318,18 @@ public enum YouTube {
         <button id="chain"></button><button id="loop"></button><button id="mute"></button><a class="b" id="open" target="_blank" rel="noopener"></a></div>
         <div id="msg"></div>
         <script>
-        var Q=\(safeJSON), L=\(labelJSON), EV=\(eventLiteral);
+        var Q=\(safeJSON), L=\(labelJSON), EV=\(eventLiteral), S=\(resumeJSON);
         var idx=\(max(0, min(index, max(queue.count - 1, 0)))), chain=\(chain), loop=\(loop), muted=\(muted), player=null, hideTimer=null;
         function $(i){return document.getElementById(i)}
-        function notify(type){
-          try{window.webkit.messageHandlers.kastideo.postMessage({type:type,index:idx,id:Q[idx]&&Q[idx].id})}catch(e){}
-          if(EV){try{fetch(EV+'?type='+type+'&index='+idx+'&id='+(Q[idx]?Q[idx].id:''),{cache:'no-store'})}catch(e){}}
+        function notify(type,t,d){
+          var m={type:type,index:idx,id:Q[idx]&&Q[idx].id};if(t!==undefined){m.t=t;m.d=d}
+          try{window.webkit.messageHandlers.kastideo.postMessage(m)}catch(e){}
+          if(EV){try{fetch(EV+'?type='+type+'&index='+idx+'&id='+(Q[idx]?Q[idx].id:'')+(t!==undefined?'&t='+t+'&d='+d:''),{cache:'no-store'})}catch(e){}}
         }
+        function tick(){
+          if(player&&player.getCurrentTime&&player.getDuration){var d=player.getDuration();if(d>0)notify('progress',Math.floor(player.getCurrentTime()),Math.floor(d))}
+        }
+        setInterval(tick,5000);
         function paint(){
           var v=Q[idx]||{};
           $('t').innerHTML='';$('t').appendChild(document.createTextNode(v.title||''));
@@ -278,7 +343,7 @@ public enum YouTube {
         }
         function load(){
           paint();$('msg').textContent='';
-          if(player&&player.loadVideoById){player.loadVideoById(Q[idx].id)}
+          if(player&&player.loadVideoById){player.loadVideoById({videoId:Q[idx].id,startSeconds:S[Q[idx].id]||0})}
           notify('video');
         }
         function go(d){
@@ -296,11 +361,11 @@ public enum YouTube {
           if(e.key==='ArrowRight'&&e.shiftKey)go(1);if(e.key==='ArrowLeft'&&e.shiftKey)go(-1);wake()});
         window.onYouTubeIframeAPIReady=function(){
           player=new YT.Player('p',{host:'https://www.youtube-nocookie.com',width:'100%',height:'100%',videoId:Q[idx].id,
-            playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,mute:muted?1:0},
+            playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,mute:muted?1:0,start:S[Q[idx].id]||0},
             events:{
               onReady:function(){paint();notify('video');wake()},
               onStateChange:function(e){
-                if(e.data===0){ notify('ended');
+                if(e.data===0){ var dd=Math.floor(player.getDuration()||0);if(dd>0)notify('progress',dd,dd);notify('ended');
                   if(chain&&idx<Q.length-1){go(1)}else if(chain&&loop&&Q.length>1){idx=0;load()}
                   else if(loop){player.seekTo(0);player.playVideo()} }
               },

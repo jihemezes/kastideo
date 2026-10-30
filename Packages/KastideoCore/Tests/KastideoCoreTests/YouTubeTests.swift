@@ -68,4 +68,22 @@ final class YouTubeTests: XCTestCase {
         XCTAssertTrue(html.contains("var Q=[{"))
         XCTAssertTrue(html.contains("EV=\"/event\""))
     }
+
+    func testSubscriptionsAndResume() {
+        let csv = ["Channel ID,Channel URL,Channel title",
+                   "UCabcdefghijklmnopqrstuv,http://www.youtube.com/channel/UCabcdefghijklmnopqrstuv,\"Chaîne, avec \"\"virgule\"\"\"",
+                   "UCzzzzzzzzzzzzzzzzzzzzzz,http://www.youtube.com/channel/UCzzzzzzzzzzzzzzzzzzzzzz,Deux",
+                   "UCabcdefghijklmnopqrstuv,http://www.youtube.com/channel/UCabcdefghijklmnopqrstuv,Doublon"].joined(separator: "\n")
+        let channels = YouTube.parseSubscriptions(csv)
+        XCTAssertEqual(channels.map(\.id), ["UCabcdefghijklmnopqrstuv", "UCzzzzzzzzzzzzzzzzzzzzzz"])
+        XCTAssertEqual(channels[0].title, "Chaîne, avec \"virgule\"")
+        let json = "[{\"snippet\":{\"title\":\"Trois\",\"resourceId\":{\"channelId\":\"UCyyyyyyyyyyyyyyyyyyyyyy\"}}}]"
+        XCTAssertEqual(YouTube.parseSubscriptions(json).map(\.title), ["Trois"])
+        XCTAssertEqual(YouTube.parseSubscriptions("https://www.youtube.com/channel/UCabcdefghijklmnopqrstuv\n@pseudo").count, 1)
+        let labels = YouTube.PlayerLabels(previous: "a", next: "b", chain: "c", loop: "d", mute: "e", openOnYouTube: "f", unavailable: "g")
+        let q = [YouTubeVideo(id: "dQw4w9WgXcQ", title: "t")]
+        let html = YouTube.playerHTML(queue: q, index: 0, resume: ["dQw4w9WgXcQ": 125.7, "bad": 3], labels: labels)
+        XCTAssertTrue(html.contains("S={\"dQw4w9WgXcQ\":125}"))
+        XCTAssertFalse(html.contains("\"bad\""))
+    }
 }

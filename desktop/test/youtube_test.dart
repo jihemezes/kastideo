@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kastideo/core/youtube.dart';
 
 void main() {
+  subscriptionsTests();
   test('reconnaît les formes d\'adresse YouTube', () {
     YouTubeSource v(String id) => YouTubeSource(YouTubeSourceKind.video, id);
     expect(parseYouTubeSource('dQw4w9WgXcQ'), v('dQw4w9WgXcQ'));
@@ -81,5 +82,33 @@ void main() {
     expect(html, contains('idx=0'));
     expect(html, contains('EV="/event"'));
     expect(html, contains(r"$('t')"));
+  });
+}
+
+void subscriptionsTests() {
+  test('import des abonnements Takeout (CSV, JSON, liens) et reprise', () {
+    const csv =
+        'Channel ID,Channel URL,Channel title\n'
+        'UCabcdefghijklmnopqrstuv,http://www.youtube.com/channel/UCabcdefghijklmnopqrstuv,"Chaîne, avec ""virgule"""\n'
+        'UCzzzzzzzzzzzzzzzzzzzzzz,http://www.youtube.com/channel/UCzzzzzzzzzzzzzzzzzzzzzz,Deux\n'
+        'UCabcdefghijklmnopqrstuv,http://www.youtube.com/channel/UCabcdefghijklmnopqrstuv,Doublon';
+    final channels = parseYouTubeSubscriptions(csv);
+    expect(channels.map((c) => c.id), ['UCabcdefghijklmnopqrstuv', 'UCzzzzzzzzzzzzzzzzzzzzzz']);
+    expect(channels[0].title, 'Chaîne, avec "virgule"');
+    expect(
+      parseYouTubeSubscriptions('[{"snippet":{"title":"Trois","resourceId":{"channelId":"UCyyyyyyyyyyyyyyyyyyyyyy"}}}]')
+          .map((c) => c.title),
+      ['Trois'],
+    );
+    expect(parseYouTubeSubscriptions('https://www.youtube.com/channel/UCabcdefghijklmnopqrstuv\n@pseudo').length, 1);
+    const labels = YouTubePlayerLabels(previous: 'a', next: 'b', chain: 'c', loop: 'd', mute: 'e', open: 'f', unavailable: 'g');
+    final html = youTubePlayerHtml(
+      queue: [YouTubeVideo(id: 'dQw4w9WgXcQ', title: 't')],
+      index: 0,
+      resume: {'dQw4w9WgXcQ': 125.7, 'bad': 3},
+      labels: labels,
+    );
+    expect(html, contains('S={"dQw4w9WgXcQ":125}'));
+    expect(html, isNot(contains('"bad"')));
   });
 }

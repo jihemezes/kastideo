@@ -150,6 +150,68 @@ String? _first(String pattern, String text) => RegExp(pattern, dotAll: true).fir
 String? youTubeChannelIdFromPage(String html) =>
     _first(r'"channelId":"(UC[A-Za-z0-9_-]{22})"', html) ?? _first(r'youtube\.com/channel/(UC[A-Za-z0-9_-]{22})', html);
 
+List<String> _csvFields(String line) {
+  final fields = <String>[];
+  final current = StringBuffer();
+  var quoted = false;
+  for (var i = 0; i < line.length; i++) {
+    final c = line[i];
+    if (quoted) {
+      if (c == '"') {
+        if (i + 1 < line.length && line[i + 1] == '"') {
+          current.write('"');
+          i++;
+        } else {
+          quoted = false;
+        }
+      } else {
+        current.write(c);
+      }
+    } else if (c == '"') {
+      quoted = true;
+    } else if (c == ',') {
+      fields.add(current.toString());
+      current.clear();
+    } else {
+      current.write(c);
+    }
+  }
+  fields.add(current.toString());
+  return [for (final f in fields) f.trim()];
+}
+
+/// Abonnements lus dans un export Google Takeout (CSV « abonnements.csv » ou JSON), ou une simple liste de liens.
+List<YouTubeChannel> parseYouTubeSubscriptions(String text) {
+  final out = <YouTubeChannel>[];
+  final seen = <String>{};
+  void add(String id, String title) {
+    if (!_channelId.hasMatch(id) || !seen.add(id)) return;
+    out.add(YouTubeChannel(id: id, title: title.isEmpty ? id : title));
+  }
+
+  final trimmed = text.trim();
+  if (trimmed.startsWith('[')) {
+    try {
+      for (final entry in jsonDecode(trimmed) as List) {
+        final snippet = (entry as Map)['snippet'] as Map? ?? const {};
+        add('${(snippet['resourceId'] as Map?)?['channelId'] ?? ''}', '${snippet['title'] ?? ''}');
+      }
+      return out;
+    } catch (_) {}
+  }
+  for (final line in trimmed.split(RegExp(r'\r?\n'))) {
+    final fields = _csvFields(line);
+    final id = fields.where(_channelId.hasMatch).firstOrNull;
+    if (id != null) {
+      add(id, fields.length > 1 ? fields.last : '');
+    } else {
+      final source = parseYouTubeSource(line);
+      if (source != null && source.kind == YouTubeSourceKind.channel) add(source.id, '');
+    }
+  }
+  return out;
+}
+
 Uri youTubeSearchUrl(String query, String apiKey, {YouTubeOrder order = YouTubeOrder.relevance, String? pageToken, int maxResults = 24}) =>
     Uri.https('www.googleapis.com', '/youtube/v3/search', {
       'part': 'snippet',
@@ -207,12 +269,14 @@ String youTubePlayerHtml({
   bool chain = true,
   bool loop = false,
   bool muted = false,
+  Map<String, double> resume = const {},
   required YouTubePlayerLabels labels,
   String? eventPath,
 }) {
   final entries = [for (final v in queue) {'id': v.id, 'title': v.title, 'channel': v.channel}];
   final safeJson = jsonEncode(entries).replaceAll('<', r'\u003c');
   final labelJson = jsonEncode(labels.toMap()).replaceAll('<', r'\u003c');
+  final resumeJson = jsonEncode({for (final e in resume.entries) if (e.value >= 1 && isYouTubeVideoId(e.key)) e.key: e.value.floor()});
   final eventLiteral = eventPath == null ? 'null' : '"${eventPath.replaceAll('"', '')}"';
   final start = queue.isEmpty ? 0 : index.clamp(0, queue.length - 1);
   return '''<!doctype html>
@@ -236,13 +300,18 @@ button.on{background:#ff6a3d}
 <button id="chain"></button><button id="loop"></button><button id="mute"></button><a class="b" id="open" target="_blank" rel="noopener"></a></div>
 <div id="msg"></div>
 <script>
-var Q=$safeJson, L=$labelJson, EV=$eventLiteral;
+var Q=$safeJson, L=$labelJson, EV=$eventLiteral, S=$resumeJson;
 var idx=$start, chain=$chain, loop=$loop, muted=$muted, player=null, hideTimer=null;
 function \$(i){return document.getElementById(i)}
-function notify(type){
-  try{window.webkit.messageHandlers.kastideo.postMessage({type:type,index:idx,id:Q[idx]&&Q[idx].id})}catch(e){}
-  if(EV){try{fetch(EV+'?type='+type+'&index='+idx+'&id='+(Q[idx]?Q[idx].id:''),{cache:'no-store'})}catch(e){}}
+function notify(type,t,d){
+  var m={type:type,index:idx,id:Q[idx]&&Q[idx].id};if(t!==undefined){m.t=t;m.d=d}
+  try{window.webkit.messageHandlers.kastideo.postMessage(m)}catch(e){}
+  if(EV){try{fetch(EV+'?type='+type+'&index='+idx+'&id='+(Q[idx]?Q[idx].id:'')+(t!==undefined?'&t='+t+'&d='+d:''),{cache:'no-store'})}catch(e){}}
 }
+function tick(){
+  if(player&&player.getCurrentTime&&player.getDuration){var d=player.getDuration();if(d>0)notify('progress',Math.floor(player.getCurrentTime()),Math.floor(d))}
+}
+setInterval(tick,5000);
 function paint(){
   var v=Q[idx]||{};
   \$('t').innerHTML='';\$('t').appendChild(document.createTextNode(v.title||''));
@@ -256,7 +325,7 @@ function paint(){
 }
 function load(){
   paint();\$('msg').textContent='';
-  if(player&&player.loadVideoById){player.loadVideoById(Q[idx].id)}
+  if(player&&player.loadVideoById){player.loadVideoById({videoId:Q[idx].id,startSeconds:S[Q[idx].id]||0})}
   notify('video');
 }
 function go(d){
@@ -274,11 +343,11 @@ document.addEventListener('mousemove',wake);document.addEventListener('keydown',
   if(e.key==='ArrowRight'&&e.shiftKey)go(1);if(e.key==='ArrowLeft'&&e.shiftKey)go(-1);wake()});
 window.onYouTubeIframeAPIReady=function(){
   player=new YT.Player('p',{host:'https://www.youtube-nocookie.com',width:'100%',height:'100%',videoId:Q[idx].id,
-    playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,mute:muted?1:0},
+    playerVars:{autoplay:1,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3,mute:muted?1:0,start:S[Q[idx].id]||0},
     events:{
       onReady:function(){paint();notify('video');wake()},
       onStateChange:function(e){
-        if(e.data===0){ notify('ended');
+        if(e.data===0){ var dd=Math.floor(player.getDuration()||0);if(dd>0)notify('progress',dd,dd);notify('ended');
           if(chain&&idx<Q.length-1){go(1)}else if(chain&&loop&&Q.length>1){idx=0;load()}
           else if(loop){player.seekTo(0);player.playVideo()} }
       },
@@ -359,6 +428,12 @@ class YouTubeStore extends ChangeNotifier {
   List<YouTubeChannel> channels = [];
   List<YouTubeVideo> favorites = [];
   List<YouTubeVideo> history = [];
+
+  /// « À regarder plus tard » : retirées automatiquement une fois vues jusqu'au bout.
+  List<YouTubeVideo> watchLater = [];
+
+  /// Position de reprise (secondes) et durée, par vidéo.
+  final Map<String, ({double t, double d, int at})> progress = {};
   final Map<String, List<YouTubeVideo>> feeds = {};
   final Map<String, String> feedErrors = {};
   bool loadingFeeds = false;
@@ -389,6 +464,14 @@ class YouTubeStore extends ChangeNotifier {
     channels = read('youtube.channels.v1', YouTubeChannel.fromJson);
     favorites = read('youtube.favorites.v1', YouTubeVideo.fromJson);
     history = read('youtube.history.v1', YouTubeVideo.fromJson);
+    watchLater = read('youtube.later.v1', YouTubeVideo.fromJson);
+    try {
+      final saved = jsonDecode(_prefs.getString('youtube.progress.v1') ?? '{}') as Map<String, dynamic>;
+      for (final e in saved.entries) {
+        final v = e.value as List;
+        progress[e.key] = (t: (v[0] as num).toDouble(), d: (v[1] as num).toDouble(), at: (v[2] as num).toInt());
+      }
+    } catch (_) {}
     chain = _prefs.getBool('youtube.chain') ?? true;
     loop = _prefs.getBool('youtube.loop') ?? false;
     muted = _prefs.getBool('youtube.muted') ?? false;
@@ -404,6 +487,67 @@ class YouTubeStore extends ChangeNotifier {
     _prefs.setString('youtube.channels.v1', jsonEncode([for (final c in channels) c.toJson()]));
     _prefs.setString('youtube.favorites.v1', jsonEncode([for (final v in favorites) v.toJson()]));
     _prefs.setString('youtube.history.v1', jsonEncode([for (final v in history) v.toJson()]));
+    _prefs.setString('youtube.later.v1', jsonEncode([for (final v in watchLater) v.toJson()]));
+    _prefs.setString('youtube.progress.v1', jsonEncode({for (final e in progress.entries) e.key: [e.value.t, e.value.d, e.value.at]}));
+  }
+
+  // Plus tard et reprise
+
+  bool isLater(YouTubeVideo v) => watchLater.any((x) => x.id == v.id);
+
+  void toggleLater(YouTubeVideo v) {
+    if (!watchLater.any((x) => x.id == v.id)) {
+      watchLater.add(v);
+    } else {
+      watchLater.removeWhere((x) => x.id == v.id);
+    }
+    _save();
+    notifyListeners();
+  }
+
+  double fractionOf(YouTubeVideo v) {
+    final p = progress[v.id];
+    return p == null || p.d <= 0 ? 0 : (p.t / p.d).clamp(0.0, 1.0);
+  }
+
+  /// Positions de reprise des vidéos de la file (au moins 10 s déjà vues).
+  Map<String, double> resumePoints(List<YouTubeVideo> videos) =>
+      {for (final v in videos) if ((progress[v.id]?.t ?? 0) >= 10) v.id: progress[v.id]!.t};
+
+  /// Progression remontée par la page de lecture (toutes les 5 s). À 95 %, la vidéo est considérée comme vue :
+  /// la reprise est oubliée et la vidéo quitte « À regarder plus tard ».
+  void didProgress(YouTubeVideo v, double t, double d) {
+    if (d <= 0) return;
+    if (t / d >= 0.95) {
+      progress.remove(v.id);
+      watchLater.removeWhere((x) => x.id == v.id);
+    } else if (t >= 10) {
+      progress[v.id] = (t: t, d: d, at: DateTime.now().millisecondsSinceEpoch);
+      if (progress.length > 300) {
+        final oldest = progress.entries.toList()..sort((a, b) => a.value.at.compareTo(b.value.at));
+        for (final e in oldest.take(progress.length - 300)) {
+          progress.remove(e.key);
+        }
+      }
+    }
+    _save();
+    notifyListeners();
+  }
+
+  /// Ajoute les chaînes d'un export Google Takeout (ou d'une liste de liens) ; renvoie le nombre de chaînes ajoutées.
+  int importSubscriptions(String text) {
+    var added = 0;
+    for (final c in parseYouTubeSubscriptions(text)) {
+      if (channels.any((x) => x.id == c.id)) continue;
+      channels.add(c);
+      added++;
+    }
+    if (added > 0) {
+      _save();
+      _lastFeedLoad = null;
+      notifyListeners();
+    }
+    return added;
   }
 
   Future<void> setApiKey(String key) async {
@@ -489,17 +633,22 @@ class YouTubeStore extends ChangeNotifier {
     loadingFeeds = true;
     notifyListeners();
     final client = this.client;
-    await Future.wait([
-      for (final c in List.of(channels))
-        () async {
-          try {
-            feeds[c.id] = (await client.channelFeed(c.id)).videos;
-            feedErrors.remove(c.id);
-          } catch (e) {
-            feedErrors[c.id] = '$e';
-          }
-        }(),
-    ]);
+    // Par lots de 8 : un import peut apporter des centaines de chaînes.
+    final all = List.of(channels);
+    for (var i = 0; i < all.length; i += 8) {
+      await Future.wait([
+        for (final c in all.skip(i).take(8))
+          () async {
+            try {
+              feeds[c.id] = (await client.channelFeed(c.id)).videos;
+              feedErrors.remove(c.id);
+            } catch (e) {
+              feedErrors[c.id] = '$e';
+            }
+          }(),
+      ]);
+      notifyListeners();
+    }
     loadingFeeds = false;
     _lastFeedLoad = DateTime.now();
     notifyListeners();
@@ -520,6 +669,9 @@ class YouTubePlayerHost {
   /// Une vidéo démarre dans la fenêtre de lecture (historique).
   void Function(YouTubeVideo video)? onVideo;
 
+  /// Progression de la lecture (secondes lues, durée), toutes les 5 s.
+  void Function(YouTubeVideo video, double t, double d)? onProgress;
+
   Future<void> _ensureServer() async {
     if (_server != null) return;
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -528,8 +680,14 @@ class YouTubePlayerHost {
       try {
         if (req.uri.path == '/event') {
           final index = int.tryParse(req.uri.queryParameters['index'] ?? '');
-          if (req.uri.queryParameters['type'] == 'video' && index != null && index >= 0 && index < _queue.length) {
-            onVideo?.call(_queue[index]);
+          final type = req.uri.queryParameters['type'];
+          if (index != null && index >= 0 && index < _queue.length) {
+            if (type == 'video') onVideo?.call(_queue[index]);
+            if (type == 'progress') {
+              final t = double.tryParse(req.uri.queryParameters['t'] ?? '');
+              final d = double.tryParse(req.uri.queryParameters['d'] ?? '');
+              if (t != null && d != null) onProgress?.call(_queue[index], t, d);
+            }
           }
           req.response.statusCode = HttpStatus.noContent;
         } else {
@@ -550,7 +708,14 @@ class YouTubePlayerHost {
     await _ensureServer();
     _queue = queue;
     _html = youTubePlayerHtml(
-        queue: queue, index: index, chain: options.chain, loop: options.loop, muted: options.muted, labels: labels, eventPath: '/event');
+        queue: queue,
+        index: index,
+        chain: options.chain,
+        loop: options.loop,
+        muted: options.muted,
+        resume: options.resumePoints(queue),
+        labels: labels,
+        eventPath: '/event');
     final url = 'http://127.0.0.1:${_server!.port}/player?${DateTime.now().millisecondsSinceEpoch}';
     PlaybackLog.shared.note('YouTube : ouverture de la fenêtre de lecture (${queue[index.clamp(0, queue.length - 1)].id})');
     if (await _openAppWindow(url)) return;

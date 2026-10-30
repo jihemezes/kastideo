@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.5.1-desktop1] - 2026-10-30
+
+**YouTube : plus pratique** (comme Kastideo 1.5.1 pour Mac). **À regarder plus tard** avec reprise là où vous vous êtes arrêté (barre d'avancement, retrait automatique une fois la vidéo vue) et **import des abonnements** d'un export Google Takeout (CSV/JSON) ou d'une liste de liens.
+
 ## [1.5.0-desktop1] - 2026-10-30
 
 **YouTube dans Kastideo** (comme Kastideo 1.5.0 pour Mac). Section **YouTube** (barre latérale, accueil, Ctrl+9) : navigateur (chaînes suivies par flux RSS, recherche avec votre clé API Google gratuite, liens collés, favoris, historique), puis lecture avec le lecteur officiel en « mode confidentialité avancée » (youtube-nocookie.com) dans sa propre fenêtre (Edge/Chrome/Chromium en mode application, à défaut le navigateur par défaut) via une page locale. Ce n'est pas un bloqueur de publicités.

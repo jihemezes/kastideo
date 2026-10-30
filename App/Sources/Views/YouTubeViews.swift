@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import WebKit
+import UniformTypeIdentifiers
 import KastideoCore
 
 // MARK: - Fenêtre principale de la section YouTube
@@ -41,12 +42,13 @@ struct YouTubeRootView: View {
 // MARK: - Navigateur
 
 private enum YouTubeTab: String, CaseIterable, Identifiable {
-    case channels, search, favorites, history
+    case channels, search, later, favorites, history
     var id: String { rawValue }
     var label: LocalizedStringKey {
         switch self {
         case .channels: return "Mes chaînes"
         case .search: return "Recherche"
+        case .later: return "À regarder"
         case .favorites: return "Favoris"
         case .history: return "Historique"
         }
@@ -80,6 +82,7 @@ struct YouTubeBrowser: View {
                     switch tab {
                     case .channels: channelsTab
                     case .search: searchTab
+                    case .later: laterTab
                     case .favorites: videoGrid(youtube.favorites, empty: "Ajoutez des vidéos en favoris avec l'étoile ou le clic droit.")
                     case .history: historyTab
                     }
@@ -162,10 +165,14 @@ struct YouTubeBrowser: View {
                 Label("Aucune chaîne suivie", systemImage: "play.tv")
             } description: {
                 Text("Collez le lien d'une chaîne ou son @pseudo dans le champ ci-dessus : ses dernières vidéos s'afficheront ici, sans clé ni compte.")
+            } actions: {
+                Button("Importer mes abonnements…") { importSubscriptions() }
             }
             .frame(maxWidth: .infinity, minHeight: 260)
         } else {
             HStack {
+                Button("Importer mes abonnements…") { importSubscriptions() }
+                    .help("Ajoute les chaînes de votre export Google Takeout (abonnements.csv)")
                 Spacer()
                 Button {
                     Task { await youtube.refreshFeeds(force: true) }
@@ -267,6 +274,31 @@ struct YouTubeBrowser: View {
         }
     }
 
+    // MARK: À regarder plus tard
+
+    @ViewBuilder
+    private var laterTab: some View {
+        Text("Mettez des vidéos de côté avec le clic droit. Une vidéo entamée reprend là où vous l'avez laissée ; elle quitte cette liste quand vous l'avez vue jusqu'au bout.")
+            .font(.caption).foregroundStyle(.secondary)
+        videoGrid(youtube.watchLater, empty: "Aucune vidéo mise de côté.")
+    }
+
+    // MARK: Import des abonnements
+
+    private func importSubscriptions() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.commaSeparatedText, .json, .plainText]
+        panel.allowsMultipleSelection = false
+        panel.message = String(localized: "Choisissez le fichier « abonnements.csv » de votre export Google Takeout")
+        guard panel.runModal() == .OK, let url = panel.url,
+              let text = try? String(contentsOf: url, encoding: .utf8) else { return }
+        let added = youtube.importSubscriptions(text)
+        message = added > 0
+            ? String(localized: "Chaînes importées : ") + added.formatted()
+            : String(localized: "Aucune nouvelle chaîne trouvée dans ce fichier.")
+        Task { await youtube.refreshFeeds(force: true) }
+    }
+
     // MARK: Historique
 
     @ViewBuilder
@@ -314,8 +346,22 @@ struct YouTubeCard: View {
                 .frame(maxWidth: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(alignment: .topTrailing) {
-                    if youtube.isFavorite(video) {
-                        Image(systemName: "star.fill").foregroundStyle(.yellow).padding(6).shadow(radius: 2)
+                    HStack(spacing: 4) {
+                        if youtube.isLater(video) { Image(systemName: "clock.fill").foregroundStyle(.white) }
+                        if youtube.isFavorite(video) { Image(systemName: "star.fill").foregroundStyle(.yellow) }
+                    }
+                    .padding(6).shadow(radius: 2)
+                }
+                .overlay(alignment: .bottom) {
+                    let fraction = youtube.fraction(of: video)
+                    if fraction > 0 {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Rectangle().fill(.black.opacity(0.5))
+                                Rectangle().fill(.red).frame(width: geo.size.width * fraction)
+                            }
+                        }
+                        .frame(height: 3)
                     }
                 }
                 Text(video.title).font(.subheadline.weight(.semibold)).lineLimit(2).multilineTextAlignment(.leading)
@@ -330,6 +376,7 @@ struct YouTubeCard: View {
         }
         .buttonStyle(.plain)
         .contextMenu {
+            Button(youtube.isLater(video) ? LocalizedStringKey("Retirer de « À regarder »") : LocalizedStringKey("À regarder plus tard")) { youtube.toggleLater(video) }
             Button(youtube.isFavorite(video) ? LocalizedStringKey("Retirer des favoris") : LocalizedStringKey("Ajouter aux favoris")) { youtube.toggleFavorite(video) }
             Button("Ouvrir sur YouTube") { NSWorkspace.shared.open(video.watchURL) }
             Button("Copier le lien") {
@@ -364,6 +411,12 @@ struct YouTubePlayerScreen: View {
                     Text(video.title).font(.headline).lineLimit(1)
                     Spacer()
                     Button {
+                        youtube.toggleLater(video)
+                    } label: {
+                        Image(systemName: youtube.isLater(video) ? "clock.fill" : "clock")
+                    }
+                    .help("À regarder plus tard")
+                    Button {
                         youtube.toggleFavorite(video)
                     } label: {
                         Image(systemName: youtube.isFavorite(video) ? "star.fill" : "star")
@@ -374,7 +427,9 @@ struct YouTubePlayerScreen: View {
             .padding(10)
             .background(.bar)
             YouTubeWebView(queue: youtube.queue, startIndex: youtube.startIndex, chain: youtube.chain, loop: youtube.loop,
-                           muted: youtube.muted) { index in youtube.didStart(index: index) }
+                           muted: youtube.muted, resume: youtube.resumePoints(for: youtube.queue),
+                           onVideo: { index in youtube.didStart(index: index) },
+                           onProgress: { index, t, d in youtube.didProgress(index: index, t: t, d: d) })
                 .id(youtube.playerSession)
         }
     }
@@ -388,9 +443,11 @@ struct YouTubeWebView: NSViewRepresentable {
     let chain: Bool
     let loop: Bool
     let muted: Bool
+    let resume: [String: Double]
     let onVideo: (Int) -> Void
+    let onProgress: (Int, Double, Double) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onVideo: onVideo) }
+    func makeCoordinator() -> Coordinator { Coordinator(onVideo: onVideo, onProgress: onProgress) }
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -401,7 +458,7 @@ struct YouTubeWebView: NSViewRepresentable {
         web.navigationDelegate = context.coordinator
         web.uiDelegate = context.coordinator
         web.setValue(false, forKey: "drawsBackground")
-        let html = YouTube.playerHTML(queue: queue, index: startIndex, chain: chain, loop: loop, muted: muted,
+        let html = YouTube.playerHTML(queue: queue, index: startIndex, chain: chain, loop: loop, muted: muted, resume: resume,
                                       labels: YouTubeStore.playerLabels)
         web.loadHTMLString(html, baseURL: URL(string: "https://www.youtube-nocookie.com"))
         return web
@@ -417,12 +474,20 @@ struct YouTubeWebView: NSViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         let onVideo: (Int) -> Void
-        init(onVideo: @escaping (Int) -> Void) { self.onVideo = onVideo }
+        let onProgress: (Int, Double, Double) -> Void
+        init(onVideo: @escaping (Int) -> Void, onProgress: @escaping (Int, Double, Double) -> Void) {
+            self.onVideo = onVideo
+            self.onProgress = onProgress
+        }
 
         func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
-            guard let body = message.body as? [String: Any], body["type"] as? String == "video",
+            guard let body = message.body as? [String: Any], let type = body["type"] as? String,
                   let index = body["index"] as? Int else { return }
-            DispatchQueue.main.async { self.onVideo(index) }
+            if type == "video" {
+                DispatchQueue.main.async { self.onVideo(index) }
+            } else if type == "progress", let t = (body["t"] as? NSNumber)?.doubleValue, let d = (body["d"] as? NSNumber)?.doubleValue {
+                DispatchQueue.main.async { self.onProgress(index, t, d) }
+            }
         }
 
         /// Les liens (« Ouvrir sur YouTube », logo du lecteur…) s'ouvrent dans le navigateur du système.

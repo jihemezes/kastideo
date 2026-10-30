@@ -1,3 +1,4 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,7 +36,7 @@ class YouTubeScreen extends StatelessWidget {
       );
 }
 
-enum _Tab { channels, search, favorites, history }
+enum _Tab { channels, search, later, favorites, history }
 
 class YouTubeBrowser extends StatefulWidget {
   const YouTubeBrowser({super.key});
@@ -64,6 +65,7 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
       _store.record(v);
       if (mounted) setState(() => _nowPlaying = v);
     };
+    YouTubePlayerHost.shared.onProgress = _store.didProgress;
     _store.load().then((_) => _store.refreshFeeds());
   }
 
@@ -173,6 +175,7 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
             switch (_tab) {
               _Tab.channels => _channelsTab(),
               _Tab.search => _searchTab(),
+              _Tab.later => _laterTab(),
               _Tab.favorites => _grid(_store.favorites, tr('Ajoutez des vidéos en favoris avec l\'étoile ou le clic droit.')),
               _Tab.history => _historyTab(),
             },
@@ -217,6 +220,7 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
             segments: [
               ButtonSegment(value: _Tab.channels, label: Text(tr('Mes chaînes'))),
               ButtonSegment(value: _Tab.search, label: Text(tr('Recherche'))),
+              ButtonSegment(value: _Tab.later, label: Text(tr('À regarder'))),
               ButtonSegment(value: _Tab.favorites, label: Text(tr('Favoris'))),
               ButtonSegment(value: _Tab.history, label: Text(tr('Historique'))),
             ],
@@ -250,18 +254,29 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
           const SizedBox(height: 6),
           Text(tr('Collez le lien d\'une chaîne ou son @pseudo dans le champ ci-dessus : ses dernières vidéos s\'afficheront ici, sans clé ni compte.'),
               textAlign: TextAlign.center, style: kText(13, color: KPalette.secondaryText)),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: _importSubscriptions,
+            icon: const Icon(Icons.upload_file_rounded, size: 18),
+            label: Text(tr('Importer mes abonnements…')),
+          ),
         ]),
       );
     }
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Align(
-        alignment: Alignment.centerRight,
-        child: TextButton.icon(
+      Row(children: [
+        TextButton.icon(
+          onPressed: _importSubscriptions,
+          icon: const Icon(Icons.upload_file_rounded, size: 18),
+          label: Text(tr('Importer mes abonnements…')),
+        ),
+        const Spacer(),
+        TextButton.icon(
           onPressed: _store.loadingFeeds ? null : () => _store.refreshFeeds(force: true),
           icon: const Icon(Icons.refresh_rounded, size: 18),
           label: Text(tr('Actualiser')),
         ),
-      ),
+      ]),
       for (final channel in _store.channels) ...[
         Row(children: [
           Expanded(child: Text(channel.title, style: kRounded(17, FontWeight.w700))),
@@ -337,6 +352,24 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
     ]);
   }
 
+  Widget _laterTab() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tr('Mettez des vidéos de côté avec le clic droit. Une vidéo entamée reprend là où vous l\'avez laissée ; elle quitte cette liste quand vous l\'avez vue jusqu\'au bout.'),
+            style: kText(12, color: KPalette.secondaryText)),
+        const SizedBox(height: 10),
+        _grid(_store.watchLater, tr('Aucune vidéo mise de côté.')),
+      ]);
+
+  /// Import des abonnements d'un export Google Takeout (abonnements.csv).
+  Future<void> _importSubscriptions() async {
+    final file = await openFile(acceptedTypeGroups: [
+      XTypeGroup(label: 'Takeout', extensions: const ['csv', 'json', 'txt']),
+    ]);
+    if (file == null) return;
+    final added = _store.importSubscriptions(await file.readAsString());
+    setState(() => _message = added > 0 ? '${tr('Chaînes importées :')} $added' : tr('Aucune nouvelle chaîne trouvée dans ce fichier.'));
+    _store.refreshFeeds(force: true);
+  }
+
   Widget _historyTab() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (_store.history.isNotEmpty)
           Align(alignment: Alignment.centerRight, child: TextButton(onPressed: _store.clearHistory, child: Text(tr('Effacer l\'historique')))),
@@ -389,7 +422,21 @@ class _VideoCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Stack(fit: StackFit.expand, children: [
                 Image.network(video.thumbnail, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(color: KPalette.ink.withValues(alpha: 0.08))),
-                if (store.isFavorite(video)) const Positioned(top: 6, right: 6, child: Icon(Icons.star_rounded, color: Colors.amber, size: 20)),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    if (store.isLater(video)) const Icon(Icons.schedule_rounded, color: Colors.white, size: 18),
+                    if (store.isFavorite(video)) const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                  ]),
+                ),
+                if (store.fractionOf(video) > 0)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: LinearProgressIndicator(value: store.fractionOf(video), minHeight: 3, color: Colors.red, backgroundColor: Colors.black54),
+                  ),
               ]),
             ),
           ),
@@ -408,12 +455,15 @@ class _VideoCard extends StatelessWidget {
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: [
+        PopupMenuItem(value: 'later', child: Text(store.isLater(video) ? tr('Retirer de « À regarder »') : tr('À regarder plus tard'))),
         PopupMenuItem(value: 'fav', child: Text(store.isFavorite(video) ? tr('Retirer des favoris') : tr('Ajouter aux favoris'))),
         PopupMenuItem(value: 'open', child: Text(tr('Ouvrir sur YouTube'))),
         PopupMenuItem(value: 'copy', child: Text(tr('Copier le lien'))),
       ],
     ).then((v) {
       switch (v) {
+        case 'later':
+          store.toggleLater(video);
         case 'fav':
           store.toggleFavorite(video);
         case 'open':

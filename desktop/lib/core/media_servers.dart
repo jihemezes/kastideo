@@ -12,7 +12,7 @@ enum PlaybackEvent { start, progress, pause, stop }
 /// Identité de Kastideo auprès des serveurs (même appareil d'un lancement à l'autre).
 class KastideoDevice {
   KastideoDevice._();
-  static String version = '1.5.0';
+  static String version = '1.5.1';
 
   /// Nom de l'ordinateur, réduit aux caractères ASCII : un accent ou une apostrophe typographique dans un en-tête HTTP
   /// fait répondre « 400 Bad Request » à certains serveurs.
