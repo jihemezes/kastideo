@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.4.2</title>
+      <pubDate>Fri, 30 Oct 2026 06:37:39 GMT</pubDate>
+      <sparkle:version>58</sparkle:version>
+      <sparkle:shortVersionString>1.4.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Soutenir Kastideo (facultatif).&lt;/b&gt; L&amp;#x27;application reste gratuite ; un bouton discret &lt;b&gt;Offrir un café&lt;/b&gt; (Ko-fi) apparaît sur l&amp;#x27;accueil et dans la fenêtre Nouveautés, avec un onglet &lt;b&gt;Réglages &amp;gt; À propos&lt;/b&gt; et l&amp;#x27;entrée &lt;b&gt;Aide &amp;gt; Soutenir Kastideo (Ko-fi)&lt;/b&gt;. Une option permet de masquer les boutons de l&amp;#x27;accueil et des Nouveautés.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.4.2/Kastideo-1.4.2.dmg" length="47126213" type="application/octet-stream" sparkle:edSignature="Phv5y33/Lto+8PeR3LsIEWLVDF4j6e88qows6gOuWh/Csp09n+DBUybMIbyjSLrxJ/F6+lSYK05fgFublCXDCg==" />
+    </item>
+    <item>
       <title>Kastideo 1.4.1</title>
       <pubDate>Thu, 29 Oct 2026 08:52:57 GMT</pubDate>
       <sparkle:version>57</sparkle:version>
@@ -490,19 +499,6 @@
 &lt;li&gt;Corrections de compilation (les versions 0.8.1 et 0.8.2 n&amp;#x27;avaient pas pu être construites) : style de couleur des cases à cocher des Récents, accès au dossier personnel depuis la recherche des fichiers d&amp;#x27;enregistrement&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.8.3/Kastideo-0.8.3.dmg" length="44488872" type="application/octet-stream" sparkle:edSignature="Hp2QaM0J4oboFwtkJUDmAhenMR9zjvV/Zr7pyTcKv6NJNYxKYlXrmZdk/3M8hDc3hYlKGPQxNab+RqbkJGPNBg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.7.0</title>
-      <pubDate>Tue, 20 Oct 2026 04:40:55 GMT</pubDate>
-      <sparkle:version>11</sparkle:version>
-      <sparkle:shortVersionString>0.7.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Nouveau &lt;b&gt;Guide TV en grille&lt;/b&gt; : les chaînes en lignes, les heures en colonnes, trait rouge « maintenant », navigation par demi-journée et par jour, durée affichée 2 / 3 / 6 h, filtre (favoris, récents, catégorie) et recherche ; un clic sur un programme ouvre sa fiche (description, &lt;b&gt;Regarder&lt;/b&gt;, &lt;b&gt;Enregistrer&lt;/b&gt;, &lt;b&gt;Programmer&lt;/b&gt;). Section Guide TV dans la barre latérale (⌘7), l&amp;#x27;onglet Cinéma et la touche G de l&amp;#x27;interface TV&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Reprise de la lecture&lt;/b&gt; : Kastideo mémorise où vous en êtes dans chaque film et épisode et vous propose de reprendre ; barres de progression dans les listes, les affiches et les épisodes ; rangée « Reprendre la lecture » en interface Cinéma&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Indicateur de téléchargement&lt;/b&gt; toujours visible dans la barre d&amp;#x27;outils : anneau d&amp;#x27;avancement et, au clic, le détail : avancement du film ou de l&amp;#x27;épisode en cours, « épisode X sur N », avancement de la série ou du lot, vitesse et &lt;b&gt;temps restant estimé&lt;/b&gt;. Les lignes de la section Enregistrements affichent aussi vitesse et temps restant&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.7.0/Kastideo-0.7.0.dmg" length="44193338" type="application/octet-stream" sparkle:edSignature="ZW9dMZ2MvkLkgx6kvYIlnvc7ZluG+byVVdRer4kec5jEQtS/QQcbMyvpVWZVAgF+uY0du1hOIFfCcJVYu2xODw==" />
     </item>
   </channel>
 </rss>
