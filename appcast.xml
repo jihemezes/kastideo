@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.5.1</title>
+      <pubDate>Fri, 30 Oct 2026 19:41:11 GMT</pubDate>
+      <sparkle:version>60</sparkle:version>
+      <sparkle:shortVersionString>1.5.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;YouTube : plus pratique.&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;À regarder plus tard&lt;/b&gt; : clic droit sur une vidéo (ou bouton dans le lecteur) ; une vidéo entamée &lt;b&gt;reprend là où vous l&amp;#x27;avez laissée&lt;/b&gt;, avec une barre d&amp;#x27;avancement sur la vignette, et quitte la liste une fois vue jusqu&amp;#x27;au bout.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Importer mes abonnements&lt;/b&gt; : lit le fichier d&amp;#x27;abonnements de votre export Google Takeout (CSV ou JSON) ou une liste de liens de chaînes. Les flux sont chargés par lots.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.5.1/Kastideo-1.5.1.dmg" length="47245137" type="application/octet-stream" sparkle:edSignature="4zZ3iQr+JJ1T7egTsw2O42CVIRklOm57jk+495LqBzBEkgqvWlNRkQQ0NY0FDh2D0Ro6c6xQgEJqo5Mtti4hCA==" />
+    </item>
+    <item>
       <title>Kastideo 1.5.0</title>
       <pubDate>Fri, 30 Oct 2026 17:30:27 GMT</pubDate>
       <sparkle:version>59</sparkle:version>
@@ -488,20 +501,6 @@
 &lt;li&gt;Correction de l&amp;#x27;&lt;b&gt;écran noir&lt;/b&gt; au retour sur une chaîne (bouton « Retourner à la lecture » de l&amp;#x27;accueil, sortie du plein écran…) : la vidéo réapparaît sans relancer le flux&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.1/Kastideo-0.9.1.dmg" length="44546263" type="application/octet-stream" sparkle:edSignature="ydZaamYdakLGqKD8qUyQxxehSWwr2deFKjIeTTCmElmsOloZr8zGOk1W5POuGOPC9Rirumuq9tN8NcJ5KeBmBw==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.0</title>
-      <pubDate>Tue, 20 Oct 2026 20:56:03 GMT</pubDate>
-      <sparkle:version>16</sparkle:version>
-      <sparkle:shortVersionString>0.9.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Fiche film / série&lt;/b&gt; en interface Cinéma : un clic sur une affiche ouvre une page de présentation (fond, affiche, année, durée, genres, note, résumé, réalisateur, distribution avec photos, bande-annonce) avec &lt;b&gt;Lire / Reprendre&lt;/b&gt;, &lt;b&gt;Voir les épisodes&lt;/b&gt;, &lt;b&gt;Télécharger&lt;/b&gt; et favori. Bouton &lt;b&gt;Plus d&amp;#x27;infos&lt;/b&gt; dans le bandeau « à la une ». Informations du fournisseur IPTV (get_vod_info / get_series_info), complétées par &lt;b&gt;TMDB&lt;/b&gt; si vous saisissez une clé gratuite dans Réglages &amp;gt; Général&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Enregistrement du direct visible pendant l&amp;#x27;écriture&lt;/b&gt; : le fichier grossit dans le sous-dossier « En cours » du dossier des enregistrements, puis est rangé à l&amp;#x27;arrêt&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Conversion MP4 fiabilisée&lt;/b&gt; : sous-titres DVB et télétexte écartés, second essai avec les pistes principales, fin de conversion détectée même sans signal du moteur ; le .ts n&amp;#x27;est conservé qu&amp;#x27;en dernier recours&lt;/li&gt;
-&lt;li&gt;Correction : passer de &lt;b&gt;Direct&lt;/b&gt; à &lt;b&gt;Films&lt;/b&gt; (ou Séries) ouvre maintenant la grille de la section au lieu du lecteur de la chaîne précédente&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.0/Kastideo-0.9.0.dmg" length="44543146" type="application/octet-stream" sparkle:edSignature="CBg1GN3X+xgBdvVMm7qHs6rEzzqB7YILfarn9ObmD/hKzRVv1pwoFldlDtsP3/a3aaZkU2LCyhzcKkHrYYePAQ==" />
     </item>
   </channel>
 </rss>
