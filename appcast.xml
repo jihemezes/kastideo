@@ -6,6 +6,22 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.0</title>
+      <pubDate>Fri, 30 Oct 2026 22:00:08 GMT</pubDate>
+      <sparkle:version>63</sparkle:version>
+      <sparkle:shortVersionString>1.7.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Diffuser sur un téléviseur (Cast).&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Bouton téléviseur dans la barre de lecture&lt;/b&gt; : envoie la chaîne, le film, la série ou la vidéo en cours vers un &lt;b&gt;Chromecast, Google TV ou TV Android&lt;/b&gt; du réseau. La lecture reprend à la position atteinte, et la barre reste la télécommande (pause, avance / recul, position, volume). « Arrêter la diffusion » ramène la lecture sur le Mac.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;YouTube sur le téléviseur&lt;/b&gt; : clic droit sur une vidéo &amp;gt; « Lire sur un téléviseur » (et bouton dans le lecteur YouTube). Réglages &amp;gt; Général &amp;gt; Cast : application YouTube du téléviseur, ou navigateur (bouton Diffuser de Chrome).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Apple TV&lt;/b&gt; : raccourci vers la recopie d&amp;#x27;écran AirPlay de macOS (VLC n&amp;#x27;envoie pas la vidéo en AirPlay).&lt;/li&gt;
+&lt;li&gt;Au premier usage, macOS demande l&amp;#x27;autorisation de trouver des appareils sur le réseau local.&lt;/li&gt;
+&lt;li&gt;Nouvelle page d&amp;#x27;aide « Diffuser sur un téléviseur ». Fonction non testée avec un vrai téléviseur : vos retours sont bienvenus.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.0/Kastideo-1.7.0.dmg" length="47635275" type="application/octet-stream" sparkle:edSignature="tGULS/YV3i7agXhN93I2CGFM8Opqszi8VWDx6dR7rauU9N4k5etTLZQFBBlQxrkvK2QjtyRvU/2vFaSzZ4XBDw==" />
+    </item>
+    <item>
       <title>Kastideo 1.6.1</title>
       <pubDate>Fri, 30 Oct 2026 21:31:45 GMT</pubDate>
       <sparkle:version>62</sparkle:version>
@@ -488,17 +504,6 @@
 &lt;li&gt;&lt;b&gt;Aide&lt;/b&gt; : nouvelle rubrique « Obtenir une clé TMDB (gratuite) », pas à pas, dans Réglages généraux&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.4/Kastideo-0.9.4.dmg" length="44544093" type="application/octet-stream" sparkle:edSignature="9YRc0eb/yt8yVOYNs1Qi0lUGew0c5zl+bNpsWFk0Jff5WjXKZGAoA0hpZ2X9kFt0clcLVnifvjg5TPuwuguKDg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.2</title>
-      <pubDate>Tue, 20 Oct 2026 21:32:50 GMT</pubDate>
-      <sparkle:version>18</sparkle:version>
-      <sparkle:shortVersionString>0.9.2</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correction de l&amp;#x27;&lt;b&gt;écran noir en plein écran&lt;/b&gt; (le son continuait) : pendant le passage en plein écran, l&amp;#x27;ancien et le nouvel écran coexistent un instant ; la vidéo va maintenant toujours à l&amp;#x27;écran affiché&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.2/Kastideo-0.9.2.dmg" length="44547745" type="application/octet-stream" sparkle:edSignature="dQjB3o3Hs5VWSsnv9F7f6KvOihpcG+WqiE37Y5gmi7OHRafk8uS7xKQrPtOewdQMVfob9jq8hEez7jZPTNjDAw==" />
     </item>
   </channel>
 </rss>
