@@ -549,7 +549,7 @@ VLC, Kastideo's playback engine, does not send video over AirPlay. For an Apple 
 
 ### Network permission
 
-On first use, macOS asks whether Kastideo may **find devices on the local network**: accept, otherwise no TV will appear (System Settings > Privacy & Security > Local Network).
+On first use, macOS asks whether Kastideo may **find devices on the local network**: accept, otherwise no TV will appear (System Settings > Privacy & Security > Local Network > Kastideo). The TV button's menu has a shortcut to this setting. If it is already allowed, choose **Search again** and check that the Mac and the TV are on the same network (no guest Wi-Fi, no VPN).
 <!--/mac-->
 
 ### YouTube on the TV

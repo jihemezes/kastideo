@@ -67,7 +67,8 @@ final class CastCenter {
         guard !isSearching else { return }
         isSearching = true
         message = nil
-        if discoverers.isEmpty { startDiscoverers() }
+        stopDiscoverers()
+        startDiscoverers()
         searchTask = Task { [weak self] in
             let found = await DIALScanner.scan()
             guard let self else { return }
@@ -79,10 +80,17 @@ final class CastCenter {
         }
     }
 
+    private func stopDiscoverers() {
+        for discoverer in discoverers { discoverer.stop() }
+        discoverers = []
+    }
+
     private func startDiscoverers() {
         bridge.onAdded = { [weak self] item in MainActor.assumeIsolated { self?.add(item) } }
         bridge.onDeleted = { [weak self] item in MainActor.assumeIsolated { self?.remove(item) } }
-        for entry in VLCRendererDiscoverer.list() ?? [] {
+        let entries = VLCRendererDiscoverer.list() ?? []
+        PlaybackLog.shared.note("Cast : modules de recherche VLC : \(entries.map(\.name).joined(separator: ", "))", topic: .playback)
+        for entry in entries {
             guard let discoverer = VLCRendererDiscoverer(name: entry.name) else { continue }
             discoverer.delegate = bridge
             if discoverer.start() {
@@ -97,6 +105,7 @@ final class CastCenter {
         let id = "\(item.type)|\(item.name)"
         guard !renderers.contains(where: { $0.id == id }) else { return }
         renderers.append(CastRenderer(id: id, name: item.name, type: item.type, item: item))
+        PlaybackLog.shared.note("Cast : appareil trouvé « \(item.name) » (\(item.type))", topic: .playback)
         renderers.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
@@ -117,6 +126,13 @@ final class CastCenter {
             PlaybackLog.shared.note("Cast : diffusion sur « \(renderer.name) »", topic: .playback)
         } else {
             PlaybackLog.shared.note("Cast : retour de la lecture sur le Mac", topic: .playback)
+        }
+    }
+
+    /// Ouvre Réglages Système > Confidentialité et sécurité > Réseau local (sans cette autorisation, aucun téléviseur n'apparaît).
+    func openLocalNetworkSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork") {
+            NSWorkspace.shared.open(url)
         }
     }
 
@@ -233,6 +249,9 @@ struct CastMenuButton: View {
             if cast.renderers.isEmpty {
                 if cast.isSearching { Text("Recherche des téléviseurs…") } else { Text("Aucun téléviseur trouvé") }
             }
+            if cast.renderers.isEmpty, !cast.isSearching {
+                Button("Autoriser Kastideo sur le réseau local…") { cast.openLocalNetworkSettings() }
+            }
             ForEach(cast.renderers) { renderer in
                 Button {
                     cast.cast(to: renderer, playback: playback)
@@ -311,6 +330,7 @@ struct CastSettingsSection: View {
             Text("Le bouton « téléviseur » de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau : VLC prépare la vidéo, aucune installation n'est nécessaire. Pour une Apple TV, utilisez la recopie d'écran AirPlay de macOS (l'image du Mac est alors reproduite sur le téléviseur).")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Button("Autoriser Kastideo sur le réseau local…") { cast.openLocalNetworkSettings() }
             HelpLink(title: "Aide : diffuser sur un téléviseur", page: "cast")
         }
         .onAppear { cast.refresh() }

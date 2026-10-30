@@ -549,7 +549,7 @@ VLC, le moteur de lecture de Kastideo, n'envoie pas la vidéo en AirPlay. Pour u
 
 ### Autorisation réseau
 
-Au premier usage, macOS demande si Kastideo peut **trouver des appareils sur le réseau local** : acceptez, sinon aucun téléviseur n'apparaît (Réglages Système > Confidentialité et sécurité > Réseau local).
+Au premier usage, macOS demande si Kastideo peut **trouver des appareils sur le réseau local** : acceptez, sinon aucun téléviseur n'apparaît (Réglages Système > Confidentialité et sécurité > Réseau local > Kastideo). Le menu du bouton téléviseur propose un raccourci vers ce réglage. Si l'autorisation est déjà donnée, choisissez **Chercher à nouveau** et vérifiez que le Mac et le téléviseur sont sur le même réseau (pas de Wi-Fi invité ni de VPN).
 <!--/mac-->
 
 ### YouTube sur le téléviseur
