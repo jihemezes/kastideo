@@ -14,7 +14,7 @@ kastideo/
 │   └── Kastideo.entitlements   Bac à sable : réseau, fichiers choisis, ~/Movies
 ├── Packages/KastideoCore/      Logique partagée (M3U, Xtream, XMLTV) + tests
 │                               réutilisable pour iOS, iPadOS et tvOS
-├── docs/AIDE.md                Aide intégrée à l'application
+├── docs/help/aide.fr.md, aide.en.md   Aide intégrée (source unique Mac + Windows/Linux, voir ci-dessous)
 ├── docs/branding/              Icône source en 1024 × 1024
 ├── scripts/kastideo-release.sh Publication d'une version
 ├── scripts/appcast.py          Mise à jour du flux Sparkle (utilisé par la CI)
@@ -74,3 +74,12 @@ Le fichier `Kastideo.xcodeproj` est généré : il n'est pas versionné.
 La version Windows / Linux (Flutter + moteur mpv) est en cours dans le dossier `desktop/`. Ses préversions sont publiées avec les tags `vX.Y.Z-desktopN` (workflow `desktop.yml`), sans toucher aux versions Mac ni aux mises à jour Sparkle.
 
 Construction locale de la version Windows / Linux : voir [desktop/README.md](../desktop/README.md).
+
+## L'aide intégrée
+
+L'aide est un seul jeu de fichiers, partagé par l'application Mac et la version Windows / Linux :
+
+- `docs/help/aide.fr.md` et `aide.en.md` : une rubrique par `# Titre`, une page par `## Titre {#identifiant}` ;
+- `<!--mac-->…<!--/mac-->` et `<!--pc-->…<!--/pc-->` gardent un bloc pour une seule plateforme (aussi possible au milieu d'une ligne) ;
+- `[texte](help:identifiant)` renvoie à une autre page, `![texte](img:nom)` insère le schéma `docs/help/img/help-<nom>-fr.png` / `-en.png` ;
+- après une modification, lancer `scripts/sync-help.sh` (copie vers `desktop/assets/help`), puis les tests : `KastideoCoreTests` et `desktop/test/help_test.dart` vérifient que tous les liens internes existent et que les deux copies sont identiques.

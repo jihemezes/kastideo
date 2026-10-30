@@ -189,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.only(right: 12),
           child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
         ),
-      _toolbarButton(Icons.help_outline_rounded, tr('Aide'), () => showHelpDialog(context)),
+      _toolbarButton(Icons.help_outline_rounded, '${tr('Aide')} (F1)', () => showHelpDialog(context, page: 'bienvenue')),
       _toolbarButton(Icons.receipt_long_outlined, tr('Journal de lecture'), () => showLogDialog(context)),
       _toolbarButton(Icons.settings_rounded, '${tr('Réglages')} (Ctrl+,)', () => showSettingsDialog(context)),
     ]);

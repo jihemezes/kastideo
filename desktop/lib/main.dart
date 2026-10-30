@@ -27,6 +27,7 @@ import 'core/settings.dart';
 import 'l10n.dart';
 import 'core/playback.dart';
 import 'theme.dart';
+import 'ui/help_dialog.dart';
 import 'ui/home_screen.dart';
 import 'ui/library_view.dart';
 import 'ui/catalog_screen.dart';
@@ -424,6 +425,7 @@ class _RootViewState extends State<RootView> {
         const SingleActivator(LogicalKeyboardKey.digit7, control: true): () => navigation.go(Screen.guide),
         const SingleActivator(LogicalKeyboardKey.keyM, control: true, alt: true): () => openMultiView(context),
         const SingleActivator(LogicalKeyboardKey.comma, control: true): () => showSettingsDialog(context),
+        const SingleActivator(LogicalKeyboardKey.f1): () => showHelpDialog(context, page: helpPageFor(navigation.screen)),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
         const SingleActivator(LogicalKeyboardKey.escape): () {

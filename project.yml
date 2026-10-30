@@ -11,7 +11,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "1.5.1"
+    MARKETING_VERSION: "1.6.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -37,9 +37,25 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources
-      - path: docs/AIDE.md
+      - path: docs/help/aide.fr.md
         buildPhase: resources
-      - path: docs/AIDE.en.md
+      - path: docs/help/aide.en.md
+        buildPhase: resources
+      - path: docs/help/img/help-home-en.png
+        buildPhase: resources
+      - path: docs/help/img/help-home-fr.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-en.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-fr.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-en.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-fr.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-en.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-fr.png
         buildPhase: resources
       - path: CHANGELOG.md
         buildPhase: resources

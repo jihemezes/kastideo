@@ -223,6 +223,7 @@ struct MainToolbar: ToolbarContent {
                 Label("Sources", systemImage: "antenna.radiowaves.left.and.right")
             }
             .help("Gérer les sources et les réglages (⌘,)")
+            HelpButton()
         }
     }
 }

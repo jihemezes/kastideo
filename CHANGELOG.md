@@ -3,6 +3,15 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.6.0] - 2026-10-30
+
+**Une aide refaite de A à Z.**
+
+- **Nouvelle fenêtre d'aide** : sommaire par rubriques à gauche, page à droite, **recherche** dans toutes les pages (extraits et mots surlignés), liens entre pages, pages précédente / suivante et petits schémas. Fini le fichier unique interminable.
+- **Bouton « ? » discret** dans la barre d'outils et sur l'accueil : l'aide s'ouvre **à la page de l'écran où vous êtes** (aussi avec ⌘? ; le menu Aide ajoute « Questions fréquentes »).
+- **Pas à pas** : importer ses abonnements YouTube via Google Takeout (avec un lien « Comment obtenir mon fichier ? » dans l'écran d'import), obtenir une clé API Google, publicités et confidentialité. Nouvelles pages « Bienvenue » et « Questions fréquentes ».
+- **Une seule source pour l'aide Mac et Windows / Linux** : mêmes rubriques et mêmes pages, avec les différences propres à chaque système (raccourcis, installation…). Le texte de l'aide est entièrement relu et réorganisé en 57 pages.
+
 ## [1.5.1] - 2026-10-30
 
 **YouTube : plus pratique.**

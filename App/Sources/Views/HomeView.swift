@@ -118,6 +118,7 @@ struct HomeView: View {
             Spacer()
             HStack(spacing: 10) {
                 Spacer()
+                HelpButton(onDark: true)
                 SupportButton(onDark: true)
                 Button {
                     navigation.showWhatsNew = true

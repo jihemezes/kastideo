@@ -9,6 +9,7 @@ import '../core/youtube.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import 'catalog_screen.dart';
+import 'help_dialog.dart';
 import 'settings_dialog.dart';
 
 YouTubePlayerLabels youTubeLabels() => YouTubePlayerLabels(
@@ -255,11 +256,15 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
           Text(tr('Collez le lien d\'une chaîne ou son @pseudo dans le champ ci-dessus : ses dernières vidéos s\'afficheront ici, sans clé ni compte.'),
               textAlign: TextAlign.center, style: kText(13, color: KPalette.secondaryText)),
           const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: _importSubscriptions,
-            icon: const Icon(Icons.upload_file_rounded, size: 18),
-            label: Text(tr('Importer mes abonnements…')),
-          ),
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            OutlinedButton.icon(
+              onPressed: _importSubscriptions,
+              icon: const Icon(Icons.upload_file_rounded, size: 18),
+              label: Text(tr('Importer mes abonnements…')),
+            ),
+            const SizedBox(width: 12),
+            HelpLink(label: tr('Comment obtenir mon fichier ?'), page: 'youtube-import'),
+          ]),
         ]),
       );
     }
@@ -270,6 +275,7 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
           icon: const Icon(Icons.upload_file_rounded, size: 18),
           label: Text(tr('Importer mes abonnements…')),
         ),
+        HelpLink(label: tr('Comment obtenir mon fichier ?'), page: 'youtube-import'),
         const Spacer(),
         TextButton.icon(
           onPressed: _store.loadingFeeds ? null : () => _store.refreshFeeds(force: true),

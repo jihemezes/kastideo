@@ -105,7 +105,7 @@ struct KastideoApp: App {
             HelpView()
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
         }
-        .defaultSize(width: 760, height: 680)
+        .defaultSize(width: 1000, height: 720)
 
         Settings {
             SettingsView()
@@ -229,7 +229,8 @@ struct KastideoCommands: Commands {
         }
 
         CommandGroup(replacing: .help) {
-            HelpMenuButton()
+            HelpMenuButton(page: HelpCenter.pageID(for: navigation.browse))
+            HelpMenuButton(page: "faq", title: "Questions fréquentes", withShortcut: false)
             Button("Nouveautés de cette version") { navigation.showWhatsNew = true }
             Divider()
             Button("Soutenir Kastideo (Ko-fi)…") { NSWorkspace.shared.open(Support.url) }
@@ -256,8 +257,22 @@ struct OpenWindowButton: View {
 
 private struct HelpMenuButton: View {
     @Environment(\.openWindow) private var openWindow
+    let page: String
+    var title: LocalizedStringKey = "Aide de Kastideo"
+    var withShortcut = true
+
     var body: some View {
-        Button("Aide de Kastideo") { openWindow(id: "help") }
-            .keyboardShortcut("?", modifiers: .command)
+        if withShortcut {
+            button.keyboardShortcut("?", modifiers: .command)
+        } else {
+            button
+        }
+    }
+
+    private var button: some View {
+        Button(title) {
+            HelpCenter.shared.requested = page
+            openWindow(id: "help")
+        }
     }
 }

@@ -166,13 +166,17 @@ struct YouTubeBrowser: View {
             } description: {
                 Text("Collez le lien d'une chaîne ou son @pseudo dans le champ ci-dessus : ses dernières vidéos s'afficheront ici, sans clé ni compte.")
             } actions: {
-                Button("Importer mes abonnements…") { importSubscriptions() }
+                HStack(spacing: 16) {
+                    Button("Importer mes abonnements…") { importSubscriptions() }
+                    HelpLink(title: "Comment obtenir mon fichier ?", page: "youtube-import")
+                }
             }
             .frame(maxWidth: .infinity, minHeight: 260)
         } else {
             HStack {
                 Button("Importer mes abonnements…") { importSubscriptions() }
                     .help("Ajoute les chaînes de votre export Google Takeout (abonnements.csv)")
+                HelpLink(title: "Comment obtenir mon fichier ?", page: "youtube-import")
                 Spacer()
                 Button {
                     Task { await youtube.refreshFeeds(force: true) }

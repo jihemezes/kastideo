@@ -39,6 +39,7 @@ struct WelcomeView: View {
                     .buttonStyle(.borderedProminent)
 
                     Button {
+                        HelpCenter.shared.requested = "bienvenue"
                         openWindow(id: "help")
                     } label: {
                         Label("Lire l'aide", systemImage: "questionmark.circle")
