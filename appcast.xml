@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.1</title>
+      <pubDate>Fri, 30 Oct 2026 22:19:53 GMT</pubDate>
+      <sparkle:version>64</sparkle:version>
+      <sparkle:shortVersionString>1.7.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : recherche des téléviseurs plus fiable.&lt;/b&gt; La recherche est relancée à chaque ouverture du menu, le Journal de lecture détaille ce que VLC trouve, et un bouton « Autoriser Kastideo sur le réseau local… » ouvre le bon réglage macOS (sans cette autorisation, aucun Chromecast / TV Android n&amp;#x27;apparaît).&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.1/Kastideo-1.7.1.dmg" length="47627171" type="application/octet-stream" sparkle:edSignature="EXsHiACZBt4qEs7MwV/KUNLU+wrhMwBeJhcOJZHY6peQl3Ie47L/7cuq9zl4CqGhR8qmKrPOrQexepAg03r9CA==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.0</title>
       <pubDate>Fri, 30 Oct 2026 22:00:08 GMT</pubDate>
       <sparkle:version>63</sparkle:version>
@@ -493,17 +502,6 @@
 &lt;li&gt;Le guide est rechargé automatiquement quand il arrive à moins de 12 h de sa fin, même si Kastideo reste ouvert plusieurs jours&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.5/Kastideo-0.9.5.dmg" length="44724022" type="application/octet-stream" sparkle:edSignature="xsIpC2fFLnZoUtD6Jgtj/OUiezutU8Eo6WsQjrPdsrNmcm9aSvUyBkEy9ktba8msUlrP4e+9zbPZKzFk9RDLDg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.4</title>
-      <pubDate>Tue, 20 Oct 2026 21:45:12 GMT</pubDate>
-      <sparkle:version>19</sparkle:version>
-      <sparkle:shortVersionString>0.9.4</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Aide&lt;/b&gt; : nouvelle rubrique « Obtenir une clé TMDB (gratuite) », pas à pas, dans Réglages généraux&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.4/Kastideo-0.9.4.dmg" length="44544093" type="application/octet-stream" sparkle:edSignature="9YRc0eb/yt8yVOYNs1Qi0lUGew0c5zl+bNpsWFk0Jff5WjXKZGAoA0hpZ2X9kFt0clcLVnifvjg5TPuwuguKDg==" />
     </item>
   </channel>
 </rss>
