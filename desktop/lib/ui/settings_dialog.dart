@@ -21,9 +21,10 @@ import '../version.dart';
 import '../core/library.dart';
 import 'log_dialog.dart';
 import 'source_form.dart';
+import 'support_button.dart';
 import 'update_view.dart';
 
-enum SettingsTab { general, appearance, sources, categories, recordings, backup }
+enum SettingsTab { general, appearance, sources, categories, recordings, backup, about }
 
 /// Fenêtre Réglages (Ctrl+,) : Général, Apparence, Sources, Catégories, Sauvegarde.
 Future<void> showSettingsDialog(BuildContext context,
@@ -53,6 +54,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
     (SettingsTab.categories, Icons.folder_outlined, 'Catégories'),
     (SettingsTab.recordings, Icons.radio_button_checked_rounded, 'Enregistrements'),
     (SettingsTab.backup, Icons.import_export_rounded, 'Sauvegarde'),
+    (SettingsTab.about, Icons.info_outline_rounded, 'À propos'),
   ];
 
   @override
@@ -73,7 +75,9 @@ class _SettingsDialogState extends State<_SettingsDialog> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(children: [
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(children: [
               for (final (tab, icon, label) in _tabs)
                 Padding(
                   padding: const EdgeInsets.only(right: 6),
@@ -85,7 +89,8 @@ class _SettingsDialogState extends State<_SettingsDialog> {
                     onSelected: (_) => setState(() => _tab = tab),
                   ),
                 ),
-            ]),
+              ]),
+            ),
           ),
           const SizedBox(height: 8),
           Divider(height: 1, color: KPalette.separator),
@@ -97,6 +102,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
               SettingsTab.categories => CategoryManager(initialKind: widget.categoryKind),
               SettingsTab.recordings => const _RecordingsTab(),
               SettingsTab.backup => const _BackupTab(),
+              SettingsTab.about => const _AboutTab(),
             },
           ),
         ]),
@@ -1522,5 +1528,46 @@ class _ReplaySection extends StatelessWidget {
         '$channels ${tr('chaîne(s) avec replay détectée(s).')} ${tr('Plus vous gardez de jours, plus le guide pèse en mémoire : il est rechargé au prochain rafraîchissement. Si le programme revu ne correspond pas à celui choisi, corrigez l\'heure avec le décalage (le fuseau du serveur est lu automatiquement).')}',
       ),
     ]);
+  }
+}
+
+
+/// Réglages > À propos : version, soutien volontaire (Ko-fi), liens du projet.
+class _AboutTab extends StatelessWidget {
+  const _AboutTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, _) => ListView(padding: const EdgeInsets.all(20), children: [
+        _section(tr('Kastideo'), [
+          Text('${tr('Version')} $kVersion', style: kText(14)),
+        ]),
+        _section(tr('Soutenir Kastideo'), [
+          Text(
+              tr("Kastideo est gratuit et le restera. Si l'application vous plaît et que vous souhaitez encourager son développement, "
+                  "vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir."),
+              style: kText(14)),
+          const SizedBox(height: 10),
+          const Align(alignment: Alignment.centerLeft, child: SupportButton(always: true)),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Masquer les boutons « Offrir un café » (accueil, nouveautés)'), style: kText(14)),
+            value: settings.hideSupport,
+            onChanged: settings.setHideSupport,
+          ),
+        ]),
+        _section(tr('Liens'), [
+          Row(children: [
+            TextButton(onPressed: () => launchUrl(Uri.parse('https://github.com/jihemezes/kastideo')), child: Text(tr('Page du projet sur GitHub'))),
+            TextButton(
+                onPressed: () => launchUrl(Uri.parse('https://github.com/jihemezes/kastideo/issues')),
+                child: Text(tr('Signaler un problème ou proposer une idée'))),
+          ]),
+        ]),
+      ]),
+    );
   }
 }

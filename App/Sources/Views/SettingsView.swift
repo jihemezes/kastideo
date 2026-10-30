@@ -15,6 +15,8 @@ struct SettingsView: View {
                 .tabItem { Label("Enregistrements", systemImage: "record.circle") }
             UpdateSettingsView()
                 .tabItem { Label("Mises à jour", systemImage: "arrow.down.circle") }
+            AboutSettingsView()
+                .tabItem { Label("À propos", systemImage: "info.circle") }
         }
         .frame(width: 720, height: 600)
     }

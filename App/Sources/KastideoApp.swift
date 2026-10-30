@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import KastideoCore
 
 @main
@@ -229,6 +230,8 @@ struct KastideoCommands: Commands {
         CommandGroup(replacing: .help) {
             HelpMenuButton()
             Button("Nouveautés de cette version") { navigation.showWhatsNew = true }
+            Divider()
+            Button("Soutenir Kastideo (Ko-fi)…") { NSWorkspace.shared.open(Support.url) }
         }
     }
 }

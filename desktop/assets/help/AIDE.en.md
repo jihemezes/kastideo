@@ -1,6 +1,6 @@
 # Kastideo for Windows and Linux
 
-> Version 1.4.0-desktop1 — replay: watch a programme that already aired (provider archive, up to 14 days) from the TV Guide or a channel, “Watch from the start”, saving a replay, return to live at the end; version 1.3.4-desktop1 — TV guide: category separators ignored, “Program not available”, French channel coverage in the log; version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
+> Version 1.4.2-desktop1 — optional “Buy me a coffee” (Ko-fi) button on the home screen, in What's New and in Settings > About, can be hidden; version 1.4.0-desktop1 — replay: watch a programme that already aired (provider archive, up to 14 days) from the TV Guide or a channel, “Watch from the start”, saving a replay, return to live at the end; version 1.3.4-desktop1 — TV guide: category separators ignored, “Program not available”, French channel coverage in the log; version 1.3.3-desktop1 — Log sorted by topic (search, levels of detail, kept history), detailed TV guide diagnostics and a “Reload the guide” button; version 1.3.1-desktop1 — “My videos” tile (rows, filters, folder browsing, diagnostics), All / IPTV / My videos selector in Movies and Series, optional password or token, Emby sign-in fixed. Version 1.3.0-desktop1 — new sources: folders (disk, USB drive, NAS), Jellyfin, Emby and Plex, network search for servers, resume and “watched” shared with servers, TMDB details for files, subtitles placed next to videos. Version 1.2.2-desktop1 — schedule a recording from live TV, edit recents, “Select all” box for categories. Kastideo provides no content: you add your own sources (Xtream Codes subscription or M3U playlist, video folders, Jellyfin, Emby or Plex server).
 
 ## Getting started
 
@@ -320,6 +320,12 @@ Settings > **Backup**: **Export configuration…** (sources and their guide, pas
 - **VPN**: an active VPN may prevent the provider from serving streams.
 - **No programmes in the guide**: Settings > Sources shows each source's guide state; the fallback guide fills in common French channels.
 - **Passwords on Linux**: without a keyring (GNOME Keyring or KWallet), Kastideo keeps passwords in its preferences and says so in the log.
+
+## Support Kastideo
+
+Kastideo is **free** and will stay free. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
+
+The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
 
 ## Privacy
 

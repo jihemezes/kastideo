@@ -14,6 +14,7 @@ import 'help_dialog.dart';
 import 'log_dialog.dart';
 import 'multiview_view.dart';
 import 'settings_dialog.dart';
+import 'support_button.dart';
 import 'widgets.dart';
 
 /// Écran d'accueil : reproduction de l'accueil de la version Mac (en-tête, recherche, trois grands pavés,
@@ -120,8 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             right: 10,
             bottom: 10,
-            child: Text('Kastideo $kVersion · ${tr('Aperçu Windows / Linux')}',
-                style: kTextD(11, color: Colors.white.withValues(alpha: 0.35))),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const SupportButton(onDark: true),
+              const SizedBox(width: 12),
+              Text('Kastideo $kVersion · ${tr('Aperçu Windows / Linux')}',
+                  style: kTextD(11, color: Colors.white.withValues(alpha: 0.35))),
+            ]),
           ),
         ]);
       }),

@@ -853,3 +853,15 @@
 "Télécharge le programme depuis l'archive du fournisseur" = "Downloads the programme from the provider's archive";
 " (depuis le début)" = " (from the start)";
 "À revoir (replay)" = "To watch again (replay)";
+
+/* 1.4.2 */
+"Offrir un café" = "Buy me a coffee";
+"Kastideo reste gratuit. Un café pour soutenir son développement ? (Ko-fi)" = "Kastideo stays free. A coffee to support its development? (Ko-fi)";
+"À propos" = "About";
+"Soutenir Kastideo" = "Support Kastideo";
+"Kastideo est gratuit et le restera. Si l'application vous plaît et que vous souhaitez encourager son développement, vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir." = "Kastideo is free and will stay free. If you enjoy the app and would like to encourage its development, you can buy me a coffee: it is entirely optional, and every gesture is appreciated.";
+"Masquer les boutons « Offrir un café » (accueil, nouveautés)" = "Hide the “Buy me a coffee” buttons (home, what's new)";
+"Page du projet sur GitHub" = "Project page on GitHub";
+"Signaler un problème ou proposer une idée" = "Report a problem or suggest an idea";
+"Liens" = "Links";
+"Soutenir Kastideo (Ko-fi)…" = "Support Kastideo (Ko-fi)…";

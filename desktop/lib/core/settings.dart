@@ -33,6 +33,9 @@ class AppSettings extends ChangeNotifier {
   bool relayEnabled = true;
   bool autoRefresh = true;
 
+  /// Masquer les boutons discrets « Offrir un café » (accueil, nouveautés).
+  bool hideSupport = false;
+
   /// « system », « fr » ou « en » (appliqué au prochain lancement).
   String language = 'system';
 
@@ -41,6 +44,7 @@ class AppSettings extends ChangeNotifier {
     resumePlayback = _prefs.getBool('resumePlayback') ?? true;
     relayEnabled = _prefs.getBool('relay.enabled') ?? true;
     autoRefresh = _prefs.getBool('autoRefresh') ?? true;
+    hideSupport = _prefs.getBool('support.hide') ?? false;
     language = _prefs.getString('language') ?? 'system';
     try {
       tmdbKey = await _secrets.read('tmdb.apiKey') ?? '';
@@ -218,6 +222,12 @@ class AppSettings extends ChangeNotifier {
   void setResume(bool value) {
     resumePlayback = value;
     _prefs.setBool('resumePlayback', value);
+    notifyListeners();
+  }
+
+  void setHideSupport(bool value) {
+    hideSupport = value;
+    _prefs.setBool('support.hide', value);
     notifyListeners();
   }
 

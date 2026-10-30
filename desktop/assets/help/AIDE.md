@@ -1,6 +1,6 @@
 # Kastideo pour Windows et Linux
 
-> Version 1.4.0-desktop1 — replay : revoir un programme déjà diffusé (archive du fournisseur, jusqu'à 14 jours) depuis le Guide TV ou une chaîne, « Revoir depuis le début », enregistrement d'un replay, retour au direct à la fin ; version 1.3.4-desktop1 — guide TV : séparateurs de catégories ignorés, « Programme non disponible », couverture des chaînes françaises dans le journal ; version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
+> Version 1.4.2-desktop1 — bouton facultatif « Offrir un café » (Ko-fi) sur l'accueil, dans Nouveautés et dans Réglages > À propos, masquable ; version 1.4.0-desktop1 — replay : revoir un programme déjà diffusé (archive du fournisseur, jusqu'à 14 jours) depuis le Guide TV ou une chaîne, « Revoir depuis le début », enregistrement d'un replay, retour au direct à la fin ; version 1.3.4-desktop1 — guide TV : séparateurs de catégories ignorés, « Programme non disponible », couverture des chaînes françaises dans le journal ; version 1.3.3-desktop1 — Journal par sujets (recherche, niveaux de détail, historique conservé), diagnostic détaillé du guide TV et bouton « Recharger le guide » ; version 1.3.1-desktop1 — tuile « Mes vidéos » (rangées, filtres, navigation par dossiers, diagnostic), sélecteur Tout / IPTV / Mes vidéos dans Films et Séries, mot de passe ou jeton facultatif, connexion Emby corrigée. Version 1.3.0-desktop1 — nouvelles sources : dossiers (disque, clé USB, NAS), Jellyfin, Emby et Plex, recherche des serveurs sur le réseau, reprise et « vu » partagés avec les serveurs, fiches TMDB des fichiers, sous-titres placés à côté. Version 1.2.2-desktop1 — programmer un enregistrement depuis le direct, modifier les récents, case « Tout sélectionner » des catégories. Kastideo ne fournit aucun contenu : vous ajoutez vos propres sources (abonnement Xtream Codes ou playlist M3U, dossiers de vidéos, serveur Jellyfin, Emby ou Plex).
 
 ## Premiers pas
 
@@ -320,6 +320,12 @@ Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur g
 - **VPN** : un VPN actif peut empêcher le fournisseur de servir les flux.
 - **Pas de programme dans le guide** : Réglages > Sources indique l'état du guide de chaque source ; le guide de secours complète les chaînes françaises courantes.
 - **Mots de passe sous Linux** : sans trousseau (GNOME Keyring ou KWallet), Kastideo garde les mots de passe dans ses préférences et le signale dans le journal.
+
+## Soutenir Kastideo
+
+Kastideo est **gratuit** et le restera. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
+
+Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
 
 ## Confidentialité
 

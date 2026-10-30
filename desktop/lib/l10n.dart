@@ -11,6 +11,14 @@ class L10n {
   }
 
   static const Map<String, String> _en = {
+    'Offrir un café': 'Buy me a coffee',
+    'Kastideo reste gratuit. Un café pour soutenir son développement ? (Ko-fi)': 'Kastideo stays free. A coffee to support its development? (Ko-fi)',
+    'Soutenir Kastideo': 'Support Kastideo',
+    "Kastideo est gratuit et le restera. Si l'application vous plaît et que vous souhaitez encourager son développement, vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir.": 'Kastideo is free and will stay free. If you enjoy the app and would like to encourage its development, you can buy me a coffee: it is entirely optional, and every gesture is appreciated.',
+    'Masquer les boutons « Offrir un café » (accueil, nouveautés)': 'Hide the “Buy me a coffee” buttons (home, what\'s new)',
+    'Page du projet sur GitHub': 'Project page on GitHub',
+    'Signaler un problème ou proposer une idée': 'Report a problem or suggest an idea',
+    'Liens': 'Links',
     'Replay': 'Replay',
     'Proposer le replay des chaînes qui en ont un': 'Offer replay for channels that have one',
     'Jours de programmes passés gardés dans le guide': 'Days of past programmes kept in the guide',

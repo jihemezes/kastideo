@@ -48,6 +48,7 @@ struct WhatsNewView: View {
 
             Divider()
             HStack {
+                SupportButton()
                 Spacer()
                 Button("Continuer") { dismiss() }
                     .keyboardShortcut(.defaultAction)

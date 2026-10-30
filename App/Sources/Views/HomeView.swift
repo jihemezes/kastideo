@@ -116,8 +116,9 @@ struct HomeView: View {
         let build = info?["CFBundleVersion"] as? String
         return VStack {
             Spacer()
-            HStack {
+            HStack(spacing: 10) {
                 Spacer()
+                SupportButton(onDark: true)
                 Button {
                     navigation.showWhatsNew = true
                 } label: {

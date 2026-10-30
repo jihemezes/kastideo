@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.4.2] - 2026-10-29
+
+**Soutenir Kastideo (facultatif).** L'application reste gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos** et l'entrée **Aide > Soutenir Kastideo (Ko-fi)**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.
+
 ## [1.4.1] - 2026-10-29
 
 **Correctif de compilation de la 1.4.0** (Mac uniquement) : « Retour au direct » du lecteur référençait un élément non défini. Aucun changement de fonctionnement.

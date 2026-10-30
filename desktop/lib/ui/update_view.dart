@@ -9,6 +9,7 @@ import '../l10n.dart';
 import '../main.dart' show appShutdown;
 import '../theme.dart';
 import '../version.dart';
+import 'support_button.dart';
 
 /// Bandeau « Nouvelle version » en haut à droite (proposé hors visionnage, comme sur Mac).
 class UpdateBanner extends StatelessWidget {
@@ -293,7 +294,10 @@ Future<void> showWhatsNew(BuildContext context, {String? since}) async {
           ]),
         ),
       ),
-      actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('Continuer')))],
+      actions: [
+        const SupportButton(),
+        FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('Continuer'))),
+      ],
     ),
   );
 }
