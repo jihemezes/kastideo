@@ -213,6 +213,7 @@ struct GeneralSettingsView: View {
                     .foregroundStyle(.secondary)
             }
             MediaInfoSettingsSection()
+            CastSettingsSection()
             YouTubeSettingsSection()
             EPGFallbackSettingsSection()
             ConfigTransferSection()

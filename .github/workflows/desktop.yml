@@ -57,6 +57,16 @@ jobs:
           flutter build windows --release \
             --build-name "${{ steps.version.outputs.name }}" --build-number "${{ github.run_number }}" \
             --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
+      - name: ffmpeg (Cast)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          # ffmpeg convertit la vidéo envoyée au téléviseur (Cast). Facultatif : sans lui, le Cast demande de l'installer.
+          Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-tmp -Force
+          $bin = Get-ChildItem -Recurse ffmpeg-tmp -Filter ffmpeg.exe | Select-Object -First 1
+          Copy-Item $bin.FullName "build/windows/x64/runner/Release/"
+          Copy-Item (Join-Path $bin.DirectoryName "ffprobe.exe") "build/windows/x64/runner/Release/"
       - name: Archive portable
         shell: pwsh
         run: |
@@ -173,6 +183,14 @@ jobs:
           APPDIR="dist/AppDir"
           mkdir -p "$APPDIR/usr/bin"
           cp -r "$BUNDLE"/. "$APPDIR/usr/bin/"
+          # ffmpeg statique pour le Cast (facultatif : sans lui, le Cast demande de l'installer).
+          case "$ARCH" in x86_64) FF=amd64;; *) FF=arm64;; esac
+          if curl -fsSL -o ffmpeg.tar.xz "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-$FF-static.tar.xz"; then
+            mkdir -p ffmpeg-tmp && tar -xJf ffmpeg.tar.xz -C ffmpeg-tmp --strip-components=1 \
+              && cp ffmpeg-tmp/ffmpeg ffmpeg-tmp/ffprobe "$APPDIR/usr/bin/" || echo "ffmpeg non embarqué"
+          else
+            echo "ffmpeg non embarqué (téléchargement impossible)"
+          fi
           LIBMPV=$(ldconfig -p | grep -m1 -E 'libmpv\.so\.[0-9]' | awk '{print $NF}')
           echo "libmpv : $LIBMPV"
           export LINUXDEPLOY_OUTPUT_VERSION="$VERSION"

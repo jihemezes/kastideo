@@ -19,6 +19,7 @@ import 'core/media_sync.dart';
 import 'core/log.dart';
 import 'core/notify.dart';
 import 'core/system_integration.dart';
+import 'core/cast_controller.dart';
 import 'core/updater.dart';
 import 'core/recording.dart';
 import 'core/library.dart';
@@ -195,6 +196,7 @@ Future<void> main(List<String> args) async {
   final alerts = AlertCenter(settings, library, guide);
   final multiview = MultiViewController(settings, playback);
   final updates = UpdateService();
+  final cast = CastController(playback, settings);
   // Serveurs Jellyfin, Emby, Plex : positions de lecture partagées, fiches TMDB des fichiers locaux.
   final sync = MediaSync(library, watch);
   library.onUserData = sync.receive;
@@ -218,6 +220,7 @@ Future<void> main(List<String> args) async {
       alerts: alerts,
       multiview: multiview,
       updates: updates,
+      cast: cast,
     ),
   );
   await library.start(autoRefresh: settings.autoRefresh);
@@ -245,9 +248,11 @@ class KastideoApp extends StatefulWidget {
     required this.alerts,
     required this.multiview,
     required this.updates,
+    required this.cast,
   });
 
   final UpdateService updates;
+  final CastController cast;
   final LibraryStore library;
   final PlaybackController playback;
   final NavigationModel navigation;
@@ -328,6 +333,7 @@ class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
       alerts: widget.alerts,
       multiview: widget.multiview,
       updates: widget.updates,
+      cast: widget.cast,
       child: MaterialApp(
         title: 'Kastideo',
         debugShowCheckedModeBanner: false,

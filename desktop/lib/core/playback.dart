@@ -15,6 +15,17 @@ import 'xtream.dart';
 /// Santé du flux (pastille de couleur, comme sur Mac).
 enum HealthLevel { unknown, poor, fair, good }
 
+/// Télécommande d'une diffusion en cours (implémentée par CastController).
+abstract class CastRemote {
+  void togglePause();
+  void seekTo(Duration position);
+  void setVolume(double level);
+  void setMuted(bool muted);
+
+  /// Ferme la session côté téléviseur (sans toucher au lecteur local).
+  Future<void> end();
+}
+
 /// Lecteur unique (moteur mpv) : une seule connexion au fournisseur à la fois.
 class PlaybackController extends ChangeNotifier {
   PlaybackController() {
@@ -28,27 +39,34 @@ class PlaybackController extends ChangeNotifier {
     video = VideoController(player);
     _subscriptions.addAll([
       player.stream.playing.listen((v) {
+        if (casting) return;
         isPlaying = v;
         notifyListeners();
       }),
       player.stream.buffering.listen((v) {
+        if (casting) return;
         isBuffering = v;
         if (v && didStart) _stalls.add(DateTime.now());
         _evaluateHealth();
       }),
       player.stream.height.listen((h) {
+        if (casting) return;
         videoHeight = h;
         if (h != null && h > 0) _markStarted();
         notifyListeners();
       }),
-      player.stream.width.listen((w) => videoWidth = w),
+      player.stream.width.listen((w) {
+        if (!casting) videoWidth = w;
+      }),
       player.stream.position.listen((p) {
+        if (casting) return;
         position = p;
         if (p > Duration.zero) _markStarted();
         _trackProgress();
         if (!isLive) notifyListeners();
       }),
       player.stream.duration.listen((d) {
+        if (casting) return;
         duration = d;
         notifyListeners();
       }),
@@ -58,7 +76,7 @@ class PlaybackController extends ChangeNotifier {
         PlaybackLog.shared.engine('[${log.prefix}] ${log.text.trim()}', level: level);
       }),
       player.stream.completed.listen((done) {
-        if (!done) return;
+        if (!done || casting) return;
         if (current?.isReplay ?? false) {
           // Fin du replay : retour automatique au direct de la chaîne (si l'option est active).
           onReplayEnded?.call(current!);
@@ -73,6 +91,13 @@ class PlaybackController extends ChangeNotifier {
     ]);
     _prepare();
   }
+
+  /// Diffusion vers un téléviseur en cours : les commandes (pause, position, volume) sont transmises au Cast.
+  CastRemote? castRemote;
+  bool get casting => castRemote != null;
+
+  /// Appelé avant de lancer un contenu : retourne vrai si la diffusion l'a pris en charge (le lecteur local reste coupé).
+  bool Function(MediaItem item)? castHook;
 
   late final Player player;
   late final VideoController video;
@@ -287,10 +312,22 @@ class PlaybackController extends ChangeNotifier {
 
   void seek(double fraction) {
     if (!isSeekable) return;
+    if (casting) {
+      castRemote!.seekTo(duration * fraction.clamp(0.0, 1.0));
+      return;
+    }
     player.seek(duration * fraction.clamp(0.0, 1.0));
   }
 
   void jump(int seconds) {
+    if (casting) {
+      if (!isSeekable) return;
+      var target = position + Duration(seconds: seconds);
+      if (target < Duration.zero) target = Duration.zero;
+      if (target > duration) target = duration - const Duration(seconds: 1);
+      castRemote!.seekTo(target);
+      return;
+    }
     if (isLive && didStart) {
       // Direct : −10 s / +30 s dans le différé (sans dépasser le direct).
       seekDelay(liveDelay - seconds);
@@ -305,7 +342,11 @@ class PlaybackController extends ChangeNotifier {
 
   void restartFromBeginning() {
     if (!isSeekable) return;
-    player.seek(Duration.zero);
+    if (casting) {
+      castRemote!.seekTo(Duration.zero);
+    } else {
+      player.seek(Duration.zero);
+    }
     resumedAt = null;
     if (current != null) watchProgress?.clear(current!.id);
     notifyListeners();
@@ -360,6 +401,8 @@ class PlaybackController extends ChangeNotifier {
       return;
     }
     _flushProgress();
+    if (casting && castHook?.call(item) == true) return;
+    if (casting) endCast();
     current = item;
     _retries = 0;
     resumedAt = null;
@@ -384,6 +427,7 @@ class PlaybackController extends ChangeNotifier {
 
   Future<void> stop() async {
     _flushProgress();
+    endCast();
     _shiftTimer?.cancel();
     liveDelay = 0;
     peakDelay = 0;
@@ -425,11 +469,86 @@ class PlaybackController extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void togglePause() => player.playOrPause();
+  void togglePause() {
+    if (casting) {
+      castRemote!.togglePause();
+      return;
+    }
+    player.playOrPause();
+  }
+
+  // MARK: Cast
+
+  /// Coupe le lecteur local (une seule connexion au fournisseur) et passe en mode diffusion. Retourne la position atteinte.
+  Future<Duration> suspendForCast(CastRemote remote) async {
+    _flushProgress();
+    final at = position;
+    castRemote = remote;
+    _watchdog?.cancel();
+    _openTimer?.cancel();
+    _healthTimer?.cancel();
+    _shiftTimer?.cancel();
+    _pendingResume = null;
+    _currentUrl = null;
+    liveDelay = 0;
+    peakDelay = 0;
+    _userShift = false;
+    errorMessage = null;
+    isLoading = false;
+    didStart = true;
+    StreamRelay.shared.closeAll();
+    _closedAt = DateTime.now();
+    notifyListeners();
+    await player.stop();
+    return at;
+  }
+
+  /// Le Cast annonce où en est la lecture sur le téléviseur.
+  void castUpdate({Duration? position, Duration? duration, bool? playing, bool? loading, String? error}) {
+    if (!casting) return;
+    if (position != null) this.position = position;
+    if (duration != null) this.duration = duration;
+    if (playing != null) isPlaying = playing;
+    if (loading != null) isLoading = loading;
+    errorMessage = error;
+    if (position != null && !isLive) _trackProgress();
+    notifyListeners();
+  }
+
+  /// Fin de la diffusion sans reprise locale (le Cast ferme sa session).
+  void endCast() {
+    final remote = castRemote;
+    if (remote == null) return;
+    castRemote = null;
+    unawaited(remote.end());
+  }
+
+  /// Reprend la lecture sur cet ordinateur à la position donnée (fin de la diffusion demandée par l'utilisateur).
+  void resumeFromCast(Duration at) {
+    castRemote = null;
+    final item = current;
+    final url = item?.stream;
+    if (item == null || url == null) {
+      notifyListeners();
+      return;
+    }
+    didStart = false;
+    errorMessage = null;
+    position = Duration.zero;
+    duration = Duration.zero;
+    if (item.kind != MediaKind.live && !item.isReplay && at > const Duration(seconds: 3)) _pendingResume = at;
+    _start(url);
+  }
 
   Future<void> setVolume(double value) async {
     volume = value.clamp(0, 100);
     if (volume > 0) muted = false;
+    if (casting) {
+      castRemote!.setVolume(volume / 100);
+      _prefs?.setDouble('volume', volume);
+      notifyListeners();
+      return;
+    }
     await _applyVolume();
     _prefs?.setDouble('volume', volume);
     notifyListeners();
@@ -437,6 +556,11 @@ class PlaybackController extends ChangeNotifier {
 
   Future<void> toggleMute() async {
     muted = !muted;
+    if (casting) {
+      castRemote!.setMuted(muted);
+      notifyListeners();
+      return;
+    }
     await _applyVolume();
     _prefs?.setBool('muted', muted);
     notifyListeners();
@@ -542,7 +666,7 @@ class PlaybackController extends ChangeNotifier {
   }
 
   void _onError(String message) {
-    if (current == null) return;
+    if (current == null || casting) return;
     PlaybackLog.shared.engine(message, level: 0);
     if (didStart || isLoading == false) return; // erreur pendant la lecture : mpv reprend seul
     final status = StreamRelay.shared.lastStatus;

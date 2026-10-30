@@ -8,6 +8,7 @@ import '../core/models.dart';
 import '../core/youtube.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import 'cast_ui.dart';
 import 'catalog_screen.dart';
 import 'help_dialog.dart';
 import 'settings_dialog.dart';
@@ -238,6 +239,11 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
           Icon(Icons.play_circle_fill_rounded, color: KPalette.accent, size: 20),
           const SizedBox(width: 10),
           Expanded(child: Text('${tr('Lecture dans la fenêtre YouTube :')} ${_nowPlaying!.title}', style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          TextButton.icon(
+            onPressed: () => castYouTubeFlow(context, video: _nowPlaying!),
+            icon: const Icon(Icons.cast_rounded, size: 18),
+            label: Text(tr('Sur un téléviseur')),
+          ),
           TextButton(onPressed: () => _play([_nowPlaying!], 0), child: Text(tr('Rouvrir la fenêtre'))),
         ]),
       );
@@ -463,6 +469,7 @@ class _VideoCard extends StatelessWidget {
       items: [
         PopupMenuItem(value: 'later', child: Text(store.isLater(video) ? tr('Retirer de « À regarder »') : tr('À regarder plus tard'))),
         PopupMenuItem(value: 'fav', child: Text(store.isFavorite(video) ? tr('Retirer des favoris') : tr('Ajouter aux favoris'))),
+        PopupMenuItem(value: 'cast', child: Text(tr('Lire sur un téléviseur…'))),
         PopupMenuItem(value: 'open', child: Text(tr('Ouvrir sur YouTube'))),
         PopupMenuItem(value: 'copy', child: Text(tr('Copier le lien'))),
       ],
@@ -472,6 +479,8 @@ class _VideoCard extends StatelessWidget {
           store.toggleLater(video);
         case 'fav':
           store.toggleFavorite(video);
+        case 'cast':
+          if (context.mounted) castYouTubeFlow(context, video: video);
         case 'open':
           launchUrl(video.watchUrl);
         case 'copy':

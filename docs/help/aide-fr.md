@@ -510,6 +510,63 @@ La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo
 La plupart des abonnements n'autorisent qu'une connexion. Kastideo ferme la chaîne précédente avant d'ouvrir la suivante (**relais de flux**, Réglages > Général > Lecture) et vous demande avant d'interrompre un enregistrement.
 <!--/pc-->
 
+## Diffuser sur un téléviseur {#cast}
+
+Envoyez ce que vous regardez — **chaîne en direct, film, série, vidéo locale ou YouTube** — vers un téléviseur du même réseau, sans quitter Kastideo. La barre de lecture reste votre télécommande.
+
+### Ce qui est possible
+
+- **Chromecast, Google TV, TV Android** (et beaucoup de téléviseurs avec Chromecast intégré) : la lecture entière part sur le téléviseur.
+- **Apple TV (AirPlay)** : Kastideo ne peut pas envoyer la vidéo directement. Utilisez la **recopie d'écran** de macOS (voir plus bas).
+- **YouTube** : la vidéo s'ouvre dans l'application YouTube du téléviseur, ou dans le navigateur (au choix dans les réglages).
+
+### Diffuser un contenu
+
+1. Lancez une chaîne, un film, une série ou une vidéo.
+2. Dans la barre de lecture, cliquez sur le bouton **téléviseur**.
+3. Choisissez l'appareil dans la liste. Si rien n'apparaît, **Chercher à nouveau** : le téléviseur doit être allumé et sur le même réseau.
+4. L'image part sur le téléviseur. Sur l'ordinateur, un écran indique « Diffusion sur… ».
+
+La lecture **reprend là où vous en étiez**. Pause, lecture, avance et recul de 10 / 30 s, position, volume et sourdine de la barre agissent sur le téléviseur. Lancer un autre contenu pendant la diffusion l'envoie aussi au téléviseur.
+
+Pour revenir, choisissez **Arrêter la diffusion** (ou **Reprendre sur l'ordinateur**) : la lecture reprend sur l'ordinateur à la même position.
+
+<!--pc-->
+### ffmpeg : la conversion de la vidéo
+
+Sous Windows et Linux, Kastideo prépare la vidéo avec **ffmpeg** avant de l'envoyer au téléviseur. Il est fourni avec la version Windows et l'AppImage Linux. Avec le paquet .deb, installez-le : `sudo apt install ffmpeg`. Si Kastideo ne le trouve pas, indiquez son chemin dans **Réglages > Général > Cast**.
+
+- **Préparation de la vidéo** : *Automatique* copie la vidéo quand elle est déjà en H.264 (léger pour l'ordinateur) et la convertit sinon ; *Toujours convertir* est le plus compatible.
+- **Définition maximale** : 720p ou 1080p.
+- **Ajouter un téléviseur par son adresse IP** : utile si la recherche automatique ne le voit pas (réseau Wi-Fi invité, VLAN…).
+
+Le pare-feu de Windows peut demander d'autoriser Kastideo : acceptez sur les réseaux **privés**, sinon le téléviseur ne peut pas lire le flux.
+<!--/pc-->
+<!--mac-->
+### Apple TV et AirPlay
+
+VLC, le moteur de lecture de Kastideo, n'envoie pas la vidéo en AirPlay. Pour une Apple TV : menu **Centre de contrôle > Recopie de l'écran** (ou **Réglages Système > Moniteurs**), choisissez l'Apple TV, puis lisez Kastideo en plein écran. Le bouton téléviseur de la barre propose un raccourci vers les réglages d'écran.
+
+### Autorisation réseau
+
+Au premier usage, macOS demande si Kastideo peut **trouver des appareils sur le réseau local** : acceptez, sinon aucun téléviseur n'apparaît (Réglages Système > Confidentialité et sécurité > Réseau local).
+<!--/mac-->
+
+### YouTube sur le téléviseur
+
+Dans **Réglages > Général > Cast**, choisissez :
+
+- **Application YouTube du téléviseur** : Kastideo demande au téléviseur d'ouvrir YouTube sur la vidéo choisie (clic droit sur une vidéo > **Lire sur un téléviseur**). Il faut que l'application YouTube soit installée sur le téléviseur.
+- **Navigateur (bouton Diffuser de Chrome)** : la vidéo s'ouvre dans votre navigateur ; utilisez le bouton **Diffuser** de Chrome pour l'envoyer sur le téléviseur.
+
+### Limites à connaître
+
+- Une seule connexion à votre fournisseur : pendant la diffusion, l'ordinateur ne lit plus la chaîne (voir [Une seule connexion à la fois](help:connexion-unique)).
+- Le **direct** ne permet pas de se déplacer dans le temps pendant la diffusion ; le **différé** de l'ordinateur est coupé.
+- L'**enregistrement** d'une chaîne et le **MultiVue** ne se combinent pas avec la diffusion.
+- Il y a quelques secondes de décalage, plus qu'avec une lecture locale.
+- Un téléviseur qui ne répond pas à la recherche : vérifiez qu'il est allumé et sur le même réseau Wi-Fi ou Ethernet que l'ordinateur.
+
 ## Mémoire tampon {#tampon}
 
 <!--mac-->

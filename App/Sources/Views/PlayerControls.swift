@@ -122,6 +122,8 @@ struct ControlsBar: View {
                     .frame(width: 80)
                     .help("Volume (100 = normal, jusqu'à 200 %)")
 
+                CastMenuButton()
+
                 Button { navigation.showContextPanel.toggle() } label: {
                     Image(systemName: navigation.showContextPanel ? "sidebar.trailing" : "info.circle")
                 }

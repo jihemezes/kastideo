@@ -25,7 +25,12 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau et lit leurs vidéos.</string>
+	<string>Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau, ainsi que les téléviseurs (Chromecast, Google TV) où diffuser la lecture.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_googlecast._tcp</string>
+		<string>_airplay._tcp</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

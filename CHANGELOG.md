@@ -3,6 +3,16 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.0] - 2026-10-30
+
+**Diffuser sur un téléviseur (Cast).**
+
+- **Bouton téléviseur dans la barre de lecture** : envoie la chaîne, le film, la série ou la vidéo en cours vers un **Chromecast, Google TV ou TV Android** du réseau. La lecture reprend à la position atteinte, et la barre reste la télécommande (pause, avance / recul, position, volume). « Arrêter la diffusion » ramène la lecture sur le Mac.
+- **YouTube sur le téléviseur** : clic droit sur une vidéo > « Lire sur un téléviseur » (et bouton dans le lecteur YouTube). Réglages > Général > Cast : application YouTube du téléviseur, ou navigateur (bouton Diffuser de Chrome).
+- **Apple TV** : raccourci vers la recopie d'écran AirPlay de macOS (VLC n'envoie pas la vidéo en AirPlay).
+- Au premier usage, macOS demande l'autorisation de trouver des appareils sur le réseau local.
+- Nouvelle page d'aide « Diffuser sur un téléviseur ». Fonction non testée avec un vrai téléviseur : vos retours sont bienvenus.
+
 ## [1.6.1] - 2026-10-30
 
 **Correctif de compilation de la 1.6.0** (aide). Aucune autre nouveauté.

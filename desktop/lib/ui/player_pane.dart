@@ -10,6 +10,7 @@ import '../core/models.dart';
 import '../core/playback.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import 'cast_ui.dart';
 import 'log_dialog.dart';
 import 'themes_view.dart';
 
@@ -113,10 +114,14 @@ class _PlayerPaneState extends State<PlayerPane> {
                 builder: (context, _) {
                   if (playback.current == null) return widget.placeholder ?? const _Placeholder();
                   return Stack(fit: StackFit.expand, children: [
-                    Video(controller: playback.video, controls: NoVideoControls, fill: Colors.black),
+                    if (playback.casting)
+                      const CastPanel()
+                    else
+                      Video(controller: playback.video, controls: NoVideoControls, fill: Colors.black),
                     if (playback.isLoading && playback.errorMessage == null)
                       const Center(child: CircularProgressIndicator(color: Colors.white)),
                     if (playback.errorMessage != null) _ErrorView(message: playback.errorMessage!),
+                    const CastErrorNotice(),
                     if (playback.startupTime != null && playback.isLive && !widget.tvMode) const _StartupBadge(),
                     if (playback.resumedAt != null) const _ResumeNotice(),
                     if (widget.showBack)
@@ -320,6 +325,7 @@ class ControlsBar extends StatelessWidget {
                 onChanged: playback.setVolume,
               ),
             ),
+            const CastBarButton(),
             _BarButton(
               icon: navigation.theater ? Icons.close_fullscreen_rounded : Icons.open_in_full_rounded,
               tooltip: '${tr('Mode cinéma')} (Ctrl+Entrée)',

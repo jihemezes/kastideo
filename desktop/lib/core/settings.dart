@@ -76,6 +76,18 @@ class AppSettings extends ChangeNotifier {
   String get alertScope => _prefs.getString('alerts.scope') ?? 'favorites';
   int get alertLead => _prefs.getInt('alerts.lead') ?? 1;
 
+  // MARK: Cast (diffusion vers un téléviseur)
+
+  /// Dernier appareil choisi (JSON), mode vidéo (« auto » : copie H.264 si possible, « transcode »), hauteur maximale,
+  /// façon de diffuser YouTube (« dial » : application YouTube du téléviseur, « browser » : navigateur), chemin de ffmpeg
+  /// (vide : celui livré avec Kastideo ou du système) et adresses IP ajoutées à la main.
+  String get castDevice => _prefs.getString('cast.device') ?? '';
+  String get castVideoMode => _prefs.getString('cast.videoMode') ?? 'auto';
+  int get castMaxHeight => _prefs.getInt('cast.maxHeight') ?? 1080;
+  String get castYouTubeMode => _prefs.getString('cast.youtubeMode') ?? 'dial';
+  String get castFfmpegPath => _prefs.getString('cast.ffmpegPath') ?? '';
+  List<String> get castManualHosts => _prefs.getStringList('cast.manualHosts') ?? const [];
+
   // MARK: Replay (archive du fournisseur)
 
   bool get replayEnabled => _prefs.getBool('replay.enabled') ?? true;

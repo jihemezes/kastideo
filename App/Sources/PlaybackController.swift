@@ -293,6 +293,8 @@ final class PlaybackController {
         }
     }
 
+    /// Téléviseur choisi pour la diffusion (nil : lecture sur le Mac).
+    @ObservationIgnored private var renderer: VLCRendererItem?
     @ObservationIgnored private var startedAt: Date?
     @ObservationIgnored private var didStart = false
     @ObservationIgnored private var pendingResume: TimeInterval?
@@ -451,6 +453,17 @@ final class PlaybackController {
         return accepted
     }
 
+    /// Envoie la lecture vers un téléviseur (nil : retour sur le Mac). Le contenu en cours est rouvert là où il en était.
+    func setRenderer(_ item: VLCRendererItem?) {
+        renderer = item
+        guard let playing = current, playing.streamURL != nil else { return }
+        let resumeAt = elapsed
+        let resumable = !isLive && isSeekable && resumeAt > 3
+        current = nil
+        play(playing)
+        if resumable { pendingResume = resumeAt }
+    }
+
     func retry() {
         guard let item = current else { return }
         current = nil
@@ -590,6 +603,8 @@ final class PlaybackController {
         player.media = media
         player.rate = 1
         applyAudio()
+        // Diffusion : VLC envoie l'image au téléviseur choisi (doit être réglé avant la lecture).
+        _ = player.setRendererItem(renderer)
         player.play()
 
         // Délai de garde : sans image au bout de 20 s, on essaie la variante suivante ou on abandonne.

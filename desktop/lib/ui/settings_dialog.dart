@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/cast_media.dart';
 import '../core/countries.dart';
 import '../core/details.dart';
 import '../core/guide.dart';
@@ -20,6 +21,7 @@ import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
 import '../core/library.dart';
+import 'help_dialog.dart';
 import 'log_dialog.dart';
 import 'source_form.dart';
 import 'support_button.dart';
@@ -256,6 +258,7 @@ class _GeneralTabState extends State<_GeneralTab> {
             child: Text(tr('Obtenir une clé TMDB')),
           ),
         ]),
+        const _CastSection(),
         const _YouTubeSection(),
         const _StartupSection(),
         const _UpdatesSection(),
@@ -1652,4 +1655,121 @@ class _YouTubeSectionState extends State<_YouTubeSection> {
         ),
         _caption(tr('La lecture utilise le lecteur officiel de YouTube en « mode confidentialité avancée » : pas de cookie de suivi, donc le plus souvent aucune publicité personnalisée. Ce n\'est pas un bloqueur de publicités et rien n\'est garanti : YouTube reste libre d\'y diffuser des annonces, qui financent les créateurs. La vidéo s\'ouvre dans une fenêtre dédiée de votre navigateur (Edge, Chrome ou Chromium).')),
       ]);
+}
+
+
+/// Réglages > Général > Cast : vidéo envoyée au téléviseur, YouTube, ffmpeg, adresses ajoutées à la main.
+class _CastSection extends StatefulWidget {
+  const _CastSection();
+
+  @override
+  State<_CastSection> createState() => _CastSectionState();
+}
+
+class _CastSectionState extends State<_CastSection> {
+  late final _ffmpeg = TextEditingController(text: context.settings.castFfmpegPath);
+  final _host = TextEditingController();
+  String? _ffmpegStatus;
+
+  @override
+  void dispose() {
+    _ffmpeg.dispose();
+    _host.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkFfmpeg() async {
+    final settings = context.settings;
+    settings.setString('cast.ffmpegPath', _ffmpeg.text.trim());
+    final path = await findFfmpeg(custom: _ffmpeg.text);
+    if (!mounted) return;
+    setState(() => _ffmpegStatus = path == null ? tr('ffmpeg introuvable.') : '${tr('ffmpeg trouvé :')} $path');
+  }
+
+  void _addHost() {
+    final settings = context.settings;
+    final host = _host.text.trim();
+    if (!RegExp(r'^\d{1,3}(\.\d{1,3}){3}$').hasMatch(host)) return;
+    final hosts = [...settings.castManualHosts];
+    if (!hosts.contains(host)) hosts.add(host);
+    settings.setStringList('cast.manualHosts', hosts);
+    _host.clear();
+    context.cast.refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, _) => _section(tr('Cast (diffusion sur un téléviseur)'), [
+        Row(children: [
+          Expanded(child: Text(tr('Préparation de la vidéo'), style: kText(14))),
+          DropdownButton<String>(
+            value: settings.castVideoMode,
+            items: [
+              DropdownMenuItem(value: 'auto', child: Text(tr('Automatique (légère)'))),
+              DropdownMenuItem(value: 'transcode', child: Text(tr('Toujours convertir (compatible)'))),
+            ],
+            onChanged: (v) => settings.setString('cast.videoMode', v ?? 'auto'),
+          ),
+        ]),
+        Row(children: [
+          Expanded(child: Text(tr('Définition maximale envoyée'), style: kText(14))),
+          DropdownButton<int>(
+            value: [720, 1080].contains(settings.castMaxHeight) ? settings.castMaxHeight : 1080,
+            items: const [DropdownMenuItem(value: 720, child: Text('720p')), DropdownMenuItem(value: 1080, child: Text('1080p'))],
+            onChanged: (v) => settings.setInt('cast.maxHeight', v ?? 1080),
+          ),
+        ]),
+        Row(children: [
+          Expanded(child: Text(tr('YouTube sur le téléviseur'), style: kText(14))),
+          DropdownButton<String>(
+            value: settings.castYouTubeMode,
+            items: [
+              DropdownMenuItem(value: 'dial', child: Text(tr('Application YouTube du téléviseur'))),
+              DropdownMenuItem(value: 'browser', child: Text(tr('Navigateur (bouton Diffuser de Chrome)'))),
+            ],
+            onChanged: (v) => settings.setString('cast.youtubeMode', v ?? 'dial'),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _ffmpeg,
+              decoration: InputDecoration(isDense: true, border: const OutlineInputBorder(), labelText: tr('Chemin de ffmpeg (vide : automatique)')),
+              onSubmitted: (_) => _checkFfmpeg(),
+            ),
+          ),
+          const SizedBox(width: 10),
+          OutlinedButton(onPressed: _checkFfmpeg, child: Text(tr('Vérifier'))),
+        ]),
+        if (_ffmpegStatus != null) _caption(_ffmpegStatus!),
+        const SizedBox(height: 8),
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _host,
+              decoration: InputDecoration(isDense: true, border: const OutlineInputBorder(), labelText: tr('Ajouter un téléviseur par son adresse IP (ex. 192.168.1.40)')),
+              onSubmitted: (_) => _addHost(),
+            ),
+          ),
+          const SizedBox(width: 10),
+          OutlinedButton(onPressed: _addHost, child: Text(tr('Ajouter'))),
+        ]),
+        for (final host in settings.castManualHosts)
+          Row(children: [
+            Expanded(child: Text(host, style: kText(13))),
+            IconButton(
+              tooltip: tr('Retirer'),
+              onPressed: () => settings.setStringList('cast.manualHosts', [...settings.castManualHosts]..remove(host)),
+              icon: const Icon(Icons.close_rounded, size: 18),
+            ),
+          ]),
+        _caption(tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. ffmpeg convertit la vidéo ; il est livré avec Kastideo sous Windows et Linux (AppImage).')),
+        TextButton(onPressed: () => showHelpDialog(context, page: 'cast'), child: Text(tr('Aide : diffuser sur un téléviseur'))),
+      ]),
+    );
+  }
 }

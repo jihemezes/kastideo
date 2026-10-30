@@ -32,6 +32,16 @@ struct YouTubeRootView: View {
         .toolbar {
             MainToolbar(store: store, scope: nil, style: .classic)
         }
+        .task { CastCenter.shared.refresh() }
+        .overlay(alignment: .bottom) {
+            if let message = CastCenter.shared.message {
+                Label(message, systemImage: "exclamationmark.triangle")
+                    .padding(10)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(16)
+                    .onTapGesture { CastCenter.shared.message = nil }
+            }
+        }
         .onChange(of: youtube.playerSession) { _, _ in
             // Une seule source sonore : la lecture IPTV s'arrête, sauf enregistrement en cours.
             if youtube.isPlaying, playback.current != nil, !recordings.isPlayerRecording { playback.stop() }
@@ -382,6 +392,7 @@ struct YouTubeCard: View {
         .contextMenu {
             Button(youtube.isLater(video) ? LocalizedStringKey("Retirer de « À regarder »") : LocalizedStringKey("À regarder plus tard")) { youtube.toggleLater(video) }
             Button(youtube.isFavorite(video) ? LocalizedStringKey("Retirer des favoris") : LocalizedStringKey("Ajouter aux favoris")) { youtube.toggleFavorite(video) }
+            YouTubeCastMenu(video: video)
             Button("Ouvrir sur YouTube") { NSWorkspace.shared.open(video.watchURL) }
             Button("Copier le lien") {
                 NSPasteboard.general.clearContents()
@@ -426,6 +437,15 @@ struct YouTubePlayerScreen: View {
                         Image(systemName: youtube.isFavorite(video) ? "star.fill" : "star")
                     }
                     .help("Favori")
+                    Menu {
+                        YouTubeCastMenu(video: video)
+                    } label: {
+                        Image(systemName: "tv")
+                    }
+                    .menuStyle(.borderlessButton)
+                    .menuIndicator(.hidden)
+                    .fixedSize()
+                    .help("Lire sur un téléviseur")
                 }
             }
             .padding(10)
@@ -576,6 +596,26 @@ struct YouTubeSettingsSection: View {
                 status = String(localized: "Vérification impossible : ") + error.localizedDescription
             }
             checking = false
+        }
+    }
+}
+
+/// Lire une vidéo YouTube sur un téléviseur : application YouTube du téléviseur (DIAL) ou navigateur, selon les réglages.
+struct YouTubeCastMenu: View {
+    let video: YouTubeVideo
+    private let cast = CastCenter.shared
+
+    var body: some View {
+        if cast.youtubeMode == "browser" {
+            Button("Lire sur un téléviseur (navigateur)") { Task { await cast.castYouTube(video, to: nil) } }
+        } else if cast.dialDevices.isEmpty {
+            Button("Chercher les téléviseurs…") { cast.refresh() }
+        } else {
+            Menu("Lire sur un téléviseur") {
+                ForEach(cast.dialDevices) { device in
+                    Button(device.name) { Task { await cast.castYouTube(video, to: device) } }
+                }
+            }
         }
     }
 }

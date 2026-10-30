@@ -21,6 +21,7 @@ struct VideoSurface: View {
         ZStack {
             Color.black
             VLCVideoRepresentable(player: playback.player)
+            CastOverlay()
 
             // Calque transparent : capte le survol et le double-clic au-dessus de la vue VLC.
             Color.clear

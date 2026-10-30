@@ -510,6 +510,63 @@ Most IPTV subscriptions allow only **one simultaneous stream**. Kastideo always 
 Most subscriptions allow a single connection. Kastideo closes the previous channel before opening the next (**stream relay**, Settings > General > Playback) and asks before interrupting a recording.
 <!--/pc-->
 
+## Cast to a TV {#cast}
+
+Send what you are watching — **a live channel, movie, series, local video or YouTube** — to a TV on the same network, without leaving Kastideo. The playback bar stays your remote control.
+
+### What is possible
+
+- **Chromecast, Google TV, Android TV** (and many TVs with built-in Chromecast): the whole playback goes to the TV.
+- **Apple TV (AirPlay)**: Kastideo cannot send the video directly. Use macOS **screen mirroring** (see below).
+- **YouTube**: the video opens in the TV's YouTube app, or in the browser (your choice in Settings).
+
+### Cast something
+
+1. Start a channel, movie, series or video.
+2. In the playback bar, click the **TV** button.
+3. Pick the device from the list. If nothing shows, click **Search again**: the TV must be on and on the same network.
+4. The picture goes to the TV. On the computer a screen says “Casting to…”.
+
+Playback **resumes where you were**. Pause, play, 10 / 30 s skip, position, volume and mute in the bar act on the TV. Starting another item while casting sends it to the TV as well.
+
+To come back, choose **Stop casting** (or **Resume on the computer**): playback resumes on the computer at the same position.
+
+<!--pc-->
+### ffmpeg: converting the video
+
+On Windows and Linux, Kastideo prepares the video with **ffmpeg** before sending it to the TV. It ships with the Windows version and the Linux AppImage. With the .deb package, install it: `sudo apt install ffmpeg`. If Kastideo cannot find it, give its path in **Settings > General > Cast**.
+
+- **Video preparation**: *Automatic* copies the video when it is already H.264 (light on the computer) and converts it otherwise; *Always convert* is the most compatible.
+- **Maximum resolution**: 720p or 1080p.
+- **Add a TV by its IP address**: useful if automatic search cannot see it (guest Wi-Fi, VLAN…).
+
+Windows Firewall may ask to allow Kastideo: accept on **private** networks, otherwise the TV cannot read the stream.
+<!--/pc-->
+<!--mac-->
+### Apple TV and AirPlay
+
+VLC, Kastideo's playback engine, does not send video over AirPlay. For an Apple TV: **Control Center > Screen Mirroring** (or **System Settings > Displays**), pick the Apple TV, then play Kastideo full screen. The TV button in the bar offers a shortcut to the display settings.
+
+### Network permission
+
+On first use, macOS asks whether Kastideo may **find devices on the local network**: accept, otherwise no TV will appear (System Settings > Privacy & Security > Local Network).
+<!--/mac-->
+
+### YouTube on the TV
+
+In **Settings > General > Cast**, choose:
+
+- **The TV's YouTube app**: Kastideo asks the TV to open YouTube on the chosen video (right-click a video > **Play on a TV**). The YouTube app must be installed on the TV.
+- **Browser (Chrome's Cast button)**: the video opens in your browser; use Chrome's **Cast** button to send it to the TV.
+
+### Limits to know
+
+- One connection to your provider: while casting, the computer no longer plays the channel (see [One connection at a time](help:connexion-unique)).
+- **Live** cannot be skipped through while casting; the computer's **time-shift** is cut.
+- Channel **recording** and **MultiView** do not combine with casting.
+- There are a few seconds of delay, more than with local playback.
+- A TV that does not answer the search: check that it is on and on the same Wi-Fi or Ethernet network as the computer.
+
 ## Buffer {#tampon}
 
 <!--mac-->

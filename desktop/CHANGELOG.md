@@ -2,6 +2,15 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.7.0-desktop1] - 2026-10-30
+
+**Diffuser sur un téléviseur (Cast)** (comme Kastideo 1.7.0 pour Mac).
+
+- **Bouton Diffuser dans la barre de lecture** : chaîne en direct, film, série ou vidéo locale vers un **Chromecast, Google TV ou TV Android** du réseau (protocole Chromecast écrit pour Kastideo, recherche automatique ou par adresse IP). Reprise à la position atteinte ; pause, avance / recul, position, volume et sourdine de la barre agissent sur le téléviseur ; « Reprendre sur l'ordinateur » ramène la lecture.
+- **ffmpeg** convertit la vidéo pour le téléviseur : fourni avec la version Windows et l'AppImage Linux (le .deb dépend du paquet ffmpeg). Réglages > Général > Cast : préparation (automatique ou toujours convertir), définition maximale, chemin de ffmpeg, téléviseurs ajoutés par adresse IP.
+- **YouTube sur le téléviseur** : clic droit sur une vidéo > « Lire sur un téléviseur » (application YouTube du téléviseur par DIAL) ou ouverture dans le navigateur, au choix.
+- Nouvelle page d'aide « Diffuser sur un téléviseur ». Testé contre un faux récepteur Chromecast, pas encore avec un vrai téléviseur.
+
 ## [1.6.1-desktop1] - 2026-10-30
 
 **Correctif de la 1.6.0-desktop1** : fichiers d'aide renommés (aide-fr.md, aide-en.md) pour éviter une collision de noms sur les systèmes de fichiers qui ignorent la casse.

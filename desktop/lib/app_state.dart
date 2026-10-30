@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'l10n.dart';
 import 'theme.dart';
 import 'core/alerts.dart';
+import 'core/cast_controller.dart';
 import 'core/downloads.dart';
 import 'core/epg.dart';
 import 'core/guide.dart';
@@ -235,6 +236,7 @@ class AppScope extends InheritedWidget {
     required this.alerts,
     required this.multiview,
     required this.updates,
+    required this.cast,
     required super.child,
   });
 
@@ -250,6 +252,7 @@ class AppScope extends InheritedWidget {
   final AlertCenter alerts;
   final MultiViewController multiview;
   final UpdateService updates;
+  final CastController cast;
 
   static AppScope of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<AppScope>()!;
 
@@ -270,6 +273,7 @@ extension AppScopeContext on BuildContext {
   AlertCenter get alerts => AppScope.of(this).alerts;
   MultiViewController get multiview => AppScope.of(this).multiview;
   UpdateService get updates => AppScope.of(this).updates;
+  CastController get cast => AppScope.of(this).cast;
 }
 
 /// Une seule connexion : lancer [item] arrêterait l'enregistrement en cours ? On demande d'abord.

@@ -11,7 +11,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "1.6.1"
+    MARKETING_VERSION: "1.7.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -83,7 +83,10 @@ targets:
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
         # Recherche des serveurs Jellyfin, Emby et Plex de la maison (Réglages > Sources).
-        NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau et lit leurs vidéos."
+        NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau, ainsi que les téléviseurs (Chromecast, Google TV) où diffuser la lecture."
+        NSBonjourServices:
+          - _googlecast._tcp
+          - _airplay._tcp
         # Sparkle : flux des versions (branche « appcast » du dépôt public) et clé publique EdDSA.
         SUFeedURL: https://raw.githubusercontent.com/jihemezes/kastideo/appcast/appcast.xml
         SUPublicEDKey: PhRxsgR0m+ocj9knZzFOQUMTl36+TfzEZ1MyRKxgtPQ=
