@@ -6,6 +6,20 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.5.0</title>
+      <pubDate>Fri, 30 Oct 2026 17:30:27 GMT</pubDate>
+      <sparkle:version>59</sparkle:version>
+      <sparkle:shortVersionString>1.5.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;YouTube dans Kastideo.&lt;/b&gt; Une nouvelle section &lt;b&gt;YouTube&lt;/b&gt; (barre latérale, accueil, ⌘9) : on commence par un navigateur, puis la vidéo choisie bascule sur le lecteur.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Navigateur&lt;/b&gt; : chaînes suivies (collez un lien ou un @pseudo ; leurs dernières vidéos par flux RSS, sans clé), &lt;b&gt;recherche&lt;/b&gt; en vignettes avec votre propre clé API Google gratuite (Réglages &amp;gt; Général &amp;gt; YouTube), liens de vidéos, playlists et chaînes collés, favoris et historique.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Lecteur&lt;/b&gt; : le lecteur officiel de YouTube en « mode confidentialité avancée » (youtube-nocookie.com), sans cookie de suivi, donc le plus souvent sans publicité personnalisée. Précédente / Suivante, enchaînement, boucle, muet. &lt;b&gt;Ce n&amp;#x27;est pas un bloqueur de publicités&lt;/b&gt; : YouTube reste libre d&amp;#x27;y diffuser des annonces.&lt;/li&gt;
+&lt;li&gt;La lecture IPTV s&amp;#x27;arrête pendant que YouTube joue (sauf enregistrement en cours).&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.5.0/Kastideo-1.5.0.dmg" length="47185606" type="application/octet-stream" sparkle:edSignature="GJfIyc5XF1a8Vcg16F4+CP3ueWXLp742Dqe8dKnpk/PpBq0LGKhnp+M0kis1uFDuF37EgRy93/xuWO94PDtBAQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.4.2</title>
       <pubDate>Fri, 30 Oct 2026 06:37:39 GMT</pubDate>
       <sparkle:version>58</sparkle:version>
@@ -488,17 +502,6 @@
 &lt;li&gt;Correction : passer de &lt;b&gt;Direct&lt;/b&gt; à &lt;b&gt;Films&lt;/b&gt; (ou Séries) ouvre maintenant la grille de la section au lieu du lecteur de la chaîne précédente&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.0/Kastideo-0.9.0.dmg" length="44543146" type="application/octet-stream" sparkle:edSignature="CBg1GN3X+xgBdvVMm7qHs6rEzzqB7YILfarn9ObmD/hKzRVv1pwoFldlDtsP3/a3aaZkU2LCyhzcKkHrYYePAQ==" />
-    </item>
-    <item>
-      <title>Kastideo 0.8.3</title>
-      <pubDate>Tue, 20 Oct 2026 18:58:30 GMT</pubDate>
-      <sparkle:version>15</sparkle:version>
-      <sparkle:shortVersionString>0.8.3</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Corrections de compilation (les versions 0.8.1 et 0.8.2 n&amp;#x27;avaient pas pu être construites) : style de couleur des cases à cocher des Récents, accès au dossier personnel depuis la recherche des fichiers d&amp;#x27;enregistrement&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.8.3/Kastideo-0.8.3.dmg" length="44488872" type="application/octet-stream" sparkle:edSignature="Hp2QaM0J4oboFwtkJUDmAhenMR9zjvV/Zr7pyTcKv6NJNYxKYlXrmZdk/3M8hDc3hYlKGPQxNab+RqbkJGPNBg==" />
     </item>
   </channel>
 </rss>
