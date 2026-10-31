@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.6</title>
+      <pubDate>Sat, 31 Oct 2026 14:59:38 GMT</pubDate>
+      <sparkle:version>69</sparkle:version>
+      <sparkle:shortVersionString>1.7.6</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : adresse IPv4 du téléviseur.&lt;/b&gt; Le forçage IPv4 de la 1.7.5 n&amp;#x27;avait pas suffi : VLC retrouvait le téléviseur par son nom et macOS lui répondait en IPv6. Kastideo cherche maintenant lui-même l&amp;#x27;adresse IPv4 du Chromecast / de la TV Android (Bonjour) et la donne directement à VLC. Si elle est introuvable, l&amp;#x27;ancien mode est utilisé.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.6/Kastideo-1.7.6.dmg" length="47641698" type="application/octet-stream" sparkle:edSignature="lj6ScK2ujipp4mMwr8D7cgpDdrwO6qDTy2RSinzBgytiHdHjFP64Wr3/rbJI7FKJQzvAxSMo1TSLlrFPkQyODg==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.5</title>
       <pubDate>Sat, 31 Oct 2026 09:10:34 GMT</pubDate>
       <sparkle:version>68</sparkle:version>
@@ -476,21 +485,6 @@
 &lt;li&gt;Titres des affiches en interface Cinéma affichés sans les étiquettes du fournisseur (« |FR| »…)&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.0/Kastideo-0.11.0.dmg" length="45027931" type="application/octet-stream" sparkle:edSignature="pI8zSW9fEdlL3oItMNPanoIRXrnVC9cb/DTxAnjCf4nRZBFYSbbXW5MlA8Zc0FKULWhKRt4jHa4RmkRuCpB4AQ==" />
-    </item>
-    <item>
-      <title>Kastideo 0.10.0</title>
-      <pubDate>Wed, 21 Oct 2026 16:12:41 GMT</pubDate>
-      <sparkle:version>24</sparkle:version>
-      <sparkle:shortVersionString>0.10.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Nouveau &lt;b&gt;bandeau « à la une »&lt;/b&gt; de l&amp;#x27;interface Cinéma : carrousel plein cadre avec grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons &lt;b&gt;Lire / Reprendre&lt;/b&gt;, &lt;b&gt;Plus d&amp;#x27;infos&lt;/b&gt; et &lt;b&gt;Bande-annonce&lt;/b&gt; ; défilement automatique (pause au survol), flèches et points de navigation&lt;/li&gt;
-&lt;li&gt;Le carrousel mélange les &lt;b&gt;tendances de la semaine TMDB&lt;/b&gt; présentes dans votre catalogue, les &lt;b&gt;derniers ajouts&lt;/b&gt; du fournisseur et une &lt;b&gt;catégorie au choix&lt;/b&gt; (ou tout le catalogue au hasard)&lt;/li&gt;
-&lt;li&gt;En &lt;b&gt;Direct&lt;/b&gt;, le bandeau montre le &lt;b&gt;programme en cours&lt;/b&gt; de vos chaînes favorites et récentes (progression, programme suivant, Regarder)&lt;/li&gt;
-&lt;li&gt;Réglages &amp;gt; Apparence &amp;gt; &lt;b&gt;Bandeau « à la une »&lt;/b&gt; : afficher/masquer, hauteur, vitesse, sources et catégories&lt;/li&gt;
-&lt;li&gt;Les films et séries Xtream mémorisent leur &lt;b&gt;date d&amp;#x27;ajout&lt;/b&gt; (actualisez la source pour l&amp;#x27;obtenir)&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.10.0/Kastideo-0.10.0.dmg" length="44883171" type="application/octet-stream" sparkle:edSignature="l5zUFgM+yjRbv/AL3ehopZLslm2N4Binplp+CYhgVgVr+lUMbzI2RGbjo5tLms2WUjaodOx8rPExmFCHiHX/Dw==" />
     </item>
   </channel>
 </rss>
