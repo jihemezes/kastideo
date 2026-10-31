@@ -53,6 +53,7 @@ final class CastCenter {
     @ObservationIgnored private var discoverers: [VLCRendererDiscoverer] = []
     @ObservationIgnored private let bridge = RendererBridge()
     @ObservationIgnored private var searchTask: Task<Void, Never>?
+    @ObservationIgnored private var locator: ChromecastLocator?
 
     var isCasting: Bool { active != nil }
 
@@ -121,11 +122,30 @@ final class CastCenter {
     func cast(to renderer: CastRenderer?, playback: PlaybackController) {
         message = nil
         active = renderer
-        playback.setRenderer(renderer?.item)
-        if let renderer {
-            PlaybackLog.shared.note("Cast : diffusion sur « \(renderer.name) »", topic: .playback)
-        } else {
+        guard let renderer else {
+            playback.setRenderer(nil)
             PlaybackLog.shared.note("Cast : retour de la lecture sur le Mac", topic: .playback)
+            return
+        }
+        PlaybackLog.shared.note("Cast : diffusion sur « \(renderer.name) »", topic: .playback)
+        guard renderer.type == "chromecast" else {
+            playback.setRenderer(renderer.item)
+            return
+        }
+        // On cherche d'abord l'adresse IPv4 du téléviseur (Bonjour), puis on lance la diffusion.
+        let finder = ChromecastLocator()
+        locator = finder
+        finder.locate(named: renderer.name) { [weak self, weak playback] address in
+            MainActor.assumeIsolated {
+                guard let self, let playback, self.active == renderer else { return }
+                self.locator = nil
+                if let address {
+                    PlaybackLog.shared.note("Cast : adresse IPv4 du téléviseur : \(address)", topic: .playback)
+                } else {
+                    PlaybackLog.shared.note("Cast : adresse IPv4 du téléviseur introuvable, VLC la cherchera lui-même", topic: .playback)
+                }
+                playback.setRenderer(renderer.item, address: address)
+            }
         }
     }
 
@@ -171,6 +191,82 @@ final class CastCenter {
         } catch {
             message = String(localized: "Le téléviseur ne répond pas.")
         }
+    }
+}
+
+/// Retrouve l'adresse IPv4 d'un Chromecast / TV Android par Bonjour (« _googlecast._tcp »), d'après son nom affiché.
+/// Les réponses arrivent sur le fil principal.
+final class ChromecastLocator: NSObject, NetServiceBrowserDelegate, NetServiceDelegate {
+    private var browser: NetServiceBrowser?
+    private var pending: [NetService] = []
+    private var candidates: [(name: String, address: String)] = []
+    private var wanted = ""
+    private var completion: ((String?) -> Void)?
+
+    func locate(named name: String, timeout: TimeInterval = 4, completion: @escaping (String?) -> Void) {
+        wanted = name
+        self.completion = completion
+        let browser = NetServiceBrowser()
+        browser.delegate = self
+        self.browser = browser
+        browser.searchForServices(ofType: "_googlecast._tcp.", inDomain: "local.")
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout) { [weak self] in
+            guard let self, self.completion != nil else { return }
+            // Un seul appareil trouvé : c'est forcément lui.
+            self.finish(self.candidates.count == 1 ? self.candidates[0].address : nil)
+        }
+    }
+
+    private func finish(_ address: String?) {
+        guard let done = completion else { return }
+        completion = nil
+        browser?.stop()
+        browser = nil
+        for service in pending { service.stop() }
+        pending = []
+        done(address)
+    }
+
+    func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
+        service.delegate = self
+        pending.append(service)
+        service.resolve(withTimeout: 3)
+    }
+
+    func netServiceDidResolveAddress(_ sender: NetService) {
+        guard let address = Self.ipv4(of: sender) else { return }
+        var name = sender.name
+        if let data = sender.txtRecordData(),
+           let raw = NetService.dictionary(fromTXTRecord: data)["fn"],
+           let text = String(data: raw, encoding: .utf8), !text.isEmpty {
+            name = text
+        }
+        candidates.append((name, address))
+        if Self.matches(name, wanted) { finish(address) }
+    }
+
+    private static func normalized(_ text: String) -> String {
+        String(text.lowercased().filter { $0.isLetter || $0.isNumber })
+    }
+
+    private static func matches(_ a: String, _ b: String) -> Bool {
+        let x = normalized(a), y = normalized(b)
+        guard !x.isEmpty, !y.isEmpty else { return false }
+        return x == y || x.contains(y) || y.contains(x)
+    }
+
+    private static func ipv4(of service: NetService) -> String? {
+        for data in service.addresses ?? [] {
+            guard data.count >= MemoryLayout<sockaddr_in>.size else { continue }
+            var socket = sockaddr_in()
+            withUnsafeMutableBytes(of: &socket) { $0.copyBytes(from: data.prefix(MemoryLayout<sockaddr_in>.size)) }
+            guard socket.sin_family == sa_family_t(AF_INET) else { continue }
+            var inAddress = socket.sin_addr
+            var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+            guard inet_ntop(AF_INET, &inAddress, &buffer, socklen_t(INET_ADDRSTRLEN)) != nil else { continue }
+            return String(cString: buffer)
+        }
+        return nil
     }
 }
 

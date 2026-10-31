@@ -295,6 +295,8 @@ final class PlaybackController {
 
     /// Téléviseur choisi pour la diffusion (nil : lecture sur le Mac).
     @ObservationIgnored private var renderer: VLCRendererItem?
+    /// Adresse IPv4 du téléviseur (cherchée par Bonjour) : évite que VLC choisisse une adresse IPv6.
+    @ObservationIgnored private var rendererAddress: String?
     @ObservationIgnored private var startedAt: Date?
     @ObservationIgnored private var didStart = false
     @ObservationIgnored private var pendingResume: TimeInterval?
@@ -456,8 +458,9 @@ final class PlaybackController {
     }
 
     /// Envoie la lecture vers un téléviseur (nil : retour sur le Mac). Le contenu en cours est rouvert là où il en était.
-    func setRenderer(_ item: VLCRendererItem?) {
+    func setRenderer(_ item: VLCRendererItem?, address: String? = nil) {
         renderer = item
+        rendererAddress = item == nil ? nil : address
         // Pendant une diffusion, le journal détaille les échanges avec le téléviseur (messages « chromecast », « sout », « http »).
         PlaybackLog.shared.level = VLCLogLevel(rawValue: item == nil ? 2 : 3) ?? PlaybackLog.shared.level
         guard let playing = current, playing.streamURL != nil else { return }
@@ -608,12 +611,24 @@ final class PlaybackController {
             media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
             media.addOption(":input-timeshift-granularity=52428800")
         }
+        // Diffusion : VLC envoie l'image au téléviseur choisi (doit être réglé avant la lecture).
+        // Avec l'adresse IPv4 du téléviseur, on construit nous-mêmes la chaîne de diffusion de VLC : en le laissant
+        // retrouver le téléviseur par son nom, il choisit une adresse IPv6 et en tire une adresse d'écoute invalide.
+        var useRendererItem = renderer != nil
+        if renderer != nil, let address = rendererAddress {
+            media.addOption(":sout=#chromecast")
+            media.addOption(":sout-chromecast-ip=\(address)")
+            media.addOption(":demux-filter=demux_chromecast")
+            useRendererItem = false
+            PlaybackLog.shared.note("Cast : diffusion vers \(address) (adresse IPv4 du téléviseur)", topic: .playback)
+        }
         player.media = media
         player.rate = 1
         applyAudio()
-        // Diffusion : VLC envoie l'image au téléviseur choisi (doit être réglé avant la lecture).
-        let applied = player.setRendererItem(renderer)
-        if let renderer { PlaybackLog.shared.note("Cast : téléviseur « \(renderer.name) » appliqué au lecteur : \(applied ? "oui" : "refusé par VLC")", topic: .playback) }
+        let applied = player.setRendererItem(useRendererItem ? renderer : nil)
+        if let renderer, useRendererItem {
+            PlaybackLog.shared.note("Cast : téléviseur « \(renderer.name) » appliqué au lecteur : \(applied ? "oui" : "refusé par VLC")", topic: .playback)
+        }
         player.play()
 
         // Délai de garde : sans image au bout de 20 s, on essaie la variante suivante ou on abandonne.

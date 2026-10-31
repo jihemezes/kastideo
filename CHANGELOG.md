@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.6] - 2026-10-31
+
+**Cast sur Mac : adresse IPv4 du téléviseur.** Le forçage IPv4 de la 1.7.5 n'avait pas suffi : VLC retrouvait le téléviseur par son nom et macOS lui répondait en IPv6. Kastideo cherche maintenant lui-même l'adresse IPv4 du Chromecast / de la TV Android (Bonjour) et la donne directement à VLC. Si elle est introuvable, l'ancien mode est utilisé.
+
 ## [1.7.5] - 2026-10-31
 
 **Cast sur Mac : cause trouvée.** VLC donnait au téléviseur une adresse IPv6 sans crochets (`http://2a02:…:8010/…`) qu'il ne sait pas lire, d'où « Media load failed ». VLC est maintenant forcé en IPv4 (la diffusion utilise l'adresse IPv4 du Mac).
