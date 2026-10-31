@@ -616,8 +616,7 @@ final class PlaybackController {
         // retrouver le téléviseur par son nom, il choisit une adresse IPv6 et en tire une adresse d'écoute invalide.
         var useRendererItem = renderer != nil
         if renderer != nil, let address = rendererAddress {
-            media.addOption(":sout=#chromecast")
-            media.addOption(":sout-chromecast-ip=\(address)")
+            media.addOption(":sout=#chromecast{ip=\(address),port=8009}")
             media.addOption(":demux-filter=demux_chromecast")
             useRendererItem = false
             PlaybackLog.shared.note("Cast : diffusion vers \(address) (adresse IPv4 du téléviseur)", topic: .playback)
