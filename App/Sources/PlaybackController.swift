@@ -604,7 +604,8 @@ final class PlaybackController {
         player.rate = 1
         applyAudio()
         // Diffusion : VLC envoie l'image au téléviseur choisi (doit être réglé avant la lecture).
-        _ = player.setRendererItem(renderer)
+        let applied = player.setRendererItem(renderer)
+        if let renderer { PlaybackLog.shared.note("Cast : téléviseur « \(renderer.name) » appliqué au lecteur : \(applied ? "oui" : "refusé par VLC")", topic: .playback) }
         player.play()
 
         // Délai de garde : sans image au bout de 20 s, on essaie la variante suivante ou on abandonne.

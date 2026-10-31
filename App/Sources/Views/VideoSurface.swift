@@ -21,7 +21,6 @@ struct VideoSurface: View {
         ZStack {
             Color.black
             VLCVideoRepresentable(player: playback.player)
-            CastOverlay()
 
             // Calque transparent : capte le survol et le double-clic au-dessus de la vue VLC.
             Color.clear
@@ -31,6 +30,9 @@ struct VideoSurface: View {
                 }
                 .onTapGesture(count: 2) { navigation.isTheater.toggle() }
                 .onTapGesture { playback.togglePause() }
+
+            // Au-dessus du calque qui capte les clics : sinon « Reprendre sur le Mac » ne reçoit rien.
+            CastOverlay()
 
             if playback.isLoading && playback.errorMessage == nil {
                 LoadingCard(item: playback.current)

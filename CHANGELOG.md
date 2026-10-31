@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.2] - 2026-10-31
+
+**Cast sur Mac.** Le bouton « Reprendre sur le Mac » de l'écran de diffusion réagit enfin (un calque transparent interceptait le clic). Le Journal de lecture indique si VLC a bien accepté le téléviseur.
+
 ## [1.7.1] - 2026-10-30
 
 **Cast sur Mac : recherche des téléviseurs plus fiable.** La recherche est relancée à chaque ouverture du menu, le Journal de lecture détaille ce que VLC trouve, et un bouton « Autoriser Kastideo sur le réseau local… » ouvre le bon réglage macOS (sans cette autorisation, aucun Chromecast / TV Android n'apparaît).
