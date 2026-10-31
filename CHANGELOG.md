@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.10] - 2026-10-31
+
+**Texte sur la gratuité.** Kastideo est gratuit, mais la promesse qu'il « le restera » est retirée partout (Réglages > À propos, info-bulle du bouton Ko-fi, aide, README).
+
 ## [1.7.9] - 2026-10-31
 
 **Avertissement légal.** Au premier lancement et après chaque mise à jour, Kastideo affiche un avertissement en français ou en anglais : aucun contenu fourni, aucune affiliation, vos propres sources et contenus, droit d'auteur, responsabilité. Il faut l'accepter (« J'ai compris et j'accepte ») ou quitter. Il se relit dans Réglages > À propos > Avertissement légal, dans la nouvelle page d'aide « Avertissement légal » et dans le README.
@@ -81,7 +85,7 @@ Les notes de chaque version sont reprises automatiquement dans la GitHub Release
 
 ## [1.4.2] - 2026-10-29
 
-**Soutenir Kastideo (facultatif).** L'application reste gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos** et l'entrée **Aide > Soutenir Kastideo (Ko-fi)**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.
+**Soutenir Kastideo (facultatif).** L'application est gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos** et l'entrée **Aide > Soutenir Kastideo (Ko-fi)**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.
 
 ## [1.4.1] - 2026-10-29
 

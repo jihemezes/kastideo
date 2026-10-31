@@ -5,7 +5,7 @@ import '../app_state.dart';
 import '../l10n.dart';
 import '../theme.dart';
 
-/// Page Ko-fi : soutien volontaire (Kastideo reste gratuit).
+/// Page Ko-fi : soutien volontaire (Kastideo est gratuit).
 final Uri kKofiUrl = Uri.parse('https://ko-fi.com/jihemezes');
 
 /// Petit bouton discret « Offrir un café ». `always` : visible même si l'utilisateur a masqué les boutons
@@ -24,7 +24,7 @@ class SupportButton extends StatelessWidget {
         if (!always && settings.hideSupport) return const SizedBox.shrink();
         final fg = onDark ? Colors.white.withValues(alpha: 0.75) : KPalette.accent;
         return Tooltip(
-          message: tr('Kastideo reste gratuit. Un café pour soutenir son développement ? (Ko-fi)'),
+          message: tr('Kastideo est gratuit. Un café pour soutenir son développement ? (Ko-fi)'),
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () => launchUrl(kKofiUrl),

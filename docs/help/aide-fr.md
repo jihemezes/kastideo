@@ -1100,13 +1100,13 @@ Cet avertissement s'affiche au premier lancement et après chaque mise à jour. 
 ## Soutenir Kastideo {#soutenir}
 
 <!--mac-->
-Kastideo est **gratuit** et le restera. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
+Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
 
 Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos** et dans **Aide > Soutenir Kastideo (Ko-fi)**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
 <!--/mac-->
 
 <!--pc-->
-Kastideo est **gratuit** et le restera. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
+Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
 
 Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
 <!--/pc-->

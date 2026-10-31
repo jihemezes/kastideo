@@ -1099,13 +1099,13 @@ This notice appears on first launch and after every update. You can read it agai
 ## Support Kastideo {#soutenir}
 
 <!--mac-->
-Kastideo is **free** and will stay free. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
+Kastideo is **free**. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
 
 The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About** and **Help > Support Kastideo (Ko-fi)**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
 <!--/mac-->
 
 <!--pc-->
-Kastideo is **free** and will stay free. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
+Kastideo is **free**. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
 
 The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
 <!--/pc-->

@@ -144,7 +144,7 @@ By clicking “I understand and accept”, you confirm that you have read and ac
 
 ## Soutenir Kastideo
 
-Kastideo est **gratuit** et le restera. Si l'application vous plaît, vous pouvez encourager son développement — c'est entièrement facultatif :
+Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement — c'est entièrement facultatif :
 
 <p align="center">
   <a href="https://ko-fi.com/jihemezes"><img src="https://img.shields.io/badge/Ko--fi-Offrir%20un%20caf%C3%A9-FF5E5B?logo=ko-fi&logoColor=white" alt="Offrir un café sur Ko-fi"></a>

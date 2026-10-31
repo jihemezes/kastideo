@@ -1553,7 +1553,7 @@ class _AboutTab extends StatelessWidget {
         ]),
         _section(tr('Soutenir Kastideo'), [
           Text(
-              tr("Kastideo est gratuit et le restera. Si l'application vous plaît et que vous souhaitez encourager son développement, "
+              tr("Kastideo est gratuit. Si l'application vous plaît et que vous souhaitez encourager son développement, "
                   "vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir."),
               style: kText(14)),
           const SizedBox(height: 10),

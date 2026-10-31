@@ -29,7 +29,7 @@ struct SupportButton: View {
                     .foregroundStyle(onDark ? Color.white.opacity(0.75) : Color.accentColor)
             }
             .buttonStyle(.plain)
-            .help("Kastideo reste gratuit. Un café pour soutenir son développement ? (Ko-fi)")
+            .help("Kastideo est gratuit. Un café pour soutenir son développement ? (Ko-fi)")
         }
     }
 }
@@ -56,7 +56,7 @@ struct AboutSettingsView: View {
             }
 
             Section {
-                Text("Kastideo est gratuit et le restera. Si l'application vous plaît et que vous souhaitez encourager son développement, vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir.")
+                Text("Kastideo est gratuit. Si l'application vous plaît et que vous souhaitez encourager son développement, vous pouvez m'offrir un café : c'est facultatif, et chaque geste fait plaisir.")
                 HStack {
                     SupportButton(always: true)
                     Spacer()

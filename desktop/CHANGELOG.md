@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.7.10-desktop1] - 2026-10-31
+
+**Texte sur la gratuité** (comme Kastideo 1.7.10 pour Mac) : la promesse qu'il « le restera » est retirée partout (Réglages > À propos, info-bulle du bouton Ko-fi, aide).
+
 ## [1.7.9-desktop1] - 2026-10-31
 
 **Avertissement légal** (comme Kastideo 1.7.9 pour Mac).
@@ -42,7 +46,7 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 
 ## [1.4.2-desktop1] - 2026-10-29
 
-**Soutenir Kastideo (facultatif).** L'application reste gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.
+**Soutenir Kastideo (facultatif).** L'application est gratuite ; un bouton discret **Offrir un café** (Ko-fi) apparaît sur l'accueil et dans la fenêtre Nouveautés, avec un onglet **Réglages > À propos**. Une option permet de masquer les boutons de l'accueil et des Nouveautés.
 
 ## [1.4.0-desktop1] - 2026-10-29
 
