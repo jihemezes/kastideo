@@ -808,7 +808,8 @@ final class PlaybackController {
         next.isPaused = !isPlaying
         next.evaluate()
         refreshTracks()
-        checkAudio(stats)
+        // Pendant une diffusion, le son n'est pas décodé ici : ne pas « réparer » les pistes (cela coupait le flux vers le téléviseur).
+        if renderer == nil { checkAudio(stats) }
         next.audioIssue = audioIssue
         health = next
         if sessionQuality != nil {
