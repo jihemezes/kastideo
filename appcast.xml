@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.4</title>
+      <pubDate>Sat, 31 Oct 2026 08:58:49 GMT</pubDate>
+      <sparkle:version>67</sparkle:version>
+      <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : diagnostic et essai de correction.&lt;/b&gt; Pendant une diffusion, le différé de VLC est désactivé (il gênait l&amp;#x27;envoi vers le téléviseur) et le Journal de lecture détaille les échanges avec le téléviseur.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.4/Kastideo-1.7.4.dmg" length="47628662" type="application/octet-stream" sparkle:edSignature="LmnoSLHyC61j0KzlqZxi4hhUxlJqpt29Bkg2sf0TjsCsUrAQV+3DPQ/eu56k36M3uMNgxiDBQ1Eo4UNhZbnuBg==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.3</title>
       <pubDate>Sat, 31 Oct 2026 08:33:21 GMT</pubDate>
       <sparkle:version>66</sparkle:version>
@@ -484,18 +493,6 @@
 &lt;li&gt;Passage &lt;b&gt;instantané&lt;/b&gt; du Direct à Films (ou à toute autre section) : l&amp;#x27;arrêt du flux par le moteur VLC, qui pouvait prendre jusqu&amp;#x27;à 30 s, se fait maintenant en arrière-plan sans bloquer l&amp;#x27;interface. La durée de l&amp;#x27;arrêt est notée dans le Journal de lecture quand elle dépasse 1 s&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.8/Kastideo-0.9.8.dmg" length="45467322" type="application/octet-stream" sparkle:edSignature="TE3Mm/dqVUhIXqX3mDIhlZL//5dvMyuh3wzNXiGKc3V5WDu3GHj2h/7UJ6tQf5EZKa89hFCgDJjzlGb9R1JJDw==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.7</title>
-      <pubDate>Wed, 21 Oct 2026 13:02:33 GMT</pubDate>
-      <sparkle:version>22</sparkle:version>
-      <sparkle:shortVersionString>0.9.7</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correction d&amp;#x27;un &lt;b&gt;blocage de l&amp;#x27;application&lt;/b&gt; (roue multicolore) en passant du Direct à Films pendant la lecture d&amp;#x27;une chaîne : la vidéo reste hébergée dans une fenêtre invisible le temps que le moteur VLC s&amp;#x27;arrête&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Enregistrements sans son&lt;/b&gt; : à la conversion en MP4, le son est maintenant converti en AAC (lisible partout, y compris QuickTime, iPhone et iPad) ; l&amp;#x27;image reste copiée sans perte&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.7/Kastideo-0.9.7.dmg" length="45106585" type="application/octet-stream" sparkle:edSignature="D7So08NOrMFAjqfIDSa+yAA+YE/wDWSHMGH4w1KeIbHBF6gT2ksYzYrFaLgdh40RNluBQLa4FirOS7RvTYLUAg==" />
     </item>
   </channel>
 </rss>
