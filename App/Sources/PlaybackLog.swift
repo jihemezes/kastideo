@@ -164,11 +164,24 @@ final class PlaybackLog: NSObject, VLCLogging {
         return clockAlerts
     }
 
+    /// Erreurs du décodeur matériel (VideoToolbox), depuis le lancement.
+    private var decoderErrors = 0
+
+    func decoderAlerts() -> Int {
+        lock.lock(); defer { lock.unlock() }
+        return decoderErrors
+    }
+
     static let clockMessages = ["buffer too late", "clock gap", "picture is too late", "feeding synchro"]
 
     func handleMessage(_ message: String, logLevel level: VLCLogLevel, context: VLCLogContext?) {
         // Ces alertes arrivent des dizaines de fois par seconde quand l'horloge du flux est incohérente :
         // on les compte et on n'en écrit qu'une ligne toutes les 5 s (sinon le journal ne contient plus que ça).
+        if message.contains("vt session error") || message.contains("kVTVideoDecoderMalfunctionErr") {
+            lock.lock()
+            decoderErrors += 1
+            lock.unlock()
+        }
         if Self.clockMessages.contains(where: { message.hasPrefix($0) }) {
             lock.lock()
             if !message.hasPrefix("feeding synchro") { clockAlerts += 1 }

@@ -959,3 +959,9 @@
 "Page affichée en ouvrant Direct, Films ou Séries depuis une autre section. « Dernière consultée » reprend la catégorie où vous étiez. Clic droit sur une catégorie de la barre latérale : « Définir comme catégorie de départ »." = "Page shown when opening Live, Movies or Series from another section. “Last viewed” goes back to the category you were in. Right-click a category in the sidebar: “Set as start category”.";
 "Définir comme catégorie de départ" = "Set as start category";
 "Ne plus utiliser comme catégorie de départ" = "Stop using as start category";
+
+"Image figée : décodage logiciel activé pour ce contenu." = "Frozen picture: software decoding turned on for this content.";
+"Décodage logiciel (image figée)" = "Software decoding (frozen picture)";
+"Décodage logiciel automatique quand l'image se fige" = "Automatic software decoding when the picture freezes";
+"Toujours décoder en logiciel (plus lourd pour le Mac)" = "Always decode in software (heavier on the Mac)";
+"Si une chaîne affiche une image puis reste figée (décodeur matériel du Mac défaillant), Kastideo la rouvre en décodage logiciel et s'en souvient. Vous pouvez aussi l'activer à la main : clic droit sur la chaîne > « Décodage logiciel (image figée) ». « Réinitialiser » ci-dessous oublie ces choix." = "If a channel shows a picture and then stays frozen (faulty hardware decoder on the Mac), Kastideo reopens it with software decoding and remembers it. You can also turn it on by hand: right-click the channel > “Software decoding (frozen picture)”. “Reset” below forgets these choices.";

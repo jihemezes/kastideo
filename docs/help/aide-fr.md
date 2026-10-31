@@ -568,6 +568,29 @@ Dans **Réglages > Général > Cast**, choisissez :
 - Il y a quelques secondes de décalage, plus qu'avec une lecture locale.
 - Un téléviseur qui ne répond pas à la recherche : vérifiez qu'il est allumé et sur le même réseau Wi-Fi ou Ethernet que l'ordinateur.
 
+## Image figée : décodage logiciel {#image-figee}
+
+Certaines chaînes affichent une image puis restent **figées**, alors que le flux continue d'arriver. La cause habituelle est le **décodeur matériel** de l'ordinateur (carte graphique ou puce vidéo) qui n'arrive pas à lire ce flux. Le **décodage logiciel** passe par le processeur : plus lourd, mais plus tolérant.
+
+### Repli automatique
+
+Par défaut, quand l'image reste figée plus de 6 secondes (ou que le décodeur matériel signale des erreurs répétées), Kastideo **rouvre la chaîne en décodage logiciel** et s'en souvient : les lectures suivantes de cette chaîne utiliseront directement le logiciel. Une ligne explicative est ajoutée au **Journal de lecture** (« Décodage : image figée… réouverture en décodage logiciel »).
+
+<!--pc-->
+Sur Windows et Linux, la détection repose sur le nombre d'images affichées par le moteur et sur ses messages d'erreur du décodeur matériel. Si une chaîne se fige sans être détectée, activez le décodage logiciel à la main (ci-dessous) et signalez-le.
+<!--/pc-->
+
+### À la main
+
+- **Pour une chaîne** : clic droit sur la chaîne > **Décodage logiciel (image figée)**. La chaîne est rouverte tout de suite ; refaites le geste pour revenir au décodeur matériel.
+- **Pour tout** : <!--mac-->**Réglages (⌘,) > Général > Lecture**<!--/mac--><!--pc-->**Réglages (Ctrl+,) > Général > Lecture**<!--/pc--> > **Toujours décoder en logiciel**. Plus gourmand en énergie et en processeur, surtout en 4K.
+- **Désactiver le repli automatique** : même endroit, **Décodage logiciel automatique quand l'image se fige**.
+- **Tout oublier** : le bouton « Réinitialiser » (Mac) ou « Oublier les chaînes en décodage logiciel » (Windows/Linux) efface la liste des chaînes mémorisées.
+
+### Si cela ne suffit pas
+
+Une chaîne qui reste figée même en logiciel a en général un flux défectueux chez le fournisseur : consultez le **Journal de lecture** et essayez une autre version de la chaîne (HD, SD…).
+
 ## Mémoire tampon {#tampon}
 
 <!--mac-->

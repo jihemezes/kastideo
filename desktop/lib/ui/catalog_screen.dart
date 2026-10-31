@@ -701,6 +701,10 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         PopupMenuItem(value: 'multi', child: Text(tr('Ajouter à la MultiVue'), style: kText(13))),
       if (isLive && context.guide.replayProgrammes(item).isNotEmpty)
         PopupMenuItem(value: 'replay', child: Text(tr('Revoir (replay)…'), style: kText(13))),
+      PopupMenuItem(
+        value: 'software',
+        child: Text(context.settings.softwareIds.contains(item.id) ? '✓ ${tr('Décodage logiciel (image figée)')}' : tr('Décodage logiciel (image figée)'), style: kText(13)),
+      ),
       if (isLive) PopupMenuItem(value: 'schedule', child: Text(tr('Programmer un enregistrement…'), style: kText(13))),
       if (isLive) PopupMenuItem(value: 'edit', child: Text(tr('Modifier la chaîne…'), style: kText(13))),
       if (isLive && context.guide.groupOf(item) != null)
@@ -744,6 +748,8 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
       }
     case 'replay':
       await showReplayPicker(context, item);
+    case 'software':
+      context.playback.setSoftwareDecoding(item, !context.settings.softwareIds.contains(item.id));
     case 'schedule':
       await showScheduleDialog(context, channel: item);
     case 'multi':

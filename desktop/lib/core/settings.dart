@@ -253,6 +253,40 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  // MARK: Décodage logiciel (image figée)
+
+  /// Tout lire en décodage logiciel (désactive le décodeur matériel).
+  bool get softwareAlways => _prefs.getBool('decode.always') ?? false;
+
+  /// Basculer seul en logiciel quand l'image se fige.
+  bool get softwareAuto => _prefs.getBool('decode.autoFallback') ?? true;
+
+  /// Contenus lus en décodage logiciel (choix automatique ou manuel).
+  Set<String> get softwareIds => (_prefs.getStringList('decode.software') ?? const []).toSet();
+
+  void setSoftwareAlways(bool value) {
+    _prefs.setBool('decode.always', value);
+    notifyListeners();
+  }
+
+  void setSoftwareAuto(bool value) {
+    _prefs.setBool('decode.autoFallback', value);
+    notifyListeners();
+  }
+
+  void setSoftwareFor(String id, bool on) {
+    final ids = softwareIds;
+    on ? ids.add(id) : ids.remove(id);
+    final list = ids.toList();
+    _prefs.setStringList('decode.software', list.length > 500 ? list.sublist(list.length - 500) : list);
+    notifyListeners();
+  }
+
+  void clearSoftware() {
+    _prefs.remove('decode.software');
+    notifyListeners();
+  }
+
   void setRelay(bool value) {
     relayEnabled = value;
     _prefs.setBool('relay.enabled', value);

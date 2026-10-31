@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.8.1] - 2026-10-31
+
+**Repli en décodage logiciel pour les chaînes qui se figent.** Quand une chaîne affiche une image puis reste figée (décodeur matériel du Mac défaillant), Kastideo la rouvre seul en décodage logiciel au bout de 6 s et s'en souvient. Réglages > Général > Lecture : repli automatique (activé par défaut) et « Toujours décoder en logiciel ». Clic droit sur une chaîne : « Décodage logiciel (image figée) ». Le Journal de lecture explique chaque bascule. Nouvelle page d'aide « Image figée : décodage logiciel ».
+
 ## [1.8.0] - 2026-10-31
 
 **Page de départ de Direct, Films et Séries.** Réglages > Général > Page de départ : pour chaque section, choisissez ce qui s'affiche en l'ouvrant depuis une autre section (et au lancement) : la liste complète, les Favoris, les Récents, la dernière catégorie consultée ou une catégorie précise. Un clic droit sur une catégorie de la barre latérale propose aussi « Définir comme catégorie de départ ». Nouvelle page d'aide « Page de départ ».

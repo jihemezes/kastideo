@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.8.1-desktop1] - 2026-10-31
+
+**Repli en décodage logiciel pour les chaînes qui se figent** (comme Kastideo 1.8.1 pour Mac).
+
+- Réglages > Général > Lecture : repli automatique (activé par défaut), « Toujours décoder en logiciel », et bouton pour oublier les chaînes mémorisées.
+- Clic droit sur un contenu : « Décodage logiciel (image figée) ». Le Journal de lecture explique chaque bascule.
+- Détection fondée sur le compteur d'images de mpv et sur ses erreurs de décodeur matériel : non vérifiée sur du matériel réel, à confirmer à l'usage. Nouvelle page d'aide.
+
 ## [1.8.0-desktop1] - 2026-10-31
 
 **Page de départ de Direct, Films et Séries** (comme Kastideo 1.8.0 pour Mac).

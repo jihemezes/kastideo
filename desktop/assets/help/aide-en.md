@@ -568,6 +568,29 @@ In **Settings > General > Cast**, choose:
 - There are a few seconds of delay, more than with local playback.
 - A TV that does not answer the search: check that it is on and on the same Wi-Fi or Ethernet network as the computer.
 
+## Frozen picture: software decoding {#image-figee}
+
+Some channels show a picture and then stay **frozen** while the stream keeps arriving. The usual cause is the computer's **hardware decoder** (graphics card or video chip) failing on that stream. **Software decoding** uses the processor instead: heavier, but more tolerant.
+
+### Automatic fallback
+
+By default, when the picture stays frozen for more than 6 seconds (or the hardware decoder reports repeated errors), Kastideo **reopens the channel with software decoding** and remembers it: later plays of that channel use software straight away. An explanatory line is added to the **Playback log** ("Décodage : … réouverture en décodage logiciel").
+
+<!--pc-->
+On Windows and Linux, detection relies on the number of pictures shown by the engine and on its hardware-decoder error messages. If a channel freezes without being detected, turn software decoding on by hand (below) and let us know.
+<!--/pc-->
+
+### By hand
+
+- **For one channel**: right-click the channel > **Software decoding (frozen picture)**. The channel reopens immediately; repeat to go back to the hardware decoder.
+- **For everything**: <!--mac-->**Settings (⌘,) > General > Playback**<!--/mac--><!--pc-->**Settings (Ctrl+,) > General > Playback**<!--/pc--> > **Always decode in software**. Uses more power and processor, especially in 4K.
+- **Turn off the automatic fallback**: same place, **Automatic software decoding when the picture freezes**.
+- **Forget everything**: the "Reset" button (Mac) or "Forget channels set to software decoding" (Windows/Linux) clears the remembered list.
+
+### If that is not enough
+
+A channel that stays frozen even in software usually has a faulty stream at the provider: check the **Playback log** and try another version of the channel (HD, SD…).
+
 ## Buffer {#tampon}
 
 <!--mac-->

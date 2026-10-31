@@ -199,6 +199,32 @@ class _GeneralTabState extends State<_GeneralTab> {
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
+            title: Text(tr('Décodage logiciel automatique quand l\'image se fige'), style: kText(14)),
+            value: settings.softwareAuto,
+            onChanged: settings.setSoftwareAuto,
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Toujours décoder en logiciel (plus lourd pour l\'ordinateur)'), style: kText(14)),
+            value: settings.softwareAlways,
+            onChanged: settings.setSoftwareAlways,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              tr('Si une chaîne affiche une image puis reste figée (décodeur matériel défaillant), Kastideo la rouvre en décodage logiciel et s\'en souvient. Vous pouvez aussi l\'activer à la main : clic droit sur la chaîne > « Décodage logiciel (image figée) ».'),
+              style: kText(12, color: Colors.white54),
+            ),
+          ),
+          if (settings.softwareIds.isNotEmpty)
+            Row(children: [
+              OutlinedButton(
+                onPressed: settings.clearSoftware,
+                child: Text('${tr('Oublier les chaînes en décodage logiciel')} (${settings.softwareIds.length})'),
+              ),
+            ]),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
             title: Text(tr('Actualiser les sources au démarrage (si plus de 6 h)'), style: kText(14)),
             value: settings.autoRefresh,
             onChanged: settings.setAutoRefresh,

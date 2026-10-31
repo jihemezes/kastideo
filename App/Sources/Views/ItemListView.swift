@@ -231,6 +231,12 @@ struct ItemActionsMenu: View {
             } label: {
                 if videoOnly { Label("Image seule (sans le son)", systemImage: "checkmark") } else { Text("Image seule (sans le son)") }
             }
+            let software = PlaybackController.softwareIDs.contains(item.id)
+            Button {
+                playback.setSoftwareDecoding(!software, for: item)
+            } label: {
+                if software { Label("Décodage logiciel (image figée)", systemImage: "checkmark") } else { Text("Décodage logiciel (image figée)") }
+            }
             if MultiViewKeys.isAvailable {
                 Button("Ajouter à la MultiVue") {
                     multiView.add(item)

@@ -134,6 +134,8 @@ final class PlaybackController {
     private(set) var currentSubtitleTrack: Int32 = -1
     @ObservationIgnored private var healthTask: Task<Void, Never>?
     @ObservationIgnored private var lastPictures: (displayed: Int, lost: Int)?
+    @ObservationIgnored private var freeze = FreezeDetector()
+    @ObservationIgnored private var lastDecoderAlerts: Int?
     @ObservationIgnored private var bufferingEvents: [Date] = []
     /// Mesure de la session en cours, pour ajuster la qualité automatique des chaînes.
     @ObservationIgnored private var sessionQuality: ChannelQuality?
@@ -623,6 +625,12 @@ final class PlaybackController {
             media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
             media.addOption(":input-timeshift-granularity=52428800")
         }
+        // Décodage logiciel (mémorisé pour la chaîne, ou réglage global) : contourne un décodeur matériel défaillant.
+        if isSoftwareDecoding {
+            media.addOption(":codec=avcodec")
+            media.addOption(":avcodec-hw=none")
+            PlaybackLog.shared.note("Ouverture en décodage logiciel (sans le décodeur matériel du Mac)")
+        }
         // Diffusion : VLC envoie l'image au téléviseur choisi (doit être réglé avant la lecture).
         // Avec l'adresse IPv4 du téléviseur, on construit nous-mêmes la chaîne de diffusion de VLC : en le laissant
         // retrouver le téléviseur par son nom, il choisit une adresse IPv6 et en tire une adresse d'écoute invalide.
@@ -793,6 +801,8 @@ final class PlaybackController {
         sessionSamples = 0
         sessionPoor = 0
         lastPictures = nil
+        freeze.reset()
+        lastDecoderAlerts = nil
         bufferingEvents = []
         audioChecks = 0
         audioRepairs = 0
@@ -843,7 +853,10 @@ final class PlaybackController {
         next.evaluate()
         refreshTracks()
         // Pendant une diffusion, le son n'est pas décodé ici : ne pas « réparer » les pistes (cela coupait le flux vers le téléviseur).
-        if renderer == nil { checkAudio(stats) }
+        if renderer == nil {
+            checkAudio(stats)
+            checkVideo(displayed: displayed, dataArriving: next.bitrateKbps > 20)
+        }
         next.audioIssue = audioIssue
         health = next
         if sessionQuality != nil {
@@ -914,6 +927,7 @@ final class PlaybackController {
     static func resetClockFixes() {
         UserDefaults.standard.removeObject(forKey: "audio.clockFix")
         UserDefaults.standard.removeObject(forKey: "audio.videoOnly")
+        UserDefaults.standard.removeObject(forKey: "decode.software")
     }
     /// Chaînes lues en image seule (son inutilisable) : choix automatique ou manuel, mémorisé.
     static var videoOnlyIDs: Set<String> {
@@ -939,6 +953,58 @@ final class PlaybackController {
         set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.clockFix") }
     }
     static let maxAudioRepairs = 4
+
+    // MARK: - Image figée : décodage logiciel
+
+    /// Chaînes (ou contenus) lus en décodage logiciel : choix automatique après une image figée, ou manuel. Mémorisé.
+    static var softwareIDs: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "decode.software") ?? []) }
+        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "decode.software") }
+    }
+
+    /// Réglages > Lecture : tout décoder en logiciel.
+    static var alwaysSoftware: Bool { UserDefaults.standard.bool(forKey: "decode.always") }
+
+    /// Réglages > Lecture : basculer seul en logiciel quand l'image se fige (activé par défaut).
+    static var autoSoftwareFallback: Bool { UserDefaults.standard.object(forKey: "decode.autoFallback") as? Bool ?? true }
+
+    /// Le contenu en cours est lu en décodage logiciel.
+    var isSoftwareDecoding: Bool {
+        Self.alwaysSoftware || (current.map { Self.softwareIDs.contains($0.id) } ?? false)
+    }
+
+    /// Active ou désactive le décodage logiciel pour un contenu ; le rouvre s'il est en cours de lecture.
+    func setSoftwareDecoding(_ on: Bool, for item: MediaItem) {
+        if on { Self.softwareIDs.insert(item.id) } else { Self.softwareIDs.remove(item.id) }
+        PlaybackLog.shared.note(on ? "Décodage logiciel activé pour ce contenu" : "Décodage logiciel désactivé : retour au décodeur matériel")
+        guard current?.id == item.id, let url = currentURL else { return }
+        reopen(url)
+    }
+
+    /// Rouvre le flux en cours en reprenant un film ou un épisode à la position atteinte.
+    private func reopen(_ url: URL) {
+        if !isLive, isSeekable, elapsed > 3 { pendingResume = elapsed }
+        audioIssue = nil
+        sameURLRetries = 1
+        sessionQuality = nil
+        start(url)
+    }
+
+    /// Toutes les 2 s : image figée (des données arrivent, aucune image affichée) ou erreurs répétées du décodeur matériel
+    /// (« vt session error ») : on rouvre le contenu en décodage logiciel, et on s'en souvient.
+    private func checkVideo(displayed: Int, dataArriving: Bool) {
+        let alerts = PlaybackLog.shared.decoderAlerts()
+        let newAlerts = alerts - (lastDecoderAlerts ?? alerts)
+        lastDecoderAlerts = alerts
+        let frozen = freeze.update(displayedPictures: displayed, playing: isPlaying && pausedAt == nil, dataArriving: dataArriving)
+        guard Self.autoSoftwareFallback, !isSoftwareDecoding, let item = current, let url = currentURL else { return }
+        guard frozen || newAlerts >= 2 else { return }
+        Self.softwareIDs.insert(item.id)
+        let reason = frozen ? "image figée depuis plus de 6 s" : "\(newAlerts) erreurs du décodeur matériel en 2 s"
+        PlaybackLog.shared.note("Décodage : \(reason) — réouverture en décodage logiciel (mémorisé pour ce contenu)")
+        timeshiftNotice = String(localized: "Image figée : décodage logiciel activé pour ce contenu.")
+        reopen(url)
+    }
 
     /// Toutes les 2 s : si aucun son n'est joué alors que l'image avance, on cherche pourquoi et on tente
     /// de réparer (sortie audio non créée → relance de la piste ; piste vide → piste suivante).

@@ -161,6 +161,8 @@ struct GeneralSettingsView: View {
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
     @AppStorage(StreamRelay.enabledKey) private var relayEnabled = true
+    @AppStorage("decode.always") private var decodeAlways = false
+    @AppStorage("decode.autoFallback") private var decodeAuto = true
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
     @AppStorage(AppLanguage.storageKey) private var languageRaw = ""
     @State private var cacheSize: Int64 = 0
@@ -197,6 +199,11 @@ struct GeneralSettingsView: View {
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
                 Toggle("Relais de flux pour le direct (une seule connexion au fournisseur)", isOn: $relayEnabled)
                 Text("Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle("Décodage logiciel automatique quand l'image se fige", isOn: $decodeAuto)
+                Toggle("Toujours décoder en logiciel (plus lourd pour le Mac)", isOn: $decodeAlways)
+                Text("Si une chaîne affiche une image puis reste figée (décodeur matériel du Mac défaillant), Kastideo la rouvre en décodage logiciel et s'en souvient. Vous pouvez aussi l'activer à la main : clic droit sur la chaîne > « Décodage logiciel (image figée) ». « Réinitialiser » ci-dessous oublie ces choix.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 LabeledContent("Chaînes à l'horloge réparée") {

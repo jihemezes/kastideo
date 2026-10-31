@@ -5,6 +5,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'decoder_fallback.dart';
 import 'log.dart';
 import 'media_servers.dart' show PlaybackEvent;
 import 'models.dart';
@@ -74,6 +75,7 @@ class PlaybackController extends ChangeNotifier {
       player.stream.log.listen((log) {
         final level = log.level == 'error' || log.level == 'fatal' ? 0 : 1;
         PlaybackLog.shared.engine('[${log.prefix}] ${log.text.trim()}', level: level);
+        if (FreezeDetector.isHardwareDecoderError('${log.prefix} ${log.text}')) _decoderErrors++;
       }),
       player.stream.completed.listen((done) {
         if (!done || casting) return;
@@ -139,6 +141,10 @@ class PlaybackController extends ChangeNotifier {
   Timer? _watchdog;
   Timer? _openTimer;
   Timer? _healthTimer;
+  final FreezeDetector _freeze = FreezeDetector();
+  int _decoderErrors = 0;
+  int _decoderErrorsSeen = 0;
+  bool _checkingFreeze = false;
   SharedPreferences? _prefs;
 
   /// Délai laissé au fournisseur pour libérer la connexion précédente (abonnement à une connexion).
@@ -623,8 +629,69 @@ class PlaybackController extends ChangeNotifier {
     }
   }
 
+  /// Le contenu en cours est lu en décodage logiciel (réglage global, ou mémorisé pour ce contenu).
+  bool get isSoftwareDecoding {
+    final s = settings;
+    if (s == null) return false;
+    return s.softwareAlways || (current != null && s.softwareIds.contains(current!.id));
+  }
+
+  Future<void> _applyDecoder() async {
+    final native = player.platform;
+    if (native is! NativePlayer) return;
+    final software = isSoftwareDecoding;
+    await native.setProperty('hwdec', software ? 'no' : 'auto-safe');
+    if (software) PlaybackLog.shared.note('Ouverture en décodage logiciel (sans le décodeur matériel)');
+  }
+
+  /// Active ou désactive le décodage logiciel pour un contenu ; le rouvre s'il est en cours de lecture.
+  void setSoftwareDecoding(MediaItem item, bool on) {
+    settings?.setSoftwareFor(item.id, on);
+    PlaybackLog.shared.note(on ? 'Décodage logiciel activé pour ce contenu' : 'Décodage logiciel désactivé : retour au décodeur matériel');
+    final url = _currentUrl;
+    if (current?.id == item.id && url != null && !casting) _reopenForDecoder(url);
+  }
+
+  void _reopenForDecoder(String url) {
+    if (!isLive && duration > Duration.zero && position > const Duration(seconds: 3)) _pendingResume = position;
+    _retries = 1;
+    _start(url);
+  }
+
+  /// Toutes les 2 s : image figée (le moteur n'affiche plus d'image alors que la lecture continue) ou erreurs
+  /// répétées du décodeur matériel → réouverture en décodage logiciel, mémorisée pour ce contenu.
+  Future<void> _checkFreeze() async {
+    if (_checkingFreeze || casting || current == null || !didStart) return;
+    _checkingFreeze = true;
+    try {
+      final native = player.platform;
+      if (native is! NativePlayer) return;
+      final raw = await native.getProperty('estimated-frame-number', waitForInitialization: false);
+      final frame = int.tryParse(raw) ?? -1;
+      final newErrors = _decoderErrors - _decoderErrorsSeen;
+      _decoderErrorsSeen = _decoderErrors;
+      final frozen = _freeze.update(frame: frame, playing: isPlaying && !isBuffering && frame >= 0, dataArriving: true);
+      final s = settings;
+      final item = current;
+      final url = _currentUrl;
+      if (s == null || !s.softwareAuto || isSoftwareDecoding || item == null || url == null) return;
+      if (!(frozen || newErrors >= 3)) return;
+      s.setSoftwareFor(item.id, true);
+      final reason = frozen ? 'image figée depuis plus de 6 s' : '$newErrors erreurs du décodeur matériel en 2 s';
+      PlaybackLog.shared.note('Décodage : $reason — réouverture en décodage logiciel (mémorisé pour ce contenu)');
+      _reopenForDecoder(url);
+    } catch (_) {
+      // Mesure impossible : on réessaiera à la prochaine.
+    } finally {
+      _checkingFreeze = false;
+    }
+  }
+
   Future<void> _open(String url) async {
     _startedAt = DateTime.now();
+    _freeze.reset();
+    _decoderErrorsSeen = _decoderErrors;
+    await _applyDecoder();
     final source = StreamRelay.shared.playbackUrl(url, live: (isLive || (current?.isReplay ?? false)) && (settings?.relayEnabled ?? true));
     PlaybackLog.shared.note('Ouverture de $url${source == url ? '' : ' (via le relais)'}');
     _watchdog = Timer(startTimeout, () {
@@ -644,7 +711,10 @@ class PlaybackController extends ChangeNotifier {
     _watchdog?.cancel();
     startupTime = DateTime.now().difference(_startedAt!);
     PlaybackLog.shared.note('Lecture démarrée en ${(startupTime!.inMilliseconds / 1000).toStringAsFixed(2)} s');
-    _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) => _evaluateHealth());
+    _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      _evaluateHealth();
+      _checkFreeze();
+    });
     _evaluateHealth();
     _startShiftTimer();
     final item = current!;
