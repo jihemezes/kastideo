@@ -149,6 +149,14 @@ final class CastCenter {
         }
     }
 
+    /// Après un arrêt de la lecture : la diffusion est terminée, le téléviseur reprend son programme.
+    func castEnded(by playback: PlaybackController) {
+        guard active != nil else { return }
+        active = nil
+        playback.setRenderer(nil)
+        PlaybackLog.shared.note("Cast : diffusion arrêtée", topic: .playback)
+    }
+
     /// Ouvre Réglages Système > Confidentialité et sécurité > Réseau local (sans cette autorisation, aucun téléviseur n'apparaît).
     func openLocalNetworkSettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork") {

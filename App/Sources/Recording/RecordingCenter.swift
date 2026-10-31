@@ -199,12 +199,12 @@ final class RecordingCenter {
                 confirmTitle: String(localized: "Tout arrêter"),
                 onConfirm: { [weak self] in
                     self?.stopLive()
-                    self?.playback.stop()
+                    self?.playback.stopByUser()
                 },
                 onCancel: {})
             return
         }
-        playback.stop()
+        playback.stopByUser()
     }
 
     // MARK: - Enregistrement du direct

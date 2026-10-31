@@ -451,6 +451,7 @@ class _RootViewState extends State<RootView> {
           navigation.closePlayer();
         },
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): playback.togglePause,
+        const SingleActivator(LogicalKeyboardKey.period, control: true): () => stopPlayback(context),
       },
       child: Focus(
         autofocus: true,

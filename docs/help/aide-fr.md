@@ -409,6 +409,7 @@ Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastil
 
 <!--mac-->
 - **Barre rétractable** : elle apparaît au moindre mouvement de souris et disparaît, avec le pointeur, après 3 secondes d'inactivité (elle reste visible tant que la souris est dessus, pendant la pause ou quand le panneau est ouvert).
+- **Arrêt** (bouton ■ à côté de lecture / pause, ou **⌘.**) : arrête le flux. La zone vidéo affiche « Aucune lecture » avec un bouton **Relancer** ; la position d'un film ou d'un épisode est mémorisée pour la reprise. Pendant une diffusion, l'arrêt ferme aussi la diffusion et le téléviseur reprend son programme. Si la chaîne est en cours d'enregistrement, Kastideo demande confirmation (l'enregistrement s'arrête avec la lecture).
 - **Mini-timeline** (films et épisodes) : un trait fin au-dessus des boutons, qui s'épaissit au survol en affichant l'heure visée ; cliquez ou glissez pour vous déplacer.
 - **Santé du flux** : une pastille **verte** (Excellent), **orange** (Correct) ou **rouge** (Instable) indique la qualité de réception, avec la définition (SD, HD, 4K). Au survol : définition exacte, débit, images par seconde, images perdues et coupures de la dernière minute.
 - **Panneau « Informations »** (bouton ⓘ ou **⌘I**, Échap pour fermer) : il glisse depuis la droite par-dessus la vidéo et montre la chaîne et son programme en cours et à venir, ou le résumé et la distribution d'un film ; le choix de la **piste audio** (langue, audiodescription…) et des **sous-titres** ; la qualité de réception détaillée.
@@ -910,7 +911,7 @@ Vos chaînes suivies, favoris, historique (80 vidéos), liste « à regarder plu
 
 <!--pc-->
 - **Ctrl+0** : accueil — **Ctrl+1** : direct — **Ctrl+2** : films — **Ctrl+3** : séries — **Ctrl+7** : guide TV — **Ctrl+Alt+M** : MultiVue — **Ctrl+,** : réglages
-- **Espace** : lecture / pause — **M** : son — **F** : favori — **R** : enregistrer / arrêter — **← / →** : −10 s / +30 s
+- **Espace** : lecture / pause — **M** : son — **F** : favori — **R** : enregistrer / arrêter — **← / →** : −10 s / +30 s — **Ctrl+.** : arrêter la lecture
 - **Ctrl+Entrée** ou double-clic sur l'image : mode cinéma — **F11** : plein écran — **Échap** : quitter le mode cinéma, revenir à la fiche ou aux rangées
 - Interface TV : **↑ / ↓** zapping, **chiffres** numéro, **←** panneau, **→ / I** bandeau, **B** chaîne précédente, **G** guide, **H** accueil
 - MultiVue : **1 à 4** son, **G** en grand, **A** ajouter, **Suppr** retirer, **F** plein écran, **Échap** quitter

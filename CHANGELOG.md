@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.8] - 2026-10-31
+
+**Bouton Arrêt dans la barre de lecture.** Un bouton ■ à côté de lecture / pause (et **⌘.**) arrête le flux sans repasser par l'accueil. La zone vidéo affiche « Aucune lecture » avec un bouton **Relancer**. La position d'un film ou d'un épisode est mémorisée pour la reprise ; pendant une diffusion, l'arrêt ferme la diffusion et le téléviseur reprend son programme ; si la chaîne est en cours d'enregistrement, Kastideo demande confirmation.
+
+**Cast sur Mac : ça fonctionne.** Les corrections 1.7.5 à 1.7.7 ont été confirmées sur une TV Android.
+
 ## [1.7.7] - 2026-10-31
 
 **Cast sur Mac : l'adresse du téléviseur est maintenant écrite dans la chaîne de diffusion de VLC.** Dans la 1.7.6, l'adresse IPv4 était bien trouvée mais VLC répondait « missing Chromecast IP address » et ne démarrait pas la diffusion.

@@ -308,6 +308,30 @@ Future<bool> confirmConnection(BuildContext context, MediaItem item) async {
   return true;
 }
 
+/// Bouton Arrêt : arrête la lecture ; demande d'abord si l'enregistrement de la chaîne regardée en dépend.
+Future<void> stopPlayback(BuildContext context) async {
+  final playback = context.playback;
+  final recordings = context.recordings;
+  final item = playback.current;
+  if (item == null) return;
+  if (recordings.isRecording(item)) {
+    final ok = await showKDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(tr('Enregistrement en cours')),
+        content: Text('${tr('Arrêter la lecture arrêtera aussi l\'enregistrement de')} ${item.displayName}.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Annuler'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('Tout arrêter'))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await recordings.stop();
+  }
+  await playback.stopByUser();
+}
+
 /// Ouvre un contenu : chaîne → lecture ; film ou série → fiche (comme sur Mac).
 Future<void> openItem(BuildContext context, MediaItem item) async {
   final navigation = context.navigation;

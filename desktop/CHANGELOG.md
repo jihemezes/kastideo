@@ -2,6 +2,13 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.7.8-desktop1] - 2026-10-31
+
+**Bouton Arrêt dans la barre de lecture** (comme Kastideo 1.7.8 pour Mac).
+
+- Un bouton ■ à côté de lecture / pause (et **Ctrl+.**) arrête le flux sans quitter l'écran. La zone vidéo affiche « Aucune lecture » avec un bouton **Relancer** (et **Retour** dans le lecteur plein cadre).
+- La position d'un film ou d'un épisode est mémorisée pour la reprise ; pendant une diffusion, l'arrêt ferme la diffusion et le téléviseur reprend son programme ; si la chaîne est en cours d'enregistrement, Kastideo demande confirmation.
+
 ## [1.7.0-desktop1] - 2026-10-30
 
 **Diffuser sur un téléviseur (Cast)** (comme Kastideo 1.7.0 pour Mac).

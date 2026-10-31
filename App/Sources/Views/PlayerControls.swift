@@ -34,6 +34,12 @@ struct ControlsBar: View {
                 .help(playback.isLive && !playback.canPause ? String(localized: "Ce flux ne permet pas la pause") : String(localized: "Lecture / pause (⌘K) — en direct : différé"))
                 .disabled(playback.isLive && playback.isPlaying && !playback.canPause)
 
+                Button { recordings.requestStop() } label: {
+                    Image(systemName: "stop.fill")
+                        .frame(width: 22)
+                }
+                .help("Arrêter la lecture (⌘.)")
+
                 if playback.isSeekable {
                     Button { playback.jump(seconds: -10) } label: { Image(systemName: "gobackward.10") }
                         .help("Reculer de 10 s")

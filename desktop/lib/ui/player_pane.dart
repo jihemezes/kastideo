@@ -77,6 +77,7 @@ class _PlayerPaneState extends State<PlayerPane> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.space): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
+        const SingleActivator(LogicalKeyboardKey.period, control: true): () => stopPlayback(context),
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
         if (!widget.tvMode) ...{
           const SingleActivator(LogicalKeyboardKey.escape): () {
@@ -112,7 +113,11 @@ class _PlayerPaneState extends State<PlayerPane> {
               child: ListenableBuilder(
                 listenable: playback,
                 builder: (context, _) {
-                  if (playback.current == null) return widget.placeholder ?? const _Placeholder();
+                  if (playback.current == null) {
+                    final stopped = playback.stoppedItem;
+                    if (stopped != null) return _StoppedView(item: stopped, onBack: widget.showBack ? _back : null);
+                    return widget.placeholder ?? const _Placeholder();
+                  }
                   return Stack(fit: StackFit.expand, children: [
                     if (playback.casting)
                       const CastPanel()
@@ -153,6 +158,37 @@ class _PlayerPaneState extends State<PlayerPane> {
       ),
     );
   }
+}
+
+/// Après le bouton Arrêt : message et relance en un clic.
+class _StoppedView extends StatelessWidget {
+  const _StoppedView({required this.item, this.onBack});
+  final MediaItem item;
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.stop_circle_outlined, size: 56, color: Colors.white54),
+          const SizedBox(height: 12),
+          Text(tr('Aucune lecture'), style: kTextD(17, weight: FontWeight.w600)),
+          const SizedBox(height: 16),
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            FilledButton.icon(
+              onPressed: () async {
+                if (!await confirmConnection(context, item)) return;
+                if (context.mounted) context.playback.play(item);
+              },
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text('${tr('Relancer')} ${item.displayName}', overflow: TextOverflow.ellipsis),
+            ),
+            if (onBack != null) ...[
+              const SizedBox(width: 10),
+              FilledButton.tonal(onPressed: onBack, child: Text(tr('Retour'))),
+            ],
+          ]),
+        ]),
+      );
 }
 
 class _Placeholder extends StatelessWidget {
@@ -277,6 +313,11 @@ class ControlsBar extends StatelessWidget {
               icon: playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
               tooltip: tr('Lecture / pause (Espace)'),
               onTap: playback.togglePause,
+            ),
+            _BarButton(
+              icon: Icons.stop_rounded,
+              tooltip: tr('Arrêter la lecture (Ctrl+.)'),
+              onTap: () => stopPlayback(context),
             ),
             if (playback.isSeekable) ...[
               const SizedBox(width: 8),

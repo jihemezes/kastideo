@@ -946,3 +946,7 @@
 "Chercher les téléviseurs…" = "Look for TVs…";
 "Lire sur un téléviseur" = "Play on a TV";
 "Autoriser Kastideo sur le réseau local…" = "Allow Kastideo on the local network…";
+
+"Arrêter la lecture (⌘.)" = "Stop playback (⌘.)";
+"Aucune lecture" = "Nothing playing";
+"Relancer « %@ »" = "Restart “%@”";

@@ -34,6 +34,25 @@ struct VideoSurface: View {
             // Au-dessus du calque qui capte les clics : sinon « Reprendre sur le Mac » ne reçoit rien.
             CastOverlay()
 
+            // Après le bouton Arrêt : message et relance en un clic.
+            if playback.current == nil, !playback.isLoading, playback.errorMessage == nil, let stopped = playback.stoppedItem {
+                VStack(spacing: 12) {
+                    Image(systemName: "stop.circle")
+                        .font(.system(size: 40, weight: .light))
+                    Text("Aucune lecture")
+                        .font(.title3.weight(.semibold))
+                    Button {
+                        recordings.requestPlay(stopped, onCancel: {})
+                    } label: {
+                        Label("Relancer « \(stopped.name) »", systemImage: "play.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                }
+                .foregroundStyle(.white)
+                .padding(24)
+            }
+
             if playback.isLoading && playback.errorMessage == nil {
                 LoadingCard(item: playback.current)
             }

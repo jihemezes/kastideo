@@ -94,6 +94,8 @@ final class PlaybackController {
     @ObservationIgnored private let bridge = VLCEventBridge()
 
     private(set) var current: MediaItem?
+    /// Contenu que l'utilisateur vient d'arrêter avec le bouton Arrêt (proposé par « Relancer »).
+    private(set) var stoppedItem: MediaItem?
     private(set) var errorMessage: String?
     private(set) var isLoading = false
     private(set) var isPlaying = false
@@ -353,6 +355,7 @@ final class PlaybackController {
         }
         flushProgress()
         current = item
+        stoppedItem = nil
         resumedAt = nil
         pendingResume = nil
         if WatchProgressStore.isEnabled, item.kind != .live, !item.isReplay, let point = watchProgress?.resumePoint(for: item.id) {
@@ -362,6 +365,15 @@ final class PlaybackController {
         sameURLRetries = 0
         if item.isReplay { PlaybackLog.shared.note("Replay « \(item.name) » : adresse d'archive composée (\(url.host ?? "?"))", topic: .playback) }
         start(url)
+    }
+
+    /// Bouton Arrêt : arrête le flux (la position d'un film est mémorisée), ferme la diffusion vers un téléviseur
+    /// et garde le contenu pour le proposer à la relance.
+    func stopByUser() {
+        let item = current
+        stop()
+        stoppedItem = item
+        CastCenter.shared.castEnded(by: self)
     }
 
     func stop() {

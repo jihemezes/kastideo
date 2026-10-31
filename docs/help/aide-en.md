@@ -409,6 +409,7 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 
 <!--mac-->
 - **Auto-hiding bar**: it appears on the slightest mouse movement and hides, along with the pointer, after 3 seconds of inactivity (it stays while the mouse is over it, while paused or when the panel is open).
+- **Stop** (■ button next to play / pause, or **⌘.**): stops the stream. The video area shows “Nothing playing” with a **Restart** button; the position of a movie or episode is remembered for resuming. While casting, stopping also ends the cast and the TV returns to its programme. If the channel is being recorded, Kastideo asks for confirmation (the recording stops with playback).
 - **Mini-timeline** (movies and episodes): a thin line above the buttons that thickens on hover and shows the target time; click or drag to move.
 - **Stream health**: a **green** (Excellent), **orange** (Fair) or **red** (Unstable) dot shows reception quality, with the definition (SD, HD, 4K). On hover: exact resolution, bitrate, frames per second, dropped pictures and interruptions in the last minute.
 - **Information panel** (ⓘ button or **⌘I**, Esc to close): it slides in from the right over the video and shows the channel with its current and upcoming programs, or a movie's synopsis and cast; the **audio track** (language, audio description…) and **subtitles** choice; detailed reception quality.
@@ -909,7 +910,7 @@ Your followed channels, favorites, history (80 videos), “watch later” list a
 
 <!--pc-->
 - **Ctrl+0**: home — **Ctrl+1**: live — **Ctrl+2**: movies — **Ctrl+3**: series — **Ctrl+7**: TV guide — **Ctrl+Alt+M**: MultiView — **Ctrl+,**: settings
-- **Space**: play / pause — **M**: sound — **F**: favorite — **R**: record / stop — **← / →**: −10 s / +30 s
+- **Space**: play / pause — **M**: sound — **F**: favorite — **R**: record / stop — **← / →**: −10 s / +30 s — **Ctrl+.**: stop playback
 - **Ctrl+Enter** or double-click the picture: cinema mode — **F11**: full screen — **Esc**: leave cinema mode, back to details or rows
 - TV interface: **↑ / ↓** zapping, **digits** channel number, **←** panel, **→ / I** banner, **B** previous channel, **G** guide, **H** home
 - MultiView: **1 to 4** sound, **G** enlarge, **A** add, **Del** remove, **F** full screen, **Esc** leave

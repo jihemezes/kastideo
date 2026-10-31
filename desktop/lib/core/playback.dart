@@ -403,6 +403,7 @@ class PlaybackController extends ChangeNotifier {
     _flushProgress();
     if (casting && castHook?.call(item) == true) return;
     if (casting) endCast();
+    stoppedItem = null;
     current = item;
     _retries = 0;
     resumedAt = null;
@@ -425,7 +426,20 @@ class PlaybackController extends ChangeNotifier {
     _start(item!.stream!);
   }
 
+  /// Contenu que l'utilisateur vient d'arrêter avec le bouton Arrêt (proposé par « Relancer »).
+  MediaItem? stoppedItem;
+
+  /// Bouton Arrêt : coupe le flux (la position d'un film est mémorisée, la diffusion vers un téléviseur est fermée).
+  Future<void> stopByUser() async {
+    final item = current;
+    final done = stop();
+    stoppedItem = item;
+    notifyListeners();
+    await done;
+  }
+
   Future<void> stop() async {
+    stoppedItem = null;
     _flushProgress();
     endCast();
     _shiftTimer?.cancel();
