@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.8.0</title>
+      <pubDate>Sat, 31 Oct 2026 18:23:12 GMT</pubDate>
+      <sparkle:version>74</sparkle:version>
+      <sparkle:shortVersionString>1.8.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Page de départ de Direct, Films et Séries.&lt;/b&gt; Réglages &amp;gt; Général &amp;gt; Page de départ : pour chaque section, choisissez ce qui s&amp;#x27;affiche en l&amp;#x27;ouvrant depuis une autre section (et au lancement) : la liste complète, les Favoris, les Récents, la dernière catégorie consultée ou une catégorie précise. Un clic droit sur une catégorie de la barre latérale propose aussi « Définir comme catégorie de départ ». Nouvelle page d&amp;#x27;aide « Page de départ ».&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.8.0/Kastideo-1.8.0.dmg" length="47688165" type="application/octet-stream" sparkle:edSignature="ElKJ5pTB73SK+oqWhzy0VwLAniFxonc/wFienZtwmGzcm3CbUsMHtwjRuGPk2aJ8EWH+GD7kN5958z91V8mHAQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.10</title>
       <pubDate>Sat, 31 Oct 2026 17:44:47 GMT</pubDate>
       <sparkle:version>73</sparkle:version>
@@ -456,21 +465,6 @@
 &lt;li&gt;Désactivée par défaut : chaque flux consomme une connexion. Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; &lt;b&gt;Connexions simultanées de l&amp;#x27;abonnement&lt;/b&gt; (1 à 4) pour l&amp;#x27;activer&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.13.0/Kastideo-0.13.0.dmg" length="45407689" type="application/octet-stream" sparkle:edSignature="z0fMSBTmC1OiXgNR5EQ623w8219/r8YT63cE9ShdL+vIqZlknuiu56BVyh2rmj8Avr53lxa8+ac7/EBCXZcjAg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.12.0</title>
-      <pubDate>Wed, 21 Oct 2026 21:03:02 GMT</pubDate>
-      <sparkle:version>29</sparkle:version>
-      <sparkle:shortVersionString>0.12.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Lecteur repensé&lt;/b&gt; : barre de contrôle compacte et &lt;b&gt;rétractable&lt;/b&gt; (disparaît avec le pointeur après 3 s, revient au moindre mouvement)&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Mini-timeline&lt;/b&gt; pour les films et épisodes : trait fin qui s&amp;#x27;épaissit au survol, avec l&amp;#x27;heure visée&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Panneau « Informations »&lt;/b&gt; (ⓘ ou ⌘I) glissant depuis la droite : chaîne et programmes en cours / à venir, ou résumé et distribution du film ; choix de la &lt;b&gt;piste audio&lt;/b&gt; et des &lt;b&gt;sous-titres&lt;/b&gt; ; qualité de réception&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Santé du flux&lt;/b&gt; : pastille verte / orange / rouge (Excellent, Correct, Instable) et définition (SD, HD, 4K) ; débit, images perdues et coupures au survol&lt;/li&gt;
-&lt;li&gt;Prochaine étape prévue (0.13) : MultiVue en option, selon le nombre de connexions de l&amp;#x27;abonnement&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.12.0/Kastideo-0.12.0.dmg" length="45196198" type="application/octet-stream" sparkle:edSignature="LMnyZ7nodX9qClvGVScp/NaurxeVThthHs+SIkaGgTEvCSEPJd3yJJjA9Ntyovs3m1CwCckaFVNGriSkL5IGDQ==" />
     </item>
   </channel>
 </rss>
