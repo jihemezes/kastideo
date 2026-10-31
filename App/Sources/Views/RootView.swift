@@ -11,6 +11,8 @@ struct RootView: View {
     @Environment(MediaInfoStore.self) private var mediaInfo
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @State private var showAddSource = false
+    @State private var showDisclaimer = LegalNotice.needsAcceptance
+    @State private var whatsNewPending = false
     @AppStorage(AppLanguage.storageKey) private var appLanguage = ""
 
     var body: some View {
@@ -36,6 +38,16 @@ struct RootView: View {
         .overlay(alignment: .top) { ProgramAlertBanner() }
         .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {
             LanguagePickerSheet(chosen: $appLanguage)
+        }
+        // Avertissement : après le choix de la langue, au premier lancement et après chaque mise à jour.
+        .sheet(isPresented: Binding(get: { showDisclaimer && !appLanguage.isEmpty }, set: { _ in })) {
+            DisclaimerSheet {
+                showDisclaimer = false
+                if whatsNewPending {
+                    whatsNewPending = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { navigation.showWhatsNew = true }
+                }
+            }
         }
         .sheet(isPresented: $showAddSource) {
             SourceEditorView(existing: nil)
@@ -74,7 +86,10 @@ struct RootView: View {
             Text(conflict.message)
         }
         .task {
-            if ReleaseNotes.shouldAnnounceUpdate() { navigation.showWhatsNew = true }
+            if ReleaseNotes.shouldAnnounceUpdate() {
+                // Une seule fenêtre à la fois : les nouveautés attendent l'acceptation de l'avertissement.
+                if showDisclaimer { whatsNewPending = true } else { navigation.showWhatsNew = true }
+            }
             await store.start(autoRefresh: autoRefresh)
         }
     }

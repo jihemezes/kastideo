@@ -2,6 +2,12 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.7.9-desktop1] - 2026-10-31
+
+**Avertissement légal** (comme Kastideo 1.7.9 pour Mac).
+
+- Au premier lancement et après chaque mise à jour, un avertissement en français ou en anglais s'affiche : « J'ai compris et j'accepte » ou « Quitter ». Il se relit dans Réglages > À propos > Avertissement légal et dans l'aide.
+
 ## [1.7.8-desktop1] - 2026-10-31
 
 **Bouton Arrêt dans la barre de lecture** (comme Kastideo 1.7.8 pour Mac).

@@ -38,6 +38,7 @@ struct SupportButton: View {
 struct AboutSettingsView: View {
     @AppStorage(Support.hideKey) private var hidden = false
     @Environment(\.openURL) private var openURL
+    @State private var showLegal = false
 
     var body: some View {
         Form {
@@ -72,10 +73,12 @@ struct AboutSettingsView: View {
                 Button("Signaler un problème ou proposer une idée") {
                     openURL(URL(string: "https://github.com/jihemezes/kastideo/issues")!)
                 }
+                Button("Avertissement légal…") { showLegal = true }
             } header: {
                 Text("Liens")
             }
         }
         .formStyle(.grouped)
+        .sheet(isPresented: $showLegal) { DisclaimerSheet(requiresAcceptance: false) }
     }
 }

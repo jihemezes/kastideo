@@ -24,6 +24,7 @@ import '../core/library.dart';
 import 'help_dialog.dart';
 import 'log_dialog.dart';
 import 'source_form.dart';
+import 'legal_notice.dart';
 import 'support_button.dart';
 import 'update_view.dart';
 
@@ -1566,6 +1567,7 @@ class _AboutTab extends StatelessWidget {
         ]),
         _section(tr('Liens'), [
           Row(children: [
+            TextButton(onPressed: () => LegalNotice.show(context), child: Text(tr('Avertissement légal'))),
             TextButton(onPressed: () => launchUrl(Uri.parse('https://github.com/jihemezes/kastideo')), child: Text(tr('Page du projet sur GitHub'))),
             TextButton(
                 onPressed: () => launchUrl(Uri.parse('https://github.com/jihemezes/kastideo/issues')),

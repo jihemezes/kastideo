@@ -277,6 +277,7 @@ class L10n {
     'Afficher dans le dossier': 'Show in folder',
     'Alertes de programme': 'Programme alerts',
     'Arrêter et lancer': 'Stop and play',
+    'Avertissement légal': 'Disclaimer',
     'Arrêter la lecture (Ctrl+.)': 'Stop playback (Ctrl+.)',
     'Arrêter la lecture arrêtera aussi l\'enregistrement de': 'Stopping playback will also stop the recording of',
     'Aucune lecture': 'Nothing playing',

@@ -39,6 +39,7 @@ import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
+import 'ui/legal_notice.dart';
 import 'ui/update_view.dart';
 import 'ui/youtube_view.dart';
 import 'core/models.dart';
@@ -363,6 +364,8 @@ class _RootViewState extends State<RootView> {
     super.initState();
     pendingOpen.addListener(_openPending);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await LegalNotice.showIfNeeded(context);
       if (!mounted) return;
       await showWhatsNewIfUpdated(context);
       _openPending();

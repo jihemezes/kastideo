@@ -1081,6 +1081,21 @@ Kastideo identifies itself to servers as the **VLC** player: many IPTV providers
 
 # About
 
+## Disclaimer {#avertissement}
+
+Thank you for using Kastideo. Kastideo is a media player: it plays playlists (M3U), IPTV accounts (Xtream Codes), your own servers (Jellyfin, Emby, Plex), the videos on your drives and YouTube.
+
+- **No content provided.** Kastideo does not provide, host or sell any channel, movie, playlist or subscription.
+- **No affiliation.** Kastideo is not affiliated with any content or IPTV subscription provider, nor with YouTube, Google, TMDB, Plex, Jellyfin, Emby, Apple or Microsoft. Trademarks mentioned belong to their respective owners. This product uses the TMDB API but is not endorsed or certified by TMDB.
+- **Your own content.** You must supply your own sources and content. You are solely responsible for checking that they are legal and that you have all the rights needed to watch, record, download and stream them.
+- **Copyright.** Kastideo does not encourage the streaming of copyright-protected material without the permission of the copyright holder. Recordings, downloads and casting to a TV are for private use only, within the limits of the law in your country.
+- **Liability.** The author of Kastideo is not responsible for how you use the software, nor for the content, availability or legality of the third-party services you connect it to. Kastideo is provided free of charge, “as is”, without warranty.
+- **Your data.** Your credentials are kept on your device and are only sent to the services you configure.
+
+By clicking “I understand and accept”, you confirm that you have read and accept these terms. Otherwise, please quit the application.
+
+This notice appears on first launch and after every update. You can read it again at any time in <!--mac-->**Settings (⌘,) > About**<!--/mac--><!--pc-->**Settings (Ctrl+,) > About**<!--/pc-->.
+
 ## Support Kastideo {#soutenir}
 
 <!--mac-->

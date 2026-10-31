@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.9] - 2026-10-31
+
+**Avertissement légal.** Au premier lancement et après chaque mise à jour, Kastideo affiche un avertissement en français ou en anglais : aucun contenu fourni, aucune affiliation, vos propres sources et contenus, droit d'auteur, responsabilité. Il faut l'accepter (« J'ai compris et j'accepte ») ou quitter. Il se relit dans Réglages > À propos > Avertissement légal, dans la nouvelle page d'aide « Avertissement légal » et dans le README.
+
 ## [1.7.8] - 2026-10-31
 
 **Bouton Arrêt dans la barre de lecture.** Un bouton ■ à côté de lecture / pause (et **⌘.**) arrête le flux sans repasser par l'accueil. La zone vidéo affiche « Aucune lecture » avec un bouton **Relancer**. La position d'un film ou d'un épisode est mémorisée pour la reprise ; pendant une diffusion, l'arrêt ferme la diffusion et le téléviseur reprend son programme ; si la chaîne est en cours d'enregistrement, Kastideo demande confirmation.

@@ -1082,6 +1082,21 @@ Kastideo s'identifie auprès des serveurs comme le lecteur **VLC** : beaucoup de
 
 # À propos
 
+## Avertissement légal {#avertissement}
+
+Merci d'utiliser Kastideo. Kastideo est un lecteur multimédia : il lit les listes de lecture (M3U), les comptes IPTV (Xtream Codes), vos serveurs personnels (Jellyfin, Emby, Plex), les vidéos de vos disques et YouTube.
+
+- **Aucun contenu fourni.** Kastideo ne fournit, n'héberge ni ne vend aucune chaîne, aucun film, aucune liste de lecture ni aucun abonnement.
+- **Aucune affiliation.** Kastideo n'est affilié à aucun fournisseur de contenus ou d'abonnements IPTV, ni à YouTube, Google, TMDB, Plex, Jellyfin, Emby, Apple ou Microsoft. Les marques citées appartiennent à leurs propriétaires. Ce produit utilise l'API TMDB mais n'est ni approuvé ni certifié par TMDB.
+- **Vos propres contenus.** Vous devez fournir vos propres sources et contenus. Vous êtes seul responsable de vérifier qu'ils sont légaux et que vous avez tous les droits nécessaires pour les regarder, les enregistrer, les télécharger et les diffuser.
+- **Droit d'auteur.** Kastideo n'encourage pas la diffusion de contenus protégés par le droit d'auteur sans l'autorisation de leurs titulaires. Les enregistrements, les téléchargements et la diffusion vers un téléviseur (Cast) sont réservés à un usage privé, dans les limites de la loi de votre pays.
+- **Responsabilité.** L'auteur de Kastideo n'est pas responsable de l'usage que vous faites du logiciel, ni du contenu, de la disponibilité ou de la légalité des services tiers auxquels vous le connectez. Kastideo est fourni gratuitement, « tel quel », sans garantie.
+- **Vos données.** Vos identifiants sont conservés sur votre appareil et ne sont transmis qu'aux services que vous configurez.
+
+En cliquant sur « J'ai compris et j'accepte », vous reconnaissez avoir lu ces conditions et vous les acceptez. Dans le cas contraire, quittez l'application.
+
+Cet avertissement s'affiche au premier lancement et après chaque mise à jour. Vous pouvez le relire à tout moment dans <!--mac-->**Réglages (⌘,) > À propos**<!--/mac--><!--pc-->**Réglages (Ctrl+,) > À propos**<!--/pc-->.
+
 ## Soutenir Kastideo {#soutenir}
 
 <!--mac-->
