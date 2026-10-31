@@ -187,6 +187,11 @@ final class PlaybackLog: NSObject, VLCLogging {
             persist(line)
             return
         }
+        if level.rawValue >= 3 {
+            // Niveau « débogage » (pendant une diffusion) : seuls les échanges avec le téléviseur sont gardés.
+            let probe = ((context?.module ?? "") + " " + message).lowercased()
+            guard probe.contains("chromecast") || probe.contains("sout") || probe.contains("httpd") || probe.contains("cast") else { return }
+        }
         var text = Self.redact(message)
         if let module = context?.module, !module.isEmpty { text = "[\(module)] " + text }
         lock.lock()

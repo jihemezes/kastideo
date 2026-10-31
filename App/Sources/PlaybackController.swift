@@ -456,6 +456,8 @@ final class PlaybackController {
     /// Envoie la lecture vers un téléviseur (nil : retour sur le Mac). Le contenu en cours est rouvert là où il en était.
     func setRenderer(_ item: VLCRendererItem?) {
         renderer = item
+        // Pendant une diffusion, le journal détaille les échanges avec le téléviseur (messages « chromecast », « sout », « http »).
+        PlaybackLog.shared.level = VLCLogLevel(rawValue: item == nil ? 2 : 3) ?? PlaybackLog.shared.level
         guard let playing = current, playing.streamURL != nil else { return }
         let resumeAt = elapsed
         let resumable = !isLive && isSeekable && resumeAt > 3
@@ -598,8 +600,11 @@ final class PlaybackController {
             PlaybackLog.shared.note("Ouverture en image seule (sans le son) pour cette chaîne")
         }
         // Direct en différé : VLC met le flux en mémoire sur disque pendant les pauses.
-        media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
-        media.addOption(":input-timeshift-granularity=52428800")
+        // Pas pendant une diffusion : le différé de VLC gêne l'envoi vers le téléviseur.
+        if renderer == nil {
+            media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
+            media.addOption(":input-timeshift-granularity=52428800")
+        }
         player.media = media
         player.rate = 1
         applyAudio()

@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.4] - 2026-10-31
+
+**Cast sur Mac : diagnostic et essai de correction.** Pendant une diffusion, le différé de VLC est désactivé (il gênait l'envoi vers le téléviseur) et le Journal de lecture détaille les échanges avec le téléviseur.
+
 ## [1.7.3] - 2026-10-31
 
 **Cast sur Mac : l'image arrive sur le téléviseur.** Pendant une diffusion, Kastideo changeait de piste son en croyant le son muet (VLC ne décode pas le son localement quand il l'envoie au téléviseur), ce qui coupait le flux. Cette « réparation » est désormais suspendue pendant la diffusion.
