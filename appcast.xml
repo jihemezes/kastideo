@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.7</title>
+      <pubDate>Sat, 31 Oct 2026 15:32:01 GMT</pubDate>
+      <sparkle:version>70</sparkle:version>
+      <sparkle:shortVersionString>1.7.7</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : l&amp;#x27;adresse du téléviseur est maintenant écrite dans la chaîne de diffusion de VLC.&lt;/b&gt; Dans la 1.7.6, l&amp;#x27;adresse IPv4 était bien trouvée mais VLC répondait « missing Chromecast IP address » et ne démarrait pas la diffusion.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.7/Kastideo-1.7.7.dmg" length="47641859" type="application/octet-stream" sparkle:edSignature="eCg6utPsNH7YxeO+cyDAGo36Rm4wlIsThdnRfWjNLPyM+JHrefnQU7Vdf/O7flSWoM8MrYWI1f2syP8gGjUxBw==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.6</title>
       <pubDate>Sat, 31 Oct 2026 14:59:38 GMT</pubDate>
       <sparkle:version>69</sparkle:version>
@@ -471,20 +480,6 @@
 &lt;li&gt;&lt;b&gt;Bandeau « à la une »&lt;/b&gt; : la largeur du bandeau est maintenant imposée par la fenêtre ; une image de fond très large ne peut plus repousser l&amp;#x27;affiche, le titre, le résumé et les boutons hors du cadre&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.1/Kastideo-0.11.1.dmg" length="45031594" type="application/octet-stream" sparkle:edSignature="vj49/kqJw/fAehbCRAHl8fgacCMpeDEboK/8YGpATs6TBz4oIzJ+su+tvtfQWOgOt1AZe9flCqkAvtHHAmZCAA==" />
-    </item>
-    <item>
-      <title>Kastideo 0.11.0</title>
-      <pubDate>Wed, 21 Oct 2026 16:54:39 GMT</pubDate>
-      <sparkle:version>25</sparkle:version>
-      <sparkle:shortVersionString>0.11.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Gérer les catégories&lt;/b&gt; (Présentation &amp;gt; Gérer les catégories…, ⌥⌘C, ou bouton de la barre latérale) pour le Direct, les Films et les Séries : &lt;b&gt;réordonner&lt;/b&gt; par glisser-déposer, &lt;b&gt;masquer&lt;/b&gt; (partout : listes, recherche, Guide TV, Cinéma, TV, bandeau), &lt;b&gt;masquer par mot-clé&lt;/b&gt; (ex. « PAKISTAN »), &lt;b&gt;renommer&lt;/b&gt;, trier A → Z, tout afficher ou réinitialiser&lt;/li&gt;
-&lt;li&gt;Clic droit sur une catégorie de la barre latérale &amp;gt; &lt;b&gt;Masquer cette catégorie&lt;/b&gt;&lt;/li&gt;
-&lt;li&gt;Correction du &lt;b&gt;bandeau « à la une »&lt;/b&gt; : l&amp;#x27;image de fond prenait toute la place et cachait l&amp;#x27;affiche, le titre, le résumé et les boutons&lt;/li&gt;
-&lt;li&gt;Titres des affiches en interface Cinéma affichés sans les étiquettes du fournisseur (« |FR| »…)&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.0/Kastideo-0.11.0.dmg" length="45027931" type="application/octet-stream" sparkle:edSignature="pI8zSW9fEdlL3oItMNPanoIRXrnVC9cb/DTxAnjCf4nRZBFYSbbXW5MlA8Zc0FKULWhKRt4jHa4RmkRuCpB4AQ==" />
     </item>
   </channel>
 </rss>
