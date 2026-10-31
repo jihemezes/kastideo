@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.3</title>
+      <pubDate>Sat, 31 Oct 2026 08:33:21 GMT</pubDate>
+      <sparkle:version>66</sparkle:version>
+      <sparkle:shortVersionString>1.7.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : l&amp;#x27;image arrive sur le téléviseur.&lt;/b&gt; Pendant une diffusion, Kastideo changeait de piste son en croyant le son muet (VLC ne décode pas le son localement quand il l&amp;#x27;envoie au téléviseur), ce qui coupait le flux. Cette « réparation » est désormais suspendue pendant la diffusion.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.3/Kastideo-1.7.3.dmg" length="47628532" type="application/octet-stream" sparkle:edSignature="eyvy2AKgF5pXuwvUoQAOqIENitMp+bri0u4rHGxlvwfNNHmkJNjMmAYdGOZ8W2rBsGOpS2UZCpEbKPNc6tfPAA==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.2</title>
       <pubDate>Sat, 31 Oct 2026 08:25:38 GMT</pubDate>
       <sparkle:version>65</sparkle:version>
@@ -487,17 +496,6 @@
 &lt;li&gt;&lt;b&gt;Enregistrements sans son&lt;/b&gt; : à la conversion en MP4, le son est maintenant converti en AAC (lisible partout, y compris QuickTime, iPhone et iPad) ; l&amp;#x27;image reste copiée sans perte&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.7/Kastideo-0.9.7.dmg" length="45106585" type="application/octet-stream" sparkle:edSignature="D7So08NOrMFAjqfIDSa+yAA+YE/wDWSHMGH4w1KeIbHBF6gT2ksYzYrFaLgdh40RNluBQLa4FirOS7RvTYLUAg==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.6</title>
-      <pubDate>Wed, 21 Oct 2026 09:24:24 GMT</pubDate>
-      <sparkle:version>21</sparkle:version>
-      <sparkle:shortVersionString>0.9.6</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Enregistrement du direct&lt;/b&gt; : si le moteur VLC ne crée pas le fichier dans le dossier « En cours » sous 10 s, Kastideo réessaie automatiquement dans un dossier temporaire avant d&amp;#x27;afficher « Enregistrement impossible » ; dossier de travail nommé sans accents ni caractères spéciaux ; chaque essai est noté dans le Journal de lecture&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.6/Kastideo-0.9.6.dmg" length="44748929" type="application/octet-stream" sparkle:edSignature="kBfKDIh+pvQ+KrjNfkQbUh9GVNNm/NxZvUQyiGwFuxXt0h3dmfHbPh3y8T7ZVGoE+tGBhktzGcpr0AvDMN24CA==" />
     </item>
   </channel>
 </rss>
