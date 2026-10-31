@@ -310,7 +310,9 @@ final class PlaybackController {
         let defaults = UserDefaults.standard
         volume = defaults.object(forKey: PlaybackKeys.volume) as? Double ?? 100
         isMuted = defaults.bool(forKey: PlaybackKeys.muted)
-        player = VLCMediaPlayer(options: ["--no-video-title-show", "--no-snapshot-preview"])
+        // IPv4 seulement : sinon VLC donne au téléviseur une adresse IPv6 sans crochets (« http://2a02:…:8010/… »), qu'il ne sait pas lire.
+        let forceIPv4 = defaults.object(forKey: "cast.forceIPv4") as? Bool ?? true
+        player = VLCMediaPlayer(options: ["--no-video-title-show", "--no-snapshot-preview"] + (forceIPv4 ? ["--ipv4"] : []))
         player.libraryInstance.setHumanReadableName("Kastideo", withHTTPUserAgent: HTTP.userAgent)
         player.libraryInstance.loggers = [PlaybackLog.shared]
         StreamRelay.shared.start()
@@ -601,6 +603,7 @@ final class PlaybackController {
         }
         // Direct en différé : VLC met le flux en mémoire sur disque pendant les pauses.
         // Pas pendant une diffusion : le différé de VLC gêne l'envoi vers le téléviseur.
+        if renderer != nil { media.addOption(":ipv4") }
         if renderer == nil {
             media.addOption(":input-timeshift-path=\(NSTemporaryDirectory())")
             media.addOption(":input-timeshift-granularity=52428800")

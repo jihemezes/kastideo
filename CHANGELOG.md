@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.7.5] - 2026-10-31
+
+**Cast sur Mac : cause trouvée.** VLC donnait au téléviseur une adresse IPv6 sans crochets (`http://2a02:…:8010/…`) qu'il ne sait pas lire, d'où « Media load failed ». VLC est maintenant forcé en IPv4 (la diffusion utilise l'adresse IPv4 du Mac).
+
 ## [1.7.4] - 2026-10-31
 
 **Cast sur Mac : diagnostic et essai de correction.** Pendant une diffusion, le différé de VLC est désactivé (il gênait l'envoi vers le téléviseur) et le Journal de lecture détaille les échanges avec le téléviseur.
