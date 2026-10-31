@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/device.dart';
 import '../core/help.dart';
 import '../core/text.dart';
 import '../l10n.dart';
@@ -62,7 +63,7 @@ class _HelpDialogState extends State<_HelpDialog> {
     super.initState();
     rootBundle.loadString(L10n.english ? 'assets/help/aide-en.md' : 'assets/help/aide-fr.md').then((text) {
       if (!mounted) return;
-      final groups = parseHelp(text);
+      final groups = parseHelp(text, android: Device.isAndroid);
       final pages = [for (final g in groups) ...g.pages];
       setState(() {
         _groups = groups;

@@ -55,8 +55,9 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 | **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
 | **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète, installateur Windows et mises à jour intégrées |
 | **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
+| **Android** (téléphone, tablette) et **Android TV** (Google TV, Chromecast avec Google TV, Nvidia Shield, TV Philips, Sony, TCL…) | 🧪 Aperçu | Comme Windows, adapté au doigt (menu ☰, gestes dans le lecteur, appui long) et à la télécommande (interface TV, touches Chaîne, Lecture/Pause) ; Cast en mode direct ; mises à jour intégrées |
 
-Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (numéros se terminant par `-desktop1`, `-desktop2`…).
+Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (numéros se terminant par `-desktop1`, `-desktop2`…), ceux d'Android et Android TV avec des numéros se terminant par `-android1`, `-android2`…
 
 ## Quelle version télécharger ?
 
@@ -99,6 +100,20 @@ uname -m         # x86_64 = PC 64 bits, aarch64 = Raspberry Pi 64 bits
 
 - **Paquet `.deb`** : double-cliquez dessus pour l'installer avec la Logithèque, ou tapez `sudo apt install ./kastideo_…deb` dans le dossier de téléchargement. Kastideo apparaît ensuite dans le menu des applications.
 - **AppImage** : un seul fichier, sans installation. Rendez-le exécutable (clic droit > **Propriétés** > **Autoriser l'exécution**, ou `chmod +x Kastideo-…AppImage`) puis double-cliquez dessus. S'il ne démarre pas, installez `libfuse2` (`libfuse2t64` sur Ubuntu 24.04 et Zorin OS 18).
+
+### 🤖 Android et Android TV
+
+| Votre appareil | Fichier à télécharger |
+|---|---|
+| Téléphone, tablette ou boîtier TV **récent** (presque tous) | `Kastideo-…-android-arm64-v8a.apk` |
+| Ancien appareil ou boîtier TV 32 bits | `Kastideo-…-android-armeabi-v7a.apk` |
+| Vous hésitez | `Kastideo-…-android-universal.apk` (plus volumineux, fonctionne partout) |
+
+Kastideo n'est pas sur Google Play : on télécharge l'**APK** et on l'ouvre. Android demande alors d'autoriser **l'application qui ouvre le fichier** (navigateur, gestionnaire de fichiers, Downloader) à installer des applications : c'est une autorisation pour cette seule application, il n'y a rien à désactiver dans les protections d'Android. Si Play Protect signale un développeur inconnu : **Plus de détails > Installer quand même**.
+
+Sur **Android TV**, le plus simple est l'application gratuite **Downloader** (saisissez l'adresse du fichier APK), ou une clé USB. Les APK sont tous signés avec la même clé : les mises à jour s'installent par-dessus, depuis Kastideo lui-même. Pas à pas : page d'aide « Kastideo sur Android et Android TV » ou [docs/ANDROID.md](docs/ANDROID.md).
+
+<p align="center"><img src="docs/android-qr.png" width="160" alt="QR code vers la page de téléchargement"><br><sub>Scannez avec le téléphone pour ouvrir la page de téléchargement de l'APK.</sub></p>
 
 ## Premiers pas
 

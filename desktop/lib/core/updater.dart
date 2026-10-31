@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../version.dart';
+import 'device.dart';
 import 'log.dart';
 
 /// Façon dont Kastideo est installé : elle décide de la mise à jour proposée.
@@ -21,6 +22,9 @@ enum InstallKind {
 
   /// Linux, paquet .deb (/opt/kastideo) : installé par apt (mot de passe demandé).
   deb,
+
+  /// Android (téléphone, tablette, Android TV) : APK téléchargé puis ouvert par l'installateur du système.
+  androidApk,
 
   /// Autre (construction locale) : lien vers la page de la version.
   other,
@@ -42,7 +46,7 @@ enum UpdateState { idle, checking, upToDate, available, downloading, installing,
 
 /// « 1.2.0-desktop7 » → [1, 2, 0, 7] (comparaison des versions des aperçus Windows / Linux).
 List<int> versionParts(String v) {
-  final m = RegExp(r'(\d+)\.(\d+)\.(\d+)(?:-desktop(\d+))?').firstMatch(v);
+  final m = RegExp(r'(\d+)\.(\d+)\.(\d+)(?:-(?:desktop|android)(\d+))?').firstMatch(v);
   if (m == null) return const [0, 0, 0, 0];
   return [for (var i = 1; i <= 4; i++) int.tryParse(m.group(i) ?? '') ?? 0];
 }
@@ -164,7 +168,7 @@ class UpdateService extends ChangeNotifier {
       ReleaseInfo? best;
       for (final r in list.whereType<Map>()) {
         final tag = r['tag_name'] as String? ?? '';
-        if (r['draft'] == true || !tag.contains('-desktop')) continue;
+        if (r['draft'] == true || !tag.contains(Device.isAndroid ? '-android' : '-desktop')) continue;
         final version = tag.startsWith('v') ? tag.substring(1) : tag;
         if (best != null && compareVersions(version, best.version) <= 0) continue;
         best = ReleaseInfo(
@@ -190,6 +194,7 @@ class UpdateService extends ChangeNotifier {
   static String get appDirectory => File(executable).parent.path;
 
   static InstallKind get installKind {
+    if (Platform.isAndroid) return InstallKind.androidApk;
     if (Platform.isWindows) {
       return File('$appDirectory${Platform.pathSeparator}unins000.exe').existsSync() ? InstallKind.windowsSetup : InstallKind.windowsPortable;
     }
@@ -225,6 +230,10 @@ class UpdateService extends ChangeNotifier {
         // libmpv2 : Ubuntu 24.04 / Zorin OS 18 ; sinon Ubuntu 22.04 / Zorin OS 17.
         final mpv2 = ['/usr/lib/x86_64-linux-gnu/libmpv.so.2', '/usr/lib/aarch64-linux-gnu/libmpv.so.2'].any((p) => File(p).existsSync());
         return find((n) => n.endsWith('_ubuntu${mpv2 ? '24.04' : '22.04'}_$arch.deb')) ?? find((n) => n.endsWith('_$arch.deb'));
+      case InstallKind.androidApk:
+        // Un APK par architecture (la plupart des téléphones : arm64 ; certains boîtiers TV anciens : 32 bits).
+        final abi = Device.abiName;
+        return find((n) => n.endsWith('-android-$abi.apk')) ?? find((n) => n.endsWith('-android-universal.apk'));
       case InstallKind.other:
         return null;
     }
@@ -291,6 +300,24 @@ class UpdateService extends ChangeNotifier {
         await Process.start(target.path, const [], mode: ProcessStartMode.detached);
         exit(0);
       }
+      if (kind == InstallKind.androidApk) {
+        // Android demande l'autorisation « Installer des applications inconnues » pour Kastideo (une seule fois).
+        if (!await Device.canInstallPackages()) {
+          await Device.openInstallSettings();
+          state = UpdateState.available;
+          progress = null;
+          notifyListeners();
+          return 'android-permission';
+        }
+        final apk = await _download(release.assets[name]!, File('${tmp.path}$sep$name'));
+        state = UpdateState.installing;
+        notifyListeners();
+        final started = await Device.installApk(apk.path);
+        state = UpdateState.available;
+        progress = null;
+        notifyListeners();
+        return started ? null : 'android-install';
+      }
       final file = await _download(release.assets[name]!, File('${tmp.path}$sep$name'));
       state = UpdateState.installing;
       notifyListeners();
@@ -333,6 +360,7 @@ class UpdateService extends ChangeNotifier {
           await Process.start('/opt/kastideo/kastideo', const [], mode: ProcessStartMode.detached);
           exit(0);
         case InstallKind.appImage:
+        case InstallKind.androidApk:
         case InstallKind.other:
           return 'no-asset';
       }

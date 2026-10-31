@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Android : clés de signature (jamais versionnées)
+*.jks
+*.keystore
+android/key.properties
+android/local.properties

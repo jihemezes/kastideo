@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'device.dart';
+
 /// Dossier Vidéos de l'utilisateur (Windows : %USERPROFILE%\Videos ; Linux : XDG_VIDEOS_DIR, sinon ~/Vidéos ou ~/Videos).
 String videosDirectory() {
   final env = Platform.environment;
   final sep = Platform.pathSeparator;
+  if (Platform.isAndroid) return Device.mediaDir ?? '/storage/emulated/0/Movies';
   if (Platform.isWindows) {
     final home = env['USERPROFILE'] ?? env['HOMEDRIVE'] ?? 'C:';
     return '$home${sep}Videos';

@@ -8,7 +8,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:window_manager/window_manager.dart';
+import 'core/desk.dart';
+import 'core/device.dart';
 
 import 'app_state.dart';
 import 'core/alerts.dart';
@@ -37,6 +38,7 @@ import 'ui/multiview_view.dart';
 import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
+import 'ui/tv_view.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
 import 'ui/legal_notice.dart';
@@ -145,17 +147,21 @@ class _CloseHandler with WindowListener {
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Device.init();
   await windowManager.ensureInitialized();
   final openPath = _playlistArgument(args);
   final minimized = args.contains('--minimized');
-  if (!await _claimSingleInstance(openPath)) exit(0);
+  // Une seule instance sur ordinateur ; Android gère déjà cela lui-même.
+  if (Device.isDesktop && !await _claimSingleInstance(openPath)) exit(0);
   if (openPath != null) pendingOpen.value = File(openPath).absolute.path;
   MediaKit.ensureInitialized();
+  // KASTIDEO_WINDOW=420x860 : fenêtre de la taille d'un téléphone (essais de la mise en page compacte).
+  final testSize = RegExp(r'^(\d+)x(\d+)$').firstMatch(Platform.environment['KASTIDEO_WINDOW'] ?? '');
   await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
+    WindowOptions(
       title: 'Kastideo',
-      size: Size(1280, 820),
-      minimumSize: Size(960, 620),
+      size: testSize == null ? const Size(1280, 820) : Size(double.parse(testSize.group(1)!), double.parse(testSize.group(2)!)),
+      minimumSize: testSize == null ? const Size(960, 620) : const Size(300, 300),
       center: true,
       backgroundColor: Color(0xFF1E1E1E),
     ),
@@ -209,6 +215,10 @@ Future<void> main(List<String> args) async {
   appShutdown = AppShutdown(playback, watch, recordings, multiview);
   await windowManager.setPreventClose(true);
   windowManager.addListener(_CloseHandler());
+  if (Device.isAndroid) {
+    // Plein écran sous les barres système ; les téléphones restent en portrait ou paysage selon l'appareil.
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
   runApp(
     KastideoApp(
       library: library,
@@ -421,10 +431,64 @@ class _RootViewState extends State<RootView> {
     navigation.go(Screen.live);
   }
 
+  /// Échap (ordinateur) ou touche Retour (Android) : quitte le mode cinéma, sinon referme le lecteur
+  /// (le direct s'arrête, comme sur Mac). Renvoie vrai si quelque chose a été refermé.
+  bool goBack(BuildContext context) {
+    final navigation = context.navigation;
+    final playback = context.playback;
+    if (navigation.theater) {
+      navigation.exitTheater();
+      return true;
+    }
+    if (navigation.screen == Screen.library && navigation.showPlayer) {
+      navigation.closePlayer();
+      return true;
+    }
+    final kind = navigation.screen.kind;
+    if (kind == MediaKind.live && context.settings.interfaceFor(MediaKind.live) == InterfaceStyle.tv) {
+      // Interface TV : Retour referme d'abord le panneau ou le bandeau ; ensuite la chaîne s'arrête (Android) et on revient à l'accueil.
+      if (TVView.onBack?.call() ?? false) return true;
+      if (Device.isAndroid && playback.isLive) playback.stop();
+      return false;
+    }
+    if (kind == null || !navigation.showPlayer) {
+      // Téléphone : la chaîne lancée dans la colonne se referme avec Retour.
+      if (Device.isAndroid && kind == MediaKind.live && playback.current != null && context.settings.interfaceFor(MediaKind.live) == InterfaceStyle.classic) {
+        playback.stop();
+        return true;
+      }
+      return false;
+    }
+    if (kind == MediaKind.live && context.settings.interfaceFor(kind) != InterfaceStyle.cinema && !Device.isAndroid) return false;
+    if (playback.isLive) playback.stop();
+    navigation.closePlayer();
+    return true;
+  }
+
+  /// Touche Retour d'Android : referme ce qui est ouvert, puis revient à l'accueil, puis quitte l'application.
+  void _systemBack(bool didPop, Object? result) {
+    if (didPop) return;
+    if (goBack(context)) return;
+    final navigation = context.navigation;
+    if (navigation.screen != Screen.home) {
+      navigation.go(Screen.home);
+      return;
+    }
+    SystemNavigator.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final navigation = context.navigation;
     final playback = context.playback;
+    return PopScope(
+      canPop: !Device.isAndroid,
+      onPopInvokedWithResult: _systemBack,
+      child: _shortcuts(context, navigation, playback),
+    );
+  }
+
+  Widget _shortcuts(BuildContext context, NavigationModel navigation, PlaybackController playback) {
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.digit0, control: true): () => navigation.go(Screen.home),
@@ -439,22 +503,7 @@ class _RootViewState extends State<RootView> {
         const SingleActivator(LogicalKeyboardKey.f1): () => showHelpDialog(context, page: helpPageFor(navigation.screen)),
         const SingleActivator(LogicalKeyboardKey.keyL, control: true, alt: true): () => showLogDialog(context),
         const SingleActivator(LogicalKeyboardKey.enter, control: true): navigation.toggleTheater,
-        const SingleActivator(LogicalKeyboardKey.escape): () {
-          // Échap : quitte le mode cinéma, sinon referme le lecteur (le direct s'arrête, comme sur Mac).
-          if (navigation.theater) {
-            navigation.exitTheater();
-            return;
-          }
-          if (navigation.screen == Screen.library && navigation.showPlayer) {
-            navigation.closePlayer();
-            return;
-          }
-          final kind = navigation.screen.kind;
-          if (kind == null || !navigation.showPlayer) return;
-          if (kind == MediaKind.live && context.settings.interfaceFor(kind) != InterfaceStyle.cinema) return;
-          if (playback.isLive) playback.stop();
-          navigation.closePlayer();
-        },
+        const SingleActivator(LogicalKeyboardKey.escape): () => goBack(context),
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.period, control: true): () => stopPlayback(context),
       },

@@ -2,16 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../app_state.dart';
+import '../l10n.dart';
 
 import '../core/text.dart';
 import '../theme.dart';
 
-/// Construit un widget différent au survol de la souris.
+/// Construit un widget différent au survol de la souris ou quand il a le focus (flèches du clavier, télécommande).
+/// OK / Entrée / Espace déclenchent [onTap] ; un appui long ou la touche Menu déclenchent [onMenu].
 class Hover extends StatefulWidget {
-  const Hover({super.key, required this.builder, this.onTap, this.cursor = SystemMouseCursors.click});
+  const Hover({super.key, required this.builder, this.onTap, this.onMenu, this.cursor = SystemMouseCursors.click, this.autofocus = false});
   final Widget Function(BuildContext context, bool hovering) builder;
   final VoidCallback? onTap;
+  final void Function(MenuPoint point)? onMenu;
   final MouseCursor cursor;
+  final bool autofocus;
 
   @override
   State<Hover> createState() => _HoverState();
@@ -19,17 +26,171 @@ class Hover extends StatefulWidget {
 
 class _HoverState extends State<Hover> {
   bool _hovering = false;
+  bool _focused = false;
+
+  Offset _center() {
+    final box = context.findRenderObject();
+    if (box is RenderBox && box.hasSize) return box.localToGlobal(box.size.center(Offset.zero));
+    return Offset.zero;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: widget.onTap == null ? MouseCursor.defer : widget.cursor,
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
+    final tappable = widget.onTap != null;
+    if (!tappable) {
+      // Sans action : simple effet de survol, pas de focus.
+      return MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPressStart: widget.onMenu == null ? null : (d) => widget.onMenu!(MenuPoint(d.globalPosition)),
+          child: widget.builder(context, _hovering),
+        ),
+      );
+    }
+    return FocusableActionDetector(
+      enabled: true,
+      autofocus: widget.autofocus,
+      mouseCursor: tappable ? widget.cursor : MouseCursor.defer,
+      onShowHoverHighlight: (v) => setState(() => _hovering = v),
+      onShowFocusHighlight: (v) => setState(() => _focused = v),
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+          widget.onTap?.call();
+          return null;
+        }),
+      },
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.contextMenu): _MenuIntent(),
+      },
+      child: Actions(
+        actions: {
+          _MenuIntent: CallbackAction<_MenuIntent>(onInvoke: (_) {
+            widget.onMenu?.call(MenuPoint(_center()));
+            return null;
+          }),
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          onLongPressStart: widget.onMenu == null ? null : (d) => widget.onMenu!(MenuPoint(d.globalPosition)),
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: _focused ? Border.all(color: KPalette.accent, width: 2.5) : null,
+            ),
+            child: widget.builder(context, _hovering || _focused),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuIntent extends Intent {
+  const _MenuIntent();
+}
+
+/// Position d'un menu contextuel (clic droit, appui long, touche Menu de la télécommande).
+class MenuPoint {
+  const MenuPoint(this.globalPosition);
+  final Offset globalPosition;
+}
+
+/// Ajoute à son contenu le menu contextuel : clic droit à la souris, appui long au doigt, touche Menu à la télécommande.
+class MenuTap extends StatelessWidget {
+  const MenuTap({super.key, required this.onMenu, required this.child});
+  final void Function(MenuPoint point) onMenu;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.contextMenu): () {
+          final box = context.findRenderObject();
+          if (box is RenderBox && box.hasSize) onMenu(MenuPoint(box.localToGlobal(box.size.center(Offset.zero))));
+        },
+      },
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.onTap,
-        child: widget.builder(context, _hovering),
+        onSecondaryTapUp: (d) => onMenu(MenuPoint(d.globalPosition)),
+        onLongPressStart: (d) => onMenu(MenuPoint(d.globalPosition)),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Barre latérale fixe sur grand écran ; sur téléphone, elle devient un tiroir ouvert par le bouton ☰.
+class SidebarShell extends StatefulWidget {
+  const SidebarShell({super.key, required this.sidebar, required this.child, this.title = ''});
+  final Widget sidebar;
+  final Widget child;
+  final String title;
+
+  /// Largeur à partir de laquelle la barre latérale reste affichée.
+  static const wide = 900.0;
+
+  @override
+  State<SidebarShell> createState() => _SidebarShellState();
+}
+
+class _SidebarShellState extends State<SidebarShell> {
+  final _key = GlobalKey<ScaffoldState>();
+  NavigationModel? _nav;
+
+  void _closeDrawer() {
+    if (_key.currentState?.isDrawerOpen ?? false) _key.currentState?.closeDrawer();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final nav = context.navigation;
+    if (!identical(nav, _nav)) {
+      _nav?.removeListener(_closeDrawer);
+      _nav = nav..addListener(_closeDrawer);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nav?.removeListener(_closeDrawer);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width >= SidebarShell.wide) {
+      return Row(children: [
+        SizedBox(width: 236, child: widget.sidebar),
+        VerticalDivider(width: 1, color: KPalette.separator),
+        Expanded(child: widget.child),
+      ]);
+    }
+    return Scaffold(
+      key: _key,
+      backgroundColor: Colors.transparent,
+      drawer: Drawer(width: 280, backgroundColor: KPalette.sidebar, child: SafeArea(child: widget.sidebar)),
+      body: SafeArea(
+        bottom: false,
+        child: Column(children: [
+          SizedBox(
+            height: 44,
+            child: Row(children: [
+              IconButton(
+                tooltip: tr('Menu'),
+                icon: Icon(Icons.menu_rounded, color: KPalette.ink),
+                onPressed: () => _key.currentState?.openDrawer(),
+              ),
+              Expanded(child: Text(widget.title, style: kText(15, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ]),
+          ),
+          Expanded(child: widget.child),
+        ]),
       ),
     );
   }

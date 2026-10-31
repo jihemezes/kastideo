@@ -97,4 +97,23 @@ void main() {
       }
     });
   }
+  test('aide Android : blocs réservés et raccourcis clavier', () {
+    const source = '''# Rubrique
+
+## Page {#p}
+
+Ouvrez <!--mac-->**Réglages (⌘,)**<!--/mac--><!--pc-->**Réglages (Ctrl+,)**<!--/pc--> maintenant.
+<!--android-->
+Touchez le menu.
+<!--/android-->
+''';
+    final android = parseHelp(source, android: true).first.pages.first.body;
+    expect(android, contains('Réglages'));
+    expect(android, isNot(contains('Ctrl+')));
+    expect(android, contains('Touchez le menu'));
+    final desktop = parseHelp(source).first.pages.first.body;
+    expect(desktop, contains('Ctrl+,'));
+    expect(desktop, isNot(contains('Touchez le menu')));
+  });
+
 }

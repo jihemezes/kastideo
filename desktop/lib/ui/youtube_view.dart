@@ -11,6 +11,7 @@ import '../theme.dart';
 import 'cast_ui.dart';
 import 'catalog_screen.dart';
 import 'help_dialog.dart';
+import 'widgets.dart';
 import 'settings_dialog.dart';
 
 YouTubePlayerLabels youTubeLabels() => YouTubePlayerLabels(
@@ -30,11 +31,11 @@ class YouTubeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Row(children: [
-          const SizedBox(width: 236, child: Sidebar(kind: MediaKind.live, youtube: true)),
-          VerticalDivider(width: 1, color: KPalette.separator),
-          const Expanded(child: YouTubeBrowser()),
-        ]),
+        body: SidebarShell(
+          title: 'YouTube',
+          sidebar: const Sidebar(kind: MediaKind.live, youtube: true),
+          child: const YouTubeBrowser(),
+        ),
       );
 }
 
@@ -422,8 +423,8 @@ class _VideoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final store = YouTubeStore.shared;
     final date = _date();
-    return GestureDetector(
-      onSecondaryTapDown: (d) => _menu(context, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => _menu(context, d.globalPosition),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,

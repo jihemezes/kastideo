@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.9.0] - 2026-10-31
+
+**Kastideo arrive sur Android et Android TV.** Cette version Mac ne change pas l'application : elle ajoute la page d'aide « Kastideo sur Android et Android TV » (choix du fichier, installation sans désactiver la sécurité d'Android, télécommande, différences avec l'ordinateur). Les APK se téléchargent sur la page des versions GitHub (tags `-android`).
+
 ## [1.8.1] - 2026-10-31
 
 **Repli en décodage logiciel pour les chaînes qui se figent.** Quand une chaîne affiche une image puis reste figée (décodeur matériel du Mac défaillant), Kastideo la rouvre seul en décodage logiciel au bout de 6 s et s'en souvient. Réglages > Général > Lecture : repli automatique (activé par défaut) et « Toujours décoder en logiciel ». Clic droit sur une chaîne : « Décodage logiciel (image figée) ». Le Journal de lecture explique chaque bascule. Nouvelle page d'aide « Image figée : décodage logiciel ».

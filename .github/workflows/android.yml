@@ -1,0 +1,149 @@
+# Kastideo pour Android et Android TV (dossier desktop/, Flutter + moteur mpv) : un seul APK par architecture.
+# Publication en pré-version GitHub à chaque tag vX.Y.Z-androidN : n'interfère ni avec la version Mac
+# (release.yml ignore ces tags) ni avec Windows / Linux (desktop.yml).
+#
+# Fichiers produits :
+#   Kastideo-<version>-android-arm64-v8a.apk     téléphones, tablettes et boîtiers TV récents (64 bits)
+#   Kastideo-<version>-android-armeabi-v7a.apk   anciens appareils et boîtiers TV 32 bits
+#   Kastideo-<version>-android-x86_64.apk        émulateurs et tablettes Intel
+#   Kastideo-<version>-android-universal.apk     tous les processeurs (plus gros)
+#
+# Secrets requis (Settings > Secrets and variables > Actions) — voir docs/ANDROID.md :
+#   ANDROID_KEYSTORE_BASE64   fichier .jks de la clé de signature, encodé en base64
+#   ANDROID_KEYSTORE_PASSWORD mot de passe du fichier .jks
+#   ANDROID_KEY_ALIAS         alias de la clé (kastideo)
+#   ANDROID_KEY_PASSWORD      mot de passe de la clé
+name: Android
+
+on:
+  push:
+    tags: ['v*-android*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: 3.47.8
+
+jobs:
+  apk:
+    name: APK signés
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          case "$TAG" in
+            v*-android*) VERSION="${TAG#v}" ;;
+            *) VERSION="0.0.0-android0" ;;
+          esac
+          NAME="$(echo "$VERSION" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          N="$(echo "$VERSION" | sed -E 's/.*-android([0-9]+)$/\1/')"
+          # Numéro de version Android : 1.9.0 + android 3 -> 1009003 (toujours croissant).
+          IFS=. read -r MAJ MIN PAT <<< "$NAME"
+          CODE=$(( MAJ * 1000000 + MIN * 10000 + PAT * 100 + N ))
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Clé de signature
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret ANDROID_KEYSTORE_BASE64 absent : créez la clé de signature (voir docs/ANDROID.md)."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > desktop/android/app/kastideo-release.jks
+          cat > desktop/android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=kastideo-release.jks
+          EOF
+
+      - name: Dépendances et tests
+        working-directory: desktop
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: APK par architecture
+        working-directory: desktop
+        run: |
+          flutter build apk --release --split-per-abi \
+            --build-name="${{ steps.version.outputs.name }}" --build-number="${{ steps.version.outputs.code }}" \
+            --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
+          flutter build apk --release \
+            --build-name="${{ steps.version.outputs.name }}" --build-number="${{ steps.version.outputs.code }}" \
+            --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
+
+      - name: Noms des fichiers et vérification de la signature
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUT="$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$OUT"
+          APK=desktop/build/app/outputs/flutter-apk
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "$APK/app-$abi-release.apk" "$OUT/Kastideo-$VERSION-android-$abi.apk"
+          done
+          cp "$APK/app-release.apk" "$OUT/Kastideo-$VERSION-android-universal.apk"
+          BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          for f in "$OUT"/*.apk; do
+            echo "== $f"
+            "$BT/apksigner" verify --verbose --print-certs "$f" | head -8
+          done
+          ls -la "$OUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: artifacts/*.apk
+
+  publish:
+    name: Pré-version GitHub
+    needs: apk
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Notes de version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' desktop/CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Kastideo $VERSION pour Android et Android TV (pré-version)." > notes.md
+          ls -la artifacts
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Kastideo ${{ github.ref_name }} — Android / Android TV (aperçu)
+          body_path: notes.md
+          prerelease: true
+          files: artifacts/*

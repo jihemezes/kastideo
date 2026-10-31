@@ -32,14 +32,21 @@ class HelpBlock {
   final String name;
 }
 
-String _filterPlatform(String source) {
+/// Android : mêmes pages que Windows / Linux, avec les blocs `<!--android-->`, sans les raccourcis clavier « (Ctrl+…) ».
+String _filterPlatform(String source, {required bool android}) {
   var text = source.replaceAll(RegExp(r'<!--mac-->.*?<!--/mac-->', dotAll: true), '');
   text = text.replaceAll('<!--pc-->', '').replaceAll('<!--/pc-->', '');
+  if (android) {
+    text = text.replaceAll('<!--android-->', '').replaceAll('<!--/android-->', '');
+    text = text.replaceAll(RegExp(r'\s*\((?:Ctrl|Alt|Maj|Shift)\+[^)]*\)'), '');
+  } else {
+    text = text.replaceAll(RegExp(r'<!--android-->.*?<!--/android-->', dotAll: true), '');
+  }
   return text;
 }
 
 /// Découpe l'aide en rubriques et pages (les pages vides pour cette plateforme sont masquées).
-List<HelpGroup> parseHelp(String source) {
+List<HelpGroup> parseHelp(String source, {bool android = false}) {
   final groups = <HelpGroup>[];
   var groupTitle = '';
   var pages = <HelpPage>[];
@@ -61,7 +68,7 @@ List<HelpGroup> parseHelp(String source) {
     pages = [];
   }
 
-  for (final line in _filterPlatform(source).split('\n')) {
+  for (final line in _filterPlatform(source, android: android).split('\n')) {
     if (line.startsWith('## ')) {
       closePage();
       var t = line.substring(3).trim();

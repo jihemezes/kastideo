@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n.dart';
 import 'cast.dart';
 import 'cast_media.dart';
+import 'device.dart';
 import 'log.dart';
 import 'models.dart';
 import 'playback.dart';
@@ -43,6 +44,10 @@ class CastController extends ChangeNotifier implements CastRemote {
 
   CastSession? _session;
   final CastMediaServer _media = CastMediaServer();
+
+  /// Mode direct (Android, sans ffmpeg) : l'adresse du flux est donnée telle quelle au téléviseur, sans conversion.
+  bool _direct = false;
+  bool get directMode => _direct;
   String? _baseUrl;
   double _offset = 0;
   Timer? _tick;
@@ -104,11 +109,16 @@ class CastController extends ChangeNotifier implements CastRemote {
     message = null;
     active = device;
     notifyListeners();
+    _direct = false;
     if (!await _media.prepare(customPath: settings.castFfmpegPath)) {
-      _fail(tr('ffmpeg est introuvable. Il convertit la vidéo pour le téléviseur : installez-le ou indiquez son chemin dans Réglages › Cast.'));
-      return;
+      if (Device.isAndroid && !(item.stream ?? '').startsWith('file:')) {
+        _direct = true;
+      } else {
+        _fail(tr('ffmpeg est introuvable. Il convertit la vidéo pour le téléviseur : installez-le ou indiquez son chemin dans Réglages › Cast.'));
+        return;
+      }
     }
-    final lan = await localNetworkAddress(towards: device.host);
+    final lan = _direct ? '' : await localNetworkAddress(towards: device.host);
     if (lan == null) {
       _fail(tr('Aucune connexion au réseau local : le téléviseur ne peut pas joindre cet ordinateur.'));
       return;
@@ -130,16 +140,19 @@ class CastController extends ChangeNotifier implements CastRemote {
   Future<void> _begin(MediaItem item, CastDevice device, String lan, double startAt, int generation) async {
     final source = _sourceOf(item);
     final live = item.kind == MediaKind.live && !item.isReplay;
-    final base = await _media.serve(
-      source: source,
-      live: live,
-      lanAddress: lan,
-      mode: CastVideoMode.fromName(settings.castVideoMode),
-      maxHeight: settings.castMaxHeight,
-    );
+    final base = _direct
+        ? directCastUrl(source, live: live)
+        : await _media.serve(
+            source: source,
+            live: live,
+            lanAddress: lan,
+            mode: CastVideoMode.fromName(settings.castVideoMode),
+            maxHeight: settings.castMaxHeight,
+          );
     if (base == null) throw StateError(_media.lastError ?? 'serveur indisponible');
     _baseUrl = base;
-    if (!live && playback.duration <= Duration.zero) {
+    if (_direct) PlaybackLog.shared.note('Cast : mode direct (sans ffmpeg), le téléviseur lit $base');
+    if (!_direct && !live && playback.duration <= Duration.zero) {
       final d = await _media.probeDuration(source);
       if (d != null) playback.castUpdate(duration: Duration(milliseconds: (d * 1000).round()));
     }
@@ -150,16 +163,25 @@ class CastController extends ChangeNotifier implements CastRemote {
     await session.connect();
     await session.launch();
     if (generation != _generation) return;
-    _offset = live ? 0 : startAt;
+    _offset = (live || _direct) ? 0 : startAt;
     session.setVolume(playback.muted ? 0 : playback.volume / 100);
-    session.load(_media.urlAt(base, _offset), title: item.name, live: live);
+    _loadOn(session, base, item.name, live, _direct ? startAt : _offset, base);
     state = CastState.casting;
     message = null;
     PlaybackLog.shared.note('Cast : diffusion de « ${item.name} » sur ${device.name}');
     _tick?.cancel();
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => _push());
-    playback.castUpdate(position: Duration(milliseconds: (_offset * 1000).round()), loading: true);
+    playback.castUpdate(position: Duration(milliseconds: ((_direct ? startAt : _offset) * 1000).round()), loading: true);
     notifyListeners();
+  }
+
+  /// Charge le contenu sur le téléviseur (converti par ffmpeg, ou adresse directe sur Android).
+  void _loadOn(CastSession session, String base, String title, bool live, double at, String source) {
+    if (_direct) {
+      session.load(base, title: title, live: live, contentType: directCastType(base, live: live), startSeconds: live ? 0 : at);
+    } else {
+      session.load(_media.urlAt(base, at), title: title, live: live);
+    }
   }
 
   static String _sourceOf(MediaItem item) {
@@ -195,25 +217,27 @@ class CastController extends ChangeNotifier implements CastRemote {
     playback.castUpdate(loading: true);
     final live = item.kind == MediaKind.live && !item.isReplay;
     try {
-      final lan = await localNetworkAddress(towards: device.host);
       final source = _sourceOf(item);
-      final base = await _media.serve(
-        source: source,
-        live: live,
-        lanAddress: lan ?? '',
-        mode: CastVideoMode.fromName(settings.castVideoMode),
-        maxHeight: settings.castMaxHeight,
-      );
+      final lan = _direct ? '' : await localNetworkAddress(towards: device.host);
+      final base = _direct
+          ? directCastUrl(source, live: live)
+          : await _media.serve(
+              source: source,
+              live: live,
+              lanAddress: lan ?? '',
+              mode: CastVideoMode.fromName(settings.castVideoMode),
+              maxHeight: settings.castMaxHeight,
+            );
       if (base == null) throw StateError(_media.lastError ?? 'serveur indisponible');
       if (generation != _generation) return;
       _baseUrl = base;
-      if (!live) {
+      if (!_direct && !live) {
         final d = await _media.probeDuration(source);
         if (d != null) playback.castUpdate(duration: Duration(milliseconds: (d * 1000).round()));
       }
-      _offset = live ? 0 : start;
-      session.load(_media.urlAt(base, _offset), title: item.name, live: live);
-      playback.castUpdate(position: Duration(milliseconds: (_offset * 1000).round()), loading: true);
+      _offset = (live || _direct) ? 0 : start;
+      _loadOn(session, base, item.name, live, _direct ? start : _offset, base);
+      playback.castUpdate(position: Duration(milliseconds: ((_direct ? start : _offset) * 1000).round()), loading: true);
     } catch (e) {
       if (generation != _generation) return;
       message = _friendly(e);
@@ -252,7 +276,10 @@ class CastController extends ChangeNotifier implements CastRemote {
     if (session == null || state != CastState.casting) return;
     final playing = session.playerState == 'PLAYING';
     final buffering = session.playerState == 'BUFFERING';
-    final pos = _offset + session.currentTime;
+    final pos = _direct ? session.currentTime : _offset + session.currentTime;
+    if (_direct && session.duration != null && session.duration! > 0 && !playback.isLive) {
+      playback.castUpdate(duration: Duration(milliseconds: (session.duration! * 1000).round()));
+    }
     playback.castUpdate(
       position: Duration(milliseconds: (pos * 1000).round()),
       playing: playing || buffering,
@@ -280,8 +307,8 @@ class CastController extends ChangeNotifier implements CastRemote {
     final base = _baseUrl;
     final item = playback.current;
     if (session == null || base == null || item == null || playback.isLive) return;
-    _offset = position.inMilliseconds / 1000;
-    session.load(_media.urlAt(base, _offset), title: item.name, live: false);
+    _offset = _direct ? 0 : position.inMilliseconds / 1000;
+    _loadOn(session, base, item.name, false, position.inMilliseconds / 1000, base);
     playback.castUpdate(position: position, loading: true);
   }
 
@@ -373,4 +400,23 @@ class CastController extends ChangeNotifier implements CastRemote {
     unawaited(_cleanup());
     super.dispose();
   }
+}
+
+/// Mode direct : adresse remise au téléviseur. Le direct Xtream en « .ts » passe en HLS (« .m3u8 »), que les
+/// téléviseurs lisent seuls ; le reste (films, séries) est donné tel quel.
+String directCastUrl(String source, {required bool live}) {
+  if (live && RegExp(r'/live/[^/]+/[^/]+/\d+\.ts$').hasMatch(source)) {
+    return source.replaceFirst(RegExp(r'\.ts$'), '.m3u8');
+  }
+  return source;
+}
+
+/// Type de média annoncé au téléviseur pour une adresse directe.
+String directCastType(String url, {required bool live}) {
+  final path = (Uri.tryParse(url)?.path ?? url).toLowerCase();
+  if (path.endsWith('.m3u8')) return 'application/x-mpegURL';
+  if (path.endsWith('.mkv')) return 'video/x-matroska';
+  if (path.endsWith('.webm')) return 'video/webm';
+  if (path.endsWith('.ts') || live) return 'video/mp2t';
+  return 'video/mp4';
 }

@@ -1079,6 +1079,74 @@ Kastideo checks GitHub for new versions at launch and then every 12 hours (Windo
 - **Any distribution, and Raspberry Pi (64-bit)**: AppImage file; make it executable (right-click > Properties > Allow executing, or `chmod +x`) and run it.
 <!--/pc-->
 
+## Kastideo on Android and Android TV {#android}
+
+Kastideo is also available for **Android phones and tablets** and for **Android TV** (Google TV, Chromecast with Google TV, Nvidia Shield, Philips, Sony, TCL TVs…). It is the same app, with the same sources, categories, favorites, guide, replay, recordings, MultiView and YouTube, adapted to touch and to the remote. A single **APK** file works on phones and on TVs.
+
+### Choose the right file
+
+On the GitHub releases page, look for the `Kastideo-…-android-….apk` files:
+
+- **arm64-v8a**: almost all recent phones, tablets and TV boxes (the right choice when in doubt);
+- **armeabi-v7a**: older devices and some 32-bit TV boxes;
+- **x86_64**: emulators and a few Intel tablets;
+- **universal**: every processor, but larger.
+
+### Install without turning security off
+
+Android does **not** require you to turn its protections off: it asks for a permission for **one app only** (the one that opens the APK: browser, file manager or Downloader).
+
+1. Download the APK, then open it.
+2. If Android says "For your security, installing unknown apps is blocked", tap **Settings** and turn on **Allow from this source** for the app you are using (Chrome, for example). Other apps stay blocked.
+3. Go back and tap **Install**.
+4. If **Play Protect** flags an app from an unknown developer, tap **More details** then **Install anyway**: Kastideo is not published on Google Play, and it is signed by its developer, not by a publisher listed with Google.
+
+All Kastideo APKs are signed with the same key: Android therefore accepts updates over the existing installation, without losing your settings.
+
+### Install on Android TV
+
+A TV often has no browser or file manager. Three methods:
+
+- **Downloader** (free app from the TV's Play Store): type the download address of the GitHub APK, then allow Downloader to install apps;
+- **USB stick**: copy the APK to the stick, plug it into the TV and open it with a file manager (Solid Explorer, File Commander…);
+- **From your phone**: send the APK with "Send Files to TV", or install it with `adb install` if network debugging is on.
+
+Kastideo then appears in the TV's app list with its banner.
+
+### Using touch (phone, tablet)
+
+- **☰ menu** at the top left: the sections (Live, Movies, Series, Favorites, categories…) open in a drawer.
+- **Long press** on a channel, a movie or an episode: the menu (favorite, record, replay, software decoding…), like a right-click on a computer.
+- **In the player**: one tap shows or hides the bar; **double tap** left = −10 s, right = +30 s, centre = pause; **swipe vertically** on the right = volume, on the left = brightness; **swipe horizontally** = skip forward or back in a movie.
+- **Back** (Android gesture or button): closes the player, then returns to the home screen.
+- Turn the device to **landscape**: the current channel goes full screen.
+
+### Using the remote (Android TV)
+
+- **Arrows** move the selection (outlined in colour); **OK** confirms; **Back** goes back.
+- **Menu key** on a channel or movie: the context menu.
+- **Live**: the TV interface opens by default. **↑ / ↓** or **Channel +/−** change channel, **digits** type a number, **←** opens the channel list, **→** shows the info banner, **OK** opens or closes the list.
+- **Movies and series**: the Cinema interface opens by default. While playing: **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; **↓** brings up the control bar, which the arrows then move across.
+- The remote's **Play/Pause** and **Fast-forward/Rewind** keys are supported.
+
+### Differences from the computer
+
+- **Cast**: on Android, casting to a Chromecast or a TV uses **direct mode**: the stream address is sent as-is to the TV (channels switch to HLS ".m3u8"). Local files (My videos) cannot be cast. The ffmpeg conversion available on computers is not available.
+- **Recordings and downloads** are stored in the app's folder (`Android/data/fr.jmezes.kastideo/files/Movies`, visible from the file manager). Android may stop an app running in the background: keep Kastideo open and the device plugged in during a recording. A scheduled recording only starts if Kastideo is running at the planned time.
+- **No launch at sign-in** and no .m3u file association: add your playlists in Settings > Sources.
+- **YouTube** opens in the device's browser.
+
+### Updates
+
+Kastideo looks for new Android versions on GitHub. When one is offered, **Install** downloads the APK and Android asks you to confirm. The first time, Android also asks you to allow Kastideo to install apps (the setting opens by itself).
+
+### If something goes wrong
+
+- **"App not installed"**: another copy of Kastideo signed with a different key is already installed; uninstall it first.
+- **"Parse error" or "App not compatible"**: wrong file for your processor; try the **universal** APK.
+- **Frozen picture**: see the page "Frozen picture: software decoding".
+- **The Playback log** (Settings) keeps the details of playback errors.
+
 ## What's new {#nouveautes}
 
 After each update, the **What's New** window summarises the changes in the installed version.

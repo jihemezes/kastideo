@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
+import '../core/desk.dart';
 
 import '../app_state.dart';
 import '../core/alerts.dart';

@@ -79,6 +79,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
         InstallKind.windowsPortable => tr('Version portable : Kastideo téléchargera la nouvelle archive, se fermera, remplacera ses fichiers puis se relancera.'),
         InstallKind.appImage => tr('AppImage : Kastideo téléchargera le nouveau fichier à côté de l\'actuel, supprimera l\'ancien puis se relancera.'),
         InstallKind.deb => tr('Paquet .deb : Kastideo téléchargera le paquet et l\'installera (votre mot de passe vous sera demandé), puis se relancera.'),
+        InstallKind.androidApk => tr('Kastideo télécharge le nouvel APK, puis Android vous demande de confirmer l\'installation.'),
         InstallKind.other => tr('Cette copie de Kastideo ne peut pas se mettre à jour seule : téléchargez la nouvelle version sur GitHub.'),
       };
 
@@ -88,6 +89,14 @@ class _UpdateDialogState extends State<_UpdateDialog> {
     if (!mounted || result == null) return;
     if (result == 'no-asset') {
       await launchUrl(Uri.parse(release.url));
+      return;
+    }
+    if (result == 'android-permission') {
+      setState(() => _message = tr('Autorisez Kastideo à installer des applications (réglage qui vient de s\'ouvrir), puis revenez ici et réessayez.'));
+      return;
+    }
+    if (result == 'android-install') {
+      setState(() => _message = tr('Android n\'a pas pu ouvrir l\'installation. Téléchargez l\'APK depuis GitHub.'));
       return;
     }
     if (result.startsWith('deb:')) {

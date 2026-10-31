@@ -20,6 +20,9 @@ import 'widgets.dart';
 class TVView extends StatefulWidget {
   const TVView({super.key});
 
+  /// Touche Retour (Android TV) : referme le panneau, le bandeau ou la saisie d'un numéro. Vrai si quelque chose a été refermé.
+  static bool Function()? onBack;
+
   @override
   State<TVView> createState() => _TVViewState();
 }
@@ -45,6 +48,23 @@ class _TVViewState extends State<TVView> {
     _clock = Timer.periodic(const Duration(seconds: 30), (_) => mounted && _banner ? setState(() {}) : null);
     _pokeTopBar();
     HardwareKeyboard.instance.addHandler(_hardwareKey);
+    TVView.onBack = _back;
+  }
+
+  bool _back() {
+    if (_typed.isNotEmpty) {
+      _cancelNumber();
+      return true;
+    }
+    if (_panel) {
+      _closePanel();
+      return true;
+    }
+    if (_banner) {
+      _toggleBanner();
+      return true;
+    }
+    return false;
   }
 
   /// Touches captées avant le système de focus (comme le moniteur clavier de la version Mac) :
@@ -63,6 +83,7 @@ class _TVViewState extends State<TVView> {
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_hardwareKey);
+    if (TVView.onBack == _back) TVView.onBack = null;
     for (final t in [_panelTimer, _bannerTimer, _typeTimer, _noticeTimer, _topTimer, _clock]) {
       t?.cancel();
     }
@@ -251,7 +272,15 @@ class _TVViewState extends State<TVView> {
       _openPanel();
     } else if (key == LogicalKeyboardKey.arrowRight) {
       _panel ? _closePanel() : _toggleBanner();
-    } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
+    } else if (key == LogicalKeyboardKey.channelUp) {
+      _zap(-1);
+    } else if (key == LogicalKeyboardKey.channelDown) {
+      _zap(1);
+    } else if (key == LogicalKeyboardKey.mediaPlayPause || key == LogicalKeyboardKey.mediaPlay || key == LogicalKeyboardKey.mediaPause) {
+      context.playback.togglePause();
+    } else if (key == LogicalKeyboardKey.contextMenu) {
+      _toggleFavorite();
+    } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.select) {
       _typed.isNotEmpty ? _commitNumber() : _togglePanel();
     } else if (key == LogicalKeyboardKey.escape) {
       if (_typed.isNotEmpty) {
@@ -581,8 +610,8 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.guide.current(item);
     final favorite = context.library.isFavorite(item.id);
-    return GestureDetector(
-      onSecondaryTapUp: (d) => showItemMenu(context, item, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => showItemMenu(context, item, d.globalPosition),
       child: Hover(
         onTap: onTap,
         builder: (context, hovering) => Container(

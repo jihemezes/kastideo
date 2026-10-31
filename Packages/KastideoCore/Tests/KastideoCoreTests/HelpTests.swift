@@ -52,6 +52,15 @@ final class HelpTests: XCTestCase {
         XCTAssertFalse(pc[0].pages[0].body.contains("⌘"))
     }
 
+    func testAndroidBlocksNeverShownOnMacOrPC() {
+        let source = "# R\n\n## P {#p}\n\nTexte.\n<!--android-->\nTouchez le menu.\n<!--/android-->\n"
+        for platform in [HelpPlatform.mac, HelpPlatform.pc] {
+            let text = HelpDocument.filter(source, platform: platform)
+            XCTAssertFalse(text.contains("Touchez le menu"))
+            XCTAssertTrue(text.contains("Texte."))
+        }
+    }
+
     func testBlocks() {
         let page = HelpDocument.parse(sample, platform: .mac)[1].pages[0]
         let blocks = HelpDocument.blocks(page.body)

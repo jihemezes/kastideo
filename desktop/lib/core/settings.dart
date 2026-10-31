@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme.dart';
+import 'device.dart';
 import 'models.dart';
 import 'secrets.dart';
 
@@ -226,7 +227,9 @@ class AppSettings extends ChangeNotifier {
 
   InterfaceStyle interfaceFor(MediaKind kind) {
     final raw = _prefs.getString('interface.${kind.name}');
-    final style = InterfaceStyle.values.where((s) => s.name == raw).firstOrNull ?? InterfaceStyle.classic;
+    // Sur Android TV, par défaut : interface TV pour le direct, Cinéma pour les films et séries (télécommande).
+    final fallback = Device.isTv ? (kind == MediaKind.live ? InterfaceStyle.tv : InterfaceStyle.cinema) : InterfaceStyle.classic;
+    final style = InterfaceStyle.values.where((s) => s.name == raw).firstOrNull ?? fallback;
     // L'interface TV n'existe que pour le direct (comme sur Mac).
     return style == InterfaceStyle.tv && kind != MediaKind.live ? InterfaceStyle.classic : style;
   }

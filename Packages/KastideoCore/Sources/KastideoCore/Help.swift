@@ -91,6 +91,8 @@ public enum HelpDocument {
         let keep = platform == .mac ? "mac" : "pc"
         let drop = platform == .mac ? "pc" : "mac"
         var text = source
+        // Blocs réservés à Android : jamais affichés sur Mac.
+        text = text.replacingOccurrences(of: "(?s)<!--android-->.*?<!--/android-->", with: "", options: .regularExpression)
         text = text.replacingOccurrences(of: "(?s)<!--\(drop)-->.*?<!--/\(drop)-->", with: "", options: .regularExpression)
         text = text.replacingOccurrences(of: "<!--\(keep)-->", with: "")
         text = text.replacingOccurrences(of: "<!--/\(keep)-->", with: "")

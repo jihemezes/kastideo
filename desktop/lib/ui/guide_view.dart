@@ -103,11 +103,11 @@ class GuideScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Row(children: [
-          const SizedBox(width: 236, child: Sidebar(kind: MediaKind.live, guide: true)),
-          VerticalDivider(width: 1, color: KPalette.separator),
-          const Expanded(child: GuideView()),
-        ]),
+        body: SidebarShell(
+          title: tr('Guide TV'),
+          sidebar: const Sidebar(kind: MediaKind.live, guide: true),
+          child: const GuideView(),
+        ),
       );
 }
 
@@ -439,8 +439,8 @@ class _GuideRow extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(border: Border(bottom: BorderSide(color: KPalette.separator))),
       child: Row(children: [
-        GestureDetector(
-          onSecondaryTapUp: (d) => showItemMenu(context, item, d.globalPosition),
+        MenuTap(
+          onMenu: (d) => showItemMenu(context, item, d.globalPosition),
           child: Hover(
             onTap: () => openItem(context, item),
             builder: (context, hovering) => Container(

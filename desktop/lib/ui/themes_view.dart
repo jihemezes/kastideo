@@ -372,8 +372,8 @@ class ProgrammeRow extends StatelessWidget {
     final p = programme;
     final airing = p == null || p.isAiring(nowSeconds());
     final theme = GuideStore.themeOf(group, p);
-    return GestureDetector(
-      onSecondaryTapUp: (d) => showGroupMenu(context, group, p, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => showGroupMenu(context, group, p, d.globalPosition),
       child: Hover(
         onTap: () => openProgramme(context, item, p),
         builder: (context, hovering) => Container(

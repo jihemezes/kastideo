@@ -42,13 +42,8 @@ class LibraryScreen extends StatelessWidget {
               : selected != null
                   ? DetailsView(key: ValueKey(selected.id), item: selected, page: true)
                   : const _LibraryBrowser();
-          return Row(children: [
-            if (!navigation.theater) ...[
-              const SizedBox(width: 236, child: _LibrarySidebar()),
-              VerticalDivider(width: 1, color: KPalette.separator),
-            ],
-            Expanded(child: content),
-          ]);
+          if (navigation.theater) return content;
+          return SidebarShell(title: tr('Mes vidéos'), sidebar: const _LibrarySidebar(), child: content);
         },
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/device.dart';
 import '../core/cast_media.dart';
 import '../core/countries.dart';
 import '../core/details.dart';
@@ -288,7 +289,7 @@ class _GeneralTabState extends State<_GeneralTab> {
         ]),
         const _CastSection(),
         const _YouTubeSection(),
-        const _StartupSection(),
+        if (!Device.isAndroid) const _StartupSection(),
         const _UpdatesSection(),
       ]),
     );
@@ -327,6 +328,7 @@ class _UpdatesSection extends StatelessWidget {
           InstallKind.windowsPortable => tr('version portable'),
           InstallKind.appImage => 'AppImage',
           InstallKind.deb => tr('paquet .deb'),
+          InstallKind.androidApk => 'APK',
           InstallKind.other => tr('construction locale'),
         };
         return _section(tr('Mises à jour'), [

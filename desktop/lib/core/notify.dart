@@ -1,7 +1,8 @@
 import 'dart:io';
 
+import 'device.dart';
 import 'package:local_notifier/local_notifier.dart';
-import 'package:window_manager/window_manager.dart';
+import 'desk.dart';
 
 import 'log.dart';
 
@@ -14,6 +15,11 @@ class SystemNotifier {
   static bool _ready = false;
 
   static Future<void> setup() async {
+    if (Platform.isAndroid) {
+      _ready = true;
+      await Device.requestNotifications();
+      return;
+    }
     if (!(Platform.isWindows || Platform.isLinux)) return;
     try {
       await localNotifier.setup(appName: 'Kastideo', shortcutPolicy: ShortcutPolicy.requireCreate);
@@ -25,6 +31,10 @@ class SystemNotifier {
 
   static Future<void> show(String title, String body) async {
     if (!enabled || !_ready) return;
+    if (Platform.isAndroid) {
+      await Device.notify(title, body);
+      return;
+    }
     try {
       final n = LocalNotification(title: title, body: body);
       n.onClick = () async {

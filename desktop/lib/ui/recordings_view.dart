@@ -29,30 +29,36 @@ class RecordingsScreen extends StatelessWidget {
   const RecordingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: ListenableBuilder(
-          listenable: context.navigation,
-          builder: (context, _) => Row(children: [
-            if (!context.navigation.theater) ...[
-              const SizedBox(width: 236, child: Sidebar(kind: MediaKind.live, recordings: true)),
-              VerticalDivider(width: 1, color: KPalette.separator),
-              const SizedBox(width: 470, child: RecordingsList()),
-              VerticalDivider(width: 1, color: KPalette.separator),
-            ],
-            Expanded(
-              child: PlayerPane(
-                placeholder: Center(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.video_file_outlined, size: 64, color: KPalette.ink.withValues(alpha: 0.35)),
-                    const SizedBox(height: 12),
-                    Text(tr('Choisissez un fichier à regarder'), style: kText(15, color: KPalette.secondaryText)),
-                  ]),
-                ),
-              ),
-            ),
-          ]),
-        ),
-      );
+  Widget build(BuildContext context) {
+    final placeholder = Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.video_file_outlined, size: 64, color: KPalette.ink.withValues(alpha: 0.35)),
+        const SizedBox(height: 12),
+        Text(tr('Choisissez un fichier à regarder'), style: kText(15, color: KPalette.secondaryText)),
+      ]),
+    );
+    return Scaffold(
+      body: ListenableBuilder(
+        listenable: Listenable.merge([context.navigation, context.playback]),
+        builder: (context, _) {
+          if (context.navigation.theater) return PlayerPane(placeholder: placeholder);
+          final compact = MediaQuery.sizeOf(context).width < SidebarShell.wide;
+          final Widget body = compact
+              // Téléphone : le fichier en cours en haut, la liste dessous.
+              ? Column(children: [
+                  if (context.playback.current != null) AspectRatio(aspectRatio: 16 / 9, child: PlayerPane(placeholder: placeholder)),
+                  const Expanded(child: RecordingsList()),
+                ])
+              : Row(children: [
+                  const SizedBox(width: 470, child: RecordingsList()),
+                  VerticalDivider(width: 1, color: KPalette.separator),
+                  Expanded(child: PlayerPane(placeholder: placeholder)),
+                ]);
+          return SidebarShell(title: tr('Enregistrements'), sidebar: const Sidebar(kind: MediaKind.live, recordings: true), child: body);
+        },
+      ),
+    );
+  }
 }
 
 class RecordingsList extends StatefulWidget {
@@ -322,8 +328,8 @@ class _FileRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onSecondaryTapUp: (d) => _menu(context, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => _menu(context, d.globalPosition),
       child: Hover(
         onTap: () => playLocalFile(context, file.path),
         builder: (context, hovering) => Container(

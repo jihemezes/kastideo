@@ -76,7 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: LayoutBuilder(builder: (context, constraints) {
         final size = constraints.biggest;
-        final tileHeight = math.min(math.max(size.height * 0.30, 210.0), 380.0);
+        _compact = size.width < 720;
+        final tileHeight = _compact ? 164.0 : math.min(math.max(size.height * 0.30, 210.0), 380.0);
         return Stack(children: [
           const Positioned.fill(child: KastideoBackground()),
           _watermark(size),
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1180),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(32, 20, 32, 40),
+                      padding: _compact ? const EdgeInsets.fromLTRB(16, 12, 16, 40) : const EdgeInsets.fromLTRB(32, 20, 32, 40),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -160,7 +161,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  bool _compact = false;
+
   Widget _header(BuildContext context) {
+    final icon = _compact ? 56.0 : 92.0;
     return Row(children: [
       Container(
         decoration: BoxDecoration(
@@ -172,15 +176,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20.6),
-          child: Image.asset('assets/images/icon.png', width: 92, height: 92),
+          child: Image.asset('assets/images/icon.png', width: icon, height: icon),
         ),
       ),
       const SizedBox(width: 14),
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Kastideo', style: kRoundedD(46, FontWeight.w900)),
+          Text('Kastideo', style: kRoundedD(_compact ? 30 : 46, FontWeight.w900)),
           const SizedBox(height: 2),
           Text(tr('Vos chaînes, vos films et vos séries au même endroit'),
+              maxLines: _compact ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
               style: kTextD(14, color: Colors.white.withValues(alpha: 0.7))),
         ]),
       ),
@@ -318,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _bigTiles(BuildContext context, double height) {
     final navigation = context.navigation;
-    return Row(children: [
+    final tiles = <Widget>[
       Expanded(
         child: HomeBigTile(
           title: tr('Direct'),
@@ -365,7 +371,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    ]);
+    ];
+    return _tileGrid(tiles);
+  }
+
+  /// Tuiles en une rangée, ou en grille 2 colonnes sur petit écran.
+  Widget _tileGrid(List<Widget> items) {
+    final tiles = items.whereType<Expanded>().toList();
+    if (!_compact) return Row(children: items);
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += 2) {
+      if (i > 0) rows.add(const SizedBox(height: 12));
+      rows.add(Row(children: [
+        tiles[i],
+        const SizedBox(width: 12),
+        i + 1 < tiles.length ? tiles[i + 1] : const Expanded(child: SizedBox()),
+      ]));
+    }
+    return Column(children: rows);
   }
 
   Widget _quickButtons(BuildContext context) {

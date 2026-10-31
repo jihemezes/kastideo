@@ -238,7 +238,7 @@ class CastSession {
       'requestId': ++_requestId,
       'sessionId': _sessionId,
       'autoplay': true,
-      'currentTime': 0,
+      'currentTime': startSeconds,
       'media': {
         'contentId': url,
         'contentType': contentType,

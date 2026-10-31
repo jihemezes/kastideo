@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:window_manager/window_manager.dart';
+import '../core/desk.dart';
+import '../core/device.dart';
 
 import '../app_state.dart';
 import '../core/models.dart';
@@ -36,9 +37,27 @@ class _PlayerPaneState extends State<PlayerPane> {
   Timer? _hideTimer;
   final _focus = FocusNode();
 
+  // Gestes tactiles : message au centre (volume, luminosité, position) et glissements en cours.
+  String? _hud;
+  Timer? _hudTimer;
+  double _dragVolume = 100;
+  double _dragBrightness = 0.5;
+  double _dragSeek = 0;
+  bool _dragLeftHalf = false;
+  Axis? _dragAxis;
+
+  void _showHud(String text) {
+    setState(() => _hud = text);
+    _hudTimer?.cancel();
+    _hudTimer = Timer(const Duration(milliseconds: 900), () {
+      if (mounted) setState(() => _hud = null);
+    });
+  }
+
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _hudTimer?.cancel();
     _focus.dispose();
     super.dispose();
   }
@@ -47,8 +66,99 @@ class _PlayerPaneState extends State<PlayerPane> {
     if (!_controlsVisible) setState(() => _controlsVisible = true);
     _hideTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted && context.playback.isPlaying) setState(() => _controlsVisible = false);
+      if (mounted && context.playback.isPlaying) {
+        setState(() => _controlsVisible = false);
+        // Télécommande : les boutons cachés ne gardent pas le focus.
+        if (Device.isTv) _focus.requestFocus();
+      }
     });
+  }
+
+  /// Touches de la télécommande (Android TV) quand l'image a le focus ; les boutons de la barre gardent les flèches.
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (Device.isAndroid) _poke();
+    if (!Device.isAndroid || !node.hasPrimaryFocus || widget.tvMode) return KeyEventResult.ignored;
+    final playback = context.playback;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.mediaPlayPause) {
+      playback.togglePause();
+    } else if (key == LogicalKeyboardKey.mediaPlay || key == LogicalKeyboardKey.mediaPause) {
+      playback.togglePause();
+    } else if (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.mediaRewind) {
+      playback.jump(-10);
+      _showHud('−10 s');
+    } else if (key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.mediaFastForward) {
+      playback.jump(30);
+      _showHud('+30 s');
+    } else if (key == LogicalKeyboardKey.arrowUp) {
+      playback.setVolume((playback.volume + 5).clamp(0, 100).toDouble());
+      _showHud('${tr('Volume')} ${playback.volume.round()} %');
+    } else if (key == LogicalKeyboardKey.arrowDown) {
+      // Fait apparaître la barre et passe le focus à ses boutons.
+      setState(() => _controlsVisible = true);
+      FocusScope.of(context).focusInDirection(TraversalDirection.down);
+    } else {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
+  // MARK: Gestes tactiles
+
+  void _onTapTouch() {
+    if (_controlsVisible && context.playback.isPlaying) {
+      setState(() => _controlsVisible = false);
+    } else {
+      _poke();
+    }
+  }
+
+  void _onDoubleTapTouch(Offset position, double width) {
+    final playback = context.playback;
+    if (position.dx < width / 3) {
+      playback.jump(-10);
+      _showHud('−10 s');
+    } else if (position.dx > width * 2 / 3) {
+      playback.jump(30);
+      _showHud('+30 s');
+    } else {
+      playback.togglePause();
+    }
+  }
+
+  Future<void> _dragStart(Offset position, double width) async {
+    _dragLeftHalf = position.dx < width / 2;
+    _dragVolume = context.playback.volume;
+    _dragBrightness = await Device.brightness();
+    _dragSeek = 0;
+    _dragAxis = null;
+  }
+
+  void _dragUpdate(DragUpdateDetails d, double height) {
+    final playback = context.playback;
+    _dragAxis ??= d.delta.dx.abs() > d.delta.dy.abs() ? Axis.horizontal : Axis.vertical;
+    if (_dragAxis == Axis.vertical) {
+      final change = -d.delta.dy / (height * 0.7);
+      if (_dragLeftHalf) {
+        _dragBrightness = (_dragBrightness + change).clamp(0.02, 1.0);
+        Device.setBrightness(_dragBrightness);
+        _showHud('${tr('Luminosité')} ${(_dragBrightness * 100).round()} %');
+      } else {
+        _dragVolume = (_dragVolume + change * 100).clamp(0, 100);
+        playback.setVolume(_dragVolume);
+        _showHud('${tr('Volume')} ${_dragVolume.round()} %');
+      }
+    } else if (playback.isSeekable) {
+      _dragSeek += d.delta.dx * 0.25;
+      final s = _dragSeek.round();
+      _showHud('${s >= 0 ? '+' : '−'}${s.abs()} s');
+    }
+  }
+
+  void _dragEnd() {
+    if (_dragAxis == Axis.horizontal && _dragSeek.abs() >= 1) context.playback.jump(_dragSeek.round());
+    _dragAxis = null;
   }
 
   /// Retour : la fiche (films, épisodes, la lecture continue) ou le catalogue du direct (la chaîne s'arrête).
@@ -68,6 +178,33 @@ class _PlayerPaneState extends State<PlayerPane> {
     if (full && navigation.theater) navigation.toggleTheater();
   }
 
+  /// Souris : clic pour le focus, double-clic pour le mode cinéma. Doigt : un appui affiche ou masque la barre,
+  /// double appui = ±10/30 s ou pause, glissements = volume (droite), luminosité (gauche), position (horizontal).
+  Widget _gestures({required Widget child}) {
+    if (!Device.isTouch) {
+      return GestureDetector(
+        onTap: () => _focus.requestFocus(),
+        onDoubleTap: context.navigation.toggleTheater,
+        child: child,
+      );
+    }
+    return LayoutBuilder(builder: (context, box) {
+      Offset? doubleTapAt;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _onTapTouch,
+        onDoubleTapDown: (d) => doubleTapAt = d.localPosition,
+        onDoubleTap: () {
+          if (doubleTapAt != null) _onDoubleTapTouch(doubleTapAt!, box.maxWidth);
+        },
+        onPanStart: (d) => _dragStart(d.localPosition, box.maxWidth),
+        onPanUpdate: (d) => _dragUpdate(d, box.maxHeight),
+        onPanEnd: (_) => _dragEnd(),
+        child: child,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
 
@@ -79,7 +216,7 @@ class _PlayerPaneState extends State<PlayerPane> {
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
         const SingleActivator(LogicalKeyboardKey.period, control: true): () => stopPlayback(context),
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
-        if (!widget.tvMode) ...{
+        if (!widget.tvMode && !Device.isAndroid) ...{
           const SingleActivator(LogicalKeyboardKey.escape): () {
             final navigation = context.navigation;
             if (navigation.theater) {
@@ -102,12 +239,11 @@ class _PlayerPaneState extends State<PlayerPane> {
       child: Focus(
         focusNode: _focus,
         autofocus: true,
+        onKeyEvent: _onKey,
         child: MouseRegion(
           onHover: (_) => _poke(),
           cursor: _controlsVisible || !playback.isPlaying ? MouseCursor.defer : SystemMouseCursors.none,
-          child: GestureDetector(
-            onTap: () => _focus.requestFocus(),
-            onDoubleTap: context.navigation.toggleTheater,
+          child: _gestures(
             child: Container(
               color: Colors.black,
               child: ListenableBuilder(
@@ -137,6 +273,14 @@ class _PlayerPaneState extends State<PlayerPane> {
                           opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
                           duration: const Duration(milliseconds: 250),
                           child: _BackChip(live: playback.isLive, onTap: _back),
+                        ),
+                      ),
+                    if (_hud != null)
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.65), borderRadius: BorderRadius.circular(12)),
+                          child: Text(_hud!, style: kTextD(18, weight: FontWeight.w700)),
                         ),
                       ),
                     Positioned(

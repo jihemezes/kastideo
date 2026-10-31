@@ -5,9 +5,25 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kastideo/core/cast.dart';
+import 'package:kastideo/core/cast_controller.dart';
 import 'package:kastideo/core/cast_media.dart';
 
 void main() {
+  group('mode direct (Android)', () {
+    test('le direct Xtream en .ts passe en HLS', () {
+      expect(directCastUrl('http://h.tv:80/live/user/pass/1234.ts', live: true), 'http://h.tv:80/live/user/pass/1234.m3u8');
+      expect(directCastUrl('http://h.tv/movie/user/pass/55.mkv', live: false), 'http://h.tv/movie/user/pass/55.mkv');
+      expect(directCastUrl('http://h.tv/live/user/pass/9.m3u8', live: true), 'http://h.tv/live/user/pass/9.m3u8');
+    });
+
+    test('type de média annoncé au téléviseur', () {
+      expect(directCastType('http://h/x.m3u8', live: true), 'application/x-mpegURL');
+      expect(directCastType('http://h/x.mkv', live: false), 'video/x-matroska');
+      expect(directCastType('http://h/x.mp4', live: false), 'video/mp4');
+      expect(directCastType('http://h/x.ts', live: true), 'video/mp2t');
+    });
+  });
+
   group('protocole', () {
     test('un message encodé puis décodé reste identique', () {
       const m = CastMessage(source: 'sender-0', destination: 'receiver-0', namespace: 'urn:x-cast:com.google.cast.tp.connection', payload: '{"type":"CONNECT"}');

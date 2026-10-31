@@ -2,6 +2,26 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.9.0-android1] - 2026-10-31
+
+**Première version pour Android et Android TV** (téléphones, tablettes, Google TV, Chromecast avec Google TV, Nvidia Shield…). Un seul APK par processeur, mêmes fonctions que la version Windows / Linux : Direct, Films, Séries, Guide TV, Replay, Thèmes, MultiVue, enregistrements, téléchargements, YouTube, Mes vidéos et serveurs (Jellyfin, Emby, Plex), aide intégrée.
+
+- **Téléphone et tablette** : barre latérale en tiroir (menu ☰), liste et lecteur sur une colonne, chaîne en plein écran en paysage, appui long = menu contextuel, gestes dans le lecteur (double appui ±10 / +30 s ou pause, glisser pour le volume, la luminosité et la position), touche Retour d'Android.
+- **Android TV** : sélection à la télécommande avec liseré visible, interface TV du direct par défaut (↑/↓ et Chaîne +/− pour zapper, chiffres, liste, bandeau), interface Cinéma pour les films et séries, touche Menu = menu contextuel, touches Lecture/Pause et Avance/Retour rapide, bannière sur l'écran d'accueil de la TV.
+- **Cast** en mode direct (l'adresse du flux est envoyée au téléviseur, le direct passe en HLS) : pas de conversion ffmpeg sur Android.
+- **Mises à jour intégrées** : l'APK de la nouvelle version est téléchargé puis ouvert par l'installateur d'Android.
+- **Signature** : APK signés avec une clé unique, ce qui permet les mises à jour sans désinstaller. Guide : docs/ANDROID.md.
+- Enregistrements et téléchargements dans le dossier de l'application (Android/data/fr.jmezes.kastideo/files/Movies). Pas de lancement à l'ouverture de session ni d'association des fichiers .m3u.
+- Nouvelle page d'aide « Kastideo sur Android et Android TV ».
+
+## [1.9.0-desktop1] - 2026-10-31
+
+**Navigation au clavier et au doigt** (code partagé avec la version Android).
+
+- Les éléments cliquables prennent le focus avec Tab et les flèches, avec un liseré visible ; Entrée ou Espace les active ; la touche Menu ouvre le menu contextuel.
+- Mises en page qui s'adaptent aux fenêtres étroites (barre latérale en tiroir sous 900 px).
+- Nouvelle page d'aide « Kastideo sur Android et Android TV ».
+
 ## [1.8.1-desktop1] - 2026-10-31
 
 **Repli en décodage logiciel pour les chaînes qui se figent** (comme Kastideo 1.8.1 pour Mac).

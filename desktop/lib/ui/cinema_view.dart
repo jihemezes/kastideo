@@ -449,8 +449,8 @@ class MediaCard extends StatelessWidget {
     final fraction = context.watch.fraction(item.id);
     final favorite = context.library.isFavorite(item.id);
     final width = kPosterWidth;
-    return GestureDetector(
-      onSecondaryTapUp: (d) => showItemMenu(context, item, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => showItemMenu(context, item, d.globalPosition),
       child: Tooltip(
         message: item.name,
         waitDuration: const Duration(milliseconds: 900),
@@ -573,8 +573,8 @@ class LiveCard extends StatelessWidget {
     final p = programme ?? guide.current(item);
     final g = group ?? guide.groupOf(item);
     final favorite = context.library.isFavorite(item.id);
-    return GestureDetector(
-      onSecondaryTapUp: (d) => g != null ? showGroupMenu(context, g, p, d.globalPosition) : showItemMenu(context, item, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => g != null ? showGroupMenu(context, g, p, d.globalPosition) : showItemMenu(context, item, d.globalPosition),
       child: Tooltip(
         message: p == null ? item.name : '${item.name}\n${p.title} · ${timeRange(p)}',
         waitDuration: const Duration(milliseconds: 900),
@@ -615,8 +615,8 @@ class ProgrammeCard extends StatelessWidget {
     final item = group.preferred;
     final p = programme;
     final airing = p.isAiring(nowSeconds());
-    return GestureDetector(
-      onSecondaryTapUp: (d) => showGroupMenu(context, group, p, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => showGroupMenu(context, group, p, d.globalPosition),
       child: Tooltip(
         message: '${p.title}\n${item.displayName} · ${timeRange(p)}',
         waitDuration: const Duration(milliseconds: 900),

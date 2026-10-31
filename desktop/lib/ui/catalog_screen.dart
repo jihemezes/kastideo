@@ -34,12 +34,13 @@ class CatalogScreen extends StatelessWidget {
     final settings = context.settings;
     return Scaffold(
       body: ListenableBuilder(
-        listenable: Listenable.merge([navigation, settings]),
+        listenable: Listenable.merge([navigation, settings, if (kind == MediaKind.live) context.playback]),
         builder: (context, _) {
           final style = settings.interfaceFor(kind);
           // Interface TV du direct : plein cadre, sans barre latérale.
           if (style == InterfaceStyle.tv && kind == MediaKind.live) return const TVView();
           final selected = navigation.selected(kind);
+          final compact = MediaQuery.sizeOf(context).width < SidebarShell.wide;
           final Widget content;
           if (style == InterfaceStyle.cinema && kind == MediaKind.live) {
             // Direct en Cinéma : lecteur plein cadre ; le retour arrête la chaîne et revient au catalogue.
@@ -50,6 +51,8 @@ class CatalogScreen extends StatelessWidget {
                 : selected != null
                     ? DetailsView(item: selected, page: true)
                     : CinemaView(kind: kind);
+          } else if (compact) {
+            content = _CompactClassic(kind: kind, selected: selected);
           } else {
             final Widget right = kind == MediaKind.live
                 ? const PlayerPane()
@@ -69,16 +72,47 @@ class CatalogScreen extends StatelessWidget {
               Expanded(child: right),
             ]);
           }
-          return Row(children: [
-            if (!navigation.theater) ...[
-              SizedBox(width: 236, child: Sidebar(kind: kind)),
-              VerticalDivider(width: 1, color: KPalette.separator),
-            ],
-            Expanded(child: content),
-          ]);
+          if (navigation.theater) return content;
+          // Plein écran du lecteur sur téléphone (paysage) : sans barre ni liste.
+          if (compact && kind == MediaKind.live && style != InterfaceStyle.cinema &&
+              context.playback.current?.kind == MediaKind.live && MediaQuery.orientationOf(context) == Orientation.landscape) {
+            return content;
+          }
+          return SidebarShell(title: sectionTitle(kind), sidebar: Sidebar(kind: kind), child: content);
         },
       ),
     );
+  }
+}
+
+/// Interface Classique sur téléphone : une colonne (lecteur en haut quand une chaîne est lancée, liste dessous).
+class _CompactClassic extends StatelessWidget {
+  const _CompactClassic({required this.kind, required this.selected});
+  final MediaKind kind;
+  final MediaItem? selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final navigation = context.navigation;
+    final playback = context.playback;
+    final list = kind == MediaKind.live && navigation.filter(kind) is ThemesFilter ? const ThemesList() : ItemList(kind: kind);
+    if (kind == MediaKind.live) {
+      return ListenableBuilder(
+        listenable: playback,
+        builder: (context, _) {
+          final playing = playback.current != null && playback.current!.kind == MediaKind.live;
+          final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
+          if (playing && landscape) return const PlayerPane(showBack: true);
+          return Column(children: [
+            if (playing) const AspectRatio(aspectRatio: 16 / 9, child: PlayerPane()),
+            Expanded(child: list),
+          ]);
+        },
+      );
+    }
+    if (navigation.showPlayer) return const PlayerPane(showBack: true);
+    if (selected != null) return DetailsView(key: ValueKey(selected!.id), item: selected!, page: true);
+    return list;
   }
 }
 
@@ -434,10 +468,9 @@ class SidebarRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onSecondaryTapUp: onSecondaryTap == null ? null : (d) => onSecondaryTap!(d.globalPosition),
-      child: Hover(
+    return Hover(
         onTap: onTap,
+        onMenu: onSecondaryTap == null ? null : (p) => onSecondaryTap!(p.globalPosition),
         builder: (context, hovering) => Container(
           margin: margin,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -457,7 +490,6 @@ class SidebarRow extends StatelessWidget {
               Text('$count', style: kText(11, color: KPalette.ink.withValues(alpha: selected ? 0.85 : 0.45))),
           ]),
         ),
-      ),
     );
   }
 }
@@ -598,8 +630,8 @@ class ItemRow extends StatelessWidget {
     final isLive = item.kind == MediaKind.live;
     final fraction = isLive ? null : context.watch.fraction(item.id);
     final programme = isLive ? context.guide.current(item) : null;
-    return GestureDetector(
-      onSecondaryTapUp: (details) => showItemMenu(context, item, details.globalPosition),
+    return MenuTap(
+      onMenu: (details) => showItemMenu(context, item, details.globalPosition),
       child: Hover(
         onTap: () => openItem(context, item),
         builder: (context, hovering) => Container(

@@ -1080,6 +1080,74 @@ Kastideo recherche les nouvelles versions sur GitHub au lancement puis toutes le
 - **Toute distribution, et Raspberry Pi (64 bits)** : fichier AppImage ; rendez-le exécutable (clic droit > Propriétés > Autoriser l'exécution, ou `chmod +x`) puis lancez-le.
 <!--/pc-->
 
+## Kastideo sur Android et Android TV {#android}
+
+Kastideo existe aussi pour les **téléphones et tablettes Android** et pour **Android TV** (Google TV, Chromecast avec Google TV, Nvidia Shield, TV Philips, Sony, TCL…). C'est la même application, avec les mêmes sources, catégories, favoris, guide, replay, enregistrements, MultiVue et YouTube, adaptée au doigt et à la télécommande. Un seul fichier **APK** fonctionne sur téléphone et sur TV.
+
+### Choisir le bon fichier
+
+Sur la page des versions GitHub, repérez les fichiers `Kastideo-…-android-….apk` :
+
+- **arm64-v8a** : presque tous les téléphones, tablettes et boîtiers TV récents (c'est le bon choix dans le doute) ;
+- **armeabi-v7a** : anciens appareils et certains boîtiers TV 32 bits ;
+- **x86_64** : émulateurs et quelques tablettes Intel ;
+- **universal** : tous les processeurs, mais plus volumineux.
+
+### Installer sans désactiver la sécurité
+
+Android n'oblige **pas** à désactiver ses protections : il demande une autorisation **pour une seule application** (celle qui ouvre l'APK : navigateur, gestionnaire de fichiers ou Downloader).
+
+1. Téléchargez l'APK, puis ouvrez-le.
+2. Si Android affiche « Pour votre sécurité, l'installation d'applications inconnues est bloquée », touchez **Paramètres** et activez **Autoriser depuis cette source** pour l'application utilisée (par exemple Chrome). Les autres applications restent bloquées.
+3. Revenez en arrière et touchez **Installer**.
+4. Si **Play Protect** signale une application d'un développeur inconnu, touchez **Plus de détails** puis **Installer quand même** : Kastideo n'est pas publié sur Google Play, et il est signé par son développeur, pas par un éditeur référencé par Google.
+
+Les APK de Kastideo sont tous signés avec la même clé : Android accepte donc les mises à jour par-dessus l'installation existante, sans rien perdre de vos réglages.
+
+### Installer sur Android TV
+
+Le navigateur et le gestionnaire de fichiers d'une TV sont souvent absents. Trois méthodes :
+
+- **Downloader** (application gratuite de Google Play Store sur la TV) : saisissez l'adresse de téléchargement de l'APK GitHub, puis autorisez Downloader à installer des applications ;
+- **Clé USB** : copiez l'APK sur la clé, branchez-la à la TV et ouvrez-le avec un gestionnaire de fichiers (Solid Explorer, File Commander…) ;
+- **Depuis le téléphone** : transférez l'APK avec « Send Files to TV », ou installez-le avec `adb install` si le débogage réseau est activé sur la TV.
+
+Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bannière.
+
+### Utilisation au doigt (téléphone, tablette)
+
+- **Menu ☰** en haut à gauche : les sections (Direct, Films, Séries, Favoris, catégories…) s'ouvrent dans un tiroir.
+- **Appui long** sur une chaîne, un film ou un épisode : le menu (favori, enregistrer, replay, décodage logiciel…), comme le clic droit sur ordinateur.
+- **Dans le lecteur** : un appui affiche ou masque la barre ; **double appui** à gauche = −10 s, à droite = +30 s, au centre = pause ; **glisser verticalement** à droite = volume, à gauche = luminosité ; **glisser horizontalement** = avancer ou reculer dans un film.
+- **Retour** (geste ou bouton d'Android) : referme le lecteur, puis revient à l'accueil.
+- Tournez l'appareil en **paysage** : la chaîne en cours passe en plein écran.
+
+### Utilisation à la télécommande (Android TV)
+
+- **Flèches** : déplacent la sélection (entourée d'un liseré de couleur) ; **OK** valide ; **Retour** revient en arrière.
+- **Touche Menu** (ou ☰ de la télécommande) sur une chaîne ou un film : le menu contextuel.
+- **Direct** : l'interface TV s'ouvre par défaut. **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes, **→** affiche le bandeau d'information, **OK** ouvre ou ferme la liste.
+- **Films et séries** : l'interface Cinéma s'ouvre par défaut. Pendant la lecture : **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume ; **↓** fait apparaître la barre de contrôle que les flèches parcourent ensuite.
+- Les touches **Lecture/Pause**, **Avance/Retour rapide** de la télécommande sont prises en charge.
+
+### Différences avec l'ordinateur
+
+- **Cast** : sur Android, la diffusion vers un Chromecast ou une TV se fait en **mode direct** : l'adresse du flux est envoyée telle quelle au téléviseur (les chaînes passent en HLS « .m3u8 »). Les fichiers locaux (Mes vidéos) ne peuvent pas être diffusés. La conversion par ffmpeg, qui existe sur ordinateur, n'est pas disponible.
+- **Enregistrements et téléchargements** : ils sont rangés dans le dossier de l'application (`Android/data/fr.jmezes.kastideo/files/Movies`, visible depuis le gestionnaire de fichiers). Android peut interrompre une application en arrière-plan : gardez Kastideo ouvert et l'appareil branché pendant un enregistrement. Un enregistrement programmé ne démarre que si Kastideo est lancé à l'heure prévue.
+- **Pas de lancement à l'ouverture de session** ni d'association des fichiers .m3u : ajoutez vos playlists dans Réglages > Sources.
+- **YouTube** s'ouvre dans le navigateur de l'appareil.
+
+### Mises à jour
+
+Kastideo cherche les nouvelles versions Android sur GitHub. Quand une version est proposée, **Installer** télécharge l'APK puis Android vous demande de confirmer. La première fois, Android demande aussi d'autoriser Kastideo à installer des applications (réglage qui s'ouvre tout seul).
+
+### En cas de problème
+
+- **« Application non installée »** : une autre copie de Kastideo signée avec une autre clé est déjà installée ; désinstallez-la d'abord.
+- **« Analyse impossible » ou « Application non compatible »** : mauvais fichier pour votre processeur ; essayez l'APK **universal**.
+- **Image figée** : voir la page « Image figée : décodage logiciel ».
+- **Le Journal de lecture** (Réglages) garde les détails des erreurs de lecture.
+
 ## Nouveautés {#nouveautes}
 
 Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée.

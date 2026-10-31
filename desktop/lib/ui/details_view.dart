@@ -518,8 +518,8 @@ class _EpisodeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fraction = context.watch.fraction(episode.id);
     final playing = context.playback.current?.id == episode.id;
-    return GestureDetector(
-      onSecondaryTapUp: (d) => showItemMenu(context, episode, d.globalPosition),
+    return MenuTap(
+      onMenu: (d) => showItemMenu(context, episode, d.globalPosition),
       child: Hover(
         onTap: () => playItem(context, episode),
         builder: (context, hovering) => Container(
