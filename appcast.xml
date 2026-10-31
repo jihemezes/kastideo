@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.5</title>
+      <pubDate>Sat, 31 Oct 2026 09:10:34 GMT</pubDate>
+      <sparkle:version>68</sparkle:version>
+      <sparkle:shortVersionString>1.7.5</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac : cause trouvée.&lt;/b&gt; VLC donnait au téléviseur une adresse IPv6 sans crochets (&lt;code&gt;http://2a02:…:8010/…&lt;/code&gt;) qu&amp;#x27;il ne sait pas lire, d&amp;#x27;où « Media load failed ». VLC est maintenant forcé en IPv4 (la diffusion utilise l&amp;#x27;adresse IPv4 du Mac).&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.5/Kastideo-1.7.5.dmg" length="47630035" type="application/octet-stream" sparkle:edSignature="Ny0KIi/uaDhrRnnF1rgkBCA+mDOmJi93C7qffXkuPqvs8qkcQh+KeShKeCrGmxqJMWP1xsUY6oTkwFQLsTIkDA==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.4</title>
       <pubDate>Sat, 31 Oct 2026 08:58:49 GMT</pubDate>
       <sparkle:version>67</sparkle:version>
@@ -482,17 +491,6 @@
 &lt;li&gt;Les films et séries Xtream mémorisent leur &lt;b&gt;date d&amp;#x27;ajout&lt;/b&gt; (actualisez la source pour l&amp;#x27;obtenir)&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.10.0/Kastideo-0.10.0.dmg" length="44883171" type="application/octet-stream" sparkle:edSignature="l5zUFgM+yjRbv/AL3ehopZLslm2N4Binplp+CYhgVgVr+lUMbzI2RGbjo5tLms2WUjaodOx8rPExmFCHiHX/Dw==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.8</title>
-      <pubDate>Wed, 21 Oct 2026 13:28:00 GMT</pubDate>
-      <sparkle:version>23</sparkle:version>
-      <sparkle:shortVersionString>0.9.8</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Passage &lt;b&gt;instantané&lt;/b&gt; du Direct à Films (ou à toute autre section) : l&amp;#x27;arrêt du flux par le moteur VLC, qui pouvait prendre jusqu&amp;#x27;à 30 s, se fait maintenant en arrière-plan sans bloquer l&amp;#x27;interface. La durée de l&amp;#x27;arrêt est notée dans le Journal de lecture quand elle dépasse 1 s&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.8/Kastideo-0.9.8.dmg" length="45467322" type="application/octet-stream" sparkle:edSignature="TE3Mm/dqVUhIXqX3mDIhlZL//5dvMyuh3wzNXiGKc3V5WDu3GHj2h/7UJ6tQf5EZKa89hFCgDJjzlGb9R1JJDw==" />
     </item>
   </channel>
 </rss>
