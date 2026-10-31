@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.2</title>
+      <pubDate>Sat, 31 Oct 2026 08:25:38 GMT</pubDate>
+      <sparkle:version>65</sparkle:version>
+      <sparkle:shortVersionString>1.7.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Cast sur Mac.&lt;/b&gt; Le bouton « Reprendre sur le Mac » de l&amp;#x27;écran de diffusion réagit enfin (un calque transparent interceptait le clic). Le Journal de lecture indique si VLC a bien accepté le téléviseur.&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.2/Kastideo-1.7.2.dmg" length="47628518" type="application/octet-stream" sparkle:edSignature="y1uQb4vrLrKn/sRGopcHOBlq95MQXH9PEQVF1Fchl+84I8sJLCr/cR813z8f7UU2iBwrU+AB62UT7vx+A4h6Cw==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.1</title>
       <pubDate>Fri, 30 Oct 2026 22:19:53 GMT</pubDate>
       <sparkle:version>64</sparkle:version>
@@ -489,19 +498,6 @@
 &lt;li&gt;&lt;b&gt;Enregistrement du direct&lt;/b&gt; : si le moteur VLC ne crée pas le fichier dans le dossier « En cours » sous 10 s, Kastideo réessaie automatiquement dans un dossier temporaire avant d&amp;#x27;afficher « Enregistrement impossible » ; dossier de travail nommé sans accents ni caractères spéciaux ; chaque essai est noté dans le Journal de lecture&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.6/Kastideo-0.9.6.dmg" length="44748929" type="application/octet-stream" sparkle:edSignature="kBfKDIh+pvQ+KrjNfkQbUh9GVNNm/NxZvUQyiGwFuxXt0h3dmfHbPh3y8T7ZVGoE+tGBhktzGcpr0AvDMN24CA==" />
-    </item>
-    <item>
-      <title>Kastideo 0.9.5</title>
-      <pubDate>Wed, 21 Oct 2026 06:28:46 GMT</pubDate>
-      <sparkle:version>20</sparkle:version>
-      <sparkle:shortVersionString>0.9.5</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Guide TV de secours&lt;/b&gt; : le guide gratuit de &lt;b&gt;xmltvfr.fr&lt;/b&gt; (Complet, ~785 chaînes) complète automatiquement les chaînes sans programme chez le fournisseur, reliées par leur nom (« |FR| TF1 FHD » → TF1). Réglages &amp;gt; Général &amp;gt; Guide TV de secours (autre guide xmltvfr.fr ou adresse XMLTV au choix)&lt;/li&gt;
-&lt;li&gt;Correction : un guide &lt;b&gt;vide ou illisible&lt;/b&gt; envoyé par le fournisseur n&amp;#x27;efface plus les programmes déjà connus ; un message l&amp;#x27;indique sous la source&lt;/li&gt;
-&lt;li&gt;Le guide est rechargé automatiquement quand il arrive à moins de 12 h de sa fin, même si Kastideo reste ouvert plusieurs jours&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.9.5/Kastideo-0.9.5.dmg" length="44724022" type="application/octet-stream" sparkle:edSignature="xsIpC2fFLnZoUtD6Jgtj/OUiezutU8Eo6WsQjrPdsrNmcm9aSvUyBkEy9ktba8msUlrP4e+9zbPZKzFk9RDLDg==" />
     </item>
   </channel>
 </rss>
