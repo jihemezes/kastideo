@@ -76,6 +76,12 @@ final class NavigationModel {
         didSet {
             browseChangedAt = Date()
             marked.removeAll()
+            // Dernière catégorie consultée (option « Dernière consultée » de la page de départ).
+            switch browse {
+            case .category(let kind, let name)?: UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind))
+            case .all(let kind)?: UserDefaults.standard.removeObject(forKey: StartPage.lastKey(kind))
+            default: break
+            }
             if let kind = browse?.kind {
                 // Changement de type de contenu (Direct → Films…) : on arrive sur la grille, pas sur le lecteur.
                 if kind != lastKind { selectedItemID = nil }
@@ -159,8 +165,25 @@ final class NavigationModel {
     /// Panneau « Contexte » du lecteur (chaîne, programme, pistes, qualité).
     var showContextPanel = false
 
+    /// Catégories affichées d'un type de contenu (renseigné au démarrage) : sert à valider la page de départ.
+    @ObservationIgnored var categoryNames: @MainActor (MediaKind) -> [String] = { _ in [] }
+
     func go(_ destination: Browse) {
-        browse = destination
+        browse = resolved(destination)
+    }
+
+    /// Entrer dans Direct, Films ou Séries depuis une autre section ouvre la page de départ choisie dans les Réglages.
+    /// Rester dans la section (« Tout », ⌘1…) affiche bien la liste complète.
+    private func resolved(_ destination: Browse) -> Browse {
+        guard case .all(let kind) = destination, kind != .episode else { return destination }
+        // Favoris et Récents ne sont liés à aucun type : on se réfère au dernier type visité.
+        let current: MediaKind?
+        switch browse {
+        case .favorites?, .recents?: current = lastKind
+        default: current = browse?.kind
+        }
+        if current == kind { return destination }
+        return StartPage.destination(for: kind, categories: categoryNames(kind))
     }
 
     /// Ouvre un contenu dans sa section (depuis l'accueil, par exemple).

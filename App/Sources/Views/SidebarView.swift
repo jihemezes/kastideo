@@ -8,9 +8,11 @@ struct SidebarView: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        @Bindable var navigation = navigation
         let _ = navigation.mark("Barre latérale")
-        List(selection: $navigation.browse) {
+        // Ouvrir Direct, Films ou Séries depuis une autre section passe par la page de départ choisie.
+        List(selection: Binding(get: { navigation.browse }, set: { value in
+            if let value { navigation.go(value) } else { navigation.browse = nil }
+        })) {
             Section("Bibliothèque") {
                 row(.home, icon: "house", count: nil)
                 row(.all(.live), icon: "dot.radiowaves.left.and.right", count: store.count(for: .live))
@@ -48,6 +50,16 @@ struct SidebarView: View {
                             .lineLimit(1)
                             .tag(Browse.category(kind, name))
                             .contextMenu {
+                                if UserDefaults.standard.string(forKey: StartPage.key(kind)) == StartPage.categoryValue(name) {
+                                    Button("Ne plus utiliser comme catégorie de départ") {
+                                        UserDefaults.standard.set("all", forKey: StartPage.key(kind))
+                                    }
+                                } else {
+                                    Button("Définir comme catégorie de départ") {
+                                        UserDefaults.standard.set(StartPage.categoryValue(name), forKey: StartPage.key(kind))
+                                    }
+                                }
+                                Divider()
                                 Button("Masquer cette catégorie") { hide(name, kind: kind) }
                                 Divider()
                                 Button("Gérer les catégories…") { openWindow(id: "categories") }

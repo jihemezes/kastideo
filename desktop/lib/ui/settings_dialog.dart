@@ -182,6 +182,7 @@ class _GeneralTabState extends State<_GeneralTab> {
           ),
           _caption(tr('Le changement s\'applique au prochain lancement de Kastideo.')),
         ]),
+          const _StartPageSection(),
           const _ReplaySection(),
         _section(tr('Lecture'), [
           SwitchListTile(
@@ -1443,6 +1444,53 @@ class _RecordingsTabState extends State<_RecordingsTab> {
         ]),
       ]),
     );
+  }
+}
+
+/// Réglages > Général > Page de départ de Direct, Films et Séries.
+class _StartPageSection extends StatelessWidget {
+  const _StartPageSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.settings;
+    final library = context.library;
+    Widget row(String label, MediaKind kind) {
+      final current = settings.startPage(kind);
+      final names = library.categories(kind);
+      final options = <(String, String)>[
+        ('all', tr('Toutes')),
+        ('favorites', tr('Favoris')),
+        ('recents', tr('Récents')),
+        ('last', tr('Dernière consultée')),
+        for (final name in names) ('cat:$name', library.categoryName(kind, name)),
+      ];
+      if (current.startsWith('cat:') && !options.any((o) => o.$1 == current)) options.add((current, current.substring(4)));
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [
+          SizedBox(width: 230, child: Text(label, style: kText(14))),
+          Flexible(
+            child: DropdownButton<String>(
+              value: current,
+              isExpanded: true,
+              items: [for (final (v, l) in options) DropdownMenuItem(value: v, child: Text(l, style: kText(13), overflow: TextOverflow.ellipsis))],
+              onChanged: (v) => v == null ? null : settings.setString('start.${kind.name}', v),
+            ),
+          ),
+        ]),
+      );
+    }
+
+    return _section(tr('Page de départ'), [
+      row(tr('Direct'), MediaKind.live),
+      row(tr('Films'), MediaKind.movie),
+      row(tr('Séries'), MediaKind.series),
+      Text(
+          tr('Page affichée en ouvrant Direct, Films ou Séries depuis une autre section. « Dernière consultée » reprend la catégorie où vous étiez. '
+              'Clic droit sur une catégorie de la barre latérale : « Définir comme catégorie de départ ».'),
+          style: kText(12, color: KPalette.secondaryText)),
+    ]);
   }
 }
 

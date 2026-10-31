@@ -725,6 +725,34 @@ New categories added by the provider appear next to their original neighbor.
 A hidden category is hidden everywhere: lists, search, home, rows.
 <!--/pc-->
 
+## Start page for Live, Movies and Series {#page-depart}
+
+By default, opening **Live**, **Movies** or **Series** shows all channels or all content, starting with the provider's first category. You can choose what is shown first instead.
+
+### Choose the start page
+
+<!--mac-->
+1. Open **Settings (⌘,) > General > Start page**.
+<!--/mac-->
+<!--pc-->
+1. Open **Settings (Ctrl+,) > General > Start page**.
+<!--/pc-->
+2. For **Live**, **Movies** and **Series**, choose separately:
+   - **All**: the full list (default);
+   - **Favorites** or **Recents**;
+   - **Last viewed**: the category you were in last time;
+   - or **a specific category** from the provider.
+
+### From the sidebar
+
+**Right-click** a category, then **Set as start category**. The same menu lets you **stop using** it as the start category.
+
+### When does it apply?
+
+Every time you open Live, Movies or Series from another section (home, TV guide…), including at launch. Once in the section you browse freely: clicking **Live**, **Movies** or **Series** in the sidebar when you are already there shows the full list.
+
+If the chosen category is hidden, renamed or no longer exists at the provider, Kastideo shows the full list. Choose it again in Settings.
+
 ## Favorites and recents {#favoris}
 
 <!--mac-->

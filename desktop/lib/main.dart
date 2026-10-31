@@ -184,7 +184,9 @@ Future<void> main(List<String> args) async {
   final playback = PlaybackController()
     ..settings = settings
     ..watchProgress = watch;
-  final navigation = NavigationModel();
+  final navigation = NavigationModel()
+    ..settings = settings
+    ..categoryNames = library.categories;
   // Fin d'un replay : retour au direct de la chaîne.
   playback.onReplayEnded = (item) {
     final channel = library.replayChannels[item.id];

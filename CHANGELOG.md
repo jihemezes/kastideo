@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.8.0] - 2026-10-31
+
+**Page de départ de Direct, Films et Séries.** Réglages > Général > Page de départ : pour chaque section, choisissez ce qui s'affiche en l'ouvrant depuis une autre section (et au lancement) : la liste complète, les Favoris, les Récents, la dernière catégorie consultée ou une catégorie précise. Un clic droit sur une catégorie de la barre latérale propose aussi « Définir comme catégorie de départ ». Nouvelle page d'aide « Page de départ ».
+
 ## [1.7.10] - 2026-10-31
 
 **Texte sur la gratuité.** Kastideo est gratuit, mais la promesse qu'il « le restera » est retirée partout (Réglages > À propos, info-bulle du bouton Ko-fi, aide, README).

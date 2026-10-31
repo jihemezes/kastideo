@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
           subtitle: _count(MediaKind.live, 'chaîne', 'chaînes'),
           colors: const [KPalette.magenta, KPalette.orange],
           height: height,
-          onTap: () => navigation.show(MediaKind.live, const AllItems()),
+          onTap: () => navigation.go(Screen.live),
         ),
       ),
       const SizedBox(width: 18),

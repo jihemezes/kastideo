@@ -277,6 +277,12 @@ class L10n {
     'Afficher dans le dossier': 'Show in folder',
     'Alertes de programme': 'Programme alerts',
     'Arrêter et lancer': 'Stop and play',
+    'Page de départ': 'Start page',
+    'Dernière consultée': 'Last viewed',
+    'Définir comme catégorie de départ': 'Set as start category',
+    'Ne plus utiliser comme catégorie de départ': 'Stop using as start category',
+    'Page affichée en ouvrant Direct, Films ou Séries depuis une autre section. « Dernière consultée » reprend la catégorie où vous étiez. Clic droit sur une catégorie de la barre latérale : « Définir comme catégorie de départ ».':
+        'Page shown when opening Live, Movies or Series from another section. “Last viewed” goes back to the category you were in. Right-click a category in the sidebar: “Set as start category”.',
     'Avertissement légal': 'Disclaimer',
     'Arrêter la lecture (Ctrl+.)': 'Stop playback (Ctrl+.)',
     'Arrêter la lecture arrêtera aussi l\'enregistrement de': 'Stopping playback will also stop the recording of',

@@ -187,6 +187,7 @@ struct GeneralSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            StartPageSettingsSection()
             ReplaySettingsSection()
             Section("Lecture") {
                 Picker("Mémoire tampon", selection: $buffering) {

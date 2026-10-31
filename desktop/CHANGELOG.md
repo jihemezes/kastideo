@@ -2,6 +2,13 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.8.0-desktop1] - 2026-10-31
+
+**Page de départ de Direct, Films et Séries** (comme Kastideo 1.8.0 pour Mac).
+
+- Réglages > Général > Page de départ : pour Direct, Films et Séries, choisissez la liste complète, les Favoris, les Récents, la dernière catégorie consultée ou une catégorie précise. Elle s'applique à chaque ouverture de la section depuis une autre (accueil, guide TV…), y compris au lancement.
+- Clic droit sur une catégorie de la barre latérale : « Définir comme catégorie de départ ». Nouvelle page d'aide.
+
 ## [1.7.10-desktop1] - 2026-10-31
 
 **Texte sur la gratuité** (comme Kastideo 1.7.10 pour Mac) : la promesse qu'il « le restera » est retirée partout (Réglages > À propos, info-bulle du bouton Ko-fi, aide).

@@ -167,7 +167,36 @@ class NavigationModel extends ChangeNotifier {
   CatalogFilter filter(MediaKind kind) => _filters[kind] ?? const AllItems();
   MediaItem? selected(MediaKind kind) => _selected[_key(kind)];
 
+  /// Réglages et catégories affichées : pour la page de départ des sections (renseignés au démarrage).
+  AppSettings? settings;
+  List<String> Function(MediaKind kind)? categoryNames;
+
+  /// Filtre de départ d'une section (null : tout afficher).
+  CatalogFilter? _startFilter(MediaKind kind) {
+    final s = settings;
+    if (s == null) return null;
+    var mode = s.startPage(kind);
+    if (mode == 'last') mode = s.startLast(kind);
+    if (mode == 'favorites') return const FavoriteItems();
+    if (mode == 'recents') return const RecentItems();
+    if (mode.startsWith('cat:')) {
+      final name = mode.substring(4);
+      if ((categoryNames?.call(kind) ?? const <String>[]).contains(name)) return CategoryFilter(name);
+    }
+    return null;
+  }
+
   void go(Screen value) {
+    // Entrer dans Direct, Films ou Séries depuis une autre section : page de départ choisie dans les Réglages.
+    final kind = value.kind;
+    if (kind != null && screen != value) {
+      final start = _startFilter(kind);
+      if (start == null) {
+        _filters.remove(kind);
+      } else {
+        _filters[kind] = start;
+      }
+    }
     screen = value;
     editingRecents = false;
     if (value != Screen.live) theater = false;
@@ -178,6 +207,18 @@ class NavigationModel extends ChangeNotifier {
 
   void show(MediaKind kind, CatalogFilter filter) {
     _filters[kind] = filter;
+    // Dernière page consultée (option « Dernière consultée » de la page de départ).
+    if (filter is! ThemesFilter) {
+      settings?.rememberStart(
+        kind,
+        switch (filter) {
+          CategoryFilter(:final name) => 'cat:$name',
+          FavoriteItems() => 'favorites',
+          RecentItems() => 'recents',
+          _ => 'all',
+        },
+      );
+    }
     editingRecents = false;
     screen = screenFor(kind);
     _selected[_key(kind)] = null;

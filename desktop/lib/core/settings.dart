@@ -100,6 +100,16 @@ class AppSettings extends ChangeNotifier {
   int get replayOffset => _prefs.getInt('replay.offsetMinutes') ?? 0;
   bool get replayReturnToLive => _prefs.getBool('replay.returnToLive') ?? true;
 
+  /// Page de départ d'une section : « all », « favorites », « recents », « last » ou « cat: suivi du nom de la catégorie ».
+  String startPage(MediaKind kind) => _prefs.getString('start.${kind.name}') ?? 'all';
+
+  /// Dernière page consultée d'une section (même codage, sans « last »).
+  String startLast(MediaKind kind) => _prefs.getString('start.last.${kind.name}') ?? 'all';
+
+  void rememberStart(MediaKind kind, String value) {
+    if (startLast(kind) != value) _prefs.setString('start.last.${kind.name}', value);
+  }
+
   void setInt(String key, int value) {
     _prefs.setInt(key, value);
     notifyListeners();

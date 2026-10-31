@@ -282,6 +282,13 @@ class Sidebar extends StatelessWidget {
         PopupMenuItem(height: 34, value: 'down', enabled: index >= 0 && index < visible.length - 1, child: Text(tr('Descendre'), style: kText(13))),
         PopupMenuItem(height: 34, value: 'bottom', enabled: index >= 0 && index < visible.length - 1, child: Text(tr('Placer en bas'), style: kText(13))),
         const PopupMenuDivider(),
+        PopupMenuItem(
+          height: 34,
+          value: 'start',
+          child: Text(
+              context.settings.startPage(kind) == 'cat:$name' ? tr('Ne plus utiliser comme catégorie de départ') : tr('Définir comme catégorie de départ'),
+              style: kText(13)),
+        ),
         PopupMenuItem(height: 34, value: 'hide', child: Text(tr('Masquer cette catégorie'), style: kText(13))),
         PopupMenuItem(height: 34, value: 'manage', child: Text(tr('Gérer les catégories…'), style: kText(13))),
       ],
@@ -301,6 +308,9 @@ class Sidebar extends StatelessWidget {
     }
 
     switch (choice) {
+      case 'start':
+        final settings = context.settings;
+        settings.setString('start.${kind.name}', settings.startPage(kind) == 'cat:$name' ? 'all' : 'cat:$name');
       case 'hide':
         library.updateCategories(kind, (p) => p.hidden.add(name));
       case 'manage':

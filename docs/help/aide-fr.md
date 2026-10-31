@@ -725,6 +725,34 @@ Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de
 Une catégorie masquée l'est partout : listes, recherche, accueil, rangées.
 <!--/pc-->
 
+## Page de départ de Direct, Films et Séries {#page-depart}
+
+Par défaut, ouvrir **Direct**, **Films** ou **Séries** affiche toutes les chaînes ou tous les contenus, en commençant par la première catégorie du fournisseur. Vous pouvez choisir à la place ce qui s'affiche d'abord.
+
+### Choisir la page de départ
+
+<!--mac-->
+1. Ouvrez **Réglages (⌘,) > Général > Page de départ**.
+<!--/mac-->
+<!--pc-->
+1. Ouvrez **Réglages (Ctrl+,) > Général > Page de départ**.
+<!--/pc-->
+2. Pour **Direct**, **Films** et **Séries**, choisissez séparément :
+   - **Toutes** : la liste complète (réglage par défaut) ;
+   - **Favoris** ou **Récents** ;
+   - **Dernière consultée** : la catégorie où vous étiez la dernière fois ;
+   - ou **une catégorie précise** du fournisseur.
+
+### Depuis la barre latérale
+
+Faites un **clic droit** sur une catégorie, puis **Définir comme catégorie de départ**. Le même menu permet de **ne plus l'utiliser** comme catégorie de départ.
+
+### Quand s'applique-t-elle ?
+
+À chaque fois que vous ouvrez Direct, Films ou Séries depuis une autre section (l'accueil, le guide TV…), y compris au lancement. Une fois dans la section, vous naviguez librement : cliquer sur **Direct**, **Films** ou **Séries** dans la barre latérale quand vous y êtes déjà affiche la liste complète.
+
+Si la catégorie choisie est masquée, renommée ou n'existe plus chez le fournisseur, Kastideo affiche la liste complète. Choisissez-la de nouveau dans les Réglages.
+
 ## Favoris et récents {#favoris}
 
 <!--mac-->

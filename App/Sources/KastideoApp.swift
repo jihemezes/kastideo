@@ -21,6 +21,7 @@ struct KastideoApp: App {
         let store = LibraryStore()
         let nav = NavigationModel()
         _navigation = State(initialValue: nav)
+        nav.categoryNames = { [weak store] kind in store?.categoriesByKind[kind] ?? [] }
         let playback = PlaybackController()
         let watch = WatchProgressStore()
         let info = MediaInfoStore()
