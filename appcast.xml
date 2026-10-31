@@ -6,6 +6,15 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.7.10</title>
+      <pubDate>Sat, 31 Oct 2026 17:44:47 GMT</pubDate>
+      <sparkle:version>73</sparkle:version>
+      <sparkle:shortVersionString>1.7.10</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;p&gt;&lt;b&gt;Texte sur la gratuité.&lt;/b&gt; Kastideo est gratuit, mais la promesse qu&amp;#x27;il « le restera » est retirée partout (Réglages &amp;gt; À propos, info-bulle du bouton Ko-fi, aide, README).&lt;/p&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.7.10/Kastideo-1.7.10.dmg" length="47684850" type="application/octet-stream" sparkle:edSignature="sDDDlEyblvu9XC1f/ERdqvxnmldqBvsQTZ3D0uwQh8qPI8H0iUzE/4XIg2jvKhuixDYnUxaOki/SurZpNyOlBg==" />
+    </item>
+    <item>
       <title>Kastideo 1.7.9</title>
       <pubDate>Sat, 31 Oct 2026 17:26:50 GMT</pubDate>
       <sparkle:version>72</sparkle:version>
@@ -462,18 +471,6 @@
 &lt;li&gt;Prochaine étape prévue (0.13) : MultiVue en option, selon le nombre de connexions de l&amp;#x27;abonnement&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.12.0/Kastideo-0.12.0.dmg" length="45196198" type="application/octet-stream" sparkle:edSignature="LMnyZ7nodX9qClvGVScp/NaurxeVThthHs+SIkaGgTEvCSEPJd3yJJjA9Ntyovs3m1CwCckaFVNGriSkL5IGDQ==" />
-    </item>
-    <item>
-      <title>Kastideo 0.11.3</title>
-      <pubDate>Wed, 21 Oct 2026 19:07:39 GMT</pubDate>
-      <sparkle:version>28</sparkle:version>
-      <sparkle:shortVersionString>0.11.3</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correction probable de la &lt;b&gt;lenteur Direct (Classique) → Films (Cinéma)&lt;/b&gt; (55 s mesurées) : la liste classique ne construit plus, même un instant, les ~100 000 films d&amp;#x27;une section affichée dans une autre interface&lt;/li&gt;
-&lt;li&gt;Journal de lecture : les étapes de construction de l&amp;#x27;affichage sont notées quand elles tardent, pour confirmer ou affiner le diagnostic&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.11.3/Kastideo-0.11.3.dmg" length="45031594" type="application/octet-stream" sparkle:edSignature="BOuq0IVfVvnbGHJcP5SXDT2EttWkMystAD+2y9WyXcgL4+Zuri2DDGGwuL3pvloLjJqGa4JKiZkJL3ehUcjbBA==" />
     </item>
   </channel>
 </rss>
