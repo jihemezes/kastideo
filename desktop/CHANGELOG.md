@@ -2,6 +2,13 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.9.0-android3] - 2026-11-01
+
+- **Mode Arranger** (Android, Windows, Linux) : dans une catégorie, le bouton ↑↓ à droite du titre permet de changer l'ordre des chaînes, films ou séries avec une grande poignée ⋮⋮ (la liste défile librement ailleurs, au doigt comme à la souris). Menu ⋮ : tout en haut / tout en bas, **déplacer vers une autre catégorie ou une liste personnelle**, remettre dans la catégorie d'origine. Tri A → Z, par numéro, retour à l'ordre du fournisseur.
+- **Catégories** : poignée de déplacement agrandie dans Réglages > Catégories (glisser-déposer impossible au doigt jusqu'ici). « Rétablir » remet aussi à zéro les ordres de chaînes et les déplacements.
+- L'ordre, les listes personnelles et les déplacements sont inclus dans l'export / import de configuration.
+- Aide : nouvelle page « Arranger l'ordre des chaînes et des catégories ».
+
 ## [1.9.0-android2] - 2026-11-01
 
 - **Android, Windows et Linux** : Réglages > Général > Page de départ : le choix d'une catégorie n'avait aucun effet au toucher sur tablette. Le menu déroulant est remplacé par une fenêtre de choix avec recherche et lignes à toucher.

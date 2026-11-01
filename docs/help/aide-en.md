@@ -748,6 +748,38 @@ New categories added by the provider appear next to their original neighbor.
 A hidden category is hidden everywhere: lists, search, home, rows.
 <!--/pc-->
 
+## Arrange the order of channels and categories {#arranger}
+
+**Arrange** mode lets you put **the channels, movies or series of a category** in the order you want, and also reorder **the categories** themselves. It is available on **Windows, Linux and Android** (not on Mac yet). It works with a finger as well as a mouse: the list scrolls normally, and only the **⋮⋮ handle** on the left moves a row.
+
+### Reorder the items of a category
+
+1. Open a category in the sidebar (for example "SPORT").
+2. Tap the **Arrange** button (↑↓ arrows) to the right of the list title.
+3. **Press and hold the ⋮⋮ handle** of a row, then **drag it** to its new place. To scroll the list, touch anywhere other than the handle.
+4. Tap **Done** when you are happy with the order. It is saved automatically.
+
+The three dots on the right of a row offer:
+
+- **Move to top** and **Move to bottom** (handy in a long list);
+- **Move to another category…**: pick a category or type the name of a **new personal list** (for example "My picks") to gather channels from several categories;
+- **Put back in its original category**.
+
+At the top of Arrange mode:
+
+- **A → Z** sorts by name; **By number** sorts channels by number;
+- **Provider order** cancels your order for this category.
+
+Arranging is not available during a search, nor in Favorites and Recents (they have their own order).
+
+### Reorder the categories
+
+Open **Settings > Categories** (or the button to the right of the "Categories" title in the sidebar). Press and hold the large ⋮⋮ handle on the left of a category and drag it. **Reset** also clears channel orders and moves.
+
+### Backup
+
+Your order, personal lists and moves are part of the **configuration backup** (Settings > Backup): they follow your exports and imports.
+
 ## Start page for Live, Movies and Series {#page-depart}
 
 By default, opening **Live**, **Movies** or **Series** shows all channels or all content, starting with the provider's first category. You can choose what is shown first instead.

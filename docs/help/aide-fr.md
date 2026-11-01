@@ -748,6 +748,38 @@ Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de
 Une catégorie masquée l'est partout : listes, recherche, accueil, rangées.
 <!--/pc-->
 
+## Arranger l'ordre des chaînes et des catégories {#arranger}
+
+Le mode **Arranger** permet de remettre en ordre **les chaînes, films ou séries d'une catégorie**, et aussi **les catégories** elles-mêmes. Il est disponible sur **Windows, Linux et Android** (pas encore sur Mac). Il fonctionne au doigt comme à la souris : la liste défile normalement, et seule la **poignée ⋮⋮** à gauche déplace une ligne.
+
+### Réorganiser les éléments d'une catégorie
+
+1. Ouvrez une catégorie dans la barre latérale (par exemple « SPORT »).
+2. Touchez le bouton **Arranger** (flèches ↑↓) à droite du titre de la liste.
+3. **Maintenez la poignée ⋮⋮** d'une ligne puis **glissez-la** à sa nouvelle place. Pour faire défiler la liste, touchez ailleurs que sur la poignée.
+4. Touchez **Terminé** quand l'ordre vous convient. Il est enregistré automatiquement.
+
+Les trois points à droite d'une ligne proposent :
+
+- **Tout en haut** et **Tout en bas** (pratique dans une longue liste) ;
+- **Déplacer vers une autre catégorie…** : choisissez une catégorie ou tapez le nom d'une **nouvelle liste personnelle** (par exemple « Ma sélection ») pour y rassembler des chaînes venant de plusieurs catégories ;
+- **Remettre dans sa catégorie d'origine**.
+
+En haut du mode Arranger :
+
+- **A → Z** trie par nom ; **Par numéro** trie les chaînes par numéro ;
+- **Ordre du fournisseur** annule votre ordre pour cette catégorie.
+
+L'arrangement n'est pas disponible pendant une recherche, ni dans Favoris et Récents (ils ont leur propre ordre).
+
+### Réorganiser les catégories
+
+Ouvrez **Réglages > Catégories** (ou le bouton à droite du titre « Catégories » de la barre latérale). Maintenez la grande poignée ⋮⋮ à gauche d'une catégorie et glissez-la. **Rétablir** remet aussi à zéro les ordres de chaînes et les déplacements.
+
+### Sauvegarde
+
+Votre ordre, vos listes personnelles et vos déplacements font partie de la **sauvegarde de configuration** (Réglages > Sauvegarde) : ils suivent vos exports et imports.
+
 ## Page de départ de Direct, Films et Séries {#page-depart}
 
 Par défaut, ouvrir **Direct**, **Films** ou **Séries** affiche toutes les chaînes ou tous les contenus, en commençant par la première catégorie du fournisseur. Vous pouvez choisir à la place ce qui s'affiche d'abord.

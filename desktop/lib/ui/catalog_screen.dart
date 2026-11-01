@@ -21,6 +21,7 @@ import '../main.dart' show mediaSync;
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'tv_view.dart';
+import 'arrange.dart';
 import 'widgets.dart';
 
 /// Une section (Direct, Films ou Séries) dans l'interface choisie : Classique (trois colonnes) ou Cinéma (affiches).
@@ -532,6 +533,7 @@ class ItemList extends StatefulWidget {
 
 class _ItemListState extends State<ItemList> {
   final _search = TextEditingController();
+  bool _arranging = false;
 
   @override
   void dispose() {
@@ -553,6 +555,9 @@ class _ItemListState extends State<ItemList> {
           final items = filteredItems(context, widget.kind);
           final selectedId = widget.kind == MediaKind.live ? playback.current?.id : navigation.selected(widget.kind)?.id;
           final recents = navigation.filter(widget.kind) is RecentItems && navigation.search.trim().isEmpty;
+          final filter = navigation.filter(widget.kind);
+          final arrangeable = filter is CategoryFilter && navigation.search.trim().isEmpty;
+          final arranging = _arranging && arrangeable;
           return Column(children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
@@ -563,15 +568,30 @@ class _ItemListState extends State<ItemList> {
                 ),
                 Text('${items.length}', style: kText(12, color: KPalette.secondaryText)),
                 if (recents) RecentsEditButton(kind: widget.kind),
+                if (arrangeable)
+                  IconButton(
+                    tooltip: tr('Arranger l\'ordre des éléments'),
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => setState(() => _arranging = !_arranging),
+                    icon: Icon(Icons.swap_vert_rounded, color: _arranging ? KPalette.accent : null),
+                  ),
               ]),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              child: SearchBox(controller: _search, onChanged: navigation.setSearch),
-            ),
-            Divider(height: 1, color: KPalette.separator),
+            if (!arranging)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: SearchBox(controller: _search, onChanged: navigation.setSearch),
+              ),
+            if (!arranging) Divider(height: 1, color: KPalette.separator),
             Expanded(
-              child: recents && navigation.editingRecents
+              child: arranging
+                  ? ArrangeList(
+                      kind: widget.kind,
+                      category: filter.name,
+                      items: items,
+                      onDone: () => setState(() => _arranging = false),
+                    )
+                  : recents && navigation.editingRecents
                   ? RecentsEditor(kind: widget.kind)
                   : items.isEmpty
                   ? Center(child: Text(tr('Aucun résultat'), style: kText(13, color: KPalette.secondaryText)))

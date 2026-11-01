@@ -888,6 +888,8 @@ class _CategoryManagerState extends State<CategoryManager> {
                   p.hidden = {};
                   p.renames = {};
                   p.keywords = [];
+                  p.itemOrder = {};
+                  p.moves = {};
                 }),
                 child: Text(tr('Rétablir')),
               ),
@@ -982,10 +984,10 @@ class _CategoryManagerState extends State<CategoryManager> {
                             if (query.isEmpty)
                               ReorderableDragStartListener(
                                 index: i,
-                                child: Padding(padding: EdgeInsets.all(8), child: Icon(Icons.drag_indicator_rounded, size: 18, color: KPalette.ink38)),
+                                child: SizedBox(width: 52, height: 44, child: Icon(Icons.drag_indicator_rounded, size: 26, color: KPalette.ink38)),
                               )
                             else
-                              const SizedBox(width: 34),
+                              const SizedBox(width: 52),
                             Checkbox(
                               value: visible,
                               onChanged: byKeyword

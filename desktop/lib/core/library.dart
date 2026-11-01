@@ -367,6 +367,23 @@ class LibraryStore extends ChangeNotifier {
     _rebuild();
   }
 
+  /// Enregistre l'ordre des contenus d'une catégorie (noms d'origine, identifiants dans l'ordre voulu).
+  void setItemOrder(MediaKind kind, String category, List<String> ids) =>
+      updateCategories(kind, (p) => p.itemOrder[category] = ids);
+
+  /// Remet une catégorie dans l'ordre du fournisseur.
+  void resetItemOrder(MediaKind kind, String category) => updateCategories(kind, (p) => p.itemOrder.remove(category));
+
+  /// Déplace un contenu vers une autre catégorie, ou une liste personnelle (nom libre). `null` : retour à l'origine.
+  void moveItem(MediaKind kind, MediaItem item, String? category, {String? from}) => updateCategories(kind, (p) {
+        if (category == null) {
+          p.moves.remove(item.id);
+        } else {
+          p.moves[item.id] = category;
+        }
+        if (from != null) p.itemOrder[from]?.remove(item.id);
+      });
+
   void _rebuild() {
     _byKind.clear();
     _categories.clear();
@@ -398,8 +415,10 @@ class LibraryStore extends ChangeNotifier {
           continue;
         }
         final edit = original.kind == MediaKind.live ? channelEdits[original.id] : null;
-        final item = edit == null ? original : edit.apply(original);
+        var item = edit == null ? original : edit.apply(original);
         final prefs = _categoryPrefs[item.kind];
+        final moved = prefs?.moves[item.id];
+        if (moved != null && moved.isNotEmpty && moved != item.group) item = item.copyWith(group: moved);
         final key = '${item.kind.index}|${item.group}';
         final list = _byCategory[key];
         if (list == null) {
@@ -415,6 +434,20 @@ class LibraryStore extends ChangeNotifier {
         (_byKind[item.kind] ??= []).add(item);
       }
     }
+    // Ordre personnalisé des contenus de chaque catégorie (mode « Arranger »).
+    _categoryPrefs.forEach((kind, p) {
+      p.itemOrder.forEach((category, ids) {
+        final list = _byCategory['${kind.index}|$category'];
+        if (list == null || ids.isEmpty) return;
+        final byId = {for (final i in list) i.id: i};
+        final ordered = <MediaItem>[for (final id in ids) ?byId.remove(id)];
+        final rest = list.where((i) => byId.containsKey(i.id)).toList();
+        list
+          ..clear()
+          ..addAll(ordered)
+          ..addAll(rest);
+      });
+    });
     providerOrder.forEach((kind, names) {
       final prefs = _categoryPrefs[kind] ?? CategoryPrefs();
       final ordered = prefs.apply(names);
@@ -940,6 +973,23 @@ class LibraryStore extends ChangeNotifier {
     return n == null ? null : '$n|${id.substring(sep + 1)}';
   }
 
+  /// Réglages de catégories pour l'export : les identifiants de contenus deviennent relatifs aux sources.
+  Map<String, dynamic> _prefsForExport(CategoryPrefs p, Map<String, int> index) {
+    final json = p.toJson();
+    if (p.itemOrder.isNotEmpty) {
+      json['itemOrder'] = {
+        for (final e in p.itemOrder.entries) e.key: [for (final id in e.value) ?_relative(id, index)],
+      };
+    }
+    if (p.moves.isNotEmpty) {
+      json['moves'] = {
+        for (final e in p.moves.entries)
+          ?_relative(e.key, index): e.value,
+      };
+    }
+    return json;
+  }
+
   Future<Map<String, dynamic>> makeExport({required bool includePasswords, required AppSettings settings, required String app}) async {
     final index = <String, int>{};
     final exported = <Map<String, dynamic>>[];
@@ -976,7 +1026,10 @@ class LibraryStore extends ChangeNotifier {
       'sources': exported,
       'favorites': [for (final id in favoriteIds) ?_relative(id, index)],
       'recents': [for (final id in recentIds) ?_relative(id, index)],
-      'categories': {for (final kind in categoryKinds) if (_categoryPrefs[kind] case final p?) kind.name: p.toJson()},
+      'categories': {
+        for (final kind in categoryKinds)
+          if (_categoryPrefs[kind] case final p?) kind.name: _prefsForExport(p, index),
+      },
       'settings': settingsMap,
     };
   }
@@ -1064,7 +1117,20 @@ class LibraryStore extends ChangeNotifier {
       for (final kind in categoryKinds) {
         final c = categories[kind.name];
         if (c is Map) {
-          final imported = CategoryPrefs.fromJson(Map<String, dynamic>.from(c));
+          final raw = Map<String, dynamic>.from(c);
+          if (raw['itemOrder'] is Map) {
+            raw['itemOrder'] = {
+              for (final e in (raw['itemOrder'] as Map).entries)
+                e.key: [for (final r in e.value as List) ?absolute(r)],
+            };
+          }
+          if (raw['moves'] is Map) {
+            raw['moves'] = {
+              for (final e in (raw['moves'] as Map).entries)
+                ?absolute(e.key): e.value,
+            };
+          }
+          final imported = CategoryPrefs.fromJson(raw);
           _categoryPrefs[kind] = imported;
           _prefs.setString('categories.${kind.name}.v1', jsonEncode(imported.toJson()));
           cats++;

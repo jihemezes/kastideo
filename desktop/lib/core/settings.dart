@@ -386,6 +386,12 @@ class CategoryPrefs {
   Map<String, String> renames = {};
   List<String> keywords = [];
 
+  /// Ordre personnalisé des contenus d'une catégorie (nom d'origine → identifiants), mode « Arranger ».
+  Map<String, List<String>> itemOrder = {};
+
+  /// Contenus déplacés vers une autre catégorie ou une liste personnelle (identifiant → catégorie).
+  Map<String, String> moves = {};
+
   bool isHidden(String name) {
     if (hidden.contains(name)) return true;
     final lower = name.toLowerCase();
@@ -408,11 +414,22 @@ class CategoryPrefs {
     return result;
   }
 
-  Map<String, dynamic> toJson() => {'order': order, 'hidden': hidden.toList(), 'renames': renames, 'keywords': keywords};
+  Map<String, dynamic> toJson() => {
+        'order': order,
+        'hidden': hidden.toList(),
+        'renames': renames,
+        'keywords': keywords,
+        if (itemOrder.isNotEmpty) 'itemOrder': itemOrder,
+        if (moves.isNotEmpty) 'moves': moves,
+      };
 
   static CategoryPrefs fromJson(Map<String, dynamic> j) => CategoryPrefs()
     ..order = List<String>.from(j['order'] as List? ?? const [])
     ..hidden = Set<String>.from(j['hidden'] as List? ?? const [])
     ..renames = Map<String, String>.from(j['renames'] as Map? ?? const {})
-    ..keywords = List<String>.from(j['keywords'] as List? ?? const []);
+    ..keywords = List<String>.from(j['keywords'] as List? ?? const [])
+    ..itemOrder = {
+      for (final e in (j['itemOrder'] as Map? ?? const {}).entries) e.key as String: List<String>.from(e.value as List),
+    }
+    ..moves = Map<String, String>.from(j['moves'] as Map? ?? const {});
 }

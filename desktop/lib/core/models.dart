@@ -54,13 +54,13 @@ class MediaItem {
 
   String get displayName => cleanTitle(name).title;
 
-  MediaItem copyWith({String? name, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres}) =>
+  MediaItem copyWith({String? name, String? group, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres}) =>
       MediaItem(
         id: id,
         sourceId: sourceId,
         kind: kind,
         name: name ?? this.name,
-        group: group,
+        group: group ?? this.group,
         logo: logo ?? this.logo,
         stream: stream,
         epgId: epgId ?? this.epgId,
