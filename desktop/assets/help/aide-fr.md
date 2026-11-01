@@ -4,11 +4,21 @@
 
 Kastideo réunit en une seule interface vos **chaînes en direct, films et séries IPTV**, vos **vidéos personnelles** (disque, clé USB, NAS, Jellyfin, Emby, Plex) et **YouTube**. Kastideo ne fournit **aucun contenu** : vous ajoutez vos propres sources.
 
+<!--mac-->
 ![L'écran d'accueil](img:home)
 
 1. Retour à l'accueil, de n'importe où.
 2. Recherche unique dans les chaînes, films et séries.
 3. Bouton **?** : l'aide, ouverte à la page de l'écran où vous êtes.
+<!--/mac-->
+<!--pc-->
+![L'écran d'accueil](img:homepc)
+
+1. Bouton **?** : l'aide, ouverte à la page de l'écran où vous êtes.
+2. **Journal de lecture** : l'outil de diagnostic.
+3. **Réglages** : sources, apparence, enregistrements…
+4. Recherche unique dans les chaînes, films et séries, puis les pavés et accès rapides ([détail de l'accueil](help:accueil)).
+<!--/pc-->
 
 ### Démarrage rapide
 
@@ -212,21 +222,40 @@ Réglages > **Sources** : **modifier** une source (bouton crayon : nom, serveur,
 
 ## L'écran d'accueil {#accueil}
 
+<!--mac-->
 ![L'écran d'accueil](img:home)
 
-<!--mac-->
-Kastideo s'ouvre sur l'**accueil** : trois grands pavés **Direct**, **Films** et **Séries**, puis des boutons plus petits vers les **Favoris**, les **Récents**, le **Guide TV** et les **Enregistrements**.
+Kastideo s'ouvre sur l'**accueil**, de haut en bas :
 
-- Le champ de **recherche** en haut cherche d'un coup dans les chaînes, les films et les séries ; un clic sur un résultat l'ouvre.
-- La rangée **Reprendre la lecture** liste les films et épisodes entamés ; un clic reprend là où vous vous étiez arrêté.
-- Si une lecture est en cours, un bandeau permet d'y **retourner** ou de l'**arrêter**.
-- Pour revenir à l'accueil à tout moment : bouton **Accueil** (maison) en haut à gauche de la barre d'outils, **⌘0**, ligne **Accueil** de la barre latérale, ou touche **H** en interface TV.
+- le **champ de recherche**, qui cherche d'un coup dans les chaînes, les films et les séries ; un clic sur un résultat l'ouvre ;
+- les grands pavés **Direct**, **Films** et **Séries**, et **Mes vidéos** dès qu'une source [Dossiers, Jellyfin, Emby ou Plex](help:mes-videos) existe ; chaque pavé indique le nombre de chaînes, films, séries ou vidéos ;
+- les boutons **Favoris**, **Récents**, **Guide TV**, **YouTube** et **Enregistrements** (un badge indique le nombre d'éléments, ou les enregistrements et téléchargements en attente) ;
+- la rangée **À la télé maintenant** : pastilles par thème (Sport, Info, Films…) et **Ce soir**, qui ouvrent le [direct par thème](help:direct-theme) ;
+- la rangée **Reprendre la lecture** : films et épisodes entamés, un clic reprend là où vous vous étiez arrêté ;
+- si une lecture est en cours, un bandeau **En cours de lecture** permet d'y **retourner** ou de l'**arrêter**.
 
-Le **numéro de version** de Kastideo est affiché discrètement en bas à droite de l'accueil ; un clic ouvre les nouveautés de la version.
+Pour revenir à l'accueil à tout moment : bouton **Accueil** (maison) en haut à gauche de la barre d'outils, **⌘0**, ligne **Accueil** de la barre latérale, ou touche **H** en interface TV.
+
+Le **numéro de version** est affiché discrètement en bas à droite, avec le bouton **?** et le bouton **Offrir un café** ; un clic sur la version ouvre les nouveautés.
 <!--/mac-->
-
 <!--pc-->
-Recherche globale (chaînes, films, séries), pavés **Direct**, **Films** et **Séries**, accès rapides **Favoris**, **Récents**, **Guide TV**, **MultiVue** et **Enregistrements**, rangée **Reprendre la lecture**.
+![L'écran d'accueil](img:homepc)
+
+Kastideo s'ouvre sur l'**accueil**, de haut en bas :
+
+- l'**en-tête** : logo, nom et, à droite, trois boutons : **Aide** (**F1**), **Journal de lecture** et **Réglages** (**Ctrl+,**) ; un petit cercle tourne pendant l'actualisation des sources ;
+- le **champ de recherche**, qui cherche d'un coup dans les chaînes, les films et les séries ; un clic sur un résultat l'ouvre ;
+- les grands pavés **Direct**, **Films** et **Séries**, et **Mes vidéos** dès qu'une source [Dossiers, Jellyfin, Emby ou Plex](help:mes-videos) existe ; chaque pavé indique le nombre de chaînes, films, séries ou vidéos ;
+- les boutons **Favoris**, **Récents**, **Guide TV**, **MultiVue**, **YouTube** et **Enregistrements** (un badge indique le nombre d'éléments, de chaînes dans la MultiVue, ou d'enregistrements et téléchargements en attente) ;
+- la rangée **Reprendre la lecture** : films et épisodes entamés, un clic reprend là où vous vous étiez arrêté ;
+- si une lecture est en cours, un bandeau **En cours de lecture** permet d'y **retourner** ou de l'**arrêter** ;
+- si aucune source n'est ajoutée, une carte **Aucune source** propose **Ajouter une source**.
+
+En bas à droite : le bouton **Offrir un café** (masquable dans Réglages > À propos) et le numéro de version.
+
+Pour revenir à l'accueil à tout moment : ligne **Accueil** de la barre latérale, **Ctrl+0**, ou touche **H** en interface TV.
+
+**Sur téléphone et tablette Android**, l'accueil s'adapte à la largeur de l'écran : en dessous d'environ 720 px (téléphone, ou tablette en portrait), les quatre pavés passent sur **deux colonnes** et l'en-tête se réduit. **Sur Android TV**, les boutons se choisissent à la télécommande (liseré visible) et **OK** ouvre.
 <!--/pc-->
 
 ## Mes vidéos {#mes-videos}

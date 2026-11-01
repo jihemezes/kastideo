@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.9.1] - 2026-11-01
+
+**Aide : l'écran d'accueil est décrit tel qu'il est.** La page « L'écran d'accueil » est réécrite (champ de recherche, pavés dont Mes vidéos, accès rapides, « À la télé maintenant », « Reprendre la lecture », bandeau de lecture, version et bouton Offrir un café) avec un schéma mis à jour. L'application elle-même ne change pas.
+
 ## [1.9.0] - 2026-10-31
 
 **Kastideo arrive sur Android et Android TV.** Cette version Mac ne change pas l'application : elle ajoute la page d'aide « Kastideo sur Android et Android TV » (choix du fichier, installation sans désactiver la sécurité d'Android, télécommande, différences avec l'ordinateur). Les APK se téléchargent sur la page des versions GitHub (tags `-android`).

@@ -4,11 +4,21 @@
 
 Kastideo brings together your **live channels, IPTV movies and series**, your **personal videos** (disk, USB drive, NAS, Jellyfin, Emby, Plex) and **YouTube** in a single interface. Kastideo provides **no content** of its own: you add your own sources.
 
+<!--mac-->
 ![The Home screen](img:home)
 
 1. Back to Home, from anywhere.
 2. One search for channels, movies and series.
 3. The **?** button: help, opened on the page that matches the screen you are on.
+<!--/mac-->
+<!--pc-->
+![The Home screen](img:homepc)
+
+1. The **?** button: help, opened on the page that matches the screen you are on.
+2. **Playback log**: the diagnostic tool.
+3. **Settings**: sources, appearance, recordings…
+4. One search for channels, movies and series, then the tiles and shortcuts ([Home screen details](help:accueil)).
+<!--/pc-->
 
 ### Quick start
 
@@ -212,21 +222,40 @@ Settings > **Sources**: **edit** a source (pencil button: name, server, username
 
 ## The Home screen {#accueil}
 
+<!--mac-->
 ![The Home screen](img:home)
 
-<!--mac-->
-Kastideo opens on the **Home** screen: three large tiles, **Live**, **Movies** and **Series**, then smaller buttons for **Favorites**, **Recents**, the **TV Guide** and **Recordings**.
+Kastideo opens on the **Home** screen, from top to bottom:
 
-- The **search** field at the top searches channels, movies and series at once; click a result to open it.
-- The **Continue Watching** row lists the movies and episodes you have started; click one to resume where you left off.
-- If something is playing, a banner lets you **go back to it** or **stop** it.
-- To return to Home at any time: the **Home** button (house) at the top left of the toolbar, **⌘0**, the **Home** row in the sidebar, or the **H** key in the TV interface.
+- the **search field**, which searches channels, movies and series at once; clicking a result opens it;
+- the large **Live**, **Movies** and **Series** tiles, and **My videos** as soon as a [Folders, Jellyfin, Emby or Plex](help:mes-videos) source exists; each tile shows the number of channels, movies, series or videos;
+- the **Favorites**, **Recents**, **TV Guide**, **YouTube** and **Recordings** buttons (a badge shows the number of items, or pending recordings and downloads);
+- the **On TV now** row: chips by theme (Sport, News, Movies…) and **Tonight**, which open [live by theme](help:direct-theme);
+- the **Continue watching** row: movies and episodes you started, one click resumes where you stopped;
+- if something is playing, a **Now playing** banner lets you **go back** to it or **stop** it.
 
-Kastideo's **version number** is shown discreetly at the bottom right of the Home screen; clicking it opens the release notes.
+To return Home at any time: the **Home** (house) button at the top left of the toolbar, **⌘0**, the **Home** row of the sidebar, or the **H** key in the TV interface.
+
+The **version number** is shown discreetly at the bottom right, next to the **?** and **Buy me a coffee** buttons; clicking the version opens what's new.
 <!--/mac-->
-
 <!--pc-->
-Global search (channels, movies, series), **Live**, **Movies** and **Series** tiles, quick access to **Favorites**, **Recents**, **TV Guide**, **MultiView** and **Recordings**, and the **Continue watching** row.
+![The Home screen](img:homepc)
+
+Kastideo opens on the **Home** screen, from top to bottom:
+
+- the **header**: logo, name and, on the right, three buttons: **Help** (**F1**), **Playback log** and **Settings** (**Ctrl+,**); a small spinner turns while sources refresh;
+- the **search field**, which searches channels, movies and series at once; clicking a result opens it;
+- the large **Live**, **Movies** and **Series** tiles, and **My videos** as soon as a [Folders, Jellyfin, Emby or Plex](help:mes-videos) source exists; each tile shows the number of channels, movies, series or videos;
+- the **Favorites**, **Recents**, **TV Guide**, **MultiView**, **YouTube** and **Recordings** buttons (a badge shows the number of items, of channels in MultiView, or pending recordings and downloads);
+- the **Continue watching** row: movies and episodes you started, one click resumes where you stopped;
+- if something is playing, a **Now playing** banner lets you **go back** to it or **stop** it;
+- if no source has been added, a **No source** card offers **Add a source**.
+
+At the bottom right: the **Buy me a coffee** button (can be hidden in Settings > About) and the version number.
+
+To return Home at any time: the **Home** row of the sidebar, **Ctrl+0**, or the **H** key in the TV interface.
+
+**On Android phones and tablets**, Home adapts to the screen width: below about 720 px (phone, or tablet in portrait), the four tiles go to **two columns** and the header shrinks. **On Android TV**, buttons are chosen with the remote (visible outline) and **OK** opens.
 <!--/pc-->
 
 ## My videos {#mes-videos}

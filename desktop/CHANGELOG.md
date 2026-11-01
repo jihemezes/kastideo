@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.9.1-android1] - 2026-11-01
+
+- **Aide** : la page « L'écran d'accueil » est réécrite pour correspondre à l'écran livré (en-tête avec Aide, Journal et Réglages, pavés dont Mes vidéos, accès rapides dont MultiVue et YouTube, bandeau de lecture, accueil à deux colonnes sur téléphone) avec un nouveau schéma ; la page « Bienvenue » est alignée.
+
+## [1.9.1-desktop1] - 2026-11-01
+
+- **Aide** : la page « L'écran d'accueil » est réécrite pour correspondre à l'écran livré (en-tête avec Aide, Journal et Réglages, pavés dont Mes vidéos, accès rapides dont MultiVue et YouTube, bandeau de lecture, accueil à deux colonnes sur téléphone) avec un nouveau schéma ; la page « Bienvenue » est alignée.
+
 ## [1.9.0-android3] - 2026-11-01
 
 - **Mode Arranger** (Android, Windows, Linux) : dans une catégorie, le bouton ↑↓ à droite du titre permet de changer l'ordre des chaînes, films ou séries avec une grande poignée ⋮⋮ (la liste défile librement ailleurs, au doigt comme à la souris). Menu ⋮ : tout en haut / tout en bas, **déplacer vers une autre catégorie ou une liste personnelle**, remettre dans la catégorie d'origine. Tri A → Z, par numéro, retour à l'ordre du fournisseur.
