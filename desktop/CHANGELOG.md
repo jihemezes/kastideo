@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.9.1-android2] - 2026-11-01
+
+- **Android** : le coin inférieur droit de l'accueil affichait « Aperçu Windows / Linux ». Il indique maintenant « Android » (ou « Android TV »). Même correction dans Réglages > Mises à jour (texte propre à Android) et dans les réglages Cast (plus de mention d'ffmpeg, absent sur Android).
+
 ## [1.9.1-android1] - 2026-11-01
 
 - **Aide** : la page « L'écran d'accueil » est réécrite pour correspondre à l'écran livré (en-tête avec Aide, Journal et Réglages, pavés dont Mes vidéos, accès rapides dont MultiVue et YouTube, bandeau de lecture, accueil à deux colonnes sur téléphone) avec un nouveau schéma ; la page « Bienvenue » est alignée.

@@ -355,8 +355,11 @@ class _UpdatesSection extends StatelessWidget {
             TextButton(onPressed: () => showWhatsNew(context), child: Text(tr('Nouveautés des dernières versions'))),
             TextButton(onPressed: () => launchUrl(Uri.parse(UpdateService.releasesPage)), child: Text(tr('Page des versions sur GitHub'))),
           ]),
-          _caption(tr('Les aperçus Windows et Linux sont publiés en pré-version. Une nouvelle version est proposée en dehors du visionnage ; '
-              'Kastideo la télécharge, se ferme, s\'installe puis se relance.')),
+          _caption(Device.isAndroid
+              ? tr('Les versions Android sont publiées en pré-version. Une nouvelle version est proposée en dehors du visionnage ; '
+                  'Kastideo la télécharge puis ouvre l\'installateur d\'Android.')
+              : tr('Les aperçus Windows et Linux sont publiés en pré-version. Une nouvelle version est proposée en dehors du visionnage ; '
+                  'Kastideo la télécharge, se ferme, s\'installe puis se relance.')),
         ]);
       },
     );
@@ -1848,7 +1851,7 @@ class _CastSectionState extends State<_CastSection> {
               icon: const Icon(Icons.close_rounded, size: 18),
             ),
           ]),
-        _caption(tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. ffmpeg convertit la vidéo ; il est livré avec Kastideo sous Windows et Linux (AppImage).')),
+        _caption(Device.isAndroid ? tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. Sur Android, l\'adresse du flux est envoyée directement à la TV, sans conversion.') : tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. ffmpeg convertit la vidéo ; il est livré avec Kastideo sous Windows et Linux (AppImage).')),
         TextButton(onPressed: () => showHelpDialog(context, page: 'cast'), child: Text(tr('Aide : diffuser sur un téléviseur'))),
       ]),
     );

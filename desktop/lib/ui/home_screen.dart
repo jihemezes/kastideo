@@ -7,6 +7,7 @@ import '../app_state.dart';
 import '../core/models.dart';
 import '../core/text.dart';
 import '../l10n.dart';
+import '../core/device.dart';
 import '../theme.dart';
 import '../version.dart';
 import 'cinema_view.dart';
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const SupportButton(onDark: true),
               const SizedBox(width: 12),
-              Text('Kastideo $kVersion · ${tr('Aperçu Windows / Linux')}',
+              Text('Kastideo $kVersion · ${Device.isAndroid ? (Device.isTv ? 'Android TV' : 'Android') : tr('Aperçu Windows / Linux')}',
                   style: kTextD(11, color: Colors.white.withValues(alpha: 0.35))),
             ]),
           ),
