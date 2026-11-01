@@ -373,3 +373,91 @@ class _WheelRowState extends State<WheelRow> {
         child: SingleChildScrollView(controller: _controller, scrollDirection: Axis.horizontal, child: Row(children: widget.children)),
       );
 }
+
+/// Liste de choix adaptée au tactile : un champ qui ouvre une fenêtre avec recherche et lignes à toucher
+/// (remplace le menu déroulant, difficile à utiliser avec une longue liste de catégories sur tablette).
+class PickerField<T> extends StatelessWidget {
+  const PickerField({super.key, required this.value, required this.options, required this.onChanged, this.title});
+  final T value;
+  final List<(T, String)> options;
+  final ValueChanged<T> onChanged;
+  final String? title;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = options.where((o) => o.$1 == value).map((o) => o.$2).firstOrNull ?? '';
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () async {
+        final result = await showKDialog<(T,)>(
+          context: context,
+          builder: (_) => _PickerDialog<T>(title: title, value: value, options: options),
+        );
+        if (result != null) onChanged(result.$1);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: KPalette.secondaryText.withValues(alpha: 0.4)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(children: [
+          Expanded(child: Text(label, style: kText(13), overflow: TextOverflow.ellipsis)),
+          const Icon(Icons.arrow_drop_down_rounded),
+        ]),
+      ),
+    );
+  }
+}
+
+class _PickerDialog<T> extends StatefulWidget {
+  const _PickerDialog({required this.title, required this.value, required this.options});
+  final String? title;
+  final T value;
+  final List<(T, String)> options;
+
+  @override
+  State<_PickerDialog<T>> createState() => _PickerDialogState<T>();
+}
+
+class _PickerDialogState<T> extends State<_PickerDialog<T>> {
+  String _filter = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final key = _filter.searchKey;
+    final shown = key.isEmpty ? widget.options : widget.options.where((o) => o.$2.searchKey.contains(key)).toList();
+    final size = MediaQuery.sizeOf(context);
+    return AlertDialog(
+      title: widget.title == null ? null : Text(widget.title!),
+      content: SizedBox(
+        width: 420,
+        height: (size.height * 0.6).clamp(240.0, 560.0),
+        child: Column(children: [
+          if (widget.options.length > 8)
+            TextField(
+              decoration: InputDecoration(prefixIcon: const Icon(Icons.search_rounded), hintText: tr('Rechercher'), isDense: true),
+              onChanged: (v) => setState(() => _filter = v),
+            ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: shown.length,
+              itemBuilder: (context, i) {
+                final (v, l) = shown[i];
+                final selected = v == widget.value;
+                return ListTile(
+                  dense: true,
+                  selected: selected,
+                  title: Text(l, style: kText(14), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  trailing: selected ? const Icon(Icons.check_rounded) : null,
+                  onTap: () => Navigator.pop(context, (v,)),
+                );
+              },
+            ),
+          ),
+        ]),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('Annuler')))],
+    );
+  }
+}

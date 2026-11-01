@@ -20,6 +20,7 @@ import '../core/updater.dart';
 import '../core/youtube.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import 'widgets.dart';
 import '../version.dart';
 import '../core/library.dart';
 import 'help_dialog.dart';
@@ -1499,11 +1500,11 @@ class _StartPageSection extends StatelessWidget {
         child: Row(children: [
           SizedBox(width: 230, child: Text(label, style: kText(14))),
           Flexible(
-            child: DropdownButton<String>(
+            child: PickerField<String>(
+              title: label,
               value: current,
-              isExpanded: true,
-              items: [for (final (v, l) in options) DropdownMenuItem(value: v, child: Text(l, style: kText(13), overflow: TextOverflow.ellipsis))],
-              onChanged: (v) => v == null ? null : settings.setString('start.${kind.name}', v),
+              options: options,
+              onChanged: (v) => settings.setString('start.${kind.name}', v),
             ),
           ),
         ]),

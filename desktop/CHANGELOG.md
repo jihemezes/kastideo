@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.9.0-android2] - 2026-11-01
+
+- **Android, Windows et Linux** : Réglages > Général > Page de départ : le choix d'une catégorie n'avait aucun effet au toucher sur tablette. Le menu déroulant est remplacé par une fenêtre de choix avec recherche et lignes à toucher.
+
 ## [1.9.0-android1] - 2026-10-31
 
 **Première version pour Android et Android TV** (téléphones, tablettes, Google TV, Chromecast avec Google TV, Nvidia Shield…). Un seul APK par processeur, mêmes fonctions que la version Windows / Linux : Direct, Films, Séries, Guide TV, Replay, Thèmes, MultiVue, enregistrements, téléchargements, YouTube, Mes vidéos et serveurs (Jellyfin, Emby, Plex), aide intégrée.
