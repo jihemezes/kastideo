@@ -6,6 +6,21 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.11.0</title>
+      <pubDate>Mon, 02 Nov 2026 23:06:18 GMT</pubDate>
+      <sparkle:version>80</sparkle:version>
+      <sparkle:shortVersionString>1.11.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Corriger la fiche, par code TMDB&lt;/b&gt; : dans « Corriger la fiche… », saisissez le numéro TMDB (ou collez l&amp;#x27;adresse de la page themoviedb.org) pour lier un film ou une série à la bonne fiche, avec aperçu avant validation. Utile quand deux films portent le même titre.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Films et séries de l&amp;#x27;abonnement IPTV&lt;/b&gt; : « Corriger la fiche… » est maintenant proposé aussi pour eux (jusqu&amp;#x27;ici, seulement pour Mes vidéos).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Fiche personnalisée&lt;/b&gt; : titre, année, adresse d&amp;#x27;affiche et résumé saisis à la main, qui l&amp;#x27;emportent sur le fournisseur et TMDB.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Retirer la correction&lt;/b&gt; pour revenir à la recherche automatique ; liste de toutes les fiches corrigées dans Réglages &amp;gt; Général, et corrections incluses dans la sauvegarde de la configuration.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Aide&lt;/b&gt; : nouvelle page « Corriger la fiche d&amp;#x27;un film ou d&amp;#x27;une série ».&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.11.0/Kastideo-1.11.0.dmg" length="48035844" type="application/octet-stream" sparkle:edSignature="dVQuFnJmU395VtNhrGwsa2bySq7zZDCzf3RqpxH/2d+EoRiNKT+W/GvIl52PIGTECbXRop/9AbNxlwyL3EXfDg==" />
+    </item>
+    <item>
       <title>Kastideo 1.10.1</title>
       <pubDate>Mon, 02 Nov 2026 22:30:15 GMT</pubDate>
       <sparkle:version>79</sparkle:version>
@@ -443,19 +458,6 @@
 &lt;li&gt;Les logos choisis ne sont pas effacés par « Vider et recharger » le cache&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.0/Kastideo-1.0.0.dmg" length="45723209" type="application/octet-stream" sparkle:edSignature="MY1hLjZlUHkRPEvoW3kb0sJ4eC3rNoMBYjFHYfbV4pc68xPgmbQ1T5gXWuZthN3M9QzlcDl71bsNnpD9xG1eDw==" />
-    </item>
-    <item>
-      <title>Kastideo 0.15.0</title>
-      <pubDate>Thu, 22 Oct 2026 21:37:58 GMT</pubDate>
-      <sparkle:version>35</sparkle:version>
-      <sparkle:shortVersionString>0.15.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Nouveaux thèmes&lt;/b&gt; : Auto-Moto (sports mécaniques), Cuisine &amp;amp; Maison, Nature / Chasse &amp;amp; Pêche, Régional (France 3 régions, télés locales), International (chaînes étrangères), Religion, Radio, et &lt;b&gt;Adulte&lt;/b&gt;&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Contenus adultes&lt;/b&gt; (« |XX| » dans le nom ou catégorie adulte) &lt;b&gt;masqués partout&lt;/b&gt; par défaut ; Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; Afficher les contenus adultes&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Sport par discipline&lt;/b&gt; : Football, Rugby, Tennis, Basket, Combat, Golf, Cyclisme, Handball, Sports mécaniques, Sports d&amp;#x27;hiver, Hippisme, Athlétisme &amp;amp; natation&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v0.15.0/Kastideo-0.15.0.dmg" length="45564774" type="application/octet-stream" sparkle:edSignature="VPaDC/4a8ILWz4pMd968/xHa87GqyhGsJLuit2PprlIqo8yuH3xLMJHAX9BMpni19oBDiut0zoaxKp0QM6K+CQ==" />
     </item>
   </channel>
 </rss>
