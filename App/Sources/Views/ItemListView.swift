@@ -256,7 +256,7 @@ struct ItemActionsMenu: View {
                 store.setPlayedOnServer(item, !seen)
             }
         }
-        if store.isLocalFile(item), item.kind == .movie || item.kind == .series {
+        if item.kind == .movie || item.kind == .series {
             Button("Corriger la fiche…") { navigation.fixingItem = item }
         }
         if store.recentIDs.contains(item.id) {

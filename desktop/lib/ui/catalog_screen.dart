@@ -776,7 +776,7 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
           value: context.watch.isWatched(item.id) ? 'unwatched' : 'watched',
           child: Text(context.watch.isWatched(item.id) ? tr('Marquer comme non vu') : tr('Marquer comme vu'), style: kText(13)),
         ),
-      if ((item.kind == MediaKind.movie || item.kind == MediaKind.series) && library.sourceOf(item)?.kind == SourceKind.folder)
+      if (item.kind == MediaKind.movie || item.kind == MediaKind.series)
         PopupMenuItem(value: 'fix', child: Text(tr('Corriger la fiche…'), style: kText(13))),
       if (library.recentIds.contains(item.id))
         PopupMenuItem(value: 'unrecent', child: Text(tr('Retirer des récents'), style: kText(13))),

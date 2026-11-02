@@ -22,7 +22,7 @@ final class MediaInfoStore {
 
     init() {
         tmdbKey = Keychain.get(account: Self.keychainAccount) ?? ""
-        tmdbFixes = UserDefaults.standard.dictionary(forKey: Self.fixesKey) as? [String: String] ?? [:]
+        edits = FicheEdits.load()
     }
 
     var usesTMDB: Bool { !tmdbKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -54,8 +54,8 @@ final class MediaInfoStore {
             details.title = cleaned.title
             details.year = cleaned.year
             details.sources = [String(localized: "Fichier local")]
-            details.tmdbID = tmdbFixes[item.id]
         }
+        let edit = edits[item.id]
 
         if source?.kind.serverType != nil {
             do {
@@ -90,6 +90,8 @@ final class MediaInfoStore {
             }
         }
 
+        // Fiche TMDB choisie à la main : elle l'emporte sur l'identifiant du fournisseur.
+        if let id = edit?.tmdbID, !id.isEmpty { details.tmdbID = id }
         if usesTMDB, !isPersonal || personalAllowed || details.tmdbID != nil {
             let client = TMDBClient(apiKey: tmdbKey, language: language)
             do {
@@ -110,6 +112,13 @@ final class MediaInfoStore {
                 errors[item.id] = String(localized: "TMDB n'a pas répondu (vérifiez la clé dans Réglages > Général).")
                 PlaybackLog.shared.note("TMDB : échec pour « \(item.name) » : \(error.localizedDescription)")
             }
+        }
+        // Textes et affiche saisis à la main : ils passent avant tout le reste.
+        if let edit {
+            if let title = edit.title?.trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty { details.title = title }
+            if let year = edit.year { details.year = year }
+            if let poster = edit.posterURL { details.posterURL = poster }
+            if let plot = edit.plot?.trimmingCharacters(in: .whitespacesAndNewlines), !plot.isEmpty { details.plot = plot }
         }
         if details.sources.isEmpty { details.sources = ["IPTV"] }
         cache[item.id] = details
@@ -167,9 +176,8 @@ final class MediaInfoStore {
 
     // MARK: Fichiers locaux : fiches TMDB
 
-    private static let fixesKey = "local.tmdbFixes.v1"
-    /// Fiches choisies à la main (« Corriger la fiche… ») : identifiant du contenu → identifiant TMDB.
-    @ObservationIgnored private var tmdbFixes: [String: String] = [:]
+    /// Corrections faites à la main (« Corriger la fiche… ») : identifiant du contenu → correction.
+    private(set) var edits: [String: FicheEdit] = [:]
     @ObservationIgnored private var enriching: Set<UUID> = []
     @ObservationIgnored private var enrichTried: Set<String> = []
 
@@ -178,13 +186,70 @@ final class MediaInfoStore {
         try await TMDBClient(apiKey: tmdbKey, language: language).search(title: title, isSeries: isSeries, year: year)
     }
 
-    /// Retient la fiche choisie, met à jour l'affiche et le résumé, puis recharge la fiche.
-    func applyFix(_ item: MediaItem, match: TMDBMatch, store: LibraryStore) async {
-        tmdbFixes[item.id] = match.tmdbID
-        UserDefaults.standard.set(tmdbFixes, forKey: Self.fixesKey)
-        store.applyEnrichment(item.sourceID, [item.id: LocalFiche(logo: match.posterURL, info: match.overview, year: match.year,
-                                                                   genres: match.genres)])
+    /// Retire une correction sans recharger de fiche (contenu qui n'est plus dans le catalogue).
+    func discardEdit(id: String) {
+        edits[id] = nil
+        FicheEdits.save(edits)
+        cache[id] = nil
+    }
+
+    /// Relit les corrections (après une importation de configuration).
+    func reloadEdits() { edits = FicheEdits.load() }
+
+    /// Vérifie un code ou une adresse TMDB pour ce contenu : fiche trouvée, ou raison du refus.
+    func lookup(_ reference: String, for item: MediaItem) async -> (details: MediaDetails?, problem: String?) {
+        guard usesTMDB else { return (nil, String(localized: "Ajoutez une clé TMDB (Réglages > Général) pour vérifier un code.")) }
+        guard let ref = TMDB.parseReference(reference) else {
+            return (nil, String(localized: "Saisissez le numéro TMDB (par exemple 12345) ou collez l'adresse de la page themoviedb.org."))
+        }
+        let isSeries = item.kind == .series
+        if let kind = ref.isSeries, kind != isSeries {
+            return (nil, isSeries ? String(localized: "Cette adresse est celle d'un film, pas d'une série.")
+                                  : String(localized: "Cette adresse est celle d'une série, pas d'un film."))
+        }
+        do {
+            let client = TMDBClient(apiKey: tmdbKey, language: language)
+            guard var found = try await client.details(title: item.name, isSeries: isSeries, tmdbID: ref.id) else {
+                return (nil, String(localized: "Aucune fiche TMDB avec ce code."))
+            }
+            found.tmdbID = ref.id
+            return (found, nil)
+        } catch {
+            return (nil, String(localized: "Aucune fiche TMDB avec ce code (ou TMDB n'a pas répondu)."))
+        }
+    }
+
+    /// Enregistre (ou, avec nil, retire) la correction d'un contenu, met à jour l'affiche et le résumé, puis recharge la fiche.
+    func setEdit(_ item: MediaItem, _ edit: FicheEdit?, store: LibraryStore) async {
+        let value = (edit?.isEmpty ?? true) ? nil : edit
+        edits[item.id] = value
+        FicheEdits.save(edits)
+        if store.isLocalFile(item) {
+            if let value {
+                var fiche = LocalFiche(logo: value.posterURL, info: value.plot, year: value.year, genres: [])
+                if let id = value.tmdbID, !id.isEmpty, usesTMDB,
+                   let found = try? await TMDBClient(apiKey: tmdbKey, language: language)
+                    .details(title: item.name, isSeries: item.kind == .series, tmdbID: id) {
+                    fiche.logo = value.posterURL ?? found.posterURL
+                    fiche.info = value.plot ?? found.plot
+                    fiche.year = value.year ?? found.year
+                    fiche.genres = found.genres
+                }
+                store.applyEnrichment(item.sourceID, [item.id: fiche])
+            } else {
+                store.clearEnrichment(item.sourceID, ids: [item.id])
+                enrichTried.remove(item.id)
+            }
+        }
         await reload(item, store: store)
+        if value == nil, let source = store.source(id: item.sourceID) { enrichLocal(source, store: store) }
+    }
+
+    /// Retient la fiche choisie dans la liste de résultats.
+    func applyFix(_ item: MediaItem, match: TMDBMatch, store: LibraryStore) async {
+        var edit = edits[item.id] ?? FicheEdit()
+        edit.tmdbID = match.tmdbID
+        await setEdit(item, edit, store: store)
     }
 
     /// Affiches et résumés TMDB des films et séries d'une source « Dossiers » qui n'en ont pas encore
@@ -201,7 +266,7 @@ final class MediaInfoStore {
         guard !todo.isEmpty else { return }
         enriching.insert(source.id)
         let client = TMDBClient(apiKey: tmdbKey, language: language)
-        let fixes = tmdbFixes
+        let fixes = edits.compactMapValues(\.tmdbID)
         let items = Array(todo)
         let isPersonalItem: @Sendable (MediaItem) -> Bool = { $0.group.hasPrefix(personal) }
         for item in items { enrichTried.insert(item.id) }
@@ -494,7 +559,7 @@ struct MediaInfoView: View {
                     }
                     Button("Actualiser") { Task { await info.reload(item, store: store) } }
                         .buttonStyle(.link)
-                    if store.isLocalFile(item) {
+                    if item.kind == .movie || item.kind == .series {
                         Button("Corriger la fiche…") { navigation.fixingItem = item }
                             .buttonStyle(.link)
                     }
@@ -548,6 +613,7 @@ private struct CastCard: View {
 /// Réglages : clé TMDB pour enrichir les fiches.
 struct MediaInfoSettingsSection: View {
     @Environment(MediaInfoStore.self) private var info
+    @Environment(LibraryStore.self) private var store
     @State private var draft = ""
     @State private var status: String?
     @State private var checking = false
@@ -574,6 +640,32 @@ struct MediaInfoSettingsSection: View {
             }
             Toggle("Chercher aussi les vidéos personnelles (dossiers)", isOn: $personal)
                 .help("Affiche et résumé pour vos fichiers : seul un titre identique à celui de TMDB est retenu (sinon, « Corriger la fiche »)")
+            if !info.edits.isEmpty {
+                DisclosureGroup("Fiches corrigées à la main (\(info.edits.count))") {
+                    ForEach(info.edits.keys.sorted(), id: \.self) { id in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(store.item(id: id)?.name ?? String(localized: "Contenu absent du catalogue"))
+                                if let edit = info.edits[id] {
+                                    Text([edit.tmdbID.map { "TMDB \($0)" }, edit.title, edit.year.map(String.init)]
+                                        .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Button("Retirer") {
+                                if let item = store.item(id: id) {
+                                    Task { await info.setEdit(item, nil, store: store) }
+                                } else {
+                                    info.discardEdit(id: id)
+                                }
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+            }
             Text("En interface Cinéma, un clic sur une affiche ouvre la fiche du film ou de la série. Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce et résumé traduit.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -592,5 +684,28 @@ struct MediaInfoSettingsSection: View {
             checking = false
             status = ok ? String(localized: "Clé valide ✓") : String(localized: "Clé refusée par TMDB")
         }
+    }
+}
+
+
+/// Corrections de fiches enregistrées (UserDefaults), partagées avec l'export de configuration.
+enum FicheEdits {
+    static let key = "fiches.edits.v1"
+    private static let legacyKey = "local.tmdbFixes.v1"
+
+    static func load() -> [String: FicheEdit] {
+        let defaults = UserDefaults.standard
+        if let data = defaults.data(forKey: key), let decoded = try? JSONDecoder().decode([String: FicheEdit].self, from: data) {
+            return decoded
+        }
+        // Anciennes versions : seulement l'identifiant TMDB choisi.
+        if let old = defaults.dictionary(forKey: legacyKey) as? [String: String] {
+            return old.mapValues { FicheEdit(tmdbID: $0) }
+        }
+        return [:]
+    }
+
+    static func save(_ edits: [String: FicheEdit]) {
+        if let data = try? JSONEncoder().encode(edits) { UserDefaults.standard.set(data, forKey: key) }
     }
 }

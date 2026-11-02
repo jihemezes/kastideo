@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.11.0-android1] - 2026-11-03
+
+- **Corriger la fiche par code TMDB** (Windows, Linux, Android) : numéro ou adresse themoviedb.org, aperçu, puis « Utiliser cette fiche » ; recherche par titre avec le numéro TMDB affiché ; fiche personnalisée (titre, année, affiche, résumé) ; « Retirer la correction ». Disponible aussi pour les films et séries de l'abonnement IPTV.
+- Liste des fiches corrigées dans Réglages, corrections incluses dans l'export/import de la configuration (format commun avec le Mac).
+- Aide : nouvelle page « Corriger la fiche d'un film ou d'une série ».
+
+## [1.11.0-desktop1] - 2026-11-03
+
+- Mêmes nouveautés que 1.11.0-android1 pour Windows et Linux.
+
 ## [1.10.0-android1] - 2026-11-02
 
 - **Menu Source** dans la barre latérale (Windows, Linux, Android) : choisir un compte IPTV sans désactiver les autres, avec les compteurs chaînes · films · séries ; choix retenu ; filtre Direct, Films, Séries, recherche et guide. Option « Fusionner les doublons » pour « Toutes les sources ».

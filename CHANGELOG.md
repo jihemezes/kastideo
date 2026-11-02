@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.11.0] - 2026-11-03
+
+- **Corriger la fiche, par code TMDB** : dans « Corriger la fiche… », saisissez le numéro TMDB (ou collez l'adresse de la page themoviedb.org) pour lier un film ou une série à la bonne fiche, avec aperçu avant validation. Utile quand deux films portent le même titre.
+- **Films et séries de l'abonnement IPTV** : « Corriger la fiche… » est maintenant proposé aussi pour eux (jusqu'ici, seulement pour Mes vidéos).
+- **Fiche personnalisée** : titre, année, adresse d'affiche et résumé saisis à la main, qui l'emportent sur le fournisseur et TMDB.
+- **Retirer la correction** pour revenir à la recherche automatique ; liste de toutes les fiches corrigées dans Réglages > Général, et corrections incluses dans la sauvegarde de la configuration.
+- **Aide** : nouvelle page « Corriger la fiche d'un film ou d'une série ».
+
 ## [1.10.1] - 2026-11-02
 
 - Correction de la version 1.10.0 (non publiée sur Mac) : un fichier de traduction anglaise était invalide, ce qui empêchait la compilation. Les nouveautés de 1.10.0 sont inchangées.

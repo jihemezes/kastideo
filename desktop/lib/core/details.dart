@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'models.dart';
 import 'text.dart';
 import 'xtream.dart';
@@ -432,4 +434,83 @@ class TMDBEpisode {
   final String? name;
   final String? overview;
   final String? still;
+}
+
+
+/// Correction manuelle de la fiche d'un film ou d'une série : lien vers une fiche TMDB précise et/ou textes personnalisés.
+/// Les champs renseignés l'emportent sur ce que renvoient le fournisseur et TMDB. Format commun avec la version Mac.
+class FicheEdit {
+  FicheEdit({this.tmdbId, this.title, this.year, this.poster, this.plot});
+  String? tmdbId;
+  String? title;
+  int? year;
+  String? poster;
+  String? plot;
+
+  static bool _blank(String? s) => s == null || s.trim().isEmpty;
+  bool get isEmpty => _blank(tmdbId) && _blank(title) && year == null && _blank(poster) && _blank(plot);
+
+  /// Affiche personnalisée (adresse http ou https).
+  String? get posterUrl {
+    final text = poster?.trim();
+    if (text == null || text.isEmpty) return null;
+    final uri = Uri.tryParse(text);
+    return (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) ? text : null;
+  }
+
+  FicheEdit copy() => FicheEdit(tmdbId: tmdbId, title: title, year: year, poster: poster, plot: plot);
+
+  Map<String, dynamic> toJson() => {
+        if (!_blank(tmdbId)) 'tmdbID': tmdbId,
+        if (!_blank(title)) 'title': title,
+        'year': ?year,
+        if (!_blank(poster)) 'poster': poster,
+        if (!_blank(plot)) 'plot': plot,
+      };
+
+  static FicheEdit fromJson(Map<dynamic, dynamic> j) => FicheEdit(
+        tmdbId: j['tmdbID']?.toString(),
+        title: j['title'] as String?,
+        year: (j['year'] as num?)?.toInt(),
+        poster: j['poster'] as String?,
+        plot: j['plot'] as String?,
+      );
+}
+
+/// Reconnaît un code TMDB (« 12345 »), « movie/12345 », « tv/1399 » ou une adresse themoviedb.org.
+/// `series` est null quand le texte ne précise pas le type.
+({String id, bool? series})? parseTmdbReference(String text) {
+  final t = text.trim();
+  if (t.isEmpty) return null;
+  if (RegExp(r'^\d+$').hasMatch(t)) return (id: t, series: null);
+  final m = RegExp(r'(?:^|/)(movie|tv)/(\d+)').firstMatch(t);
+  if (m == null) return null;
+  return (id: m.group(2)!, series: m.group(1) == 'tv');
+}
+
+/// Corrections de fiches enregistrées dans les préférences (identifiant du contenu → correction).
+class FicheEdits {
+  static const _key = 'fiches.edits.v1';
+  static const _legacyKey = 'local.tmdbFixes.v1';
+
+  static Future<Map<String, FicheEdit>> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final raw = prefs.getString(_key);
+      if (raw != null) {
+        return {for (final e in (jsonDecode(raw) as Map).entries) e.key as String: FicheEdit.fromJson(e.value as Map)};
+      }
+      // Anciennes versions : seulement l'identifiant TMDB choisi.
+      final old = prefs.getString(_legacyKey);
+      if (old != null) {
+        return {for (final e in (jsonDecode(old) as Map).entries) e.key as String: FicheEdit(tmdbId: e.value.toString())};
+      }
+    } catch (_) {}
+    return {};
+  }
+
+  static Future<void> save(Map<String, FicheEdit> edits) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, jsonEncode({for (final e in edits.entries) e.key: e.value.toJson()}));
+  }
 }

@@ -241,6 +241,52 @@ public enum TMDB {
     }
 }
 
+/// Correction manuelle de la fiche d'un film ou d'une série : lien vers une fiche TMDB précise et/ou textes personnalisés.
+/// Les champs renseignés l'emportent sur ce que renvoient le fournisseur et TMDB.
+public struct FicheEdit: Codable, Sendable, Hashable {
+    public var tmdbID: String?
+    public var title: String?
+    public var year: Int?
+    public var poster: String?
+    public var plot: String?
+
+    public init(tmdbID: String? = nil, title: String? = nil, year: Int? = nil, poster: String? = nil, plot: String? = nil) {
+        self.tmdbID = tmdbID
+        self.title = title
+        self.year = year
+        self.poster = poster
+        self.plot = plot
+    }
+
+    /// Aucune correction renseignée.
+    public var isEmpty: Bool {
+        func blank(_ s: String?) -> Bool { s?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true }
+        return blank(tmdbID) && blank(title) && year == nil && blank(poster) && blank(plot)
+    }
+
+    /// Affiche personnalisée (adresse http ou https).
+    public var posterURL: URL? {
+        guard let text = poster?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty,
+              let url = URL(string: text), ["http", "https"].contains(url.scheme?.lowercased()) else { return nil }
+        return url
+    }
+}
+
+extension TMDB {
+    /// Reconnaît un code TMDB (« 12345 »), « movie/12345 », « tv/1399 » ou une adresse themoviedb.org
+    /// (« https://www.themoviedb.org/movie/12345-hero »). `isSeries` est nil quand le texte ne précise pas le type.
+    public static func parseReference(_ text: String) -> (id: String, isSeries: Bool?)? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        if trimmed.allSatisfy(\.isNumber) { return (trimmed, nil) }
+        guard let match = trimmed.range(of: #"(?:^|/)(movie|tv)/(\d+)"#, options: .regularExpression) else { return nil }
+        let piece = String(trimmed[match]).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let parts = piece.split(separator: "/")
+        guard parts.count == 2 else { return nil }
+        return (String(parts[1]), parts[0] == "tv")
+    }
+}
+
 /// Résultat d'une recherche TMDB (correction d'une fiche).
 public struct TMDBMatch: Sendable, Hashable, Identifiable {
     public var tmdbID: String

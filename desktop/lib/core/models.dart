@@ -74,6 +74,22 @@ class MediaItem {
     archiveDays: archiveDays,
       );
 
+  /// Même élément sans l'affiche, le résumé, l'année ni les genres venus de TMDB (retour à la recherche automatique).
+  MediaItem withoutFiche() => MediaItem(
+        id: id,
+        sourceId: sourceId,
+        kind: kind,
+        name: name,
+        group: group,
+        stream: stream,
+        epgId: epgId,
+        seriesId: seriesId,
+        number: number,
+        added: added,
+        season: season,
+        archiveDays: archiveDays,
+      );
+
   Map<String, dynamic> toJson() => {
         'id': id,
         's': sourceId,

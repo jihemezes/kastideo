@@ -1,7 +1,6 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n.dart';
 import 'details.dart';
@@ -83,10 +82,10 @@ class MediaInfoStore extends ChangeNotifier {
     }
     // Vidéos personnelles (dossiers locaux) : recherche TMDB seulement si le titre correspond exactement.
     final personal = local && item.group.startsWith('${tr('Vidéos')} · ');
-    if (settings.usesTMDB && item.kind != MediaKind.episode && (!personal || settings.tmdbPersonal || _tmdbFixes.containsKey(item.id))) {
+    if (settings.usesTMDB && item.kind != MediaKind.episode && (!personal || settings.tmdbPersonal || edits[item.id]?.tmdbId != null)) {
       try {
         final client = TMDBClient(settings.tmdbKey, _language);
-        var fixed = _tmdbFixes[item.id] ?? d.tmdbId;
+        var fixed = _nonEmpty(edits[item.id]?.tmdbId) ?? d.tmdbId;
         if (personal && fixed == null) {
           fixed = (await _exactMatch(client, item.name))?.tmdbId;
           if (fixed == null) PlaybackLog.shared.note('TMDB : aucun titre exact pour la vidéo « ${item.name} »');
@@ -105,6 +104,13 @@ class MediaInfoStore extends ChangeNotifier {
         errors[item.id] = tr('TMDB n\'a pas répondu (vérifiez la clé dans Réglages > Général).');
         PlaybackLog.shared.note('TMDB : échec pour « ${item.name} » : $e');
       }
+    }
+    // Textes et affiche saisis à la main : ils passent avant tout le reste.
+    if (edits[item.id] case final edit?) {
+      if (_nonEmpty(edit.title?.trim()) case final t?) d.title = t;
+      if (edit.year != null) d.year = edit.year;
+      if (edit.posterUrl case final p?) d.poster = p;
+      if (_nonEmpty(edit.plot?.trim()) case final t?) d.plot = t;
     }
     if (d.sources.isEmpty) d.sources = ['IPTV'];
     _cache[item.id] = d;
@@ -144,32 +150,97 @@ class MediaInfoStore extends ChangeNotifier {
 
   // MARK: Fichiers locaux
 
-  /// Corrections à la main (identifiant du contenu → identifiant TMDB), gardées dans les préférences.
-  final Map<String, String> _tmdbFixes = {};
+  static String? _nonEmpty(String? s) => (s == null || s.isEmpty) ? null : s;
+
+  /// Corrections à la main (identifiant du contenu → correction), gardées dans les préférences.
+  Map<String, FicheEdit> edits = {};
   bool _fixesLoaded = false;
   bool _enriching = false;
 
   Future<void> _loadFixes() async {
     if (_fixesLoaded) return;
     _fixesLoaded = true;
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('local.tmdbFixes.v1');
-    if (raw != null) {
-      try {
-        _tmdbFixes.addAll(Map<String, String>.from(jsonDecode(raw) as Map));
-      } catch (_) {}
+    edits = await FicheEdits.load();
+  }
+
+  /// Charge les corrections (réglages) ou les relit après une importation de configuration.
+  Future<void> reloadEdits() async {
+    _fixesLoaded = true;
+    edits = await FicheEdits.load();
+    notifyListeners();
+  }
+
+  /// Vérifie un code ou une adresse TMDB pour ce contenu : fiche trouvée, ou raison du refus.
+  Future<({MediaDetails? details, String? problem})> lookup(String reference, MediaItem item) async {
+    if (!settings.usesTMDB) return (details: null, problem: tr('Ajoutez une clé TMDB (Réglages > Général) pour vérifier un code.'));
+    final ref = parseTmdbReference(reference);
+    if (ref == null) {
+      return (details: null, problem: tr('Saisissez le numéro TMDB (par exemple 12345) ou collez l\'adresse de la page themoviedb.org.'));
     }
+    final series = item.kind == MediaKind.series;
+    if (ref.series != null && ref.series != series) {
+      return (
+        details: null,
+        problem: series ? tr('Cette adresse est celle d\'un film, pas d\'une série.') : tr('Cette adresse est celle d\'une série, pas d\'un film.')
+      );
+    }
+    try {
+      final found = await TMDBClient(settings.tmdbKey, _language).details(item.name, series: series, tmdbId: ref.id);
+      if (found == null) return (details: null, problem: tr('Aucune fiche TMDB avec ce code.'));
+      found.tmdbId = ref.id;
+      return (details: found, problem: null);
+    } catch (_) {
+      return (details: null, problem: tr('Aucune fiche TMDB avec ce code (ou TMDB n\'a pas répondu).'));
+    }
+  }
+
+  /// Enregistre (ou, avec null, retire) la correction d'un contenu, met à jour l'affiche et le résumé, puis recharge la fiche.
+  Future<void> setEdit(MediaItem item, FicheEdit? edit) async {
+    await _loadFixes();
+    final value = (edit == null || edit.isEmpty) ? null : edit;
+    if (value == null) {
+      edits.remove(item.id);
+    } else {
+      edits[item.id] = value;
+    }
+    await FicheEdits.save(edits);
+    final source = library.sourceOf(item);
+    final local = source?.kind == SourceKind.folder;
+    if (local) {
+      if (value != null) {
+        var logo = value.posterUrl;
+        var info = _nonEmpty(value.plot?.trim());
+        var year = value.year;
+        var genres = <String>[];
+        if (_nonEmpty(value.tmdbId) != null && settings.usesTMDB) {
+          try {
+            final found = await TMDBClient(settings.tmdbKey, _language)
+                .details(item.name, series: item.kind == MediaKind.series, tmdbId: value.tmdbId);
+            if (found != null) {
+              logo ??= found.poster;
+              info ??= found.plot;
+              year ??= found.year;
+              genres = found.genres;
+            }
+          } catch (_) {}
+        }
+        await library.applyEnrichment(item.sourceId, {item.id: (logo: logo, info: info, year: year, genres: genres)});
+      } else {
+        await library.clearEnrichment(item.sourceId, {item.id});
+      }
+    }
+    _cache.remove(item.id);
+    notifyListeners();
+    await load(library.item(item.id) ?? item, force: true);
+    if (value == null && local && source != null) unawaited(enrichLocal(source));
   }
 
   /// « Corriger la fiche… » : l'élément est associé au résultat TMDB choisi (affiche, résumé, fiche).
   Future<void> applyFix(MediaItem item, TMDBMatch match) async {
     await _loadFixes();
-    _tmdbFixes[item.id] = match.tmdbId;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('local.tmdbFixes.v1', jsonEncode(_tmdbFixes));
-    await library.applyEnrichment(item.sourceId, {item.id: (logo: match.poster, info: match.overview, year: match.year, genres: match.genres)});
-    _cache.remove(item.id);
-    await load(library.item(item.id) ?? item, force: true);
+    final edit = edits[item.id]?.copy() ?? FicheEdit();
+    edit.tmdbId = match.tmdbId;
+    await setEdit(item, edit);
   }
 
   Future<List<TMDBMatch>> searchTMDB(String title, {required bool series, int? year}) =>

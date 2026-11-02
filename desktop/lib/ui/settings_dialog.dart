@@ -295,6 +295,7 @@ class _GeneralTabState extends State<_GeneralTab> {
             value: settings.tmdbPersonal,
             onChanged: (v) => settings.setBool('tmdb.personal', v),
           ),
+          const _FicheEditsList(),
         ]),
         const _CastSection(),
         const _YouTubeSection(),
@@ -1090,6 +1091,7 @@ class _BackupTabState extends State<_BackupTab> {
       final data = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       if (!mounted) return;
       final result = await context.library.importConfig(data, context.settings);
+      if (mounted) await context.info.reloadEdits();
       setState(() => _message = result);
     } catch (e) {
       setState(() => _message = '${tr('Fichier illisible')} : $e');
@@ -1873,6 +1875,69 @@ class _CastSectionState extends State<_CastSection> {
         _caption(Device.isAndroid ? tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. Sur Android, l\'adresse du flux est envoyée directement à la TV, sans conversion.') : tr('Le bouton Diffuser de la barre de lecture envoie la chaîne, le film, la série ou la vidéo en cours vers un Chromecast, un Google TV ou une TV Android du même réseau. ffmpeg convertit la vidéo ; il est livré avec Kastideo sous Windows et Linux (AppImage).')),
         TextButton(onPressed: () => showHelpDialog(context, page: 'cast'), child: Text(tr('Aide : diffuser sur un téléviseur'))),
       ]),
+    );
+  }
+}
+
+
+/// Liste des fiches corrigées à la main (Réglages > Général, fiches TMDB) avec un bouton pour retirer chaque correction.
+class _FicheEditsList extends StatefulWidget {
+  const _FicheEditsList();
+
+  @override
+  State<_FicheEditsList> createState() => _FicheEditsListState();
+}
+
+class _FicheEditsListState extends State<_FicheEditsList> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => context.info.reloadEdits());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = context.info;
+    return ListenableBuilder(
+      listenable: info,
+      builder: (context, _) {
+        final edits = info.edits;
+        if (edits.isEmpty) return const SizedBox.shrink();
+        final ids = edits.keys.toList()..sort();
+        return ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: Text('${tr('Fiches corrigées à la main')} (${ids.length})', style: kText(14)),
+          children: [
+            for (final id in ids)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.library.item(id)?.name ?? tr('Contenu absent du catalogue'), style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text(
+                  [
+                    if (edits[id]!.tmdbId != null) 'TMDB ${edits[id]!.tmdbId}',
+                    if (edits[id]!.title != null) edits[id]!.title!,
+                    if (edits[id]!.year != null) '${edits[id]!.year}',
+                  ].join(' · '),
+                  style: kText(12, color: KPalette.secondaryText),
+                ),
+                trailing: TextButton(
+                  onPressed: () async {
+                    final item = context.library.item(id);
+                    if (item != null) {
+                      await info.setEdit(item, null);
+                    } else {
+                      info.edits.remove(id);
+                      await FicheEdits.save(info.edits);
+                      await info.reloadEdits();
+                    }
+                  },
+                  child: Text(tr('Retirer')),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

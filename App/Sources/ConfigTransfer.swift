@@ -17,6 +17,8 @@ struct KastideoExport: Codable {
     var recents: [String] = []
     var categories: [String: ExportedCategories] = [:]
     var settings: [String: String] = [:]
+    /// Fiches corrigées à la main (« numéro de source|identifiant » → correction).
+    var fiches: [String: FicheEdit]?
 
     struct ExportedSource: Codable {
         var name: String
@@ -108,6 +110,7 @@ struct ConfigTransferSection: View {
                 return
             }
             let summary = store.importConfig(export)
+            mediaInfo.reloadEdits()
             if let key = export.settings["tmdbKey"], !key.isEmpty, !mediaInfo.usesTMDB { mediaInfo.tmdbKey = key }
             message = String(localized: "Importation terminée : \(summary.sourcesAdded) source(s) ajoutée(s), \(summary.sourcesSkipped) déjà présente(s), \(summary.favoritesAdded) favori(s), catégories de \(summary.categoriesImported) section(s).")
         } catch {

@@ -777,6 +777,43 @@ Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de
 Une catégorie masquée l'est partout : listes, recherche, accueil, rangées.
 <!--/pc-->
 
+## Corriger la fiche d'un film ou d'une série {#corriger-fiche}
+
+Quand l'affiche, le titre ou le résumé d'un film ou d'une série ne sont pas les bons (deux films portent le même titre, par exemple), vous pouvez **le lier à la bonne fiche TMDB** ou **saisir les informations vous-même**. Cela fonctionne pour **Mes vidéos** (dossiers, Jellyfin, Emby, Plex) comme pour les films et séries de l'**abonnement IPTV**, sur Mac, Windows, Linux et Android.
+
+### Ouvrir la fenêtre
+
+Clic droit (ou appui long) sur le film ou la série, puis **Corriger la fiche…** ; ce lien existe aussi en bas de la fiche détaillée.
+
+### Lier à un code TMDB
+
+1. Sur **themoviedb.org**, cherchez le bon film. Le **numéro** est dans l'adresse de la page : `themoviedb.org/movie/12345-hero` → **12345** (pour une série : `…/tv/1399-…`).
+2. Dans Kastideo, saisissez ce numéro, ou **collez l'adresse complète**, puis **Vérifier**.
+3. Un aperçu (affiche, titre, année, résumé) s'affiche : si c'est bien le bon, **Utiliser cette fiche**.
+
+Une [clé TMDB](help:tmdb) est nécessaire. Si l'adresse est celle d'une série alors que vous corrigez un film (ou l'inverse), Kastideo le signale.
+
+### Chercher par titre
+
+Sous le code, la recherche par titre et année propose une liste de fiches : touchez la bonne. Le numéro TMDB est indiqué à côté de chaque résultat.
+
+### Personnaliser à la main
+
+**Personnaliser la fiche à la main** permet de saisir un **titre**, une **année**, l'**adresse d'une affiche** (https://…) et un **résumé**. Ces champs remplacent ceux du fournisseur et de TMDB ; ceux que vous laissez vides ne changent rien. Ils se combinent avec un code TMDB.
+
+### Retirer une correction
+
+Dans la fenêtre, **Retirer la correction** revient à la recherche automatique. **Réglages > Général > Fiches des films et séries** liste aussi toutes les fiches corrigées (**Fiches corrigées à la main**) avec un bouton **Retirer** pour chacune.
+
+### Sauvegarde
+
+Les corrections font partie de la **sauvegarde de la configuration** (Réglages > Sauvegarde) : elles suivent vos exports et importations, d'un appareil à l'autre.
+
+### À savoir
+
+- Pour les films de l'abonnement IPTV, la correction s'applique à la **fiche détaillée** ; la vignette de la liste garde l'image du fournisseur.
+- Pour Mes vidéos, l'affiche de la liste est aussi mise à jour.
+
 ## Arranger l'ordre des chaînes et des catégories {#arranger}
 
 Le mode **Arranger** permet de remettre en ordre **les chaînes, films ou séries d'une catégorie**, et aussi **les catégories** elles-mêmes. Il est disponible sur **Windows, Linux et Android** (pas encore sur Mac). Il fonctionne au doigt comme à la souris : la liste défile normalement, et seule la **poignée ⋮⋮** à gauche déplace une ligne.
@@ -1107,7 +1144,7 @@ Pour les films et séries de vos **dossiers**, Kastideo peut chercher l'affiche 
 Comme un nom de fichier n'a ni année ni étiquette, la recherche est **prudente** : la fiche n'est retenue que si son **titre (ou son titre original) est exactement celui du fichier**. Les noms collés en majuscules intérieures (**TearsOfSteel**) sont séparés (Tears Of Steel). Les noms entièrement en minuscules collées (« bigbuckbunny ») ne sont pas reconnus.
 
 - Réglage : dans **Réglages**, section **Fiches des films et séries** : **Chercher aussi les vidéos personnelles**. Activé par défaut ; désactivez-le pour éviter toute recherche.
-- Si une fiche manque ou est mauvaise, utilisez **Corriger la fiche** pour choisir la bonne : elle sera retenue.
+- Si une fiche manque ou est mauvaise (deux films portent le même titre, par exemple), utilisez [Corriger la fiche](help:corriger-fiche) : vous pouvez lier le film au bon **code TMDB**.
 
 ## Démarrage et fichiers .m3u {#demarrage}
 

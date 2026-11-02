@@ -1037,6 +1037,15 @@ class LibraryStore extends ChangeNotifier {
     _rebuild();
   }
 
+  /// Efface les fiches TMDB (affiche, résumé, année, genres) de fichiers : retour à la recherche automatique.
+  Future<void> clearEnrichment(String sourceId, Set<String> ids) async {
+    final list = _contentBySource[sourceId];
+    if (list == null) return;
+    _contentBySource[sourceId] = [for (final i in list) ids.contains(i.id) ? i.withoutFiche() : i];
+    await _writeCache(_cacheFile(sourceId).path, [for (final i in _contentBySource[sourceId]!) i.toJson()]);
+    _rebuild();
+  }
+
   /// Contenus d'une source (fiches automatiques).
   List<MediaItem> contentOf(String sourceId) => _contentBySource[sourceId] ?? const [];
 
@@ -1096,6 +1105,11 @@ class LibraryStore extends ChangeNotifier {
       ...settings.exportedAppearance(),
       if (includePasswords && settings.usesTMDB) 'tmdbKey': settings.tmdbKey,
     };
+    final fiches = <String, dynamic>{};
+    for (final e in (await FicheEdits.load()).entries) {
+      final rel = _relative(e.key, index);
+      if (rel != null) fiches[rel] = e.value.toJson();
+    }
     return {
       'format': 'kastideo-export',
       'version': 1,
@@ -1109,6 +1123,7 @@ class LibraryStore extends ChangeNotifier {
           if (_categoryPrefs[kind] case final p?) kind.name: _prefsForExport(p, index),
       },
       'settings': settingsMap,
+      if (fiches.isNotEmpty) 'fiches': fiches,
     };
   }
 
@@ -1190,6 +1205,14 @@ class LibraryStore extends ChangeNotifier {
     if (recentIds.length > 60) recentIds = recentIds.sublist(0, 60);
     _prefs.setStringList('favorites.v1', favoriteIds);
     _prefs.setStringList('recents.v1', recentIds);
+    if (data['fiches'] is Map) {
+      final edits = await FicheEdits.load();
+      for (final e in (data['fiches'] as Map).entries) {
+        final id = absolute(e.key);
+        if (id != null && e.value is Map && !edits.containsKey(id)) edits[id] = FicheEdit.fromJson(e.value as Map);
+      }
+      await FicheEdits.save(edits);
+    }
     final categories = data['categories'];
     if (categories is Map) {
       for (final kind in categoryKinds) {

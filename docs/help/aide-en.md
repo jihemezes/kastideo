@@ -777,6 +777,43 @@ New categories added by the provider appear next to their original neighbor.
 A hidden category is hidden everywhere: lists, search, home, rows.
 <!--/pc-->
 
+## Fix the details of a movie or series {#corriger-fiche}
+
+When the poster, title or summary of a movie or series is wrong (two movies share the same title, for example), you can **link it to the right TMDB entry** or **enter the details yourself**. It works for **My videos** (folders, Jellyfin, Emby, Plex) as well as for movies and series of the **IPTV subscription**, on Mac, Windows, Linux and Android.
+
+### Open the window
+
+Right-click (or long-press) the movie or series, then **Fix details…**; the link is also at the bottom of the details page.
+
+### Link to a TMDB code
+
+1. On **themoviedb.org**, find the right movie. The **number** is in the page address: `themoviedb.org/movie/12345-hero` → **12345** (for a series: `…/tv/1399-…`).
+2. In Kastideo, enter that number, or **paste the full address**, then **Check**.
+3. A preview (poster, title, year, summary) appears: if it is the right one, **Use this entry**.
+
+A [TMDB key](help:tmdb) is required. If the address is a series while you are fixing a movie (or the reverse), Kastideo tells you.
+
+### Search by title
+
+Below the code, the title and year search offers a list of entries: tap the right one. The TMDB number is shown next to each result.
+
+### Customise by hand
+
+**Customise the entry by hand** lets you enter a **title**, a **year**, a **poster address** (https://…) and a **summary**. These fields replace those from the provider and TMDB; fields left empty change nothing. They combine with a TMDB code.
+
+### Remove a correction
+
+In the window, **Remove the correction** goes back to automatic lookup. **Settings > General > Movie and series details** also lists every corrected entry (**Entries corrected by hand**) with a **Remove** button for each.
+
+### Backup
+
+Corrections are part of the **configuration backup** (Settings > Backup): they follow your exports and imports from one device to another.
+
+### Good to know
+
+- For IPTV subscription movies, the correction applies to the **details page**; the list thumbnail keeps the provider's image.
+- For My videos, the list poster is updated too.
+
 ## Arrange the order of channels and categories {#arranger}
 
 **Arrange** mode lets you put **the channels, movies or series of a category** in the order you want, and also reorder **the categories** themselves. It is available on **Windows, Linux and Android** (not on Mac yet). It works with a finger as well as a mouse: the list scrolls normally, and only the **⋮⋮ handle** on the left moves a row.
@@ -1106,7 +1143,7 @@ For the movies and series in your **folders**, Kastideo can look up the poster a
 Because a file name has no year or tag, the search is **cautious**: a match is accepted only if its **title (or original title) is exactly the file's name**. Names glued with inner capitals (**TearsOfSteel**) are split (Tears Of Steel). Names entirely in glued lowercase ("bigbuckbunny") are not recognised.
 
 - Setting: in **Settings**, section **Movie and series details**: **Also look up personal videos**. On by default; turn it off to avoid any lookup.
-- If a match is missing or wrong, use **Fix details** to pick the right one: it will be remembered.
+- If a match is missing or wrong (two movies share the same title, for example), use [Fix details](help:corriger-fiche): you can link the movie to the right **TMDB code**.
 
 ## Startup and .m3u files {#demarrage}
 

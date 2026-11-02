@@ -77,4 +77,28 @@ final class TMDBMatchTests: XCTestCase {
         XCTAssertEqual(list.first?.originalTitle, "Tears of Steel")
         XCTAssertEqual(TMDB.titleKey("Tears Of Steel"), TMDB.titleKey(list[0].title))
     }
+
+    func testParseReference() {
+        XCTAssertEqual(TMDB.parseReference(" 12345 ")?.id, "12345")
+        XCTAssertNil(TMDB.parseReference("12345")?.isSeries)
+        let movie = TMDB.parseReference("https://www.themoviedb.org/movie/12345-hero?language=fr-FR")
+        XCTAssertEqual(movie?.id, "12345")
+        XCTAssertEqual(movie?.isSeries, false)
+        let tv = TMDB.parseReference("themoviedb.org/tv/1399-game-of-thrones")
+        XCTAssertEqual(tv?.id, "1399")
+        XCTAssertEqual(tv?.isSeries, true)
+        XCTAssertEqual(TMDB.parseReference("tv/77")?.id, "77")
+        XCTAssertNil(TMDB.parseReference("hero"))
+        XCTAssertNil(TMDB.parseReference(""))
+    }
+
+    func testFicheEdit() {
+        XCTAssertTrue(FicheEdit().isEmpty)
+        XCTAssertTrue(FicheEdit(title: "  ").isEmpty)
+        XCTAssertFalse(FicheEdit(tmdbID: "5").isEmpty)
+        XCTAssertNotNil(FicheEdit(poster: "https://x.test/a.jpg").posterURL)
+        XCTAssertNil(FicheEdit(poster: "file:///a.jpg").posterURL)
+        let data = try! JSONEncoder().encode(FicheEdit(tmdbID: "5", year: 2012))
+        XCTAssertEqual(try! JSONDecoder().decode(FicheEdit.self, from: data).year, 2012)
+    }
 }

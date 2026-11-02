@@ -1427,6 +1427,21 @@ extension LibraryStore {
         Task.detached(priority: .utility) { Storage.save(snapshot, name: "content-\(sourceID.uuidString)") }
     }
 
+    /// Efface l'affiche, le résumé, l'année et les genres venus de TMDB pour des fichiers (retour à la recherche automatique).
+    func clearEnrichment(_ sourceID: UUID, ids: Set<String>) {
+        guard var content = contents[sourceID] else { return }
+        for index in content.items.indices where ids.contains(content.items[index].id) {
+            content.items[index].logoURL = nil
+            content.items[index].info = nil
+            content.items[index].year = nil
+            content.items[index].genres = nil
+        }
+        contents[sourceID] = content
+        rebuildIndex()
+        let snapshot = content
+        Task.detached(priority: .utility) { Storage.save(snapshot, name: "content-\(sourceID.uuidString)") }
+    }
+
     /// Contenu chargé d'une source.
     func content(of sourceID: UUID) -> SourceContent? { contents[sourceID] }
 
@@ -1502,6 +1517,11 @@ extension LibraryStore {
             guard let prefs = categoryPrefs[kind], let name = KastideoExport.kindNames[kind] else { continue }
             export.categories[name] = .init(order: prefs.order, hidden: Array(prefs.hidden), renames: prefs.renames, keywords: prefs.keywords)
         }
+        var fiches: [String: FicheEdit] = [:]
+        for (id, edit) in FicheEdits.load() {
+            if let relative = relativeID(id, sourceIndex: sourceIndex) { fiches[relative] = edit }
+        }
+        if !fiches.isEmpty { export.fiches = fiches }
         let defaults = UserDefaults.standard
         for key in ["interface.live", "interface.movie", "interface.series", "adult.show", "buffering", CountryKeys.codes, CountryKeys.neutral] {
             if let value = defaults.object(forKey: key) { export.settings[key] = "\(value)" }
@@ -1572,6 +1592,13 @@ extension LibraryStore {
         }
         if recentIDs.count > 60 { recentIDs.removeLast(recentIDs.count - 60) }
         UserDefaults.standard.set(recentIDs, forKey: "recents.v1")
+        if let imported = export.fiches, !imported.isEmpty {
+            var edits = FicheEdits.load()
+            for (relative, edit) in imported {
+                if let id = absolute(relative), edits[id] == nil { edits[id] = edit }
+            }
+            FicheEdits.save(edits)
+        }
         for kind in CategoryPrefs.kinds {
             guard let name = KastideoExport.kindNames[kind], let imported = export.categories[name] else { continue }
             updateCategories(kind) { prefs in
