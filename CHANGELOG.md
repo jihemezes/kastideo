@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.10.1] - 2026-11-02
+
+- Correction de la version 1.10.0 (non publiée sur Mac) : un fichier de traduction anglaise était invalide, ce qui empêchait la compilation. Les nouveautés de 1.10.0 sont inchangées.
+
 ## [1.10.0] - 2026-11-02
 
 - **Menu Source** : avec plusieurs comptes IPTV, un menu dans la barre latérale choisit le compte affiché (Direct, Films, Séries, recherche, guide) sans désactiver les autres, avec le nombre de chaînes · films · séries de chaque compte. Le choix est retenu.
