@@ -91,6 +91,8 @@ class AppSettings extends ChangeNotifier {
 
   // MARK: Replay (archive du fournisseur)
 
+  /// Vidéos personnelles (sans année ni étiquette de qualité) : chercher quand même sur TMDB, titre exact seulement.
+  bool get tmdbPersonal => _prefs.getBool('tmdb.personal') ?? true;
   bool get replayEnabled => _prefs.getBool('replay.enabled') ?? true;
 
   /// Jours de programmes passés gardés dans le guide pour les chaînes à replay (1 à 14).

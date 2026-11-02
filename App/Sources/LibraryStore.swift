@@ -131,6 +131,46 @@ final class LibraryStore {
             rebuildIndex()
         }
     }
+    /// Compte IPTV affiché (menu Source de la barre latérale) ; `nil` : toutes les sources activées.
+    var activeSourceID: UUID? = UserDefaults.standard.string(forKey: "catalog.source").flatMap(UUID.init(uuidString:)) {
+        didSet {
+            guard activeSourceID != oldValue else { return }
+            if let id = activeSourceID { UserDefaults.standard.set(id.uuidString, forKey: "catalog.source") }
+            else { UserDefaults.standard.removeObject(forKey: "catalog.source") }
+            rebuildIndex()
+        }
+    }
+    /// Plusieurs comptes IPTV : un film ou une série fourni par plusieurs comptes n'est listé qu'une fois (« Toutes les sources »).
+    var dedupeSources: Bool = UserDefaults.standard.object(forKey: "catalog.dedupe") as? Bool ?? true {
+        didSet {
+            guard dedupeSources != oldValue else { return }
+            UserDefaults.standard.set(dedupeSources, forKey: "catalog.dedupe")
+            rebuildIndex()
+        }
+    }
+    /// Comptes IPTV activés (le menu Source apparaît à partir de deux). Dossiers et serveurs restent toujours visibles.
+    var selectableSources: [Source] { sources.filter { $0.isEnabled && $0.kind.isIPTV } }
+    var activeSource: Source? { activeSourceID.flatMap { id in selectableSources.first { $0.id == id } } }
+
+    /// Contenus renvoyés par le fournisseur pour une source (avant masquages et fusion des doublons).
+    func rawCounts(_ source: Source) -> (live: Int, movies: Int, series: Int) {
+        var live = 0, movies = 0, series = 0
+        for item in contents[source.id]?.items ?? [] {
+            switch item.kind {
+            case .live: live += 1
+            case .movie: movies += 1
+            case .series: series += 1
+            default: break
+            }
+        }
+        return (live, movies, series)
+    }
+
+    /// Éléments d'une source réellement affichés (après masquages, contenus adultes et fusion des doublons).
+    func visibleCount(_ kind: MediaKind, source: Source) -> Int {
+        itemsByKind[kind]?.filter { $0.sourceID == source.id }.count ?? 0
+    }
+
     /// Diagnostic du dernier chargement d'une source (requête et réponse exacte du serveur).
     private(set) var errorDetails: [UUID: String] = [:]
     @ObservationIgnored private var rescanTicker: Task<Void, Never>?
@@ -739,10 +779,23 @@ final class LibraryStore {
         var counts: [MediaKind: [String: Int]] = [:]
         // Origine des films et séries (Tout / IPTV / Mes vidéos) : le direct reste toujours celui de l'IPTV.
         let origin = catalogOrigin
-        for source in sources where source.isEnabled && (source.kind.isIPTV || origin != .iptv) {
+        // Source choisie dans le menu Source (compte disparu ou désactivé : retour à « Toutes les sources »).
+        let chosen = activeSource?.id
+        let merge = dedupeSources && chosen == nil && selectableSources.count > 1
+        func shown(_ source: Source) -> Bool { chosen == nil || !source.kind.isIPTV || source.id == chosen }
+        func dedupeKey(_ item: MediaItem) -> String? {
+            guard merge, item.kind == .movie || item.kind == .series else { return nil }
+            return "\(item.kind.rawValue)|\(TMDB.titleKey(item.name))|\(item.year ?? 0)"
+        }
+        var countOwner: [String: UUID] = [:]
+        for source in sources where source.isEnabled && (source.kind.isIPTV || origin != .iptv) && shown(source) {
             guard let content = contents[source.id] else { continue }
             for item in content.items where item.kind != .episode {
                 if source.kind.isIPTV, origin == .library, item.kind != .live { continue }
+                if source.kind.isIPTV, let key = dedupeKey(item) {
+                    if let owner = countOwner[key], owner != source.id { continue }
+                    countOwner[key] = source.id
+                }
                 if counts[item.kind, default: [:]][item.group] == nil { providerOrder[item.kind, default: []].append(item.group) }
                 counts[item.kind, default: [:]][item.group, default: 0] += 1
             }
@@ -763,7 +816,8 @@ final class LibraryStore {
         var byCategory: [MediaKind: [String: [MediaItem]]] = [:]
         var library: [UUID: [MediaItem]] = [:]
         var libraryGroups: [MediaKind: Set<String>] = [:]
-        for source in sources where source.isEnabled {
+        var owners: [String: UUID] = [:]
+        for source in sources where source.isEnabled && shown(source) {
             guard let content = contents[source.id] else { continue }
             if !source.kind.isIPTV {
                 // Dossiers et serveurs de la maison : toujours dans « Mes vidéos » ; dans Films et Séries selon le filtre.
@@ -798,6 +852,14 @@ final class LibraryStore {
                 if !showAdult, item.kind != .episode, ThemeClassifier.isAdult(name: item.name, group: item.group) {
                     byID[item.id] = item
                     continue
+                }
+                // Deux comptes du même fournisseur : un film ou une série déjà fourni par un autre compte n'est listé qu'une fois.
+                if let key = dedupeKey(item) {
+                    if let owner = owners[key], owner != source.id {
+                        byID[item.id] = item
+                        continue
+                    }
+                    owners[key] = source.id
                 }
                 if item.kind != .episode, let prefs = categoryPrefs[item.kind] {
                     if hidden[item.kind]?.contains(item.group) == true {
@@ -855,7 +917,7 @@ final class LibraryStore {
     private func rebuildEPG() {
         var programmes: [Programme] = []
         var counts: [UUID: Int] = [:]
-        for source in sources where source.isEnabled {
+        for source in sources where source.isEnabled && (activeSource == nil || !source.kind.isIPTV || source.id == activeSource?.id) {
             let list = epgBySource[source.id] ?? []
             counts[source.id] = list.count
             programmes += list

@@ -81,12 +81,19 @@ class MediaInfoStore extends ChangeNotifier {
     } catch (e) {
       PlaybackLog.shared.note('Fiche IPTV indisponible pour « ${item.name} » : $e');
     }
-    // Vidéos personnelles (dossiers locaux) : pas de recherche TMDB.
+    // Vidéos personnelles (dossiers locaux) : recherche TMDB seulement si le titre correspond exactement.
     final personal = local && item.group.startsWith('${tr('Vidéos')} · ');
-    if (settings.usesTMDB && item.kind != MediaKind.episode && !personal) {
+    if (settings.usesTMDB && item.kind != MediaKind.episode && (!personal || settings.tmdbPersonal || _tmdbFixes.containsKey(item.id))) {
       try {
         final client = TMDBClient(settings.tmdbKey, _language);
-        final tmdb = await client.details(item.name, series: series, tmdbId: _tmdbFixes[item.id] ?? d.tmdbId, year: d.year, originalTitle: d.originalTitle);
+        var fixed = _tmdbFixes[item.id] ?? d.tmdbId;
+        if (personal && fixed == null) {
+          fixed = (await _exactMatch(client, item.name))?.tmdbId;
+          if (fixed == null) PlaybackLog.shared.note('TMDB : aucun titre exact pour la vidéo « ${item.name} »');
+        }
+        final tmdb = personal && fixed == null
+            ? null
+            : await client.details(item.name, series: series, tmdbId: fixed, year: d.year, originalTitle: d.originalTitle);
         if (tmdb != null) d = d.merged(tmdb)..title ??= item.name;
         // Épisodes : titres et résumés de TMDB dans la langue de l'interface (ceux du fournisseur sont parfois en espagnol…).
         final seasons = _seasons[item.id];
@@ -177,7 +184,7 @@ class MediaInfoStore extends ChangeNotifier {
       final client = TMDBClient(settings.tmdbKey, _language);
       final todo = library
           .contentOf(source.id)
-          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && i.logo == null && !i.group.startsWith('${tr('Vidéos')} · '))
+          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && i.logo == null && (settings.tmdbPersonal || !i.group.startsWith('${tr('Vidéos')} · ')))
           .take(300)
           .toList();
       if (todo.isEmpty) return;
@@ -188,8 +195,13 @@ class MediaInfoStore extends ChangeNotifier {
           for (final item in todo.skip(i).take(4))
             () async {
               try {
-                final matches = await client.search(item.name, series: item.kind == MediaKind.series);
-                final m = matches.firstOrNull;
+                final personal = item.group.startsWith('${tr('Vidéos')} · ');
+                final TMDBMatch? m;
+                if (personal) {
+                  m = await _exactMatch(client, item.name);
+                } else {
+                  m = (await client.search(item.name, series: item.kind == MediaKind.series)).firstOrNull;
+                }
                 if (m != null && m.poster != null) found[item.id] = (logo: m.poster, info: m.overview, year: m.year, genres: m.genres);
               } catch (_) {}
             }(),
@@ -203,6 +215,22 @@ class MediaInfoStore extends ChangeNotifier {
     } finally {
       _enriching = false;
     }
+  }
+
+  /// Titre exact (titre affiché ou titre original TMDB) : seule garantie pour une vidéo sans année ni étiquette.
+  /// Gère aussi les noms en « CamelCase » (TearsOfSteel → Tears Of Steel).
+  Future<TMDBMatch?> _exactMatch(TMDBClient client, String name) async {
+    final base = cleanTitle(name).title;
+    final spaced = base.replaceAllMapped(RegExp(r'([a-zà-ÿ])([A-ZÀ-Þ])'), (m) => '${m[1]} ${m[2]}');
+    for (final query in {base, spaced}) {
+      final key = titleKey(query);
+      if (key.isEmpty) continue;
+      final matches = await client.search(query, series: false);
+      for (final m in matches) {
+        if (titleKey(m.title) == key || (m.originalTitle != null && titleKey(m.originalTitle!) == key)) return m;
+      }
+    }
+    return null;
   }
 
   static bool _generic(String name) => RegExp(r'^(Épisode|Episode|Episodio|Capítulo|Capitulo)\s*\d+$', caseSensitive: false).hasMatch(name.trim());

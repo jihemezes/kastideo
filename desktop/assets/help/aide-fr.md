@@ -837,6 +837,35 @@ Faites un **clic droit** sur une catégorie, puis **Définir comme catégorie de
 
 Si la catégorie choisie est masquée, renommée ou n'existe plus chez le fournisseur, Kastideo affiche la liste complète. Choisissez-la de nouveau dans les Réglages.
 
+## Plusieurs comptes : source active, doublons et diagnostic {#sources-multiples}
+
+Quand vous avez **deux comptes IPTV ou plus**, Kastideo propose de choisir celui qui est affiché, **sans désactiver** les autres dans les réglages.
+
+### Choisir la source active
+
+- Sur **Mac**, un menu **Source** apparaît dans la barre latérale. Sur **Windows, Linux et Android**, le menu **Source** est dans la barre latérale (sur téléphone : dans le tiroir du menu).
+- Choisissez **Toutes les sources** ou un compte précis. À côté de chaque nom, trois nombres : **chaînes · films · séries** renvoyés par le fournisseur.
+- Le choix filtre **Direct, Films, Séries, la recherche et le guide TV**, et il est **retenu** d'un lancement à l'autre.
+- Les dossiers et serveurs [Mes vidéos](help:mes-videos) restent toujours visibles.
+
+### Fusionner les doublons
+
+Avec **Toutes les sources**, un film ou une série fourni par plusieurs comptes (même titre, même année) n'est listé qu'**une seule fois**. Décochez **Fusionner les doublons** pour tout voir. Les favoris et récents déjà enregistrés continuent de fonctionner.
+
+### Pourquoi deux comptes du même niveau n'ont pas les mêmes films ?
+
+Les **chaînes** sont souvent identiques, mais les **catalogues de films et séries** dépendent du compte : beaucoup de fournisseurs attribuent des bouquets de vidéo à la demande différents à chaque compte. Si les nombres diffèrent, c'est le plus souvent **côté fournisseur**.
+
+### Le bouton Diagnostic
+
+Dans **Réglages > Sources**, le bouton **Diagnostic** (stéthoscope) d'un compte affiche :
+
+- l'état du compte (statut, expiration, connexions) ;
+- pour les chaînes, films et séries : le nombre **renvoyé par le fournisseur**, le nombre de catégories, et le nombre **réellement affiché** ;
+- ce que Kastideo **masque** : catégories masquées, contenus adultes, doublons fusionnés.
+
+Si « renvoyés par le fournisseur » diffère entre vos deux comptes, la différence vient du fournisseur. Le bouton **Copier** permet de joindre le résultat à un message à votre fournisseur.
+
 ## Favoris et récents {#favoris}
 
 <!--mac-->
@@ -1070,6 +1099,15 @@ La clé est conservée dans le trousseau du Mac. **Retirer la clé** revient aux
 <!--pc-->
 Créez un compte sur themoviedb.org, puis **Paramètres > API** et demandez une clé (usage personnel). Copiez la « clé API » (v3) ou le « jeton d'accès en lecture » (v4) dans Réglages > Général, puis **Enregistrer**. Les fiches deviennent plus complètes (affiches, distribution, bandes-annonces, résumés et épisodes en français).
 <!--/pc-->
+
+## Affiches et résumés de vos vidéos personnelles {#tmdb-perso}
+
+Pour les films et séries de vos **dossiers**, Kastideo peut chercher l'affiche et le résumé sur **TMDB** (une [clé TMDB](help:tmdb) est nécessaire).
+
+Comme un nom de fichier n'a ni année ni étiquette, la recherche est **prudente** : la fiche n'est retenue que si son **titre (ou son titre original) est exactement celui du fichier**. Les noms collés en majuscules intérieures (**TearsOfSteel**) sont séparés (Tears Of Steel). Les noms entièrement en minuscules collées (« bigbuckbunny ») ne sont pas reconnus.
+
+- Réglage : dans **Réglages**, section **Fiches des films et séries** : **Chercher aussi les vidéos personnelles**. Activé par défaut ; désactivez-le pour éviter toute recherche.
+- Si une fiche manque ou est mauvaise, utilisez **Corriger la fiche** pour choisir la bonne : elle sera retenue.
 
 ## Démarrage et fichiers .m3u {#demarrage}
 

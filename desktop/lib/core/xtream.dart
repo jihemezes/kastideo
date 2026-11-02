@@ -130,6 +130,29 @@ class XtreamClient {
     return int.tryParse(str(user['max_connections']) ?? '');
   }
 
+  /// Informations du compte telles que le fournisseur les indique (statut, expiration, connexions) : diagnostic.
+  Future<Map<String, String>> accountInfo() async {
+    final root = await _json(api());
+    if (root is! Map || root['user_info'] is! Map) throw XtreamException('Réponse du serveur illisible.');
+    final user = root['user_info'] as Map;
+    String? date(String? epoch) {
+      final n = int.tryParse(epoch ?? '');
+      if (n == null) return epoch;
+      final d = DateTime.fromMillisecondsSinceEpoch(n * 1000);
+      return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    }
+
+    return {
+      'status': ?str(user['status']),
+      'exp_date': ?date(str(user['exp_date'])),
+      'created_at': ?date(str(user['created_at'])),
+      'max_connections': ?str(user['max_connections']),
+      'active_cons': ?str(user['active_cons']),
+      'is_trial': ?str(user['is_trial']),
+      'allowed_output_formats': ?((user['allowed_output_formats'] is List) ? (user['allowed_output_formats'] as List).join(',') : null),
+    };
+  }
+
   /// Horloge du serveur lue lors de la dernière vérification du compte.
   ServerClock? clock;
 

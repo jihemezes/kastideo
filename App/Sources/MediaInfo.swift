@@ -46,8 +46,9 @@ final class MediaInfoStore {
         details.posterURL = item.logoURL
         let source = store.source(id: item.sourceID)
         let isLocal = store.isLocalFile(item)
-        // Vidéos personnelles (dossiers) : pas de recherche TMDB.
+        // Vidéos personnelles (dossiers) : recherche TMDB seulement si le réglage est activé (titre exact exigé).
         let isPersonal = isLocal && item.group.hasPrefix(String(localized: "Vidéos") + " · ")
+        let personalAllowed = UserDefaults.standard.object(forKey: "tmdb.personal") as? Bool ?? true
         if isLocal {
             let cleaned = TMDB.cleanTitle(item.name)
             details.title = cleaned.title
@@ -89,10 +90,15 @@ final class MediaInfoStore {
             }
         }
 
-        if usesTMDB, !isPersonal {
+        if usesTMDB, !isPersonal || personalAllowed || details.tmdbID != nil {
             let client = TMDBClient(apiKey: tmdbKey, language: language)
             do {
-                if let tmdb = try await client.details(title: isLocal ? (details.title ?? item.name) : item.name, isSeries: isSeries,
+                if isPersonal, details.tmdbID == nil {
+                    details.tmdbID = try await client.exactMatch(name: item.name, isSeries: isSeries)?.tmdbID
+                }
+                // Vidéo personnelle sans titre exact trouvé : on garde la fiche telle quelle.
+                let skip = isPersonal && details.tmdbID == nil
+                if !skip, let tmdb = try await client.details(title: isLocal ? (details.title ?? item.name) : item.name, isSeries: isSeries,
                                                        tmdbID: details.tmdbID, year: details.year) {
                     var merged = details.merged(with: tmdb)
                     // Le titre affiché reste celui de votre catalogue s'il n'y a pas de traduction.
@@ -187,14 +193,17 @@ final class MediaInfoStore {
         guard usesTMDB, case .folders = source.kind, !enriching.contains(source.id),
               let content = store.content(of: source.id) else { return }
         let personal = String(localized: "Vidéos") + " · "
+        let personalAllowed = UserDefaults.standard.object(forKey: "tmdb.personal") as? Bool ?? true
         let todo = content.items.filter {
-            ($0.kind == .movie || $0.kind == .series) && $0.logoURL == nil && !$0.group.hasPrefix(personal) && !enrichTried.contains($0.id)
+            ($0.kind == .movie || $0.kind == .series) && $0.logoURL == nil && (personalAllowed || !$0.group.hasPrefix(personal))
+                && !enrichTried.contains($0.id)
         }.prefix(300)
         guard !todo.isEmpty else { return }
         enriching.insert(source.id)
         let client = TMDBClient(apiKey: tmdbKey, language: language)
         let fixes = tmdbFixes
         let items = Array(todo)
+        let isPersonalItem: @Sendable (MediaItem) -> Bool = { $0.group.hasPrefix(personal) }
         for item in items { enrichTried.insert(item.id) }
         Task {
             var found: [String: LocalFiche] = [:]
@@ -206,8 +215,13 @@ final class MediaInfoStore {
                     for item in batch {
                         group.addTask {
                             let cleaned = TMDB.cleanTitle(item.name)
+                            var fixed = fixes[item.id]
+                            if fixed == nil, isPersonalItem(item) {
+                                fixed = (try? await client.exactMatch(name: item.name, isSeries: item.kind == .series))?.tmdbID
+                                if fixed == nil { return (item.id, nil) }
+                            }
                             let tmdb = try? await client.details(title: cleaned.title, isSeries: item.kind == .series,
-                                                                 tmdbID: fixes[item.id], year: cleaned.year)
+                                                                 tmdbID: fixed, year: cleaned.year)
                             return (item.id, tmdb)
                         }
                     }
@@ -537,6 +551,7 @@ struct MediaInfoSettingsSection: View {
     @State private var draft = ""
     @State private var status: String?
     @State private var checking = false
+    @AppStorage("tmdb.personal") private var personal = true
 
     var body: some View {
         Section("Fiches des films et séries") {
@@ -557,6 +572,8 @@ struct MediaInfoSettingsSection: View {
                 Spacer()
                 Link("Obtenir une clé gratuite", destination: URL(string: "https://www.themoviedb.org/settings/api")!)
             }
+            Toggle("Chercher aussi les vidéos personnelles (dossiers)", isOn: $personal)
+                .help("Affiche et résumé pour vos fichiers : seul un titre identique à celui de TMDB est retenu (sinon, « Corriger la fiche »)")
             Text("En interface Cinéma, un clic sur une affiche ouvre la fiche du film ou de la série. Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce et résumé traduit.")
                 .font(.caption)
                 .foregroundStyle(.secondary)

@@ -288,6 +288,27 @@ public struct XtreamClient: Sendable {
         try XtreamAPI.parseAccount(try await HTTP.get(XtreamAPI.apiURL(credentials)))
     }
 
+    /// Informations du compte telles que le fournisseur les indique (statut, expiration, connexions) : diagnostic.
+    public func accountSummary() async throws -> [String] {
+        let data = try await HTTP.get(XtreamAPI.apiURL(credentials))
+        guard let root = try XtreamAPI.json(data) as? [String: Any], let user = root["user_info"] as? [String: Any] else {
+            throw XtreamError.invalidData
+        }
+        func date(_ key: String) -> String? {
+            guard let text = XtreamAPI.string(user[key]) else { return nil }
+            guard let seconds = Double(text) else { return text }
+            return Date(timeIntervalSince1970: seconds).formatted(date: .numeric, time: .omitted)
+        }
+        var lines: [String] = []
+        if let v = XtreamAPI.string(user["status"]) { lines.append("status=\(v)") }
+        if let v = date("exp_date") { lines.append("exp_date=\(v)") }
+        if let v = date("created_at") { lines.append("created_at=\(v)") }
+        if let v = XtreamAPI.string(user["max_connections"]) { lines.append("max_connections=\(v)") }
+        if let v = XtreamAPI.string(user["active_cons"]) { lines.append("active_cons=\(v)") }
+        if let v = XtreamAPI.string(user["is_trial"]) { lines.append("is_trial=\(v)") }
+        return lines
+    }
+
     /// Charge chaînes, films et séries. Les sections en erreur sont ignorées si au moins une réussit.
     public func fetchLibrary() async throws -> SourceContent {
         let account = try await account()

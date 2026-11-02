@@ -249,10 +249,14 @@ public struct TMDBMatch: Sendable, Hashable, Identifiable {
     public var posterURL: URL?
     public var overview: String?
     public var genres: [String]
+    /// Titre original (langue de production), pour reconnaître un titre exact.
+    public var originalTitle: String?
     public var id: String { tmdbID }
 
-    public init(tmdbID: String, title: String, year: Int? = nil, posterURL: URL? = nil, overview: String? = nil, genres: [String] = []) {
+    public init(tmdbID: String, title: String, year: Int? = nil, posterURL: URL? = nil, overview: String? = nil, genres: [String] = [],
+                originalTitle: String? = nil) {
         self.tmdbID = tmdbID
+        self.originalTitle = originalTitle
         self.title = title
         self.year = year
         self.posterURL = posterURL
@@ -290,7 +294,8 @@ extension TMDB {
                              year: s(r[isSeries ? "first_air_date" : "release_date"]).flatMap(XtreamAPI.year(in:)),
                              posterURL: s(r["poster_path"]).flatMap { URL(string: images + "w342" + $0) },
                              overview: s(r["overview"]),
-                             genres: genreNames((r["genre_ids"] as? [Any] ?? []).compactMap { MediaServerHTTP.int($0) }, english: english))
+                             genres: genreNames((r["genre_ids"] as? [Any] ?? []).compactMap { MediaServerHTTP.int($0) }, english: english),
+                             originalTitle: s(r[isSeries ? "original_name" : "original_title"]))
         }
     }
 }
@@ -399,6 +404,25 @@ public struct TMDBClient: Sendable {
                                         isSeries: isSeries, english: english)
         }
         return matches
+    }
+
+    /// Fiche dont le titre (ou le titre original) est exactement celui du fichier : seule garantie pour une vidéo personnelle
+    /// sans année ni étiquette. Gère aussi les noms collés en « CamelCase » (TearsOfSteel → Tears Of Steel).
+    public func exactMatch(name: String, isSeries: Bool) async throws -> TMDBMatch? {
+        let base = TMDB.cleanTitle(name).title
+        let spaced = base.replacingOccurrences(of: #"([a-zà-ÿ])([A-ZÀ-Þ])"#, with: "$1 $2", options: .regularExpression)
+        var tried = Set<String>()
+        for query in [base, spaced] where tried.insert(query).inserted {
+            let key = TMDB.titleKey(query)
+            if key.isEmpty { continue }
+            let english = !language.hasPrefix("fr")
+            let matches = TMDB.parseMatches(try await request("search/\(isSeries ? "tv" : "movie")", [URLQueryItem(name: "query", value: query)]),
+                                            isSeries: isSeries, english: english)
+            if let found = matches.first(where: { TMDB.titleKey($0.title) == key || ($0.originalTitle.map(TMDB.titleKey) == key) }) {
+                return found
+            }
+        }
+        return nil
     }
 
     /// Films ou séries en tendance cette semaine (2 pages, ~40 titres).

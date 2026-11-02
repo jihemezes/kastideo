@@ -2,6 +2,17 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.10.0-android1] - 2026-11-02
+
+- **Menu Source** dans la barre latérale (Windows, Linux, Android) : choisir un compte IPTV sans désactiver les autres, avec les compteurs chaînes · films · séries ; choix retenu ; filtre Direct, Films, Séries, recherche et guide. Option « Fusionner les doublons » pour « Toutes les sources ».
+- **Diagnostic de la source** (Réglages > Sources) : statut du compte, contenus renvoyés par le fournisseur et affichés, masqués ou fusionnés ; bouton Copier.
+- **Vidéos personnelles** : affiches et résumés TMDB par titre exact (noms collés « TearsOfSteel » gérés), réglage « Chercher aussi les vidéos personnelles ».
+- Aide : deux nouvelles pages.
+
+## [1.10.0-desktop1] - 2026-11-02
+
+- Mêmes nouveautés que 1.10.0-android1 pour Windows et Linux.
+
 ## [1.9.1-android2] - 2026-11-01
 
 - **Android** : le coin inférieur droit de l'accueil affichait « Aperçu Windows / Linux ». Il indique maintenant « Android » (ou « Android TV »). Même correction dans Réglages > Mises à jour (texte propre à Android) et dans les réglages Cast (plus de mention d'ffmpeg, absent sur Android).

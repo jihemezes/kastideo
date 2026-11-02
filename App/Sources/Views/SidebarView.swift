@@ -30,6 +30,28 @@ struct SidebarView: View {
                     count: recordings.activityCount)
             }
 
+            if store.selectableSources.count > 1 {
+                // Plusieurs comptes IPTV : afficher un seul compte sans désactiver les autres.
+                Section("Source") {
+                    Picker("Source", selection: Binding(get: { store.activeSource?.id }, set: { store.activeSourceID = $0 })) {
+                        Text("Toutes les sources").tag(UUID?.none)
+                        ForEach(store.selectableSources) { source in
+                            let c = store.rawCounts(source)
+                            Text("\(source.name) — \(c.live) · \(c.movies) · \(c.series)").tag(UUID?.some(source.id))
+                        }
+                    }
+                    .labelsHidden()
+                    .selectionDisabled()
+                    .help("Compte IPTV affiché dans Direct, Films, Séries, la recherche et le guide (chaînes · films · séries)")
+                    if store.activeSource == nil {
+                        Toggle("Fusionner les doublons", isOn: Binding(get: { store.dedupeSources }, set: { store.dedupeSources = $0 }))
+                            .toggleStyle(.checkbox)
+                            .selectionDisabled()
+                            .help("Un film ou une série fourni par plusieurs comptes n'est listé qu'une fois")
+                    }
+                }
+            }
+
             let kind = navigation.lastKind
             if store.hasLibrary, kind == .movie || kind == .series {
                 // Films et séries de l'IPTV, de « Mes vidéos » (dossiers, serveurs), ou des deux.

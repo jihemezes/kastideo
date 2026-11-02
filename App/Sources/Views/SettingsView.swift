@@ -81,6 +81,7 @@ struct SourceSettingsRow: View {
     let source: Source
     let onEdit: () -> Void
     let onDelete: () -> Void
+    @State private var diagnosing = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -116,6 +117,11 @@ struct SourceSettingsRow: View {
                         .help("Recharger le guide TV (résultat détaillé dans le Journal, sujet « Guide TV »)")
                 }
             }
+            if source.kind.isIPTV {
+                Button { diagnosing = true } label: { Image(systemName: "stethoscope") }
+                    .buttonStyle(.borderless)
+                    .help("Diagnostic de la source (ce que le fournisseur renvoie, ce qui est affiché)")
+            }
             Button { onEdit() } label: { Image(systemName: "pencil") }
                 .buttonStyle(.borderless)
                 .help("Modifier")
@@ -124,6 +130,7 @@ struct SourceSettingsRow: View {
                 .help("Supprimer")
         }
         .padding(.vertical, 4)
+        .sheet(isPresented: $diagnosing) { SourceDiagnosticSheet(source: source).environment(store) }
     }
 
     private var details: String {

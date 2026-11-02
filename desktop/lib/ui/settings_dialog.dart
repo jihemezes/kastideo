@@ -25,6 +25,7 @@ import '../version.dart';
 import '../core/library.dart';
 import 'help_dialog.dart';
 import 'log_dialog.dart';
+import 'source_diag.dart';
 import 'source_form.dart';
 import 'legal_notice.dart';
 import 'support_button.dart';
@@ -286,6 +287,13 @@ class _GeneralTabState extends State<_GeneralTab> {
           TextButton(
             onPressed: () => launchUrl(Uri.parse('https://www.themoviedb.org/settings/api')),
             child: Text(tr('Obtenir une clé TMDB')),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Chercher aussi les vidéos personnelles (titre exact)'), style: kText(14)),
+            subtitle: _caption(tr('Pour les fichiers sans année ni qualité dans leur nom (« Sintel.mp4 ») : l\'affiche n\'est ajoutée que si le titre existe tel quel sur TMDB.')),
+            value: settings.tmdbPersonal,
+            onChanged: (v) => settings.setBool('tmdb.personal', v),
           ),
         ]),
         const _CastSection(),
@@ -739,7 +747,12 @@ class _SourcesTabState extends State<_SourcesTab> {
 
   Widget _sourceRow(Source source) {
     final library = context.library;
-    int count(MediaKind k) => library.items(k).where((i) => i.sourceId == source.id).length;
+    final raw = library.rawCounts(source);
+    int count(MediaKind k) => switch (k) {
+          MediaKind.live => raw.live,
+          MediaKind.movie => source.kind.isIptv ? raw.movies : library.items(k).where((i) => i.sourceId == source.id).length,
+          _ => source.kind.isIptv ? raw.series : library.items(k).where((i) => i.sourceId == source.id).length,
+        };
     final counts = source.kind.isIptv
         ? '${count(MediaKind.live)} ${tr('chaînes')} · ${count(MediaKind.movie)} ${tr('films')} · ${count(MediaKind.series)} ${tr('séries')}'
         : '${count(MediaKind.movie)} ${tr('films et vidéos')} · ${count(MediaKind.series)} ${tr('séries')}';
@@ -765,6 +778,12 @@ class _SourcesTabState extends State<_SourcesTab> {
           ]),
         ),
         if (library.isBusy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+        if (source.kind.isIptv)
+          IconButton(
+            tooltip: tr('Diagnostic de la source'),
+            onPressed: () => showSourceDiagnostic(context, source),
+            icon: const Icon(Icons.fact_check_outlined),
+          ),
         IconButton(
           tooltip: tr('Modifier'),
           onPressed: () => setState(() {

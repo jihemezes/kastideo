@@ -18,6 +18,7 @@ import 'countries.dart';
 import 'models.dart';
 import 'secrets.dart';
 import 'settings.dart';
+import 'text.dart';
 import 'themes.dart';
 import 'xtream.dart';
 import '../l10n.dart';
@@ -105,6 +106,21 @@ class LibraryStore extends ChangeNotifier {
 
   static const categoryKinds = [MediaKind.live, MediaKind.movie, MediaKind.series];
 
+  /// Tests : charge des sources et leur contenu sans passer par le réseau ni le disque.
+  @visibleForTesting
+  Future<void> debugLoad(List<Source> list, Map<String, List<MediaItem>> content) async {
+    _prefs = await SharedPreferences.getInstance();
+    sources
+      ..clear()
+      ..addAll(list);
+    _contentBySource
+      ..clear()
+      ..addAll(content);
+    activeSourceId = _prefs.getString('catalog.source');
+    dedupe = _prefs.getBool('catalog.dedupe') ?? true;
+    _rebuild();
+  }
+
   Future<void> start({bool autoRefresh = true}) async {
     _prefs = await SharedPreferences.getInstance();
     final support = await getApplicationSupportDirectory();
@@ -118,6 +134,8 @@ class LibraryStore extends ChangeNotifier {
     }
     showAdult = _prefs.getBool('adult.show') ?? false;
     _loadCountries();
+    activeSourceId = _prefs.getString('catalog.source');
+    dedupe = _prefs.getBool('catalog.dedupe') ?? true;
     final edits = _prefs.getString('channelEdits.v1');
     if (edits != null) {
       try {
@@ -254,6 +272,52 @@ class LibraryStore extends ChangeNotifier {
   /// Pays choisis (vide : tous) et catégories sans pays reconnu gardées ou non.
   Set<String> countries = {};
   bool countryNeutral = true;
+
+  /// Source affichée (identifiant) ; null : toutes les sources activées.
+  String? activeSourceId;
+
+  /// Plusieurs comptes IPTV : un film ou une série présent dans plusieurs comptes n'est listé qu'une fois (« Toutes les sources »).
+  bool dedupe = true;
+  final Map<String, String> _dedupeOwner = {};
+
+  /// Comptes IPTV activés, proposés dans le sélecteur de source (au moins deux). Dossiers et serveurs restent toujours visibles.
+  List<Source> get selectableSources => sources.where((s) => s.enabled && s.kind.isIptv).toList();
+
+  Source? get activeSource => activeSourceId == null ? null : selectableSources.where((s) => s.id == activeSourceId).firstOrNull;
+
+  void setActiveSource(String? id) {
+    activeSourceId = id;
+    if (id == null) {
+      _prefs.remove('catalog.source');
+    } else {
+      _prefs.setString('catalog.source', id);
+    }
+    _rebuild();
+  }
+
+  void setDedupe(bool value) {
+    dedupe = value;
+    _prefs.setBool('catalog.dedupe', value);
+    _rebuild();
+  }
+
+  /// Contenus renvoyés par le fournisseur pour une source (avant masquages et fusion des doublons).
+  ({int live, int movies, int series}) rawCounts(Source source) {
+    var live = 0, movies = 0, series = 0;
+    for (final i in _contentBySource[source.id] ?? const <MediaItem>[]) {
+      switch (i.kind) {
+        case MediaKind.live:
+          live++;
+        case MediaKind.movie:
+          movies++;
+        case MediaKind.series:
+          series++;
+        case MediaKind.episode:
+          break;
+      }
+    }
+    return (live: live, movies: movies, series: series);
+  }
 
   /// Change quand le choix des pays change (le bandeau se recompose).
   int countriesGeneration = 0;
@@ -395,7 +459,10 @@ class LibraryStore extends ChangeNotifier {
     _libraryGroups.clear();
     final origin = catalogOrigin;
     final providerOrder = <MediaKind, List<String>>{};
-    for (final source in sources.where((s) => s.enabled)) {
+    _dedupeOwner.clear();
+    if (activeSourceId != null && activeSource == null) activeSourceId = null;
+    final merge = dedupe && activeSourceId == null && sources.where((s) => s.enabled && s.kind.isIptv).length > 1;
+    for (final source in sources.where((s) => s.enabled && (activeSourceId == null || !s.kind.isIptv || s.id == activeSourceId))) {
       final iptv = source.kind.isIptv;
       for (final original in _contentBySource[source.id] ?? const <MediaItem>[]) {
         // Épisodes des dossiers locaux : rangés sous leur série (fiche de la série), pas dans les listes.
@@ -419,6 +486,17 @@ class LibraryStore extends ChangeNotifier {
         final prefs = _categoryPrefs[item.kind];
         final moved = prefs?.moves[item.id];
         if (moved != null && moved.isNotEmpty && moved != item.group) item = item.copyWith(group: moved);
+        // Deux comptes du même fournisseur : un film ou une série déjà fourni par un autre compte n'est listé qu'une fois.
+        if (merge && iptv && (item.kind == MediaKind.movie || item.kind == MediaKind.series)) {
+          final dk = '${item.kind.index}|${titleKey(item.name)}|${item.year ?? ''}';
+          final owner = _dedupeOwner[dk];
+          if (owner == null) {
+            _dedupeOwner[dk] = source.id;
+          } else if (owner != source.id) {
+            _byId[item.id] = item;
+            continue;
+          }
+        }
         final key = '${item.kind.index}|${item.group}';
         final list = _byCategory[key];
         if (list == null) {

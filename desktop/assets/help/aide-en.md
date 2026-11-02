@@ -837,6 +837,35 @@ Every time you open Live, Movies or Series from another section (home, TV guide�
 
 If the chosen category is hidden, renamed or no longer exists at the provider, Kastideo shows the full list. Choose it again in Settings.
 
+## Several accounts: active source, duplicates and diagnostic {#sources-multiples}
+
+When you have **two or more IPTV accounts**, Kastideo lets you choose the one that is displayed, **without disabling** the others in the settings.
+
+### Choose the active source
+
+- On **Mac**, a **Source** menu appears in the sidebar. On **Windows, Linux and Android**, the **Source** menu is in the sidebar (on a phone: in the menu drawer).
+- Choose **All sources** or a specific account. Next to each name, three numbers: **channels · movies · series** returned by the provider.
+- The choice filters **Live, Movies, Series, search and the TV guide**, and is **remembered** between launches.
+- [My videos](help:mes-videos) folders and servers always stay visible.
+
+### Merge duplicates
+
+With **All sources**, a movie or series provided by several accounts (same title, same year) is listed only **once**. Untick **Merge duplicates** to see everything. Favorites and recents already saved keep working.
+
+### Why do two accounts of the same level have different movies?
+
+**Channels** are often identical, but **movie and series catalogues** depend on the account: many providers give each account different video-on-demand bouquets. If the numbers differ, it is most often **on the provider's side**.
+
+### The Diagnostic button
+
+In **Settings > Sources**, an account's **Diagnostic** button (stethoscope) shows:
+
+- the account status (status, expiry, connections);
+- for channels, movies and series: the number **returned by the provider**, the number of categories, and the number **actually shown**;
+- what Kastideo **hides**: hidden categories, adult content, merged duplicates.
+
+If "returned by the provider" differs between your two accounts, the difference comes from the provider. The **Copy** button lets you attach the result to a message to your provider.
+
 ## Favorites and recents {#favoris}
 
 <!--mac-->
@@ -1069,6 +1098,15 @@ The key is stored in the Mac keychain. **Remove Key** goes back to IPTV provider
 <!--pc-->
 Create an account on themoviedb.org, then **Settings > API** and request a key (personal use). Paste the "API key" (v3) or the "read access token" (v4) into Settings > General, then **Save**. Details become richer (posters, cast, trailers, summaries and episodes in your language).
 <!--/pc-->
+
+## Posters and summaries for your personal videos {#tmdb-perso}
+
+For the movies and series in your **folders**, Kastideo can look up the poster and summary on **TMDB** (a [TMDB key](help:tmdb) is required).
+
+Because a file name has no year or tag, the search is **cautious**: a match is accepted only if its **title (or original title) is exactly the file's name**. Names glued with inner capitals (**TearsOfSteel**) are split (Tears Of Steel). Names entirely in glued lowercase ("bigbuckbunny") are not recognised.
+
+- Setting: in **Settings**, section **Movie and series details**: **Also look up personal videos**. On by default; turn it off to avoid any lookup.
+- If a match is missing or wrong, use **Fix details** to pick the right one: it will be remembered.
 
 ## Startup and .m3u files {#demarrage}
 

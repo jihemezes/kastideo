@@ -165,6 +165,12 @@ class NavigationModel extends ChangeNotifier {
   }
 
   CatalogFilter filter(MediaKind kind) => _filters[kind] ?? const AllItems();
+
+  /// Retour à « toutes les chaînes / films / séries » (après un changement de source).
+  void resetFilters() {
+    _filters.clear();
+    notifyListeners();
+  }
   MediaItem? selected(MediaKind kind) => _selected[_key(kind)];
 
   /// Réglages et catégories affichées : pour la page de départ des sections (renseignés au démarrage).

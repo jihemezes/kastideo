@@ -19,6 +19,7 @@ import 'fix_dialog.dart';
 import 'schedule_dialog.dart';
 import '../main.dart' show mediaSync;
 import 'settings_dialog.dart';
+import 'source_picker.dart';
 import 'themes_view.dart';
 import 'tv_view.dart';
 import 'arrange.dart';
@@ -178,6 +179,7 @@ class Sidebar extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(10, 12, 10, 4),
               child: SectionPicker(current: kind),
             ),
+            const SourcePicker(),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),

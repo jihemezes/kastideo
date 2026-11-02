@@ -70,4 +70,11 @@ final class TMDBMatchTests: XCTestCase {
         XCTAssertEqual(matches[0].posterURL?.absoluteString, "https://image.tmdb.org/t/p/w342/d.jpg")
         XCTAssertEqual(matches[0].genres, ["Science-Fiction", "Aventure"])
     }
+
+    func testParseMatchesKeepsOriginalTitle() {
+        let json = #"{"results":[{"id":1,"title":"Tears of Steel","original_title":"Tears of Steel","release_date":"2012-09-26"}]}"#
+        let list = TMDB.parseMatches(Data(json.utf8), isSeries: false)
+        XCTAssertEqual(list.first?.originalTitle, "Tears of Steel")
+        XCTAssertEqual(TMDB.titleKey("Tears Of Steel"), TMDB.titleKey(list[0].title))
+    }
 }

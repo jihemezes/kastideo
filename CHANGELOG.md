@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.10.0] - 2026-11-02
+
+- **Menu Source** : avec plusieurs comptes IPTV, un menu dans la barre latérale choisit le compte affiché (Direct, Films, Séries, recherche, guide) sans désactiver les autres, avec le nombre de chaînes · films · séries de chaque compte. Le choix est retenu.
+- **Fusion des doublons** : avec « Toutes les sources », un film ou une série fourni par plusieurs comptes n'est listé qu'une fois (case « Fusionner les doublons »).
+- **Diagnostic de la source** : nouveau bouton (stéthoscope) dans Réglages > Sources : état du compte, nombre de chaînes, films et séries renvoyés par le fournisseur, affichés, masqués ou fusionnés. Il permet de savoir si une différence entre deux comptes vient du fournisseur.
+- **Vidéos personnelles et TMDB** : les films de vos dossiers (par exemple les films ouverts de la fondation Blender) reçoivent affiche et résumé quand leur titre est exactement celui de TMDB, y compris les noms collés comme « TearsOfSteel ». Réglage « Chercher aussi les vidéos personnelles » (activé par défaut).
+- **Aide** : nouvelles pages « Plusieurs comptes : source active, doublons et diagnostic » et « Affiches et résumés de vos vidéos personnelles ».
+
 ## [1.9.1] - 2026-11-01
 
 **Aide : l'écran d'accueil est décrit tel qu'il est.** La page « L'écran d'accueil » est réécrite (champ de recherche, pavés dont Mes vidéos, accès rapides, « À la télé maintenant », « Reprendre la lecture », bandeau de lecture, version et bouton Offrir un café) avec un schéma mis à jour. L'application elle-même ne change pas.

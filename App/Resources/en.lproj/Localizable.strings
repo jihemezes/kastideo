@@ -965,3 +965,22 @@
 "Décodage logiciel automatique quand l'image se fige" = "Automatic software decoding when the picture freezes";
 "Toujours décoder en logiciel (plus lourd pour le Mac)" = "Always decode in software (heavier on the Mac)";
 "Si une chaîne affiche une image puis reste figée (décodeur matériel du Mac défaillant), Kastideo la rouvre en décodage logiciel et s'en souvient. Vous pouvez aussi l'activer à la main : clic droit sur la chaîne > « Décodage logiciel (image figée) ». « Réinitialiser » ci-dessous oublie ces choix." = "If a channel shows a picture and then stays frozen (faulty hardware decoder on the Mac), Kastideo reopens it with software decoding and remembers it. You can also turn it on by hand: right-click the channel > “Software decoding (frozen picture)”. “Reset” below forgets these choices.";
+
+/* 1.10.0 */
+"Diagnostic de la source" = "Source diagnostic";
+"Deux comptes d'un même fournisseur peuvent avoir des bouquets de films et séries différents : les chaînes sont souvent communes, pas les catalogues. Si « renvoyés par le fournisseur » diffère, la différence vient du fournisseur, pas de Kastideo." = "Two accounts with the same provider can have different movie and series bouquets: channels are often shared, catalogues are not. If "returned by the provider" differs, the difference comes from the provider, not from Kastideo.";
+"Compte" = "Account";
+"illisible" = "unreadable";
+"renvoyés par le fournisseur" = "returned by the provider";
+"catégories" = "categories";
+"Affichés" = "Shown";
+"Dans des catégories masquées" = "In hidden categories";
+"Contenus adultes masqués" = "Adult content hidden";
+"Autres (doublons fusionnés avec un autre compte, source non affichée)" = "Other (duplicates merged with another account, source not shown)";
+"Source" = "Source";
+"Compte IPTV affiché dans Direct, Films, Séries, la recherche et le guide (chaînes · films · séries)" = "IPTV account shown in Live, Movies, Series, search and the guide (channels · movies · series)";
+"Fusionner les doublons" = "Merge duplicates";
+"Un film ou une série fourni par plusieurs comptes n'est listé qu'une fois" = "A movie or series provided by several accounts is listed only once";
+"Diagnostic de la source (ce que le fournisseur renvoie, ce qui est affiché)" = "Source diagnostic (what the provider returns, what is shown)";
+"Chercher aussi les vidéos personnelles (dossiers)" = "Also look up personal videos (folders)";
+"Affiche et résumé pour vos fichiers : seul un titre identique à celui de TMDB est retenu (sinon, « Corriger la fiche »)" = "Poster and summary for your files: only a title identical to TMDB's is accepted (otherwise use "Fix details")";

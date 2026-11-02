@@ -338,6 +338,7 @@ class TMDBClient {
           TMDBMatch(
             id,
             s(r[series ? 'name' : 'title']) ?? cleaned.title,
+            originalTitle: s(r[series ? 'original_name' : 'original_title']),
             year: yearIn(s(r[series ? 'first_air_date' : 'release_date'])),
             poster: s(r['poster_path']) == null ? null : '${_images}w342${s(r['poster_path'])}',
             overview: s(r['overview']),
@@ -395,9 +396,10 @@ class TMDBTrend {
 
 /// Résultat d'une recherche TMDB.
 class TMDBMatch {
-  TMDBMatch(this.tmdbId, this.title, {this.year, this.poster, this.overview, this.genres = const []});
+  TMDBMatch(this.tmdbId, this.title, {this.originalTitle, this.year, this.poster, this.overview, this.genres = const []});
   final String tmdbId;
   final String title;
+  final String? originalTitle;
   final int? year;
   final String? poster;
   final String? overview;
