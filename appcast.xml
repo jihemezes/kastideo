@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.12.1</title>
+      <pubDate>Tue, 03 Nov 2026 15:00:22 GMT</pubDate>
+      <sparkle:version>82</sparkle:version>
+      <sparkle:shortVersionString>1.12.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;MultiVue&lt;/b&gt; : dans Réglages &amp;gt; Général &amp;gt; Lecture, chaque source a maintenant sa propre ligne indépendante (nom et type : abonnement ou liste publique) ; changer l&amp;#x27;une ne modifie plus l&amp;#x27;autre.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.12.1/Kastideo-1.12.1.dmg" length="48008450" type="application/octet-stream" sparkle:edSignature="sadK/q8Di1ED/yzVweFMEQ7+f0pT5Izg/D4u3Hp/nQZKiYEG7MczFNyIfOXhijnQ1Z/gs5H34oA0OgkUmTcoCw==" />
+    </item>
+    <item>
       <title>Kastideo 1.12.0</title>
       <pubDate>Tue, 03 Nov 2026 14:21:38 GMT</pubDate>
       <sparkle:version>81</sparkle:version>
@@ -448,17 +459,6 @@
 &lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : durée de fermeture du flux précédent à chaque changement de chaîne.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.2/Kastideo-1.0.2.dmg" length="46317322" type="application/octet-stream" sparkle:edSignature="rUrmxBAKCFlZOUPUhMX1hpsK9Y3o7x3WeW1zQYtEV7Hm8inztiq7F4sFdcoIRoaGPba35lONIZrJON5KDKCSAQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.0.1</title>
-      <pubDate>Thu, 22 Oct 2026 22:03:24 GMT</pubDate>
-      <sparkle:version>37</sparkle:version>
-      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Thèmes — « En ce moment »&lt;/b&gt; : les chaînes dont le nom est suffisamment explicite (beIN Sports, BFM, Gulli, Eurosport…) sont désormais proposées dans leur thème &lt;b&gt;même sans programme dans le guide TV&lt;/b&gt;. Elles s&amp;#x27;affichent avec le nom de la chaîne à la place du titre du programme. Les chaînes que Kastideo ne sait pas classer sans guide restent proposées dans le mode &lt;b&gt;Chaînes&lt;/b&gt; (vous pouvez les classer vous-même : clic droit &amp;gt; Thème de la chaîne).&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.1/Kastideo-1.0.1.dmg" length="45726513" type="application/octet-stream" sparkle:edSignature="/Uijp1dRpiBgufdV7eWqfMysEsUwQX6+8229/1UqT6E00K9YCi0ev/2UL83unNI8cOsuWHtnkAIkt9w0sDTJDQ==" />
     </item>
   </channel>
 </rss>
