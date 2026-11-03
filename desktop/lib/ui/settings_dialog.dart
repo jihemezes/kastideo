@@ -505,7 +505,7 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
     final settings = context.settings;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Expanded(child: Text(tr('Connexions simultanées de votre abonnement'), style: kText(14))),
+        Expanded(child: Text(tr('Connexions par défaut d\'un abonnement'), style: kText(14))),
         DropdownButton<int>(
           value: settings.multiviewConnections,
           items: [
@@ -517,9 +517,19 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
         const SizedBox(width: 8),
         OutlinedButton(onPressed: _busy ? null : _detect, child: Text(tr('Détecter'))),
       ]),
+      for (final source in context.library.selectableSources)
+        Row(children: [
+          Expanded(child: Text('${tr('MultiVue')} · ${source.name}', style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          DropdownButton<int>(
+            value: settings.multiviewLimit(source),
+            items: [for (final n in const [1, 2, 3, 4]) DropdownMenuItem(value: n, child: Text('$n', style: kText(13)))],
+            onChanged: (v) => settings.setMultiviewLimit(source, v ?? 1),
+          ),
+        ]),
       _caption(_status ??
-          tr('La MultiVue affiche jusqu\'à 4 chaînes à la fois : chaque chaîne utilise une connexion à votre fournisseur. '
-              'Indiquez 2 ou plus seulement si votre abonnement l\'autorise, sinon le fournisseur peut refuser les flux ou bloquer le compte.')),
+          tr('MultiVue : mélangez les chaînes de plusieurs sources (4 flux au plus en tout). Chaque source garde son nombre de connexions : '
+              '1 pour un abonnement limité, 4 pour une liste publique. Indiquez 2 ou plus pour un abonnement seulement s\'il l\'autorise, '
+              'sinon le fournisseur peut refuser les flux ou bloquer le compte.')),
     ]);
   }
 }

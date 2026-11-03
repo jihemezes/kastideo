@@ -23,6 +23,10 @@ class MediaItem {
     this.year,
     this.genres = const [],
     this.archiveDays,
+    this.rating,
+    this.runtime,
+    this.country,
+    this.language,
   }) : searchKey = name.searchKey;
 
   final String id;
@@ -46,6 +50,12 @@ class MediaItem {
   final List<String> genres;
   final String searchKey;
 
+  /// Note sur 10, durée en minutes, pays et langue d'origine (fiches TMDB, serveurs) : tri et filtres de la vidéothèque.
+  final double? rating;
+  final int? runtime;
+  final String? country;
+  final String? language;
+
   /// Jours de replay (archive) proposés par le fournisseur pour cette chaîne ; null ou 0 : aucun.
   final int? archiveDays;
 
@@ -54,7 +64,7 @@ class MediaItem {
 
   String get displayName => cleanTitle(name).title;
 
-  MediaItem copyWith({String? name, String? group, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres}) =>
+  MediaItem copyWith({String? name, String? group, String? logo, String? epgId, int? number, String? info, int? year, List<String>? genres, double? rating, int? runtime, String? country, String? language}) =>
       MediaItem(
         id: id,
         sourceId: sourceId,
@@ -71,7 +81,11 @@ class MediaItem {
         season: season,
         year: year ?? this.year,
         genres: genres ?? this.genres,
-    archiveDays: archiveDays,
+        archiveDays: archiveDays,
+        rating: rating ?? this.rating,
+        runtime: runtime ?? this.runtime,
+        country: country ?? this.country,
+        language: language ?? this.language,
       );
 
   /// Même élément sans l'affiche, le résumé, l'année ni les genres venus de TMDB (retour à la recherche automatique).
@@ -106,7 +120,11 @@ class MediaItem {
         if (season != null) 'se': season,
         if (year != null) 'y': year,
         if (genres.isNotEmpty) 'gn': genres,
-    if (archiveDays != null) 'ad': archiveDays,
+        if (archiveDays != null) 'ad': archiveDays,
+        if (rating != null) 'rt': rating,
+        if (runtime != null) 'rm': runtime,
+        if (country != null) 'co': country,
+        if (language != null) 'lg': language,
       };
 
   factory MediaItem.fromJson(Map<String, dynamic> j) => MediaItem(
@@ -125,7 +143,11 @@ class MediaItem {
         season: j['se'] as int?,
         year: j['y'] as int?,
         genres: [for (final g in (j['gn'] as List? ?? const [])) '$g'],
-    archiveDays: j['ad'] as int?,
+        archiveDays: j['ad'] as int?,
+        rating: (j['rt'] as num?)?.toDouble(),
+        runtime: j['rm'] as int?,
+        country: j['co'] as String?,
+        language: j['lg'] as String?,
       );
 }
 

@@ -282,6 +282,19 @@ As soon as a **Folders**, **Jellyfin**, **Emby** or **Plex** source exists, a **
 In **Movies** and **Series**, the **All / IPTV / My videos** selector (sidebar, above the categories) chooses what is shown: IPTV only (default), your videos only, or both mixed. The categories of your videos are never hidden by the countries setting.
 <!--/pc-->
 
+## Sort and filter My videos {#filtres-videos}
+
+In **My videos**, the **Movies**, **Series** and **Videos** views have a filter bar. Your choices are **remembered** and restored at the next launch. **Reset** clears every filter (the sort order is kept).
+
+- **Source**: when several sources are added (local folder, Emby, Jellyfin, Plex…), show only one of them. In the "all sources" view, a **badge** on each poster shows where the movie comes from.
+- **Genre**, **Year**.
+- **Country** and **Language**: from the TMDB details (or from the Emby, Jellyfin or Plex server).
+- **Quality**: **4K** (2160p, UHD), **HD** (1080p, 720p, Blu-ray, WEB-DL…) or other, from the file name.
+- **Status**: **Unwatched**, **In progress**, **Watched** or **Favorites**.
+- **Sort**: title, recently added, year, **TMDB rating** or **duration**.
+
+Ratings, durations, countries and languages of the files in your folders come from TMDB (a [TMDB key](help:tmdb) is required): they appear as the details are looked up, which takes a few minutes the first time. A movie with no rating comes last when sorting by rating.
+
 ## Window layout and sidebar {#colonnes}
 
 ![Window layout and sidebar](img:layout)
@@ -469,6 +482,18 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 
 > A recording or a download also uses a connection: an ⓘ icon reminds you in the MultiView bar. If a tile says "The channel is not responding", the provider is probably refusing an extra connection: remove a channel or lower the number of connections.
 <!--/pc-->
+
+## Several live sources: MultiView and picture in picture {#multivue-sources}
+
+If you have **several live sources** (for example an IPTV subscription and a list of public channels, or two subscriptions), you can **mix** them.
+
+**Connections per source.** Each source has its own number of simultaneous streams, in **Settings > General > Playback** (one "MultiView · source name" line per source):
+- a **subscription** (Xtream, or an M3U list with credentials): 1 by default, or your subscription's number of connections;
+- a **public list**: 4 by default.
+
+[MultiView](help:multivue) shows **4 channels at most in all**, respecting each source's limit: for example one subscription channel + three public channels, or one channel from each subscription. The source name is shown on each tile, and in the channel picker the channels whose source has no free connection left are greyed out.
+
+**Picture in picture (PIP).** While a live channel plays, the **picture in picture** button (top right of the player) opens a **second channel in a small window** in a corner, muted. **Click the small window** to swap it with the main channel, or the cross to close it. The second channel must come from a source with a free connection: with a single subscription limited to one connection, pick a channel from the public list (or a second subscription). The small window closes when you leave the player.
 
 ## If a channel does not start {#chaine-ne-demarre-pas}
 

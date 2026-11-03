@@ -282,6 +282,19 @@ Dès qu'une source **Dossiers**, **Jellyfin**, **Emby** ou **Plex** existe, une 
 Dans **Films** et **Séries**, le sélecteur **Tout / IPTV / Mes vidéos** (barre latérale, au-dessus des catégories) choisit ce qui est affiché : l'IPTV seul (par défaut), vos vidéos seules, ou les deux mélangés. Les catégories de vos vidéos ne sont jamais masquées par le réglage des pays.
 <!--/pc-->
 
+## Trier et filtrer Mes vidéos {#filtres-videos}
+
+Dans **Mes vidéos**, les vues **Films**, **Séries** et **Vidéos** ont une barre de filtres. Vos choix sont **mémorisés** : ils sont retrouvés au prochain lancement. Le bouton **Réinitialiser** remet tous les filtres à zéro (le tri est conservé).
+
+- **Source** : quand plusieurs sources sont ajoutées (dossier local, Emby, Jellyfin, Plex…), choisissez de n'afficher que l'une d'elles. Dans la vue « toutes les sources », une **pastille** sur chaque affiche indique d'où vient le film.
+- **Genre**, **Année**.
+- **Pays** et **Langue** : d'après la fiche TMDB (ou celle du serveur Emby, Jellyfin, Plex).
+- **Qualité** : **4K** (2160p, UHD), **HD** (1080p, 720p, Blu-ray, WEB-DL…) ou autre, d'après le nom du fichier.
+- **État** : **Non vus**, **En cours**, **Vus** ou **Favoris**.
+- **Tri** : titre, ajout récent, année, **note TMDB** ou **durée**.
+
+Les notes, durées, pays et langues des fichiers de vos dossiers viennent de TMDB (une [clé TMDB](help:tmdb) est nécessaire) : elles apparaissent au fil de la recherche des fiches, qui se complète en quelques minutes la première fois. Un film sans note est placé en dernier pour le tri par note.
+
 ## Colonnes et barre latérale {#colonnes}
 
 ![Colonnes et barre latérale](img:layout)
@@ -469,6 +482,18 @@ La **MultiVue** affiche jusqu'à **4 chaînes en direct** sur un même écran. L
 
 > Un enregistrement ou un téléchargement occupe aussi une connexion : une icône ⓘ le rappelle dans la barre de la MultiVue. Si une vignette affiche « La chaîne ne répond pas », le fournisseur refuse sans doute une connexion de plus : retirez une chaîne ou baissez le nombre de connexions.
 <!--/pc-->
+
+## Plusieurs sources de direct : MultiVue et image dans l'image {#multivue-sources}
+
+Si vous avez **plusieurs sources de direct** (par exemple un abonnement IPTV et une liste de chaînes publiques, ou deux abonnements), vous pouvez les **mélanger**.
+
+**Connexions par source.** Chaque source a son propre nombre de flux simultanés, dans **Réglages > Général > Lecture** (une ligne « MultiVue · nom de la source » par source) :
+- un **abonnement** (Xtream, ou liste M3U avec identifiants) : 1 par défaut, ou le nombre de connexions de votre abonnement ;
+- une **liste publique** : 4 par défaut.
+
+La [MultiVue](help:multivue) affiche **4 chaînes au plus en tout**, en respectant la limite de chaque source : par exemple une chaîne de l'abonnement + trois chaînes publiques, ou une chaîne de chaque abonnement. Le nom de la source est affiché sur chaque vignette, et dans le sélecteur de chaînes celles dont la source n'a plus de connexion libre sont grisées.
+
+**Image dans l'image (PIP).** Pendant la lecture d'une chaîne en direct, le bouton **image dans l'image** (en haut à droite du lecteur) ouvre une **seconde chaîne en miniature** dans un coin, sans le son. **Cliquez sur la miniature** pour l'échanger avec la chaîne principale, ou sur la croix pour la fermer. La seconde chaîne doit venir d'une source qui a une connexion libre : avec un seul abonnement limité à une connexion, choisissez une chaîne de la liste publique (ou d'un second abonnement). La miniature se ferme quand vous quittez le lecteur.
 
 ## Si une chaîne ne démarre pas {#chaine-ne-demarre-pas}
 

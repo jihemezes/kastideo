@@ -1011,3 +1011,25 @@
 "Correction en place" = "Correction in place";
 "Contenu absent du catalogue" = "Content missing from the catalogue";
 "Fiches corrigées à la main (%lld)" = "Entries corrected by hand (%lld)";
+
+/* 1.12.0 */
+"Note TMDB" = "TMDB rating";
+"Durée" = "Duration";
+"Autre qualité" = "Other quality";
+"Pays" = "Country";
+"Toutes les langues" = "All languages";
+"Toutes les qualités" = "All qualities";
+"État" = "Status";
+"Qualité" = "Quality";
+"Vus" = "Watched";
+"Cette source n'autorise pas de second flux. Choisissez une chaîne d'une autre source." = "This source does not allow a second stream. Pick a channel from another source.";
+"Échanger avec la lecture principale" = "Swap with the main playback";
+"Fermer la miniature" = "Close the thumbnail";
+"Flux refusé" = "Stream refused";
+"Image dans l'image : une seconde chaîne en miniature" = "Picture in picture: a second channel in a small window";
+"Chaque abonnement n'autorise qu'une connexion à la fois : un second flux serait refusé par le serveur. Ajoutez une autre source de direct (liste publique, second abonnement) ou indiquez le nombre de connexions de votre abonnement dans Réglages > Général > Lecture." = "Each subscription allows only one connection at a time: a second stream would be refused by the server. Add another live source (public list, second subscription) or set your subscription's number of connections in Settings > General > Playback.";
+"Regardez jusqu'à %lld chaînes en même temps, de sources différentes si vous voulez. Chaque source respecte son nombre de connexions. Le son suit la vignette sélectionnée (clic ou touches 1 à 4)." = "Watch up to %lld channels at once, from different sources if you like. Each source respects its number of connections. Sound follows the selected tile (click or keys 1 to 4).";
+"Connexions par défaut d'un abonnement" = "Default connections of a subscription";
+"MultiVue : mélangez les chaînes de plusieurs sources (jusqu'à 4 flux en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Menu Lecture > MultiVue, ⌥⌘M. Les enregistrements et téléchargements utilisent aussi une connexion." = "MultiView: mix channels from several sources (up to 4 streams in all). Each source keeps its own number of connections: 1 for a limited subscription, 4 for a public list. Playback menu > MultiView, ⌥⌘M. Recordings and downloads also use a connection.";
+"MultiVue · %@" = "MultiView · %@";
+"Connexions de « %@ » toutes utilisées" = "All connections of “%@” are in use";

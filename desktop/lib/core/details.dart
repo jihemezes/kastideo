@@ -28,6 +28,10 @@ class MediaDetails {
   double? rating;
   int? runtime;
   int? seasonCount;
+
+  /// Premier pays de production et langue d'origine (code ISO 639-1), pour les filtres de la vidéothèque.
+  String? country;
+  String? language;
   String? trailer;
   String? poster;
   String? backdrop;
@@ -47,6 +51,8 @@ class MediaDetails {
       ..cast = better.cast.isNotEmpty ? better.cast : cast
       ..rating = better.rating ?? rating
       ..runtime = better.runtime ?? runtime
+      ..country = better.country ?? country
+      ..language = better.language ?? language
       ..seasonCount = better.seasonCount ?? seasonCount
       ..trailer = better.trailer ?? trailer
       ..poster = better.poster ?? poster
@@ -266,7 +272,10 @@ class TMDBClient {
       ..plot = s(root['overview'])
       ..tagline = s(root['tagline'])
       ..year = yearIn(s(root[series ? 'first_air_date' : 'release_date']))
-      ..genres = [for (final g in (root['genres'] as List? ?? const []).whereType<Map>()) ?s(g['name'])];
+      ..genres = [for (final g in (root['genres'] as List? ?? const []).whereType<Map>()) ?s(g['name'])]
+      ..country = [for (final c in (root['production_countries'] as List? ?? const []).whereType<Map>()) ?s(c['name'])].firstOrNull ??
+          [for (final c in (root['origin_country'] as List? ?? const [])) '$c'].firstOrNull
+      ..language = s(root['original_language']);
     final vote = root['vote_average'];
     if (vote is num && vote > 0) d.rating = vote.toDouble();
     if (series) {

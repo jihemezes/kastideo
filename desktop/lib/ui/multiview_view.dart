@@ -25,16 +25,16 @@ bool _mainDucked = false;
 /// sauf si elle enregistre (son coupé), comme sur Mac.
 Future<void> openMultiView(BuildContext context, {MediaItem? add}) async {
   final settings = context.settings;
-  if (!settings.multiviewAvailable) {
+  if (!settings.multiviewAvailableFor(context.library.selectableSources)) {
     final open = await showKDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(tr('MultiVue')),
         content: SizedBox(
           width: 460,
-          child: Text(tr('La MultiVue affiche jusqu\'à 4 chaînes à la fois, chacune avec sa propre connexion à votre fournisseur. '
-              'Elle est désactivée tant que vous n\'avez pas indiqué le nombre de connexions simultanées de votre abonnement '
-              '(Réglages > Général > Lecture).')),
+          child: Text(tr('La MultiVue affiche jusqu\'à 4 chaînes à la fois, de sources différentes si vous voulez ; chaque source garde son nombre de connexions. '
+              'Elle est désactivée tant qu\'aucune source n\'autorise deux flux : ajoutez une autre source de direct (liste publique, second abonnement) '
+              'ou indiquez le nombre de connexions de votre abonnement (Réglages > Général > Lecture).')),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Annuler'))),
@@ -62,7 +62,7 @@ Future<void> openMultiView(BuildContext context, {MediaItem? add}) async {
   navigation.go(Screen.multiview);
   if (watched != null && !recordingInPlayer && !multiview.contains(watched)) await multiview.add(watched);
   if (add != null && !await multiview.add(add) && context.mounted) {
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('La MultiVue est complète : retirez une chaîne d\'abord.'))));
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('La MultiVue est complète ou les connexions de cette source sont toutes utilisées : retirez une chaîne d\'abord.'))));
   }
 }
 
@@ -163,11 +163,11 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
       return;
     }
     final item = await pickMultiViewChannel(context);
-    if (item != null) await multiview.add(item);
+    if (item != null && !await multiview.add(item)) _snack(tr('Les connexions de cette source sont toutes utilisées.'));
   }
 
   Future<void> _change(int index) async {
-    final item = await pickMultiViewChannel(context);
+    final item = await pickMultiViewChannel(context, replacing: index);
     if (item != null && mounted) await context.multiview.replace(index, item);
   }
 
@@ -294,7 +294,7 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
           const SizedBox(height: 12),
           Text(tr('Aucune chaîne dans la MultiVue'), style: kTextD(16, weight: FontWeight.w600)),
           const SizedBox(height: 6),
-          Text('${tr('Jusqu\'à')} ${context.multiview.capacity} ${tr('chaînes selon votre abonnement.')}', style: kTextD(13, color: Colors.white60)),
+          Text('${tr('Jusqu\'à')} ${context.multiview.capacity} ${tr('chaînes, selon les connexions de chaque source.')}', style: kTextD(13, color: Colors.white60)),
           const SizedBox(height: 16),
           FilledButton.icon(onPressed: _add, icon: const Icon(Icons.add_rounded), label: Text(tr('Ajouter une chaîne'))),
         ]),
@@ -582,7 +582,13 @@ class _SlotTileState extends State<_SlotTile> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                              Text(item.displayName, style: kTextD(13, weight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              Text(
+                                  context.library.selectableSources.length > 1 && context.library.sourceOf(item) != null
+                                      ? '${item.displayName} · ${context.library.sourceOf(item)!.name}'
+                                      : item.displayName,
+                                  style: kTextD(13, weight: FontWeight.w600),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
                               if (programme != null)
                                 Text('${hm(programme.start)} – ${hm(programme.stop)} · ${programme.title}',
                                     style: kTextD(11, color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -629,11 +635,15 @@ class _SlotTileState extends State<_SlotTile> {
 }
 
 /// Choix d'une chaîne pour la MultiVue : favoris, récents, ou recherche dans toutes les chaînes.
-Future<MediaItem?> pickMultiViewChannel(BuildContext context) =>
-    showKDialog<MediaItem>(context: context, builder: (_) => const DarkZone(child: _ChannelPicker()));
+Future<MediaItem?> pickMultiViewChannel(BuildContext context, {int? replacing, bool Function(MediaItem)? canPick}) =>
+    showKDialog<MediaItem>(context: context, builder: (_) => DarkZone(child: _ChannelPicker(replacing: replacing, canPick: canPick)));
 
 class _ChannelPicker extends StatefulWidget {
-  const _ChannelPicker();
+  const _ChannelPicker({this.replacing, this.canPick});
+
+  /// Case remplacée (ses flux ne comptent pas dans la limite de la source) et règle de choix personnalisée (image dans l'image).
+  final int? replacing;
+  final bool Function(MediaItem)? canPick;
 
   @override
   State<_ChannelPicker> createState() => _ChannelPickerState();
@@ -702,14 +712,15 @@ class _ChannelPickerState extends State<_ChannelPicker> {
                     itemExtent: 50,
                     itemBuilder: (context, i) {
                       final item = items[i];
-                      final already = multiview.contains(item);
+                      final already = widget.canPick == null && multiview.contains(item);
+                      final allowed = widget.canPick?.call(item) ?? multiview.canPlay(item, replacing: widget.replacing);
                       final p = context.guide.current(item);
                       return ListTile(
                         dense: true,
-                        enabled: !already,
+                        enabled: !already && allowed,
                         leading: LogoView(url: item.logo, name: item.name, size: 32),
                         title: Text(item.displayName, style: kTextD(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text(already ? tr('Déjà dans la MultiVue') : p?.title ?? item.group,
+                        subtitle: Text(already ? tr('Déjà dans la MultiVue') : !allowed ? tr('Connexions de cette source toutes utilisées') : p?.title ?? item.group,
                             style: kTextD(11, color: Colors.white54), maxLines: 1, overflow: TextOverflow.ellipsis),
                         onTap: () => Navigator.pop(context, item),
                       );

@@ -237,9 +237,9 @@ struct ItemActionsMenu: View {
             } label: {
                 if software { Label("Décodage logiciel (image figée)", systemImage: "checkmark") } else { Text("Décodage logiciel (image figée)") }
             }
-            if MultiViewKeys.isAvailable {
+            if MultiViewKeys.isAvailable(sources: store.sources) {
                 Button("Ajouter à la MultiVue") {
-                    multiView.add(item)
+                    multiView.add(item, store: store)
                     openWindow(id: "multiview")
                 }
             }

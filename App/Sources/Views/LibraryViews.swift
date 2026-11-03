@@ -11,6 +11,20 @@ extension MediaItem {
 
     /// Année connue (serveur, fiche TMDB) ou lue dans le nom « Titre (2020) ».
     var displayYear: Int? { year ?? TMDB.cleanTitle(name).year }
+
+    /// Qualité d'image lue dans le nom du fichier ou de l'adresse (2160p/4K/UHD, 1080p/720p/HD).
+    var libraryQuality: LibraryQuality {
+        let text = (name + " " + (streamURL?.lastPathComponent ?? "")).lowercased()
+        if text.range(of: #"(?<![a-z0-9])(2160p|4k|uhd)(?![a-z0-9])"#, options: .regularExpression) != nil { return .uhd }
+        if text.range(of: #"(?<![a-z0-9])(1080p|1080i|720p|fhd|hd|bluray|blu-ray|bdrip|brrip|web-?dl)(?![a-z0-9])"#, options: .regularExpression) != nil { return .hd }
+        return .other
+    }
+
+    /// Nom lisible de la langue d'origine (code ISO) pour les filtres.
+    var languageName: String? {
+        guard let language, !language.isEmpty else { return nil }
+        return Locale.current.localizedString(forLanguageCode: language)?.capitalized ?? language
+    }
 }
 
 /// Vidéothèque : dossiers (disque, clé USB, NAS) et serveurs Jellyfin, Emby, Plex, à part de l'IPTV.
@@ -356,18 +370,33 @@ struct LibraryGridView: View {
         }
         let genres = Array(Set(all.flatMap { $0.genres ?? [] })).sorted()
         let years = Array(Set(all.compactMap(\.displayYear))).sorted(by: >)
+        let countries = Array(Set(all.compactMap(\.country))).sorted()
+        let languages = Array(Set(all.compactMap(\.languageName))).sorted()
+        let sources = store.librarySources
         let key = navigation.search.kastideoSearchKey
+        let favorites = store.favoriteSet
         var items = all.filter { item in
             if !key.isEmpty, !item.searchKey.contains(key) { return false }
             if let genre = navigation.libraryGenre, !(item.genres ?? []).contains(genre) { return false }
             if let year = navigation.libraryYear, item.displayYear != year { return false }
-            if navigation.libraryUnwatched, watch.isWatched(item.id) { return false }
+            if let country = navigation.libraryCountry, item.country != country { return false }
+            if let language = navigation.libraryLanguage, item.languageName != language { return false }
+            if let quality = navigation.libraryQuality, item.libraryQuality != quality { return false }
+            switch navigation.libraryStatus {
+            case .all: break
+            case .unwatched: if watch.isWatched(item.id) || watch.fraction(for: item.id) != nil { return false }
+            case .inProgress: if watch.isWatched(item.id) || watch.fraction(for: item.id) == nil { return false }
+            case .watched: if !watch.isWatched(item.id) { return false }
+            case .favorites: if !favorites.contains(item.id) { return false }
+            }
             return true
         }
         switch navigation.librarySort {
         case .title: items.sort(by: byTitle)
         case .added: items.sort { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
         case .year: items.sort { ($0.displayYear ?? 0) > ($1.displayYear ?? 0) }
+        case .rating: items.sort { ($0.rating ?? 0) > ($1.rating ?? 0) }
+        case .runtime: items.sort { ($0.runtime ?? 0) > ($1.runtime ?? 0) }
         }
         let title: String = view == .movies ? String(localized: "Films") : view == .series ? String(localized: "Séries") : String(localized: "Vidéos")
         let size = CardSize(rawValue: cardSizeRaw) ?? .medium
@@ -379,30 +408,7 @@ struct LibraryGridView: View {
                 }
                 .padding(.horizontal, 24)
                 LibraryStatusBanner()
-                HStack(spacing: 12) {
-                    if !genres.isEmpty {
-                        Picker("Genre", selection: $navigation.libraryGenre) {
-                            Text("Tous les genres").tag(String?.none)
-                            ForEach(genres, id: \.self) { Text($0).tag(String?.some($0)) }
-                        }
-                        .fixedSize()
-                    }
-                    if !years.isEmpty {
-                        Picker("Année", selection: $navigation.libraryYear) {
-                            Text("Toutes les années").tag(Int?.none)
-                            ForEach(years, id: \.self) { Text(String($0)).tag(Int?.some($0)) }
-                        }
-                        .fixedSize()
-                    }
-                    Toggle("Non vus", isOn: $navigation.libraryUnwatched)
-                        .toggleStyle(.checkbox)
-                    Picker("Tri", selection: $navigation.librarySort) {
-                        ForEach(LibrarySort.allCases) { Text($0.label).tag($0) }
-                    }
-                    .fixedSize()
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
+                filterBar(genres: genres, years: years, countries: countries, languages: languages, sources: sources)
                 if items.isEmpty {
                     ContentUnavailableView(title, systemImage: "tray", description: Text("Aucun résultat."))
                         .frame(maxWidth: .infinity, minHeight: 300)
@@ -417,6 +423,71 @@ struct LibraryGridView: View {
                 }
             }
             .padding(.vertical, 20)
+        }
+    }
+}
+
+extension LibraryGridView {
+    /// Barre de filtres : source, genre, année, pays, langue, qualité, état de visionnage et tri (choix mémorisés).
+    @ViewBuilder
+    fileprivate func filterBar(genres: [String], years: [Int], countries: [String], languages: [String], sources: [Source]) -> some View {
+        @Bindable var navigation = navigation
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                if sources.count > 1 {
+                    Picker("Source", selection: $navigation.librarySource) {
+                        Text("Toutes les sources").tag(UUID?.none)
+                        ForEach(sources) { Text($0.name).tag(UUID?.some($0.id)) }
+                    }
+                    .fixedSize()
+                }
+                if !genres.isEmpty {
+                    Picker("Genre", selection: $navigation.libraryGenre) {
+                        Text("Tous les genres").tag(String?.none)
+                        ForEach(genres, id: \.self) { Text($0).tag(String?.some($0)) }
+                    }
+                    .fixedSize()
+                }
+                if !years.isEmpty {
+                    Picker("Année", selection: $navigation.libraryYear) {
+                        Text("Toutes les années").tag(Int?.none)
+                        ForEach(years, id: \.self) { Text(String($0)).tag(Int?.some($0)) }
+                    }
+                    .fixedSize()
+                }
+                if !countries.isEmpty {
+                    Picker("Pays", selection: $navigation.libraryCountry) {
+                        Text("Tous les pays").tag(String?.none)
+                        ForEach(countries, id: \.self) { Text($0).tag(String?.some($0)) }
+                    }
+                    .fixedSize()
+                }
+                if !languages.isEmpty {
+                    Picker("Langue", selection: $navigation.libraryLanguage) {
+                        Text("Toutes les langues").tag(String?.none)
+                        ForEach(languages, id: \.self) { Text($0).tag(String?.some($0)) }
+                    }
+                    .fixedSize()
+                }
+                Picker("Qualité", selection: $navigation.libraryQuality) {
+                    Text("Toutes les qualités").tag(LibraryQuality?.none)
+                    ForEach(LibraryQuality.allCases) { Text($0.label).tag(LibraryQuality?.some($0)) }
+                }
+                .fixedSize()
+                Picker("État", selection: $navigation.libraryStatus) {
+                    ForEach(LibraryStatus.allCases) { Text($0.label).tag($0) }
+                }
+                .fixedSize()
+                Picker("Tri", selection: $navigation.librarySort) {
+                    ForEach(LibrarySort.allCases) { Text($0.label).tag($0) }
+                }
+                .fixedSize()
+                if navigation.hasLibraryFilters {
+                    Button("Réinitialiser") { navigation.resetLibraryFilters() }
+                        .buttonStyle(.link)
+                }
+            }
+            .padding(.horizontal, 24)
         }
     }
 }

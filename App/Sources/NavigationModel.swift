@@ -10,15 +10,51 @@ enum LibraryView: String, CaseIterable, Identifiable {
 
 /// Tri de la vidéothèque.
 enum LibrarySort: String, CaseIterable, Identifiable {
-    case title, added, year
+    case title, added, year, rating, runtime
     var id: String { rawValue }
     var label: String {
         switch self {
         case .title: return String(localized: "Titre")
         case .added: return String(localized: "Ajout récent")
         case .year: return String(localized: "Année")
+        case .rating: return String(localized: "Note TMDB")
+        case .runtime: return String(localized: "Durée")
         }
     }
+}
+
+/// Qualité d'image d'une vidéo, d'après le nom du fichier.
+enum LibraryQuality: String, CaseIterable, Identifiable {
+    case uhd, hd, other
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .uhd: return "4K"
+        case .hd: return "HD"
+        case .other: return String(localized: "Autre qualité")
+        }
+    }
+}
+
+/// Filtre d'état de visionnage.
+enum LibraryStatus: String, CaseIterable, Identifiable {
+    case all, unwatched, inProgress, watched, favorites
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .all: return String(localized: "Tous")
+        case .unwatched: return String(localized: "Non vus")
+        case .inProgress: return String(localized: "En cours")
+        case .watched: return String(localized: "Vus")
+        case .favorites: return String(localized: "Favoris")
+        }
+    }
+}
+
+/// Filtres et tri de la vidéothèque, gardés d'un lancement à l'autre.
+enum LibraryPrefs {
+    static func string(_ key: String) -> String? { UserDefaults.standard.string(forKey: "library." + key) }
+    static func set(_ key: String, _ value: String?) { UserDefaults.standard.set(value, forKey: "library." + key) }
 }
 
 /// Ce que l'utilisateur parcourt dans la barre latérale.
@@ -136,10 +172,34 @@ final class NavigationModel {
         didSet { if libraryView != .folders { libraryFolder = [] } }
     }
     var libraryFolder: [String] = []
-    var libraryGenre: String?
-    var libraryYear: Int?
-    var libraryUnwatched = false
-    var librarySort: LibrarySort = .title
+    var libraryGenre: String? = LibraryPrefs.string("genre") { didSet { LibraryPrefs.set("genre", libraryGenre) } }
+    var libraryYear: Int? = LibraryPrefs.string("year").flatMap(Int.init) { didSet { LibraryPrefs.set("year", libraryYear.map(String.init)) } }
+    var libraryCountry: String? = LibraryPrefs.string("country") { didSet { LibraryPrefs.set("country", libraryCountry) } }
+    var libraryLanguage: String? = LibraryPrefs.string("language") { didSet { LibraryPrefs.set("language", libraryLanguage) } }
+    var libraryQuality: LibraryQuality? = LibraryPrefs.string("quality").flatMap(LibraryQuality.init) {
+        didSet { LibraryPrefs.set("quality", libraryQuality?.rawValue) }
+    }
+    var libraryStatus: LibraryStatus = LibraryPrefs.string("status").flatMap(LibraryStatus.init) ?? .all {
+        didSet { LibraryPrefs.set("status", libraryStatus.rawValue) }
+    }
+    var librarySort: LibrarySort = LibraryPrefs.string("sort").flatMap(LibrarySort.init) ?? .title {
+        didSet { LibraryPrefs.set("sort", librarySort.rawValue) }
+    }
+    /// Raccourci utilisé par « Films à voir » (page d'accueil de la vidéothèque).
+    var libraryUnwatched: Bool {
+        get { libraryStatus == .unwatched }
+        set { libraryStatus = newValue ? .unwatched : .all }
+    }
+
+    /// Remet à zéro tous les filtres (le tri est conservé).
+    func resetLibraryFilters() {
+        libraryGenre = nil; libraryYear = nil; libraryCountry = nil; libraryLanguage = nil
+        libraryQuality = nil; libraryStatus = .all
+    }
+    var hasLibraryFilters: Bool {
+        libraryGenre != nil || libraryYear != nil || libraryCountry != nil || libraryLanguage != nil
+            || libraryQuality != nil || libraryStatus != .all
+    }
 
     /// Ouvre une vue de la vidéothèque (la fiche ou le lecteur ouverts se referment).
     func showLibrary(_ view: LibraryView) {

@@ -203,7 +203,7 @@ Future<void> main(List<String> args) async {
   final recordings = RecordingCenter(settings, playback, library);
   final downloads = DownloadManager(settings, playback);
   final alerts = AlertCenter(settings, library, guide);
-  final multiview = MultiViewController(settings, playback);
+  final multiview = MultiViewController(settings, playback)..library = library;
   final updates = UpdateService();
   final cast = CastController(playback, settings);
   // Serveurs Jellyfin, Emby, Plex : positions de lecture partagées, fiches TMDB des fichiers locaux.

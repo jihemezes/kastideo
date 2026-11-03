@@ -344,6 +344,33 @@ class _LibraryHome extends StatelessWidget {
   }
 }
 
+/// Nom lisible de la langue d'origine (code ISO 639-1) pour les filtres.
+String? languageName(String? code) {
+  if (code == null || code.isEmpty) return null;
+  const fr = {
+    'en': 'Anglais', 'fr': 'Français', 'es': 'Espagnol', 'de': 'Allemand', 'it': 'Italien', 'pt': 'Portugais', 'ja': 'Japonais',
+    'ko': 'Coréen', 'zh': 'Chinois', 'ru': 'Russe', 'nl': 'Néerlandais', 'sv': 'Suédois', 'da': 'Danois', 'no': 'Norvégien',
+    'fi': 'Finnois', 'pl': 'Polonais', 'tr': 'Turc', 'ar': 'Arabe', 'hi': 'Hindi', 'cs': 'Tchèque', 'el': 'Grec', 'he': 'Hébreu',
+  };
+  const en = {
+    'en': 'English', 'fr': 'French', 'es': 'Spanish', 'de': 'German', 'it': 'Italian', 'pt': 'Portuguese', 'ja': 'Japanese',
+    'ko': 'Korean', 'zh': 'Chinese', 'ru': 'Russian', 'nl': 'Dutch', 'sv': 'Swedish', 'da': 'Danish', 'no': 'Norwegian',
+    'fi': 'Finnish', 'pl': 'Polish', 'tr': 'Turkish', 'ar': 'Arabic', 'hi': 'Hindi', 'cs': 'Czech', 'el': 'Greek', 'he': 'Hebrew',
+  };
+  return (tr('Anglais') == 'English' ? en : fr)[code.toLowerCase()] ?? code;
+}
+
+final _uhdPattern = RegExp(r'(?<![a-z0-9])(2160p|4k|uhd)(?![a-z0-9])');
+final _hdPattern = RegExp(r'(?<![a-z0-9])(1080p|1080i|720p|fhd|hd|bluray|blu-ray|bdrip|brrip|web-?dl)(?![a-z0-9])');
+
+/// Qualité d'image lue dans le nom du fichier ou de l'adresse (2160p/4K/UHD, 1080p/720p/HD).
+LibraryQuality qualityOf(MediaItem item) {
+  final text = '${item.name} ${(item.stream ?? '').split(RegExp(r'[\\/]')).last}'.toLowerCase();
+  if (_uhdPattern.hasMatch(text)) return LibraryQuality.uhd;
+  if (_hdPattern.hasMatch(text)) return LibraryQuality.hd;
+  return LibraryQuality.other;
+}
+
 int _byTitle(MediaItem a, MediaItem b) => a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
 
 String _scopeTitle(BuildContext context) {
@@ -381,14 +408,32 @@ class _LibraryGridState extends State<_LibraryGrid> {
           LibraryView.videos => isPersonalVideo(i),
           _ => false,
         });
+    navigation.loadLibraryPrefs();
     final genres = <String>{for (final i in all) ...i.genres}.toList()..sort();
     final years = <int>{for (final i in all) ?yearOf(i)}.toList()..sort((a, b) => b.compareTo(a));
+    final countries = <String>{for (final i in all) ?i.country}.toList()..sort();
+    final languages = <String>{for (final i in all) ?languageName(i.language)}.toList()..sort();
+    final sources = library.librarySources.toList();
     final key = _search.text.searchKey;
     final items = all.where((i) {
       if (key.isNotEmpty && !i.searchKey.contains(key)) return false;
       if (navigation.libraryGenre != null && !i.genres.contains(navigation.libraryGenre)) return false;
       if (navigation.libraryYear != null && yearOf(i) != navigation.libraryYear) return false;
-      if (navigation.libraryUnwatched && (watch.isWatched(i.id))) return false;
+      if (navigation.libraryCountry != null && i.country != navigation.libraryCountry) return false;
+      if (navigation.libraryLanguage != null && languageName(i.language) != navigation.libraryLanguage) return false;
+      if (navigation.libraryQuality != null && qualityOf(i) != navigation.libraryQuality) return false;
+      switch (navigation.libraryStatus) {
+        case LibraryStatus.all:
+          break;
+        case LibraryStatus.unwatched:
+          if (watch.isWatched(i.id) || watch.fraction(i.id) != null) return false;
+        case LibraryStatus.inProgress:
+          if (watch.isWatched(i.id) || watch.fraction(i.id) == null) return false;
+        case LibraryStatus.watched:
+          if (!watch.isWatched(i.id)) return false;
+        case LibraryStatus.favorites:
+          if (!library.isFavorite(i.id)) return false;
+      }
       return true;
     }).toList();
     switch (navigation.librarySort) {
@@ -398,6 +443,10 @@ class _LibraryGridState extends State<_LibraryGrid> {
         items.sort((a, b) => (b.added ?? DateTime(1970)).compareTo(a.added ?? DateTime(1970)));
       case LibrarySort.year:
         items.sort((a, b) => (yearOf(b) ?? 0).compareTo(yearOf(a) ?? 0));
+      case LibrarySort.rating:
+        items.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+      case LibrarySort.runtime:
+        items.sort((a, b) => (b.runtime ?? 0).compareTo(a.runtime ?? 0));
     }
     final title = switch (view) {
       LibraryView.movies => tr('Films'),
@@ -446,23 +495,48 @@ class _LibraryGridState extends State<_LibraryGrid> {
                   ),
                 ),
               ),
+              if (sources.length > 1)
+                dropdown<String>(tr('Source'), navigation.librarySource, [(null, tr('Toutes les sources')), for (final s in sources) (s.id, s.name)],
+                    (v) => navigation.setLibrary(source: v)),
               if (genres.isNotEmpty)
                 dropdown<String>(tr('Genre'), navigation.libraryGenre, [(null, tr('Tous les genres')), for (final g in genres) (g, g)],
                     (v) => navigation.setLibrary(genre: v)),
               if (years.isNotEmpty)
                 dropdown<int>(tr('Année'), navigation.libraryYear, [(null, tr('Toutes les années')), for (final y in years) (y, '$y')],
                     (v) => navigation.setLibrary(year: v)),
-              FilterChip(
-                label: Text(tr('Non vus'), style: kText(13)),
-                selected: navigation.libraryUnwatched,
-                onSelected: (v) => navigation.setLibrary(unwatched: v),
-              ),
+              if (countries.isNotEmpty)
+                dropdown<String>(tr('Pays'), navigation.libraryCountry, [(null, tr('Tous les pays')), for (final c in countries) (c, c)],
+                    (v) => navigation.setLibrary(country: v)),
+              if (languages.isNotEmpty)
+                dropdown<String>(tr('Langue'), navigation.libraryLanguage, [(null, tr('Toutes les langues')), for (final l in languages) (l, l)],
+                    (v) => navigation.setLibrary(language: v)),
+              dropdown<LibraryQuality>(tr('Qualité'), navigation.libraryQuality, [
+                (null, tr('Toutes les qualités')),
+                (LibraryQuality.uhd, '4K'),
+                (LibraryQuality.hd, 'HD'),
+                (LibraryQuality.other, tr('Autre qualité')),
+              ], (v) => navigation.setLibrary(quality: v)),
+              dropdown<LibraryStatus>(tr('État'), navigation.libraryStatus, [
+                (LibraryStatus.all, tr('Tous')),
+                (LibraryStatus.unwatched, tr('Non vus')),
+                (LibraryStatus.inProgress, tr('En cours')),
+                (LibraryStatus.watched, tr('Vus')),
+                (LibraryStatus.favorites, tr('Favoris')),
+              ], (v) => navigation.setLibrary(status: v ?? LibraryStatus.all)),
               dropdown<LibrarySort>(
                 tr('Tri'),
                 navigation.librarySort,
-                [(LibrarySort.title, tr('Titre')), (LibrarySort.added, tr('Ajout récent')), (LibrarySort.year, tr('Année'))],
+                [
+                  (LibrarySort.title, tr('Titre')),
+                  (LibrarySort.added, tr('Ajout récent')),
+                  (LibrarySort.year, tr('Année')),
+                  (LibrarySort.rating, tr('Note TMDB')),
+                  (LibrarySort.runtime, tr('Durée')),
+                ],
                 (v) => navigation.setLibrary(sort: v ?? LibrarySort.title),
               ),
+              if (navigation.hasLibraryFilters)
+                TextButton(onPressed: navigation.resetLibraryFilters, child: Text(tr('Réinitialiser'), style: kText(13))),
             ]),
           ]),
         ),

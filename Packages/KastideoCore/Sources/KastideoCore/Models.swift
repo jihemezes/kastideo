@@ -43,6 +43,11 @@ public struct MediaItem: Identifiable, Hashable, Codable, Sendable {
     /// Année et genres (serveurs, fiches TMDB des fichiers) : filtres de la vidéothèque.
     public var year: Int?
     public var genres: [String]?
+    /// Note sur 10, durée en minutes, pays et langue d'origine (fiches TMDB, serveurs) : tri et filtres de la vidéothèque.
+    public var rating: Double?
+    public var runtime: Int?
+    public var country: String?
+    public var language: String?
     /// Nombre de jours de replay (archive) proposés par le fournisseur pour cette chaîne ; `nil` ou 0 = aucun.
     public var archiveDays: Int?
 

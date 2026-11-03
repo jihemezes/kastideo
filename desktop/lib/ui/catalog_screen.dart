@@ -751,7 +751,7 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
           value: 'record',
           child: Text(context.recordings.isRecording(item) ? tr('Arrêter l\'enregistrement') : tr('Enregistrer maintenant'), style: kText(13)),
         ),
-      if (isLive && context.settings.multiviewAvailable)
+      if (isLive && context.settings.multiviewAvailableFor(context.library.selectableSources))
         PopupMenuItem(value: 'multi', child: Text(tr('Ajouter à la MultiVue'), style: kText(13))),
       if (isLive && context.guide.replayProgrammes(item).isNotEmpty)
         PopupMenuItem(value: 'replay', child: Text(tr('Revoir (replay)…'), style: kText(13))),

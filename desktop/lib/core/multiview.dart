@@ -6,6 +6,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n.dart';
+import 'library.dart';
 import 'log.dart';
 import 'models.dart';
 import 'playback.dart';
@@ -170,6 +172,7 @@ class MultiViewController extends ChangeNotifier {
 
   final AppSettings settings;
   final PlaybackController playback;
+  LibraryStore? library;
   SharedPreferences? _prefs;
 
   final List<MultiSlot> slots = [];
@@ -192,7 +195,22 @@ class MultiViewController extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get capacity => settings.multiviewConnections.clamp(1, 4);
+  /// Cases de la grille : 4 au plus ; chaque source garde sa propre limite de flux.
+  int get capacity => 4;
+
+  Source? _source(MediaItem item) => library?.sourceOf(item);
+
+  /// Flux déjà ouverts pour la source d'une chaîne (hors la case remplacée).
+  int activeCount(String sourceId, {int? excluding}) {
+    var n = 0;
+    for (var i = 0; i < slots.length; i++) {
+      if (i != excluding && slots[i].item?.sourceId == sourceId) n++;
+    }
+    return n;
+  }
+
+  /// Vrai si la source de la chaîne a encore une connexion libre.
+  bool canPlay(MediaItem item, {int? replacing}) => activeCount(item.sourceId, excluding: replacing) < settings.multiviewLimit(_source(item));
   bool get isRunning => slots.any((s) => s.item != null);
   List<MediaItem> get channels => [for (final s in slots) ?s.item];
   bool contains(MediaItem item) => slots.any((s) => s.item?.id == item.id);
@@ -202,6 +220,7 @@ class MultiViewController extends ChangeNotifier {
   /// Ajoute une chaîne (dans une case vide, ou une nouvelle case s'il en reste). Faux si la MultiVue est pleine.
   Future<bool> add(MediaItem item) async {
     if (contains(item)) return true;
+    if (!canPlay(item)) return false;
     var index = slots.indexWhere((s) => s.item == null);
     if (index < 0) {
       if (slots.length >= capacity) return false;
@@ -223,6 +242,7 @@ class MultiViewController extends ChangeNotifier {
       setActive(existing);
       return;
     }
+    if (!canPlay(item, replacing: index)) return;
     await slots[index].play(item, volume: index == active ? _volume : 0);
     notifyListeners();
   }
@@ -341,5 +361,63 @@ class MultiViewController extends ChangeNotifier {
     }
     notifyListeners();
     return missing;
+  }
+}
+
+/// Image dans l'image : une seconde chaîne en miniature dans le lecteur (son coupé), échangeable en un clic.
+class PipController extends ChangeNotifier {
+  PipController._();
+  static final PipController shared = PipController._();
+
+  MultiSlot? slot;
+  String? message;
+
+  MediaItem? get item => slot?.item;
+  bool get isOpen => slot != null;
+
+  /// Vrai si la source de [candidate] a une connexion libre en plus de la lecture principale.
+  bool canOpen(MediaItem candidate, PlaybackController playback, LibraryStore library, AppSettings settings) {
+    final inUse = playback.current?.sourceId == candidate.sourceId ? 1 : 0;
+    return inUse + 1 <= settings.multiviewLimit(library.sourceOf(candidate));
+  }
+
+  Future<void> open(MediaItem candidate, PlaybackController playback, LibraryStore library, AppSettings settings) async {
+    if (candidate.id == playback.current?.id) return;
+    if (!canOpen(candidate, playback, library, settings)) {
+      message = tr('Cette source n\'autorise pas de second flux. Choisissez une chaîne d\'une autre source.');
+      notifyListeners();
+      return;
+    }
+    message = null;
+    final pip = slot ??= MultiSlot();
+    notifyListeners();
+    await pip.play(candidate, volume: 0);
+    notifyListeners();
+  }
+
+  /// La miniature prend la place de la lecture principale, et inversement.
+  Future<void> swap(PlaybackController playback) async {
+    final pip = slot;
+    final small = pip?.item;
+    final big = playback.current;
+    if (pip == null || small == null || big == null) return;
+    await pip.stop();
+    playback.play(small);
+    // Le flux principal précédent passe en miniature une fois l'ancien fermé.
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (slot == pip) await pip.play(big, volume: 0);
+    notifyListeners();
+  }
+
+  Future<void> close() async {
+    final pip = slot;
+    if (pip == null) return;
+    slot = null;
+    message = null;
+    notifyListeners();
+    try {
+      await pip.stop();
+    } catch (_) {}
+    pip.dispose();
   }
 }

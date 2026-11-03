@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.12.0] - 2026-11-03
+
+- **Mes vidéos : barre de filtres** : nouveau filtre **Source** (dossier local, Emby, Jellyfin, Plex…) à côté de Genre et Année, avec une pastille de la source sur chaque affiche quand la vue les mélange. Nouveaux filtres **Pays**, **Langue**, **Qualité** (4K, HD d'après le nom du fichier) et **État** (Non vus, En cours, Vus, Favoris).
+- **Tri** par **note TMDB** et par **durée**. Filtres et tri sont **mémorisés** d'un lancement à l'autre ; bouton « Réinitialiser ».
+- **MultiVue avec plusieurs sources** : chaque source de direct a son propre nombre de connexions (1 pour un abonnement limité, 4 pour une liste publique, réglable dans Réglages > Général > Lecture). Mélangez un abonnement et une liste publique, ou deux abonnements ; 4 flux au plus en tout, le nom de la source est affiché sur chaque vignette.
+- **Image dans l'image** : pendant un direct, le bouton PIP ouvre une seconde chaîne en miniature dans le lecteur (sans le son) ; un clic l'échange avec la chaîne principale.
+- **Aide** : nouvelles pages « Trier et filtrer Mes vidéos » et « Plusieurs sources de direct : MultiVue et image dans l'image ».
+
 ## [1.11.0] - 2026-11-03
 
 - **Corriger la fiche, par code TMDB** : dans « Corriger la fiche… », saisissez le numéro TMDB (ou collez l'adresse de la page themoviedb.org) pour lier un film ou une série à la bonne fiche, avec aperçu avant validation. Utile quand deux films portent le même titre.

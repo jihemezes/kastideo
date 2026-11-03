@@ -24,7 +24,7 @@ import 'xtream.dart';
 import '../l10n.dart';
 
 /// Fiche trouvée sur TMDB pour un fichier local (affiche, résumé, année, genres).
-typedef LocalFiche = ({String? logo, String? info, int? year, List<String> genres});
+typedef LocalFiche = ({String? logo, String? info, int? year, List<String> genres, double? rating, int? runtime, String? country, String? language});
 
 /// Bibliothèque : sources, contenus (mis en cache sur disque), favoris, récents et catégories personnalisées.
 class LibraryStore extends ChangeNotifier {
@@ -807,7 +807,7 @@ class LibraryStore extends ChangeNotifier {
           content = SourceContent([
             for (final i in content.items)
               if (known[i.id] case final k? when k.logo != null || k.info != null || k.genres.isNotEmpty)
-            i.copyWith(logo: k.logo, info: k.info, year: k.year, genres: k.genres)
+            i.copyWith(logo: k.logo, info: k.info, year: k.year, genres: k.genres, rating: k.rating, runtime: k.runtime, country: k.country, language: k.language)
           else
             i,
           ]);
@@ -1027,7 +1027,8 @@ class LibraryStore extends ChangeNotifier {
     _contentBySource[sourceId] = [
       for (final i in list)
         if (found[i.id] case final f?)
-          i.copyWith(logo: f.logo ?? i.logo, info: f.info ?? i.info, year: f.year ?? i.year, genres: f.genres.isEmpty ? i.genres : f.genres)
+          i.copyWith(logo: f.logo ?? i.logo, info: f.info ?? i.info, year: f.year ?? i.year, genres: f.genres.isEmpty ? i.genres : f.genres,
+              rating: f.rating, runtime: f.runtime, country: f.country, language: f.language)
         else
           i,
     ];

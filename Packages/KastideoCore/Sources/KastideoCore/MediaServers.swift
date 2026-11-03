@@ -107,6 +107,12 @@ public enum PlaybackEvent: Sendable {
 
 /// Fonctions communes aux clients Jellyfin / Emby et Plex.
 public enum MediaServerHTTP {
+    /// Nombre décimal strictement positif (note, durée), sinon nil.
+    public static func positive(_ value: Any?) -> Double? {
+        guard let number = (value as? NSNumber)?.doubleValue ?? (value as? String).flatMap(Double.init), number > 0 else { return nil }
+        return number
+    }
+
     /// Adresse complète. Sans « http:// » ni port, le port habituel est ajouté.
     public static func normalize(_ address: String, type: MediaServerType) throws -> URL {
         var text = address.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -333,7 +339,7 @@ public struct JellyfinClient: MediaServerClient {
         URL(string: "\(server.absoluteString)/Videos/\(id)/stream?static=true&MediaSourceId=\(id)&api_key=\(session.token)")
     }
 
-    private static let fields = "Overview,Genres,ProductionYear,DateCreated,RunTimeTicks,CommunityRating,UserData,PremiereDate"
+    private static let fields = "Overview,Genres,ProductionYear,DateCreated,RunTimeTicks,CommunityRating,UserData,PremiereDate,ProductionLocations"
 
     private func group(_ library: String) -> String { label.isEmpty ? library : "\(library) · \(label)" }
 
@@ -379,6 +385,9 @@ public struct JellyfinClient: MediaServerClient {
                                      info: e["Overview"] as? String, added: MediaServerHTTP.date(e["DateCreated"]))
                 item.year = year
                 item.genres = (e["Genres"] as? [Any])?.map { "\($0)" }
+                item.rating = MediaServerHTTP.positive(e["CommunityRating"])
+                if let ticks = MediaServerHTTP.int(e["RunTimeTicks"]), ticks > 0 { item.runtime = ticks / 600_000_000 }
+                item.country = (e["ProductionLocations"] as? [Any])?.first.map { "\($0)" }
                 items.append(item)
                 Self.userData(item.id, e, into: &progress)
             }
@@ -572,6 +581,9 @@ public struct PlexClient: MediaServerClient {
                 item.year = year
                 let genres = (m["Genre"] as? [[String: Any]] ?? []).compactMap { MediaServerHTTP.string($0["tag"]) }
                 item.genres = genres.isEmpty ? nil : genres
+                item.rating = MediaServerHTTP.positive(m["rating"])
+                if let ms = MediaServerHTTP.int(m["duration"]), ms > 0 { item.runtime = ms / 60_000 }
+                item.country = (m["Country"] as? [[String: Any]])?.compactMap { MediaServerHTTP.string($0["tag"]) }.first
                 items.append(item)
                 Self.userData(item.id, m, into: &progress)
             }

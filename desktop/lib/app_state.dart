@@ -69,7 +69,13 @@ class CategoryFilter extends CatalogFilter {
 enum LibraryView { home, movies, series, videos, folders }
 
 /// Tri de la vidéothèque.
-enum LibrarySort { title, added, year }
+enum LibrarySort { title, added, year, rating, runtime }
+
+/// Qualité d'image d'une vidéo, d'après le nom du fichier.
+enum LibraryQuality { uhd, hd, other }
+
+/// Filtre d'état de visionnage.
+enum LibraryStatus { all, unwatched, inProgress, watched, favorites }
 
 /// Navigation (équivalent du NavigationModel de la version Mac).
 class NavigationModel extends ChangeNotifier {
@@ -90,8 +96,54 @@ class NavigationModel extends ChangeNotifier {
   List<String> libraryFolder = const [];
   String? libraryGenre;
   int? libraryYear;
-  bool libraryUnwatched = false;
+  String? libraryCountry;
+  String? libraryLanguage;
+  LibraryQuality? libraryQuality;
+  LibraryStatus libraryStatus = LibraryStatus.all;
   LibrarySort librarySort = LibrarySort.title;
+
+  /// Raccourci utilisé par « Films à voir » (page d'accueil de la vidéothèque).
+  bool get libraryUnwatched => libraryStatus == LibraryStatus.unwatched;
+
+  bool get hasLibraryFilters =>
+      libraryGenre != null || libraryYear != null || libraryCountry != null || libraryLanguage != null || libraryQuality != null || libraryStatus != LibraryStatus.all;
+
+  bool _libraryPrefsLoaded = false;
+
+  /// Relit les filtres et le tri mémorisés (une seule fois, quand les réglages sont disponibles).
+  void loadLibraryPrefs() {
+    final s = settings;
+    if (_libraryPrefsLoaded || s == null) return;
+    _libraryPrefsLoaded = true;
+    libraryGenre = s.libraryPref('genre');
+    libraryYear = int.tryParse(s.libraryPref('year') ?? '');
+    libraryCountry = s.libraryPref('country');
+    libraryLanguage = s.libraryPref('language');
+    libraryQuality = LibraryQuality.values.where((e) => e.name == s.libraryPref('quality')).firstOrNull;
+    libraryStatus = LibraryStatus.values.where((e) => e.name == s.libraryPref('status')).firstOrNull ?? LibraryStatus.all;
+    librarySort = LibrarySort.values.where((e) => e.name == s.libraryPref('sort')).firstOrNull ?? LibrarySort.title;
+  }
+
+  void _saveLibraryPrefs() {
+    final s = settings;
+    if (s == null) return;
+    s.setLibraryPref('genre', libraryGenre);
+    s.setLibraryPref('year', libraryYear?.toString());
+    s.setLibraryPref('country', libraryCountry);
+    s.setLibraryPref('language', libraryLanguage);
+    s.setLibraryPref('quality', libraryQuality?.name);
+    s.setLibraryPref('status', libraryStatus == LibraryStatus.all ? null : libraryStatus.name);
+    s.setLibraryPref('sort', librarySort.name);
+  }
+
+  /// Remet à zéro tous les filtres (le tri est conservé).
+  void resetLibraryFilters() {
+    libraryGenre = libraryYear = libraryCountry = libraryLanguage = null;
+    libraryQuality = null;
+    libraryStatus = LibraryStatus.all;
+    _saveLibraryPrefs();
+    notifyListeners();
+  }
 
   void setLibrary({
     Object? source = _keep,
@@ -99,7 +151,11 @@ class NavigationModel extends ChangeNotifier {
     List<String>? folder,
     Object? genre = _keep,
     Object? year = _keep,
+    Object? country = _keep,
+    Object? language = _keep,
+    Object? quality = _keep,
     bool? unwatched,
+    LibraryStatus? status,
     LibrarySort? sort,
   }) {
     if (source != _keep) {
@@ -113,8 +169,13 @@ class NavigationModel extends ChangeNotifier {
     if (folder != null) libraryFolder = folder;
     if (genre != _keep) libraryGenre = genre as String?;
     if (year != _keep) libraryYear = year as int?;
-    if (unwatched != null) libraryUnwatched = unwatched;
+    if (country != _keep) libraryCountry = country as String?;
+    if (language != _keep) libraryLanguage = language as String?;
+    if (quality != _keep) libraryQuality = quality as LibraryQuality?;
+    if (unwatched != null) libraryStatus = unwatched ? LibraryStatus.unwatched : LibraryStatus.all;
+    if (status != null) libraryStatus = status;
     if (sort != null) librarySort = sort;
+    _saveLibraryPrefs();
     _selected['library'] = null;
     showPlayer = false;
     notifyListeners();

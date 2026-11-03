@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.12.0-android1] - 2026-11-03
+
+- **Mes vidéos** : filtre **Source** et pastille de la source sur les affiches, filtres **Pays**, **Langue**, **Qualité** (4K/HD) et **État** (Non vus, En cours, Vus, Favoris), tri par **note TMDB** et par **durée** ; filtres et tri mémorisés.
+- **MultiVue multi-sources** : un nombre de connexions par source (abonnement ou liste publique), mélange de plusieurs sources, 4 flux au plus ; fonctionne aussi avec deux abonnements.
+- **Image dans l'image** : seconde chaîne en miniature dans le lecteur (direct), échangeable en un clic.
+
+## [1.12.0-desktop1] - 2026-11-03
+
+- Mêmes nouveautés qu'en 1.12.0-android1 (Windows et Linux).
+
 ## [1.11.1-android1] - 2026-11-03
 
 - **Réglages** : dans plusieurs sections (connexions simultanées, page de départ, Replay, YouTube), une valeur choisie dans une liste déroulante ou un interrupteur ne s'affichait qu'après avoir fermé puis rouvert la fenêtre. L'affichage suit maintenant le choix immédiatement (Windows, Linux, Android).

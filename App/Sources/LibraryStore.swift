@@ -43,6 +43,10 @@ struct LocalFiche {
     var info: String?
     var year: Int?
     var genres: [String] = []
+    var rating: Double?
+    var runtime: Int?
+    var country: String?
+    var language: String?
 }
 
 /// Accès aux dossiers choisis (bac à sable) : ouvert une fois et gardé pendant toute la session,
@@ -411,6 +415,10 @@ final class LibraryStore {
                         if content.items[index].info == nil { content.items[index].info = old.info }
                         if content.items[index].year == nil { content.items[index].year = old.year }
                         if content.items[index].genres == nil { content.items[index].genres = old.genres }
+                        if content.items[index].rating == nil { content.items[index].rating = old.rating }
+                        if content.items[index].runtime == nil { content.items[index].runtime = old.runtime }
+                        if content.items[index].country == nil { content.items[index].country = old.country }
+                        if content.items[index].language == nil { content.items[index].language = old.language }
                     }
                 }
                 contents[source.id] = content
@@ -1420,6 +1428,10 @@ extension LibraryStore {
             if let info = update.info, !info.isEmpty { content.items[index].info = info }
             if let year = update.year { content.items[index].year = year }
             if !update.genres.isEmpty { content.items[index].genres = update.genres }
+            if let rating = update.rating { content.items[index].rating = rating }
+            if let runtime = update.runtime { content.items[index].runtime = runtime }
+            if let country = update.country { content.items[index].country = country }
+            if let language = update.language { content.items[index].language = language }
         }
         contents[sourceID] = content
         rebuildIndex()
@@ -1435,6 +1447,10 @@ extension LibraryStore {
             content.items[index].info = nil
             content.items[index].year = nil
             content.items[index].genres = nil
+            content.items[index].rating = nil
+            content.items[index].runtime = nil
+            content.items[index].country = nil
+            content.items[index].language = nil
         }
         contents[sourceID] = content
         rebuildIndex()

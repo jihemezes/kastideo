@@ -442,6 +442,22 @@ struct MediaCard: View {
                                 .padding(6)
                         }
                     }
+                    .overlay(alignment: .bottomLeading) {
+                        // Plusieurs sources mélangées dans la vidéothèque : pastille de la source d'origine.
+                        if navigation.browse == .library, navigation.librarySource == nil, store.librarySources.count > 1,
+                           item.kind != .live, let origin = store.source(id: item.sourceID) {
+                            Text(origin.name)
+                                .font(.caption2.weight(.semibold))
+                                .lineLimit(1)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(.black.opacity(0.65), in: Capsule())
+                                .foregroundStyle(.white)
+                                .padding(.leading, 6)
+                                .padding(.bottom, watch.fraction(for: item.id) != nil ? 22 : 6)
+                                .frame(maxWidth: width, alignment: .leading)
+                        }
+                    }
                     .overlay(shape.strokeBorder(Color.white.opacity(hovering ? 0.55 : 0.08),
                                                 lineWidth: hovering ? 2 : 1))
                 Text(isLive ? item.name : TMDB.cleanTitle(item.name).title)

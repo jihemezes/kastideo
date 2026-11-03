@@ -169,6 +169,29 @@ class AppSettings extends ChangeNotifier {
   int get multiviewConnections => (_prefs.getInt('multiview.connections') ?? 1).clamp(1, 4);
   bool get multiviewAvailable => multiviewConnections >= 2;
 
+  /// Une liste M3U avec identifiants dans l'adresse (get.php?username=…) est un abonnement à connexions limitées.
+  static bool isSubscription(Source s) {
+    if (s.kind == SourceKind.xtream) return true;
+    if (s.kind != SourceKind.m3uUrl) return false;
+    final a = s.address.toLowerCase();
+    return a.contains('username=') || a.contains('get.php') || a.contains('password=');
+  }
+
+  /// Flux simultanés autorisés pour une source : valeur choisie, sinon réglage global (abonnement) ou 4 (liste publique).
+  int multiviewLimit(Source? s) {
+    if (s == null) return multiviewConnections;
+    final stored = _prefs.getInt('multiview.max.${s.id}');
+    return (stored ?? (isSubscription(s) ? multiviewConnections : 4)).clamp(1, 4);
+  }
+
+  void setMultiviewLimit(Source s, int value) {
+    _prefs.setInt('multiview.max.${s.id}', value.clamp(1, 4));
+    notifyListeners();
+  }
+
+  /// Vrai si au moins deux flux peuvent tourner en même temps (deux sources, ou une source qui en autorise plusieurs).
+  bool multiviewAvailableFor(Iterable<Source> sources) => sources.fold<int>(0, (n, s) => n + multiviewLimit(s)) >= 2;
+
   /// Notifications du système (alertes, fin d'enregistrement, téléchargement terminé).
   bool get systemNotifications => _prefs.getBool('notifications.system') ?? true;
 
@@ -239,6 +262,17 @@ class AppSettings extends ChangeNotifier {
   void setInterface(MediaKind kind, InterfaceStyle style) {
     _prefs.setString('interface.${kind.name}', style.name);
     notifyListeners();
+  }
+
+  /// Filtres et tri de la vidéothèque, gardés d'un lancement à l'autre.
+  String? libraryPref(String key) => _prefs.getString('library.$key');
+
+  void setLibraryPref(String key, String? value) {
+    if (value == null) {
+      _prefs.remove('library.$key');
+    } else {
+      _prefs.setString('library.$key', value);
+    }
   }
 
   String? rawSetting(String key) {

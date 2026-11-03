@@ -449,6 +449,11 @@ class MediaCard extends StatelessWidget {
     final fraction = context.watch.fraction(item.id);
     final favorite = context.library.isFavorite(item.id);
     final width = kPosterWidth;
+    final navigation = context.navigation;
+    final library = context.library;
+    final originName = navigation.screen == Screen.library && navigation.librarySource == null && library.librarySources.length > 1 && item.kind != MediaKind.live
+        ? library.sourceOf(item)?.name
+        : null;
     return MenuTap(
       onMenu: (d) => showItemMenu(context, item, d.globalPosition),
       child: Tooltip(
@@ -477,6 +482,20 @@ class MediaCard extends StatelessWidget {
                           right: 8,
                           bottom: 8,
                           child: LinearProgressIndicator(value: fraction, minHeight: 3, color: KPalette.ink, backgroundColor: KPalette.ink24),
+                        ),
+                      // Plusieurs sources mélangées dans la vidéothèque : pastille de la source d'origine.
+                      if (originName != null)
+                        Positioned(
+                          left: 6,
+                          bottom: fraction != null ? 18 : 6,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: width - 12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: const Color(0xA6000000), borderRadius: BorderRadius.circular(10)),
+                              child: Text(originName, style: kText(10, weight: FontWeight.w600, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                          ),
                         ),
                       if (favorite)
                         const Positioned(top: 6, right: 6, child: Icon(Icons.star_rounded, size: 16, color: Colors.amber)),

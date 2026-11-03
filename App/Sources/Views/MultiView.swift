@@ -3,13 +3,45 @@ import AppKit
 import VLCKitSPM
 import KastideoCore
 
-/// Réglages MultiVue.
+/// Réglages MultiVue : un nombre de connexions simultanées par source (abonnement), 4 flux au plus en tout.
 enum MultiViewKeys {
-    /// Nombre de connexions simultanées autorisées par l'abonnement (1 = MultiVue désactivé).
+    /// Ancien réglage global : devient la valeur par défaut des abonnements (Xtream, M3U avec identifiants).
     static let connections = "multiview.connections"
-    static var connectionCount: Int { max(UserDefaults.standard.integer(forKey: connections), 1) }
-    static var maxStreams: Int { min(connectionCount, 4) }
-    static var isAvailable: Bool { connectionCount >= 2 }
+    static let totalMax = 4
+    static var legacyCount: Int { min(max(UserDefaults.standard.integer(forKey: connections), 1), totalMax) }
+
+    private static func key(_ id: UUID) -> String { "multiview.max." + id.uuidString }
+
+    /// Une liste M3U avec identifiants dans l'adresse (get.php?username=…) est un abonnement à connexions limitées.
+    static func isSubscription(_ source: Source) -> Bool {
+        switch source.kind {
+        case .xtream: return true
+        case .m3uURL(let url):
+            let text = url.absoluteString.lowercased()
+            return text.contains("username=") || text.contains("get.php") || text.contains("password=")
+        default: return false
+        }
+    }
+
+    /// Valeur choisie pour la source, sinon la valeur par défaut de son type.
+    static func defaultLimit(for source: Source) -> Int { isSubscription(source) ? legacyCount : totalMax }
+
+    /// Flux simultanés autorisés pour une source (listes publiques : jusqu'à 4 ; abonnement : sa limite).
+    static func limit(for source: Source?) -> Int {
+        guard let source else { return legacyCount }
+        let stored = UserDefaults.standard.integer(forKey: key(source.id))
+        return min(max(stored > 0 ? stored : defaultLimit(for: source), 1), totalMax)
+    }
+
+    static func setLimit(_ value: Int, for source: Source) {
+        UserDefaults.standard.set(min(max(value, 1), totalMax), forKey: key(source.id))
+    }
+
+    /// Vrai si au moins deux flux peuvent tourner en même temps (deux sources, ou une source qui en autorise plusieurs).
+    static func isAvailable(sources: [Source]) -> Bool {
+        let live = sources.filter { $0.isEnabled && $0.kind.isIPTV }
+        return live.reduce(0) { $0 + limit(for: $1) } >= 2
+    }
 }
 
 /// Un flux de la MultiVue : son propre lecteur VLC et sa vue vidéo.
@@ -96,20 +128,34 @@ final class MultiViewModel {
     var focusedID: UUID?
     var pickerSlotID: UUID?
 
-    var capacity: Int { MultiViewKeys.maxStreams }
+    /// Cases de la grille : 4 au plus ; chaque source garde sa propre limite de flux.
+    var capacity: Int { MultiViewKeys.totalMax }
 
-    /// Ajoute une chaîne (dans une case vide, ou une nouvelle case s'il en reste).
-    func add(_ item: MediaItem) {
-        if slots.contains(where: { $0.item?.id == item.id }) { return }
+    /// Flux déjà ouverts pour la source d'une chaîne (hors la case remplacée).
+    func activeCount(source: UUID, excluding slotID: UUID? = nil) -> Int {
+        slots.filter { $0.id != slotID && $0.item?.sourceID == source }.count
+    }
+
+    /// Vrai si la source de la chaîne a encore une connexion libre.
+    func canPlay(_ item: MediaItem, replacing slotID: UUID? = nil, store: LibraryStore) -> Bool {
+        activeCount(source: item.sourceID, excluding: slotID) < MultiViewKeys.limit(for: store.source(id: item.sourceID))
+    }
+
+    /// Ajoute une chaîne (dans une case vide, ou une nouvelle case s'il en reste). Renvoie faux si la source est au maximum.
+    @discardableResult
+    func add(_ item: MediaItem, store: LibraryStore) -> Bool {
+        if slots.contains(where: { $0.item?.id == item.id }) { return true }
+        guard canPlay(item, store: store) else { return false }
         if let empty = slots.first(where: { $0.item == nil }) {
             empty.play(item, muted: empty.id != focusedID)
-            return
+            return true
         }
-        guard slots.count < capacity else { return }
+        guard slots.count < capacity else { return false }
         let slot = MultiViewSlot()
         slots.append(slot)
         if focusedID == nil { focusedID = slot.id }
         slot.play(item, muted: slot.id != focusedID)
+        return true
     }
 
     func addEmptySlot() {
@@ -120,8 +166,8 @@ final class MultiViewModel {
         pickerSlotID = slot.id
     }
 
-    func replace(_ slotID: UUID, with item: MediaItem) {
-        guard let slot = slots.first(where: { $0.id == slotID }) else { return }
+    func replace(_ slotID: UUID, with item: MediaItem, store: LibraryStore) {
+        guard let slot = slots.first(where: { $0.id == slotID }), canPlay(item, replacing: slotID, store: store) else { return }
         slot.play(item, muted: slot.id != focusedID)
     }
 
@@ -160,11 +206,10 @@ struct MultiViewWindow: View {
     @Environment(MultiViewModel.self) private var model
     @Environment(PlaybackController.self) private var playback
     @Environment(RecordingCenter.self) private var recordings
-    @AppStorage(MultiViewKeys.connections) private var connections = 1
-
     var body: some View {
+        let available = MultiViewKeys.isAvailable(sources: store.sources)
         Group {
-            if connections < 2 {
+            if !available {
                 unavailable
             } else if model.slots.isEmpty {
                 empty
@@ -185,7 +230,7 @@ struct MultiViewWindow: View {
                 } label: {
                     Label("Ajouter une chaîne", systemImage: "plus.rectangle.on.rectangle")
                 }
-                .disabled(connections < 2 || model.slots.count >= model.capacity)
+                .disabled(!MultiViewKeys.isAvailable(sources: store.sources) || model.slots.count >= model.capacity)
                 .help("Ajouter une chaîne à la MultiVue")
                 Button {
                     model.stopAll()
@@ -198,7 +243,7 @@ struct MultiViewWindow: View {
         .navigationTitle("MultiVue")
         .onAppear {
             // Une connexion est libérée pour la MultiVue : la lecture principale s'arrête (sauf enregistrement).
-            if connections >= 2, playback.current != nil, !recordings.isPlayerRecording {
+            if MultiViewKeys.isAvailable(sources: store.sources), playback.current != nil, !recordings.isPlayerRecording {
                 recordings.requestStop()
             }
         }
@@ -264,7 +309,7 @@ struct MultiViewWindow: View {
         VStack(spacing: 16) {
             Image(systemName: "rectangle.split.2x2").font(.system(size: 54)).foregroundStyle(.white.opacity(0.5))
             Text("MultiVue").font(.title.weight(.bold))
-            Text("Regardez jusqu'à \(model.capacity) chaînes en même temps. Le son suit la vignette sélectionnée (clic ou touches 1 à 4).")
+            Text("Regardez jusqu'à \(model.capacity) chaînes en même temps, de sources différentes si vous voulez. Chaque source respecte son nombre de connexions. Le son suit la vignette sélectionnée (clic ou touches 1 à 4).")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: 440)
@@ -279,7 +324,7 @@ struct MultiViewWindow: View {
         VStack(spacing: 14) {
             Image(systemName: "rectangle.split.2x2").font(.system(size: 54)).foregroundStyle(.white.opacity(0.4))
             Text("MultiVue désactivée").font(.title2.weight(.bold))
-            Text("Votre abonnement n'autorise qu'une connexion à la fois : un second flux serait refusé par le serveur. Si votre abonnement permet plusieurs connexions, indiquez leur nombre dans Réglages > Général > Lecture.")
+            Text("Chaque abonnement n'autorise qu'une connexion à la fois : un second flux serait refusé par le serveur. Ajoutez une autre source de direct (liste publique, second abonnement) ou indiquez le nombre de connexions de votre abonnement dans Réglages > Général > Lecture.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: 480)
@@ -325,8 +370,8 @@ struct MultiViewTile: View {
         .onHover { hovering = $0 }
         .popover(isPresented: Binding(get: { model.pickerSlotID == slot.id },
                                       set: { if !$0, model.pickerSlotID == slot.id { model.pickerSlotID = nil } })) {
-            MultiViewChannelPicker { item in
-                model.replace(slot.id, with: item)
+            MultiViewChannelPicker(canPick: { model.canPlay($0, replacing: slot.id, store: store) }) { item in
+                model.replace(slot.id, with: item, store: store)
                 model.pickerSlotID = nil
             }
         }
@@ -341,6 +386,14 @@ struct MultiViewTile: View {
                     .background(focused ? KastideoPalette.orange : Color.black.opacity(0.6), in: Circle())
                 if let item = slot.item {
                     Text(item.name).font(.callout.weight(.semibold)).lineLimit(1)
+                    if store.sources.filter({ $0.isEnabled && $0.kind.isIPTV }).count > 1, let origin = store.source(id: item.sourceID) {
+                        Text(origin.name)
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Color.white.opacity(0.2), in: Capsule())
+                            .lineLimit(1)
+                    }
                     if let programme = store.epg.current(for: item.epgID) {
                         Text("· \(programme.title)").font(.caption).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
                     }
@@ -403,6 +456,8 @@ struct MultiViewVideo: NSViewRepresentable {
 /// Choix d'une chaîne : favoris, récents, puis recherche dans tout le direct.
 struct MultiViewChannelPicker: View {
     @Environment(LibraryStore.self) private var store
+    /// Vrai si la source de la chaîne a encore une connexion libre.
+    let canPick: (MediaItem) -> Bool
     let onPick: (MediaItem) -> Void
     @State private var query = ""
 
@@ -434,6 +489,7 @@ struct MultiViewChannelPicker: View {
     private func section(_ title: String, _ items: [MediaItem]) -> some View {
         Section(title) {
             ForEach(items) { item in
+                let allowed = canPick(item)
                 Button {
                     onPick(item)
                 } label: {
@@ -441,30 +497,43 @@ struct MultiViewChannelPicker: View {
                         LogoView(url: item.logoURL, name: item.name, size: 26)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(item.name).lineLimit(1)
-                            if let programme = store.epg.current(for: item.epgID) {
+                            if !allowed {
+                                Text("Connexions de « \(store.source(id: item.sourceID)?.name ?? "") » toutes utilisées")
+                                    .font(.caption).foregroundStyle(.orange).lineLimit(1)
+                            } else if let programme = store.epg.current(for: item.epgID) {
                                 Text(programme.title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
                         }
                     }
                     .contentShape(Rectangle())
+                    .opacity(allowed ? 1 : 0.5)
                 }
                 .buttonStyle(.plain)
+                .disabled(!allowed)
             }
         }
     }
 }
 
-/// Réglage : nombre de connexions de l'abonnement.
+/// Réglage : nombre de connexions de chaque source de direct (abonnement ou liste publique).
 struct MultiViewSettingsRow: View {
+    @Environment(LibraryStore.self) private var store
     @AppStorage(MultiViewKeys.connections) private var connections = 1
+    @State private var refresh = 0
 
     var body: some View {
+        let live = store.sources.filter { $0.kind.isIPTV }
         Stepper(value: $connections, in: 1...4) {
-            LabeledContent("Connexions simultanées de l'abonnement", value: "\(connections)")
+            LabeledContent("Connexions par défaut d'un abonnement", value: "\(connections)")
         }
-        Text(connections < 2
-             ? String(localized: "MultiVue désactivée : avec une seule connexion, un second flux serait refusé par votre fournisseur.")
-             : String(localized: "MultiVue : jusqu'à \(min(connections, 4)) chaînes en même temps (menu Lecture > MultiVue, ⌥⌘M). Les enregistrements et téléchargements utilisent aussi une connexion."))
+        ForEach(live) { source in
+            Stepper(value: Binding(get: { MultiViewKeys.limit(for: source) },
+                                   set: { MultiViewKeys.setLimit($0, for: source); refresh += 1 }), in: 1...4) {
+                LabeledContent("MultiVue · \(source.name)", value: "\(MultiViewKeys.limit(for: source))")
+            }
+            .id(refresh)
+        }
+        Text("MultiVue : mélangez les chaînes de plusieurs sources (jusqu'à 4 flux en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Menu Lecture > MultiVue, ⌥⌘M. Les enregistrements et téléchargements utilisent aussi une connexion.")
             .font(.caption)
             .foregroundStyle(.secondary)
     }

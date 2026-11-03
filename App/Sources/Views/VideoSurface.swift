@@ -8,6 +8,8 @@ struct VideoSurface: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(NavigationModel.self) private var navigation
     @Environment(RecordingCenter.self) private var recordings
+    @Environment(LibraryStore.self) private var store
+    private let pip = PipModel.shared
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
 
     @State private var controlsVisible = true
@@ -74,12 +76,21 @@ struct VideoSurface: View {
                 .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 14))
             }
 
+            if playback.current?.kind == .live || pip.slot != nil {
+                PipOverlay(pip: pip)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+            }
+
             VStack {
                 HStack {
                     if let live = recordings.activeLive {
                         RecordingBadge(live: live)
                     }
                     Spacer()
+                    if controlsVisible, playback.current?.kind == .live, playback.errorMessage == nil,
+                       MultiViewKeys.isAvailable(sources: store.sources) {
+                        PipButton(pip: pip)
+                    }
                     if showStartupTime, showStartupBadge, let time = playback.startupTime {
                         Label(String(format: String(localized: "Prête en %.1f s"), time), systemImage: "bolt.fill")
                             .font(.caption.weight(.semibold).monospacedDigit())
@@ -148,7 +159,14 @@ struct VideoSurface: View {
                 showStartupBadge = false
             }
         }
-        .onChange(of: playback.current?.id) { _, _ in revealControls() }
+        .onChange(of: playback.current?.id) { _, _ in
+            revealControls()
+            if playback.current?.kind != .live, pip.slot != nil { pip.close() }
+            // Nouvelle chaîne principale sur la même source limitée à un flux : la miniature est fermée.
+            if let small = pip.item, let main = playback.current, small.sourceID == main.sourceID,
+               MultiViewKeys.limit(for: store.source(id: main.sourceID)) < 2 { pip.close() }
+        }
+        .onDisappear { pip.close() }
         .onExitCommand {
             if navigation.showContextPanel { navigation.showContextPanel = false }
             else if navigation.isTheater { navigation.isTheater = false }

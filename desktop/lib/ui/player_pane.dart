@@ -13,6 +13,8 @@ import '../l10n.dart';
 import '../theme.dart';
 import 'cast_ui.dart';
 import 'log_dialog.dart';
+import 'pip_view.dart';
+import '../core/multiview.dart';
 import 'themes_view.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
@@ -56,6 +58,7 @@ class _PlayerPaneState extends State<PlayerPane> {
 
   @override
   void dispose() {
+    PipController.shared.close();
     _hideTimer?.cancel();
     _hudTimer?.cancel();
     _focus.dispose();
@@ -273,6 +276,17 @@ class _PlayerPaneState extends State<PlayerPane> {
                           opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
                           duration: const Duration(milliseconds: 250),
                           child: _BackChip(live: playback.isLive, onTap: _back),
+                        ),
+                      ),
+                    if (playback.isLive || PipController.shared.isOpen) const PipOverlay(),
+                    if (pipAvailable(context, playback.current))
+                      Positioned(
+                        top: 14,
+                        right: 14,
+                        child: AnimatedOpacity(
+                          opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
+                          duration: const Duration(milliseconds: 250),
+                          child: const PipButton(),
                         ),
                       ),
                     if (_hud != null)

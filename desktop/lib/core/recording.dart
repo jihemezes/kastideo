@@ -283,7 +283,7 @@ class RecordingCenter extends ChangeNotifier {
         active = a;
         how = 'par le lecteur (stream-record)';
       } else {
-        if (playback.current != null && settings.multiviewConnections < 2) {
+        if (playback.current != null && playback.current!.sourceId == channel.sourceId && settings.multiviewLimit(library.sourceOf(channel)) < 2) {
           // Une seule connexion : la lecture en cours laisse la place à l'enregistrement.
           await playback.stop();
           _say('Lecture arrêtée : l\'enregistrement de ${channel.displayName} utilise la connexion de l\'abonnement.');

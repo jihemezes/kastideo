@@ -234,6 +234,10 @@ final class MediaInfoStore {
                     fiche.info = value.plot ?? found.plot
                     fiche.year = value.year ?? found.year
                     fiche.genres = found.genres
+                    fiche.rating = found.rating
+                    fiche.runtime = found.runtime
+                    fiche.country = found.country
+                    fiche.language = found.language
                 }
                 store.applyEnrichment(item.sourceID, [item.id: fiche])
             } else {
@@ -260,7 +264,7 @@ final class MediaInfoStore {
         let personal = String(localized: "Vidéos") + " · "
         let personalAllowed = UserDefaults.standard.object(forKey: "tmdb.personal") as? Bool ?? true
         let todo = content.items.filter {
-            ($0.kind == .movie || $0.kind == .series) && $0.logoURL == nil && (personalAllowed || !$0.group.hasPrefix(personal))
+            ($0.kind == .movie || $0.kind == .series) && ($0.logoURL == nil || $0.rating == nil) && (personalAllowed || !$0.group.hasPrefix(personal))
                 && !enrichTried.contains($0.id)
         }.prefix(300)
         guard !todo.isEmpty else { return }
@@ -292,7 +296,8 @@ final class MediaInfoStore {
                     }
                     for await (id, tmdb) in group {
                         guard let tmdb, tmdb.posterURL != nil || tmdb.plot != nil else { continue }
-                        found[id] = LocalFiche(logo: tmdb.posterURL, info: tmdb.plot, year: tmdb.year, genres: tmdb.genres)
+                        found[id] = LocalFiche(logo: tmdb.posterURL, info: tmdb.plot, year: tmdb.year, genres: tmdb.genres,
+                                               rating: tmdb.rating, runtime: tmdb.runtime, country: tmdb.country, language: tmdb.language)
                     }
                 }
                 if found.count >= 24 {

@@ -12,7 +12,7 @@ enum PlaybackEvent { start, progress, pause, stop }
 /// Identité de Kastideo auprès des serveurs (même appareil d'un lancement à l'autre).
 class KastideoDevice {
   KastideoDevice._();
-  static String version = '1.11.1';
+  static String version = '1.12.0';
 
   /// Nom de l'ordinateur, réduit aux caractères ASCII : un accent ou une apostrophe typographique dans un en-tête HTTP
   /// fait répondre « 400 Bad Request » à certains serveurs.
@@ -285,7 +285,7 @@ class JellyfinClient extends MediaServerClient {
 
   String stream(String id) => '$server/Videos/$id/stream?static=true&MediaSourceId=$id&api_key=$_token';
 
-  static const _fields = 'Overview,Genres,ProductionYear,DateCreated,RunTimeTicks,CommunityRating,UserData,PremiereDate';
+  static const _fields = 'Overview,Genres,ProductionYear,DateCreated,RunTimeTicks,CommunityRating,UserData,PremiereDate,ProductionLocations';
 
   @override
   Future<SourceContent> fetchLibrary() async {
@@ -331,6 +331,9 @@ class JellyfinClient extends MediaServerClient {
           added: DateTime.tryParse(e['DateCreated'] as String? ?? ''),
           year: year,
           genres: [for (final g in (e['Genres'] as List? ?? const [])) '$g'],
+          rating: _positive(e['CommunityRating']),
+          runtime: (MediaServerClient.integer(e['RunTimeTicks']) ?? 0) > 0 ? MediaServerClient.integer(e['RunTimeTicks'])! ~/ 600000000 : null,
+          country: (e['ProductionLocations'] as List? ?? const []).map((c) => '$c').firstOrNull,
         );
         items.add(item);
         _userData(item.id, e, progress);
@@ -557,6 +560,9 @@ class PlexClient extends MediaServerClient {
           added: added == null ? null : DateTime.fromMillisecondsSinceEpoch(added * 1000),
           year: year,
           genres: [for (final g in (m['Genre'] as List? ?? const []).whereType<Map>()) '${g['tag']}'],
+          rating: _positive(m['rating']),
+          runtime: (MediaServerClient.integer(m['duration']) ?? 0) > 0 ? MediaServerClient.integer(m['duration'])! ~/ 60000 : null,
+          country: (m['Country'] as List? ?? const []).whereType<Map>().map((c) => '${c['tag']}').firstOrNull,
         );
         items.add(item);
         _userData(item.id, m, progress);
@@ -662,4 +668,10 @@ class PlexPin {
     final root = await probe.requestJson('GET', Uri.parse('https://plex.tv/api/v2/pins/$id'), headers: PlexClient.headers());
     return root is Map ? MediaServerClient.str(root['authToken']) : null;
   }
+}
+
+/// Nombre décimal strictement positif (note), sinon null.
+double? _positive(Object? v) {
+  final n = v is num ? v.toDouble() : double.tryParse('$v');
+  return n != null && n > 0 ? n : null;
 }

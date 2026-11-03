@@ -32,13 +32,16 @@ final class MediaDetailsTests: XCTestCase {
     func testTMDBDetailsAndMerge() throws {
         let json = """
         {"id":438631,"title":"Dune","overview":"Paul Atreides…","release_date":"2021-09-15","runtime":155,
-        "vote_average":7.8,"genres":[{"name":"Science-Fiction"}],"poster_path":"/p.jpg","backdrop_path":"/b.jpg",
+        "vote_average":7.8,"genres":[{"name":"Science-Fiction"}],"production_countries":[{"iso_3166_1":"US","name":"United States of America"}],
+        "original_language":"en","poster_path":"/p.jpg","backdrop_path":"/b.jpg",
         "credits":{"cast":[{"name":"Timothée Chalamet","character":"Paul","profile_path":"/t.jpg"}],
         "crew":[{"name":"Denis Villeneuve","job":"Director"}]},
         "videos":{"results":[{"site":"YouTube","type":"Trailer","key":"n9xhJrPXop4"}]}}
         """
         let tmdb = try TMDB.parseDetails(Data(json.utf8), isSeries: false)
         XCTAssertEqual(tmdb.directors, ["Denis Villeneuve"])
+        XCTAssertEqual(tmdb.country, "United States of America")
+        XCTAssertEqual(tmdb.language, "en")
         XCTAssertEqual(tmdb.cast.first?.photoURL?.absoluteString, "https://image.tmdb.org/t/p/w185/t.jpg")
         var iptv = MediaDetails()
         iptv.plot = "Résumé IPTV"

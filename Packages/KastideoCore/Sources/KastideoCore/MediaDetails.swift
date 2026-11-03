@@ -32,6 +32,9 @@ public struct MediaDetails: Sendable, Equatable {
     /// Durée en minutes (film) ou durée d'un épisode (série).
     public var runtime: Int?
     public var seasonCount: Int?
+    /// Premier pays de production et langue d'origine (code ISO 639-1), pour les filtres de la vidéothèque.
+    public var country: String?
+    public var language: String?
     public var trailerURL: URL?
     public var posterURL: URL?
     public var backdropURL: URL?
@@ -197,6 +200,9 @@ public enum TMDB {
         d.tagline = s(root["tagline"])
         d.year = s(root[isSeries ? "first_air_date" : "release_date"]).flatMap(XtreamAPI.year(in:))
         d.genres = (root["genres"] as? [[String: Any]] ?? []).compactMap { s($0["name"]) }
+        d.country = (root["production_countries"] as? [[String: Any]] ?? []).compactMap { s($0["name"]) }.first
+            ?? (root["origin_country"] as? [String])?.first
+        d.language = s(root["original_language"])
         if let vote = root["vote_average"] as? Double, vote > 0 { d.rating = vote }
         if isSeries {
             d.runtime = (root["episode_run_time"] as? [Int])?.first

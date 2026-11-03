@@ -212,6 +212,10 @@ class MediaInfoStore extends ChangeNotifier {
         var info = _nonEmpty(value.plot?.trim());
         var year = value.year;
         var genres = <String>[];
+        double? rating;
+        int? runtime;
+        String? country;
+        String? language;
         if (_nonEmpty(value.tmdbId) != null && settings.usesTMDB) {
           try {
             final found = await TMDBClient(settings.tmdbKey, _language)
@@ -221,10 +225,14 @@ class MediaInfoStore extends ChangeNotifier {
               info ??= found.plot;
               year ??= found.year;
               genres = found.genres;
+              rating = found.rating;
+              runtime = found.runtime;
+              country = found.country;
+              language = found.language;
             }
           } catch (_) {}
         }
-        await library.applyEnrichment(item.sourceId, {item.id: (logo: logo, info: info, year: year, genres: genres)});
+        await library.applyEnrichment(item.sourceId, {item.id: (logo: logo, info: info, year: year, genres: genres, rating: rating, runtime: runtime, country: country, language: language)});
       } else {
         await library.clearEnrichment(item.sourceId, {item.id});
       }
@@ -255,7 +263,7 @@ class MediaInfoStore extends ChangeNotifier {
       final client = TMDBClient(settings.tmdbKey, _language);
       final todo = library
           .contentOf(source.id)
-          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && i.logo == null && (settings.tmdbPersonal || !i.group.startsWith('${tr('Vidéos')} · ')))
+          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && (i.logo == null || i.rating == null) && (settings.tmdbPersonal || !i.group.startsWith('${tr('Vidéos')} · ')))
           .take(300)
           .toList();
       if (todo.isEmpty) return;
@@ -273,7 +281,23 @@ class MediaInfoStore extends ChangeNotifier {
                 } else {
                   m = (await client.search(item.name, series: item.kind == MediaKind.series)).firstOrNull;
                 }
-                if (m != null && m.poster != null) found[item.id] = (logo: m.poster, info: m.overview, year: m.year, genres: m.genres);
+                if (m != null && m.poster != null) {
+                  // Note, durée, pays et langue viennent de la fiche complète.
+                  MediaDetails? full;
+                  try {
+                    full = await client.details(item.name, series: item.kind == MediaKind.series, tmdbId: m.tmdbId);
+                  } catch (_) {}
+                  found[item.id] = (
+                    logo: m.poster,
+                    info: m.overview,
+                    year: m.year,
+                    genres: m.genres,
+                    rating: full?.rating,
+                    runtime: full?.runtime,
+                    country: full?.country,
+                    language: full?.language,
+                  );
+                }
               } catch (_) {}
             }(),
         ]);
