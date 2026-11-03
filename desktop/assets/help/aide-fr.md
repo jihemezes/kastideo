@@ -1152,7 +1152,7 @@ Comme un nom de fichier n'a ni année ni étiquette, la recherche est **prudente
 Réglages > Général > **Démarrage et fichiers** :
 
 - **Lancer Kastideo à l'ouverture de session** (Windows et Linux), et **Démarrer réduit** dans la barre des tâches : les enregistrements programmés et les alertes n'ont lieu que si Kastideo est ouvert.
-- **Ouvrir les fichiers .m3u et .m3u8 avec Kastideo** (facultatif) : un double-clic sur une playlist propose de l'ajouter comme source (Réglages > Sources) ; si Kastideo est déjà ouvert, la fenêtre existante la reçoit. Si Windows continue d'ouvrir un autre programme, faites clic droit sur le fichier > Ouvrir avec > Choisir une autre application > Kastideo.
+- **Ouvrir les fichiers .m3u et .m3u8 avec Kastideo** (facultatif) : un double-clic sur une playlist propose de l'ajouter comme source (Réglages > Sources) ; si Kastideo est déjà ouvert, la fenêtre existante la reçoit. Si Windows continue d'ouvrir un autre programme, faites clic droit sur le fichier > Ouvrir avec > Choisir une autre application > Kastideo. Sous Linux, l'association est enregistrée dans votre profil (fichier `~/.config/mimeapps.list`) ; si un message d'erreur s'affiche sous l'interrupteur, il indique la cause.
 
 Ces deux options sont aussi proposées par l'installateur Windows (décochées par défaut).
 <!--/pc-->

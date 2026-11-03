@@ -1151,7 +1151,7 @@ Because a file name has no year or tag, the search is **cautious**: a match is a
 Settings > General > **Startup and files**:
 
 - **Start Kastideo when I sign in** (Windows and Linux), and **Start minimized** in the taskbar: scheduled recordings and alerts only happen while Kastideo is open.
-- **Open .m3u and .m3u8 files with Kastideo** (optional): double-clicking a playlist offers to add it as a source (Settings > Sources); if Kastideo is already open, the existing window receives it. If Windows keeps opening another program, right-click the file > Open with > Choose another app > Kastideo.
+- **Open .m3u and .m3u8 files with Kastideo** (optional): double-clicking a playlist offers to add it as a source (Settings > Sources); if Kastideo is already open, the existing window receives it. If Windows keeps opening another program, right-click the file > Open with > Choose another app > Kastideo. On Linux, the association is saved in your profile (file `~/.config/mimeapps.list`); if an error message appears under the switch, it gives the cause.
 
 Both options are also offered by the Windows installer (unticked by default).
 <!--/pc-->

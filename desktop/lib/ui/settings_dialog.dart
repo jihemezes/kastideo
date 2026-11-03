@@ -418,6 +418,7 @@ class _StartupSectionState extends State<_StartupSection> {
         onChanged: _autostart == null
             ? null
             : (v) async {
+                setState(() => _autostart = v);
                 await SystemIntegration.setAutostart(v, minimized: _minimized);
                 await _load();
               },
@@ -442,6 +443,7 @@ class _StartupSectionState extends State<_StartupSection> {
         onChanged: _m3u == null
             ? null
             : (v) async {
+                setState(() => _m3u = v);
                 final error = await SystemIntegration.setM3uAssociation(v);
                 setState(() => _message = error);
                 await _load();
@@ -497,7 +499,9 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(listenable: context.settings, builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) {
     final settings = context.settings;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
@@ -1507,7 +1511,9 @@ class _StartPageSection extends StatelessWidget {
   const _StartPageSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(listenable: Listenable.merge([context.settings, context.library]), builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) {
     final settings = context.settings;
     final library = context.library;
     Widget row(String label, MediaKind kind) {
@@ -1554,7 +1560,9 @@ class _ReplaySection extends StatelessWidget {
   const _ReplaySection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(listenable: Listenable.merge([context.settings, context.library]), builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) {
     final settings = context.settings;
     final channels = context.library
         .items(MediaKind.live)
@@ -1730,7 +1738,9 @@ class _YouTubeSectionState extends State<_YouTubeSection> {
   }
 
   @override
-  Widget build(BuildContext context) => _section('YouTube', [
+  Widget build(BuildContext context) => ListenableBuilder(listenable: context.settings, builder: (context, _) => _content(context));
+
+  Widget _content(BuildContext context) => _section('YouTube', [
         Row(children: [
           Expanded(
             child: TextField(

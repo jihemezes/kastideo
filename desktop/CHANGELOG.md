@@ -2,6 +2,15 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.11.1-android1] - 2026-11-03
+
+- **Réglages** : dans plusieurs sections (connexions simultanées, page de départ, Replay, YouTube), une valeur choisie dans une liste déroulante ou un interrupteur ne s'affichait qu'après avoir fermé puis rouvert la fenêtre. L'affichage suit maintenant le choix immédiatement (Windows, Linux, Android).
+
+## [1.11.1-desktop1] - 2026-11-03
+
+- Mêmes corrections qu'en 1.11.1-android1.
+- **Linux** : « Ouvrir les fichiers .m3u et .m3u8 avec Kastideo » ne pouvait pas être activé (les outils du système échouaient dans l'AppImage). L'association est maintenant écrite directement dans `~/.config/mimeapps.list`, puis vérifiée ; un message indique la cause en cas d'échec. L'interrupteur répond aussitôt.
+
 ## [1.11.0-android1] - 2026-11-03
 
 - **Corriger la fiche par code TMDB** (Windows, Linux, Android) : numéro ou adresse themoviedb.org, aperçu, puis « Utiliser cette fiche » ; recherche par titre avec le numéro TMDB affiché ; fiche personnalisée (titre, année, affiche, résumé) ; « Retirer la correction ». Disponible aussi pour les films et séries de l'abonnement IPTV.

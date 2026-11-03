@@ -17,8 +17,63 @@ class SystemIntegration {
     return Platform.resolvedExecutable;
   }
 
-  static String get _home => Platform.environment['HOME'] ?? '';
+  /// Dossier personnel (remplaçable pour les tests).
+  static String? homeOverride;
+  static String get _home => homeOverride ?? Platform.environment['HOME'] ?? '';
   static File get _autostartFile => File('$_home/.config/autostart/fr.jmezes.kastideo.desktop');
+
+  /// Environnement propre pour lancer les outils du système (xdg-mime, gio…) : dans une AppImage, LD_LIBRARY_PATH et
+  /// consorts pointent vers les bibliothèques embarquées, ce qui fait échouer ces programmes.
+  static Map<String, String> get _cleanEnv {
+    const drop = {
+      'LD_LIBRARY_PATH', 'LD_PRELOAD', 'GIO_MODULE_DIR', 'GIO_EXTRA_MODULES', 'GTK_PATH', 'GTK_EXE_PREFIX', 'GTK_DATA_PREFIX',
+      'GDK_PIXBUF_MODULE_FILE', 'GDK_PIXBUF_MODULEDIR', 'GSETTINGS_SCHEMA_DIR', 'PYTHONHOME', 'PYTHONPATH', 'PERLLIB', 'PERL5LIB',
+      'QT_PLUGIN_PATH', 'APPDIR', 'APPIMAGE', 'ARGV0', 'OWD',
+    };
+    final env = {for (final e in Platform.environment.entries) if (!drop.contains(e.key)) e.key: e.value};
+    final appDir = Platform.environment['APPDIR'];
+    if (appDir != null && appDir.isNotEmpty && env['PATH'] != null) {
+      env['PATH'] = env['PATH']!.split(':').where((p) => !p.startsWith(appDir)).join(':');
+    }
+    return env;
+  }
+
+  static Future<ProcessResult> _system(String exe, List<String> args) =>
+      Process.run(exe, args, environment: _cleanEnv, includeParentEnvironment: false).timeout(const Duration(seconds: 15));
+
+  static File get _mimeApps => File('$_home/.config/mimeapps.list');
+  static const _desktopId = 'fr.jmezes.kastideo-m3u.desktop';
+
+  /// Ajoute (ou retire) notre application comme programme par défaut des types M3U dans mimeapps.list,
+  /// sans dépendre de xdg-mime (le fichier est lu par GNOME, KDE, Cinnamon, XFCE…).
+  static Future<void> _writeMimeApps(bool enabled) async {
+    final file = _mimeApps;
+    await file.parent.create(recursive: true);
+    final lines = file.existsSync() ? file.readAsLinesSync() : <String>[];
+    final out = <String>[];
+    var section = '';
+    var hasDefaults = false;
+    final entries = [for (final t in _mimeTypes) '$t=$_desktopId'];
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('[')) {
+        if (section == '[Default Applications]' && enabled) out.addAll(entries);
+        section = trimmed;
+        if (section == '[Default Applications]') hasDefaults = true;
+        out.add(line);
+        continue;
+      }
+      if (section == '[Default Applications]' && _mimeTypes.any((t) => trimmed.startsWith('$t='))) continue;
+      if (!enabled && line.contains(_desktopId)) continue;
+      out.add(line);
+    }
+    if (section == '[Default Applications]' && enabled) out.addAll(entries);
+    if (enabled && !hasDefaults) {
+      if (out.isNotEmpty && out.last.trim().isNotEmpty) out.add('');
+      out..add('[Default Applications]')..addAll(entries);
+    }
+    await file.writeAsString('${out.join('\n')}\n');
+  }
 
   static Future<ProcessResult?> _reg(List<String> args) async {
     try {
@@ -97,7 +152,11 @@ class SystemIntegration {
     }
     if (Platform.isLinux) {
       try {
-        final r = await Process.run('xdg-mime', ['query', 'default', 'audio/x-mpegurl']);
+        if (_mimeApps.existsSync()) {
+          final inDefaults = _mimeApps.readAsLinesSync().any((l) => l.contains('=$_desktopId') && _mimeTypes.any((t) => l.startsWith('$t=')));
+          if (inDefaults) return true;
+        }
+        final r = await _system('xdg-mime', ['query', 'default', 'audio/x-mpegurl']);
         return '${r.stdout}'.contains('kastideo');
       } catch (_) {}
     }
@@ -143,18 +202,21 @@ class SystemIntegration {
             'MimeType=${_mimeTypes.join(';')};',
             '',
           ].join('\n'));
-          final r = await Process.run('xdg-mime', ['default', 'fr.jmezes.kastideo-m3u.desktop', ..._mimeTypes]);
-          if (r.exitCode != 0) return '${r.stderr}'.trim();
+          // Écriture directe de mimeapps.list (fiable partout), puis xdg-mime pour prévenir le bureau (sans conséquence si absent).
+          await _writeMimeApps(true);
+          try {
+            await _system('update-desktop-database', [apps.path]);
+            await _system('xdg-mime', ['default', _desktopId, ..._mimeTypes]);
+          } catch (e) {
+            PlaybackLog.shared.note('xdg-mime : $e');
+          }
+          if (!await m3uAssociated()) return 'L\'association n\'a pas pu être enregistrée (${_mimeApps.path}).';
         } else {
           if (desktop.existsSync()) await desktop.delete();
           // L'application par défaut redevient celle choisie par le système.
-          final list = File('$_home/.config/mimeapps.list');
-          if (list.existsSync()) {
-            final lines = list.readAsLinesSync().where((l) => !l.contains('fr.jmezes.kastideo-m3u.desktop')).toList();
-            await list.writeAsString('${lines.join('\n')}\n');
-          }
+          if (_mimeApps.existsSync()) await _writeMimeApps(false);
         }
-        await Process.run('update-desktop-database', [apps.path]).catchError((_) => ProcessResult(0, 0, '', ''));
+        await _system('update-desktop-database', [apps.path]).catchError((_) => ProcessResult(0, 0, '', ''));
       } catch (e) {
         return '$e';
       }
