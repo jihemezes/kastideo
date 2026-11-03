@@ -123,10 +123,11 @@ struct PipButton: View {
         .help(pip.slot != nil ? "Fermer la miniature" : "Image dans l'image : une seconde chaîne en miniature")
         .popover(isPresented: $pip.showPicker) {
             VStack(spacing: 0) {
-                MultiViewChannelPicker(canPick: { pip.canOpen($0, playback: playback, store: store) }) { item in
+                MultiViewChannelPicker(canPick: { pip.canOpen($0, playback: playback, store: store) },
+                                       onPick: { item in
                     pip.showPicker = false
                     pip.open(item, playback: playback, store: store)
-                }
+                })
                 if let message = pip.message {
                     Text(message).font(.caption).foregroundStyle(.orange).padding(8)
                 }

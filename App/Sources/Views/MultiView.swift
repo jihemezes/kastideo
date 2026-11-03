@@ -563,7 +563,7 @@ struct MultiViewTile: View {
         .highPriorityGesture(pipDrag, including: pip ? .all : .subviews)
         .popover(isPresented: Binding(get: { model.pickerSlotID == slot.id },
                                       set: { if !$0, model.pickerSlotID == slot.id { model.pickerSlotID = nil } })) {
-            MultiViewChannelPicker(slot: slot) { model.pickerSlotID = nil }
+            MultiViewChannelPicker(slot: slot, onClose: { model.pickerSlotID = nil })
         }
     }
 
@@ -687,14 +687,17 @@ struct MultiViewVideo: NSViewRepresentable {
 struct MultiViewChannelPicker: View {
     @Environment(LibraryStore.self) private var store
     @Environment(MultiViewModel.self) private var model
-    let slot: MultiViewSlot
-    let onClose: () -> Void
+    /// Écran à remplir (zapping). Sans écran : choix d'une chaîne seule, validée par [onPick] (image dans l'image).
+    var slot: MultiViewSlot?
+    var canPick: ((MediaItem) -> Bool)?
+    var onPick: ((MediaItem) -> Void)?
+    var onClose: () -> Void = {}
     @State private var categories: [LiveCategory] = []
     @State private var selection = "fav"
     @State private var query = ""
     @State private var pending: Task<Void, Never>?
 
-    private var sourceID: UUID? { slot.sourceID }
+    private var sourceID: UUID? { slot?.sourceID }
 
     private func inSource(_ item: MediaItem) -> Bool { item.kind == .live && (sourceID == nil || item.sourceID == sourceID) }
     private var favorites: [MediaItem] { store.favoriteIDs.compactMap { store.item(id: $0) }.filter(inSource) }
@@ -731,7 +734,7 @@ struct MultiViewChannelPicker: View {
                     .padding(10)
                 let items = visibleItems(key: key)
                 if items.isEmpty {
-                    Text(key.isEmpty ? "Aucune chaîne dans cette catégorie." : "Aucun résultat.")
+                    Text(LocalizedStringKey(key.isEmpty ? "Aucune chaîne dans cette catégorie." : "Aucun résultat."))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -769,18 +772,23 @@ struct MultiViewChannelPicker: View {
 
     /// Écran qui affiche déjà cette chaîne (autre que celui-ci).
     private func usedElsewhere(_ item: MediaItem) -> Int? {
-        model.slots.firstIndex { $0.id != slot.id && $0.item?.id == item.id }
+        guard let slot else { return nil }
+        return model.slots.firstIndex { $0.id != slot.id && $0.item?.id == item.id }
     }
 
     private func row(_ item: MediaItem) -> some View {
         let other = usedElsewhere(item)
-        let current = slot.item?.id == item.id
+        let current = slot?.item?.id == item.id
+        let allowed = canPick?(item) ?? true
         return HStack(spacing: 8) {
             LogoView(url: item.logoURL, name: item.name, size: 28)
             VStack(alignment: .leading, spacing: 1) {
                 Text(item.name).lineLimit(1).fontWeight(current ? .bold : .regular)
                 if let other {
                     Text("Déjà affichée sur l'écran \(other + 1)").font(.caption).foregroundStyle(.orange).lineLimit(1)
+                } else if !allowed {
+                    Text("Connexions de « \(store.source(id: item.sourceID)?.name ?? "") » toutes utilisées")
+                        .font(.caption).foregroundStyle(.orange).lineLimit(1)
                 } else if let programme = store.epg.current(for: item.epgID) {
                     Text(programme.title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
@@ -789,15 +797,20 @@ struct MultiViewChannelPicker: View {
             if current { Image(systemName: "play.fill").foregroundStyle(KastideoPalette.orange) }
         }
         .contentShape(Rectangle())
-        .opacity(other == nil ? 1 : 0.4)
+        .opacity(other == nil && allowed ? 1 : 0.4)
         .onTapGesture(count: 2) {
-            guard other == nil else { return }
+            guard other == nil, allowed, let slot else { return }
             pending?.cancel()
             model.replace(slot.id, with: item, store: store)
             onClose()
         }
         .onTapGesture {
-            guard other == nil, !current else { return }
+            guard other == nil, allowed else { return }
+            if let onPick {
+                onPick(item)
+                return
+            }
+            guard let slot, !current else { return }
             // Court délai : un double-clic annule ce premier lancement et le remplace par « lancer + fermer ».
             pending?.cancel()
             pending = Task { @MainActor in
