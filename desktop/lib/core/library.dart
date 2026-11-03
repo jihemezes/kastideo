@@ -1050,6 +1050,51 @@ class LibraryStore extends ChangeNotifier {
   /// Contenus d'une source (fiches automatiques).
   List<MediaItem> contentOf(String sourceId) => _contentBySource[sourceId] ?? const [];
 
+  /// Chaînes de direct d'une source (toutes sources si [sourceId] est nul) rangées par catégorie comme dans l'interface Classique :
+  /// ordre et masquage des catégories, noms personnalisés, chaînes déplacées, corrections et ordre arrangé.
+  List<({String name, List<MediaItem> items})> liveCategoriesOf(String? sourceId) {
+    final prefs = _categoryPrefs[MediaKind.live] ?? CategoryPrefs();
+    final provider = <String>[];
+    final buckets = <String, List<MediaItem>>{};
+    final ids = sourceId == null ? [for (final s in selectableSources) s.id] : [sourceId];
+    for (final id in ids) {
+      for (final original in _contentBySource[id] ?? const <MediaItem>[]) {
+        if (original.kind != MediaKind.live) continue;
+        final edit = channelEdits[original.id];
+        var item = edit == null ? original : edit.apply(original);
+        final moved = prefs.moves[item.id];
+        if (moved != null && moved.isNotEmpty && moved != item.group) item = item.copyWith(group: moved);
+        if (!showAdult && ThemeClassifier.isAdult(item.name, group: item.group)) continue;
+        if (prefs.isHidden(item.group)) continue;
+        final list = buckets[item.group];
+        if (list == null) {
+          buckets[item.group] = [item];
+          provider.add(item.group);
+        } else {
+          list.add(item);
+        }
+      }
+    }
+    final result = <({String name, List<MediaItem> items})>[];
+    for (final name in prefs.apply(provider)) {
+      var items = buckets[name];
+      if (items == null) continue;
+      final order = prefs.itemOrder[name];
+      if (order != null && order.isNotEmpty) {
+        final byId = {for (final i in items) i.id: i};
+        items = [for (final id in order) ?byId.remove(id), ...items.where((i) => byId.containsKey(i.id))];
+      }
+      final display = prefs.displayName(name);
+      final at = result.indexWhere((c) => c.name == display);
+      if (at >= 0) {
+        result[at] = (name: display, items: [...result[at].items, ...items]);
+      } else {
+        result.add((name: display, items: items));
+      }
+    }
+    return result;
+  }
+
 
   // MARK: Exportation / importation (format commun avec la version Mac)
 

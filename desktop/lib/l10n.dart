@@ -640,6 +640,7 @@ class L10n {
     'Aérée': 'Spacious',
     'Taille des vignettes (Cinéma)': 'Thumbnail size (Cinema)',
     'Petites': 'Small',
+    'Déjà affichée sur l\'écran': 'Already shown on screen',
     'Ouvrir la MultiVue avec cette chaîne': 'Open MultiView with this channel',
     'Une grande + vignettes PIP déplaçables (G)': 'One large + draggable PIP thumbnails (G)',
     'Taille des vignettes (glissez une vignette pour la déplacer, double-clic pour l\'échanger)': 'Thumbnail size (drag a thumbnail to move it, double-click to swap)',

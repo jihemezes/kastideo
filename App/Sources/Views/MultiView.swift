@@ -99,8 +99,12 @@ final class MultiViewSlot: Identifiable {
         }
     }
 
+    @ObservationIgnored private var startTask: Task<Void, Never>?
+    @ObservationIgnored private var stoppedAt = Date.distantPast
+
     func play(_ item: MediaItem, muted: Bool) {
         guard let url = item.streamURL else { return }
+        // Un flux était ouvert sur cet écran : on laisse au fournisseur le temps de libérer la connexion.
         stop()
         self.item = item
         failed = false
@@ -111,10 +115,16 @@ final class MultiViewSlot: Identifiable {
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
         media.addOption(":http-reconnect")
-        player.media = media
-        setMuted(muted)
-        player.play()
+        let wait = max(0, 1.2 - Date().timeIntervalSince(stoppedAt))
         PlaybackLog.shared.note("MultiVue : ouverture de \(item.name)")
+        startTask = Task { @MainActor [weak self] in
+            if wait > 0 { try? await Task.sleep(for: .milliseconds(Int(wait * 1000))) }
+            guard !Task.isCancelled, let self else { return }
+            self.startTask = nil
+            self.player.media = media
+            self.setMuted(muted)
+            self.player.play()
+        }
     }
 
     @ObservationIgnored private var muted = true
@@ -125,7 +135,14 @@ final class MultiViewSlot: Identifiable {
     }
 
     func stop() {
-        guard player.media != nil else { return }
+        startTask?.cancel()
+        startTask = nil
+        if item != nil { stoppedAt = Date() }
+        guard player.media != nil else {
+            item = nil
+            isLoading = false
+            return
+        }
         let engine = player
         Task.detached(priority: .userInitiated) { engine.stop() }
         item = nil
@@ -546,10 +563,7 @@ struct MultiViewTile: View {
         .highPriorityGesture(pipDrag, including: pip ? .all : .subviews)
         .popover(isPresented: Binding(get: { model.pickerSlotID == slot.id },
                                       set: { if !$0, model.pickerSlotID == slot.id { model.pickerSlotID = nil } })) {
-            MultiViewChannelPicker(canPick: { model.canPlay($0, on: slot.id) }, onlySource: slot.sourceID) { item in
-                model.replace(slot.id, with: item, store: store)
-                model.pickerSlotID = nil
-            }
+            MultiViewChannelPicker(slot: slot) { model.pickerSlotID = nil }
         }
     }
 
@@ -668,69 +682,128 @@ struct MultiViewVideo: NSViewRepresentable {
     }
 }
 
-/// Choix d'une chaîne : favoris, récents, puis recherche dans tout le direct.
+/// Choix d'une chaîne : catégories de la source de l'écran (comme dans l'interface Classique), favoris, récents et recherche.
+/// Un clic lance la chaîne sur l'écran sans fermer le sélecteur (pour zapper) ; un double-clic la lance et ferme.
 struct MultiViewChannelPicker: View {
     @Environment(LibraryStore.self) private var store
-    /// Vrai si la source de la chaîne a encore une connexion libre.
-    let canPick: (MediaItem) -> Bool
-    /// Écran réservé à une source : seules ses chaînes sont proposées.
-    var onlySource: UUID?
-    let onPick: (MediaItem) -> Void
+    @Environment(MultiViewModel.self) private var model
+    let slot: MultiViewSlot
+    let onClose: () -> Void
+    @State private var categories: [LiveCategory] = []
+    @State private var selection = "fav"
     @State private var query = ""
+    @State private var pending: Task<Void, Never>?
+
+    private var sourceID: UUID? { slot.sourceID }
+
+    private func inSource(_ item: MediaItem) -> Bool { item.kind == .live && (sourceID == nil || item.sourceID == sourceID) }
+    private var favorites: [MediaItem] { store.favoriteIDs.compactMap { store.item(id: $0) }.filter(inSource) }
+    private var recents: [MediaItem] { store.recentIDs.compactMap { store.item(id: $0) }.filter(inSource) }
 
     var body: some View {
         let key = query.kastideoSearchKey
-        let inScope: (MediaItem) -> Bool = { $0.kind == .live && (onlySource == nil || $0.sourceID == onlySource) }
-        let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter(inScope)
-        let recents = store.recentIDs.compactMap { store.item(id: $0) }.filter(inScope)
-        // Contenu brut de chaque source : la source active choisie dans la barre latérale ne cache pas les autres comptes.
-        let pool: [MediaItem] = (onlySource.map { [$0] } ?? MultiViewKeys.liveSources(store.sources).map(\.id))
-            .flatMap { store.content(of: $0)?.items ?? [] }
-        let results = key.isEmpty ? [] : Array(pool.lazy.filter { inScope($0) && $0.searchKey.contains(key) }.prefix(60))
-        VStack(spacing: 0) {
-            TextField("Rechercher une chaîne", text: $query)
-                .textFieldStyle(.roundedBorder)
-                .padding(10)
-            List {
-                if key.isEmpty {
-                    if !favorites.isEmpty { section(String(localized: "Favoris"), favorites) }
-                    if !recents.isEmpty { section(String(localized: "Récents"), recents) }
-                    if favorites.isEmpty && recents.isEmpty {
-                        Text("Tapez le nom d'une chaîne.").foregroundStyle(.secondary)
+        HStack(spacing: 0) {
+            List(selection: Binding<String?>(get: { selection }, set: { if let v = $0 { selection = v; query = "" } })) {
+                if !favorites.isEmpty {
+                    Label("Favoris", systemImage: "star").tag("fav")
+                }
+                if !recents.isEmpty {
+                    Label("Récents", systemImage: "clock.arrow.circlepath").tag("rec")
+                }
+                Section("Catégories") {
+                    ForEach(categories) { category in
+                        HStack {
+                            Text(category.name).lineLimit(1)
+                            Spacer()
+                            Text(category.items.count, format: .number)
+                                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        }
+                        .tag("c:" + category.name)
                     }
-                } else {
-                    section(String(localized: "Résultats"), results)
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.sidebar)
+            .frame(width: 220)
+            Divider()
+            VStack(spacing: 0) {
+                TextField("Rechercher une chaîne", text: $query)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(10)
+                let items = visibleItems(key: key)
+                if items.isEmpty {
+                    Text(key.isEmpty ? "Aucune chaîne dans cette catégorie." : "Aucun résultat.")
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(items) { item in row(item) }
+                        .listStyle(.plain)
+                }
+            }
         }
-        .frame(width: 320, height: 420)
+        .frame(width: 720, height: 480)
+        .onAppear {
+            if let sourceID { categories = store.liveCategories(of: sourceID) }
+            else { categories = MultiViewKeys.liveSources(store.sources).flatMap { store.liveCategories(of: $0.id) } }
+            if favorites.isEmpty { selection = recents.isEmpty ? "c:" + (categories.first?.name ?? "") : "rec" }
+        }
+        .onDisappear { pending?.cancel() }
     }
 
-    private func section(_ title: String, _ items: [MediaItem]) -> some View {
-        Section(title) {
-            ForEach(items) { item in
-                let allowed = canPick(item)
-                Button {
-                    onPick(item)
-                } label: {
-                    HStack(spacing: 8) {
-                        LogoView(url: item.logoURL, name: item.name, size: 26)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(item.name).lineLimit(1)
-                            if !allowed {
-                                Text("Connexions de « \(store.source(id: item.sourceID)?.name ?? "") » toutes utilisées")
-                                    .font(.caption).foregroundStyle(.orange).lineLimit(1)
-                            } else if let programme = store.epg.current(for: item.epgID) {
-                                Text(programme.title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                            }
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .opacity(allowed ? 1 : 0.5)
+    private func visibleItems(key: String) -> [MediaItem] {
+        if !key.isEmpty {
+            var found: [MediaItem] = []
+            for category in categories {
+                for item in category.items where item.searchKey.contains(key) {
+                    found.append(item)
+                    if found.count >= 200 { return found }
                 }
-                .buttonStyle(.plain)
-                .disabled(!allowed)
+            }
+            return found
+        }
+        switch selection {
+        case "fav": return favorites
+        case "rec": return recents
+        default: return categories.first { "c:" + $0.name == selection }?.items ?? []
+        }
+    }
+
+    /// Écran qui affiche déjà cette chaîne (autre que celui-ci).
+    private func usedElsewhere(_ item: MediaItem) -> Int? {
+        model.slots.firstIndex { $0.id != slot.id && $0.item?.id == item.id }
+    }
+
+    private func row(_ item: MediaItem) -> some View {
+        let other = usedElsewhere(item)
+        let current = slot.item?.id == item.id
+        return HStack(spacing: 8) {
+            LogoView(url: item.logoURL, name: item.name, size: 28)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(item.name).lineLimit(1).fontWeight(current ? .bold : .regular)
+                if let other {
+                    Text("Déjà affichée sur l'écran \(other + 1)").font(.caption).foregroundStyle(.orange).lineLimit(1)
+                } else if let programme = store.epg.current(for: item.epgID) {
+                    Text(programme.title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                }
+            }
+            Spacer()
+            if current { Image(systemName: "play.fill").foregroundStyle(KastideoPalette.orange) }
+        }
+        .contentShape(Rectangle())
+        .opacity(other == nil ? 1 : 0.4)
+        .onTapGesture(count: 2) {
+            guard other == nil else { return }
+            pending?.cancel()
+            model.replace(slot.id, with: item, store: store)
+            onClose()
+        }
+        .onTapGesture {
+            guard other == nil, !current else { return }
+            // Court délai : un double-clic annule ce premier lancement et le remplace par « lancer + fermer ».
+            pending?.cancel()
+            pending = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(280))
+                guard !Task.isCancelled else { return }
+                model.replace(slot.id, with: item, store: store)
             }
         }
     }

@@ -174,7 +174,8 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
 
   Future<void> _change(int index) async {
     final item = await pickMultiViewChannel(context, replacing: index);
-    if (item != null && mounted) await context.multiview.replace(index, item);
+    // Un clic simple a déjà lancé la chaîne pendant le zapping : on ne relance pas le flux.
+    if (item != null && mounted && context.multiview.slots[index].item?.id != item.id) await context.multiview.replace(index, item);
   }
 
   void _snack(String text) => ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(text)));
@@ -711,7 +712,8 @@ class _SlotTileState extends State<_SlotTile> {
       );
 }
 
-/// Choix d'une chaîne pour la MultiVue : favoris, récents, ou recherche dans toutes les chaînes.
+/// Choix d'une chaîne pour la MultiVue : catégories de la source (comme dans l'interface Classique), favoris, récents, recherche.
+/// Avec [replacing], un clic lance la chaîne sur l'écran sans fermer le sélecteur (zapping) ; un double-clic la lance et ferme.
 Future<MediaItem?> pickMultiViewChannel(BuildContext context, {int? replacing, bool Function(MediaItem)? canPick}) =>
     showKDialog<MediaItem>(context: context, builder: (_) => DarkZone(child: _ChannelPicker(replacing: replacing, canPick: canPick)));
 
@@ -728,94 +730,144 @@ class _ChannelPicker extends StatefulWidget {
 
 class _ChannelPickerState extends State<_ChannelPicker> {
   String _query = '';
-  int _tab = 0;
+
+  /// « fav », « rec » ou « c: » suivi du nom de la catégorie.
+  String? _selection;
+
+  bool get _zapping => widget.replacing != null && widget.canPick == null;
+
+  String? _onlySource(MultiViewController multiview) =>
+      widget.replacing != null && widget.replacing! >= 0 && widget.replacing! < multiview.slots.length ? multiview.slots[widget.replacing!].sourceId : null;
 
   @override
   Widget build(BuildContext context) {
     final library = context.library;
     final multiview = context.multiview;
-    final List<MediaItem> items;
-    // Écran réservé à une source : seules ses chaînes sont proposées (contenu brut, sans filtre de source active).
-    final onlySource = widget.replacing != null && widget.replacing! >= 0 && widget.replacing! < multiview.slots.length
-        ? multiview.slots[widget.replacing!].sourceId
-        : null;
+    final onlySource = _onlySource(multiview);
     bool inScope(MediaItem i) => onlySource == null || i.sourceId == onlySource;
-    final pool = [
-      for (final s in onlySource == null ? multiview.liveSources : multiview.liveSources.where((s) => s.id == onlySource))
-        ...library.contentOf(s.id).where((i) => i.kind == MediaKind.live),
-    ];
+    final categories = library.liveCategoriesOf(onlySource);
+    final favorites = library.favoritesOf(MediaKind.live).where(inScope).toList();
+    final recents = library.recentsOf(MediaKind.live).where(inScope).toList();
+    final selection = _selection ?? (favorites.isNotEmpty ? 'fav' : recents.isNotEmpty ? 'rec' : categories.isNotEmpty ? 'c:${categories.first.name}' : 'fav');
+    final List<MediaItem> items;
     if (_query.trim().length >= 2) {
       final q = _query.searchKey;
-      items = pool.where((i) => i.name.searchKey.contains(q)).take(200).toList();
+      items = [
+        for (final c in categories) ...c.items.where((i) => i.name.searchKey.contains(q)),
+      ].take(200).toList();
+    } else if (selection == 'fav') {
+      items = favorites;
+    } else if (selection == 'rec') {
+      items = recents;
     } else {
-      items = switch (_tab) {
-        0 => library.favoritesOf(MediaKind.live).where(inScope).toList(),
-        1 => library.recentsOf(MediaKind.live).where(inScope).toList(),
-        _ => pool.take(300).toList(),
-      };
+      items = categories.where((c) => 'c:${c.name}' == selection).firstOrNull?.items ?? const [];
     }
+
+    Widget entry(String id, IconData icon, String label, int? count) {
+      final on = selection == id && _query.trim().length < 2;
+      return InkWell(
+        onTap: () => setState(() {
+          _selection = id;
+          _query = '';
+        }),
+        child: Container(
+          color: on ? Colors.white12 : null,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(children: [
+            Icon(icon, size: 16, color: on ? KPalette.orange : Colors.white54),
+            const SizedBox(width: 8),
+            Expanded(child: Text(label, style: kTextD(13, weight: on ? FontWeight.w700 : FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            if (count != null) Text('$count', style: kTextD(11, color: Colors.white54)),
+          ]),
+        ),
+      );
+    }
+
     return AlertDialog(
       backgroundColor: KPalette.panelDark,
-      title: Text(tr('Ajouter une chaîne'), style: kRoundedD(20, FontWeight.w800)),
+      title: Text(tr('Choisir une chaîne'), style: kRoundedD(20, FontWeight.w800)),
       content: SizedBox(
-        width: 520,
-        height: 480,
-        child: Column(children: [
-          TextField(
-            autofocus: true,
-            style: kTextD(14),
-            decoration: InputDecoration(
-              isDense: true,
-              prefixIcon: const Icon(Icons.search_rounded, size: 18),
-              hintText: tr('Rechercher une chaîne'),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onChanged: (v) => setState(() => _query = v),
-            onSubmitted: (_) {
-              if (items.isNotEmpty) Navigator.pop(context, items.first);
-            },
+        width: 780,
+        height: 500,
+        child: Row(children: [
+          SizedBox(
+            width: 220,
+            child: ListView(children: [
+              if (favorites.isNotEmpty) entry('fav', Icons.star_rounded, tr('Favoris'), favorites.length),
+              if (recents.isNotEmpty) entry('rec', Icons.history_rounded, tr('Récents'), null),
+              for (final c in categories) entry('c:${c.name}', Icons.folder_outlined, c.name, c.items.length),
+            ]),
           ),
-          const SizedBox(height: 10),
-          if (_query.trim().length < 2)
-            SegmentedButton<int>(
-              segments: [
-                ButtonSegment(value: 0, label: Text(tr('Favoris'))),
-                ButtonSegment(value: 1, label: Text(tr('Récents'))),
-                ButtonSegment(value: 2, label: Text(tr('Toutes'))),
-              ],
-              selected: {_tab},
-              onSelectionChanged: (v) => setState(() => _tab = v.first),
-            ),
-          const SizedBox(height: 8),
+          const VerticalDivider(width: 16),
           Expanded(
-            child: items.isEmpty
-                ? Center(
-                    child: Text(_tab == 0 && _query.isEmpty ? tr('Aucun favori : tapez le nom d\'une chaîne.') : tr('Aucune chaîne'),
-                        style: kTextD(13, color: Colors.white54)),
-                  )
-                : ListView.builder(
-                    itemCount: items.length,
-                    itemExtent: 50,
-                    itemBuilder: (context, i) {
-                      final item = items[i];
-                      final already = widget.canPick == null && multiview.contains(item);
-                      final allowed = widget.canPick?.call(item) ?? multiview.canPlay(item, replacing: widget.replacing);
-                      final p = context.guide.current(item);
-                      return ListTile(
-                        dense: true,
-                        enabled: !already && allowed,
-                        leading: LogoView(url: item.logo, name: item.name, size: 32),
-                        title: Text(item.displayName, style: kTextD(13, weight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text(already ? tr('Déjà dans la MultiVue') : !allowed ? tr('Connexions de cette source toutes utilisées') : p?.title ?? item.group,
-                            style: kTextD(11, color: Colors.white54), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        onTap: () => Navigator.pop(context, item),
-                      );
-                    },
-                  ),
+            child: Column(children: [
+              TextField(
+                autofocus: true,
+                style: kTextD(14),
+                decoration: InputDecoration(
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                  hintText: tr('Rechercher une chaîne'),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onChanged: (v) => setState(() => _query = v),
+                onSubmitted: (_) {
+                  if (items.isNotEmpty) Navigator.pop(context, items.first);
+                },
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: items.isEmpty
+                    ? Center(child: Text(tr('Aucune chaîne'), style: kTextD(13, color: Colors.white54)))
+                    : ListView.builder(
+                        itemCount: items.length,
+                        itemExtent: 50,
+                        itemBuilder: (context, i) {
+                          final item = items[i];
+                          final shownAt = widget.canPick == null ? multiview.slots.indexWhere((s) => s.item?.id == item.id) : -1;
+                          final already = shownAt >= 0 && shownAt != widget.replacing;
+                          final current = shownAt >= 0 && shownAt == widget.replacing;
+                          final allowed = widget.canPick?.call(item) ?? multiview.canPlay(item, replacing: widget.replacing);
+                          final p = context.guide.current(item);
+                          return GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: already || !allowed
+                                ? null
+                                : () {
+                                    if (_zapping) {
+                                      if (!current) multiview.replace(widget.replacing!, item);
+                                      setState(() {});
+                                    } else {
+                                      Navigator.pop(context, item);
+                                    }
+                                  },
+                            onDoubleTap: !_zapping || already || !allowed ? null : () => Navigator.pop(context, item),
+                            child: ListTile(
+                              dense: true,
+                              enabled: !already && allowed,
+                              leading: LogoView(url: item.logo, name: item.name, size: 32),
+                              title: Text(item.displayName,
+                                  style: kTextD(13, weight: current ? FontWeight.w800 : FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              subtitle: Text(
+                                  already
+                                      ? '${tr('Déjà affichée sur l\'écran')} ${shownAt + 1}'
+                                      : !allowed
+                                          ? tr('Connexions de cette source toutes utilisées')
+                                          : p?.title ?? item.group,
+                                  style: kTextD(11, color: already ? KPalette.orange : Colors.white54),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                              trailing: current ? const Icon(Icons.play_arrow_rounded, color: KPalette.orange) : null,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ]),
           ),
         ]),
       ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('Annuler')))],
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(_zapping ? tr('Fermer') : tr('Annuler')))],
     );
   }
 }

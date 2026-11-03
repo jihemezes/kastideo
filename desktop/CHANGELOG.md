@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.13.2-android1] - 2026-11-03
+
+- **Sélecteur de chaînes de la MultiVue** : Favoris, Récents et catégories de la source de l'écran (ordre, masquage, noms et arrangement respectés), programme en cours, clic = zapping sans fermer, double-clic = valider, chaînes déjà affichées grisées.
+
+## [1.13.2-desktop1] - 2026-11-03
+
+- **Sélecteur de chaînes de la MultiVue** : Favoris, Récents et catégories de la source de l'écran (ordre, masquage, noms et arrangement respectés), programme en cours, clic = zapping sans fermer, double-clic = valider, chaînes déjà affichées grisées.
+
 ## [1.13.1-android1] - 2026-11-03
 
 - **Vrai PIP** dans la MultiVue (disposition « une grande ») : vignettes 16:9 flottantes, déplaçables et accrochées aux coins, double-clic pour échanger avec la grande, taille réglable.

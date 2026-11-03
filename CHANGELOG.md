@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.13.2] - 2026-11-03
+
+- **Sélecteur de chaînes de la MultiVue refondu** : comme dans l'interface Classique, Favoris, Récents et **catégories de la source de l'écran** (ordre, masquage et noms personnalisés respectés) à gauche, chaînes avec programme en cours à droite. Un clic lance la chaîne et garde le sélecteur ouvert pour zapper, un double-clic lance et ferme ; les chaînes déjà affichées sur un autre écran sont grisées.
+- Changer de chaîne sur un écran attend la libération de la connexion par le fournisseur (évite les refus).
+
 ## [1.13.1] - 2026-11-03
 
 - **MultiVue : le bouton « Choisir une chaîne » fonctionne** (une couche invisible interceptait le clic).

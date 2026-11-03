@@ -1056,3 +1056,8 @@
 "MultiVue : plusieurs chaînes en même temps (⌥⌘M)" = "MultiView: several channels at once (⌥⌘M)";
 "Plusieurs chaînes en même temps (⌥⌘M)" = "Several channels at once (⌥⌘M)";
 "Ouvrir la MultiVue avec cette chaîne (⌥⌘M)" = "Open MultiView with this channel (⌥⌘M)";
+
+/* 1.13.2 */
+"Catégories" = "Categories";
+"Aucune chaîne dans cette catégorie." = "No channels in this category.";
+"Déjà affichée sur l'écran %lld" = "Already shown on screen %lld";

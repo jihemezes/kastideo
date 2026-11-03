@@ -900,6 +900,38 @@ final class LibraryStore {
         rebuildEPG()
     }
 
+    /// Chaînes de direct d'une source rangées par catégorie, comme dans l'interface Classique
+    /// (ordre des catégories, masquage, renommage, corrections de chaînes), quelle que soit la source active de la barre latérale.
+    func liveCategories(of sourceID: UUID) -> [LiveCategory] {
+        guard let content = contents[sourceID] else { return [] }
+        let showAdult = UserDefaults.standard.bool(forKey: "adult.show")
+        let prefs = categoryPrefs[.live] ?? CategoryPrefs()
+        var providerOrder: [String] = []
+        var seen = Set<String>()
+        var buckets: [String: [MediaItem]] = [:]
+        for original in content.items where original.kind == .live {
+            if prefs.isHidden(original.group) { continue }
+            var item = original
+            if let edit = channelEdits[item.id] { edit.apply(to: &item) }
+            if !showAdult, ThemeClassifier.isAdult(name: item.name, group: item.group) { continue }
+            if seen.insert(item.group).inserted { providerOrder.append(item.group) }
+            buckets[item.group, default: []].append(item)
+        }
+        var result: [LiveCategory] = []
+        var index: [String: Int] = [:]
+        for name in prefs.apply(order: providerOrder) {
+            guard let items = buckets[name] else { continue }
+            let display = prefs.displayName(name)
+            if let i = index[display] {
+                result[i].items += items
+            } else {
+                index[display] = result.count
+                result.append(LiveCategory(name: display, items: items))
+            }
+        }
+        return result
+    }
+
     // MARK: - Catégories personnalisées
 
     func prefs(for kind: MediaKind) -> CategoryPrefs { categoryPrefs[kind] ?? CategoryPrefs() }
@@ -1635,4 +1667,11 @@ extension LibraryStore {
         rebuildIndex()
         return summary
     }
+}
+
+/// Une catégorie de chaînes de direct (nom affiché, chaînes dans l'ordre du fournisseur).
+struct LiveCategory: Identifiable {
+    let name: String
+    var items: [MediaItem]
+    var id: String { name }
 }
