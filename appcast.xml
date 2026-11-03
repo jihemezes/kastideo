@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.13.1</title>
+      <pubDate>Tue, 03 Nov 2026 20:17:59 GMT</pubDate>
+      <sparkle:version>84</sparkle:version>
+      <sparkle:shortVersionString>1.13.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;MultiVue : le bouton « Choisir une chaîne » fonctionne&lt;/b&gt; (une couche invisible interceptait le clic).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Vrai PIP&lt;/b&gt; dans la disposition « Une grande + vignettes (PIP) » : une chaîne plein cadre, les autres en vignettes 16:9 flottantes, &lt;b&gt;déplaçables&lt;/b&gt; (elles s&amp;#x27;accrochent au coin le plus proche), &lt;b&gt;double-clic pour les échanger&lt;/b&gt; avec la grande, taille réglable (petites, moyennes, grandes).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;MultiVue plus facile à trouver&lt;/b&gt; : entrée dans la barre latérale, bouton dans la barre d&amp;#x27;outils, bouton sur l&amp;#x27;accueil (à côté de Favoris et Enregistrements) et bouton dans la barre de lecture (ouvre la MultiVue avec la chaîne regardée).&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.13.1/Kastideo-1.13.1.dmg" length="48128814" type="application/octet-stream" sparkle:edSignature="hQXWZQEznatiBU1xfVi2wzXu7XiDgrZZtLBqNSoXWf2f3vvMSGXQrZJC77PxI9PHB17oLVAYaO8GxSRDS/VFAw==" />
+    </item>
+    <item>
       <title>Kastideo 1.13.0</title>
       <pubDate>Tue, 03 Nov 2026 18:01:05 GMT</pubDate>
       <sparkle:version>83</sparkle:version>
@@ -446,18 +459,6 @@
 &lt;li&gt;Réglages &amp;gt; Général &amp;gt; Lecture : &lt;b&gt;durée maximale du différé&lt;/b&gt; (30 min à 3 h ou sans limite, la lecture reprend seule une fois atteinte), &lt;b&gt;vitesse de rattrapage&lt;/b&gt;, emplacement du dossier du différé avec bouton &lt;b&gt;Afficher&lt;/b&gt;.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.0/Kastideo-1.1.0.dmg" length="45844137" type="application/octet-stream" sparkle:edSignature="gAp+Jzcn/gn1a7IGSz+34ZmgE4mF0n/8/iYegVpgrZfVFG7RxQmnIM6MTEePyCAtjS8h0vzXezgrGGRqqHSfDQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.0.3</title>
-      <pubDate>Fri, 23 Oct 2026 05:34:58 GMT</pubDate>
-      <sparkle:version>39</sparkle:version>
-      <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Direct — changement de chaîne&lt;/b&gt; : le fournisseur refusait la nouvelle chaîne (HTTP 404/403) parce qu&amp;#x27;il comptait encore l&amp;#x27;ancienne connexion (abonnement à une connexion). Kastideo laisse désormais 1,5 s au serveur pour libérer la chaîne précédente avant d&amp;#x27;ouvrir la suivante, et réessaie deux fois la même chaîne (après 2 puis 4 s) si le serveur la refuse encore, avant d&amp;#x27;essayer la variante .m3u8.&lt;/li&gt;
-&lt;li&gt;L&amp;#x27;essai en http ajouté en 1.0.2 est retiré (le serveur le refuse : HTTP 403).&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.3/Kastideo-1.0.3.dmg" length="45733873" type="application/octet-stream" sparkle:edSignature="FcdHUJeXlBI99QgdoBLU5aEDp9zGSSPyClDcDLo6OTEMEVjvRAMUCxt9RtuHVwu45oFoj64I9C6h4b49RFlSCg==" />
     </item>
   </channel>
 </rss>
