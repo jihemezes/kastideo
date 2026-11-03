@@ -1033,3 +1033,6 @@
 "MultiVue : mélangez les chaînes de plusieurs sources (jusqu'à 4 flux en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Menu Lecture > MultiVue, ⌥⌘M. Les enregistrements et téléchargements utilisent aussi une connexion." = "MultiView: mix channels from several sources (up to 4 streams in all). Each source keeps its own number of connections: 1 for a limited subscription, 4 for a public list. Playback menu > MultiView, ⌥⌘M. Recordings and downloads also use a connection.";
 "MultiVue · %@" = "MultiView · %@";
 "Connexions de « %@ » toutes utilisées" = "All connections of “%@” are in use";
+"abonnement" = "subscription";
+"liste publique" = "public list";
+"MultiVue · %@ (%@)" = "MultiView · %@ (%@)";

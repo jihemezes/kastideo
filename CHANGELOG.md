@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.12.1] - 2026-11-03
+
+- **MultiVue** : dans Réglages > Général > Lecture, chaque source a maintenant sa propre ligne indépendante (nom et type : abonnement ou liste publique) ; changer l'une ne modifie plus l'autre.
+
 ## [1.12.0] - 2026-11-03
 
 - **Mes vidéos : barre de filtres** : nouveau filtre **Source** (dossier local, Emby, Jellyfin, Plex…) à côté de Genre et Année, avec une pastille de la source sur chaque affiche quand la vue les mélange. Nouveaux filtres **Pays**, **Langue**, **Qualité** (4K, HD d'après le nom du fichier) et **État** (Non vus, En cours, Vus, Favoris).

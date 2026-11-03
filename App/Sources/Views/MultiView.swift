@@ -519,22 +519,37 @@ struct MultiViewChannelPicker: View {
 struct MultiViewSettingsRow: View {
     @Environment(LibraryStore.self) private var store
     @AppStorage(MultiViewKeys.connections) private var connections = 1
-    @State private var refresh = 0
 
     var body: some View {
         let live = store.sources.filter { $0.kind.isIPTV }
         Stepper(value: $connections, in: 1...4) {
             LabeledContent("Connexions par défaut d'un abonnement", value: "\(connections)")
         }
-        ForEach(live) { source in
-            Stepper(value: Binding(get: { MultiViewKeys.limit(for: source) },
-                                   set: { MultiViewKeys.setLimit($0, for: source); refresh += 1 }), in: 1...4) {
-                LabeledContent("MultiVue · \(source.name)", value: "\(MultiViewKeys.limit(for: source))")
-            }
-            .id(refresh)
+        ForEach(live, id: \.id) { source in
+            MultiViewSourceRow(source: source)
         }
         Text("MultiVue : mélangez les chaînes de plusieurs sources (jusqu'à 4 flux en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Menu Lecture > MultiVue, ⌥⌘M. Les enregistrements et téléchargements utilisent aussi une connexion.")
             .font(.caption)
             .foregroundStyle(.secondary)
+    }
+}
+
+/// Une ligne par source : sa propre valeur, enregistrée aussitôt, sans lien avec les autres sources.
+struct MultiViewSourceRow: View {
+    let source: Source
+    @State private var value: Int
+
+    init(source: Source) {
+        self.source = source
+        _value = State(initialValue: MultiViewKeys.limit(for: source))
+    }
+
+    var body: some View {
+        Stepper(value: $value, in: 1...MultiViewKeys.totalMax) {
+            LabeledContent("MultiVue · \(source.name) (\(MultiViewKeys.isSubscription(source) ? String(localized: "abonnement") : String(localized: "liste publique")))",
+                           value: "\(value)")
+        }
+        .onChange(of: value) { _, newValue in MultiViewKeys.setLimit(newValue, for: source) }
+        .id(source.id)
     }
 }
