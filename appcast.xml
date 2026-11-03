@@ -6,6 +6,21 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.12.0</title>
+      <pubDate>Tue, 03 Nov 2026 14:21:38 GMT</pubDate>
+      <sparkle:version>81</sparkle:version>
+      <sparkle:shortVersionString>1.12.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Mes vidéos : barre de filtres&lt;/b&gt; : nouveau filtre &lt;b&gt;Source&lt;/b&gt; (dossier local, Emby, Jellyfin, Plex…) à côté de Genre et Année, avec une pastille de la source sur chaque affiche quand la vue les mélange. Nouveaux filtres &lt;b&gt;Pays&lt;/b&gt;, &lt;b&gt;Langue&lt;/b&gt;, &lt;b&gt;Qualité&lt;/b&gt; (4K, HD d&amp;#x27;après le nom du fichier) et &lt;b&gt;État&lt;/b&gt; (Non vus, En cours, Vus, Favoris).&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Tri&lt;/b&gt; par &lt;b&gt;note TMDB&lt;/b&gt; et par &lt;b&gt;durée&lt;/b&gt;. Filtres et tri sont &lt;b&gt;mémorisés&lt;/b&gt; d&amp;#x27;un lancement à l&amp;#x27;autre ; bouton « Réinitialiser ».&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;MultiVue avec plusieurs sources&lt;/b&gt; : chaque source de direct a son propre nombre de connexions (1 pour un abonnement limité, 4 pour une liste publique, réglable dans Réglages &amp;gt; Général &amp;gt; Lecture). Mélangez un abonnement et une liste publique, ou deux abonnements ; 4 flux au plus en tout, le nom de la source est affiché sur chaque vignette.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Image dans l&amp;#x27;image&lt;/b&gt; : pendant un direct, le bouton PIP ouvre une seconde chaîne en miniature dans le lecteur (sans le son) ; un clic l&amp;#x27;échange avec la chaîne principale.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Aide&lt;/b&gt; : nouvelles pages « Trier et filtrer Mes vidéos » et « Plusieurs sources de direct : MultiVue et image dans l&amp;#x27;image ».&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.12.0/Kastideo-1.12.0.dmg" length="48004266" type="application/octet-stream" sparkle:edSignature="vkAPCQdaXdbxhvMTbA2RNb5dzjK0bING9FzNu1OkLLroNxZzinsDWSjDqIPAuyUGHJWERpPwTanMPfzfmLvWAw==" />
+    </item>
+    <item>
       <title>Kastideo 1.11.0</title>
       <pubDate>Mon, 02 Nov 2026 23:06:18 GMT</pubDate>
       <sparkle:version>80</sparkle:version>
@@ -444,20 +459,6 @@
 &lt;li&gt;&lt;b&gt;Thèmes — « En ce moment »&lt;/b&gt; : les chaînes dont le nom est suffisamment explicite (beIN Sports, BFM, Gulli, Eurosport…) sont désormais proposées dans leur thème &lt;b&gt;même sans programme dans le guide TV&lt;/b&gt;. Elles s&amp;#x27;affichent avec le nom de la chaîne à la place du titre du programme. Les chaînes que Kastideo ne sait pas classer sans guide restent proposées dans le mode &lt;b&gt;Chaînes&lt;/b&gt; (vous pouvez les classer vous-même : clic droit &amp;gt; Thème de la chaîne).&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.1/Kastideo-1.0.1.dmg" length="45726513" type="application/octet-stream" sparkle:edSignature="/Uijp1dRpiBgufdV7eWqfMysEsUwQX6+8229/1UqT6E00K9YCi0ev/2UL83unNI8cOsuWHtnkAIkt9w0sDTJDQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.0.0</title>
-      <pubDate>Thu, 22 Oct 2026 21:55:22 GMT</pubDate>
-      <sparkle:version>36</sparkle:version>
-      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;p&gt;&lt;b&gt;Première version stable de Kastideo.&lt;/b&gt; Direct, films et séries IPTV (Xtream Codes et M3U) lus par le moteur VLC, interfaces Classique, Cinéma et TV, écran d&amp;#x27;accueil, guide TV en grille avec guide de secours xmltvfr.fr, Direct par thème avec alertes de programme, fiches films et séries (TMDB), enregistrement et téléchargement, MultiVue, catégories personnalisables, français et anglais, mises à jour automatiques.&lt;/p&gt;
-&lt;p&gt;Nouveau dans cette version :&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Modifier la chaîne…&lt;/b&gt; (clic droit sur une chaîne du direct) : corriger le &lt;b&gt;nom&lt;/b&gt;, le &lt;b&gt;numéro&lt;/b&gt;, le &lt;b&gt;logo&lt;/b&gt; (adresse ou fichier) et la &lt;b&gt;chaîne du guide TV&lt;/b&gt; associée, pour cette version de la chaîne ; &lt;b&gt;Rétablir l&amp;#x27;original&lt;/b&gt; pour annuler. Les corrections survivent aux actualisations de la source&lt;/li&gt;
-&lt;li&gt;Les logos choisis ne sont pas effacés par « Vider et recharger » le cache&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.0/Kastideo-1.0.0.dmg" length="45723209" type="application/octet-stream" sparkle:edSignature="MY1hLjZlUHkRPEvoW3kb0sJ4eC3rNoMBYjFHYfbV4pc68xPgmbQ1T5gXWuZthN3M9QzlcDl71bsNnpD9xG1eDw==" />
     </item>
   </channel>
 </rss>
