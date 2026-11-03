@@ -6,6 +6,18 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.13.0</title>
+      <pubDate>Tue, 03 Nov 2026 18:01:05 GMT</pubDate>
+      <sparkle:version>83</sparkle:version>
+      <sparkle:shortVersionString>1.13.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;MultiVue repensée pour plusieurs abonnements&lt;/b&gt; : réglages &amp;gt; Lecture = une ligne par abonnement (nom + identifiant du compte) avec son nombre de connexions ; dans la fenêtre MultiVue, vous choisissez le &lt;b&gt;nombre d&amp;#x27;écrans&lt;/b&gt;, la &lt;b&gt;disposition&lt;/b&gt; (côte à côte, empilé, grille, une grande + petites) et la &lt;b&gt;source réservée à chaque écran&lt;/b&gt;. Chaque écran ne propose que les chaînes de sa source ; une source ne dépasse pas son nombre de connexions.&lt;/li&gt;
+&lt;li&gt;Le sélecteur de chaînes de la MultiVue et du PIP cherche dans toutes les sources, même si une source active est choisie dans la barre latérale.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.13.0/Kastideo-1.13.0.dmg" length="48077650" type="application/octet-stream" sparkle:edSignature="skyqExl2S4oNp38X/7WhESswFQS/RMdAEnUjQOVSRhijNwqgHU1dY54FuwjXS5zzwoTvjnYpwr8B6uVXrqgnCg==" />
+    </item>
+    <item>
       <title>Kastideo 1.12.1</title>
       <pubDate>Tue, 03 Nov 2026 15:00:22 GMT</pubDate>
       <sparkle:version>82</sparkle:version>
@@ -446,19 +458,6 @@
 &lt;li&gt;L&amp;#x27;essai en http ajouté en 1.0.2 est retiré (le serveur le refuse : HTTP 403).&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.3/Kastideo-1.0.3.dmg" length="45733873" type="application/octet-stream" sparkle:edSignature="FcdHUJeXlBI99QgdoBLU5aEDp9zGSSPyClDcDLo6OTEMEVjvRAMUCxt9RtuHVwu45oFoj64I9C6h4b49RFlSCg==" />
-    </item>
-    <item>
-      <title>Kastideo 1.0.2</title>
-      <pubDate>Thu, 22 Oct 2026 22:14:12 GMT</pubDate>
-      <sparkle:version>38</sparkle:version>
-      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Direct&lt;/b&gt; : quand le serveur refuse un flux en https (erreur HTTP 520 de Cloudflare, alors que la chaîne fonctionne ailleurs), Kastideo réessaie automatiquement la même chaîne en http (.ts puis .m3u8).&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Connexion libérée&lt;/b&gt; : le flux est désormais fermé proprement quand on quitte Kastideo, pour que le fournisseur ne compte plus la session (abonnement à une connexion).&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : durée de fermeture du flux précédent à chaque changement de chaîne.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.0.2/Kastideo-1.0.2.dmg" length="46317322" type="application/octet-stream" sparkle:edSignature="rUrmxBAKCFlZOUPUhMX1hpsK9Y3o7x3WeW1zQYtEV7Hm8inztiq7F4sFdcoIRoaGPba35lONIZrJON5KDKCSAQ==" />
     </item>
   </channel>
 </rss>
