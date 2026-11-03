@@ -485,13 +485,15 @@ La **MultiVue** affiche jusqu'à **4 chaînes en direct** sur un même écran. L
 
 ## Plusieurs sources de direct : MultiVue et image dans l'image {#multivue-sources}
 
-Si vous avez **plusieurs sources de direct** (par exemple un abonnement IPTV et une liste de chaînes publiques, ou deux abonnements), vous pouvez les **mélanger**.
+Si vous avez **plusieurs sources de direct** (deux abonnements IPTV, ou un abonnement et une liste de chaînes publiques), la [MultiVue](help:multivue) les **mélange**. Il y a trois étapes.
 
-**Connexions par source.** Chaque source a son propre nombre de flux simultanés, dans **Réglages > Général > Lecture** (une ligne « MultiVue · nom de la source » par source) :
-- un **abonnement** (Xtream, ou liste M3U avec identifiants) : 1 par défaut, ou le nombre de connexions de votre abonnement ;
-- une **liste publique** : 4 par défaut.
+**1. Connexions de chaque abonnement.** Dans **Réglages > Général > Lecture**, une ligne par abonnement (nom + identifiant du compte, pour distinguer deux comptes d'un même fournisseur) indique le nombre de flux simultanés qu'il autorise : 1 pour la plupart des abonnements, 4 pour une liste publique. Sur Windows, Linux et Android, **Détecter** interroge les comptes Xtream.
 
-La [MultiVue](help:multivue) affiche **4 chaînes au plus en tout**, en respectant la limite de chaque source : par exemple une chaîne de l'abonnement + trois chaînes publiques, ou une chaîne de chaque abonnement. Le nom de la source est affiché sur chaque vignette, et dans le sélecteur de chaînes celles dont la source n'a plus de connexion libre sont grisées.
+**2. Nombre d'écrans.** Dans la fenêtre MultiVue, réglez le nombre d'**écrans** (de 1 à 4, au plus la somme des connexions de vos sources).
+
+**3. Source de chaque écran.** Chaque écran est **réservé à une source** : la pastille en haut de l'écran permet d'en changer. Le sélecteur de chaînes de cet écran ne propose que les chaînes de sa source, et une source ne peut pas réserver plus d'écrans qu'elle n'a de connexions.
+
+**Disposition** : côte à côte, empilé, grille, ou une grande image avec des petites (menu de disposition de la MultiVue).
 
 **Image dans l'image (PIP).** Pendant la lecture d'une chaîne en direct, le bouton **image dans l'image** (en haut à droite du lecteur) ouvre une **seconde chaîne en miniature** dans un coin, sans le son. **Cliquez sur la miniature** pour l'échanger avec la chaîne principale, ou sur la croix pour la fermer. La seconde chaîne doit venir d'une source qui a une connexion libre : avec un seul abonnement limité à une connexion, choisissez une chaîne de la liste publique (ou d'un second abonnement). La miniature se ferme quand vous quittez le lecteur.
 
@@ -1359,6 +1361,12 @@ Kastideo s'identifie auprès des serveurs comme le lecteur **VLC** : beaucoup de
 - **Pas de programme dans le guide** : Réglages > Sources indique l'état du guide de chaque source ; le guide de secours complète les chaînes françaises courantes.
 - **Mots de passe sous Linux** : sans trousseau (GNOME Keyring ou KWallet), Kastideo garde les mots de passe dans ses préférences et le signale dans le journal.
 <!--/pc-->
+
+## La fenêtre est hors écran (Windows et Linux) {#fenetre-hors-ecran}
+
+Avec plusieurs écrans, une fenêtre pouvait s'ouvrir à moitié hors écran, sans barre de titre accessible. Depuis la version 1.12.1, Kastideo **mémorise la position de sa fenêtre** et, au démarrage, vérifie que sa barre de titre est visible sur un écran. Si ce n'est pas le cas (écran débranché, résolution ou mise à l'échelle changée), la fenêtre est **recentrée sur l'écran principal**.
+
+Si une fenêtre reste malgré tout hors de portée : sous Windows, **Alt + Espace** puis **D** (Déplacer), puis les flèches du clavier ; ou fermez Kastideo et relancez-le.
 
 # À propos
 

@@ -27,6 +27,9 @@ enum MultiLayout {
 
   /// Toutes côte à côte sur une ligne.
   row,
+
+  /// Toutes empilées en colonne.
+  column,
 }
 
 /// Groupe de chaînes mémorisé (ex. « Multiplex foot »).
@@ -81,6 +84,9 @@ class MultiSlot extends ChangeNotifier {
   late final Future<void> _ready;
 
   MediaItem? item;
+
+  /// Source réservée à cet écran (ses chaînes seules sont proposées).
+  String? sourceId;
   bool loading = false;
   bool failed = false;
   Timer? _timeout;
@@ -195,37 +201,96 @@ class MultiViewController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cases de la grille : 4 au plus ; chaque source garde sa propre limite de flux.
+  /// Cases de la grille : 4 au plus.
   int get capacity => 4;
 
-  Source? _source(MediaItem item) => library?.sourceOf(item);
-
-  /// Flux déjà ouverts pour la source d'une chaîne (hors la case remplacée).
-  int activeCount(String sourceId, {int? excluding}) {
-    var n = 0;
-    for (var i = 0; i < slots.length; i++) {
-      if (i != excluding && slots[i].item?.sourceId == sourceId) n++;
-    }
-    return n;
-  }
-
-  /// Vrai si la source de la chaîne a encore une connexion libre.
-  bool canPlay(MediaItem item, {int? replacing}) => activeCount(item.sourceId, excluding: replacing) < settings.multiviewLimit(_source(item));
   bool get isRunning => slots.any((s) => s.item != null);
   List<MediaItem> get channels => [for (final s in slots) ?s.item];
   bool contains(MediaItem item) => slots.any((s) => s.item?.id == item.id);
 
   double get _volume => playback.muted ? 0 : playback.volume;
 
-  /// Ajoute une chaîne (dans une case vide, ou une nouvelle case s'il en reste). Faux si la MultiVue est pleine.
+  /// Nom + identifiant du compte (deux abonnements peuvent porter le même nom).
+  static String accountLabel(Source s) {
+    var user = s.username ?? '';
+    if (user.isEmpty && s.kind == SourceKind.m3uUrl) user = Uri.tryParse(s.address)?.queryParameters['username'] ?? '';
+    return user.isEmpty ? s.name : '${s.name} · $user';
+  }
+
+  List<Source> get liveSources => library?.selectableSources ?? const [];
+
+  /// Nombre d'écrans possible : somme des connexions des sources, 4 au plus.
+  int get maxScreens => liveSources.fold<int>(0, (n, s) => n + settings.multiviewLimit(s)).clamp(1, 4);
+
+  int get screenCount => (_prefs?.getInt('multiview.screens') ?? 2).clamp(1, 4);
+
+  /// Écrans déjà réservés à une source (hors l'écran indiqué).
+  int assignedCount(String sourceId, {int? excluding}) {
+    var n = 0;
+    for (var i = 0; i < slots.length; i++) {
+      if (i != excluding && slots[i].sourceId == sourceId) n++;
+    }
+    return n;
+  }
+
+  /// Première source de direct qui a encore une connexion à réserver.
+  String? freeSource({int? excluding}) {
+    for (final s in liveSources) {
+      if (assignedCount(s.id, excluding: excluding) < settings.multiviewLimit(s)) return s.id;
+    }
+    return null;
+  }
+
+  /// Prépare les écrans à l'ouverture de la MultiVue.
+  void ensureScreens() => setScreenCount(slots.length > screenCount ? slots.length : screenCount);
+
+  /// Fixe le nombre d'écrans (les nouveaux sont réservés à la première source disponible).
+  Future<void> setScreenCount(int wanted) async {
+    final target = wanted.clamp(1, maxScreens);
+    while (slots.length > target) {
+      await remove(slots.length - 1);
+    }
+    while (slots.length < target) {
+      slots.add(MultiSlot()..sourceId = freeSource());
+    }
+    _prefs?.setInt('multiview.screens', target);
+    notifyListeners();
+  }
+
+  /// Réserve un écran à une source ; faux si toutes ses connexions sont déjà réservées.
+  Future<bool> assign(int index, String sourceId) async {
+    if (index < 0 || index >= slots.length) return false;
+    final source = liveSources.where((s) => s.id == sourceId).firstOrNull;
+    if (source == null) return false;
+    if (slots[index].sourceId != sourceId && assignedCount(sourceId, excluding: index) >= settings.multiviewLimit(source)) return false;
+    slots[index].sourceId = sourceId;
+    if (slots[index].item != null && slots[index].item!.sourceId != sourceId) await slots[index].stop();
+    notifyListeners();
+    return true;
+  }
+
+  /// Vrai si la chaîne peut être lue sur cet écran (celui-ci est réservé à sa source).
+  bool canPlay(MediaItem item, {int? replacing}) {
+    if (replacing != null && replacing >= 0 && replacing < slots.length) return slots[replacing].sourceId == item.sourceId;
+    return true;
+  }
+
+  /// Ajoute une chaîne : dans un écran libre de sa source, sinon dans un écran vide réaffecté, sinon dans un nouvel écran.
   Future<bool> add(MediaItem item) async {
     if (contains(item)) return true;
-    if (!canPlay(item)) return false;
-    var index = slots.indexWhere((s) => s.item == null);
+    final source = library?.sourceOf(item);
+    if (source == null) return false;
+    var index = slots.indexWhere((s) => s.item == null && s.sourceId == item.sourceId);
     if (index < 0) {
-      if (slots.length >= capacity) return false;
-      slots.add(MultiSlot());
-      index = slots.length - 1;
+      if (assignedCount(item.sourceId) >= settings.multiviewLimit(source)) return false;
+      index = slots.indexWhere((s) => s.item == null);
+      if (index < 0) {
+        if (slots.length >= maxScreens) return false;
+        slots.add(MultiSlot());
+        index = slots.length - 1;
+        _prefs?.setInt('multiview.screens', slots.length);
+      }
+      slots[index].sourceId = item.sourceId;
     }
     if (!isRunning) active = index;
     notifyListeners();
@@ -234,7 +299,7 @@ class MultiViewController extends ChangeNotifier {
     return true;
   }
 
-  /// Remplace la chaîne d'une case.
+  /// Remplace la chaîne d'une case (même source seulement).
   Future<void> replace(int index, MediaItem item) async {
     if (index < 0 || index >= slots.length) return;
     final existing = slots.indexWhere((s) => s.item?.id == item.id);
@@ -246,6 +311,9 @@ class MultiViewController extends ChangeNotifier {
     await slots[index].play(item, volume: index == active ? _volume : 0);
     notifyListeners();
   }
+
+  /// Redessine après l'arrêt d'une chaîne d'un écran.
+  void refresh() => notifyListeners();
 
   /// Ajoute une case vide (le choix de la chaîne suit).
   int? addEmptySlot() {

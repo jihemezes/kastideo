@@ -60,6 +60,7 @@ Future<void> openMultiView(BuildContext context, {MediaItem? add}) async {
     await playback.stop();
   }
   navigation.go(Screen.multiview);
+  multiview.ensureScreens();
   if (watched != null && !recordingInPlayer && !multiview.contains(watched)) await multiview.add(watched);
   if (add != null && !await multiview.add(add) && context.mounted) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('La MultiVue est complète ou les connexions de cette source sont toutes utilisées : retirez une chaîne d\'abord.'))));
@@ -101,10 +102,10 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
     super.initState();
     HardwareKeyboard.instance.addHandler(_onKey);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // MultiVue vide : on propose tout de suite une première chaîne.
+      // Les écrans sont prêts dès l'ouverture : chacun réservé à une source, la chaîne se choisit ensuite.
       if (mounted && !_openedPicker && context.multiview.slots.isEmpty) {
         _openedPicker = true;
-        _add();
+        context.multiview.ensureScreens();
       }
     });
   }
@@ -158,7 +159,12 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
 
   Future<void> _add() async {
     final multiview = context.multiview;
-    if (multiview.slots.length >= multiview.capacity && !multiview.slots.any((s) => s.item == null)) {
+    final empty = multiview.slots.indexWhere((s) => s.item == null);
+    if (empty >= 0) {
+      await _change(empty);
+      return;
+    }
+    if (multiview.slots.length >= multiview.maxScreens) {
       _snack(tr('La MultiVue est complète : retirez une chaîne d\'abord.'));
       return;
     }
@@ -318,7 +324,19 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
           const SizedBox(width: 8),
           Text(tr('MultiVue'), style: kRoundedD(20, FontWeight.w800)),
           const SizedBox(width: 10),
-          Text('${multiview.channels.length} / ${multiview.capacity}', style: kTextD(13, color: Colors.white60)),
+          IconButton(
+            tooltip: tr('Un écran de moins'),
+            visualDensity: VisualDensity.compact,
+            onPressed: multiview.slots.length > 1 ? () => multiview.setScreenCount(multiview.slots.length - 1) : null,
+            icon: const Icon(Icons.remove_circle_outline_rounded, size: 20, color: Colors.white),
+          ),
+          Text('${tr('Écrans')} : ${multiview.slots.length}', style: kTextD(13, color: Colors.white70)),
+          IconButton(
+            tooltip: tr('Un écran de plus'),
+            visualDensity: VisualDensity.compact,
+            onPressed: multiview.slots.length < multiview.maxScreens ? () => multiview.setScreenCount(multiview.slots.length + 1) : null,
+            icon: const Icon(Icons.add_circle_outline_rounded, size: 20, color: Colors.white),
+          ),
           if (busy) ...[
             const SizedBox(width: 12),
             Tooltip(
@@ -329,7 +347,6 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
           const Spacer(),
           _LayoutPicker(multiview: multiview),
           const SizedBox(width: 10),
-          _barButton(Icons.add_rounded, tr('Ajouter une chaîne (A)'), _add),
           Builder(
             builder: (c) => _barButton(Icons.bookmarks_outlined, tr('Groupes mémorisés'), () {
               final box = c.findRenderObject() as RenderBox;
@@ -382,6 +399,7 @@ class _LayoutPicker extends StatelessWidget {
         seg(MultiLayout.grid, Icons.grid_view_rounded, tr('Grille 2 × 2')),
         seg(MultiLayout.focus, Icons.view_quilt_rounded, tr('Une grande et les autres en petit (G)')),
         seg(MultiLayout.row, Icons.view_column_rounded, tr('Côte à côte')),
+        seg(MultiLayout.column, Icons.view_agenda_rounded, tr('Empilé')),
       ]),
     );
   }
@@ -408,6 +426,8 @@ class _MultiGrid extends StatelessWidget {
     switch (layout) {
       case MultiLayout.row:
         return [for (var i = 0; i < n; i++) cell(i, 0, n, 1)];
+      case MultiLayout.column:
+        return [for (var i = 0; i < n; i++) cell(0, i, 1, n)];
       case MultiLayout.grid:
         return [for (var i = 0; i < n; i++) cell(i % 2, i ~/ 2, 2, 2)];
       case MultiLayout.focus:
@@ -436,12 +456,9 @@ class _MultiGrid extends StatelessWidget {
     final multiview = context.multiview;
     final n = multiview.slots.length;
     final big = multiview.big.clamp(0, n - 1);
-    // Case libre de la grille : bouton « + ».
-    final showsAdd = n < multiview.capacity && n == 3 && (multiview.layout == MultiLayout.auto || multiview.layout == MultiLayout.grid);
     return LayoutBuilder(builder: (context, constraints) {
       final size = Size(constraints.maxWidth, constraints.maxHeight);
       final r = rects(multiview.layout, n, big, size);
-      final addRect = showsAdd ? rects(MultiLayout.grid, 4, 0, size)[3] : null;
       return Stack(children: [
         for (var i = 0; i < n; i++)
           AnimatedPositioned(
@@ -453,26 +470,6 @@ class _MultiGrid extends StatelessWidget {
             width: r[i].width,
             height: r[i].height,
             child: _SlotTile(index: i, slot: multiview.slots[i], onChange: () => onChange(i), focus: focus),
-          ),
-        if (addRect != null)
-          Positioned.fromRect(
-            rect: addRect,
-            child: Hover(
-              onTap: onAdd,
-              builder: (context, hovering) => Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: hovering ? 0.08 : 0.04),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Center(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.add_rounded, size: 40, color: Colors.white54),
-                    Text(tr('Ajouter une chaîne'), style: kTextD(13, color: Colors.white60)),
-                  ]),
-                ),
-              ),
-            ),
           ),
       ]);
     });
@@ -606,7 +603,11 @@ class _SlotTileState extends State<_SlotTile> {
                       if (item != null)
                         _tileButton(Icons.open_in_full_rounded, tr('En grand (double-clic)'), () => multiview.makeBig(widget.index)),
                       _tileButton(Icons.swap_horiz_rounded, tr('Changer de chaîne'), widget.onChange),
-                      _tileButton(Icons.close_rounded, tr('Retirer'), () => multiview.remove(widget.index)),
+                      _sourceMenu(context, multiview),
+                      _tileButton(Icons.close_rounded, tr('Arrêter cette chaîne'), () async {
+                        await slot.stop();
+                        multiview.refresh();
+                      }),
                     ]),
                   ),
               ]),
@@ -614,6 +615,39 @@ class _SlotTileState extends State<_SlotTile> {
           ),
         );
       },
+    );
+  }
+
+  /// Source réservée à cet écran : un clic pour en changer (si plusieurs abonnements ou listes).
+  Widget _sourceMenu(BuildContext context, MultiViewController multiview) {
+    final sources = multiview.liveSources;
+    if (sources.length < 2) return const SizedBox.shrink();
+    final current = sources.where((s) => s.id == widget.slot.sourceId).firstOrNull;
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: PopupMenuButton<String>(
+        tooltip: tr('Source réservée à cet écran'),
+        color: KPalette.menu,
+        onSelected: (id) async {
+          if (!await multiview.assign(widget.index, id) && context.mounted) {
+            ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('Les connexions de cette source sont toutes réservées.'))));
+          }
+        },
+        itemBuilder: (_) => [
+          for (final s in sources)
+            PopupMenuItem(
+              value: s.id,
+              enabled: s.id == widget.slot.sourceId ||
+                  multiview.assignedCount(s.id, excluding: widget.index) < context.settings.multiviewLimit(s),
+              child: Text('${s.id == widget.slot.sourceId ? '✓ ' : ''}${MultiViewController.accountLabel(s)}', style: kTextD(13)),
+            ),
+        ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
+          child: Text(current == null ? tr('Source') : MultiViewController.accountLabel(current), style: kTextD(11, weight: FontWeight.w600)),
+        ),
+      ),
     );
   }
 
@@ -658,14 +692,23 @@ class _ChannelPickerState extends State<_ChannelPicker> {
     final library = context.library;
     final multiview = context.multiview;
     final List<MediaItem> items;
+    // Écran réservé à une source : seules ses chaînes sont proposées (contenu brut, sans filtre de source active).
+    final onlySource = widget.replacing != null && widget.replacing! >= 0 && widget.replacing! < multiview.slots.length
+        ? multiview.slots[widget.replacing!].sourceId
+        : null;
+    bool inScope(MediaItem i) => onlySource == null || i.sourceId == onlySource;
+    final pool = [
+      for (final s in onlySource == null ? multiview.liveSources : multiview.liveSources.where((s) => s.id == onlySource))
+        ...library.contentOf(s.id).where((i) => i.kind == MediaKind.live),
+    ];
     if (_query.trim().length >= 2) {
       final q = _query.searchKey;
-      items = library.items(MediaKind.live).where((i) => i.name.searchKey.contains(q)).take(200).toList();
+      items = pool.where((i) => i.name.searchKey.contains(q)).take(200).toList();
     } else {
       items = switch (_tab) {
-        0 => library.favoritesOf(MediaKind.live),
-        1 => library.recentsOf(MediaKind.live),
-        _ => library.items(MediaKind.live).take(300).toList(),
+        0 => library.favoritesOf(MediaKind.live).where(inScope).toList(),
+        1 => library.recentsOf(MediaKind.live).where(inScope).toList(),
+        _ => pool.take(300).toList(),
       };
     }
     return AlertDialog(

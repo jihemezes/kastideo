@@ -485,13 +485,15 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 
 ## Several live sources: MultiView and picture in picture {#multivue-sources}
 
-If you have **several live sources** (for example an IPTV subscription and a list of public channels, or two subscriptions), you can **mix** them.
+If you have **several live sources** (two IPTV subscriptions, or a subscription and a list of public channels), [MultiView](help:multivue) **mixes** them. There are three steps.
 
-**Connections per source.** Each source has its own number of simultaneous streams, in **Settings > General > Playback** (one "MultiView · source name" line per source):
-- a **subscription** (Xtream, or an M3U list with credentials): 1 by default, or your subscription's number of connections;
-- a **public list**: 4 by default.
+**1. Connections of each subscription.** In **Settings > General > Playback**, one line per subscription (name + account ID, to tell two accounts from the same provider apart) sets the number of simultaneous streams it allows: 1 for most subscriptions, 4 for a public list. On Windows, Linux and Android, **Detect** queries Xtream accounts.
 
-[MultiView](help:multivue) shows **4 channels at most in all**, respecting each source's limit: for example one subscription channel + three public channels, or one channel from each subscription. The source name is shown on each tile, and in the channel picker the channels whose source has no free connection left are greyed out.
+**2. Number of screens.** In the MultiView window, set the number of **screens** (1 to 4, at most the sum of your sources' connections).
+
+**3. Source of each screen.** Each screen is **reserved for one source**: the badge at the top of the screen lets you change it. The channel picker of that screen only offers channels from its source, and a source cannot reserve more screens than it has connections.
+
+**Layout**: side by side, stacked, grid, or one large picture with small ones (MultiView layout menu).
 
 **Picture in picture (PIP).** While a live channel plays, the **picture in picture** button (top right of the player) opens a **second channel in a small window** in a corner, muted. **Click the small window** to swap it with the main channel, or the cross to close it. The second channel must come from a source with a free connection: with a single subscription limited to one connection, pick a channel from the public list (or a second subscription). The small window closes when you leave the player.
 
@@ -1358,6 +1360,12 @@ Kastideo identifies itself to servers as the **VLC** player: many IPTV providers
 - **No programmes in the guide**: Settings > Sources shows each source's guide state; the fallback guide fills in common French channels.
 - **Passwords on Linux**: without a keyring (GNOME Keyring or KWallet), Kastideo keeps passwords in its preferences and says so in the log.
 <!--/pc-->
+
+## The window is off screen (Windows and Linux) {#fenetre-hors-ecran}
+
+With several screens, a window could open half off screen with no reachable title bar. Since version 1.12.1, Kastideo **remembers its window position** and, at startup, checks that its title bar is visible on a screen. If not (screen unplugged, resolution or scaling changed), the window is **re-centred on the main screen**.
+
+If a window is still out of reach: on Windows, press **Alt + Space** then **M** (Move), then the arrow keys; or close Kastideo and start it again.
 
 # About
 

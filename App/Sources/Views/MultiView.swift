@@ -37,6 +37,27 @@ enum MultiViewKeys {
         UserDefaults.standard.set(min(max(value, 1), totalMax), forKey: key(source.id))
     }
 
+    /// Sources de direct actives.
+    static func liveSources(_ sources: [Source]) -> [Source] { sources.filter { $0.isEnabled && $0.kind.isIPTV } }
+
+    /// Nom + identifiant du compte (deux abonnements peuvent porter le même nom).
+    static func accountLabel(_ source: Source) -> String {
+        switch source.kind {
+        case .xtream(_, let user):
+            return user.isEmpty ? source.name : "\(source.name) · \(user)"
+        case .m3uURL(let url):
+            let user = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "username" }?.value ?? ""
+            return user.isEmpty ? source.name : "\(source.name) · \(user)"
+        default:
+            return source.name
+        }
+    }
+
+    /// Nombre d'écrans possible : somme des connexions des sources, 4 au plus.
+    static func maxScreens(_ sources: [Source]) -> Int {
+        min(totalMax, liveSources(sources).reduce(0) { $0 + limit(for: $1) })
+    }
+
     /// Vrai si au moins deux flux peuvent tourner en même temps (deux sources, ou une source qui en autorise plusieurs).
     static func isAvailable(sources: [Source]) -> Bool {
         let live = sources.filter { $0.isEnabled && $0.kind.isIPTV }
@@ -50,6 +71,8 @@ enum MultiViewKeys {
 final class MultiViewSlot: Identifiable {
     let id = UUID()
     private(set) var item: MediaItem?
+    /// Source réservée à cet écran (ses chaînes seules sont proposées).
+    var sourceID: UUID?
     private(set) var isLoading = false
     private(set) var failed = false
     @ObservationIgnored let player: VLCMediaPlayer
@@ -120,54 +143,115 @@ final class MultiViewSlot: Identifiable {
     }
 }
 
-/// MultiVue : jusqu'à 4 chaînes en direct, le son suit la vignette active.
+/// Dispositions de la MultiVue.
+enum MultiViewLayout: String, CaseIterable, Identifiable {
+    case sideBySide, stacked, grid, focus
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .sideBySide: return String(localized: "Côte à côte")
+        case .stacked: return String(localized: "Empilé")
+        case .grid: return String(localized: "Grille")
+        case .focus: return String(localized: "Une grande + petites")
+        }
+    }
+    var icon: String {
+        switch self {
+        case .sideBySide: return "rectangle.split.2x1"
+        case .stacked: return "rectangle.split.1x2"
+        case .grid: return "rectangle.split.2x2"
+        case .focus: return "rectangle.leadinghalf.inset.filled"
+        }
+    }
+}
+
+/// MultiVue : jusqu'à 4 écrans, chacun réservé à une source ; le son suit la vignette active.
 @MainActor
 @Observable
 final class MultiViewModel {
     private(set) var slots: [MultiViewSlot] = []
     var focusedID: UUID?
     var pickerSlotID: UUID?
+    var layout: MultiViewLayout = MultiViewLayout(rawValue: UserDefaults.standard.string(forKey: "multiview.layout") ?? "") ?? .grid {
+        didSet { UserDefaults.standard.set(layout.rawValue, forKey: "multiview.layout") }
+    }
+    private(set) var screenCount = max(UserDefaults.standard.integer(forKey: "multiview.screens"), 2)
 
-    /// Cases de la grille : 4 au plus ; chaque source garde sa propre limite de flux.
+    /// Cases de la grille : 4 au plus.
     var capacity: Int { MultiViewKeys.totalMax }
 
-    /// Flux déjà ouverts pour la source d'une chaîne (hors la case remplacée).
-    func activeCount(source: UUID, excluding slotID: UUID? = nil) -> Int {
-        slots.filter { $0.id != slotID && $0.item?.sourceID == source }.count
+    /// Écrans déjà réservés à une source (hors l'écran indiqué).
+    func assignedCount(source: UUID, excluding slotID: UUID? = nil) -> Int {
+        slots.filter { $0.id != slotID && $0.sourceID == source }.count
     }
 
-    /// Vrai si la source de la chaîne a encore une connexion libre.
-    func canPlay(_ item: MediaItem, replacing slotID: UUID? = nil, store: LibraryStore) -> Bool {
-        activeCount(source: item.sourceID, excluding: slotID) < MultiViewKeys.limit(for: store.source(id: item.sourceID))
+    /// Première source de direct qui a encore une connexion à réserver.
+    func freeSource(store: LibraryStore, excluding slotID: UUID? = nil) -> UUID? {
+        MultiViewKeys.liveSources(store.sources).first { assignedCount(source: $0.id, excluding: slotID) < MultiViewKeys.limit(for: $0) }?.id
     }
 
-    /// Ajoute une chaîne (dans une case vide, ou une nouvelle case s'il en reste). Renvoie faux si la source est au maximum.
+    /// Prépare les écrans à l'ouverture de la fenêtre.
+    func ensureScreens(store: LibraryStore) {
+        setScreenCount(max(screenCount, slots.count), store: store)
+    }
+
+    /// Fixe le nombre d'écrans (les nouveaux sont réservés à la première source disponible).
+    func setScreenCount(_ wanted: Int, store: LibraryStore) {
+        let target = min(max(wanted, 1), max(MultiViewKeys.maxScreens(store.sources), 1))
+        while slots.count > target, let last = slots.last { remove(last.id) }
+        while slots.count < target {
+            let slot = MultiViewSlot()
+            slot.sourceID = freeSource(store: store)
+            slots.append(slot)
+            if focusedID == nil { focusedID = slot.id }
+        }
+        screenCount = target
+        UserDefaults.standard.set(target, forKey: "multiview.screens")
+    }
+
+    /// Réserve un écran à une source ; faux si toutes ses connexions sont déjà réservées.
+    @discardableResult
+    func assign(_ slotID: UUID, to source: UUID, store: LibraryStore) -> Bool {
+        guard let slot = slots.first(where: { $0.id == slotID }), let src = store.source(id: source) else { return false }
+        guard slot.sourceID == source || assignedCount(source: source, excluding: slotID) < MultiViewKeys.limit(for: src) else { return false }
+        slot.sourceID = source
+        if let item = slot.item, item.sourceID != source { slot.stop() }
+        return true
+    }
+
+    /// Vrai si la chaîne peut être lue sur cet écran (celui-ci est réservé à sa source).
+    func canPlay(_ item: MediaItem, on slotID: UUID) -> Bool {
+        slots.first { $0.id == slotID }?.sourceID == item.sourceID
+    }
+
+    /// Ajoute une chaîne : dans un écran libre de sa source, sinon dans un écran vide réaffecté, sinon dans un nouvel écran.
     @discardableResult
     func add(_ item: MediaItem, store: LibraryStore) -> Bool {
         if slots.contains(where: { $0.item?.id == item.id }) { return true }
-        guard canPlay(item, store: store) else { return false }
+        guard let source = store.source(id: item.sourceID) else { return false }
+        if let own = slots.first(where: { $0.item == nil && $0.sourceID == item.sourceID }) {
+            own.play(item, muted: own.id != focusedID)
+            return true
+        }
+        let quota = MultiViewKeys.limit(for: source)
+        guard assignedCount(source: item.sourceID) < quota else { return false }
         if let empty = slots.first(where: { $0.item == nil }) {
+            empty.sourceID = item.sourceID
             empty.play(item, muted: empty.id != focusedID)
             return true
         }
-        guard slots.count < capacity else { return false }
+        guard slots.count < MultiViewKeys.maxScreens(store.sources) else { return false }
         let slot = MultiViewSlot()
+        slot.sourceID = item.sourceID
         slots.append(slot)
+        screenCount = slots.count
         if focusedID == nil { focusedID = slot.id }
         slot.play(item, muted: slot.id != focusedID)
         return true
     }
 
-    func addEmptySlot() {
-        guard slots.count < capacity else { return }
-        let slot = MultiViewSlot()
-        slots.append(slot)
-        if focusedID == nil { focusedID = slot.id }
-        pickerSlotID = slot.id
-    }
-
     func replace(_ slotID: UUID, with item: MediaItem, store: LibraryStore) {
-        guard let slot = slots.first(where: { $0.id == slotID }), canPlay(item, replacing: slotID, store: store) else { return }
+        guard let slot = slots.first(where: { $0.id == slotID }), canPlay(item, on: slotID) else { return }
         slot.play(item, muted: slot.id != focusedID)
     }
 
@@ -198,6 +282,50 @@ final class MultiViewModel {
         slots = []
         focusedID = nil
     }
+
+    /// Rectangles des écrans selon la disposition.
+    func frames(in size: CGSize, spacing: CGFloat = 4) -> [CGRect] {
+        let n = slots.count
+        guard n > 0 else { return [] }
+        let w = size.width, h = size.height
+        if n == 1 { return [CGRect(x: 0, y: 0, width: w, height: h)] }
+        switch layout {
+        case .sideBySide:
+            let cw = (w - spacing * CGFloat(n - 1)) / CGFloat(n)
+            return (0..<n).map { CGRect(x: CGFloat($0) * (cw + spacing), y: 0, width: cw, height: h) }
+        case .stacked:
+            let ch = (h - spacing * CGFloat(n - 1)) / CGFloat(n)
+            return (0..<n).map { CGRect(x: 0, y: CGFloat($0) * (ch + spacing), width: w, height: ch) }
+        case .grid:
+            let columns = 2
+            let rows = Int(ceil(Double(n) / Double(columns)))
+            let cw = (w - spacing) / 2
+            let ch = (h - spacing * CGFloat(rows - 1)) / CGFloat(rows)
+            return (0..<n).map { i in
+                let row = i / columns, col = i % columns
+                // Dernière ligne incomplète : l'écran seul prend toute la largeur.
+                let alone = (i == n - 1) && n % columns == 1
+                return CGRect(x: alone ? 0 : CGFloat(col) * (cw + spacing), y: CGFloat(row) * (ch + spacing),
+                              width: alone ? w : cw, height: ch)
+            }
+        case .focus:
+            let big = slots.firstIndex { $0.id == focusedID } ?? 0
+            let bigW = (w - spacing) * 2 / 3
+            let smallW = w - bigW - spacing
+            let smallH = (h - spacing * CGFloat(n - 2)) / CGFloat(n - 1)
+            var result = [CGRect](repeating: .zero, count: n)
+            var k = 0
+            for i in 0..<n {
+                if i == big {
+                    result[i] = CGRect(x: 0, y: 0, width: bigW, height: h)
+                } else {
+                    result[i] = CGRect(x: bigW + spacing, y: CGFloat(k) * (smallH + spacing), width: smallW, height: smallH)
+                    k += 1
+                }
+            }
+            return result
+        }
+    }
 }
 
 /// Fenêtre MultiVue.
@@ -222,22 +350,24 @@ struct MultiViewWindow: View {
         .environment(\.colorScheme, .dark)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Text("\(model.slots.filter { $0.item != nil }.count) / \(model.capacity)")
-                    .font(.callout.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Button {
-                    model.addEmptySlot()
-                } label: {
-                    Label("Ajouter une chaîne", systemImage: "plus.rectangle.on.rectangle")
+                Picker("Disposition", selection: Binding(get: { model.layout }, set: { model.layout = $0 })) {
+                    ForEach(MultiViewLayout.allCases) { Label($0.label, systemImage: $0.icon).tag($0) }
                 }
-                .disabled(!MultiViewKeys.isAvailable(sources: store.sources) || model.slots.count >= model.capacity)
-                .help("Ajouter une chaîne à la MultiVue")
+                .pickerStyle(.menu)
+                .help("Disposition des écrans")
+                Stepper(value: Binding(get: { model.screenCount },
+                                       set: { model.setScreenCount($0, store: store) }),
+                        in: 1...max(MultiViewKeys.maxScreens(store.sources), 1)) {
+                    Text("Écrans : \(model.slots.count)")
+                        .font(.callout.monospacedDigit())
+                }
                 Button {
                     model.stopAll()
+                    model.ensureScreens(store: store)
                 } label: {
                     Label("Tout arrêter", systemImage: "stop.fill")
                 }
-                .disabled(model.slots.isEmpty)
+                .disabled(model.slots.allSatisfy { $0.item == nil })
             }
         }
         .navigationTitle("MultiVue")
@@ -247,6 +377,7 @@ struct MultiViewWindow: View {
                 recordings.requestStop()
             }
         }
+        .onAppear { if MultiViewKeys.isAvailable(sources: store.sources) { model.ensureScreens(store: store) } }
         .onDisappear { model.stopAll() }
         .background(keyShortcuts)
     }
@@ -263,25 +394,14 @@ struct MultiViewWindow: View {
     }
 
     private var grid: some View {
-        let count = model.slots.count
-        let columns = count <= 1 ? 1 : 2
-        let rows = Int(ceil(Double(count) / Double(columns)))
-        return GeometryReader { geo in
-            let spacing: CGFloat = 4
-            let width = (geo.size.width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
-            let height = (geo.size.height - spacing * CGFloat(rows - 1)) / CGFloat(rows)
-            VStack(spacing: spacing) {
-                ForEach(0..<rows, id: \.self) { row in
-                    HStack(spacing: spacing) {
-                        ForEach(0..<columns, id: \.self) { column in
-                            let index = row * columns + column
-                            if index < count {
-                                MultiViewTile(slot: model.slots[index], index: index)
-                                    .frame(width: width, height: height)
-                            } else {
-                                addTile.frame(width: width, height: height)
-                            }
-                        }
+        GeometryReader { geo in
+            let frames = model.frames(in: CGSize(width: geo.size.width, height: geo.size.height))
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(model.slots.enumerated()), id: \.element.id) { index, slot in
+                    if index < frames.count {
+                        MultiViewTile(slot: slot, index: index)
+                            .frame(width: max(frames[index].width, 1), height: max(frames[index].height, 1))
+                            .offset(x: frames[index].minX, y: frames[index].minY)
                     }
                 }
             }
@@ -289,33 +409,11 @@ struct MultiViewWindow: View {
         .padding(4)
     }
 
-    private var addTile: some View {
-        Button {
-            model.addEmptySlot()
-        } label: {
-            VStack(spacing: 10) {
-                Image(systemName: "plus.circle").font(.system(size: 40))
-                Text("Ajouter une chaîne")
-            }
-            .foregroundStyle(.white.opacity(0.6))
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.white.opacity(0.05))
-        }
-        .buttonStyle(.plain)
-        .disabled(model.slots.count >= model.capacity)
-    }
-
     private var empty: some View {
         VStack(spacing: 16) {
             Image(systemName: "rectangle.split.2x2").font(.system(size: 54)).foregroundStyle(.white.opacity(0.5))
             Text("MultiVue").font(.title.weight(.bold))
-            Text("Regardez jusqu'à \(model.capacity) chaînes en même temps, de sources différentes si vous voulez. Chaque source respecte son nombre de connexions. Le son suit la vignette sélectionnée (clic ou touches 1 à 4).")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 440)
-            Button("Choisir une première chaîne") { model.addEmptySlot() }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+            ProgressView()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -370,10 +468,44 @@ struct MultiViewTile: View {
         .onHover { hovering = $0 }
         .popover(isPresented: Binding(get: { model.pickerSlotID == slot.id },
                                       set: { if !$0, model.pickerSlotID == slot.id { model.pickerSlotID = nil } })) {
-            MultiViewChannelPicker(canPick: { model.canPlay($0, replacing: slot.id, store: store) }) { item in
+            MultiViewChannelPicker(canPick: { model.canPlay($0, on: slot.id) }, onlySource: slot.sourceID) { item in
                 model.replace(slot.id, with: item, store: store)
                 model.pickerSlotID = nil
             }
+        }
+    }
+
+    /// Source réservée à cet écran : un clic pour en changer (si plusieurs abonnements ou listes).
+    @ViewBuilder
+    private var sourceMenu: some View {
+        let sources = MultiViewKeys.liveSources(store.sources)
+        if sources.count > 1 {
+            Menu {
+                ForEach(sources) { source in
+                    let full = slot.sourceID != source.id
+                        && model.assignedCount(source: source.id, excluding: slot.id) >= MultiViewKeys.limit(for: source)
+                    Button {
+                        model.assign(slot.id, to: source.id, store: store)
+                    } label: {
+                        if slot.sourceID == source.id {
+                            Label(MultiViewKeys.accountLabel(source), systemImage: "checkmark")
+                        } else {
+                            Text(MultiViewKeys.accountLabel(source) + (full ? " — " + String(localized: "connexions toutes réservées") : ""))
+                        }
+                    }
+                    .disabled(full)
+                }
+            } label: {
+                Text(slot.sourceID.flatMap { store.source(id: $0) }.map(MultiViewKeys.accountLabel) ?? String(localized: "Source"))
+                    .font(.caption2.weight(.semibold))
+                    .lineLimit(1)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Color.white.opacity(0.2), in: Capsule())
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("Source réservée à cet écran")
         }
     }
 
@@ -386,19 +518,12 @@ struct MultiViewTile: View {
                     .background(focused ? KastideoPalette.orange : Color.black.opacity(0.6), in: Circle())
                 if let item = slot.item {
                     Text(item.name).font(.callout.weight(.semibold)).lineLimit(1)
-                    if store.sources.filter({ $0.isEnabled && $0.kind.isIPTV }).count > 1, let origin = store.source(id: item.sourceID) {
-                        Text(origin.name)
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(Color.white.opacity(0.2), in: Capsule())
-                            .lineLimit(1)
-                    }
                     if let programme = store.epg.current(for: item.epgID) {
                         Text("· \(programme.title)").font(.caption).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
                     }
                 }
                 Spacer()
+                sourceMenu
                 Image(systemName: focused ? "speaker.wave.2.fill" : "speaker.slash.fill")
                     .foregroundStyle(focused ? .white : .white.opacity(0.5))
                 if hovering {
@@ -458,14 +583,20 @@ struct MultiViewChannelPicker: View {
     @Environment(LibraryStore.self) private var store
     /// Vrai si la source de la chaîne a encore une connexion libre.
     let canPick: (MediaItem) -> Bool
+    /// Écran réservé à une source : seules ses chaînes sont proposées.
+    var onlySource: UUID?
     let onPick: (MediaItem) -> Void
     @State private var query = ""
 
     var body: some View {
         let key = query.kastideoSearchKey
-        let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { $0.kind == .live }
-        let recents = store.recentIDs.compactMap { store.item(id: $0) }.filter { $0.kind == .live }
-        let results = key.isEmpty ? [] : Array(store.items(for: .all(.live)).lazy.filter { $0.searchKey.contains(key) }.prefix(60))
+        let inScope: (MediaItem) -> Bool = { $0.kind == .live && (onlySource == nil || $0.sourceID == onlySource) }
+        let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter(inScope)
+        let recents = store.recentIDs.compactMap { store.item(id: $0) }.filter(inScope)
+        // Contenu brut de chaque source : la source active choisie dans la barre latérale ne cache pas les autres comptes.
+        let pool: [MediaItem] = (onlySource.map { [$0] } ?? MultiViewKeys.liveSources(store.sources).map(\.id))
+            .flatMap { store.content(of: $0)?.items ?? [] }
+        let results = key.isEmpty ? [] : Array(pool.lazy.filter { inScope($0) && $0.searchKey.contains(key) }.prefix(60))
         VStack(spacing: 0) {
             TextField("Rechercher une chaîne", text: $query)
                 .textFieldStyle(.roundedBorder)
@@ -515,20 +646,17 @@ struct MultiViewChannelPicker: View {
     }
 }
 
-/// Réglage : nombre de connexions de chaque source de direct (abonnement ou liste publique).
+/// Réglage : une ligne par abonnement ou liste, avec son nombre de connexions simultanées.
 struct MultiViewSettingsRow: View {
     @Environment(LibraryStore.self) private var store
-    @AppStorage(MultiViewKeys.connections) private var connections = 1
 
     var body: some View {
-        let live = store.sources.filter { $0.kind.isIPTV }
-        Stepper(value: $connections, in: 1...4) {
-            LabeledContent("Connexions par défaut d'un abonnement", value: "\(connections)")
-        }
-        ForEach(live, id: \.id) { source in
+        Text("Connexions simultanées de chaque abonnement")
+            .font(.headline)
+        ForEach(MultiViewKeys.liveSources(store.sources), id: \.id) { source in
             MultiViewSourceRow(source: source)
         }
-        Text("MultiVue : mélangez les chaînes de plusieurs sources (jusqu'à 4 flux en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Menu Lecture > MultiVue, ⌥⌘M. Les enregistrements et téléchargements utilisent aussi une connexion.")
+        Text("Indiquez pour chaque abonnement le nombre de connexions qu'il autorise (1 pour la plupart, 4 pour une liste publique). Dans la fenêtre MultiVue (⌥⌘M), choisissez ensuite le nombre d'écrans, la disposition et la source de chaque écran. Les enregistrements et téléchargements utilisent aussi une connexion.")
             .font(.caption)
             .foregroundStyle(.secondary)
     }
@@ -546,7 +674,7 @@ struct MultiViewSourceRow: View {
 
     var body: some View {
         Stepper(value: $value, in: 1...MultiViewKeys.totalMax) {
-            LabeledContent("MultiVue · \(source.name) (\(MultiViewKeys.isSubscription(source) ? String(localized: "abonnement") : String(localized: "liste publique")))",
+            LabeledContent("\(MultiViewKeys.accountLabel(source)) (\(MultiViewKeys.isSubscription(source) ? String(localized: "abonnement") : String(localized: "liste publique")))",
                            value: "\(value)")
         }
         .onChange(of: value) { _, newValue in MultiViewKeys.setLimit(newValue, for: source) }

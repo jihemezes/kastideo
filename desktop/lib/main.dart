@@ -9,6 +9,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/desk.dart';
+import 'core/window_placement.dart';
 import 'core/device.dart';
 
 import 'app_state.dart';
@@ -162,11 +163,19 @@ Future<void> main(List<String> args) async {
       title: 'Kastideo',
       size: testSize == null ? const Size(1280, 820) : Size(double.parse(testSize.group(1)!), double.parse(testSize.group(2)!)),
       minimumSize: testSize == null ? const Size(960, 620) : const Size(300, 300),
-      center: true,
+      center: !Device.isDesktop || testSize != null,
       backgroundColor: Color(0xFF1E1E1E),
     ),
     () async {
-      await windowManager.show();
+      if (Device.isDesktop && testSize == null) {
+        // Position mémorisée si elle est encore visible, sinon centrée sur l'écran principal.
+        final placement = await WindowPlacement.start(await SharedPreferences.getInstance());
+        await placement.restore(const Size(1280, 820), const Size(960, 620));
+        await windowManager.show();
+        await placement.verify(const Size(1280, 820));
+      } else {
+        await windowManager.show();
+      }
       // Lancement à l'ouverture de session : fenêtre réduite dans la barre des tâches.
       if (minimized) {
         await windowManager.minimize();

@@ -886,6 +886,17 @@ class L10n {
     'Connexions de cette source toutes utilisées': 'All connections of this source are in use',
     'chaînes, selon les connexions de chaque source.': 'channels, depending on each source\'s connections.',
     'MultiVue : mélangez les chaînes de plusieurs sources (4 flux au plus en tout). Chaque source garde son nombre de connexions : 1 pour un abonnement limité, 4 pour une liste publique. Indiquez 2 ou plus pour un abonnement seulement s\'il l\'autorise, sinon le fournisseur peut refuser les flux ou bloquer le compte.': 'MultiView: mix channels from several sources (4 streams at most in all). Each source keeps its own number of connections: 1 for a limited subscription, 4 for a public list. Set 2 or more for a subscription only if it allows it, otherwise the provider may refuse the streams or block the account.',
+    'Un écran de moins': 'One screen less',
+    'Un écran de plus': 'One screen more',
+    'Écrans': 'Screens',
+    'Empilé': 'Stacked',
+    'Arrêter cette chaîne': 'Stop this channel',
+    'Source réservée à cet écran': 'Source reserved for this screen',
+    'Les connexions de cette source sont toutes réservées.': 'All connections of this source are reserved.',
+    'Connexions simultanées de chaque abonnement': 'Simultaneous connections of each subscription',
+    'Connexions simultanées détectées pour': 'Simultaneous connections detected for',
+    'abonnement(s).': 'subscription(s).',
+    'Indiquez pour chaque abonnement le nombre de connexions qu\'il autorise (1 pour la plupart, 4 pour une liste publique). Dans la MultiVue, choisissez ensuite le nombre d\'écrans, la disposition et la source de chaque écran.': 'For each subscription, enter the number of connections it allows (1 for most, 4 for a public list). Then, in MultiView, choose the number of screens, the layout and each screen\'s source.',
   };
 
   static String tr(String french) => english ? (_en[french] ?? french) : french;

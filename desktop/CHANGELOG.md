@@ -2,6 +2,18 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.13.0-android1] - 2026-11-03
+
+- **MultiVue multi-abonnements** : une ligne de connexions par abonnement (Détecter pour les comptes Xtream), choix du nombre d'écrans (±), disposition (grille, une grande, côte à côte, empilé) et source réservée à chaque écran.
+
+## [1.13.0-desktop1] - 2026-11-03
+
+- Mêmes nouveautés qu'en 1.13.0-android1 (Windows et Linux).
+
+## [1.12.1-desktop1] - 2026-11-03
+
+- **Windows / Linux** : la fenêtre pouvait s'ouvrir à moitié hors écran, barre de titre inaccessible, surtout avec plusieurs écrans après une mise à jour. Kastideo mémorise maintenant la position de la fenêtre, vérifie au démarrage que sa barre de titre est visible sur un écran (écran débranché, mise à l'échelle changée…), sinon la recentre sur l'écran principal, et revérifie juste après l'affichage.
+
 ## [1.12.0-android1] - 2026-11-03
 
 - **Mes vidéos** : filtre **Source** et pastille de la source sur les affiches, filtres **Pays**, **Langue**, **Qualité** (4K/HD) et **État** (Non vus, En cours, Vus, Favoris), tri par **note TMDB** et par **durée** ; filtres et tri mémorisés.

@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.13.0] - 2026-11-03
+
+- **MultiVue repensée pour plusieurs abonnements** : réglages > Lecture = une ligne par abonnement (nom + identifiant du compte) avec son nombre de connexions ; dans la fenêtre MultiVue, vous choisissez le **nombre d'écrans**, la **disposition** (côte à côte, empilé, grille, une grande + petites) et la **source réservée à chaque écran**. Chaque écran ne propose que les chaînes de sa source ; une source ne dépasse pas son nombre de connexions.
+- Le sélecteur de chaînes de la MultiVue et du PIP cherche dans toutes les sources, même si une source active est choisie dans la barre latérale.
+
 ## [1.12.1] - 2026-11-03
 
 - **MultiVue** : dans Réglages > Général > Lecture, chaque source a maintenant sa propre ligne indépendante (nom et type : abonnement ou liste publique) ; changer l'une ne modifie plus l'autre.

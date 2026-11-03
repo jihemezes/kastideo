@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/multiview.dart';
 import '../core/device.dart';
 import '../core/cast_media.dart';
 import '../core/countries.dart';
@@ -475,13 +476,16 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
     });
     final library = context.library;
     final settings = context.settings;
-    int? best;
+    var found = 0;
     String? error;
     for (final source in library.sources.where((s) => s.enabled && s.kind == SourceKind.xtream)) {
       try {
         final client = await library.xtreamClient(source.id);
         final n = await client?.account();
-        if (n != null && (best == null || n > best)) best = n;
+        if (n != null) {
+          settings.setMultiviewLimit(source, n.clamp(1, 4));
+          found++;
+        }
       } catch (e) {
         error = '$e';
       }
@@ -489,12 +493,9 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
     if (!mounted) return;
     setState(() {
       _busy = false;
-      if (best != null) {
-        settings.setInt('multiview.connections', best.clamp(1, 4));
-        _status = '${tr('Votre abonnement autorise')} $best ${tr('connexion(s) simultanée(s).')}';
-      } else {
-        _status = error ?? tr('Le fournisseur n\'indique pas ce nombre (ou aucune source Xtream) : choisissez-le à la main.');
-      }
+      _status = found > 0
+          ? '${tr('Connexions simultanées détectées pour')} $found ${tr('abonnement(s).')}'
+          : error ?? tr('Le fournisseur n\'indique pas ce nombre (ou aucune source Xtream) : choisissez-le à la main.');
     });
   }
 
@@ -505,21 +506,12 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
     final settings = context.settings;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Expanded(child: Text(tr('Connexions par défaut d\'un abonnement'), style: kText(14))),
-        DropdownButton<int>(
-          value: settings.multiviewConnections,
-          items: [
-            for (final n in const [1, 2, 3, 4])
-              DropdownMenuItem(value: n, child: Text(n == 1 ? '1 (${tr('MultiVue désactivée')})' : '$n', style: kText(13))),
-          ],
-          onChanged: (v) => settings.setInt('multiview.connections', v ?? 1),
-        ),
-        const SizedBox(width: 8),
+        Expanded(child: Text(tr('Connexions simultanées de chaque abonnement'), style: kText(14, weight: FontWeight.w600))),
         OutlinedButton(onPressed: _busy ? null : _detect, child: Text(tr('Détecter'))),
       ]),
       for (final source in context.library.selectableSources)
         Row(children: [
-          Expanded(child: Text('${tr('MultiVue')} · ${source.name}', style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(child: Text(MultiViewController.accountLabel(source), style: kText(13), maxLines: 1, overflow: TextOverflow.ellipsis)),
           DropdownButton<int>(
             value: settings.multiviewLimit(source),
             items: [for (final n in const [1, 2, 3, 4]) DropdownMenuItem(value: n, child: Text('$n', style: kText(13)))],
@@ -527,9 +519,8 @@ class _ConnectionsRowState extends State<_ConnectionsRow> {
           ),
         ]),
       _caption(_status ??
-          tr('MultiVue : mélangez les chaînes de plusieurs sources (4 flux au plus en tout). Chaque source garde son nombre de connexions : '
-              '1 pour un abonnement limité, 4 pour une liste publique. Indiquez 2 ou plus pour un abonnement seulement s\'il l\'autorise, '
-              'sinon le fournisseur peut refuser les flux ou bloquer le compte.')),
+          tr('Indiquez pour chaque abonnement le nombre de connexions qu\'il autorise (1 pour la plupart, 4 pour une liste publique). '
+              'Dans la MultiVue, choisissez ensuite le nombre d\'écrans, la disposition et la source de chaque écran.')),
     ]);
   }
 }
