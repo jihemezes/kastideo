@@ -346,6 +346,16 @@ class _MultiViewScreenState extends State<MultiViewScreen> {
           ],
           const Spacer(),
           _LayoutPicker(multiview: multiview),
+          if (multiview.layout == MultiLayout.focus && multiview.slots.length > 1)
+            PopupMenuButton<int>(
+              tooltip: tr('Taille des vignettes (glissez une vignette pour la déplacer, double-clic pour l\'échanger)'),
+              icon: const Icon(Icons.picture_in_picture_alt_rounded, color: Colors.white, size: 22),
+              initialValue: multiview.pipSize,
+              onSelected: multiview.setPipSize,
+              itemBuilder: (_) => [
+                for (final e in [(0, tr('Petites')), (1, tr('Moyennes')), (2, tr('Grandes'))]) PopupMenuItem(value: e.$1, child: Text(e.$2)),
+              ],
+            ),
           const SizedBox(width: 10),
           Builder(
             builder: (c) => _barButton(Icons.bookmarks_outlined, tr('Groupes mémorisés'), () {
@@ -397,7 +407,7 @@ class _LayoutPicker extends StatelessWidget {
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         seg(MultiLayout.auto, Icons.auto_awesome_mosaic_rounded, tr('Automatique (selon le nombre de chaînes)')),
         seg(MultiLayout.grid, Icons.grid_view_rounded, tr('Grille 2 × 2')),
-        seg(MultiLayout.focus, Icons.view_quilt_rounded, tr('Une grande et les autres en petit (G)')),
+        seg(MultiLayout.focus, Icons.picture_in_picture_alt_rounded, tr('Une grande + vignettes PIP déplaçables (G)')),
         seg(MultiLayout.row, Icons.view_column_rounded, tr('Côte à côte')),
         seg(MultiLayout.column, Icons.view_agenda_rounded, tr('Empilé')),
       ]),
@@ -414,7 +424,7 @@ class _MultiGrid extends StatelessWidget {
 
   static const gap = 6.0;
 
-  static List<Rect> rects(MultiLayout layout, int n, int big, Size size) {
+  static List<Rect> rects(MultiLayout layout, int n, int big, Size size, {List<MultiSlot>? slots, int pipSize = 1}) {
     final w = size.width, h = size.height;
     Rect cell(int col, int row, int cols, int rows) {
       final cw = (w - gap * (cols - 1)) / cols;
@@ -431,18 +441,26 @@ class _MultiGrid extends StatelessWidget {
       case MultiLayout.grid:
         return [for (var i = 0; i < n; i++) cell(i % 2, i ~/ 2, 2, 2)];
       case MultiLayout.focus:
-        final bigW = (w - gap) * 0.74;
-        final others = n - 1;
-        final smallH = (h - gap * (others - 1)) / others;
+        // Une grande vignette plein cadre ; les autres en 16:9 flottantes, accrochées aux coins.
+        const margin = 12.0, pgap = 8.0;
+        final pw = (w * const [0.16, 0.22, 0.30][pipSize]).clamp(200.0, w / 2);
+        final ph = pw * 9 / 16;
+        final used = <int, int>{};
         final result = <Rect>[];
-        var k = 0;
         for (var i = 0; i < n; i++) {
           if (i == big) {
-            result.add(Rect.fromLTWH(0, 0, bigW, h));
-          } else {
-            result.add(Rect.fromLTWH(bigW + gap, k * (smallH + gap), w - bigW - gap, smallH));
-            k++;
+            result.add(Rect.fromLTWH(0, 0, w, h));
+            continue;
           }
+          final corner = slots != null && i < slots.length ? slots[i].pipCorner : 3;
+          final drag = slots != null && i < slots.length ? slots[i].pipDrag : Offset.zero;
+          final k = used[corner] ?? 0;
+          used[corner] = k + 1;
+          final right = corner % 2 == 1, bottom = corner >= 2;
+          var x = right ? w - margin - pw - k * (pw + pgap) : margin + k * (pw + pgap);
+          final y = bottom ? h - margin - ph : margin;
+          x = x.clamp(0.0, (w - pw) < 0 ? 0.0 : w - pw);
+          result.add(Rect.fromLTWH(x + drag.dx, y + drag.dy, pw, ph));
         }
         return result;
       case MultiLayout.auto:
@@ -458,18 +476,29 @@ class _MultiGrid extends StatelessWidget {
     final big = multiview.big.clamp(0, n - 1);
     return LayoutBuilder(builder: (context, constraints) {
       final size = Size(constraints.maxWidth, constraints.maxHeight);
-      final r = rects(multiview.layout, n, big, size);
+      final r = rects(multiview.layout, n, big, size, slots: multiview.slots, pipSize: multiview.pipSize);
+      final isFocus = multiview.layout == MultiLayout.focus && n > 1;
+      // Les vignettes PIP passent au-dessus de la grande.
+      final order = [for (var i = 0; i < n; i++) i]..sort((a, b) => (isFocus && a != big ? 1 : 0).compareTo(isFocus && b != big ? 1 : 0));
       return Stack(children: [
-        for (var i = 0; i < n; i++)
+        for (final i in order)
           AnimatedPositioned(
             key: ObjectKey(multiview.slots[i]),
-            duration: const Duration(milliseconds: 220),
+            duration: multiview.pipDragging ? Duration.zero : const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
             left: r[i].left,
             top: r[i].top,
             width: r[i].width,
             height: r[i].height,
-            child: _SlotTile(index: i, slot: multiview.slots[i], onChange: () => onChange(i), focus: focus),
+            child: _SlotTile(
+              index: i,
+              slot: multiview.slots[i],
+              onChange: () => onChange(i),
+              focus: focus,
+              pip: isFocus && i != big,
+              onPipDrag: (d) => multiview.pipMove(i, d),
+              onPipDrop: () => multiview.pipDrop(i, r[i].center, size),
+            ),
           ),
       ]);
     });
@@ -477,7 +506,18 @@ class _MultiGrid extends StatelessWidget {
 }
 
 class _SlotTile extends StatefulWidget {
-  const _SlotTile({required this.index, required this.slot, required this.onChange, required this.focus});
+  const _SlotTile({
+    required this.index,
+    required this.slot,
+    required this.onChange,
+    required this.focus,
+    this.pip = false,
+    this.onPipDrag,
+    this.onPipDrop,
+  });
+  final bool pip;
+  final void Function(Offset delta)? onPipDrag;
+  final VoidCallback? onPipDrop;
   final int index;
   final MultiSlot slot;
   final VoidCallback onChange;
@@ -514,6 +554,9 @@ class _SlotTileState extends State<_SlotTile> {
               }
             },
             onDoubleTap: item == null ? null : () => multiview.makeBig(widget.index),
+            onPanUpdate: widget.pip ? (d) => widget.onPipDrag?.call(d.delta) : null,
+            onPanEnd: widget.pip ? (_) => widget.onPipDrop?.call() : null,
+            onPanCancel: widget.pip ? () => widget.onPipDrop?.call() : null,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               decoration: BoxDecoration(

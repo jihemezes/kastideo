@@ -28,6 +28,15 @@ struct SidebarView: View {
                 row(.youtube, icon: "play.rectangle", count: nil)
                 row(.recordings, icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",
                     count: recordings.activityCount)
+                // Ouvre la fenêtre MultiVue (pas une page de la fenêtre principale).
+                Button {
+                    openWindow(id: "multiview")
+                } label: {
+                    Label("MultiVue", systemImage: "rectangle.split.2x2")
+                }
+                .buttonStyle(.plain)
+                .selectionDisabled()
+                .help("Plusieurs chaînes en même temps (⌥⌘M)")
             }
 
             if store.selectableSources.count > 1 {

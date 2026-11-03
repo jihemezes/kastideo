@@ -493,7 +493,9 @@ Si vous avez **plusieurs sources de direct** (deux abonnements IPTV, ou un abonn
 
 **3. Source de chaque écran.** Chaque écran est **réservé à une source** : la pastille en haut de l'écran permet d'en changer. Le sélecteur de chaînes de cet écran ne propose que les chaînes de sa source, et une source ne peut pas réserver plus d'écrans qu'elle n'a de connexions.
 
-**Disposition** : côte à côte, empilé, grille, ou une grande image avec des petites (menu de disposition de la MultiVue).
+**Disposition** : côte à côte, empilé, grille, ou **une grande + vignettes (PIP)** (menu de disposition de la MultiVue). Dans cette dernière, une chaîne occupe tout le cadre et les autres flottent en **petites vignettes 16:9** : **glissez** une vignette pour la déplacer (elle s'accroche au coin le plus proche), **double-cliquez** dessus pour l'échanger avec la grande (le son suit), et réglez leur **taille** (petites, moyennes, grandes) dans la barre de la MultiVue. Un simple clic donne le son à une vignette.
+
+**Où trouver la MultiVue ?** Sur Mac : entrée **MultiVue** de la barre latérale, bouton de la barre d'outils, bouton **MultiVue** de l'accueil (à côté de Favoris et Enregistrements), bouton de la barre de lecture (ouvre la MultiVue avec la chaîne regardée), menu Lecture et ⌥⌘M. Sur Windows, Linux et Android : accueil, barre latérale du Direct, bouton de la barre de lecture et Ctrl+Alt+M.
 
 **Image dans l'image (PIP).** Pendant la lecture d'une chaîne en direct, le bouton **image dans l'image** (en haut à droite du lecteur) ouvre une **seconde chaîne en miniature** dans un coin, sans le son. **Cliquez sur la miniature** pour l'échanger avec la chaîne principale, ou sur la croix pour la fermer. La seconde chaîne doit venir d'une source qui a une connexion libre : avec un seul abonnement limité à une connexion, choisissez une chaîne de la liste publique (ou d'un second abonnement). La miniature se ferme quand vous quittez le lecteur.
 

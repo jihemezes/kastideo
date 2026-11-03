@@ -493,7 +493,9 @@ If you have **several live sources** (two IPTV subscriptions, or a subscription 
 
 **3. Source of each screen.** Each screen is **reserved for one source**: the badge at the top of the screen lets you change it. The channel picker of that screen only offers channels from its source, and a source cannot reserve more screens than it has connections.
 
-**Layout**: side by side, stacked, grid, or one large picture with small ones (MultiView layout menu).
+**Layout**: side by side, stacked, grid, or **one large + thumbnails (PIP)** (MultiView layout menu). In the latter, one channel fills the frame and the others float as **small 16:9 thumbnails**: **drag** a thumbnail to move it (it snaps to the nearest corner), **double-click** it to swap it with the large one (the sound follows), and set their **size** (small, medium, large) in the MultiView bar. A single click gives a thumbnail the sound.
+
+**Where to find MultiView?** On Mac: the **MultiView** entry in the sidebar, the toolbar button, the **MultiView** button on the Home screen (next to Favorites and Recordings), the player bar button (opens MultiView with the channel you are watching), the Playback menu and ⌥⌘M. On Windows, Linux and Android: Home, the Live sidebar, the player bar button and Ctrl+Alt+M.
 
 **Picture in picture (PIP).** While a live channel plays, the **picture in picture** button (top right of the player) opens a **second channel in a small window** in a corner, muted. **Click the small window** to swap it with the main channel, or the cross to close it. The second channel must come from a source with a free connection: with a single subscription limited to one connection, pick a channel from the public list (or a second subscription). The small window closes when you leave the player.
 

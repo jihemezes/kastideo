@@ -128,6 +128,8 @@ struct ControlsBar: View {
                     .frame(width: 80)
                     .help("Volume (100 = normal, jusqu'à 200 %)")
 
+                if playback.isLive { MultiViewPlayerButton() }
+
                 CastMenuButton()
 
                 Button { navigation.showContextPanel.toggle() } label: {

@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.13.1-android1] - 2026-11-03
+
+- **Vrai PIP** dans la MultiVue (disposition « une grande ») : vignettes 16:9 flottantes, déplaçables et accrochées aux coins, double-clic pour échanger avec la grande, taille réglable.
+- Bouton MultiVue dans la barre de lecture des chaînes en direct (ouvre la MultiVue avec la chaîne regardée).
+
+## [1.13.1-desktop1] - 2026-11-03
+
+- **Vrai PIP** dans la MultiVue (disposition « une grande ») : vignettes 16:9 flottantes, déplaçables et accrochées aux coins, double-clic pour échanger avec la grande, taille réglable.
+- Bouton MultiVue dans la barre de lecture des chaînes en direct (ouvre la MultiVue avec la chaîne regardée).
+
 ## [1.13.0-android1] - 2026-11-03
 
 - **MultiVue multi-abonnements** : une ligne de connexions par abonnement (Détecter pour les comptes Xtream), choix du nombre d'écrans (±), disposition (grille, une grande, côte à côte, empilé) et source réservée à chaque écran.

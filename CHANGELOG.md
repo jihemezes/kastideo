@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.13.1] - 2026-11-03
+
+- **MultiVue : le bouton « Choisir une chaîne » fonctionne** (une couche invisible interceptait le clic).
+- **Vrai PIP** dans la disposition « Une grande + vignettes (PIP) » : une chaîne plein cadre, les autres en vignettes 16:9 flottantes, **déplaçables** (elles s'accrochent au coin le plus proche), **double-clic pour les échanger** avec la grande, taille réglable (petites, moyennes, grandes).
+- **MultiVue plus facile à trouver** : entrée dans la barre latérale, bouton dans la barre d'outils, bouton sur l'accueil (à côté de Favoris et Enregistrements) et bouton dans la barre de lecture (ouvre la MultiVue avec la chaîne regardée).
+
 ## [1.13.0] - 2026-11-03
 
 - **MultiVue repensée pour plusieurs abonnements** : réglages > Lecture = une ligne par abonnement (nom + identifiant du compte) avec son nombre de connexions ; dans la fenêtre MultiVue, vous choisissez le **nombre d'écrans**, la **disposition** (côte à côte, empilé, grille, une grande + petites) et la **source réservée à chaque écran**. Chaque écran ne propose que les chaînes de sa source ; une source ne dépasse pas son nombre de connexions.

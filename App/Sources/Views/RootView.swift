@@ -208,6 +208,7 @@ struct MainToolbar: ToolbarContent {
                     .help("Chargement des sources ou du guide TV…")
             }
             DownloadIndicator()
+            MultiViewOpenButton()
             if let scope {
                 Menu {
                     Section("Interface — \(scope.label)") {

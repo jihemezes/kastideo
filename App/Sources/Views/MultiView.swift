@@ -73,6 +73,9 @@ final class MultiViewSlot: Identifiable {
     private(set) var item: MediaItem?
     /// Source réservée à cet écran (ses chaînes seules sont proposées).
     var sourceID: UUID?
+    /// Disposition PIP : coin où la vignette est accrochée, et déplacement en cours (glisser).
+    var pipCorner: PipCorner = .bottomRight
+    var drag: CGSize = .zero
     private(set) var isLoading = false
     private(set) var failed = false
     @ObservationIgnored let player: VLCMediaPlayer
@@ -152,7 +155,7 @@ enum MultiViewLayout: String, CaseIterable, Identifiable {
         case .sideBySide: return String(localized: "Côte à côte")
         case .stacked: return String(localized: "Empilé")
         case .grid: return String(localized: "Grille")
-        case .focus: return String(localized: "Une grande + petites")
+        case .focus: return String(localized: "Une grande + vignettes (PIP)")
         }
     }
     var icon: String {
@@ -161,6 +164,41 @@ enum MultiViewLayout: String, CaseIterable, Identifiable {
         case .stacked: return "rectangle.split.1x2"
         case .grid: return "rectangle.split.2x2"
         case .focus: return "rectangle.leadinghalf.inset.filled"
+        }
+    }
+}
+
+/// Coin où une vignette PIP s'accroche.
+enum PipCorner: String {
+    case topLeft, topRight, bottomLeft, bottomRight
+    var isRight: Bool { self == .topRight || self == .bottomRight }
+    var isBottom: Bool { self == .bottomLeft || self == .bottomRight }
+    static func nearest(x: CGFloat, y: CGFloat, in size: CGSize) -> PipCorner {
+        switch (x > size.width / 2, y > size.height / 2) {
+        case (false, false): return .topLeft
+        case (true, false): return .topRight
+        case (false, true): return .bottomLeft
+        case (true, true): return .bottomRight
+        }
+    }
+}
+
+/// Taille des vignettes PIP (part de la largeur de la fenêtre).
+enum PipSize: String, CaseIterable, Identifiable {
+    case small, medium, large
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .small: return String(localized: "Petites")
+        case .medium: return String(localized: "Moyennes")
+        case .large: return String(localized: "Grandes")
+        }
+    }
+    var fraction: CGFloat {
+        switch self {
+        case .small: return 0.16
+        case .medium: return 0.22
+        case .large: return 0.30
         }
     }
 }
@@ -174,6 +212,11 @@ final class MultiViewModel {
     var pickerSlotID: UUID?
     var layout: MultiViewLayout = MultiViewLayout(rawValue: UserDefaults.standard.string(forKey: "multiview.layout") ?? "") ?? .grid {
         didSet { UserDefaults.standard.set(layout.rawValue, forKey: "multiview.layout") }
+    }
+    /// Écran affiché en grand dans la disposition PIP (le premier par défaut).
+    var bigID: UUID?
+    var pipSize: PipSize = PipSize(rawValue: UserDefaults.standard.string(forKey: "multiview.pipsize") ?? "") ?? .medium {
+        didSet { UserDefaults.standard.set(pipSize.rawValue, forKey: "multiview.pipsize") }
     }
     private(set) var screenCount = max(UserDefaults.standard.integer(forKey: "multiview.screens"), 2)
 
@@ -269,6 +312,12 @@ final class MultiViewModel {
         for slot in slots { slot.setMuted(slot.id != id) }
     }
 
+    /// Met un écran en grand (disposition PIP) et lui donne le son.
+    func makeBig(_ id: UUID) {
+        bigID = id
+        focus(id)
+    }
+
     func focus(index: Int) {
         guard slots.indices.contains(index) else { return }
         focus(slots[index].id)
@@ -281,6 +330,7 @@ final class MultiViewModel {
         }
         slots = []
         focusedID = nil
+        bigID = nil
     }
 
     /// Rectangles des écrans selon la disposition.
@@ -309,19 +359,26 @@ final class MultiViewModel {
                               width: alone ? w : cw, height: ch)
             }
         case .focus:
-            let big = slots.firstIndex { $0.id == focusedID } ?? 0
-            let bigW = (w - spacing) * 2 / 3
-            let smallW = w - bigW - spacing
-            let smallH = (h - spacing * CGFloat(n - 2)) / CGFloat(n - 1)
+            // Un écran en grand ; les autres en vignettes 16:9 flottantes, accrochées aux coins.
+            let big = slots.firstIndex { $0.id == bigID } ?? 0
+            let margin: CGFloat = 12, gap: CGFloat = 8
+            let pw = min(max(w * pipSize.fraction, 200), w / 2)
+            let ph = pw * 9 / 16
             var result = [CGRect](repeating: .zero, count: n)
-            var k = 0
+            var used: [PipCorner: Int] = [:]
             for i in 0..<n {
                 if i == big {
-                    result[i] = CGRect(x: 0, y: 0, width: bigW, height: h)
-                } else {
-                    result[i] = CGRect(x: bigW + spacing, y: CGFloat(k) * (smallH + spacing), width: smallW, height: smallH)
-                    k += 1
+                    result[i] = CGRect(x: 0, y: 0, width: w, height: h)
+                    continue
                 }
+                let corner = slots[i].pipCorner
+                let k = CGFloat(used[corner, default: 0])
+                used[corner, default: 0] += 1
+                var x = corner.isRight ? w - margin - pw - k * (pw + gap) : margin + k * (pw + gap)
+                let y = corner.isBottom ? h - margin - ph : margin
+                x = min(max(x, 0), max(w - pw, 0))
+                let d = slots[i].drag
+                result[i] = CGRect(x: x + d.width, y: y + d.height, width: pw, height: ph)
             }
             return result
         }
@@ -355,6 +412,13 @@ struct MultiViewWindow: View {
                 }
                 .pickerStyle(.menu)
                 .help("Disposition des écrans")
+                if model.layout == .focus {
+                    Picker("Taille des vignettes", selection: Binding(get: { model.pipSize }, set: { model.pipSize = $0 })) {
+                        ForEach(PipSize.allCases) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.menu)
+                    .help("Taille des vignettes PIP (glissez une vignette pour la déplacer, double-clic pour l'échanger avec la grande)")
+                }
                 Stepper(value: Binding(get: { model.screenCount },
                                        set: { model.setScreenCount($0, store: store) }),
                         in: 1...max(MultiViewKeys.maxScreens(store.sources), 1)) {
@@ -399,12 +463,16 @@ struct MultiViewWindow: View {
             ZStack(alignment: .topLeading) {
                 ForEach(Array(model.slots.enumerated()), id: \.element.id) { index, slot in
                     if index < frames.count {
-                        MultiViewTile(slot: slot, index: index)
+                        let isPip = model.layout == .focus && model.slots.count > 1
+                            && slot.id != (model.slots.first { $0.id == model.bigID } ?? model.slots[0]).id
+                        MultiViewTile(slot: slot, index: index, pip: isPip, area: geo.size)
                             .frame(width: max(frames[index].width, 1), height: max(frames[index].height, 1))
                             .offset(x: frames[index].minX, y: frames[index].minY)
+                            .zIndex(isPip ? 1 : 0)
                     }
                 }
             }
+            .coordinateSpace(name: "multiviewArea")
         }
         .padding(4)
     }
@@ -438,6 +506,10 @@ struct MultiViewTile: View {
     @Environment(LibraryStore.self) private var store
     let slot: MultiViewSlot
     let index: Int
+    /// Vignette flottante de la disposition PIP (déplaçable, accrochée aux coins).
+    var pip = false
+    /// Taille de la zone d'affichage (pour accrocher la vignette au coin le plus proche).
+    var area: CGSize = .zero
     @State private var hovering = false
 
     var body: some View {
@@ -445,12 +517,17 @@ struct MultiViewTile: View {
         ZStack {
             Color.black
             MultiViewVideo(slot: slot)
+            // Couche de clic sous les boutons : un clic donne le son, un double-clic met l'écran en grand (PIP).
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture(count: 2) { if model.layout == .focus { model.makeBig(slot.id) } else { model.focus(slot.id) } }
+                .onTapGesture { model.focus(slot.id) }
             if slot.item == nil {
                 Button {
                     model.pickerSlotID = slot.id
                 } label: {
                     Label("Choisir une chaîne", systemImage: "plus.circle")
-                        .font(.title3)
+                        .font(pip ? .caption : .title3)
                 }
                 .buttonStyle(.bordered)
             } else if slot.isLoading {
@@ -459,13 +536,14 @@ struct MultiViewTile: View {
                 Label("Flux refusé ou indisponible", systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
             }
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture { model.focus(slot.id) }
             overlay(focused: focused)
         }
-        .overlay(Rectangle().strokeBorder(focused ? KastideoPalette.orange : Color.white.opacity(0.08), lineWidth: focused ? 3 : 1))
+        .clipShape(RoundedRectangle(cornerRadius: pip ? 10 : 0))
+        .overlay(RoundedRectangle(cornerRadius: pip ? 10 : 0)
+            .strokeBorder(focused ? KastideoPalette.orange : Color.white.opacity(pip ? 0.35 : 0.08), lineWidth: focused ? 3 : 1))
+        .shadow(color: .black.opacity(pip ? 0.6 : 0), radius: pip ? 8 : 0)
         .onHover { hovering = $0 }
+        .highPriorityGesture(pipDrag, including: pip ? .all : .subviews)
         .popover(isPresented: Binding(get: { model.pickerSlotID == slot.id },
                                       set: { if !$0, model.pickerSlotID == slot.id { model.pickerSlotID = nil } })) {
             MultiViewChannelPicker(canPick: { model.canPlay($0, on: slot.id) }, onlySource: slot.sourceID) { item in
@@ -473,6 +551,18 @@ struct MultiViewTile: View {
                 model.pickerSlotID = nil
             }
         }
+    }
+
+    /// Glisser une vignette PIP : elle suit la souris puis s'accroche au coin le plus proche.
+    private var pipDrag: some Gesture {
+        DragGesture(minimumDistance: 8, coordinateSpace: .named("multiviewArea"))
+            .onChanged { value in
+                slot.drag = value.translation
+            }
+            .onEnded { value in
+                slot.pipCorner = PipCorner.nearest(x: value.location.x, y: value.location.y, in: area)
+                withAnimation(.easeOut(duration: 0.18)) { slot.drag = .zero }
+            }
     }
 
     /// Source réservée à cet écran : un clic pour en changer (si plusieurs abonnements ou listes).
@@ -518,12 +608,12 @@ struct MultiViewTile: View {
                     .background(focused ? KastideoPalette.orange : Color.black.opacity(0.6), in: Circle())
                 if let item = slot.item {
                     Text(item.name).font(.callout.weight(.semibold)).lineLimit(1)
-                    if let programme = store.epg.current(for: item.epgID) {
+                    if !pip, let programme = store.epg.current(for: item.epgID) {
                         Text("· \(programme.title)").font(.caption).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
                     }
                 }
                 Spacer()
-                sourceMenu
+                if !pip { sourceMenu }
                 Image(systemName: focused ? "speaker.wave.2.fill" : "speaker.slash.fill")
                     .foregroundStyle(focused ? .white : .white.opacity(0.5))
                 if hovering {
@@ -679,5 +769,43 @@ struct MultiViewSourceRow: View {
         }
         .onChange(of: value) { _, newValue in MultiViewKeys.setLimit(newValue, for: source) }
         .id(source.id)
+    }
+}
+
+/// Bouton d'accès à la MultiVue (barre d'outils, accueil) : ouvre la fenêtre.
+struct MultiViewOpenButton: View {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Button {
+            openWindow(id: "multiview")
+        } label: {
+            Label("MultiVue", systemImage: "rectangle.split.2x2")
+        }
+        .help("MultiVue : plusieurs chaînes en même temps (⌥⌘M)")
+    }
+}
+
+/// Bouton de la barre de lecture : ouvre la MultiVue avec la chaîne en cours.
+struct MultiViewPlayerButton: View {
+    @Environment(\.openWindow) private var openWindow
+    @Environment(LibraryStore.self) private var store
+    @Environment(MultiViewModel.self) private var multiView
+    @Environment(PlaybackController.self) private var playback
+    @Environment(RecordingCenter.self) private var recordings
+
+    var body: some View {
+        Button {
+            let item = playback.current
+            if MultiViewKeys.isAvailable(sources: store.sources), let item, item.kind == .live {
+                // La connexion de la lecture principale est rendue à la MultiVue (sauf enregistrement en cours).
+                if !recordings.isPlayerRecording { playback.stopByUser() }
+                multiView.add(item, store: store)
+            }
+            openWindow(id: "multiview")
+        } label: {
+            Image(systemName: "rectangle.split.2x2")
+        }
+        .help("Ouvrir la MultiVue avec cette chaîne (⌥⌘M)")
     }
 }

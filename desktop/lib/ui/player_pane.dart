@@ -15,6 +15,7 @@ import 'cast_ui.dart';
 import 'log_dialog.dart';
 import 'pip_view.dart';
 import '../core/multiview.dart';
+import 'multiview_view.dart' show openMultiView;
 import 'themes_view.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
@@ -524,6 +525,12 @@ class ControlsBar extends StatelessWidget {
                 onChanged: playback.setVolume,
               ),
             ),
+            if (playback.isLive)
+              _BarButton(
+                icon: Icons.grid_view_rounded,
+                tooltip: '${tr('Ouvrir la MultiVue avec cette chaîne')} (Ctrl+Alt+M)',
+                onTap: () => openMultiView(context),
+              ),
             const CastBarButton(),
             _BarButton(
               icon: navigation.theater ? Icons.close_fullscreen_rounded : Icons.open_in_full_rounded,

@@ -32,6 +32,7 @@ struct HomeView: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(RecordingCenter.self) private var recordings
     @Environment(WatchProgressStore.self) private var watch
+    @Environment(\.openWindow) private var openWindow
     @State private var query = ""
     @State private var results: [MediaItem] = []
 
@@ -77,6 +78,7 @@ struct HomeView: View {
                         .help("Chargement des sources ou du guide TV…")
                 }
                 DownloadIndicator()
+                MultiViewOpenButton()
                 SettingsLink {
                     Label("Sources", systemImage: "antenna.radiowaves.left.and.right")
                 }
@@ -286,6 +288,9 @@ struct HomeView: View {
             }
             HomeSmallButton(title: "YouTube", icon: "play.rectangle.fill", badge: 0) {
                 navigation.go(.youtube)
+            }
+            HomeSmallButton(title: "MultiVue", icon: "rectangle.split.2x2", badge: 0) {
+                openWindow(id: "multiview")
             }
             HomeSmallButton(title: "Enregistrements",
                             icon: recordings.activeLive != nil ? "record.circle.fill" : "record.circle",

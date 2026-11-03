@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show Offset, Size;
 
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
@@ -50,6 +51,10 @@ class MultiViewGroup {
 
 /// Un flux de la MultiVue : son propre lecteur mpv (une connexion au fournisseur).
 class MultiSlot extends ChangeNotifier {
+  /// Disposition PIP : coin d'accroche (0 haut-gauche, 1 haut-droite, 2 bas-gauche, 3 bas-droite) et déplacement en cours.
+  int pipCorner = 3;
+  Offset pipDrag = Offset.zero;
+
   MultiSlot() {
     player = Player(
       configuration: const PlayerConfiguration(title: 'Kastideo', logLevel: MPVLogLevel.warn, bufferSize: 32 * 1024 * 1024),
@@ -187,11 +192,16 @@ class MultiViewController extends ChangeNotifier {
   /// Vignette affichée en grand (disposition « une grande »).
   int big = 0;
   MultiLayout layout = MultiLayout.auto;
+
+  /// Taille des vignettes PIP : 0 petites, 1 moyennes, 2 grandes.
+  int pipSize = 1;
+  bool pipDragging = false;
   final List<MultiViewGroup> groups = [];
 
   Future<void> _load() async {
     _prefs = await SharedPreferences.getInstance();
     layout = MultiLayout.values.where((l) => l.name == _prefs!.getString('multiview.layout')).firstOrNull ?? MultiLayout.auto;
+    pipSize = (_prefs!.getInt('multiview.pipsize') ?? 1).clamp(0, 2);
     final raw = _prefs!.getString('multiview.groups.v1');
     if (raw != null) {
       try {
@@ -364,6 +374,31 @@ class MultiViewController extends ChangeNotifier {
     }
     big = index;
     setActive(index);
+  }
+
+  void setPipSize(int value) {
+    pipSize = value.clamp(0, 2);
+    _prefs?.setInt('multiview.pipsize', pipSize);
+    notifyListeners();
+  }
+
+  /// Une vignette PIP suit la souris.
+  void pipMove(int index, Offset delta) {
+    if (index < 0 || index >= slots.length) return;
+    pipDragging = true;
+    slots[index].pipDrag += delta;
+    notifyListeners();
+  }
+
+  /// Relâchement : la vignette s'accroche au coin le plus proche de son centre.
+  void pipDrop(int index, Offset center, Size area) {
+    if (index < 0 || index >= slots.length) return;
+    final right = center.dx > area.width / 2;
+    final bottom = center.dy > area.height / 2;
+    slots[index].pipCorner = (bottom ? 2 : 0) + (right ? 1 : 0);
+    slots[index].pipDrag = Offset.zero;
+    pipDragging = false;
+    notifyListeners();
   }
 
   void setLayout(MultiLayout value) {

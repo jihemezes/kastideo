@@ -1048,3 +1048,11 @@
 "Connexions simultanées de chaque abonnement" = "Simultaneous connections of each subscription";
 "Indiquez pour chaque abonnement le nombre de connexions qu'il autorise (1 pour la plupart, 4 pour une liste publique). Dans la fenêtre MultiVue (⌥⌘M), choisissez ensuite le nombre d'écrans, la disposition et la source de chaque écran. Les enregistrements et téléchargements utilisent aussi une connexion." = "For each subscription, enter the number of connections it allows (1 for most, 4 for a public list). Then, in the MultiView window (⌥⌘M), choose the number of screens, the layout and each screen's source. Recordings and downloads also use a connection.";
 "%@ (%@)" = "%@ (%@)";
+
+/* 1.13.1 */
+"Une grande + vignettes (PIP)" = "One large + thumbnails (PIP)";
+"Taille des vignettes" = "Thumbnail size";
+"Taille des vignettes PIP (glissez une vignette pour la déplacer, double-clic pour l'échanger avec la grande)" = "PIP thumbnail size (drag a thumbnail to move it, double-click to swap it with the large one)";
+"MultiVue : plusieurs chaînes en même temps (⌥⌘M)" = "MultiView: several channels at once (⌥⌘M)";
+"Plusieurs chaînes en même temps (⌥⌘M)" = "Several channels at once (⌥⌘M)";
+"Ouvrir la MultiVue avec cette chaîne (⌥⌘M)" = "Open MultiView with this channel (⌥⌘M)";
