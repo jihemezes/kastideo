@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
@@ -69,6 +70,20 @@ class RecordingsList extends StatefulWidget {
 }
 
 class _RecordingsListState extends State<RecordingsList> {
+  bool _selecting = false;
+  final Set<String> _selected = {};
+
+  Future<void> _remove(List<RecordedFile> list, {bool clear = false}) async {
+    if (list.isEmpty) return;
+    final done = await showRemovalDialog(context, list, clear: clear);
+    if (done && mounted) {
+      setState(() {
+        _selected.clear();
+        _selecting = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -113,6 +128,22 @@ class _RecordingsListState extends State<RecordingsList> {
                   icon: const Icon(Icons.folder_open_rounded),
                 ),
                 IconButton(tooltip: tr('Actualiser'), onPressed: recordings.scanFiles, icon: const Icon(Icons.refresh_rounded)),
+                IconButton(
+                  tooltip: tr('Sélectionner'),
+                  isSelected: _selecting,
+                  onPressed: recordings.files.isEmpty
+                      ? null
+                      : () => setState(() {
+                            _selecting = !_selecting;
+                            _selected.clear();
+                          }),
+                  icon: const Icon(Icons.checklist_rounded),
+                ),
+                IconButton(
+                  tooltip: tr('Vider la liste…'),
+                  onPressed: recordings.files.isEmpty ? null : () => _remove(List.of(recordings.files), clear: true),
+                  icon: const Icon(Icons.delete_sweep_outlined),
+                ),
               ]),
             ),
             Padding(
@@ -150,14 +181,40 @@ class _RecordingsListState extends State<RecordingsList> {
                     style: kText(12, color: KPalette.ink38)),
               ),
             for (final s in scheduled) _ScheduleRow(schedule: s, date: _date(s.start)),
-            _header('${tr('FICHIERS')} (${recordings.files.length})'),
+            _header('${tr('FICHIERS')} (${recordings.files.length})', actions: [
+              if (_selecting) ...[
+                TextButton(onPressed: () => setState(() => _selected.addAll(recordings.files.map((f) => f.path))), child: Text(tr('Tout sélectionner'))),
+                TextButton(
+                  onPressed: _selected.isEmpty ? null : () => _remove([for (final f in recordings.files) if (_selected.contains(f.path)) f]),
+                  child: Text('${tr('Retirer la sélection')} (${_selected.length})…'),
+                ),
+              ],
+            ]),
+            if (recordings.removalUndo != null)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
+                child: Row(children: [
+                  Expanded(child: Text(tr('Retiré de la liste.'), style: kText(12))),
+                  TextButton(onPressed: recordings.undoRemoval, child: Text(tr('Annuler'))),
+                ]),
+              ),
             if (recordings.files.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(tr('Aucun fichier pour l\'instant.'), style: kText(12, color: KPalette.ink38)),
               ),
             for (final f in recordings.files)
-              _FileRow(file: f, playing: playingPath == f.path, date: _date(f.modified)),
+              _FileRow(
+                file: f,
+                playing: playingPath == f.path,
+                date: _date(f.modified),
+                selecting: _selecting,
+                selected: _selected.contains(f.path),
+                onToggle: () => setState(() => _selected.contains(f.path) ? _selected.remove(f.path) : _selected.add(f.path)),
+                onRemove: () => _remove([f]),
+              ),
           ]);
         },
       ),
@@ -321,17 +378,29 @@ void playLocalFile(BuildContext context, String path) {
 }
 
 class _FileRow extends StatelessWidget {
-  const _FileRow({required this.file, required this.playing, required this.date});
+  const _FileRow({
+    required this.file,
+    required this.playing,
+    required this.date,
+    required this.selecting,
+    required this.selected,
+    required this.onToggle,
+    required this.onRemove,
+  });
   final RecordedFile file;
   final bool playing;
   final String date;
+  final bool selecting;
+  final bool selected;
+  final VoidCallback onToggle;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     return MenuTap(
       onMenu: (d) => _menu(context, d.globalPosition),
       child: Hover(
-        onTap: () => playLocalFile(context, file.path),
+        onTap: selecting ? onToggle : () => playLocalFile(context, file.path),
         builder: (context, hovering) => Container(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
@@ -340,6 +409,11 @@ class _FileRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(children: [
+            if (selecting)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(selected ? Icons.check_circle : Icons.circle_outlined, size: 20, color: selected ? KPalette.accent : KPalette.ink54),
+              ),
             Icon(Icons.movie_outlined, size: 18, color: playing ? KPalette.ink : KPalette.ink54),
             const SizedBox(width: 10),
             Expanded(
@@ -348,6 +422,14 @@ class _FileRow extends StatelessWidget {
                 Text('${sizeText(file.size)} · $date', style: kText(11, color: KPalette.ink.withValues(alpha: playing ? 0.8 : 0.45))),
               ]),
             ),
+            if (!selecting && hovering)
+              IconButton(
+                tooltip: tr('Retirer de la liste…'),
+                visualDensity: VisualDensity.compact,
+                iconSize: 18,
+                onPressed: onRemove,
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
           ]),
         ),
       ),
@@ -362,12 +444,14 @@ class _FileRow extends StatelessWidget {
       items: [
         PopupMenuItem(value: 'play', child: Text(tr('Regarder'), style: kText(13))),
         PopupMenuItem(value: 'folder', child: Text(tr('Afficher dans le dossier'), style: kText(13))),
+        PopupMenuItem(value: 'remove', child: Text(tr('Retirer de la liste…'), style: kText(13))),
         PopupMenuItem(value: 'delete', child: Text(tr('Supprimer le fichier'), style: kText(13, color: KPalette.orange))),
       ],
     );
     if (!context.mounted) return;
     if (choice == 'play') playLocalFile(context, file.path);
     if (choice == 'folder') openFolder(File(file.path).parent.path);
+    if (choice == 'remove') onRemove();
     if (choice == 'delete') {
       final ok = await showKDialog<bool>(
         context: context,
@@ -386,4 +470,85 @@ class _FileRow extends StatelessWidget {
       }
     }
   }
+}
+
+/// Boîte de retrait de la liste : par défaut les fichiers restent dans le stockage ; renvoie true si le retrait a eu lieu.
+Future<bool> showRemovalDialog(BuildContext context, List<RecordedFile> list, {bool clear = false}) async {
+  final prefs = await SharedPreferences.getInstance();
+  if (!context.mounted) return false;
+  var deleteFiles = prefs.getBool('recordings.remove.deleteFiles') ?? false;
+  var remember = false;
+  final total = list.fold<int>(0, (a, f) => a + f.size);
+  final go = await showKDialog<bool>(
+    context: context,
+    builder: (c) => StatefulBuilder(
+      builder: (c, setS) => AlertDialog(
+        title: Text(clear
+            ? '${tr('Vider la liste')} (${list.length})'
+            : list.length == 1
+                ? tr('Retirer l\'enregistrement de la liste')
+                : '${tr('Retirer de la liste')} : ${list.length}'),
+        content: SizedBox(
+          width: 420,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (list.length <= 8)
+              for (final f in list) Text('• ${f.name}', style: kText(12), maxLines: 1, overflow: TextOverflow.ellipsis)
+            else
+              Text('${list.length} ${tr('enregistrements terminés (programmations et téléchargements ne sont pas concernés).')}', style: kText(12)),
+            const SizedBox(height: 10),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: deleteFiles,
+              onChanged: (v) => setS(() => deleteFiles = v ?? false),
+              title: Text(tr('Supprimer aussi le(s) fichier(s) du stockage'), style: kText(13)),
+              subtitle: Text(
+                deleteFiles
+                    ? '${tr('Espace libéré')} : ${sizeText(total)}'
+                    : tr('Les fichiers restent dans le dossier ; ils ne réapparaîtront pas dans la liste. Annulation possible juste après.'),
+                style: kText(11, color: KPalette.ink54),
+              ),
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: remember,
+              onChanged: (v) => setS(() => remember = v ?? false),
+              title: Text(tr('Mémoriser ce choix'), style: kText(12)),
+            ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Annuler'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(deleteFiles ? tr('Retirer et supprimer') : tr('Retirer de la liste'))),
+        ],
+      ),
+    ),
+  );
+  if (go != true || !context.mounted) return false;
+  final recs = context.recordings;
+  final playback = context.playback;
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  if (remember) await prefs.setBool('recordings.remove.deleteFiles', deleteFiles);
+  for (final f in list) {
+    if (deleteFiles && playback.current?.stream == f.path) await playback.stop();
+  }
+  final warnings = await recs.remove(list, deleteFiles: deleteFiles);
+  if (warnings.length == 1) {
+    messenger?.showSnackBar(SnackBar(content: Text(warnings.first)));
+  } else if (warnings.length > 1 && context.mounted) {
+    await showKDialog<void>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text('${warnings.length} ${tr('avertissements')}'),
+        content: SizedBox(
+          width: 460,
+          height: 200,
+          child: ListView(children: [for (final w in warnings) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Text(w, style: kText(12)))]),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('OK')))],
+      ),
+    );
+  }
+  return true;
 }

@@ -10,6 +10,10 @@ enum RecordingKeys {
     static let convertMP4 = "recordings.convertMP4"
     static let autoClean = "recordings.autoClean"
     static let autoCleanDays = "recordings.autoCleanDays"
+    /// Fichiers retirés de la liste (chemins) sans avoir été supprimés du stockage.
+    static let hiddenFiles = "recordings.hiddenFiles.v1"
+    /// Dernier choix « supprimer aussi le fichier » de la boîte de retrait (désactivé par défaut).
+    static let removeDeletesFiles = "recordings.remove.deleteFiles"
     static let notifications = "recordings.notifications"
     static let schedules = "recordings.schedules.v1"
     static let downloads = "recordings.downloads.v1"

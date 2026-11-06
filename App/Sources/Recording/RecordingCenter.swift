@@ -22,6 +22,18 @@ struct RecordingToast: Identifiable {
     let isError: Bool
 }
 
+/// Avertissements d'un retrait de la liste (fichier introuvable, suppression impossible…), affichés en liste quand il y en a plusieurs.
+struct RemovalWarnings: Identifiable {
+    let id = UUID()
+    let messages: [String]
+}
+
+/// Retrait de la liste qu'on peut encore annuler quelques secondes.
+struct RemovalUndo: Identifiable {
+    let id = UUID()
+    let paths: [String]
+}
+
 /// Chef d'orchestre des enregistrements (direct, programmés), des téléchargements et des conversions.
 /// Garantit qu'une seule connexion au fournisseur est utilisée à la fois.
 @MainActor
@@ -49,6 +61,8 @@ final class RecordingCenter {
     /// Dernier résultat d'enregistrement ou de téléchargement, affiché en bandeau (les notifications macOS peuvent être refusées).
     var toast: RecordingToast?
     var scheduleSheetItem: MediaItem?
+    var removalWarnings: RemovalWarnings?
+    var removalUndo: RemovalUndo?
 
     private let store: LibraryStore
     private let playback: PlaybackController
@@ -721,13 +735,85 @@ final class RecordingCenter {
         let keys: [URLResourceKey] = [.creationDateKey, .contentModificationDateKey, .fileSizeKey, .isRegularFileKey]
         let urls = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: keys,
                                                                  options: [.skipsHiddenFiles])) ?? []
-        files = urls.compactMap { url in
+        let hidden = hiddenPaths
+        let all = urls.compactMap { url -> RecordingFile? in
             guard RecordingFile.extensions.contains(url.pathExtension.lowercased()),
                   let values = try? url.resourceValues(forKeys: Set(keys)), values.isRegularFile == true else { return nil }
             let date = values.creationDate ?? values.contentModificationDate ?? Date()
             return RecordingFile(url: url, date: date, size: Int64(values.fileSize ?? 0))
         }
-        .sorted { $0.date > $1.date }
+        // Un fichier disparu du stockage n'a plus besoin d'être masqué (un nouvel enregistrement de même nom réapparaîtra).
+        if !hidden.isEmpty, !urls.isEmpty {
+            let present = Set(all.map(\.url.path))
+            let kept = hidden.intersection(present)
+            if kept != hidden { setHiddenPaths(kept) }
+        }
+        files = all.filter { !hidden.contains($0.url.path) }.sorted { $0.date > $1.date }
+    }
+
+    @ObservationIgnored private var hiddenPaths: Set<String> {
+        Set(UserDefaults.standard.stringArray(forKey: RecordingKeys.hiddenFiles) ?? [])
+    }
+
+    private func setHiddenPaths(_ paths: Set<String>) {
+        UserDefaults.standard.set(paths.sorted(), forKey: RecordingKeys.hiddenFiles)
+    }
+
+    /// Retire des enregistrements de la liste ; avec [deleteFiles], place aussi leurs fichiers dans la corbeille.
+    /// Un fichier déjà absent ou impossible à supprimer ne bloque rien : l'opération continue et un avertissement est émis
+    /// (notification s'il n'y en a qu'un, fenêtre listant les avertissements s'il y en a plusieurs).
+    func remove(_ list: [RecordingFile], deleteFiles: Bool) {
+        let fm = FileManager.default
+        var hidden = hiddenPaths
+        var hiddenNow: [String] = []
+        var warnings: [String] = []
+        for file in list {
+            let path = file.url.path
+            if converting.contains(file.name) {
+                warnings.append(String(localized: "« \(file.name) » est en cours de conversion : conservé dans la liste."))
+                continue
+            }
+            if !fm.fileExists(atPath: path) {
+                warnings.append(String(localized: "« \(file.name) » : le fichier n'existe plus dans le stockage, il est seulement retiré de la liste."))
+                continue
+            }
+            if deleteFiles {
+                if (try? fm.trashItem(at: file.url, resultingItemURL: nil)) == nil {
+                    do { try fm.removeItem(at: file.url) } catch {
+                        warnings.append(String(localized: "« \(file.name) » : suppression du fichier impossible (\(error.localizedDescription)), il est seulement retiré de la liste."))
+                    }
+                }
+            }
+            if fm.fileExists(atPath: path) {
+                hidden.insert(path)
+                hiddenNow.append(path)
+            }
+        }
+        setHiddenPaths(hidden)
+        refreshFiles()
+        if !deleteFiles, !hiddenNow.isEmpty {
+            let undo = RemovalUndo(paths: hiddenNow)
+            removalUndo = undo
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(10))
+                if self?.removalUndo?.id == undo.id { self?.removalUndo = nil }
+            }
+        } else {
+            removalUndo = nil
+        }
+        switch warnings.count {
+        case 0: break
+        case 1: report(String(localized: "Retrait de la liste"), warnings[0])
+        default: removalWarnings = RemovalWarnings(messages: warnings)
+        }
+    }
+
+    /// Annule le dernier retrait de la liste (les fichiers n'avaient pas été touchés).
+    func undoRemoval() {
+        guard let undo = removalUndo else { return }
+        setHiddenPaths(hiddenPaths.subtracting(undo.paths))
+        removalUndo = nil
+        refreshFiles()
     }
 
     func deleteFile(_ file: RecordingFile) {

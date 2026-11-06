@@ -7,9 +7,13 @@ import KastideoCore
 struct RecordingsListView: View {
     @Environment(RecordingCenter.self) private var recordings
     @Environment(NavigationModel.self) private var navigation
+    @State private var selecting = false
+    @State private var selected: Set<String> = []
+    @State private var request: RemovalRequest?
 
     var body: some View {
         @Bindable var navigation = navigation
+        @Bindable var recordings = recordings
         List(selection: $navigation.selectedItemID) {
             if let live = recordings.activeLive {
                 Section("Enregistrement en cours") {
@@ -52,19 +56,89 @@ struct RecordingsListView: View {
                         .selectionDisabled()
                 } else {
                     ForEach(recordings.files) { file in
-                        FileRow(file: file)
-                            .contextMenu {
-                                Button("Afficher dans le Finder") { recordings.reveal(file) }
-                                Divider()
-                                Button("Placer dans la corbeille", role: .destructive) { recordings.deleteFile(file) }
+                        HStack(spacing: 8) {
+                            if selecting {
+                                Image(systemName: selected.contains(file.id) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(selected.contains(file.id) ? Color.accentColor : Color.secondary)
+                                    .imageScale(.large)
                             }
+                            FileRow(file: file)
+                            Spacer(minLength: 0)
+                            if !selecting {
+                                Button {
+                                    request = RemovalRequest(files: [file], isClear: false)
+                                } label: { Image(systemName: "trash") }
+                                    .buttonStyle(.borderless)
+                                    .help("Retirer de la liste…")
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            guard selecting else { return }
+                            if selected.contains(file.id) { selected.remove(file.id) } else { selected.insert(file.id) }
+                        }
+                        .contextMenu {
+                            Button("Afficher dans le Finder") { recordings.reveal(file) }
+                            Divider()
+                            Button("Retirer de la liste…") { request = RemovalRequest(files: [file], isClear: false) }
+                            Button("Placer dans la corbeille", role: .destructive) { recordings.deleteFile(file) }
+                        }
                     }
                 }
             }
         }
         .listStyle(.inset)
         .navigationTitle("Enregistrements")
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                if selecting {
+                    HStack {
+                        Button("Tout sélectionner") { selected = Set(recordings.files.map(\.id)) }
+                        Button("Aucun") { selected = [] }
+                        Spacer()
+                        Button("Retirer la sélection (\(selected.count))…", role: .destructive) {
+                            let list = recordings.files.filter { selected.contains($0.id) }
+                            if !list.isEmpty { request = RemovalRequest(files: list, isClear: false) }
+                        }
+                        .disabled(selected.isEmpty)
+                        Button("Terminer") { selecting = false; selected = [] }
+                            .keyboardShortcut(.defaultAction)
+                    }
+                    .padding(10)
+                    .background(.bar)
+                }
+                if recordings.removalUndo != nil {
+                    HStack {
+                        Image(systemName: "arrow.uturn.backward.circle")
+                        Text("Retiré de la liste.")
+                        Spacer()
+                        Button("Annuler") { recordings.undoRemoval() }
+                    }
+                    .padding(10)
+                    .background(.bar)
+                }
+            }
+        }
         .toolbar {
+            ToolbarItem {
+                Button {
+                    selecting.toggle()
+                    if !selecting { selected = [] }
+                } label: {
+                    Label("Sélectionner", systemImage: selecting ? "checkmark.circle.fill" : "checkmark.circle")
+                }
+                .disabled(recordings.files.isEmpty)
+                .help("Sélectionner plusieurs enregistrements pour les retirer de la liste")
+            }
+            ToolbarItem {
+                Button {
+                    request = RemovalRequest(files: recordings.files, isClear: true)
+                } label: {
+                    Label("Vider la liste…", systemImage: "trash.slash")
+                }
+                .disabled(recordings.files.isEmpty)
+                .help("Retirer tous les enregistrements terminés de la liste")
+            }
             ToolbarItem {
                 Button {
                     recordings.reveal()
@@ -75,6 +149,98 @@ struct RecordingsListView: View {
             }
         }
         .onAppear { recordings.refreshFiles() }
+        .onChange(of: recordings.files) { _, files in
+            let ids = Set(files.map(\.id))
+            selected = selected.intersection(ids)
+            if files.isEmpty { selecting = false }
+        }
+        .sheet(item: $request) { req in
+            RemovalConfirmSheet(request: req) { selected = []; selecting = false }
+        }
+        .sheet(item: $recordings.removalWarnings) { warnings in
+            RemovalWarningsSheet(warnings: warnings)
+        }
+    }
+}
+
+/// Demande de retrait de la liste (une ou plusieurs entrées, ou la liste entière).
+struct RemovalRequest: Identifiable {
+    let id = UUID()
+    let files: [RecordingFile]
+    let isClear: Bool
+}
+
+/// Boîte de dialogue : retirer de la liste seulement (par défaut) ou supprimer aussi les fichiers du stockage.
+struct RemovalConfirmSheet: View {
+    @Environment(RecordingCenter.self) private var recordings
+    @Environment(\.dismiss) private var dismiss
+    let request: RemovalRequest
+    var onDone: () -> Void = {}
+
+    @State private var deleteFiles = UserDefaults.standard.bool(forKey: RecordingKeys.removeDeletesFiles)
+    @State private var remember = false
+
+    private var total: Int64 { request.files.reduce(0) { $0 + $1.size } }
+    private var sizeText: String { ByteCountFormatter.string(fromByteCount: total, countStyle: .file) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(request.isClear ? String(localized: "Vider la liste (\(request.files.count))") : request.files.count == 1 ? String(localized: "Retirer l'enregistrement de la liste") : String(localized: "Retirer \(request.files.count) enregistrements de la liste"))
+                .font(.headline)
+            if request.files.count <= 8 {
+                VStack(alignment: .leading, spacing: 3) {
+                    ForEach(request.files) { Text("• " + $0.name).lineLimit(1).font(.callout) }
+                }
+            } else {
+                Text("\(request.files.count) enregistrements terminés (programmations, téléchargements et enregistrement en cours ne sont pas concernés).")
+                    .font(.callout).foregroundStyle(.secondary)
+            }
+            Divider()
+            Toggle(isOn: $deleteFiles) {
+                Text("Supprimer aussi le(s) fichier(s) du stockage (corbeille)")
+            }
+            if deleteFiles {
+                Label("Espace libéré : \(sizeText)", systemImage: "internaldrive")
+                    .font(.callout).foregroundStyle(.secondary)
+            } else {
+                Text("Les fichiers restent dans le dossier des enregistrements ; ils ne réapparaîtront pas dans la liste. Vous pourrez annuler juste après.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            Toggle("Mémoriser ce choix", isOn: $remember).font(.callout)
+            HStack {
+                Spacer()
+                Button("Annuler", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button(deleteFiles ? "Retirer et supprimer" : "Retirer de la liste", role: deleteFiles ? .destructive : nil) {
+                    if remember { UserDefaults.standard.set(deleteFiles, forKey: RecordingKeys.removeDeletesFiles) }
+                    recordings.remove(request.files, deleteFiles: deleteFiles)
+                    onDone()
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(20)
+        .frame(width: 440)
+    }
+}
+
+/// Liste des avertissements d'un retrait (fichier introuvable, suppression impossible…).
+struct RemovalWarningsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let warnings: RemovalWarnings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("\(warnings.messages.count) avertissements", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline).foregroundStyle(.orange)
+            Text("Le retrait a été effectué malgré ces avertissements.").font(.callout).foregroundStyle(.secondary)
+            List(warnings.messages, id: \.self) { Text($0).font(.callout) }
+                .frame(minHeight: 120, maxHeight: 260)
+            HStack { Spacer(); Button("OK") { dismiss() }.keyboardShortcut(.defaultAction) }
+        }
+        .padding(20)
+        .frame(width: 480)
     }
 }
 

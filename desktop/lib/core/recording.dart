@@ -180,6 +180,7 @@ class RecordingCenter extends ChangeNotifier {
   @override
   void dispose() {
     _ticker?.cancel();
+    _undoTimer?.cancel();
     _sizeTimer?.cancel();
     playback.removeListener(_playbackChanged);
     super.dispose();
@@ -701,6 +702,14 @@ class RecordingCenter extends ChangeNotifier {
 
   static const _videoExtensions = {'mkv', 'ts', 'mp4', 'm4v', 'avi', 'mov', 'webm', 'mpg', 'mpeg'};
 
+  static const _hiddenKey = 'recordings.hiddenFiles.v1';
+
+  /// Retrait de la liste qu'on peut encore annuler quelques secondes (chemins masqués).
+  List<String>? removalUndo;
+  Timer? _undoTimer;
+
+  Set<String> get _hidden => {...?_prefs.getStringList(_hiddenKey)};
+
   Future<void> scanFiles() async {
     final dir = Directory(folder);
     final result = <RecordedFile>[];
@@ -715,9 +724,68 @@ class RecordingCenter extends ChangeNotifier {
         }
       }
     } catch (_) {}
+    // Un fichier disparu du stockage n'a plus besoin d'être masqué.
+    final hidden = _hidden;
+    if (hidden.isNotEmpty && result.isNotEmpty) {
+      final kept = hidden.intersection({for (final f in result) f.path});
+      if (kept.length != hidden.length) await _prefs.setStringList(_hiddenKey, kept.toList());
+    }
+    result.removeWhere((f) => hidden.contains(f.path));
     result.sort((a, b) => b.modified.compareTo(a.modified));
     files = result;
     notifyListeners();
+  }
+
+  /// Retire des enregistrements de la liste ; avec [deleteFiles], supprime aussi leurs fichiers du stockage.
+  /// Un fichier absent ou impossible à supprimer ne bloque rien : l'opération continue et un avertissement est renvoyé.
+  Future<List<String>> remove(List<RecordedFile> list, {required bool deleteFiles}) async {
+    final warnings = <String>[];
+    final hidden = _hidden;
+    final hiddenNow = <String>[];
+    for (final f in list) {
+      if (active != null && active!.path == f.path) {
+        warnings.add('« ${f.name} » : enregistrement en cours, conservé dans la liste.');
+        continue;
+      }
+      final file = File(f.path);
+      if (!await file.exists()) {
+        warnings.add('« ${f.name} » : le fichier n\'existe plus dans le stockage, il est seulement retiré de la liste.');
+        continue;
+      }
+      if (deleteFiles) {
+        try {
+          await file.delete();
+        } catch (e) {
+          warnings.add('« ${f.name} » : suppression du fichier impossible ($e), il est seulement retiré de la liste.');
+        }
+      }
+      if (await file.exists()) {
+        hidden.add(f.path);
+        hiddenNow.add(f.path);
+      }
+    }
+    await _prefs.setStringList(_hiddenKey, hidden.toList());
+    _undoTimer?.cancel();
+    removalUndo = null;
+    if (!deleteFiles && hiddenNow.isNotEmpty) {
+      removalUndo = hiddenNow;
+      _undoTimer = Timer(const Duration(seconds: 10), () {
+        removalUndo = null;
+        notifyListeners();
+      });
+    }
+    await scanFiles();
+    return warnings;
+  }
+
+  /// Annule le dernier retrait de la liste (les fichiers n'avaient pas été touchés).
+  Future<void> undoRemoval() async {
+    final undo = removalUndo;
+    if (undo == null) return;
+    _undoTimer?.cancel();
+    removalUndo = null;
+    await _prefs.setStringList(_hiddenKey, (_hidden..removeAll(undo)).toList());
+    await scanFiles();
   }
 
   Future<void> deleteFile(RecordedFile f) async {

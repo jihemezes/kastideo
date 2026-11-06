@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.14.0-android1] - 2026-11-06
+
+- **Nettoyer la liste des enregistrements** : bouton corbeille au survol d'une ligne, menu clic droit, mode **Sélectionner** et **Vider la liste…**. La boîte de dialogue propose de supprimer aussi les fichiers (par défaut : seule la liste est nettoyée), affiche l'espace libéré, mémorise le choix et permet d'annuler le retrait. Avertissements en notification, ou en liste s'il y en a plusieurs.
+
+## [1.14.0-desktop1] - 2026-11-06
+
+- **Nettoyer la liste des enregistrements** : bouton corbeille au survol d'une ligne, menu clic droit, mode **Sélectionner** et **Vider la liste…**. La boîte de dialogue propose de supprimer aussi les fichiers (par défaut : seule la liste est nettoyée), affiche l'espace libéré, mémorise le choix et permet d'annuler le retrait. Avertissements en notification, ou en liste s'il y en a plusieurs.
+
 ## [1.13.2-android1] - 2026-11-03
 
 - **Sélecteur de chaînes de la MultiVue** : Favoris, Récents et catégories de la source de l'écran (ordre, masquage, noms et arrangement respectés), programme en cours, clic = zapping sans fermer, double-clic = valider, chaînes déjà affichées grisées.
