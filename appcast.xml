@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.14.0</title>
+      <pubDate>Fri, 06 Nov 2026 22:53:56 GMT</pubDate>
+      <sparkle:version>87</sparkle:version>
+      <sparkle:shortVersionString>1.14.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Nettoyer la liste des enregistrements&lt;/b&gt; : retirez un enregistrement (bouton corbeille, clic droit), plusieurs (mode &lt;b&gt;Sélectionner&lt;/b&gt;) ou toute la liste (&lt;b&gt;Vider la liste…&lt;/b&gt;). Une boîte de dialogue propose de supprimer aussi le fichier du stockage (corbeille) ; par défaut, seule la liste est nettoyée et le fichier reste dans le dossier sans réapparaître. L&amp;#x27;espace libéré est affiché, le choix peut être mémorisé et un bandeau &lt;b&gt;Annuler&lt;/b&gt; permet de tout remettre pendant une dizaine de secondes. Un fichier déjà absent ou impossible à supprimer n&amp;#x27;arrête rien : notification, ou fenêtre listant les avertissements s&amp;#x27;il y en a plusieurs.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.14.0/Kastideo-1.14.0.dmg" length="48188781" type="application/octet-stream" sparkle:edSignature="osYdJDXUpPW/QgLSCjMi5wBA1HYciv9sYt5Il/Ef5rDicdVO14ntzxrRqj2k8XgYs/G+uNAbAllDiERy0VNoCg==" />
+    </item>
+    <item>
       <title>Kastideo 1.13.3</title>
       <pubDate>Tue, 03 Nov 2026 22:19:36 GMT</pubDate>
       <sparkle:version>86</sparkle:version>
@@ -447,17 +458,6 @@
 &lt;li&gt;&lt;b&gt;Journal de lecture&lt;/b&gt; : réponse réelle du fournisseur (code HTTP, délai, redirections) et durée/volume de chaque connexion.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.3/Kastideo-1.1.3.dmg" length="45931584" type="application/octet-stream" sparkle:edSignature="mnBVjO5DE9u/S2gLIULZ2cSBn+UnPiFvHyn+zStmI4dqvDCuLgqN5Ys7lEfe9v++xiz2QWeLp/PEGQKijtJPCg==" />
-    </item>
-    <item>
-      <title>Kastideo 1.1.2</title>
-      <pubDate>Fri, 23 Oct 2026 22:29:43 GMT</pubDate>
-      <sparkle:version>42</sparkle:version>
-      <sparkle:shortVersionString>1.1.2</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;Correctif de compilation de la 1.1.1 (type des statistiques VLC renommé &lt;code&gt;VLCMedia.Stats&lt;/code&gt;). Contient toutes les nouveautés de la 1.1.1.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.2/Kastideo-1.1.2.dmg" length="45864240" type="application/octet-stream" sparkle:edSignature="0/qrDpkvgWZ9N4iz/3+tu4QVBZYOoLt8IuBGOCDVHbxjn3hmKpfawF1mF8Q19MtDomF/z2jb0xyBdM128CiDCQ==" />
     </item>
   </channel>
 </rss>
