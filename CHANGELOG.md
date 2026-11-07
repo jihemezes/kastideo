@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.14.2] - 2026-11-07
+
+- Correction : hors du mode **Sélectionner**, un clic sur un enregistrement relançait plus la lecture (le nouveau code de sélection interceptait les clics de la liste). Le clic n'est désormais capté qu'en mode sélection.
+
 ## [1.14.1] - 2026-11-07
 
 - Enregistrements : les boutons **Sélectionner** et **Vider la liste…** sont maintenant dans l'en-tête de la section « Enregistrés » (ils étaient dans la barre d'outils, parfois masquée). La boîte de dialogue « Supprimer aussi le fichier du stockage » s'applique à toutes les formes de retrait.

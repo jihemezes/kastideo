@@ -72,10 +72,15 @@ struct RecordingsListView: View {
                                     .help("Retirer de la liste…")
                             }
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            guard selecting else { return }
-                            if selected.contains(file.id) { selected.remove(file.id) } else { selected.insert(file.id) }
+                        .overlay {
+                            // Le clic n'est capté qu'en mode sélection : sinon la liste garde son comportement (clic = lecture).
+                            if selecting {
+                                Color.clear
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        if selected.contains(file.id) { selected.remove(file.id) } else { selected.insert(file.id) }
+                                    }
+                            }
                         }
                         .contextMenu {
                             Button("Afficher dans le Finder") { recordings.reveal(file) }
