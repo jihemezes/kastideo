@@ -182,6 +182,16 @@ class _RecordingsListState extends State<RecordingsList> {
               ),
             for (final s in scheduled) _ScheduleRow(schedule: s, date: _date(s.start)),
             _header('${tr('FICHIERS')} (${recordings.files.length})', actions: [
+              if (recordings.files.isNotEmpty) ...[
+                TextButton(
+                  onPressed: () => setState(() {
+                    _selecting = !_selecting;
+                    _selected.clear();
+                  }),
+                  child: Text(_selecting ? tr('Terminer la sélection') : tr('Sélectionner')),
+                ),
+                TextButton(onPressed: () => _remove(List.of(recordings.files), clear: true), child: Text(tr('Vider la liste…'))),
+              ],
               if (_selecting) ...[
                 TextButton(onPressed: () => setState(() => _selected.addAll(recordings.files.map((f) => f.path))), child: Text(tr('Tout sélectionner'))),
                 TextButton(

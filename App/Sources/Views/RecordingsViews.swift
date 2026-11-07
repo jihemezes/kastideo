@@ -48,7 +48,7 @@ struct RecordingsListView: View {
                     }
                 }
             }
-            Section("Enregistrés (\(recordings.files.count))") {
+            Section {
                 if recordings.files.isEmpty {
                     Text("Aucun enregistrement pour le moment. Utilisez ● pendant la lecture, le guide TV, ou le clic droit sur une chaîne, un film ou un épisode.")
                         .font(.callout)
@@ -83,6 +83,22 @@ struct RecordingsListView: View {
                             Button("Retirer de la liste…") { request = RemovalRequest(files: [file], isClear: false) }
                             Button("Placer dans la corbeille", role: .destructive) { recordings.deleteFile(file) }
                         }
+                    }
+                }
+            } header: {
+                HStack(spacing: 12) {
+                    Text("Enregistrés (\(recordings.files.count))")
+                    Spacer()
+                    if !recordings.files.isEmpty {
+                        Button(selecting ? "Terminer la sélection" : "Sélectionner") {
+                            selecting.toggle()
+                            if !selecting { selected = [] }
+                        }
+                        .buttonStyle(.link)
+                        Button("Vider la liste…") {
+                            request = RemovalRequest(files: recordings.files, isClear: true)
+                        }
+                        .buttonStyle(.link)
                     }
                 }
             }

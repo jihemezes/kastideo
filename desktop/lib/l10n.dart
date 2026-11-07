@@ -744,6 +744,7 @@ class L10n {
     'Retirer la sélection': 'Remove selection',
     'Aucun récent': 'No recents',
     'Programmer…': 'Schedule…',
+    'Terminer la sélection': 'Done selecting',
     'Sélectionner': 'Select',
     'Vider la liste…': 'Clear list…',
     'Vider la liste': 'Clear list',

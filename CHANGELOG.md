@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.14.1] - 2026-11-07
+
+- Enregistrements : les boutons **Sélectionner** et **Vider la liste…** sont maintenant dans l'en-tête de la section « Enregistrés » (ils étaient dans la barre d'outils, parfois masquée). La boîte de dialogue « Supprimer aussi le fichier du stockage » s'applique à toutes les formes de retrait.
+
 ## [1.14.0] - 2026-11-06
 
 - **Nettoyer la liste des enregistrements** : retirez un enregistrement (bouton corbeille, clic droit), plusieurs (mode **Sélectionner**) ou toute la liste (**Vider la liste…**). Une boîte de dialogue propose de supprimer aussi le fichier du stockage (corbeille) ; par défaut, seule la liste est nettoyée et le fichier reste dans le dossier sans réapparaître. L'espace libéré est affiché, le choix peut être mémorisé et un bandeau **Annuler** permet de tout remettre pendant une dizaine de secondes. Un fichier déjà absent ou impossible à supprimer n'arrête rien : notification, ou fenêtre listant les avertissements s'il y en a plusieurs.
