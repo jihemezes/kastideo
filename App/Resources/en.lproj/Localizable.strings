@@ -1091,3 +1091,12 @@
 "Vider « Reprendre la lecture »" = "Clear “Continue watching”";
 "Retirés de « Reprendre la lecture »." = "Removed from “Continue watching”.";
 "Retiré de « Reprendre la lecture »." = "Removed from “Continue watching”.";
+"Durée par défaut (sans fin connue dans le guide)" = "Default duration (when the guide gives no end)";
+"L'enregistrement démarre tout de suite ; un bandeau permet de choisir un autre arrêt. Sans choix, il s'arrête à la fin du programme (guide TV) ou, à défaut, après cette durée." = "Recording starts right away; a banner lets you pick another stop time. If you do not, it stops at the end of the programme (TV guide) or, failing that, after this duration.";
+"Arrêter l'enregistrement dans…" = "Stop recording in…";
+"À une heure précise…" = "At a specific time…";
+"Sans limite de durée" = "No time limit";
+"Arrêter l'enregistrement à" = "Stop recording at";
+"Arrêt automatique à %@" = "Automatic stop at %@";
+" (reste %@)" = " (%@ left)";
+" · sans limite de durée" = " · no time limit";

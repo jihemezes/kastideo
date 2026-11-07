@@ -281,15 +281,67 @@ struct LiveRecordingRow: View {
                 }
             }
             Spacer()
+            StopDurationMenu()
             Button("Arrêter") { recordings.stopLive() }
         }
     }
 
     private func detail(at date: Date) -> String {
         var text = "\(live.item.name) — \(date.timeIntervalSince(live.startedAt).clockString)"
-        if let end = live.endsAt { text += String(localized: " · fin à \(end.formatted(date: .omitted, time: .shortened))") }
+        if let end = live.endsAt {
+            text += String(localized: " · fin à \(end.formatted(date: .omitted, time: .shortened))")
+            text += String(localized: " (reste \(max(0, end.timeIntervalSince(date)).clockString))")
+        } else {
+            text += String(localized: " · sans limite de durée")
+        }
         text += live.mode == .player ? String(localized: " · pendant la lecture") : String(localized: " · en arrière-plan")
         return text
+    }
+}
+
+/// Menu « Arrêt » : changer à tout moment l'arrêt programmé de l'enregistrement en cours (durée, heure précise ou sans limite).
+struct StopDurationMenu: View {
+    @Environment(RecordingCenter.self) private var recordings
+    @State private var showTime = false
+    @State private var customDate = Date().addingTimeInterval(3600)
+
+    var body: some View {
+        Menu {
+            Section("Arrêter l'enregistrement dans…") {
+                ForEach([15, 30, 60, 90, 120, 180, 240], id: \.self) { minutes in
+                    Button(minutes < 60 ? "\(minutes) min" : (minutes % 60 == 0 ? "\(minutes / 60) h" : "\(minutes / 60) h \(minutes % 60)")) {
+                        recordings.setStop(after: minutes)
+                    }
+                }
+            }
+            Divider()
+            Button("À une heure précise…") {
+                customDate = recordings.activeLive?.endsAt ?? Date().addingTimeInterval(3600)
+                showTime = true
+            }
+            Button("Sans limite de durée") { recordings.setStop(after: nil) }
+        } label: {
+            Label("Durée", systemImage: "timer")
+        }
+        .menuStyle(.button)
+        .fixedSize()
+        .popover(isPresented: $showTime) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Arrêter l'enregistrement à").font(.headline)
+                DatePicker("", selection: $customDate, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                HStack {
+                    Spacer()
+                    Button("Annuler") { showTime = false }
+                    Button("OK") {
+                        recordings.setStop(at: customDate)
+                        showTime = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(14)
+        }
     }
 }
 
@@ -483,6 +535,7 @@ struct RecordingSettingsView: View {
     @Environment(RecordingCenter.self) private var recordings
     @AppStorage(RecordingKeys.marginBefore) private var marginBefore = 2
     @AppStorage(RecordingKeys.marginAfter) private var marginAfter = 5
+    @AppStorage(RecordingKeys.defaultMinutes) private var defaultMinutes = 120
     @AppStorage(RecordingKeys.nightHour) private var nightHour = 2
     @AppStorage(RecordingKeys.convertMP4) private var convertMP4 = true
     @AppStorage(RecordingKeys.autoClean) private var autoClean = false
@@ -514,6 +567,15 @@ struct RecordingSettingsView: View {
             Section("Enregistrement du direct") {
                 Stepper("Marge avant le programme : \(marginBefore) min", value: $marginBefore, in: 0...30)
                 Stepper("Marge après le programme : \(marginAfter) min", value: $marginAfter, in: 0...60)
+                Picker("Durée par défaut (sans fin connue dans le guide)", selection: $defaultMinutes) {
+                    Text("Sans limite").tag(0)
+                    ForEach([30, 60, 90, 120, 180, 240, 360, 480, 720], id: \.self) { minutes in
+                        Text(minutes % 60 == 0 ? "\(minutes / 60) h" : "\(minutes / 60) h \(minutes % 60) min").tag(minutes)
+                    }
+                }
+                Text("L'enregistrement démarre tout de suite ; un bandeau permet de choisir un autre arrêt. Sans choix, il s'arrête à la fin du programme (guide TV) ou, à défaut, après cette durée.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Toggle("Convertir en MP4 (sans perte de qualité, lisible par QuickTime et l'iPhone)", isOn: $convertMP4)
             }
             Section("Téléchargements") {

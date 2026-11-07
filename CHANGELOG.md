@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.16.0] - 2026-11-07
+
+- **Durée des enregistrements** : l'enregistrement démarre immédiatement ; un bandeau permet ensuite de choisir l'arrêt automatique (15 min à 4 h, heure précise, sans limite). Sans choix, il s'arrête à la fin du programme (guide) ou après la **durée par défaut** (Réglages > Enregistrements, 2 h au départ, « Sans limite » possible). Le bouton **Durée** de l'enregistrement en cours change l'arrêt à tout moment, et le temps restant est affiché.
+
 ## [1.15.0] - 2026-11-07
 
 - **Retirer un contenu de « Reprendre la lecture »** : clic droit sur une vignette > **Retirer de « Reprendre la lecture »** ou **Vider « Reprendre la lecture »** (accueil, Cinéma, Mes vidéos). La position reste mémorisée, le contenu réapparaît dès qu'on le regarde de nouveau, et un bandeau **Annuler** permet de revenir en arrière.

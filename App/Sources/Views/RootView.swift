@@ -35,6 +35,7 @@ struct RootView: View {
         }
         .recordingToast()
         .resumeUndoBanner()
+        .durationPromptBanner()
         .overlay(alignment: .top) { UpdateBanner() }
         .overlay(alignment: .top) { ProgramAlertBanner() }
         .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {

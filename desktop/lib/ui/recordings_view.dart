@@ -258,11 +258,13 @@ class _ActiveCard extends StatelessWidget {
             ]),
             Text(
               '${active.channel.displayName} · ${durationText(elapsed)} · ${sizeText(active.bytes)}'
-              '${active.stopS != null ? ' · ${tr('jusqu\'à')} ${hm(DateTime.fromMillisecondsSinceEpoch(active.stopS! * 1000))}' : ''}',
+              '${active.stopS != null ? ' · ${tr('jusqu\'à')} ${hm(DateTime.fromMillisecondsSinceEpoch(active.stopS! * 1000))} (${tr('reste')} ${durationText(DateTime.fromMillisecondsSinceEpoch(active.stopS! * 1000).difference(DateTime.now()))})' : ' · ${tr('sans limite de durée')}'}',
               style: kText(12, color: KPalette.secondaryText),
             ),
           ]),
         ),
+        const StopDurationButton(),
+        const SizedBox(width: 6),
         FilledButton.icon(
           style: FilledButton.styleFrom(backgroundColor: Colors.red),
           onPressed: context.recordings.stop,
@@ -561,4 +563,90 @@ Future<bool> showRemovalDialog(BuildContext context, List<RecordedFile> list, {b
     );
   }
   return true;
+}
+
+/// Menu « Durée » : change à tout moment l'arrêt programmé de l'enregistrement en cours.
+class StopDurationButton extends StatelessWidget {
+  const StopDurationButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () async {
+        final box = context.findRenderObject() as RenderBox;
+        final p = box.localToGlobal(Offset(0, box.size.height));
+        final recordings = context.recordings;
+        final choice = await showMenu<int>(
+          context: context,
+          position: RelativeRect.fromLTRB(p.dx, p.dy, p.dx, p.dy),
+          color: KPalette.menu,
+          items: [
+            for (final m in [15, 30, 60, 90, 120, 180, 240])
+              PopupMenuItem(
+                value: m,
+                child: Text('${tr('Arrêter dans')} ${m < 60 ? '$m min' : (m % 60 == 0 ? '${m ~/ 60} h' : '${m ~/ 60} h ${m % 60}')}', style: kText(13)),
+              ),
+            PopupMenuItem(value: -1, child: Text(tr('À une heure précise…'), style: kText(13))),
+            PopupMenuItem(value: -2, child: Text(tr('Sans limite de durée'), style: kText(13))),
+          ],
+        );
+        if (choice == null) return;
+        if (choice == -2) return recordings.setStopAfter(null);
+        if (choice == -1) {
+          if (!context.mounted) return;
+          final t = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 1))),
+          );
+          if (t == null) return;
+          final now = DateTime.now();
+          return recordings.setStopAt(DateTime(now.year, now.month, now.day, t.hour, t.minute));
+        }
+        recordings.setStopAfter(choice);
+      },
+      icon: const Icon(Icons.timer_outlined, size: 16),
+      label: Text(tr('Durée')),
+    );
+  }
+}
+
+/// Bandeau affiché juste après le démarrage d'un enregistrement : il a déjà commencé et ne l'attend pas.
+class RecordingDurationBanner extends StatelessWidget {
+  const RecordingDurationBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final recordings = context.recordings;
+    return ListenableBuilder(
+      listenable: recordings,
+      builder: (context, _) {
+        final a = recordings.active;
+        if (!recordings.durationPrompt || a == null) return const SizedBox.shrink();
+        final end = a.stopS == null ? null : DateTime.fromMillisecondsSinceEpoch(a.stopS! * 1000);
+        return Container(
+          constraints: const BoxConstraints(maxWidth: 460),
+          padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+          decoration: BoxDecoration(
+            color: KPalette.menuDark,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 16)],
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.fiber_manual_record, size: 16, color: Colors.red),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr('Enregistrement démarré'), style: kText(13, weight: FontWeight.w600, color: Colors.white)),
+                Text(end == null ? tr('Sans limite de durée') : '${tr('Arrêt automatique à')} ${hm(end)}',
+                    style: kText(12, color: Colors.white70)),
+              ]),
+            ),
+            const SizedBox(width: 10),
+            const StopDurationButton(),
+            IconButton(onPressed: recordings.dismissDurationPrompt, icon: const Icon(Icons.close_rounded, size: 18)),
+          ]),
+        );
+      },
+    );
+  }
 }

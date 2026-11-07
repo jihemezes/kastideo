@@ -22,6 +22,11 @@ struct RecordingToast: Identifiable {
     let isError: Bool
 }
 
+/// Proposition de durée affichée juste après le démarrage d'un enregistrement (qui, lui, ne l'attend pas).
+struct DurationPrompt: Identifiable {
+    let id = UUID()
+}
+
 /// Avertissements d'un retrait de la liste (fichier introuvable, suppression impossible…), affichés en liste quand il y en a plusieurs.
 struct RemovalWarnings: Identifiable {
     let id = UUID()
@@ -62,6 +67,7 @@ final class RecordingCenter {
     var toast: RecordingToast?
     var scheduleSheetItem: MediaItem?
     var removalWarnings: RemovalWarnings?
+    var durationPrompt: DurationPrompt?
     var removalUndo: RemovalUndo?
 
     private let store: LibraryStore
@@ -249,7 +255,10 @@ final class RecordingCenter {
             return
         }
         let programme = store.epg.current(for: item.epgID)
+        // Fin du programme (guide) + marge ; sinon durée par défaut des réglages (0 = jusqu'à l'arrêt manuel).
+        let defaultMinutes = RecordingKeys.defaultDurationMinutes
         let end = programme.map { $0.stop.addingTimeInterval(marginAfter) }
+            ?? (defaultMinutes > 0 ? Date().addingTimeInterval(TimeInterval(defaultMinutes * 60)) : nil)
         let title = programme?.title ?? item.name
         checkDiskSpace()
 
@@ -269,6 +278,30 @@ final class RecordingCenter {
             if activeDownload != nil { pauseActiveDownload(byUser: false) }
             startBackground(item, title: title, end: end, scheduleID: nil)
         }
+    }
+
+    /// Affiche le bandeau de choix de durée ; l'enregistrement a déjà démarré et suit sa fin actuelle sans attendre.
+    private func offerDuration() {
+        let prompt = DurationPrompt()
+        durationPrompt = prompt
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(20))
+            if self?.durationPrompt?.id == prompt.id { self?.durationPrompt = nil }
+        }
+    }
+
+    /// Modifie l'arrêt programmé de l'enregistrement en cours : dans [minutes] minutes, à une heure précise, ou jamais (nil).
+    func setStop(after minutes: Int?) {
+        setStop(at: minutes.map { Date().addingTimeInterval(TimeInterval($0 * 60)) })
+    }
+
+    func setStop(at date: Date?) {
+        guard activeLive != nil else { return }
+        // Une heure déjà passée vaut « demain à cette heure ».
+        var end = date
+        if let d = end, d <= Date() { end = Calendar.current.date(byAdding: .day, value: 1, to: d) }
+        activeLive?.endsAt = end
+        durationPrompt = nil
     }
 
     func stopLive() {
@@ -321,6 +354,7 @@ final class RecordingCenter {
         playerRecordingDir = dir
         playerRecordingStart = Date()
         activeLive = ActiveLive(item: item, title: title, startedAt: Date(), endsAt: end, mode: .player, scheduleID: scheduleID)
+        if scheduleID == nil { offerDuration() }
         updateSleepGuard()
         Task { [weak self] in
             // La lecture peut être encore en cours d'ouverture : on attend jusqu'à 20 s qu'elle ait démarré.
@@ -381,6 +415,7 @@ final class RecordingCenter {
         background = recorder
         workDir = dir
         activeLive = ActiveLive(item: item, title: title, startedAt: Date(), endsAt: end, mode: .background, scheduleID: scheduleID)
+        if scheduleID == nil { offerDuration() }
         recorder.start(url: url)
         Notifier.post(String(localized: "Enregistrement démarré"), "\(item.name) — \(title)")
         updateSleepGuard()

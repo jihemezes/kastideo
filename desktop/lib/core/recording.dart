@@ -115,7 +115,7 @@ class ActiveRecording {
   final String title;
   String path;
   final bool viaPlayer;
-  final int? stopS;
+  int? stopS;
   final String? scheduleId;
   final DateTime startedAt = DateTime.now();
   int bytes = 0;
@@ -188,6 +188,38 @@ class RecordingCenter extends ChangeNotifier {
 
   void _save() => _prefs.setString('recordings.schedule.v1', jsonEncode([for (final s in schedules) s.toJson()]));
 
+  /// Bandeau « Enregistrement démarré — choisir la durée » : visible quelques secondes, l'enregistrement ne l'attend pas.
+  bool durationPrompt = false;
+  Timer? _promptTimer;
+
+  void _offerDuration() {
+    durationPrompt = true;
+    _promptTimer?.cancel();
+    _promptTimer = Timer(const Duration(seconds: 20), dismissDurationPrompt);
+    notifyListeners();
+  }
+
+  void dismissDurationPrompt() {
+    if (!durationPrompt) return;
+    durationPrompt = false;
+    _promptTimer?.cancel();
+    notifyListeners();
+  }
+
+  /// Modifie l'arrêt programmé de l'enregistrement en cours : dans [minutes] minutes, ou jamais (null).
+  void setStopAfter(int? minutes) => setStopAt(minutes == null ? null : DateTime.now().add(Duration(minutes: minutes)));
+
+  /// À une heure précise (déjà passée = demain à cette heure), ou jamais (null).
+  void setStopAt(DateTime? at) {
+    final a = active;
+    if (a == null) return;
+    var when = at;
+    if (when != null && !when.isAfter(DateTime.now())) when = when.add(const Duration(days: 1));
+    a.stopS = when == null ? null : when.millisecondsSinceEpoch ~/ 1000;
+    dismissDurationPrompt();
+    notifyListeners();
+  }
+
   void _say(String text, {bool system = false}) {
     if (system) SystemNotifier.show('Kastideo', text);
     notice = text;
@@ -255,6 +287,10 @@ class RecordingCenter extends ChangeNotifier {
 
   /// Enregistre une chaîne maintenant (jusqu'à [stopS] si donné, sinon jusqu'à l'arrêt).
   Future<bool> recordNow(MediaItem channel, {String title = '', int? stopS, String? scheduleId}) async {
+    // Enregistrement manuel sans fin connue (guide) : durée par défaut des réglages (0 = jusqu'à l'arrêt manuel).
+    if (scheduleId == null && stopS == null && settings.recordingDefaultMinutes > 0) {
+      stopS = nowSeconds() + settings.recordingDefaultMinutes * 60;
+    }
     if (active != null) {
       if (active!.channel.id == channel.id) return true;
       await stop();
@@ -308,6 +344,7 @@ class RecordingCenter extends ChangeNotifier {
     }
     PlaybackLog.shared.note('Enregistrement de « ${channel.name} » $how : $path');
     _say('Enregistrement de ${channel.displayName} commencé.', system: true);
+    if (scheduleId == null) _offerDuration();
     _watchSize();
     notifyListeners();
     return true;

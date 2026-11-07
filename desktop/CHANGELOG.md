@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.16.0-android1] - 2026-11-07
+
+- **Durée des enregistrements** : l'enregistrement démarre immédiatement ; un bandeau permet ensuite de choisir l'arrêt automatique (15 min à 4 h, heure précise, sans limite). Sans choix, il s'arrête à la fin du programme (guide) ou après la **durée par défaut** (Réglages > Enregistrement du direct, 2 h au départ). Le bouton **Durée** de l'enregistrement en cours change l'arrêt à tout moment, avec le temps restant.
+
+## [1.16.0-desktop1] - 2026-11-07
+
+- **Durée des enregistrements** : l'enregistrement démarre immédiatement ; un bandeau permet ensuite de choisir l'arrêt automatique (15 min à 4 h, heure précise, sans limite). Sans choix, il s'arrête à la fin du programme (guide) ou après la **durée par défaut** (Réglages > Enregistrement du direct, 2 h au départ). Le bouton **Durée** de l'enregistrement en cours change l'arrêt à tout moment, avec le temps restant.
+
 ## [1.15.0-android1] - 2026-11-07
 
 - **Retirer un contenu de « Reprendre la lecture »** : clic droit (appui long) sur une vignette > Retirer ou Vider. La position reste mémorisée, le contenu réapparaît dès qu'on le regarde de nouveau, avec une action **Annuler**.

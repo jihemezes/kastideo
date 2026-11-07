@@ -1444,6 +1444,10 @@ class _RecordingsTabState extends State<_RecordingsTab> {
               (v) => settings.setInt('recordings.marginBefore', v))),
           _row(tr('Prolonger après la fin de'), _choice<int>(settings.marginAfter, [(0, '0 min'), (5, '5 min'), (10, '10 min'), (15, '15 min'), (30, '30 min')],
               (v) => settings.setInt('recordings.marginAfter', v))),
+          _row(tr('Durée par défaut'), _choice<int>(settings.recordingDefaultMinutes,
+              [(0, tr('Sans limite')), for (final m in [30, 60, 90, 120, 180, 240, 360, 480, 720]) (m, m % 60 == 0 ? '${m ~/ 60} h' : '${m ~/ 60} h ${m % 60} min')],
+              (v) => settings.setInt('recordings.defaultMinutes', v))),
+          _caption(tr('L\'enregistrement démarre tout de suite ; un bandeau permet de choisir un autre arrêt. Sans choix, il s\'arrête à la fin du programme (guide TV) ou, à défaut, après la durée par défaut.')),
           _caption(tr('Le flux est recopié tel quel en .ts, sans perte de qualité (la chaîne regardée sans seconde connexion), puis converti en MKV '
               'à la fin si ce format est choisi. Une seule connexion : enregistrer une autre chaîne que celle regardée arrête la lecture. '
               'Les enregistrements programmés ont lieu si Kastideo est ouvert (ordinateur allumé, sans mise en veille).')),

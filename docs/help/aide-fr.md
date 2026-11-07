@@ -692,6 +692,8 @@ Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidit�
 Tout se retrouve dans la section **Enregistrements** de la barre latérale (**⌘6**) : enregistrement en cours, conversions, téléchargements, programmations et fichiers enregistrés (un clic pour les regarder, clic droit pour les afficher dans le Finder ou les supprimer).
 
 Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglages > Enregistrements**) et nommés automatiquement, par exemple « TF1 – Le goût du détail – 2026-10-18 20h50 ».
+
+**Durée de l'enregistrement.** L'enregistrement **démarre tout de suite**, sans question. Un bandeau « Enregistrement démarré » propose ensuite de choisir l'arrêt : dans 15 min, 30 min, 1 h, 2 h…, **à une heure précise**, ou **sans limite**. Si vous ne choisissez rien, l'enregistrement s'arrête à la **fin du programme** (guide TV, marge incluse) ou, quand le guide ne la connaît pas, après la **durée par défaut** réglée dans **Réglages > Enregistrements** (2 h au départ ; « Sans limite » possible). Vous pouvez changer l'arrêt à tout moment avec le bouton **Durée** de la ligne « Enregistrement en cours », qui indique aussi le temps restant.
 <!--/mac-->
 
 <!--pc-->

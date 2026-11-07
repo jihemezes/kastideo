@@ -69,6 +69,9 @@ class AppSettings extends ChangeNotifier {
   String get recordingFormat => _prefs.getString('recordings.format') ?? 'mkv';
   int get marginBefore => _prefs.getInt('recordings.marginBefore') ?? 2;
   int get marginAfter => _prefs.getInt('recordings.marginAfter') ?? 5;
+
+  /// Durée (minutes) d'un enregistrement lancé à la main quand le guide ne donne pas de fin ; 0 = sans limite.
+  int get recordingDefaultMinutes => _prefs.getInt('recordings.defaultMinutes') ?? 120;
   bool get pauseDownloadsDuringPlayback => _prefs.getBool('downloads.pauseDuringPlayback') ?? true;
   int get nightHour => _prefs.getInt('downloads.nightHour') ?? 1;
 

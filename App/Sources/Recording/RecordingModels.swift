@@ -8,6 +8,8 @@ enum RecordingKeys {
     static let marginAfter = "recordings.marginAfter"       // minutes
     static let nightHour = "recordings.nightHour"           // heure de début « cette nuit »
     static let convertMP4 = "recordings.convertMP4"
+    /// Durée d'un enregistrement lancé à la main quand le guide ne donne pas de fin (minutes ; 0 = sans limite).
+    static let defaultMinutes = "recordings.defaultMinutes"
     static let autoClean = "recordings.autoClean"
     static let autoCleanDays = "recordings.autoCleanDays"
     /// Fichiers retirés de la liste (chemins) sans avoir été supprimés du stockage.
@@ -23,6 +25,7 @@ enum RecordingKeys {
     static var marginAfterMinutes: Int { UserDefaults.standard.object(forKey: marginAfter) as? Int ?? 5 }
     static var nightHourValue: Int { UserDefaults.standard.object(forKey: nightHour) as? Int ?? 2 }
     static var convertToMP4: Bool { UserDefaults.standard.object(forKey: convertMP4) as? Bool ?? true }
+    static var defaultDurationMinutes: Int { UserDefaults.standard.object(forKey: defaultMinutes) as? Int ?? 120 }
     static var autoCleanEnabled: Bool { UserDefaults.standard.bool(forKey: autoClean) }
     static var autoCleanDayCount: Int { UserDefaults.standard.object(forKey: autoCleanDays) as? Int ?? 30 }
     static var notificationsEnabled: Bool { UserDefaults.standard.object(forKey: notifications) as? Bool ?? true }

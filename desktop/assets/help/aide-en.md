@@ -692,6 +692,8 @@ In **Settings > General > Playback**, choose the trade-off between speed and sta
 Everything is in the **Recordings** section of the sidebar (**⌘6**): current recording, conversions, downloads, schedules and recorded files (click to watch them, right-click to show them in Finder or delete them).
 
 Files are stored in **~/Movies/Kastideo** (can be changed in **Settings > Recordings**) and named automatically, for example “TF1 – Le goût du détail – 2026-10-18 20h50”.
+
+**Recording duration.** Recording **starts immediately**, with no question asked. A “Recording started” banner then lets you pick when to stop: in 15 min, 30 min, 1 h, 2 h…, **at a specific time**, or **no limit**. If you choose nothing, recording stops at the **end of the programme** (TV guide, margin included) or, when the guide does not know it, after the **default duration** set in **Settings > Recordings** (2 h to begin with; “No limit” is possible). You can change the stop at any time with the **Duration** button on the “Recording in progress” row, which also shows the time left.
 <!--/mac-->
 
 <!--pc-->

@@ -50,6 +50,44 @@ struct RecordingToastModifier: ViewModifier {
     }
 }
 
+/// Bandeau affiché juste après le démarrage d'un enregistrement : l'enregistrement a déjà commencé,
+/// l'utilisateur peut choisir un autre arrêt programmé (sinon, fin du programme ou durée par défaut).
+struct DurationPromptModifier: ViewModifier {
+    @Environment(RecordingCenter.self) private var recordings
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .top) {
+                if recordings.durationPrompt != nil, let live = recordings.activeLive {
+                    HStack(spacing: 12) {
+                        Image(systemName: "record.circle.fill").foregroundStyle(.red).font(.title3)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Enregistrement démarré").font(.headline)
+                            if let end = live.endsAt {
+                                Text("Arrêt automatique à \(end.formatted(date: .omitted, time: .shortened))")
+                                    .font(.callout).foregroundStyle(.secondary)
+                            } else {
+                                Text("Sans limite de durée").font(.callout).foregroundStyle(.secondary)
+                            }
+                        }
+                        StopDurationMenu()
+                        Button {
+                            recordings.durationPrompt = nil
+                        } label: { Image(systemName: "xmark") }
+                            .buttonStyle(.borderless)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(radius: 10, y: 3)
+                    .padding(.top, 54)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .animation(.easeOut(duration: 0.2), value: recordings.durationPrompt?.id)
+    }
+}
+
 /// Bandeau « Annuler » après le retrait d'un contenu de « Reprendre la lecture ».
 struct ResumeUndoModifier: ViewModifier {
     @Environment(WatchProgressStore.self) private var watch
@@ -77,5 +115,6 @@ struct ResumeUndoModifier: ViewModifier {
 
 extension View {
     func resumeUndoBanner() -> some View { modifier(ResumeUndoModifier()) }
+    func durationPromptBanner() -> some View { modifier(DurationPromptModifier()) }
     func recordingToast() -> some View { modifier(RecordingToastModifier()) }
 }
