@@ -339,7 +339,7 @@ struct HomeView: View {
     @ViewBuilder
     private var resumeRail: some View {
         let started = store.recentIDs.compactMap { store.item(id: $0) }
-            .filter { $0.kind != .live && watch.fraction(for: $0.id) != nil }
+            .filter { $0.kind != .live && watch.inResume($0.id) }
             .prefix(14)
         if !started.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
@@ -349,7 +349,11 @@ struct HomeView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(alignment: .top, spacing: 14) {
                         ForEach(Array(started)) { item in
-                            HomeResumeCard(item: item, fraction: watch.fraction(for: item.id) ?? 0) {
+                            HomeResumeCard(item: item, fraction: watch.fraction(for: item.id) ?? 0, onRemove: {
+                                watch.hideResume([item.id])
+                            }, onClear: {
+                                watch.hideResume(started.map(\.id))
+                            }) {
                                 navigation.open(item, inLibrary: store.isLibraryItem(item))
                             }
                         }
@@ -521,6 +525,8 @@ struct HomeSmallButton: View {
 struct HomeResumeCard: View {
     let item: MediaItem
     let fraction: Double
+    var onRemove: () -> Void = {}
+    var onClear: () -> Void = {}
     let action: () -> Void
     @State private var hovering = false
 
@@ -552,6 +558,10 @@ struct HomeResumeCard: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        .contextMenu {
+            Button("Retirer de « Reprendre la lecture »", action: onRemove)
+            Button("Vider « Reprendre la lecture »", action: onClear)
+        }
         .help(item.name)
     }
 }

@@ -1087,3 +1087,7 @@
 "« %@ » : le fichier n'existe plus dans le stockage, il est seulement retiré de la liste." = "“%@”: the file no longer exists in storage; it is only removed from the list.";
 "« %@ » : suppression du fichier impossible (%@), il est seulement retiré de la liste." = "“%@”: the file could not be deleted (%@); it is only removed from the list.";
 "Terminer la sélection" = "Done selecting";
+"Retirer de « Reprendre la lecture »" = "Remove from “Continue watching”";
+"Vider « Reprendre la lecture »" = "Clear “Continue watching”";
+"Retirés de « Reprendre la lecture »." = "Removed from “Continue watching”.";
+"Retiré de « Reprendre la lecture »." = "Removed from “Continue watching”.";

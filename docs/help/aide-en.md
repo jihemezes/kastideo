@@ -258,17 +258,15 @@ To return Home at any time: the **Home** row of the sidebar, **Ctrl+0**, or the 
 **On Android phones and tablets**, Home adapts to the screen width: below about 720 px (phone, or tablet in portrait), the four tiles go to **two columns** and the header shrinks. **On Android TV**, buttons are chosen with the remote (visible outline) and **OK** opens.
 <!--/pc-->
 
-## My videos {#mes-videos}
+## Remove an item from “Continue watching” {#mes-videos}
 
 <!--mac-->
-As soon as a **Folders**, **Jellyfin**, **Emby** or **Plex** source exists, a **My videos** tile appears on the home screen (and a row in the sidebar, **⌘8**). It gathers your videos, apart from IPTV:
+Right-click a thumbnail in **Continue watching** (home, Cinema interface, My videos; long press on Android) to get:
 
-- **Featured**: **Resume playback** (started movies and episodes), **Recently added**, **Movies to watch**, then a Movies, Series and Videos row;
-- **Movies**, **Series**, **Videos**: grids with search, filters (**genre**, **year**, **unwatched**) and sorting (title, recently added, year);
-- **Folders**: browse your folders and subfolders as in the Finder (breadcrumb to go back up), and the servers' libraries;
-- **Sources**: all, or just one (NAS, Emby, Plex…). An orange triangle flags an error: right-click > **Error details…** shows the request and the **exact server response** (**Copy** button), then **Retry**.
+- **Remove from “Continue watching”**: the thumbnail disappears from the row, but the **position is kept**: when you play the film again later, it resumes where you left off.
+- **Clear “Continue watching”**: removes every thumbnail from the row.
 
-In **Movies** and **Series**, the **All / IPTV / My videos** selector (sidebar, above the categories) chooses what is shown: IPTV only (default), your videos only, or both mixed. The categories of your videos are never hidden by the countries setting.
+An **Undo** banner stays visible for a few seconds. A removed item **comes back** to the row as soon as you watch it again; meanwhile it appears in “Recently watched”.
 <!--/mac-->
 
 <!--pc-->
@@ -300,6 +298,23 @@ Ratings, durations, countries and languages of the files in your folders come fr
 ![Window layout and sidebar](img:layout)
 
 <!--mac-->
+As soon as a **Folders**, **Jellyfin**, **Emby** or **Plex** source exists, a **My videos** tile appears on the home screen (and a row in the sidebar, **⌘8**). It gathers your videos, apart from IPTV:
+
+- **Featured**: **Resume playback** (started movies and episodes), **Recently added**, **Movies to watch**, then a Movies, Series and Videos row;
+- **Movies**, **Series**, **Videos**: grids with search, filters (**genre**, **year**, **unwatched**) and sorting (title, recently added, year);
+- **Folders**: browse your folders and subfolders as in the Finder (breadcrumb to go back up), and the servers' libraries;
+- **Sources**: all, or just one (NAS, Emby, Plex…). An orange triangle flags an error: right-click > **Error details…** shows the request and the **exact server response** (**Copy** button), then **Retry**.
+
+In **Movies** and **Series**, the **All / IPTV / My videos** selector (sidebar, above the categories) chooses what is shown: IPTV only (default), your videos only, or both mixed. The categories of your videos are never hidden by the countries setting.
+<!--/mac-->
+
+<!--pc-->
+Live / Movies / Series picker, then: all channels or movies, **Favorites**, **Recents**, and for live TV **Themes**, **TV Guide** and **MultiView**; **Recordings**; the **categories**. At the bottom: the current recording and download (progress, time left) and **Settings**.
+<!--/pc-->
+
+## The window columns {#interfaces}
+
+<!--mac-->
 In the Classic interface, the window has three columns:
 
 - **Sidebar**: Home, Live, Movies, Series, Favorites, Recents, TV Guide, then the categories of the chosen section and the status of your sources.
@@ -310,10 +325,14 @@ Right-clicking an item lets you add it to favorites or copy the stream address.
 <!--/mac-->
 
 <!--pc-->
-Live / Movies / Series picker, then: all channels or movies, **Favorites**, **Recents**, and for live TV **Themes**, **TV Guide** and **MultiView**; **Recordings**; the **categories**. At the bottom: the current recording and download (progress, time left) and **Settings**.
+Settings > Appearance > **Interface per content type**:
+
+- **Classic**: three columns (sidebar, list with the current programme, player or details on the right).
+- **Cinema**: featured banner, posters or thumbnails in horizontal rows, full-page details. For live TV: "Sport right now", "Live news", "Tonight" rows per theme, favorites, recents, categories; a click opens the channel full frame, **Back** (or Esc) stops it.
+- **TV** (live only): the channel full frame, like a television (see [The TV interface](help:interface-tv)).
 <!--/pc-->
 
-## Three interfaces to choose from {#interfaces}
+## Three interfaces to choose from {#bandeau}
 
 <!--mac-->
 Kastideo offers three presentations, which you choose **separately for live, movies, series, and favorites / recents**:
@@ -332,14 +351,10 @@ For example: TV for live and Cinema for movies and series. The **Recordings** se
 <!--/mac-->
 
 <!--pc-->
-Settings > Appearance > **Interface per content type**:
-
-- **Classic**: three columns (sidebar, list with the current programme, player or details on the right).
-- **Cinema**: featured banner, posters or thumbnails in horizontal rows, full-page details. For live TV: "Sport right now", "Live news", "Tonight" rows per theme, favorites, recents, categories; a click opens the channel full frame, **Back** (or Esc) stops it.
-- **TV** (live only): the channel full frame, like a television (see [The TV interface](help:interface-tv)).
+It cycles through movies or series (this week's TMDB trends available to you, latest additions, a category selection) or, for live TV, the current programme of your channels. Arrows on hover, pauses while the mouse is over it. Settings > Appearance > **Featured banner**: show or hide, height, speed, sources.
 <!--/pc-->
 
-## The “featured” banner (Cinema) {#bandeau}
+## The “featured” banner (Cinema) {#pays}
 
 <!--mac-->
 At the top of Movies and Series, a **full-width carousel** scrolls through a selection: backdrop, poster, title, year, runtime, genres, rating, synopsis and **Play** (or **Resume** / **View Episodes**), **More Info** (the details page) and **Trailer** buttons. It mixes:
@@ -354,20 +369,23 @@ Settings > Appearance > **“Featured” Banner**: show or hide, height (compact
 <!--/mac-->
 
 <!--pc-->
-It cycles through movies or series (this week's TMDB trends available to you, latest additions, a category selection) or, for live TV, the current programme of your channels. Arrows on hover, pauses while the mouse is over it. Settings > Appearance > **Featured banner**: show or hide, height, speed, sources.
+Providers often mix several countries (categories “FR| …”, “|PT| …”, “ITALIA”…). Settings > Appearance > **Countries and languages (Cinema interface)** lists the countries found in your category names, with the number of items: choose the ones to show. **Latest additions**, **trends**, the **featured banner** and **category rows** of the Cinema interface then only show those countries. **Keep categories without a country** keeps categories such as “Action” or “New”. **All** goes back to the full display. Lists and search stay complete.
 <!--/pc-->
 
-## Countries and languages (Cinema) {#pays}
+## Countries and languages (Cinema) {#interface-tv}
 
 <!--mac-->
 Providers often mix several countries (categories “FR| …”, “|PT| …”, “ITALIA”…). Settings > Appearance > **Countries and languages (Cinema interface)** lists the countries found in your category names, with the number of items: tick the ones you want to see. **Latest additions**, **trends**, the **featured banner** and **category rows** of the Cinema interface then only show those countries. **Keep categories without a country** keeps categories such as “Action” or “New”. **All countries** goes back to the full display. Classic lists and search stay complete.
 <!--/mac-->
 
 <!--pc-->
-Providers often mix several countries (categories “FR| …”, “|PT| …”, “ITALIA”…). Settings > Appearance > **Countries and languages (Cinema interface)** lists the countries found in your category names, with the number of items: choose the ones to show. **Latest additions**, **trends**, the **featured banner** and **category rows** of the Cinema interface then only show those countries. **Keep categories without a country** keeps categories such as “Action” or “New”. **All** goes back to the full display. Lists and search stay complete.
+- **↑ / ↓**: previous / next channel; **type a number** (up to 4 digits).
+- **←** or left edge: **channel panel** (filter, search, current programme).
+- **→** or **I**: **info banner** (current and next programme).
+- **B**: previous channel — **F**: favorite — **M**: sound — **Space**: pause — **G**: TV guide — **H**: home.
 <!--/pc-->
 
-## The TV interface (live) {#interface-tv}
+## The TV interface (live) {#guide-grille}
 
 <!--mac-->
 The channel fills the whole frame, like on a television. The first time it appears, Kastideo resumes the last channel you watched.
@@ -382,13 +400,10 @@ The channel fills the whole frame, like on a television. The first time it appea
 <!--/mac-->
 
 <!--pc-->
-- **↑ / ↓**: previous / next channel; **type a number** (up to 4 digits).
-- **←** or left edge: **channel panel** (filter, search, current programme).
-- **→** or **I**: **info banner** (current and next programme).
-- **B**: previous channel — **F**: favorite — **M**: sound — **Space**: pause — **G**: TV guide — **H**: home.
+Home, live sidebar, **Ctrl+7** or the G key in the TV interface. Channels in rows, hours in columns, a red line at the current time; **‹ Now ›**, day picker, 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. A click on a programme opens its details: **Watch**, **Record**, **Schedule recording** (red dot in the grid) or **Alert me when it starts** (bell). On a past programme of a channel with replay (↺): **Watch again** or **Save this replay**; past days are in the date menu.
 <!--/pc-->
 
-## The TV Guide grid {#guide-grille}
+## The TV Guide grid {#direct-theme}
 
 <!--mac-->
 The **TV Guide** section (sidebar, **TV Guide** tab of the Cinema and TV interfaces, **⌘7**, or the **G** key in the TV interface). Channels are in rows, hours in columns; the red line marks the current time.
@@ -401,10 +416,12 @@ The **TV Guide** section (sidebar, **TV Guide** tab of the Cinema and TV interfa
 <!--/mac-->
 
 <!--pc-->
-Home, live sidebar, **Ctrl+7** or the G key in the TV interface. Channels in rows, hours in columns, a red line at the current time; **‹ Now ›**, day picker, 2 h / 3 h / 6 h span, filter (all, favorites, recents, theme, category) and search. A click on a programme opens its details: **Watch**, **Record**, **Schedule recording** (red dot in the grid) or **Alert me when it starts** (bell). On a past programme of a channel with replay (↺): **Watch again** or **Save this replay**; past days are in the date menu.
+Sidebar > **Themes**: **Right now**, **Tonight** (8–11 pm) or **Channels**, filtered by theme (Sport, News, Movies, Kids, Documentaries…) and, for sport, by discipline. One version per channel (FHD, HD or SD depending on your connection). Right-click: channel version, **channel theme** (to fix the classification), favorites, edit the channel.
 <!--/pc-->
 
-## Live TV by theme {#direct-theme}
+# Playback
+
+## The essentials {#lecture}
 
 <!--mac-->
 The **Themes** section of the sidebar (under Live) sorts live TV by **theme** — Sports, Auto & Moto (motorsport), Movies, Series, News, Documentaries, Nature / Hunting & Fishing, Kids, Entertainment, Food & Home, Music, General, Regional (France 3 regions, local TV), International (foreign channels), Religion, Radio — without the categories you hid. Three modes:
@@ -425,12 +442,10 @@ In **Sports**, a second row filters by **discipline**: Football, Rugby, Tennis, 
 <!--/mac-->
 
 <!--pc-->
-Sidebar > **Themes**: **Right now**, **Tonight** (8–11 pm) or **Channels**, filtered by theme (Sport, News, Movies, Kids, Documentaries…) and, for sport, by discipline. One version per channel (FHD, HD or SD depending on your connection). Right-click: channel version, **channel theme** (to fix the classification), favorites, edit the channel.
+The player (mpv engine) has a control bar that hides by itself, a stream health dot, volume, cinema mode (double-click or Ctrl+Enter) and full screen (F11). For movies and episodes: mini timeline, −10 s / +30 s, **resume** where you left off, **Back to details**.
 <!--/pc-->
 
-# Playback
-
-## The essentials {#lecture}
+## Playback {#barre-controle}
 
 <!--mac-->
 Kastideo plays all content with the **VLC** engine: live MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…
@@ -443,11 +458,7 @@ Kastideo plays all content with the **VLC** engine: live MPEG-TS (.ts), HLS (.m3
 - For Xtream sources, live is played in MPEG-TS (.ts) format, like the Xtream reference player; if the stream fails, Kastideo automatically tries the .m3u8 variant (and vice versa).
 <!--/mac-->
 
-<!--pc-->
-The player (mpv engine) has a control bar that hides by itself, a stream health dot, volume, cinema mode (double-click or Ctrl+Enter) and full screen (F11). For movies and episodes: mini timeline, −10 s / +30 s, **resume** where you left off, **Back to details**.
-<!--/pc-->
-
-## Control bar, timeline and information panel {#barre-controle}
+## Control bar, timeline and information panel {#multivue}
 
 <!--mac-->
 - **Auto-hiding bar**: it appears on the slightest mouse movement and hides, along with the pointer, after 3 seconds of inactivity (it stays while the mouse is over it, while paused or when the panel is open).
@@ -455,16 +466,6 @@ The player (mpv engine) has a control bar that hides by itself, a stream health 
 - **Mini-timeline** (movies and episodes): a thin line above the buttons that thickens on hover and shows the target time; click or drag to move.
 - **Stream health**: a **green** (Excellent), **orange** (Fair) or **red** (Unstable) dot shows reception quality, with the definition (SD, HD, 4K). On hover: exact resolution, bitrate, frames per second, dropped pictures and interruptions in the last minute.
 - **Information panel** (ⓘ button or **⌘I**, Esc to close): it slides in from the right over the video and shows the channel with its current and upcoming programs, or a movie's synopsis and cast; the **audio track** (language, audio description…) and **subtitles** choice; detailed reception quality.
-<!--/mac-->
-
-## MultiView (several channels at once) {#multivue}
-
-<!--mac-->
-**MultiView** shows up to **4 live channels** in one window (1 full frame, 2 side by side, 3 or 4 in a grid). **Sound follows the active tile** (orange border): click a tile or use keys **1 to 4**.
-
-- Open it: **Playback > MultiView…** (**⌥⌘M**), or right-click a channel > **Add to MultiView**.
-- In the window: **+** adds a channel (favorites, recents or search); hovering a tile, ⟳ changes the channel and ✕ removes it; **Stop All** stops every stream. Closing the window stops MultiView.
-- Each stream uses **one connection** to your provider, so MultiView is **off by default**: enter your subscription's number of simultaneous connections in **Settings > General > Playback** (2 to 4) to enable it. An Xtream source's **Test Connection** button shows this number. When opened, main playback stops to free its connection (unless recording); a recording or download also uses a connection.
 <!--/mac-->
 
 <!--pc-->
@@ -501,7 +502,17 @@ If you have **several live sources** (two IPTV subscriptions, or a subscription 
 
 **Picture in picture (PIP).** While a live channel plays, the **picture in picture** button (top right of the player) opens a **second channel in a small window** in a corner, muted. **Click the small window** to swap it with the main channel, or the cross to close it. The second channel must come from a source with a free connection: with a single subscription limited to one connection, pick a channel from the public list (or a second subscription). The small window closes when you leave the player.
 
-## If a channel does not start {#chaine-ne-demarre-pas}
+## MultiView (several channels at once) {#chaine-ne-demarre-pas}
+
+<!--mac-->
+**MultiView** shows up to **4 live channels** in one window (1 full frame, 2 side by side, 3 or 4 in a grid). **Sound follows the active tile** (orange border): click a tile or use keys **1 to 4**.
+
+- Open it: **Playback > MultiView…** (**⌥⌘M**), or right-click a channel > **Add to MultiView**.
+- In the window: **+** adds a channel (favorites, recents or search); hovering a tile, ⟳ changes the channel and ✕ removes it; **Stop All** stops every stream. Closing the window stops MultiView.
+- Each stream uses **one connection** to your provider, so MultiView is **off by default**: enter your subscription's number of simultaneous connections in **Settings > General > Playback** (2 to 4) to enable it. An Xtream source's **Test Connection** button shows this number. When opened, main playback stops to free its connection (unless recording); a recording or download also uses a connection.
+<!--/mac-->
+
+## If a channel does not start {#differe}
 
 <!--mac-->
 If no picture arrives after **20 seconds**, Kastideo automatically tries the other stream format (.ts or .m3u8), then shows an error message with the details returned by the VLC engine.
@@ -515,7 +526,11 @@ The **Log** (menu **Playback > Playback Log…**, **⌥⌘L**, or the button in 
 - **Current session / Previous session**: the log is kept on disk, so you can read what happened at startup in the previous session. **Show the log folder** reveals the file in the Finder.
 <!--/mac-->
 
-## Live timeshift {#differe}
+<!--pc-->
+Pause a channel (or go back with ← or the bar): it keeps being buffered (up to 1 h by default, adjustable). Without any action from you, the channel stays “LIVE”. The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
+<!--/pc-->
+
+## Live timeshift {#replay}
 
 <!--mac-->
 **Pause** a live channel: the VLC engine keeps receiving the stream and stores it. When you resume, you are watching in **timeshift** (yellow “TIMESHIFT −2:34” indicator in the controls). If a stream cannot be paused, the button is greyed out.
@@ -532,24 +547,6 @@ In timeshift, the controls offer:
 <!--/mac-->
 
 <!--pc-->
-Pause a channel (or go back with ← or the bar): it keeps being buffered (up to 1 h by default, adjustable). Without any action from you, the channel stays “LIVE”. The timeshift bar shows the delay, a slider to go back or catch up faster, the speed, **Catch up** and **Back to live**. ← / →: −10 s / +30 s.
-<!--/pc-->
-
-## Replay: watching a programme that already aired {#replay}
-
-<!--mac-->
-Some IPTV subscriptions keep channels for up to **14 days** (depending on the provider and the channel). Kastideo detects this by itself: channels with replay show a **↺** icon in lists and in the TV Guide.
-
-- **In the TV Guide**: click a **past** programme (marked ↺), then **Watch again**. On the **current** programme, **Watch from the start** replays it from the beginning. **Save this replay** downloads the programme from the provider's archive (recordings folder).
-- **Previous days**: the date menu of the TV Guide offers **Watch again (replay)** with the past days.
-- **From a channel**: right-click the channel > **Watch again (replay)** (recent programmes of that channel). The Cinema interface also has a **To watch again** row (your favourite channels with replay).
-- **During a replay**, the player bar lets you pause and move within the programme. At the end, Kastideo **returns to the channel's live stream** (can be turned off).
-- **Settings > General > Replay**: turn replay on or off, number of **days of past programmes kept in the guide** (more days = more memory), **time offset** (if the replayed programme is shifted by a few minutes or an hour, fix it here; the server's time zone is read automatically), return to live.
-- A replay counts as **one connection**: it closes the current channel, like switching channels.
-- If a replay does not start, open the **Log** (topic “Playback and relay”): the archive address built and the offset used are listed there. The provider's guide must contain past programmes: reload it after increasing the number of days kept.
-<!--/mac-->
-
-<!--pc-->
 Some IPTV subscriptions keep channels for up to **14 days** (depending on the provider and the channel). Kastideo detects this by itself: channels with replay show a **↺** icon in lists and in the TV Guide.
 
 - **In the TV Guide**: click a **past** programme (marked ↺), then **Watch again**. On the **current** programme, **Watch from the start** replays it from the beginning. **Save this replay** downloads the programme from the provider's archive (recordings folder).
@@ -561,10 +558,18 @@ Some IPTV subscriptions keep channels for up to **14 days** (depending on the pr
 - If a replay does not start, open the **Log** (button Log, topic “Playback and relay”): the archive address built and the offset used are listed there. The provider's guide must contain past programmes: reload it after increasing the number of days kept.
 <!--/pc-->
 
-## One connection at a time {#connexion-unique}
+## Replay: watching a programme that already aired {#connexion-unique}
 
 <!--mac-->
-Most IPTV subscriptions allow only **one simultaneous stream**. Kastideo always closes the current stream before opening the next one: you can zap without risk of exceeding your limit. If playback fails, check that no other device (TV, phone, Piboard…) is watching with the same subscription.
+Some IPTV subscriptions keep channels for up to **14 days** (depending on the provider and the channel). Kastideo detects this by itself: channels with replay show a **↺** icon in lists and in the TV Guide.
+
+- **In the TV Guide**: click a **past** programme (marked ↺), then **Watch again**. On the **current** programme, **Watch from the start** replays it from the beginning. **Save this replay** downloads the programme from the provider's archive (recordings folder).
+- **Previous days**: the date menu of the TV Guide offers **Watch again (replay)** with the past days.
+- **From a channel**: right-click the channel > **Watch again (replay)** (recent programmes of that channel). The Cinema interface also has a **To watch again** row (your favourite channels with replay).
+- **During a replay**, the player bar lets you pause and move within the programme. At the end, Kastideo **returns to the channel's live stream** (can be turned off).
+- **Settings > General > Replay**: turn replay on or off, number of **days of past programmes kept in the guide** (more days = more memory), **time offset** (if the replayed programme is shifted by a few minutes or an hour, fix it here; the server's time zone is read automatically), return to live.
+- A replay counts as **one connection**: it closes the current channel, like switching channels.
+- If a replay does not start, open the **Log** (topic “Playback and relay”): the archive address built and the offset used are listed there. The provider's guide must contain past programmes: reload it after increasing the number of days kept.
 <!--/mac-->
 
 <!--pc-->
@@ -651,14 +656,10 @@ On Windows and Linux, detection relies on the number of pictures shown by the en
 
 A channel that stays frozen even in software usually has a faulty stream at the provider: check the **Playback log** and try another version of the channel (HD, SD…).
 
-## Buffer {#tampon}
+## One connection at a time {#tampon}
 
 <!--mac-->
-In **Settings > General > Playback**, choose the trade-off between speed and stability:
-
-- **Fast** (default): 0.4 s of reserve, the shortest zapping.
-- **Balanced**: 1 s.
-- **Stable**: 3 s, for unreliable connections or servers (fewer interruptions, slower start).
+Most IPTV subscriptions allow only **one simultaneous stream**. Kastideo always closes the current stream before opening the next one: you can zap without risk of exceeding your limit. If playback fails, check that no other device (TV, phone, Piboard…) is watching with the same subscription.
 <!--/mac-->
 
 ## The Log (diagnostics) {#journal}
@@ -678,12 +679,30 @@ The **Log** (**Ctrl+Alt+L**, or the button on the home screen and in error messa
 ## Overview {#enregistrements}
 
 <!--mac-->
+In **Settings > General > Playback**, choose the trade-off between speed and stability:
+
+- **Fast** (default): 0.4 s of reserve, the shortest zapping.
+- **Balanced**: 1 s.
+- **Stable**: 3 s, for unreliable connections or servers (fewer interruptions, slower start).
+<!--/mac-->
+
+## Recordings and downloads {#enregistrer}
+
+<!--mac-->
 Everything is in the **Recordings** section of the sidebar (**⌘6**): current recording, conversions, downloads, schedules and recorded files (click to watch them, right-click to show them in Finder or delete them).
 
 Files are stored in **~/Movies/Kastideo** (can be changed in **Settings > Recordings**) and named automatically, for example “TF1 – Le goût du détail – 2026-10-18 20h50”.
 <!--/mac-->
 
-## Recording live {#enregistrer}
+<!--pc-->
+Red round button in the player bar, **R** key, or right-click a channel > **Record now**: the channel is recorded until the end of the current programme (plus the margin) or until you stop it, in **Videos/Kastideo/Enregistrements**.
+
+- The stream bytes are copied as is to a **.ts** file, losslessly: the watched channel is copied from the relay (no second connection to the provider); another channel is downloaded directly, reconnecting if the stream drops.
+- At the end, the .ts is converted losslessly to **MKV** (default format, Settings > Recordings); if conversion fails, the .ts is kept — it plays everywhere.
+- HLS streams (.m3u8) and playback without the relay still go through the video engine.
+<!--/pc-->
+
+## Recording live {#programmer}
 
 <!--mac-->
 - While a channel is playing, click **●** in the controls, **Record** under the video, or use **⇧⌘R**. The **REC** badge shows the duration.
@@ -696,14 +715,15 @@ Files are stored in **~/Movies/Kastideo** (can be changed in **Settings > Record
 <!--/mac-->
 
 <!--pc-->
-Red round button in the player bar, **R** key, or right-click a channel > **Record now**: the channel is recorded until the end of the current programme (plus the margin) or until you stop it, in **Videos/Kastideo/Enregistrements**.
-
-- The stream bytes are copied as is to a **.ts** file, losslessly: the watched channel is copied from the relay (no second connection to the provider); another channel is downloaded directly, reconnecting if the stream drops.
-- At the end, the .ts is converted losslessly to **MKV** (default format, Settings > Recordings); if conversion fails, the .ts is kept — it plays everywhere.
-- HLS streams (.m3u8) and playback without the relay still go through the video engine.
+- **Right-click a live channel > Schedule a recording…**, or the **Schedule…** button of the Recordings screen (then choose the channel: favorites, recents or search).
+  - **Guide programmes**: the channel's next programmes, with **Schedule** (or **Record** for the current one). A check mark shows those already scheduled.
+  - **Time slot**: day, start and end time, optional title — for a channel without TV guide or a specific show. An end earlier than the start finishes the next day.
+  - **Repetition** (list at the top right): **once**, **every day**, **Monday to Friday** or **every week**. The next occurrence is added automatically; the ⟲ button of a repeated recording in the list stops repeating.
+- From the details of an upcoming programme (TV guide, themes): **Schedule recording**.
+- Margins before and after (Settings > Recordings) are added. Kastideo must be open at the scheduled time: turn on **Start Kastideo when I sign in** if needed (Settings > General).
 <!--/pc-->
 
-## Scheduling a recording {#programmer}
+## Scheduling a recording {#telecharger}
 
 <!--mac-->
 - In the TV guide under the video, **double-click** an upcoming program, or right-click > **Schedule Recording**. A red dot marks scheduled programs.
@@ -713,15 +733,10 @@ Red round button in the player bar, **R** key, or right-click a channel > **Reco
 <!--/mac-->
 
 <!--pc-->
-- **Right-click a live channel > Schedule a recording…**, or the **Schedule…** button of the Recordings screen (then choose the channel: favorites, recents or search).
-  - **Guide programmes**: the channel's next programmes, with **Schedule** (or **Record** for the current one). A check mark shows those already scheduled.
-  - **Time slot**: day, start and end time, optional title — for a channel without TV guide or a specific show. An end earlier than the start finishes the next day.
-  - **Repetition** (list at the top right): **once**, **every day**, **Monday to Friday** or **every week**. The next occurrence is added automatically; the ⟲ button of a repeated recording in the list stops repeating.
-- From the details of an upcoming programme (TV guide, themes): **Schedule recording**.
-- Margins before and after (Settings > Recordings) are added. Kastideo must be open at the scheduled time: turn on **Start Kastideo when I sign in** if needed (Settings > General).
+**Download** button on a movie's details (now or **tonight**), **Download the season** or each episode's icon for a series, right-click > Download. One download at a time, resumed after an interruption, paused during playback (adjustable). Files go to **Videos/Kastideo/Films** and **Séries/<series>**.
 <!--/pc-->
 
-## Downloading a movie or episodes without watching {#telecharger}
+## Downloading a movie or episodes without watching {#priorite}
 
 <!--mac-->
 - Right-click a movie or an episode > **Download** or **Download Tonight**, or the **Download** button under the video.
@@ -729,20 +744,6 @@ Red round button in the player bar, **R** key, or right-click a channel > **Reco
 - Downloads run **one after the other** (queue). “Tonight” starts at 2 a.m. by default (adjustable).
 - You can pause, resume or cancel each download in the Recordings section.
 - **Permanent indicator**: as long as a download is active, a progress ring stays visible in the toolbar. A click opens the details: progress of the current movie or episode, “episode X of N”, progress of the series or batch, speed and **estimated time remaining** (refined as the download goes on).
-<!--/mac-->
-
-<!--pc-->
-**Download** button on a movie's details (now or **tonight**), **Download the season** or each episode's icon for a series, right-click > Download. One download at a time, resumed after an interruption, paused during playback (adjustable). Files go to **Videos/Kastideo/Films** and **Séries/<series>**.
-<!--/pc-->
-
-## Single connection: who has priority? {#priorite}
-
-<!--mac-->
-Your subscription allows only one connection. Kastideo therefore does only one thing at a time and **always asks you** before interrupting something:
-
-- You change channel during a recording: Kastideo asks whether to **stop the recording**.
-- You start playback during a download: the download is **paused** and resumes by itself when playback stops.
-- Files that are already recorded can be watched at any time, even during a background recording.
 <!--/mac-->
 
 ## Recordings screen {#ecran-enregistrements}
@@ -757,7 +758,19 @@ Current recording (stop), downloads (pause, resume, cancel), scheduled recording
 With a **TMDB key** (Settings > General), titles, summaries, genres and episodes come from TMDB, in the interface language. When the only summary available is the provider's in another language (Portuguese, Spanish…), it is folded: **Show the summary (Portuguese)** shows it anyway. It doesn't appear in the banner or the episode list.
 <!--/pc-->
 
-## Cleaning up the recordings list {#bon-a-savoir}
+## Single connection: who has priority? {#bon-a-savoir}
+
+<!--mac-->
+Your subscription allows only one connection. Kastideo therefore does only one thing at a time and **always asks you** before interrupting something:
+
+- You change channel during a recording: Kastideo asks whether to **stop the recording**.
+- You start playback during a download: the download is **paused** and resumes by itself when playback stops.
+- Files that are already recorded can be watched at any time, even during a background recording.
+<!--/mac-->
+
+# Organize and customize
+
+## Cleaning up the recordings list {#corriger}
 
 <!--mac-->
 In the **Recordings** section you can **remove finished recordings from the list** (schedules, downloads and the recording in progress are never touched).
@@ -773,9 +786,11 @@ After a simple removal from the list, an **Undo** banner stays visible for about
 If a file no longer exists in storage, or cannot be deleted, the removal carries on anyway: a notification warns you, and with several warnings a window lists them.
 <!--/mac-->
 
-# Organize and customize
+<!--pc-->
+Right-click a channel > **Edit channel…**: name, number, logo (image address or a file copied into Kastideo) and **TV guide** channel (search among the provider and fallback guides). The fix applies to this version of the channel (HD, FHD…) and survives every refresh. **Restore** goes back to the original.
+<!--/pc-->
 
-## Good to know {#corriger}
+## Good to know {#categories}
 
 <!--mac-->
 - Kastideo must **stay open** and the Mac **on** for scheduled recordings and overnight downloads. Kastideo prevents automatic sleep during activity and in the hour before, but not manual shutdown or sleep.
@@ -783,22 +798,6 @@ If a file no longer exists in storage, or cannot be deleted, the removal carries
 - **Automatic cleanup** (optional): recordings older than the chosen number of days are moved to the Trash.
 - An alert warns you when disk space gets low.
 - Copying rights depend on your provider's conditions: Kastideo records for your private use what your subscription already gives you.
-<!--/mac-->
-
-<!--pc-->
-Right-click a channel > **Edit channel…**: name, number, logo (image address or a file copied into Kastideo) and **TV guide** channel (search among the provider and fallback guides). The fix applies to this version of the channel (HD, FHD…) and survives every refresh. **Restore** goes back to the original.
-<!--/pc-->
-
-## Fixing a channel {#categories}
-
-<!--mac-->
-Some channels are badly referenced by the provider (wrong name, wrong programs, missing logo). Right-click the channel > **Edit Channel…**:
-
-- **Name** and **number** (used for number zapping in the TV interface);
-- **Logo**: an image address, or **Choose a File…** (the image is copied into Kastideo);
-- **TV guide programs**: if the programs shown are wrong or missing, search the right channel in the list (provider guide and backup guide); the program on now helps recognize it.
-
-The fix only applies to **this version** of the channel (FHD, HD, SD… are fixed separately) and survives source refreshes. **Restore Original** undoes it.
 <!--/mac-->
 
 <!--pc-->
@@ -935,19 +934,16 @@ In **Settings > Sources**, an account's **Diagnostic** button (stethoscope) show
 
 If "returned by the provider" differs between your two accounts, the difference comes from the provider. The **Copy** button lets you attach the result to a message to your provider.
 
-## Organizing categories {#favoris}
+## Fixing a channel {#favoris}
 
 <!--mac-->
-You don't have to put up with your provider's category list and order. Open **View > Manage Categories…** (**⌥⌘C**), the button next to the “Categories” title in the sidebar, or right-click a category. Choose the section (**Live**, **Movies** or **Series**), then:
+Some channels are badly referenced by the provider (wrong name, wrong programs, missing logo). Right-click the channel > **Edit Channel…**:
 
-- **Reorder**: drag categories in the list, or use the **…** menu > **Move to Top / Bottom**. **Sort A → Z** sorts everything alphabetically.
-- **Select / deselect all**: the box above the list ticks or unticks all listed categories at once. With a search (for example “PT”), it only affects the categories found: handy to hide a whole country in one go, then show only the ones you want.
-- **Hide**: uncheck a category (or right-click > **Hide This Category** in the sidebar). A hidden category disappears **everywhere**: sidebar, Live / Movies / Series lists, search, TV Guide, Cinema and TV interfaces, featured banner. Your favorites and recents stay available.
-- **Hide by keyword**: type for example “PAKISTAN” or “ARABIC”: every category whose name contains it is hidden, including ones the provider adds later. Click a keyword's cross to undo it.
-- **Rename**: the pencil gives a more readable name (“FRANCE FHD | OTT” → “France HD”); **Original Name** undoes it.
-- **Show All** shows hidden categories again; **Reset…** goes back entirely to the provider's layout.
+- **Name** and **number** (used for number zapping in the TV interface);
+- **Logo**: an image address, or **Choose a File…** (the image is copied into Kastideo);
+- **TV guide programs**: if the programs shown are wrong or missing, search the right channel in the list (provider guide and backup guide); the program on now helps recognize it.
 
-New categories added by the provider appear next to their original neighbor.
+The fix only applies to **this version** of the channel (FHD, HD, SD… are fixed separately) and survives source refreshes. **Restore Original** undoes it.
 <!--/mac-->
 
 <!--pc-->
@@ -1102,14 +1098,19 @@ Your followed channels, favorites, history (80 videos), “watch later” list a
 
 # Settings and maintenance
 
-## Favorites and recents {#raccourcis}
+## Organizing categories {#raccourcis}
 
 <!--mac-->
-- Add a favorite with the star in the information panel, right-click or **⌘D**.
-- The **Recents** section keeps the last 60 items you watched.
-- **Removing from recents**: right-click an item > **Remove from Recents** (or the **⌫** key on the selected item in the Classic interface). For several items, click **Edit**, tick the items, then **Delete**; **Select All** ticks the whole list and **Clear All** empties the history.
-- After a deletion, an **Undo** banner stays visible for a few seconds to restore everything.
-- Recents can also be cleared in settings, **General** tab.
+You don't have to put up with your provider's category list and order. Open **View > Manage Categories…** (**⌥⌘C**), the button next to the “Categories” title in the sidebar, or right-click a category. Choose the section (**Live**, **Movies** or **Series**), then:
+
+- **Reorder**: drag categories in the list, or use the **…** menu > **Move to Top / Bottom**. **Sort A → Z** sorts everything alphabetically.
+- **Select / deselect all**: the box above the list ticks or unticks all listed categories at once. With a search (for example “PT”), it only affects the categories found: handy to hide a whole country in one go, then show only the ones you want.
+- **Hide**: uncheck a category (or right-click > **Hide This Category** in the sidebar). A hidden category disappears **everywhere**: sidebar, Live / Movies / Series lists, search, TV Guide, Cinema and TV interfaces, featured banner. Your favorites and recents stay available.
+- **Hide by keyword**: type for example “PAKISTAN” or “ARABIC”: every category whose name contains it is hidden, including ones the provider adds later. Click a keyword's cross to undo it.
+- **Rename**: the pencil gives a more readable name (“FRANCE FHD | OTT” → “France HD”); **Original Name** undoes it.
+- **Show All** shows hidden categories again; **Reset…** goes back entirely to the provider's layout.
+
+New categories added by the provider appear next to their original neighbor.
 <!--/mac-->
 
 <!--pc-->
@@ -1126,7 +1127,19 @@ Your followed channels, favorites, history (80 videos), “watch later” list a
 ## General settings {#reglages}
 
 <!--mac-->
-After each update, the **What's New** window summarizes the changes in the installed version. You can reopen it with **Help > What's New in This Version** and browse previous versions there. Release notes are written in French.
+Kastideo updates itself thanks to **Sparkle**, the reference tool for Mac apps distributed outside the App Store.
+
+- **At launch** (a few seconds after starting), then once a day if Kastideo stays open, Kastideo discreetly checks whether a new version is available on GitHub.
+- If so, a **banner** at the top of the window announces it — **never while watching or recording** (it waits for playback to end). The update is **optional**: **Update…** opens the release notes window then **Install Update** (Kastideo quits, installs and relaunches); **Later** hides the banner until the next launch; **Skip This Version** stops offering it (the next one will be offered).
+- You can check at any time with **Kastideo > Check for Updates…**.
+- Every update is signed: Kastideo refuses to install a file that does not come from its publisher.
+
+In **Settings > Updates**:
+
+- **Check for updates at launch**: turns the launch and daily check on or off.
+- **Receive test versions (beta)**: also offers beta versions, which bring new features earlier but may be less stable. Turn the option off to return to stable versions at the next update.
+
+> Versions 0.1.0 and earlier cannot update themselves: install 0.2.0 by hand once, and the following ones will arrive on their own.
 <!--/mac-->
 
 <!--pc-->
@@ -1138,14 +1151,10 @@ After each update, the **What's New** window summarizes the changes in the insta
 - **Backup**: export or import the configuration.
 <!--/pc-->
 
-## General settings {#tmdb}
+## What's New {#tmdb}
 
 <!--mac-->
-- **Language** (**General** tab): Kastideo is available in **French** and **English**. The language is chosen at first launch, then can be changed in **Settings > General > Language** (or “System” to follow the Mac's language). The change applies after the app restarts, which Kastideo offers to do for you. Help and menus follow the chosen language; release notes remain in French.
-- **Appearance** (**Appearance** tab): dark theme (default), light or same as system; **accent color** (System, blue, purple, pink, red, orange, green, teal); **interface** Classic or Cinema for each type of content; **list density** (compact, standard, spacious) for the Classic interface; **thumbnail size** (small, medium, large) for the Cinema interface.
-- **Movie and Series Details** (**General** tab): optional **TMDB** API key (free at themoviedb.org > Settings > API; v3 key or v4 read token), stored in the keychain. **Save and Verify** checks it. Without a key, details come from your IPTV provider.
-- **Refresh at launch**: reloads sources whose last refresh is more than 6 hours old.
-- **Cache**: Kastideo keeps a local copy of lists and the TV guide to start instantly. **Clear and Reload** erases this copy and restarts loading.
+After each update, the **What's New** window summarizes the changes in the installed version. You can reopen it with **Help > What's New in This Version** and browse previous versions there. Release notes are written in French.
 <!--/mac-->
 
 <!--pc-->
@@ -1172,45 +1181,28 @@ Settings > General > **Startup and files**:
 Both options are also offered by the Windows installer (unticked by default).
 <!--/pc-->
 
-## Getting a TMDB key (free) {#sauvegarde}
+## General settings {#sauvegarde}
 
 <!--mac-->
-TMDB (The Movie Database) is a community movie and TV database. Its key is **free** for personal use; it lets Kastideo show cast photos, HD posters and backdrops, the trailer and a translated synopsis.
-
-1. Create an account on **themoviedb.org** (“Join TMDB”), then confirm it with the link sent by e-mail.
-2. Signed in, open **themoviedb.org/settings/api** (avatar > Settings > API), or click **Get a Free Key** in Kastideo's settings.
-3. Click **Create**, choose **Developer** and accept the terms of use.
-4. Fill in the form: usage type **Personal**, application name **Kastideo**, URL **https://github.com/jihemezes/kastideo**, a short summary (“Personal IPTV player, shows movie details”), then your contact details.
-5. Submit: the page shows an **API Key** (32 characters) and an **API Read Access Token** (long, starts with “eyJ”). Kastideo accepts either; the API key is easier to copy.
-6. In Kastideo: **Settings (⌘,) > General > Movie and Series Details**, paste the key and click **Save and Verify**. “Valid key ✓” confirms it.
-7. Reopen a details page (or click **Refresh** at its bottom): it is now completed by TMDB.
-
-The key is stored in the Mac keychain. **Remove Key** goes back to IPTV provider information only.
+- **Language** (**General** tab): Kastideo is available in **French** and **English**. The language is chosen at first launch, then can be changed in **Settings > General > Language** (or “System” to follow the Mac's language). The change applies after the app restarts, which Kastideo offers to do for you. Help and menus follow the chosen language; release notes remain in French.
+- **Appearance** (**Appearance** tab): dark theme (default), light or same as system; **accent color** (System, blue, purple, pink, red, orange, green, teal); **interface** Classic or Cinema for each type of content; **list density** (compact, standard, spacious) for the Classic interface; **thumbnail size** (small, medium, large) for the Cinema interface.
+- **Movie and Series Details** (**General** tab): optional **TMDB** API key (free at themoviedb.org > Settings > API; v3 key or v4 read token), stored in the keychain. **Save and Verify** checks it. Without a key, details come from your IPTV provider.
+- **Refresh at launch**: reloads sources whose last refresh is more than 6 hours old.
+- **Cache**: Kastideo keeps a local copy of lists and the TV guide to start instantly. **Clear and Reload** erases this copy and restarts loading.
 <!--/mac-->
 
 <!--pc-->
 Settings > **Backup**: **Export configuration…** (sources and their guide, passwords if you wish, favorites, recents, categories, interfaces, appearance, number of connections, adult content, banner, TMDB key) and **Import configuration…**. The file is the same as Kastideo for Mac: you can move from one computer to the other in both directions. Nothing is deleted on import. Jellyfin, Emby and Plex servers are included (password or token too, if requested); folders as well, with their paths (to fix if they differ on this computer).
 <!--/pc-->
 
-## Keyboard shortcuts {#mises-a-jour}
+## Favorites and recents {#mises-a-jour}
 
 <!--mac-->
-- **⌘0**: Home
-- **⌘1 to ⌘7**: Live, Movies, Series, Favorites, Recents, Recordings, TV Guide
-- **⌥⌘1 / ⌥⌘2 / ⌥⌘3**: Classic / Cinema / TV interface (for the type of content displayed)
-- TV interface: **↑ ↓** zapping, **←** channel panel, digits = channel number, **I** banner, **B** previous channel, **G** TV guide, **H** home, **F** favorite, **M** mute
-- **⌘↑ / ⌘↓**: previous / next item (zapping)
-- **⌘K**: play / pause
-- **⌘[ / ⌘]**: back 10 s / forward 30 s (movies and episodes)
-- **⌘↩** or double-click the video: theater mode (Esc to leave)
-- **⌘.**: stop playback
-- **⇧⌘R**: record the channel being watched / stop recording
-- **⌥⌘L**: log
-- **⌘D**: add or remove from favorites
-- **⌘R**: refresh all sources
-- **⌘,**: settings and sources
-- **⌘?**: this help (opens on the page for the current screen)
-- **⌘8**: My videos, **⌘9**: YouTube
+- Add a favorite with the star in the information panel, right-click or **⌘D**.
+- The **Recents** section keeps the last 60 items you watched.
+- **Removing from recents**: right-click an item > **Remove from Recents** (or the **⌫** key on the selected item in the Classic interface). For several items, click **Edit**, tick the items, then **Delete**; **Select All** ticks the whole list and **Clear All** empties the history.
+- After a deletion, an **Undo** banner stays visible for a few seconds to restore everything.
+- Recents can also be cleared in settings, **General** tab.
 <!--/mac-->
 
 <!--pc-->
@@ -1322,15 +1314,20 @@ The full history is also published on the [GitHub Releases](https://github.com/j
 
 # Troubleshooting
 
-## Backup and transfer {#depannage}
+## Getting a TMDB key (free) {#depannage}
 
 <!--mac-->
-Settings > General > **Backup and transfer**:
+TMDB (The Movie Database) is a community movie and TV database. Its key is **free** for personal use; it lets Kastideo show cast photos, HD posters and backdrops, the trailer and a translated synopsis.
 
-- **Export configuration…** saves a `Kastideo-configuration.json` file: sources (Xtream and M3U playlists by address), favorites, recents, custom categories (order, hidden, names, keywords), chosen interfaces and TMDB key. Tick **Include passwords** so nothing has to be typed again; keep the file somewhere safe.
-- **Import configuration…** adds the content of a file: on a new Mac, or from Kastideo for Windows and Linux (same format). Sources already present are recognised and nothing is deleted.
+1. Create an account on **themoviedb.org** (“Join TMDB”), then confirm it with the link sent by e-mail.
+2. Signed in, open **themoviedb.org/settings/api** (avatar > Settings > API), or click **Get a Free Key** in Kastideo's settings.
+3. Click **Create**, choose **Developer** and accept the terms of use.
+4. Fill in the form: usage type **Personal**, application name **Kastideo**, URL **https://github.com/jihemezes/kastideo**, a short summary (“Personal IPTV player, shows movie details”), then your contact details.
+5. Submit: the page shows an **API Key** (32 characters) and an **API Read Access Token** (long, starts with “eyJ”). Kastideo accepts either; the API key is easier to copy.
+6. In Kastideo: **Settings (⌘,) > General > Movie and Series Details**, paste the key and click **Save and Verify**. “Valid key ✓” confirms it.
+7. Reopen a details page (or click **Refresh** at its bottom): it is now completed by TMDB.
 
-Jellyfin, Emby and Plex servers are exported (with their password or token if you tick **Include passwords**). M3U playlists added as local files and folders are not imported on another Mac (the files do not exist there or must be chosen again).
+The key is stored in the Mac keychain. **Remove Key** goes back to IPTV provider information only.
 <!--/mac-->
 
 <!--pc-->
@@ -1371,7 +1368,34 @@ By clicking “I understand and accept”, you confirm that you have read and ac
 
 This notice appears on first launch and after every update. You can read it again at any time in <!--mac-->**Settings (⌘,) > About**<!--/mac--><!--pc-->**Settings (Ctrl+,) > About**<!--/pc-->.
 
-## YouTube {#soutenir}
+## Troubleshooting {#soutenir}
+
+<!--mac-->
+- **A channel has no sound**: Kastideo detects it within a few seconds and repairs it on its own: if the stream clock is shifted (sound is dropped, “buffer too late” in the log), the channel is reopened synced on sound and picture, and Kastideo remembers it; otherwise it restarts the audio track or tries the next one. If an orange 🔇 icon stays next to the health pill, the provider is sending a stream without sound or an unreadable track: try another version of the channel (HD, SD…) or pick another audio track in the information panel (⌘I). The playback log (“Son :” lines) shows the format received.
+
+- **“The provider refuses this channel (HTTP 403)”**: the provider itself blocks this channel (out of service or not in your subscription). Kastideo does not insist; try another version (HD, SD…) or later.
+- **Frozen picture, “Faulty stream at the provider”**: the stream clock is inconsistent. Kastideo reopens the channel once, synced on sound and picture; if that is not enough, it switches to **picture only** (no sound) so the picture no longer freezes, and remembers it. Right-click the channel > **Image seule (sans le son)** / picture only to turn it on or off manually. Settings > General > Playback > **Reset** cancels these remembered repairs.
+- **Stream relay** (Settings > General > Playback, on by default): Kastideo opens the connection to the provider itself and passes it to the VLC engine, like Piboard, so there are never two at once. The playback log then shows “Relais :” lines with the provider's exact answer (e.g. “HTTP 200 en 0,35 s”).
+- **Slow or refused channel switch (“HTTP 404”, “403”, “401” or “520” in the playback log)**: with a one-connection subscription, the provider takes a moment to release the previous channel. Kastideo waits 1.5 s before opening the new channel and retries once if it is refused (“Attente…” and “nouvel essai” in the log). If refusals persist, wait a minute and try again.
+
+Kastideo identifies itself to servers as the **VLC** player: many IPTV providers only answer players they recognize.
+
+- **“The server did not respond in time”**: the server is overloaded or unavailable. Try again later; if your address looks like `get.php?username=…`, check that it was converted to Xtream Codes (type shown in the sources settings).
+
+- **“Username or password refused”**: check your credentials with **Test Connection**.
+- **“Account not active”**: the subscription has expired or is suspended at your provider.
+- **No program in the guide**: the channel has no TV guide identifier, or your source's guide does not contain any for it.
+- **“App Transport Security”**: this message appeared in versions 0.1.0 and 0.2.0 with http:// sources. It has been fixed since version 0.2.1.
+- **Cannot play**: the server did not provide the stream. Check that no other device is using your subscription (only one connection allowed), then click **Try Again**. Also try the **Stable** buffer.
+<!--/mac-->
+
+<!--pc-->
+Kastideo is **free**. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
+
+The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
+<!--/pc-->
+
+## YouTube {#confidentialite}
 
 <!--mac-->
 The **YouTube** section (sidebar, home button, **⌘9**) works in two steps: a **browser** first, then the **player** as soon as you pick a video.
@@ -1388,25 +1412,13 @@ Kastideo uses **YouTube's official player in “privacy-enhanced mode”** (yout
 <!--/mac-->
 
 <!--pc-->
-Kastideo is **free**. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
-
-The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
+Kastideo collects no data. It only contacts your IPTV providers, the TV guides you chose, GitHub for updates and, if you entered a key, TMDB. Your settings, favorites and passwords stay on your computer.
 <!--/pc-->
 
-## Support Kastideo {#confidentialite}
+## Support Kastideo {#licences}
 
 <!--mac-->
 Kastideo is **free**. If you enjoy the app, you can encourage its development by buying me a coffee on [Ko-fi](https://ko-fi.com/jihemezes): it is entirely optional.
 
 The **Buy me a coffee** button appears discreetly on the home screen and in the What's New window, as well as in **Settings > About** and **Help > Support Kastideo (Ko-fi)**. To hide the buttons on the home screen and in What's New, tick **Hide the “Buy me a coffee” buttons** in **Settings > About**.
-<!--/mac-->
-
-<!--pc-->
-Kastideo collects no data. It only contacts your IPTV providers, the TV guides you chose, GitHub for updates and, if you entered a key, TMDB. Your settings, favorites and passwords stay on your computer.
-<!--/pc-->
-
-## Privacy {#licences}
-
-<!--mac-->
-Kastideo runs in the macOS sandbox. It only accesses the network and the files that you choose. Your passwords stay in the keychain. No data is sent anywhere other than to your own sources.
 <!--/mac-->

@@ -258,17 +258,15 @@ Pour revenir à l'accueil à tout moment : ligne **Accueil** de la barre latéra
 **Sur téléphone et tablette Android**, l'accueil s'adapte à la largeur de l'écran : en dessous d'environ 720 px (téléphone, ou tablette en portrait), les quatre pavés passent sur **deux colonnes** et l'en-tête se réduit. **Sur Android TV**, les boutons se choisissent à la télécommande (liseré visible) et **OK** ouvre.
 <!--/pc-->
 
-## Mes vidéos {#mes-videos}
+## Retirer un contenu de « Reprendre la lecture » {#mes-videos}
 
 <!--mac-->
-Dès qu'une source **Dossiers**, **Jellyfin**, **Emby** ou **Plex** existe, une tuile **Mes vidéos** apparaît sur l'accueil (et une ligne dans la barre latérale, **⌘8**). Elle réunit vos vidéos, à part de l'IPTV :
+Un clic droit sur une vignette de **Reprendre la lecture** (accueil, interface Cinéma, Mes vidéos ; appui long sur Android) propose :
 
-- **À la une** : **Reprendre la lecture** (films et épisodes entamés), **Ajouts récents**, **Films à voir**, puis une rangée Films, Séries et Vidéos ;
-- **Films**, **Séries**, **Vidéos** : grilles avec recherche, filtres (**genre**, **année**, **non vus**) et tri (titre, ajout récent, année) ;
-- **Dossiers** : parcourez vos dossiers et sous-dossiers comme dans le Finder (fil d'Ariane pour remonter), et les bibliothèques des serveurs ;
-- **Sources** : toutes, ou une seule (NAS, Emby, Plex…). Un triangle orange signale une erreur : clic droit > **Détails de l'erreur…** affiche la requête et la **réponse exacte du serveur** (bouton **Copier**), puis **Réessayer**.
+- **Retirer de « Reprendre la lecture »** : la vignette disparaît de la rangée, mais la **position reste mémorisée** : en relançant le film plus tard, la lecture reprend où elle en était.
+- **Vider « Reprendre la lecture »** : retire toutes les vignettes de la rangée.
 
-Dans **Films** et **Séries**, le sélecteur **Tout / IPTV / Mes vidéos** (barre latérale, au-dessus des catégories) choisit ce qui est affiché : l'IPTV seul (par défaut), vos vidéos seules, ou les deux mélangés. Les catégories de vos vidéos ne sont jamais masquées par le réglage des pays.
+Un bandeau **Annuler** reste affiché quelques secondes. Un contenu retiré **réapparaît** dans la rangée dès que vous le regardez de nouveau ; en attendant, il figure dans « Regardés récemment ».
 <!--/mac-->
 
 <!--pc-->
@@ -300,6 +298,23 @@ Les notes, durées, pays et langues des fichiers de vos dossiers viennent de TMD
 ![Colonnes et barre latérale](img:layout)
 
 <!--mac-->
+Dès qu'une source **Dossiers**, **Jellyfin**, **Emby** ou **Plex** existe, une tuile **Mes vidéos** apparaît sur l'accueil (et une ligne dans la barre latérale, **⌘8**). Elle réunit vos vidéos, à part de l'IPTV :
+
+- **À la une** : **Reprendre la lecture** (films et épisodes entamés), **Ajouts récents**, **Films à voir**, puis une rangée Films, Séries et Vidéos ;
+- **Films**, **Séries**, **Vidéos** : grilles avec recherche, filtres (**genre**, **année**, **non vus**) et tri (titre, ajout récent, année) ;
+- **Dossiers** : parcourez vos dossiers et sous-dossiers comme dans le Finder (fil d'Ariane pour remonter), et les bibliothèques des serveurs ;
+- **Sources** : toutes, ou une seule (NAS, Emby, Plex…). Un triangle orange signale une erreur : clic droit > **Détails de l'erreur…** affiche la requête et la **réponse exacte du serveur** (bouton **Copier**), puis **Réessayer**.
+
+Dans **Films** et **Séries**, le sélecteur **Tout / IPTV / Mes vidéos** (barre latérale, au-dessus des catégories) choisit ce qui est affiché : l'IPTV seul (par défaut), vos vidéos seules, ou les deux mélangés. Les catégories de vos vidéos ne sont jamais masquées par le réglage des pays.
+<!--/mac-->
+
+<!--pc-->
+Sélecteur Direct / Films / Séries, puis : toutes les chaînes ou tous les films, **Favoris**, **Récents**, et pour le direct **Thèmes**, **Guide TV** et **MultiVue** ; **Enregistrements** ; les **catégories**. En bas : enregistrement et téléchargement en cours (progression, temps restant) et **Réglages**.
+<!--/pc-->
+
+## Les colonnes de la fenêtre {#interfaces}
+
+<!--mac-->
 En interface Classique, la fenêtre comporte trois colonnes :
 
 - **Barre latérale** : Accueil, Direct, Films, Séries, Favoris, Récents, Guide TV, puis les catégories de la section choisie et l'état de vos sources.
@@ -310,10 +325,14 @@ Un clic droit sur un élément permet de l'ajouter aux favoris ou de copier l'ad
 <!--/mac-->
 
 <!--pc-->
-Sélecteur Direct / Films / Séries, puis : toutes les chaînes ou tous les films, **Favoris**, **Récents**, et pour le direct **Thèmes**, **Guide TV** et **MultiVue** ; **Enregistrements** ; les **catégories**. En bas : enregistrement et téléchargement en cours (progression, temps restant) et **Réglages**.
+Réglages > Apparence > **Interface par type de contenu** :
+
+- **Classique** : trois colonnes (barre latérale, liste avec le programme en cours, lecteur ou fiche à droite).
+- **Cinéma** : bandeau « à la une », affiches ou vignettes en rangées horizontales, fiche en page entière. Pour le direct : rangées « Sport en ce moment », « Info en direct », « Ce soir » par thème, favoris, récents, catégories ; un clic ouvre la chaîne en plein cadre, **Retour** (ou Échap) l'arrête.
+- **TV** (direct seulement) : la chaîne en plein cadre, comme sur un téléviseur (voir [L'interface TV](help:interface-tv)).
 <!--/pc-->
 
-## Trois interfaces au choix {#interfaces}
+## Trois interfaces au choix {#bandeau}
 
 <!--mac-->
 Kastideo propose trois présentations, que vous choisissez **séparément pour le direct, les films, les séries, et les favoris / récents** :
@@ -332,14 +351,10 @@ Par exemple : TV pour le direct et Cinéma pour les films et séries. La section
 <!--/mac-->
 
 <!--pc-->
-Réglages > Apparence > **Interface par type de contenu** :
-
-- **Classique** : trois colonnes (barre latérale, liste avec le programme en cours, lecteur ou fiche à droite).
-- **Cinéma** : bandeau « à la une », affiches ou vignettes en rangées horizontales, fiche en page entière. Pour le direct : rangées « Sport en ce moment », « Info en direct », « Ce soir » par thème, favoris, récents, catégories ; un clic ouvre la chaîne en plein cadre, **Retour** (ou Échap) l'arrête.
-- **TV** (direct seulement) : la chaîne en plein cadre, comme sur un téléviseur (voir [L'interface TV](help:interface-tv)).
+Il fait défiler des films ou séries (tendances de la semaine sur TMDB disponibles chez vous, derniers ajouts, sélection d'une catégorie) ou, pour le direct, le programme en cours de vos chaînes. Flèches au survol, arrêt quand la souris le survole. Réglages > Apparence > **Bandeau « à la une »** : afficher ou masquer, hauteur, vitesse, sources.
 <!--/pc-->
 
-## Le bandeau « à la une » (Cinéma) {#bandeau}
+## Le bandeau « à la une » (Cinéma) {#pays}
 
 <!--mac-->
 En haut des sections Films et Séries, un **carrousel plein cadre** fait défiler une sélection : grande image de fond, affiche, titre, année, durée, genres, note, résumé et boutons **Lire** (ou **Reprendre** / **Voir les épisodes**), **Plus d'infos** (la fiche) et **Bande-annonce**. Il mélange :
@@ -354,20 +369,23 @@ Réglages > Apparence > **Bandeau « à la une »** : afficher ou masquer, haute
 <!--/mac-->
 
 <!--pc-->
-Il fait défiler des films ou séries (tendances de la semaine sur TMDB disponibles chez vous, derniers ajouts, sélection d'une catégorie) ou, pour le direct, le programme en cours de vos chaînes. Flèches au survol, arrêt quand la souris le survole. Réglages > Apparence > **Bandeau « à la une »** : afficher ou masquer, hauteur, vitesse, sources.
+Votre fournisseur mélange souvent plusieurs pays (catégories « FR| … », « |PT| … », « ITALIA »…). Réglages > Apparence > **Pays et langues (interface Cinéma)** liste les pays repérés dans les noms de vos catégories, avec le nombre de contenus : choisissez ceux à montrer. Les **derniers ajouts**, les **tendances**, le **bandeau « à la une »** et les **rangées par catégorie** de l'interface Cinéma ne montrent alors que ces pays. **Garder les catégories sans pays indiqué** conserve les catégories comme « Action » ou « Nouveautés ». **Tous** revient à l'affichage complet. Les listes et la recherche restent complètes.
 <!--/pc-->
 
-## Pays et langues (Cinéma) {#pays}
+## Pays et langues (Cinéma) {#interface-tv}
 
 <!--mac-->
 Votre fournisseur mélange souvent plusieurs pays (catégories « FR| … », « |PT| … », « ITALIA »…). Réglages > Apparence > **Pays et langues (interface Cinéma)** liste les pays repérés dans les noms de vos catégories, avec le nombre de contenus : cochez ceux que vous voulez voir. Les **derniers ajouts**, les **tendances**, le **bandeau « à la une »** et les **rangées par catégorie** de l'interface Cinéma ne montrent alors que ces pays. **Garder les catégories sans pays indiqué** conserve les catégories comme « Action » ou « Nouveautés ». **Tous les pays** revient à l'affichage complet. Les listes de l'interface Classique et la recherche restent complètes.
 <!--/mac-->
 
 <!--pc-->
-Votre fournisseur mélange souvent plusieurs pays (catégories « FR| … », « |PT| … », « ITALIA »…). Réglages > Apparence > **Pays et langues (interface Cinéma)** liste les pays repérés dans les noms de vos catégories, avec le nombre de contenus : choisissez ceux à montrer. Les **derniers ajouts**, les **tendances**, le **bandeau « à la une »** et les **rangées par catégorie** de l'interface Cinéma ne montrent alors que ces pays. **Garder les catégories sans pays indiqué** conserve les catégories comme « Action » ou « Nouveautés ». **Tous** revient à l'affichage complet. Les listes et la recherche restent complètes.
+- **↑ / ↓** : chaîne précédente / suivante ; **tapez un numéro** (jusqu'à 4 chiffres).
+- **←** ou bord gauche : **panneau des chaînes** (filtre, recherche, programme en cours).
+- **→** ou **I** : **bandeau d'information** (programme en cours et suivant).
+- **B** : chaîne précédente — **F** : favori — **M** : son — **Espace** : pause — **G** : guide TV — **H** : accueil.
 <!--/pc-->
 
-## L'interface TV (direct) {#interface-tv}
+## L'interface TV (direct) {#guide-grille}
 
 <!--mac-->
 La chaîne occupe tout le cadre, comme sur une télévision. Au premier affichage, Kastideo reprend la dernière chaîne regardée.
@@ -382,13 +400,10 @@ La chaîne occupe tout le cadre, comme sur une télévision. Au premier affichag
 <!--/mac-->
 
 <!--pc-->
-- **↑ / ↓** : chaîne précédente / suivante ; **tapez un numéro** (jusqu'à 4 chiffres).
-- **←** ou bord gauche : **panneau des chaînes** (filtre, recherche, programme en cours).
-- **→** ou **I** : **bandeau d'information** (programme en cours et suivant).
-- **B** : chaîne précédente — **F** : favori — **M** : son — **Espace** : pause — **G** : guide TV — **H** : accueil.
+Accueil, barre latérale du direct, **Ctrl+7** ou touche G en interface TV. Chaînes en lignes, heures en colonnes, trait rouge sur l'heure actuelle ; **‹ Maintenant ›**, choix du jour, durée affichée 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thème, catégorie) et recherche. Un clic sur un programme ouvre sa fiche : **Regarder**, **Enregistrer**, **Programmer l'enregistrement** (point rouge dans la grille) ou **M'alerter au début** (cloche). Sur un programme passé d'une chaîne à replay (↺) : **Revoir** ou **Enregistrer ce replay** ; les jours passés sont dans le menu de la date.
 <!--/pc-->
 
-## Le Guide TV en grille {#guide-grille}
+## Le Guide TV en grille {#direct-theme}
 
 <!--mac-->
 Section **Guide TV** (barre latérale, onglet **Guide TV** des interfaces Cinéma et TV, **⌘7**, ou touche **G** en interface TV). Les chaînes sont en lignes, les heures en colonnes ; le trait rouge marque l'heure actuelle.
@@ -401,10 +416,12 @@ Section **Guide TV** (barre latérale, onglet **Guide TV** des interfaces Ciném
 <!--/mac-->
 
 <!--pc-->
-Accueil, barre latérale du direct, **Ctrl+7** ou touche G en interface TV. Chaînes en lignes, heures en colonnes, trait rouge sur l'heure actuelle ; **‹ Maintenant ›**, choix du jour, durée affichée 2 h / 3 h / 6 h, filtre (toutes, favoris, récents, thème, catégorie) et recherche. Un clic sur un programme ouvre sa fiche : **Regarder**, **Enregistrer**, **Programmer l'enregistrement** (point rouge dans la grille) ou **M'alerter au début** (cloche). Sur un programme passé d'une chaîne à replay (↺) : **Revoir** ou **Enregistrer ce replay** ; les jours passés sont dans le menu de la date.
+Barre latérale > **Thèmes** : **En ce moment**, **Ce soir** (20 h – 23 h) ou **Chaînes**, filtrés par thème (Sport, Info, Films, Jeunesse, Documentaires…) et, pour le sport, par discipline. Une seule version par chaîne (FHD, HD ou SD selon la connexion). Clic droit : version de la chaîne, **thème de la chaîne** (pour corriger le classement), favoris, modifier la chaîne.
 <!--/pc-->
 
-## Le Direct par thème {#direct-theme}
+# Lecture
+
+## L'essentiel {#lecture}
 
 <!--mac-->
 La section **Thèmes** de la barre latérale (sous Direct) classe le direct par **thème** — Sport, Auto-Moto (sports mécaniques), Films, Séries, Info, Documentaires, Nature / Chasse & Pêche, Jeunesse, Divertissement, Cuisine & Maison, Musique, Généralistes, Régional (France 3 régions, télévisions locales), International (chaînes étrangères), Religion, Radio — sans les catégories que vous avez masquées. Trois modes :
@@ -425,12 +442,10 @@ Dans **Sport**, une seconde rangée filtre par **discipline** : Football, Rugby,
 <!--/mac-->
 
 <!--pc-->
-Barre latérale > **Thèmes** : **En ce moment**, **Ce soir** (20 h – 23 h) ou **Chaînes**, filtrés par thème (Sport, Info, Films, Jeunesse, Documentaires…) et, pour le sport, par discipline. Une seule version par chaîne (FHD, HD ou SD selon la connexion). Clic droit : version de la chaîne, **thème de la chaîne** (pour corriger le classement), favoris, modifier la chaîne.
+Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastille de santé du flux, le volume, le mode cinéma (double-clic ou Ctrl+Entrée) et le plein écran (F11). Pour les films et épisodes : mini-timeline, −10 s / +30 s, **reprise de lecture** là où vous vous étiez arrêté, **Retour à la fiche**.
 <!--/pc-->
 
-# Lecture
-
-## L'essentiel {#lecture}
+## Lecture {#barre-controle}
 
 <!--mac-->
 Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…
@@ -443,11 +458,7 @@ Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS
 - Pour les sources Xtream, le direct est lu au format MPEG-TS (.ts), comme le lecteur de référence Xtream ; si le flux échoue, Kastideo essaie automatiquement la variante .m3u8 (et inversement).
 <!--/mac-->
 
-<!--pc-->
-Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastille de santé du flux, le volume, le mode cinéma (double-clic ou Ctrl+Entrée) et le plein écran (F11). Pour les films et épisodes : mini-timeline, −10 s / +30 s, **reprise de lecture** là où vous vous étiez arrêté, **Retour à la fiche**.
-<!--/pc-->
-
-## Barre de contrôle, timeline et panneau d'informations {#barre-controle}
+## Barre de contrôle, timeline et panneau d'informations {#multivue}
 
 <!--mac-->
 - **Barre rétractable** : elle apparaît au moindre mouvement de souris et disparaît, avec le pointeur, après 3 secondes d'inactivité (elle reste visible tant que la souris est dessus, pendant la pause ou quand le panneau est ouvert).
@@ -455,16 +466,6 @@ Le lecteur (moteur mpv) a une barre de contrôles qui se cache seule, une pastil
 - **Mini-timeline** (films et épisodes) : un trait fin au-dessus des boutons, qui s'épaissit au survol en affichant l'heure visée ; cliquez ou glissez pour vous déplacer.
 - **Santé du flux** : une pastille **verte** (Excellent), **orange** (Correct) ou **rouge** (Instable) indique la qualité de réception, avec la définition (SD, HD, 4K). Au survol : définition exacte, débit, images par seconde, images perdues et coupures de la dernière minute.
 - **Panneau « Informations »** (bouton ⓘ ou **⌘I**, Échap pour fermer) : il glisse depuis la droite par-dessus la vidéo et montre la chaîne et son programme en cours et à venir, ou le résumé et la distribution d'un film ; le choix de la **piste audio** (langue, audiodescription…) et des **sous-titres** ; la qualité de réception détaillée.
-<!--/mac-->
-
-## MultiVue (plusieurs chaînes à la fois) {#multivue}
-
-<!--mac-->
-La **MultiVue** affiche jusqu'à **4 chaînes en direct** dans une même fenêtre (1 en plein cadre, 2 côte à côte, 3 ou 4 en grille). Le **son suit la vignette active** (bordure orange) : cliquez sur une vignette ou utilisez les touches **1 à 4**.
-
-- Ouverture : menu **Lecture > MultiVue…** (**⌥⌘M**), ou clic droit sur une chaîne > **Ajouter à la MultiVue**.
-- Dans la fenêtre : **+** ajoute une chaîne (favoris, récents ou recherche) ; au survol d'une vignette, ⟳ change la chaîne et ✕ la retire ; **Tout arrêter** coupe tous les flux. Fermer la fenêtre arrête la MultiVue.
-- Chaque flux utilise **une connexion** à votre fournisseur. La MultiVue est donc **désactivée par défaut** : indiquez le nombre de connexions simultanées de votre abonnement dans **Réglages > Général > Lecture** (2 à 4) pour l'activer. Le bouton **Tester la connexion** d'une source Xtream affiche ce nombre. À l'ouverture, la lecture principale s'arrête pour libérer sa connexion (sauf enregistrement en cours) ; un enregistrement ou un téléchargement occupe aussi une connexion.
 <!--/mac-->
 
 <!--pc-->
@@ -501,7 +502,17 @@ Si vous avez **plusieurs sources de direct** (deux abonnements IPTV, ou un abonn
 
 **Image dans l'image (PIP).** Pendant la lecture d'une chaîne en direct, le bouton **image dans l'image** (en haut à droite du lecteur) ouvre une **seconde chaîne en miniature** dans un coin, sans le son. **Cliquez sur la miniature** pour l'échanger avec la chaîne principale, ou sur la croix pour la fermer. La seconde chaîne doit venir d'une source qui a une connexion libre : avec un seul abonnement limité à une connexion, choisissez une chaîne de la liste publique (ou d'un second abonnement). La miniature se ferme quand vous quittez le lecteur.
 
-## Si une chaîne ne démarre pas {#chaine-ne-demarre-pas}
+## MultiVue (plusieurs chaînes à la fois) {#chaine-ne-demarre-pas}
+
+<!--mac-->
+La **MultiVue** affiche jusqu'à **4 chaînes en direct** dans une même fenêtre (1 en plein cadre, 2 côte à côte, 3 ou 4 en grille). Le **son suit la vignette active** (bordure orange) : cliquez sur une vignette ou utilisez les touches **1 à 4**.
+
+- Ouverture : menu **Lecture > MultiVue…** (**⌥⌘M**), ou clic droit sur une chaîne > **Ajouter à la MultiVue**.
+- Dans la fenêtre : **+** ajoute une chaîne (favoris, récents ou recherche) ; au survol d'une vignette, ⟳ change la chaîne et ✕ la retire ; **Tout arrêter** coupe tous les flux. Fermer la fenêtre arrête la MultiVue.
+- Chaque flux utilise **une connexion** à votre fournisseur. La MultiVue est donc **désactivée par défaut** : indiquez le nombre de connexions simultanées de votre abonnement dans **Réglages > Général > Lecture** (2 à 4) pour l'activer. Le bouton **Tester la connexion** d'une source Xtream affiche ce nombre. À l'ouverture, la lecture principale s'arrête pour libérer sa connexion (sauf enregistrement en cours) ; un enregistrement ou un téléchargement occupe aussi une connexion.
+<!--/mac-->
+
+## Si une chaîne ne démarre pas {#differe}
 
 <!--mac-->
 Si aucune image n'arrive au bout de **20 secondes**, Kastideo essaie automatiquement l'autre format du flux (.ts ou .m3u8), puis affiche un message d'erreur avec le détail renvoyé par le moteur VLC.
@@ -515,7 +526,11 @@ Le **Journal** (menu **Lecture > Journal de lecture…**, **⌥⌘L**, ou bouton
 - **Session en cours / Session précédente** : le journal est conservé sur disque, ce qui permet de relire ce qui s'est passé au démarrage de la session précédente. **Afficher le dossier du journal** ouvre le fichier dans le Finder.
 <!--/mac-->
 
-## Direct en différé {#differe}
+<!--pc-->
+Mettez une chaîne en pause (ou revenez en arrière avec ← ou la barre) : elle continue d'être gardée (jusqu'à 1 h par défaut, réglable). Sans action de votre part, la chaîne reste « EN DIRECT ». La barre du différé affiche le retard, un curseur pour revenir en arrière ou rattraper en accéléré, la vitesse, **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s.
+<!--/pc-->
+
+## Direct en différé {#replay}
 
 <!--mac-->
 Mettez une chaîne en direct en **pause** : le moteur VLC continue de recevoir le flux et le garde en réserve. À la reprise, vous regardez en **différé** (indicateur jaune « DIFFÉRÉ −2:34 » dans les contrôles). Si un flux ne permet pas la pause, le bouton est grisé.
@@ -532,24 +547,6 @@ En différé, les contrôles proposent :
 <!--/mac-->
 
 <!--pc-->
-Mettez une chaîne en pause (ou revenez en arrière avec ← ou la barre) : elle continue d'être gardée (jusqu'à 1 h par défaut, réglable). Sans action de votre part, la chaîne reste « EN DIRECT ». La barre du différé affiche le retard, un curseur pour revenir en arrière ou rattraper en accéléré, la vitesse, **Rattraper** et **Retour au direct**. ← / → : −10 s / +30 s.
-<!--/pc-->
-
-## Replay : revoir un programme déjà diffusé {#replay}
-
-<!--mac-->
-Certains abonnements IPTV conservent les chaînes jusqu'à **14 jours** (selon le fournisseur et la chaîne). Kastideo le détecte tout seul : les chaînes concernées portent une icône **↺** dans les listes et dans le Guide TV.
-
-- **Dans le Guide TV** : cliquez sur un programme **passé** (marqué ↺) puis **Revoir**. Sur le programme **en cours**, **Revoir depuis le début** le relit depuis son commencement. **Enregistrer ce replay** télécharge le programme depuis l'archive du fournisseur (dossier des enregistrements).
-- **Jours précédents** : le menu de la date du Guide TV propose **Revoir (replay)** avec les jours passés.
-- **Depuis une chaîne** : clic droit sur la chaîne > **Revoir (replay)** (programmes récents de cette chaîne). L'interface Cinéma propose aussi la rangée **À revoir** (vos chaînes préférées avec replay).
-- **Pendant le replay**, la barre du lecteur permet la pause et le déplacement dans le programme. À la fin, Kastideo **revient au direct** de la chaîne (désactivable).
-- **Réglages > Général > Replay** : activer ou non le replay, nombre de **jours de programmes passés gardés dans le guide** (plus de jours = plus de mémoire), **décalage de l'heure** (si le programme revu est décalé de quelques minutes ou d'une heure, corrigez-le ici ; le fuseau du serveur est lu automatiquement), retour au direct.
-- Le replay compte comme **une connexion** : il ferme la chaîne en cours, comme un changement de chaîne.
-- Si un replay ne démarre pas, ouvrez le **Journal** (sujet « Lecture et relais ») : l'adresse d'archive composée et le décalage utilisé y sont indiqués. Le guide du fournisseur doit contenir les programmes passés : rechargez-le après avoir augmenté le nombre de jours conservés.
-<!--/mac-->
-
-<!--pc-->
 Certains abonnements IPTV conservent les chaînes jusqu'à **14 jours** (selon le fournisseur et la chaîne). Kastideo le détecte tout seul : les chaînes concernées portent une icône **↺** dans les listes et dans le Guide TV.
 
 - **Dans le Guide TV** : cliquez sur un programme **passé** (marqué ↺) puis **Revoir**. Sur le programme **en cours**, **Revoir depuis le début** le relit depuis son commencement. **Enregistrer ce replay** télécharge le programme depuis l'archive du fournisseur (dossier des enregistrements).
@@ -561,10 +558,18 @@ Certains abonnements IPTV conservent les chaînes jusqu'à **14 jours** (selon l
 - Si un replay ne démarre pas, ouvrez le **Journal** (bouton Journal, sujet « Lecture et relais ») : l'adresse d'archive composée et le décalage utilisé y sont indiqués. Le guide du fournisseur doit contenir les programmes passés : rechargez-le après avoir augmenté le nombre de jours conservés.
 <!--/pc-->
 
-## Une seule connexion à la fois {#connexion-unique}
+## Replay : revoir un programme déjà diffusé {#connexion-unique}
 
 <!--mac-->
-La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo ferme toujours le flux en cours avant d'ouvrir le suivant : vous pouvez zapper sans risque de dépasser votre limite. Si la lecture échoue, vérifiez qu'aucun autre appareil (TV, téléphone, Piboard…) ne regarde avec le même abonnement.
+Certains abonnements IPTV conservent les chaînes jusqu'à **14 jours** (selon le fournisseur et la chaîne). Kastideo le détecte tout seul : les chaînes concernées portent une icône **↺** dans les listes et dans le Guide TV.
+
+- **Dans le Guide TV** : cliquez sur un programme **passé** (marqué ↺) puis **Revoir**. Sur le programme **en cours**, **Revoir depuis le début** le relit depuis son commencement. **Enregistrer ce replay** télécharge le programme depuis l'archive du fournisseur (dossier des enregistrements).
+- **Jours précédents** : le menu de la date du Guide TV propose **Revoir (replay)** avec les jours passés.
+- **Depuis une chaîne** : clic droit sur la chaîne > **Revoir (replay)** (programmes récents de cette chaîne). L'interface Cinéma propose aussi la rangée **À revoir** (vos chaînes préférées avec replay).
+- **Pendant le replay**, la barre du lecteur permet la pause et le déplacement dans le programme. À la fin, Kastideo **revient au direct** de la chaîne (désactivable).
+- **Réglages > Général > Replay** : activer ou non le replay, nombre de **jours de programmes passés gardés dans le guide** (plus de jours = plus de mémoire), **décalage de l'heure** (si le programme revu est décalé de quelques minutes ou d'une heure, corrigez-le ici ; le fuseau du serveur est lu automatiquement), retour au direct.
+- Le replay compte comme **une connexion** : il ferme la chaîne en cours, comme un changement de chaîne.
+- Si un replay ne démarre pas, ouvrez le **Journal** (sujet « Lecture et relais ») : l'adresse d'archive composée et le décalage utilisé y sont indiqués. Le guide du fournisseur doit contenir les programmes passés : rechargez-le après avoir augmenté le nombre de jours conservés.
 <!--/mac-->
 
 <!--pc-->
@@ -651,14 +656,10 @@ Sur Windows et Linux, la détection repose sur le nombre d'images affichées par
 
 Une chaîne qui reste figée même en logiciel a en général un flux défectueux chez le fournisseur : consultez le **Journal de lecture** et essayez une autre version de la chaîne (HD, SD…).
 
-## Mémoire tampon {#tampon}
+## Une seule connexion à la fois {#tampon}
 
 <!--mac-->
-Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidité et stabilité :
-
-- **Rapide** (par défaut) : 0,4 s de réserve, le zapping le plus court.
-- **Équilibré** : 1 s.
-- **Stable** : 3 s, pour les connexions ou les serveurs irréguliers (moins de coupures, démarrage plus lent).
+La plupart des abonnements IPTV n'autorisent qu'**un flux simultané**. Kastideo ferme toujours le flux en cours avant d'ouvrir le suivant : vous pouvez zapper sans risque de dépasser votre limite. Si la lecture échoue, vérifiez qu'aucun autre appareil (TV, téléphone, Piboard…) ne regarde avec le même abonnement.
 <!--/mac-->
 
 ## Le Journal (diagnostic) {#journal}
@@ -678,12 +679,30 @@ Le **Journal** (**Ctrl+Alt+L**, ou bouton dans l'accueil et dans les messages d'
 ## Vue d'ensemble {#enregistrements}
 
 <!--mac-->
+Dans **Réglages > Général > Lecture**, choisissez le compromis entre rapidité et stabilité :
+
+- **Rapide** (par défaut) : 0,4 s de réserve, le zapping le plus court.
+- **Équilibré** : 1 s.
+- **Stable** : 3 s, pour les connexions ou les serveurs irréguliers (moins de coupures, démarrage plus lent).
+<!--/mac-->
+
+## Enregistrements et téléchargements {#enregistrer}
+
+<!--mac-->
 Tout se retrouve dans la section **Enregistrements** de la barre latérale (**⌘6**) : enregistrement en cours, conversions, téléchargements, programmations et fichiers enregistrés (un clic pour les regarder, clic droit pour les afficher dans le Finder ou les supprimer).
 
 Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglages > Enregistrements**) et nommés automatiquement, par exemple « TF1 – Le goût du détail – 2026-10-18 20h50 ».
 <!--/mac-->
 
-## Enregistrer le direct {#enregistrer}
+<!--pc-->
+Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une chaîne > **Enregistrer maintenant** : la chaîne est enregistrée jusqu'à la fin du programme en cours (plus la marge) ou jusqu'à l'arrêt, dans **Vidéos/Kastideo/Enregistrements**.
+
+- Les octets du flux sont recopiés tels quels dans un fichier **.ts**, sans perte : la chaîne regardée est copiée depuis le relais (aucune seconde connexion au fournisseur) ; une autre chaîne est téléchargée directement, avec reconnexion si le flux est coupé.
+- À la fin, le .ts est converti sans perte en **MKV** (format par défaut, Réglages > Enregistrements) ; si la conversion échoue, le .ts est gardé — il se lit partout.
+- Les flux HLS (.m3u8) et la lecture sans relais passent encore par le moteur vidéo.
+<!--/pc-->
+
+## Enregistrer le direct {#programmer}
 
 <!--mac-->
 - Pendant la lecture d'une chaîne, cliquez sur **●** dans les contrôles, sur **Enregistrer** sous la vidéo, ou utilisez **⇧⌘R**. La pastille **REC** indique la durée.
@@ -696,14 +715,15 @@ Les fichiers sont rangés dans **~/Movies/Kastideo** (modifiable dans **Réglage
 <!--/mac-->
 
 <!--pc-->
-Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une chaîne > **Enregistrer maintenant** : la chaîne est enregistrée jusqu'à la fin du programme en cours (plus la marge) ou jusqu'à l'arrêt, dans **Vidéos/Kastideo/Enregistrements**.
-
-- Les octets du flux sont recopiés tels quels dans un fichier **.ts**, sans perte : la chaîne regardée est copiée depuis le relais (aucune seconde connexion au fournisseur) ; une autre chaîne est téléchargée directement, avec reconnexion si le flux est coupé.
-- À la fin, le .ts est converti sans perte en **MKV** (format par défaut, Réglages > Enregistrements) ; si la conversion échoue, le .ts est gardé — il se lit partout.
-- Les flux HLS (.m3u8) et la lecture sans relais passent encore par le moteur vidéo.
+- **Clic droit sur une chaîne du direct > Programmer un enregistrement…**, ou bouton **Programmer…** de l'écran Enregistrements (choisissez alors la chaîne : favoris, récents ou recherche).
+  - **Programmes du guide** : les prochains programmes de la chaîne, avec **Programmer** (ou **Enregistrer** pour celui en cours). Une coche indique ceux déjà programmés.
+  - **Plage horaire** : jour, heure de début et de fin, titre facultatif — pour une chaîne sans guide TV ou une émission précise. Une fin plus tôt que le début se termine le lendemain.
+  - **Répétition** (liste en haut à droite) : **une seule fois**, **tous les jours**, **du lundi au vendredi** ou **chaque semaine**. La prochaine occurrence est ajoutée automatiquement ; le bouton ⟲ d'un enregistrement répété dans la liste arrête la répétition.
+- Depuis la fiche d'un programme à venir (guide TV, thèmes) : **Programmer l'enregistrement**.
+- Les marges avant et après (Réglages > Enregistrements) s'ajoutent. Kastideo doit être ouvert à l'heure prévue : activez au besoin **Lancer Kastideo à l'ouverture de session** (Réglages > Général).
 <!--/pc-->
 
-## Programmer un enregistrement {#programmer}
+## Programmer un enregistrement {#telecharger}
 
 <!--mac-->
 - Dans le guide TV sous la vidéo, **double-cliquez** sur un programme à venir, ou faites un clic droit > **Programmer l'enregistrement**. Une pastille rouge marque les programmes programmés.
@@ -713,15 +733,10 @@ Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une ch
 <!--/mac-->
 
 <!--pc-->
-- **Clic droit sur une chaîne du direct > Programmer un enregistrement…**, ou bouton **Programmer…** de l'écran Enregistrements (choisissez alors la chaîne : favoris, récents ou recherche).
-  - **Programmes du guide** : les prochains programmes de la chaîne, avec **Programmer** (ou **Enregistrer** pour celui en cours). Une coche indique ceux déjà programmés.
-  - **Plage horaire** : jour, heure de début et de fin, titre facultatif — pour une chaîne sans guide TV ou une émission précise. Une fin plus tôt que le début se termine le lendemain.
-  - **Répétition** (liste en haut à droite) : **une seule fois**, **tous les jours**, **du lundi au vendredi** ou **chaque semaine**. La prochaine occurrence est ajoutée automatiquement ; le bouton ⟲ d'un enregistrement répété dans la liste arrête la répétition.
-- Depuis la fiche d'un programme à venir (guide TV, thèmes) : **Programmer l'enregistrement**.
-- Les marges avant et après (Réglages > Enregistrements) s'ajoutent. Kastideo doit être ouvert à l'heure prévue : activez au besoin **Lancer Kastideo à l'ouverture de session** (Réglages > Général).
+Bouton **Télécharger** de la fiche d'un film (maintenant ou **cette nuit**), **Télécharger la saison** ou icône de chaque épisode pour une série, clic droit > Télécharger. Un téléchargement à la fois, repris après une coupure, mis en pause pendant la lecture (réglable). Fichiers dans **Vidéos/Kastideo/Films** et **Séries/<série>**.
 <!--/pc-->
 
-## Télécharger un film ou des épisodes sans les regarder {#telecharger}
+## Télécharger un film ou des épisodes sans les regarder {#priorite}
 
 <!--mac-->
 - Clic droit sur un film ou un épisode > **Télécharger** ou **Télécharger cette nuit**, ou le bouton **Télécharger** sous la vidéo.
@@ -729,20 +744,6 @@ Bouton rond rouge de la barre du lecteur, touche **R**, ou clic droit sur une ch
 - Les téléchargements passent **l'un après l'autre** (file d'attente). « Cette nuit » démarre à 2 h par défaut (réglable).
 - Vous pouvez mettre en pause, reprendre ou annuler chaque téléchargement dans la section Enregistrements.
 - **Indicateur permanent** : tant qu'un téléchargement est actif, un anneau d'avancement reste visible dans la barre d'outils. Un clic ouvre le détail : avancement du film ou de l'épisode en cours, « épisode X sur N », avancement de la série ou du lot, vitesse et **temps restant estimé** (affiné au fil du téléchargement).
-<!--/mac-->
-
-<!--pc-->
-Bouton **Télécharger** de la fiche d'un film (maintenant ou **cette nuit**), **Télécharger la saison** ou icône de chaque épisode pour une série, clic droit > Télécharger. Un téléchargement à la fois, repris après une coupure, mis en pause pendant la lecture (réglable). Fichiers dans **Vidéos/Kastideo/Films** et **Séries/<série>**.
-<!--/pc-->
-
-## Connexion unique : qui a la priorité ? {#priorite}
-
-<!--mac-->
-Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose à la fois et **vous demande toujours** avant d'interrompre quelque chose :
-
-- Vous changez de chaîne pendant un enregistrement : Kastideo demande s'il faut **arrêter l'enregistrement**.
-- Vous lancez une lecture pendant un téléchargement : le téléchargement est **mis en pause** et reprend tout seul quand la lecture s'arrête.
-- Les fichiers déjà enregistrés se regardent à tout moment, même pendant un enregistrement en arrière-plan.
 <!--/mac-->
 
 ## L'écran Enregistrements {#ecran-enregistrements}
@@ -757,7 +758,19 @@ Enregistrement en cours (arrêt), téléchargements (pause, reprise, annulation)
 Avec une **clé TMDB** (Réglages > Général), titres, résumés, genres et épisodes viennent de TMDB, dans la langue de l'interface. Quand le seul résumé disponible est celui du fournisseur dans une autre langue (portugais, espagnol…), il est replié : **Afficher le résumé (portugais)** l'affiche quand même. Il n'apparaît pas dans le bandeau ni dans la liste des épisodes.
 <!--/pc-->
 
-## Nettoyer la liste des enregistrements {#bon-a-savoir}
+## Connexion unique : qui a la priorité ? {#bon-a-savoir}
+
+<!--mac-->
+Votre abonnement n'autorise qu'une connexion. Kastideo ne fait donc qu'une chose à la fois et **vous demande toujours** avant d'interrompre quelque chose :
+
+- Vous changez de chaîne pendant un enregistrement : Kastideo demande s'il faut **arrêter l'enregistrement**.
+- Vous lancez une lecture pendant un téléchargement : le téléchargement est **mis en pause** et reprend tout seul quand la lecture s'arrête.
+- Les fichiers déjà enregistrés se regardent à tout moment, même pendant un enregistrement en arrière-plan.
+<!--/mac-->
+
+# Organiser et personnaliser
+
+## Nettoyer la liste des enregistrements {#corriger}
 
 <!--mac-->
 Dans la section **Enregistrements**, vous pouvez **retirer des enregistrements terminés de la liste** (les programmations, téléchargements et l'enregistrement en cours ne sont jamais touchés).
@@ -773,9 +786,11 @@ Après un simple retrait de la liste, un bandeau **Annuler** reste affiché une 
 Si un fichier n'existe plus dans le stockage, ou ne peut pas être supprimé, le retrait continue quand même : une notification vous prévient, et s'il y a plusieurs avertissements, une fenêtre les liste.
 <!--/mac-->
 
-# Organiser et personnaliser
+<!--pc-->
+Clic droit sur une chaîne > **Modifier la chaîne…** : nom, numéro, logo (adresse d'une image ou fichier copié dans Kastideo) et chaîne du **guide TV** (recherche parmi les guides du fournisseur et de secours). La correction vaut pour cette version de la chaîne (HD, FHD…) et reste après chaque actualisation. **Rétablir** revient à l'original.
+<!--/pc-->
 
-## Bon à savoir {#corriger}
+## Bon à savoir {#categories}
 
 <!--mac-->
 - Kastideo doit **rester ouvert** et le Mac **allumé** pour les enregistrements programmés et les téléchargements de nuit. Kastideo empêche la mise en veille automatique pendant l'activité et dans l'heure qui précède, mais pas l'extinction ni la mise en veille manuelle.
@@ -783,22 +798,6 @@ Si un fichier n'existe plus dans le stockage, ou ne peut pas être supprimé, le
 - **Nettoyage automatique** (facultatif) : les enregistrements plus anciens que le nombre de jours choisi sont placés dans la corbeille.
 - Une alerte prévient quand l'espace disque devient faible.
 - Les droits de copie dépendent des conditions de votre fournisseur : Kastideo enregistre pour votre usage privé ce que votre abonnement vous donne déjà.
-<!--/mac-->
-
-<!--pc-->
-Clic droit sur une chaîne > **Modifier la chaîne…** : nom, numéro, logo (adresse d'une image ou fichier copié dans Kastideo) et chaîne du **guide TV** (recherche parmi les guides du fournisseur et de secours). La correction vaut pour cette version de la chaîne (HD, FHD…) et reste après chaque actualisation. **Rétablir** revient à l'original.
-<!--/pc-->
-
-## Corriger une chaîne {#categories}
-
-<!--mac-->
-Certaines chaînes sont mal référencées par le fournisseur (nom erroné, mauvais programmes, logo absent). Clic droit sur la chaîne > **Modifier la chaîne…** :
-
-- **Nom** et **numéro** (utilisé pour le zapping par numéro de l'interface TV) ;
-- **Logo** : adresse d'une image, ou **Choisir un fichier…** (l'image est copiée dans Kastideo) ;
-- **Programmes du guide TV** : si les programmes affichés sont faux ou absents, cherchez la bonne chaîne dans la liste (guide du fournisseur et guide de secours) ; le programme en cours aide à la reconnaître.
-
-La correction ne concerne que **cette version** de la chaîne (FHD, HD, SD… se corrigent séparément) et survit aux actualisations de la source. **Rétablir l'original** l'annule.
 <!--/mac-->
 
 <!--pc-->
@@ -935,19 +934,16 @@ Dans **Réglages > Sources**, le bouton **Diagnostic** (stéthoscope) d'un compt
 
 Si « renvoyés par le fournisseur » diffère entre vos deux comptes, la différence vient du fournisseur. Le bouton **Copier** permet de joindre le résultat à un message à votre fournisseur.
 
-## Organiser les catégories {#favoris}
+## Corriger une chaîne {#favoris}
 
 <!--mac-->
-Vous n'êtes pas obligé de subir l'ordre et la liste des catégories du fournisseur. Ouvrez **Présentation > Gérer les catégories…** (**⌥⌘C**), le bouton à droite du titre « Catégories » de la barre latérale, ou faites un clic droit sur une catégorie. Choisissez la section (**Direct**, **Films** ou **Séries**), puis :
+Certaines chaînes sont mal référencées par le fournisseur (nom erroné, mauvais programmes, logo absent). Clic droit sur la chaîne > **Modifier la chaîne…** :
 
-- **Réordonner** : glissez les catégories dans la liste, ou utilisez le menu **…** > **Placer en haut / en bas**. **Trier A → Z** classe tout par ordre alphabétique.
-- **Tout sélectionner / désélectionner** : la case au-dessus de la liste coche ou décoche d'un coup toutes les catégories listées. Avec une recherche (par exemple « PT »), elle ne concerne que les catégories trouvées : idéal pour masquer en une fois tout un pays, puis réafficher seulement celles que vous voulez.
-- **Masquer** : décochez une catégorie (ou clic droit > **Masquer cette catégorie** dans la barre latérale). Une catégorie masquée disparaît **partout** : barre latérale, listes « Direct / Films / Séries », recherche, Guide TV, interfaces Cinéma et TV, bandeau « à la une ». Vos favoris et récents restent accessibles.
-- **Masquer par mot-clé** : saisissez par exemple « PAKISTAN » ou « ARABIC » : toutes les catégories dont le nom contient ce mot sont masquées, y compris celles que le fournisseur ajoutera plus tard. Cliquez sur la croix d'un mot-clé pour l'annuler.
-- **Renommer** : le crayon permet de donner un nom plus lisible (« FRANCE FHD | OTT » → « France HD ») ; **Nom d'origine** l'annule.
-- **Tout afficher** réaffiche les catégories masquées ; **Réinitialiser…** revient entièrement à la présentation du fournisseur.
+- **Nom** et **numéro** (utilisé pour le zapping par numéro de l'interface TV) ;
+- **Logo** : adresse d'une image, ou **Choisir un fichier…** (l'image est copiée dans Kastideo) ;
+- **Programmes du guide TV** : si les programmes affichés sont faux ou absents, cherchez la bonne chaîne dans la liste (guide du fournisseur et guide de secours) ; le programme en cours aide à la reconnaître.
 
-Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de leur voisine d'origine.
+La correction ne concerne que **cette version** de la chaîne (FHD, HD, SD… se corrigent séparément) et survit aux actualisations de la source. **Rétablir l'original** l'annule.
 <!--/mac-->
 
 <!--pc-->
@@ -1102,14 +1098,19 @@ Vos chaînes suivies, favoris, historique (80 vidéos), liste « à regarder plu
 
 # Réglages et maintenance
 
-## Favoris et récents {#raccourcis}
+## Organiser les catégories {#raccourcis}
 
 <!--mac-->
-- Ajoutez un favori avec l'étoile du panneau d'informations, le clic droit ou **⌘D**.
-- La section **Récents** garde les 60 derniers contenus regardés.
-- **Supprimer des récents** : clic droit sur un élément > **Retirer des récents** (ou touche **⌫** sur l'élément sélectionné en interface Classique). Pour plusieurs éléments, cliquez sur **Modifier**, cochez les éléments puis **Supprimer** ; **Tout sélectionner** coche toute la liste et **Tout effacer** vide l'historique.
-- Après une suppression, un bandeau **Annuler** reste affiché quelques secondes pour tout restaurer.
-- Les récents peuvent aussi être effacés dans les réglages, onglet **Général**.
+Vous n'êtes pas obligé de subir l'ordre et la liste des catégories du fournisseur. Ouvrez **Présentation > Gérer les catégories…** (**⌥⌘C**), le bouton à droite du titre « Catégories » de la barre latérale, ou faites un clic droit sur une catégorie. Choisissez la section (**Direct**, **Films** ou **Séries**), puis :
+
+- **Réordonner** : glissez les catégories dans la liste, ou utilisez le menu **…** > **Placer en haut / en bas**. **Trier A → Z** classe tout par ordre alphabétique.
+- **Tout sélectionner / désélectionner** : la case au-dessus de la liste coche ou décoche d'un coup toutes les catégories listées. Avec une recherche (par exemple « PT »), elle ne concerne que les catégories trouvées : idéal pour masquer en une fois tout un pays, puis réafficher seulement celles que vous voulez.
+- **Masquer** : décochez une catégorie (ou clic droit > **Masquer cette catégorie** dans la barre latérale). Une catégorie masquée disparaît **partout** : barre latérale, listes « Direct / Films / Séries », recherche, Guide TV, interfaces Cinéma et TV, bandeau « à la une ». Vos favoris et récents restent accessibles.
+- **Masquer par mot-clé** : saisissez par exemple « PAKISTAN » ou « ARABIC » : toutes les catégories dont le nom contient ce mot sont masquées, y compris celles que le fournisseur ajoutera plus tard. Cliquez sur la croix d'un mot-clé pour l'annuler.
+- **Renommer** : le crayon permet de donner un nom plus lisible (« FRANCE FHD | OTT » → « France HD ») ; **Nom d'origine** l'annule.
+- **Tout afficher** réaffiche les catégories masquées ; **Réinitialiser…** revient entièrement à la présentation du fournisseur.
+
+Les nouvelles catégories ajoutées par le fournisseur apparaissent à côté de leur voisine d'origine.
 <!--/mac-->
 
 <!--pc-->
@@ -1126,7 +1127,19 @@ Vos chaînes suivies, favoris, historique (80 vidéos), liste « à regarder plu
 ## Réglages généraux {#reglages}
 
 <!--mac-->
-Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée. Vous pouvez la rouvrir avec **Aide > Nouveautés de cette version** et y consulter les versions précédentes.
+Kastideo se met à jour tout seul grâce à **Sparkle**, l'outil de référence des applications Mac distribuées hors App Store.
+
+- **Au démarrage** (quelques secondes après le lancement), puis une fois par jour si Kastideo reste ouvert, Kastideo vérifie discrètement si une nouvelle version est disponible sur GitHub.
+- Si c'est le cas, un **bandeau** en haut de la fenêtre l'annonce — **jamais pendant un visionnage ni un enregistrement** (il attend la fin de la lecture). La mise à jour est **facultative** : **Mettre à jour…** ouvre la fenêtre des nouveautés puis **Installer la mise à jour** (Kastideo se ferme, s'installe et se relance) ; **Plus tard** masque le bandeau jusqu'au prochain lancement ; **Ignorer cette version** ne la propose plus (la suivante le sera).
+- Vous pouvez vérifier à tout moment avec **Kastideo > Rechercher les mises à jour…**.
+- Chaque mise à jour est signée : Kastideo refuse d'installer un fichier qui ne vient pas de son éditeur.
+
+Dans **Réglages > Mises à jour** :
+
+- **Rechercher les mises à jour au démarrage** : active ou désactive la vérification au lancement et quotidienne.
+- **Recevoir les versions de test (bêta)** : propose aussi les versions bêta, qui apportent les nouveautés plus tôt mais peuvent être moins stables. Désactivez l'option pour revenir aux versions stables à la prochaine mise à jour.
+
+> Les versions 0.1.0 et antérieures ne savent pas se mettre à jour : installez la 0.2.0 une fois à la main, les suivantes arriveront toutes seules.
 <!--/mac-->
 
 <!--pc-->
@@ -1138,14 +1151,10 @@ Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements 
 - **Sauvegarde** : exporter ou importer la configuration.
 <!--/pc-->
 
-## Réglages généraux {#tmdb}
+## Nouveautés {#tmdb}
 
 <!--mac-->
-- **Langue** (onglet **Général**) : Kastideo existe en **français** et en **anglais**. La langue se choisit au premier lancement, puis peut être changée dans **Réglages > Général > Langue** (ou « Système » pour suivre la langue du Mac). Le changement s'applique après un redémarrage de l'application, que Kastideo propose de faire pour vous. L'aide et les menus suivent la langue choisie ; les notes de version restent en français.
-- **Apparence** (onglet **Apparence**) : thème sombre (par défaut), clair ou comme le système ; **couleur d'accent** (Système, bleu, violet, rose, rouge, orange, vert, turquoise) ; **interface** Classique ou Cinéma pour chaque type de contenu ; **densité des listes** (compacte, standard, aérée) pour l'interface Classique ; **taille des vignettes** (petites, moyennes, grandes) pour l'interface Cinéma.
-- **Fiches des films et séries** (onglet **Général**) : clé API **TMDB** facultative (gratuite sur themoviedb.org > Paramètres > API ; clé v3 ou jeton de lecture v4). Elle est conservée dans le trousseau. **Enregistrer et vérifier** contrôle la clé. Sans clé, les fiches utilisent les informations de votre fournisseur IPTV.
-- **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
-- **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
+Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée. Vous pouvez la rouvrir avec **Aide > Nouveautés de cette version** et y consulter les versions précédentes.
 <!--/mac-->
 
 <!--pc-->
@@ -1172,46 +1181,28 @@ Réglages > Général > **Démarrage et fichiers** :
 Ces deux options sont aussi proposées par l'installateur Windows (décochées par défaut).
 <!--/pc-->
 
-## Obtenir une clé TMDB (gratuite) {#sauvegarde}
+## Réglages généraux {#sauvegarde}
 
 <!--mac-->
-TMDB (The Movie Database) est une base de films et séries communautaire. Sa clé est **gratuite** pour un usage personnel ; elle permet à Kastideo d'afficher les photos des acteurs, les affiches et fonds en haute définition, la bande-annonce et un résumé traduit.
-
-1. Créez un compte sur **themoviedb.org** (bouton « Rejoindre TMDB »), puis validez-le avec le lien reçu par e-mail.
-2. Connecté, ouvrez **themoviedb.org/settings/api** (avatar > Paramètres > API), ou cliquez sur **Obtenir une clé gratuite** dans les réglages de Kastideo.
-3. Cliquez sur **Créer**, choisissez **Developer** et acceptez les conditions d'utilisation.
-4. Remplissez le formulaire : type d'usage **Personnel**, nom de l'application **Kastideo**, URL **https://github.com/jihemezes/kastideo**, un court résumé (« Lecteur IPTV personnel, affichage des fiches de films »), puis vos coordonnées.
-5. Validez : la page affiche une **Clé d'API** (32 caractères) et un **Jeton d'accès en lecture** (long, commence par « eyJ »). Kastideo accepte l'un ou l'autre ; la clé d'API est la plus simple à copier.
-6. Dans Kastideo : **Réglages (⌘,) > Général > Fiches des films et séries**, collez la clé puis cliquez sur **Enregistrer et vérifier**. « Clé valide ✓ » confirme la saisie.
-7. Rouvrez une fiche (ou cliquez sur **Actualiser** en bas de la fiche) : elle est complétée par TMDB.
-
-La clé est conservée dans le trousseau du Mac. **Retirer la clé** revient aux seules informations du fournisseur IPTV.
+- **Langue** (onglet **Général**) : Kastideo existe en **français** et en **anglais**. La langue se choisit au premier lancement, puis peut être changée dans **Réglages > Général > Langue** (ou « Système » pour suivre la langue du Mac). Le changement s'applique après un redémarrage de l'application, que Kastideo propose de faire pour vous. L'aide et les menus suivent la langue choisie ; les notes de version restent en français.
+- **Apparence** (onglet **Apparence**) : thème sombre (par défaut), clair ou comme le système ; **couleur d'accent** (Système, bleu, violet, rose, rouge, orange, vert, turquoise) ; **interface** Classique ou Cinéma pour chaque type de contenu ; **densité des listes** (compacte, standard, aérée) pour l'interface Classique ; **taille des vignettes** (petites, moyennes, grandes) pour l'interface Cinéma.
+- **Fiches des films et séries** (onglet **Général**) : clé API **TMDB** facultative (gratuite sur themoviedb.org > Paramètres > API ; clé v3 ou jeton de lecture v4). Elle est conservée dans le trousseau. **Enregistrer et vérifier** contrôle la clé. Sans clé, les fiches utilisent les informations de votre fournisseur IPTV.
+- **Actualiser au démarrage** : recharge les sources dont la dernière actualisation date de plus de 6 heures.
+- **Cache** : Kastideo garde une copie locale des listes et du guide TV pour démarrer instantanément. **Vider et recharger** efface cette copie et relance le chargement.
 <!--/mac-->
 
 <!--pc-->
 Réglages > **Sauvegarde** : **Exporter la configuration…** (sources et leur guide, mots de passe si vous le souhaitez, favoris, récents, catégories, interfaces, apparence, nombre de connexions, contenus adultes, bandeau, clé TMDB) et **Importer une configuration…**. Le fichier est le même que celui de Kastideo pour Mac : vous pouvez passer d'un ordinateur à l'autre dans les deux sens. Rien n'est supprimé à l'importation. Les serveurs Jellyfin, Emby et Plex sont repris (mot de passe ou jeton compris si demandé) ; les dossiers aussi, avec leurs chemins (à corriger s'ils diffèrent sur cet ordinateur).
 <!--/pc-->
 
-## Raccourcis clavier {#mises-a-jour}
+## Favoris et récents {#mises-a-jour}
 
 <!--mac-->
-- **⌘0** : accueil
-- **⌘1 à ⌘7** : Direct, Films, Séries, Favoris, Récents, Enregistrements, Guide TV
-- **⌥⌘1 / ⌥⌘2 / ⌥⌘3** : interface Classique / Cinéma / TV (pour le type de contenu affiché)
-- Interface TV : **↑ ↓** zapping, **←** panneau de chaînes, chiffres = numéro de chaîne, **I** bandeau, **B** chaîne précédente, **G** guide TV, **H** accueil, **F** favori, **M** muet
-- **⌘↑ / ⌘↓** : élément précédent / suivant (zapping)
-- **⌘K** : lecture / pause
-- **⌘[ / ⌘]** : reculer de 10 s / avancer de 30 s (films et épisodes)
-- **⌘↩** ou double-clic sur la vidéo : mode cinéma (Échap pour sortir)
-- **⌘.** : arrêter la lecture
-- **⇧⌘R** : enregistrer la chaîne regardée / arrêter l'enregistrement
-- **⌘6** : section Enregistrements
-- **⌥⌘L** : journal
-- **⌘D** : ajouter ou retirer des favoris
-- **⌘R** : actualiser toutes les sources
-- **⌘,** : réglages et sources
-- **⌘?** : cette aide (ouverte à la page de l'écran affiché)
-- **⌘8** : Mes vidéos, **⌘9** : YouTube
+- Ajoutez un favori avec l'étoile du panneau d'informations, le clic droit ou **⌘D**.
+- La section **Récents** garde les 60 derniers contenus regardés.
+- **Supprimer des récents** : clic droit sur un élément > **Retirer des récents** (ou touche **⌫** sur l'élément sélectionné en interface Classique). Pour plusieurs éléments, cliquez sur **Modifier**, cochez les éléments puis **Supprimer** ; **Tout sélectionner** coche toute la liste et **Tout effacer** vide l'historique.
+- Après une suppression, un bandeau **Annuler** reste affiché quelques secondes pour tout restaurer.
+- Les récents peuvent aussi être effacés dans les réglages, onglet **Général**.
 <!--/mac-->
 
 <!--pc-->
@@ -1323,15 +1314,20 @@ L'historique complet est aussi publié sur la page [Releases de GitHub](https://
 
 # Dépannage
 
-## Sauvegarde et transfert {#depannage}
+## Obtenir une clé TMDB (gratuite) {#depannage}
 
 <!--mac-->
-Réglages > Général > **Sauvegarde et transfert** :
+TMDB (The Movie Database) est une base de films et séries communautaire. Sa clé est **gratuite** pour un usage personnel ; elle permet à Kastideo d'afficher les photos des acteurs, les affiches et fonds en haute définition, la bande-annonce et un résumé traduit.
 
-- **Exporter la configuration…** enregistre un fichier `Kastideo-configuration.json` : sources (Xtream et playlists M3U par adresse), favoris, récents, catégories personnalisées (ordre, masquage, noms, mots-clés), interfaces choisies et clé TMDB. Cochez **Inclure les mots de passe** pour ne rien avoir à ressaisir ; gardez alors le fichier en lieu sûr.
-- **Importer une configuration…** ajoute le contenu d'un fichier : sur un nouveau Mac, ou depuis Kastideo pour Windows et Linux (même format). Les sources déjà présentes sont reconnues et rien n'est supprimé.
+1. Créez un compte sur **themoviedb.org** (bouton « Rejoindre TMDB »), puis validez-le avec le lien reçu par e-mail.
+2. Connecté, ouvrez **themoviedb.org/settings/api** (avatar > Paramètres > API), ou cliquez sur **Obtenir une clé gratuite** dans les réglages de Kastideo.
+3. Cliquez sur **Créer**, choisissez **Developer** et acceptez les conditions d'utilisation.
+4. Remplissez le formulaire : type d'usage **Personnel**, nom de l'application **Kastideo**, URL **https://github.com/jihemezes/kastideo**, un court résumé (« Lecteur IPTV personnel, affichage des fiches de films »), puis vos coordonnées.
+5. Validez : la page affiche une **Clé d'API** (32 caractères) et un **Jeton d'accès en lecture** (long, commence par « eyJ »). Kastideo accepte l'un ou l'autre ; la clé d'API est la plus simple à copier.
+6. Dans Kastideo : **Réglages (⌘,) > Général > Fiches des films et séries**, collez la clé puis cliquez sur **Enregistrer et vérifier**. « Clé valide ✓ » confirme la saisie.
+7. Rouvrez une fiche (ou cliquez sur **Actualiser** en bas de la fiche) : elle est complétée par TMDB.
 
-Les serveurs Jellyfin, Emby et Plex sont exportés (avec leur mot de passe ou leur jeton si vous cochez **Inclure les mots de passe**). Les playlists M3U ajoutées comme fichiers locaux et les dossiers ne sont pas importés sur un autre Mac (les fichiers n'y existent pas ou doivent être choisis à nouveau).
+La clé est conservée dans le trousseau du Mac. **Retirer la clé** revient aux seules informations du fournisseur IPTV.
 <!--/mac-->
 
 <!--pc-->
@@ -1372,7 +1368,34 @@ En cliquant sur « J'ai compris et j'accepte », vous reconnaissez avoir lu ces 
 
 Cet avertissement s'affiche au premier lancement et après chaque mise à jour. Vous pouvez le relire à tout moment dans <!--mac-->**Réglages (⌘,) > À propos**<!--/mac--><!--pc-->**Réglages (Ctrl+,) > À propos**<!--/pc-->.
 
-## YouTube {#soutenir}
+## Dépannage {#soutenir}
+
+<!--mac-->
+- **Une chaîne n'a pas de son** : Kastideo le détecte au bout de quelques secondes et répare seul : si l'horloge du flux est décalée (le son est jeté, « buffer too late » dans le journal), la chaîne est rouverte en se calant sur le son et l'image, et Kastideo s'en souvient ; sinon, relance de la piste son ou piste suivante. Si une icône 🔇 orange reste affichée près de la pastille de santé, le fournisseur envoie un flux sans son ou une piste illisible : essayez une autre version de la chaîne (HD, SD…) ou choisissez une autre piste son dans le panneau d'informations (⌘I). Le journal de lecture (lignes « Son : ») indique le format reçu.
+
+- **« Le fournisseur refuse cette chaîne (HTTP 403) »** : le fournisseur lui-même bloque cette chaîne (hors service ou absente de votre abonnement). Kastideo n'insiste pas ; essayez une autre version (HD, SD…) ou plus tard.
+- **Image figée, « Flux défectueux chez le fournisseur »** : l'horloge du flux est incohérente. Kastideo rouvre la chaîne une fois en se calant sur le son et l'image ; si cela ne suffit pas, il passe en **image seule** (sans le son) pour que l'image ne se fige plus, et s'en souvient. Clic droit sur la chaîne > **Image seule (sans le son)** pour l'activer ou la désactiver à la main. Réglages > Général > Lecture > **Réinitialiser** annule ces réparations mémorisées.
+- **Relais de flux** (Réglages > Général > Lecture, activé par défaut) : Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard, pour qu'il n'y en ait jamais deux à la fois. Le journal de lecture affiche alors les lignes « Relais : » avec la réponse exacte du fournisseur (ex. « HTTP 200 en 0,35 s »).
+- **Changement de chaîne lent ou refusé (« HTTP 404 », « 403 », « 401 » ou « 520 » dans le journal de lecture)** : avec un abonnement à une connexion, le fournisseur met un instant à libérer la chaîne précédente. Kastideo attend 1,5 s avant d'ouvrir la nouvelle chaîne puis réessaie une fois si elle est refusée (« Attente… » et « nouvel essai » dans le journal). Si le refus persiste, patientez une minute puis réessayez.
+
+Kastideo s'identifie auprès des serveurs comme le lecteur **VLC** : beaucoup de fournisseurs IPTV ne répondent qu'aux lecteurs qu'ils reconnaissent.
+
+- **« Le serveur n'a pas répondu à temps »** : le serveur est surchargé ou indisponible. Réessayez plus tard ; si votre adresse est de type `get.php?username=…`, vérifiez qu'elle a bien été convertie en Xtream Codes (type affiché dans les réglages des sources).
+
+- **« Identifiant ou mot de passe refusé »** : vérifiez vos identifiants avec **Tester la connexion**.
+- **« Compte non actif »** : l'abonnement a expiré ou est suspendu chez votre fournisseur.
+- **Aucun programme dans le guide** : la chaîne n'a pas d'identifiant de guide TV, ou le guide de votre source n'en contient pas pour elle.
+- **« App Transport Security »** : ce message apparaissait en version 0.1.0 et 0.2.0 avec les sources en http://. Il est corrigé depuis la version 0.2.1.
+- **Lecture impossible** : le serveur n'a pas fourni le flux. Vérifiez qu'aucun autre appareil n'utilise votre abonnement (une seule connexion autorisée), puis cliquez sur **Réessayer**. Essayez aussi la mémoire tampon **Stable**.
+<!--/mac-->
+
+<!--pc-->
+Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
+
+Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
+<!--/pc-->
+
+## YouTube {#confidentialite}
 
 <!--mac-->
 La section **YouTube** (barre latérale, bouton de l'accueil, **⌘9**) fonctionne en deux temps : un **navigateur** d'abord, puis le **lecteur** dès que vous choisissez une vidéo.
@@ -1389,25 +1412,13 @@ Kastideo utilise le **lecteur officiel de YouTube en « mode confidentialité av
 <!--/mac-->
 
 <!--pc-->
-Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
-
-Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
+Kastideo ne collecte aucune donnée. Il contacte seulement vos fournisseurs IPTV, les guides TV que vous avez choisis, GitHub pour les mises à jour et, si vous avez saisi une clé, TMDB. Vos réglages, favoris et mots de passe restent sur votre ordinateur.
 <!--/pc-->
 
-## Soutenir Kastideo {#confidentialite}
+## Soutenir Kastideo {#licences}
 
 <!--mac-->
 Kastideo est **gratuit**. Si l'application vous plaît, vous pouvez encourager son développement en m'offrant un café sur [Ko-fi](https://ko-fi.com/jihemezes) : c'est entièrement facultatif.
 
 Le bouton **Offrir un café** apparaît discrètement sur l'accueil et dans la fenêtre Nouveautés, ainsi que dans **Réglages > À propos** et dans **Aide > Soutenir Kastideo (Ko-fi)**. Pour masquer les boutons de l'accueil et des Nouveautés, cochez **Masquer les boutons « Offrir un café »** dans **Réglages > À propos**.
-<!--/mac-->
-
-<!--pc-->
-Kastideo ne collecte aucune donnée. Il contacte seulement vos fournisseurs IPTV, les guides TV que vous avez choisis, GitHub pour les mises à jour et, si vous avez saisi une clé, TMDB. Vos réglages, favoris et mots de passe restent sur votre ordinateur.
-<!--/pc-->
-
-## Confidentialité {#licences}
-
-<!--mac-->
-Kastideo fonctionne dans le bac à sable de macOS. Il n'accède qu'au réseau et aux fichiers que vous choisissez. Vos mots de passe restent dans le trousseau. Aucune donnée n'est envoyée ailleurs qu'à vos propres sources.
 <!--/mac-->

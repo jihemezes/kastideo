@@ -298,7 +298,7 @@ class _LibraryHome extends StatelessWidget {
     final watch = context.watch;
     final items = library.libraryItems(sourceId: navigation.librarySource);
     bool inScope(MediaItem i) => library.isLibraryItem(i) && (navigation.librarySource == null || i.sourceId == navigation.librarySource);
-    final resume = library.recents.where((i) => inScope(i) && watch.fraction(i.id) != null).take(20).toList();
+    final resume = library.recents.where((i) => inScope(i) && watch.inResume(i.id)).take(20).toList();
     final recent = [...items.where((i) => i.added != null)]..sort((a, b) => b.added!.compareTo(a.added!));
     final movies = items.where((i) => i.kind == MediaKind.movie && !isPersonalVideo(i)).toList()..sort(_byTitle);
     final series = items.where((i) => i.kind == MediaKind.series).toList()..sort(_byTitle);
@@ -330,7 +330,7 @@ class _LibraryHome extends StatelessWidget {
             ]),
           ),
         ),
-      if (resume.isNotEmpty) CinemaRail.items(title: tr('Reprendre la lecture'), items: resume),
+      if (resume.isNotEmpty) CinemaRail.items(title: tr('Reprendre la lecture'), items: resume, resume: true),
       if (recent.isNotEmpty) CinemaRail.items(title: tr('Ajouts récents'), items: recent.take(30).toList()),
       if (unwatched.length >= 6 && unwatched.length < movies.length)
         CinemaRail.items(title: tr('Films à voir'), items: unwatched.take(30).toList(), onSeeAll: () => navigation.setLibrary(view: LibraryView.movies, unwatched: true)),

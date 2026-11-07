@@ -12,6 +12,12 @@ struct WatchEntry: Codable, Hashable {
     var fraction: Double { duration > 0 ? min(position / duration, 1) : 0 }
 }
 
+/// Retrait de « Reprendre la lecture » qu'on peut encore annuler quelques secondes.
+struct ResumeUndo: Identifiable {
+    let id = UUID()
+    let ids: [String]
+}
+
 /// Mémorise où vous en êtes dans chaque film ou épisode, pour reprendre la lecture au même endroit.
 @MainActor
 @Observable
@@ -19,10 +25,15 @@ final class WatchProgressStore {
     private(set) var entries: [String: WatchEntry] = [:]
     /// Contenus vus jusqu'au bout (ou marqués « vus »), pour les pastilles et le partage avec les serveurs.
     private(set) var watched: Set<String> = []
+    /// Contenus retirés de « Reprendre la lecture » (la position reste mémorisée) ; ils y reviennent dès qu'on les regarde de nouveau.
+    private(set) var hiddenResume: Set<String> = []
+    /// Dernier retrait annulable (bandeau « Annuler »).
+    var resumeUndo: ResumeUndo?
     @ObservationIgnored private var lastSave = Date.distantPast
     @ObservationIgnored private var observer: Any?
     private let key = "watchProgress.v1"
     private let watchedKey = "watched.v1"
+    private let hiddenKey = "watchResumeHidden.v1"
     /// En dessous de cette durée (clips, bandes-annonces), la position n'est pas mémorisée.
     private let minimumDuration: TimeInterval = 120
     /// Au-delà de cette fraction, le contenu est considéré comme terminé.
@@ -39,6 +50,7 @@ final class WatchProgressStore {
             entries = decoded
         }
         watched = Set(UserDefaults.standard.stringArray(forKey: watchedKey) ?? [])
+        hiddenResume = Set(UserDefaults.standard.stringArray(forKey: hiddenKey) ?? [])
         observer = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification,
                                                           object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.flush() }
@@ -49,6 +61,32 @@ final class WatchProgressStore {
     func fraction(for id: String) -> Double? {
         guard let entry = entries[id], entry.position >= 10, entry.fraction < finishedFraction else { return nil }
         return entry.fraction
+    }
+
+    /// Faut-il afficher ce contenu dans « Reprendre la lecture » ? (entamé, non terminé, non retiré)
+    func inResume(_ id: String) -> Bool {
+        fraction(for: id) != nil && !hiddenResume.contains(id)
+    }
+
+    /// Retire des contenus de « Reprendre la lecture » sans effacer leur position.
+    func hideResume(_ ids: [String]) {
+        let fresh = ids.filter { !hiddenResume.contains($0) }
+        guard !fresh.isEmpty else { return }
+        hiddenResume.formUnion(fresh)
+        flush()
+        let undo = ResumeUndo(ids: fresh)
+        resumeUndo = undo
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(10))
+            if self?.resumeUndo?.id == undo.id { self?.resumeUndo = nil }
+        }
+    }
+
+    func undoHideResume() {
+        guard let undo = resumeUndo else { return }
+        hiddenResume.subtract(undo.ids)
+        resumeUndo = nil
+        flush()
     }
 
     /// Position à laquelle reprendre la lecture (secondes), si le contenu est entamé et non terminé.
@@ -64,6 +102,8 @@ final class WatchProgressStore {
             watched.insert(id)
         } else {
             entries[id] = WatchEntry(position: position, duration: duration, updatedAt: Date())
+            // Regardé de nouveau : le contenu réapparaît dans « Reprendre la lecture ».
+            if hiddenResume.contains(id) { hiddenResume.remove(id) }
         }
         if Date().timeIntervalSince(lastSave) > 10 { flush() }
     }
@@ -115,6 +155,7 @@ final class WatchProgressStore {
         }
         if watched.count > 5000 { watched = Set(watched.prefix(5000)) }
         UserDefaults.standard.set(Array(watched), forKey: watchedKey)
+        UserDefaults.standard.set(Array(hiddenResume), forKey: hiddenKey)
         lastSave = Date()
     }
 }

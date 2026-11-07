@@ -50,6 +50,32 @@ struct RecordingToastModifier: ViewModifier {
     }
 }
 
+/// Bandeau « Annuler » après le retrait d'un contenu de « Reprendre la lecture ».
+struct ResumeUndoModifier: ViewModifier {
+    @Environment(WatchProgressStore.self) private var watch
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .bottom) {
+                if let undo = watch.resumeUndo {
+                    HStack(spacing: 12) {
+                        Image(systemName: "arrow.uturn.backward.circle").font(.title3)
+                        Text(undo.ids.count > 1 ? String(localized: "Retirés de « Reprendre la lecture ».") : String(localized: "Retiré de « Reprendre la lecture »."))
+                        Button("Annuler") { watch.undoHideResume() }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .shadow(radius: 10, y: 3)
+                    .padding(.bottom, 80)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.easeOut(duration: 0.2), value: watch.resumeUndo?.id)
+    }
+}
+
 extension View {
+    func resumeUndoBanner() -> some View { modifier(ResumeUndoModifier()) }
     func recordingToast() -> some View { modifier(RecordingToastModifier()) }
 }

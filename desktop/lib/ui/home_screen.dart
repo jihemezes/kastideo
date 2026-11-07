@@ -419,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// « Reprendre la lecture » : films et épisodes entamés.
   Widget _resumeRail(BuildContext context) {
     final watch = context.watch;
-    final started = context.library.recents.where((i) => i.kind != MediaKind.live && watch.fraction(i.id) != null).take(14).toList();
+    final started = context.library.recents.where((i) => i.kind != MediaKind.live && watch.inResume(i.id)).take(14).toList();
     if (started.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 26),
@@ -432,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             itemCount: started.length,
             separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) => MediaCard(item: started[i]),
+            itemBuilder: (context, i) => MediaCard(item: started[i], resumeIds: [for (final e in started) e.id]),
           ),
         ),
       ]),

@@ -304,7 +304,7 @@ struct LibraryHomeView: View {
         let scope = navigation.librarySource
         let items = store.libraryItems(source: scope)
         let resume = store.recentIDs.compactMap { store.item(id: $0) }
-            .filter { store.isLibraryItem($0) && (scope == nil || $0.sourceID == scope) && watch.fraction(for: $0.id) != nil }
+            .filter { store.isLibraryItem($0) && (scope == nil || $0.sourceID == scope) && watch.inResume($0.id) }
         let recent = items.filter { $0.added != nil }.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
         let movies = items.filter { $0.kind == .movie && !$0.isPersonalVideo }.sorted(by: byTitle)
         let series = items.filter { $0.kind == .series }.sorted(by: byTitle)
@@ -325,7 +325,7 @@ struct LibraryHomeView: View {
                     .frame(maxWidth: .infinity, minHeight: 260)
                 }
                 if !resume.isEmpty {
-                    CinemaRail(title: String(localized: "Reprendre la lecture"), items: Array(resume.prefix(20)))
+                    CinemaRail(title: String(localized: "Reprendre la lecture"), items: Array(resume.prefix(20)), resumeMode: true)
                 }
                 if !recent.isEmpty {
                     CinemaRail(title: String(localized: "Ajouts récents"), items: Array(recent.prefix(30)))

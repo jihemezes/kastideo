@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.15.0] - 2026-11-07
+
+- **Retirer un contenu de « Reprendre la lecture »** : clic droit sur une vignette > **Retirer de « Reprendre la lecture »** ou **Vider « Reprendre la lecture »** (accueil, Cinéma, Mes vidéos). La position reste mémorisée, le contenu réapparaît dès qu'on le regarde de nouveau, et un bandeau **Annuler** permet de revenir en arrière.
+
 ## [1.14.2] - 2026-11-07
 
 - Correction : hors du mode **Sélectionner**, un clic sur un enregistrement relançait plus la lecture (le nouveau code de sélection interceptait les clics de la liste). Le clic n'est désormais capté qu'en mode sélection.

@@ -359,6 +359,10 @@ class AppSettings extends ChangeNotifier {
 class WatchProgressStore extends ChangeNotifier {
   final Map<String, (double position, double duration)> _entries = {};
   File? _file;
+  File? _hiddenFile;
+
+  /// Contenus retirés de « Reprendre la lecture » (la position reste mémorisée) ; ils y reviennent dès qu'on les regarde de nouveau.
+  final Set<String> hiddenResume = {};
 
   Future<void> load() async {
     final dir = await getApplicationSupportDirectory();
@@ -369,6 +373,32 @@ class WatchProgressStore extends ChangeNotifier {
         final list = (v as List).cast<num>();
         _entries[k] = (list[0].toDouble(), list[1].toDouble());
       });
+    } catch (_) {}
+    _hiddenFile = File('${dir.path}${Platform.pathSeparator}watch-resume-hidden.json');
+    try {
+      hiddenResume.addAll((jsonDecode(await _hiddenFile!.readAsString()) as List).cast<String>());
+    } catch (_) {}
+  }
+
+  /// Faut-il afficher ce contenu dans « Reprendre la lecture » ? (entamé, non terminé, non retiré)
+  bool inResume(String id) => fraction(id) != null && !hiddenResume.contains(id);
+
+  /// Retire des contenus de « Reprendre la lecture » sans effacer leur position.
+  void hideResume(Iterable<String> ids) {
+    hiddenResume.addAll(ids);
+    notifyListeners();
+    _saveHidden();
+  }
+
+  void unhideResume(Iterable<String> ids) {
+    hiddenResume.removeAll(ids);
+    notifyListeners();
+    _saveHidden();
+  }
+
+  Future<void> _saveHidden() async {
+    try {
+      await _hiddenFile?.writeAsString(jsonEncode(hiddenResume.toList()));
     } catch (_) {}
   }
 
@@ -399,6 +429,8 @@ class WatchProgressStore extends ChangeNotifier {
   void update(String id, double position, double duration) {
     if (duration <= 0) return;
     _entries[id] = (position, duration);
+    // Regardé de nouveau : le contenu réapparaît dans « Reprendre la lecture ».
+    if (hiddenResume.remove(id)) _saveHidden();
     notifyListeners();
   }
 

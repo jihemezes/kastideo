@@ -123,13 +123,13 @@ class _CinemaHome extends StatelessWidget {
     final all = library.items(kind);
     if (all.isEmpty) return _emptySection(context);
     final recents = library.recentsOf(kind);
-    final started = recents.where((i) => watch.fraction(i.id) != null).toList();
-    final others = recents.where((i) => watch.fraction(i.id) == null).toList();
+    final started = recents.where((i) => watch.inResume(i.id)).toList();
+    final others = recents.where((i) => !watch.inResume(i.id)).toList();
     final favorites = library.favoritesOf(kind);
     final latest = library.latest(kind);
     return _railList([
       if (context.settings.heroEnabled) HeroCarousel(kind: kind),
-      if (started.isNotEmpty) CinemaRail.items(title: tr('Reprendre la lecture'), items: started),
+      if (started.isNotEmpty) CinemaRail.items(title: tr('Reprendre la lecture'), items: started, resume: true),
       if (latest.isNotEmpty) CinemaRail.items(title: tr('Derniers ajouts'), items: latest),
       if (others.isNotEmpty)
         CinemaRail.items(title: tr('Regardés récemment'), items: others, onSeeAll: () => context.navigation.show(kind, RecentItems())),
@@ -288,7 +288,7 @@ class CinemaRail extends StatelessWidget {
   }) : _seeAllSize = seeAllSize; // ignore: prefer_initializing_formals
 
   /// Films, séries, épisodes ou chaînes (vignette adaptée au type).
-  factory CinemaRail.items({required String title, required List<MediaItem> items, VoidCallback? onSeeAll}) {
+  factory CinemaRail.items({required String title, required List<MediaItem> items, VoidCallback? onSeeAll, bool resume = false}) {
     final live = items.isNotEmpty && items.first.kind == MediaKind.live;
     return CinemaRail(
       title: title,
@@ -296,7 +296,8 @@ class CinemaRail extends StatelessWidget {
       onSeeAll: onSeeAll,
       height: live ? kTileHeight + 64 : kPosterWidth * 1.5 + 48,
       seeAllSize: live ? Size(kTileWidth * 0.6, kTileHeight) : Size(kPosterWidth * 0.8, kPosterWidth * 1.5),
-      builder: (context, i) => live ? LiveCard(item: items[i]) : MediaCard(item: items[i]),
+      builder: (context, i) =>
+          live ? LiveCard(item: items[i]) : MediaCard(item: items[i], resumeIds: resume ? [for (final e in items) e.id] : null),
     );
   }
 
@@ -441,8 +442,39 @@ class CinemaGrid extends StatelessWidget {
 
 /// Vignette d'un film ou d'une série : affiche, titre, catégorie, progression, favori.
 class MediaCard extends StatelessWidget {
-  const MediaCard({super.key, required this.item});
+  const MediaCard({super.key, required this.item, this.resumeIds});
   final MediaItem item;
+
+  /// Non null dans « Reprendre la lecture » : identifiants de toute la rangée (pour « Vider »).
+  final List<String>? resumeIds;
+
+  Future<void> _menu(BuildContext context, Offset position) async {
+    final ids = resumeIds;
+    if (ids == null) return showItemMenu(context, item, position);
+    final watch = context.watch;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
+      color: KPalette.menu,
+      items: [
+        PopupMenuItem(value: 'remove', child: Text(tr('Retirer de « Reprendre la lecture »'), style: kText(13))),
+        PopupMenuItem(value: 'clear', child: Text(tr('Vider « Reprendre la lecture »'), style: kText(13))),
+        PopupMenuItem(value: 'more', child: Text(tr('Autres actions…'), style: kText(13))),
+      ],
+    );
+    if (!context.mounted) return;
+    if (choice == 'more') return showItemMenu(context, item, position);
+    if (choice != 'remove' && choice != 'clear') return;
+    final hidden = choice == 'remove' ? [item.id] : ids;
+    watch.hideResume(hidden);
+    messenger?.hideCurrentSnackBar();
+    messenger?.showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Text(hidden.length > 1 ? tr('Retirés de « Reprendre la lecture ».') : tr('Retiré de « Reprendre la lecture ».')),
+      action: SnackBarAction(label: tr('Annuler'), onPressed: () => watch.unhideResume(hidden)),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -455,7 +487,7 @@ class MediaCard extends StatelessWidget {
         ? library.sourceOf(item)?.name
         : null;
     return MenuTap(
-      onMenu: (d) => showItemMenu(context, item, d.globalPosition),
+      onMenu: (d) => _menu(context, d.globalPosition),
       child: Tooltip(
         message: item.name,
         waitDuration: const Duration(milliseconds: 900),

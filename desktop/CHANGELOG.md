@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.15.0-android1] - 2026-11-07
+
+- **Retirer un contenu de « Reprendre la lecture »** : clic droit (appui long) sur une vignette > Retirer ou Vider. La position reste mémorisée, le contenu réapparaît dès qu'on le regarde de nouveau, avec une action **Annuler**.
+
+## [1.15.0-desktop1] - 2026-11-07
+
+- **Retirer un contenu de « Reprendre la lecture »** : clic droit sur une vignette > Retirer ou Vider. La position reste mémorisée, le contenu réapparaît dès qu'on le regarde de nouveau, avec une action **Annuler**.
+
 ## [1.14.1-android1] - 2026-11-07
 
 - Enregistrements : **Sélectionner** et **Vider la liste…** sont désormais des boutons texte dans l'en-tête de la section Fichiers.

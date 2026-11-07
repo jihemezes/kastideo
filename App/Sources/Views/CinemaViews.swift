@@ -222,8 +222,8 @@ struct CinemaHome: View {
         let all = store.items(for: .all(kind))
         let allRecents = store.recentIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         // Pour les films et séries : les contenus entamés d'abord (« Reprendre »), puis les autres récents.
-        let started = kind == .live ? [] : allRecents.filter { watch.fraction(for: $0.id) != nil }
-        let recents = kind == .live ? allRecents : allRecents.filter { watch.fraction(for: $0.id) == nil }
+        let started = kind == .live ? [] : allRecents.filter { watch.inResume($0.id) }
+        let recents = kind == .live ? allRecents : allRecents.filter { !watch.inResume($0.id) }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
         // Pays choisis (Réglages > Apparence) : seules leurs catégories ont une rangée.
         let categories = (store.categoriesByKind[kind] ?? []).filter {
@@ -266,7 +266,7 @@ struct CinemaHome: View {
                     }
                 }
                 if !started.isEmpty {
-                    CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) })
+                    CinemaRail(title: String(localized: "Reprendre la lecture"), items: started, seeAll: { navigation.go(.recents) }, resumeMode: true)
                 }
                 if !recents.isEmpty {
                     CinemaRail(title: kind == .live ? String(localized: "Regardées récemment") : String(localized: "Regardés récemment"),
@@ -324,12 +324,15 @@ struct CinemaRail: View {
     let title: String
     let items: [MediaItem]
     var seeAll: (() -> Void)?
+    /// Rangée « Reprendre la lecture » : le clic droit propose d'en retirer une vignette ou de la vider.
+    var resumeMode = false
     private let limit = 40
 
-    init(title: String, items: [MediaItem], seeAll: (() -> Void)? = nil) {
+    init(title: String, items: [MediaItem], seeAll: (() -> Void)? = nil, resumeMode: Bool = false) {
         self.title = title
         self.items = items
         self.seeAll = seeAll
+        self.resumeMode = resumeMode
     }
 
     var body: some View {
@@ -348,7 +351,7 @@ struct CinemaRail: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(alignment: .top, spacing: 14) {
                     ForEach(Array(items.prefix(limit))) { item in
-                        MediaCard(item: item)
+                        MediaCard(item: item, resumeIDs: resumeMode ? items.map(\.id) : nil)
                     }
                     if items.count > limit, let seeAll {
                         SeeAllCard(remaining: items.count - limit, action: seeAll)
@@ -393,6 +396,8 @@ struct MediaCard: View {
     @Environment(WatchProgressStore.self) private var watch
     @AppStorage(AppearanceKeys.cardSize) private var cardSizeRaw = CardSize.medium.rawValue
     let item: MediaItem
+    /// Non nil dans « Reprendre la lecture » : identifiants de toute la rangée (pour « Vider »).
+    var resumeIDs: [String]?
     @State private var hovering = false
 
     var body: some View {
@@ -471,7 +476,14 @@ struct MediaCard: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .contextMenu { ItemActionsMenu(item: item) }
+        .contextMenu {
+            if let resumeIDs {
+                Button("Retirer de « Reprendre la lecture »") { watch.hideResume([item.id]) }
+                Button("Vider « Reprendre la lecture »") { watch.hideResume(resumeIDs) }
+                Divider()
+            }
+            ItemActionsMenu(item: item)
+        }
         .help(item.name)
     }
 
