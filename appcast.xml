@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.16.2</title>
+      <pubDate>Sat, 07 Nov 2026 23:10:40 GMT</pubDate>
+      <sparkle:version>93</sparkle:version>
+      <sparkle:shortVersionString>1.16.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Enregistrements : garde-fou contre les enregistrements « son seulement ». Si la conversion en MP4 perd l&amp;#x27;image (vidéo MPEG-2 de certaines chaînes que le MP4 ne sait pas contenir), le fichier &lt;b&gt;.ts d&amp;#x27;origine est conservé&lt;/b&gt; au lieu d&amp;#x27;un MP4 sans image, avec une ligne dans le Journal de lecture.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.16.2/Kastideo-1.16.2.dmg" length="48346567" type="application/octet-stream" sparkle:edSignature="KiBcY6lH24mdqPQx9LaQNf1J0XkZ2I0yhvfDKEsQv7AfJ/QwOPN6516YtkCy6iFhfd3Ex8+CaG/yft5GbaSLAA==" />
+    </item>
+    <item>
       <title>Kastideo 1.16.1</title>
       <pubDate>Sat, 07 Nov 2026 22:58:34 GMT</pubDate>
       <sparkle:version>92</sparkle:version>
@@ -439,17 +450,6 @@
 &lt;li&gt;&lt;b&gt;Pays et langues des rangées Cinéma&lt;/b&gt; (Réglages &amp;gt; Apparence) : Kastideo repère les pays dans les noms de vos catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…) et vous laisse choisir ceux à montrer. Les derniers ajouts du bandeau « à la une », les tendances TMDB, la sélection au hasard et les rangées par catégorie de l&amp;#x27;interface Cinéma ne montrent plus que ces pays (option pour garder les catégories sans pays, comme « Action »). Les listes et la recherche restent complètes. Le choix est repris par la sauvegarde de la configuration, comme dans Kastideo pour Windows et Linux.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.1/Kastideo-1.2.1.dmg" length="45909963" type="application/octet-stream" sparkle:edSignature="87xJB4jM5jFNac0rJIQagu85+b44+GiljUeTvEqteFuU9wodehMmY2lUygkxFVzEcxKZYmyaB+UG6ZCdG7kxDg==" />
-    </item>
-    <item>
-      <title>Kastideo 1.2.0</title>
-      <pubDate>Sun, 25 Oct 2026 08:22:25 GMT</pubDate>
-      <sparkle:version>48</sparkle:version>
-      <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Sauvegarde et transfert de la configuration&lt;/b&gt; (Réglages &amp;gt; Général) : &lt;b&gt;Exporter la configuration…&lt;/b&gt; crée un fichier avec vos sources (mots de passe compris si vous le souhaitez), favoris, récents, catégories personnalisées et interfaces choisies ; &lt;b&gt;Importer une configuration…&lt;/b&gt; les ajoute sur un autre Mac — ou dans Kastideo pour Windows et Linux, qui lit et écrit le même fichier. Rien n&amp;#x27;est supprimé à l&amp;#x27;importation : les sources déjà présentes sont reconnues.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.0/Kastideo-1.2.0.dmg" length="46502720" type="application/octet-stream" sparkle:edSignature="xJxhWF182FDGBih/a3oXPAYVymuthY8a6jZKcx9jzunFcYRUzrLPPr1oc1eTBJl01aknJNq2DgaPjATOp0JIDQ==" />
     </item>
   </channel>
 </rss>
