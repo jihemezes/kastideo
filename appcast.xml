@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.16.1</title>
+      <pubDate>Sat, 07 Nov 2026 22:58:34 GMT</pubDate>
+      <sparkle:version>92</sparkle:version>
+      <sparkle:shortVersionString>1.16.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l&amp;#x27;arrêt (souris dessus, sélecteur d&amp;#x27;heure ouvert), reste affiché 45 s au lieu de 20 s, et le sélecteur d&amp;#x27;&lt;b&gt;heure précise&lt;/b&gt; est maintenant une horloge graphique plus rapide à régler. Bandeau sans animation d&amp;#x27;apparition, pour ne pas perturber l&amp;#x27;affichage de la vidéo.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.16.1/Kastideo-1.16.1.dmg" length="48968615" type="application/octet-stream" sparkle:edSignature="kWUclZnC9MkUvxDhzCb18HSZIZg7QbnRRTJHkwPzg/FP+Shuz7m5v1njcYYS6TpE2H5tcFGJNwnhc8i3y+TXAg==" />
+    </item>
+    <item>
       <title>Kastideo 1.16.0</title>
       <pubDate>Sat, 07 Nov 2026 22:28:32 GMT</pubDate>
       <sparkle:version>91</sparkle:version>
@@ -439,18 +450,6 @@
 &lt;li&gt;&lt;b&gt;Sauvegarde et transfert de la configuration&lt;/b&gt; (Réglages &amp;gt; Général) : &lt;b&gt;Exporter la configuration…&lt;/b&gt; crée un fichier avec vos sources (mots de passe compris si vous le souhaitez), favoris, récents, catégories personnalisées et interfaces choisies ; &lt;b&gt;Importer une configuration…&lt;/b&gt; les ajoute sur un autre Mac — ou dans Kastideo pour Windows et Linux, qui lit et écrit le même fichier. Rien n&amp;#x27;est supprimé à l&amp;#x27;importation : les sources déjà présentes sont reconnues.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.0/Kastideo-1.2.0.dmg" length="46502720" type="application/octet-stream" sparkle:edSignature="xJxhWF182FDGBih/a3oXPAYVymuthY8a6jZKcx9jzunFcYRUzrLPPr1oc1eTBJl01aknJNq2DgaPjATOp0JIDQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.1.7</title>
-      <pubDate>Sat, 24 Oct 2026 18:15:38 GMT</pubDate>
-      <sparkle:version>47</sparkle:version>
-      <sparkle:shortVersionString>1.1.7</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Image seule (sans le son)&lt;/b&gt; : quand le son d&amp;#x27;une chaîne est inutilisable et fige l&amp;#x27;image (horloge incohérente même après réouverture), Kastideo passe automatiquement en &lt;b&gt;image seule&lt;/b&gt; : l&amp;#x27;image ne se fige plus. Le choix est mémorisé pour la chaîne. Il est aussi disponible à la main : clic droit sur une chaîne du direct &amp;gt; &lt;b&gt;Image seule (sans le son)&lt;/b&gt; (coché = actif ; décocher pour réessayer avec le son).&lt;/li&gt;
-&lt;li&gt;Réglages &amp;gt; Général &amp;gt; Lecture &amp;gt; &lt;b&gt;Réinitialiser&lt;/b&gt; annule aussi les chaînes passées en image seule.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.1.7/Kastideo-1.1.7.dmg" length="45965467" type="application/octet-stream" sparkle:edSignature="gGraM6EiOmWlit1hOXYhOSl+tEmyOJCwZF48eES82o1R0Np7ZvFEm8Xe6au8b+r3R7RjjnMYQYWXMx6x5q5KBA==" />
     </item>
   </channel>
 </rss>
