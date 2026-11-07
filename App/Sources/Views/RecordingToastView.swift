@@ -81,10 +81,11 @@ struct DurationPromptModifier: ViewModifier {
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .shadow(radius: 10, y: 3)
                     .padding(.top, 54)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onHover { inside in
+                        if inside { recordings.holdDurationPrompt() } else { recordings.releaseDurationPrompt() }
+                    }
                 }
             }
-            .animation(.easeOut(duration: 0.2), value: recordings.durationPrompt?.id)
     }
 }
 

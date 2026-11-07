@@ -284,10 +284,27 @@ final class RecordingCenter {
     private func offerDuration() {
         let prompt = DurationPrompt()
         durationPrompt = prompt
-        Task { [weak self] in
-            try? await Task.sleep(for: .seconds(20))
-            if self?.durationPrompt?.id == prompt.id { self?.durationPrompt = nil }
+        scheduleDismiss(of: prompt, after: 45)
+    }
+
+    @ObservationIgnored private var promptTask: Task<Void, Never>?
+
+    private func scheduleDismiss(of prompt: DurationPrompt, after seconds: Double) {
+        promptTask?.cancel()
+        promptTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(seconds))
+            guard !Task.isCancelled, self?.durationPrompt?.id == prompt.id else { return }
+            self?.durationPrompt = nil
         }
+    }
+
+    /// Le bandeau reste affiché tant que l'utilisateur est en train de régler l'arrêt (souris dessus, sélecteur d'heure ouvert).
+    func holdDurationPrompt() {
+        promptTask?.cancel()
+    }
+
+    func releaseDurationPrompt() {
+        if let prompt = durationPrompt { scheduleDismiss(of: prompt, after: 20) }
     }
 
     /// Modifie l'arrêt programmé de l'enregistrement en cours : dans [minutes] minutes, à une heure précise, ou jamais (nil).
@@ -301,6 +318,7 @@ final class RecordingCenter {
         var end = date
         if let d = end, d <= Date() { end = Calendar.current.date(byAdding: .day, value: 1, to: d) }
         activeLive?.endsAt = end
+        promptTask?.cancel()
         durationPrompt = nil
     }
 

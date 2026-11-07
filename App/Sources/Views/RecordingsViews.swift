@@ -325,10 +325,14 @@ struct StopDurationMenu: View {
         }
         .menuStyle(.button)
         .fixedSize()
+        .onChange(of: showTime) { _, open in
+            if open { recordings.holdDurationPrompt() } else { recordings.releaseDurationPrompt() }
+        }
         .popover(isPresented: $showTime) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Arrêter l'enregistrement à").font(.headline)
                 DatePicker("", selection: $customDate, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(.graphical)
                     .labelsHidden()
                 HStack {
                     Spacer()

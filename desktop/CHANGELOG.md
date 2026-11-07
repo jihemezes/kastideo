@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.16.1-android1] - 2026-11-08
+
+- Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l'arrêt (menu ou sélecteur d'heure ouverts) et reste affiché 45 s ; le sélecteur d'heure précise s'ouvre de nouveau correctement.
+
+## [1.16.1-desktop1] - 2026-11-08
+
+- Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l'arrêt (menu ou sélecteur d'heure ouverts) et reste affiché 45 s ; le sélecteur d'heure précise s'ouvre de nouveau correctement.
+
 ## [1.16.0-android1] - 2026-11-07
 
 - **Durée des enregistrements** : l'enregistrement démarre immédiatement ; un bandeau permet ensuite de choisir l'arrêt automatique (15 min à 4 h, heure précise, sans limite). Sans choix, il s'arrête à la fin du programme (guide) ou après la **durée par défaut** (Réglages > Enregistrement du direct, 2 h au départ). Le bouton **Durée** de l'enregistrement en cours change l'arrêt à tout moment, avec le temps restant.

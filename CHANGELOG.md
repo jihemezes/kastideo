@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.16.1] - 2026-11-08
+
+- Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l'arrêt (souris dessus, sélecteur d'heure ouvert), reste affiché 45 s au lieu de 20 s, et le sélecteur d'**heure précise** est maintenant une horloge graphique plus rapide à régler. Bandeau sans animation d'apparition, pour ne pas perturber l'affichage de la vidéo.
+
 ## [1.16.0] - 2026-11-07
 
 - **Durée des enregistrements** : l'enregistrement démarre immédiatement ; un bandeau permet ensuite de choisir l'arrêt automatique (15 min à 4 h, heure précise, sans limite). Sans choix, il s'arrête à la fin du programme (guide) ou après la **durée par défaut** (Réglages > Enregistrements, 2 h au départ, « Sans limite » possible). Le bouton **Durée** de l'enregistrement en cours change l'arrêt à tout moment, et le temps restant est affiché.

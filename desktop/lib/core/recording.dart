@@ -195,8 +195,17 @@ class RecordingCenter extends ChangeNotifier {
   void _offerDuration() {
     durationPrompt = true;
     _promptTimer?.cancel();
-    _promptTimer = Timer(const Duration(seconds: 20), dismissDurationPrompt);
+    _promptTimer = Timer(const Duration(seconds: 45), dismissDurationPrompt);
     notifyListeners();
+  }
+
+  /// Le bandeau reste affiché tant que l'utilisateur règle l'arrêt (menu ou sélecteur d'heure ouvert).
+  void holdDurationPrompt() => _promptTimer?.cancel();
+
+  void releaseDurationPrompt() {
+    if (!durationPrompt) return;
+    _promptTimer?.cancel();
+    _promptTimer = Timer(const Duration(seconds: 20), dismissDurationPrompt);
   }
 
   void dismissDurationPrompt() {
