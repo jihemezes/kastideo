@@ -1,4 +1,5 @@
 import Foundation
+import AVFoundation
 import AppKit
 import Observation
 import KastideoCore
@@ -535,18 +536,37 @@ final class RecordingCenter {
             guard let self else { return }
             self.remuxer = nil
             self.converting.removeAll { $0 == job.name }
-            if success {
-                try? FileManager.default.removeItem(at: job.input)
-                self.report(String(localized: "Enregistrement terminé"), job.name, file: job.output)
-            } else {
-                try? FileManager.default.removeItem(at: job.output)
-                self.report(String(localized: "Enregistrement terminé"),
-                            String(localized: "\(job.name) — conservé au format .ts (conversion MP4 impossible)"), file: job.input)
+            Task { [weak self] in
+                guard let self else { return }
+                // Garde-fou : un MP4 sans image alors que le .ts est bien plus gros (vidéo MPEG-2 que le MP4 ne sait pas contenir)
+                // serait un enregistrement « son seulement » : on garde alors le .ts d'origine.
+                var ok = success
+                if ok, await Self.lostVideo(input: job.input, output: job.output) {
+                    PlaybackLog.shared.note("Conversion en MP4 : l'image a été perdue, le .ts d'origine est conservé")
+                    ok = false
+                }
+                if ok {
+                    try? FileManager.default.removeItem(at: job.input)
+                    self.report(String(localized: "Enregistrement terminé"), job.name, file: job.output)
+                } else {
+                    try? FileManager.default.removeItem(at: job.output)
+                    self.report(String(localized: "Enregistrement terminé"),
+                                String(localized: "\(job.name) — conservé au format .ts (conversion MP4 impossible)"), file: job.input)
+                }
+                self.refreshFiles()
+                self.updateSleepGuard()
+                self.runRemuxQueue()
             }
-            self.refreshFiles()
-            self.updateSleepGuard()
-            self.runRemuxQueue()
         }
+    }
+
+    /// Vrai si le MP4 produit n'a aucune piste vidéo alors que le fichier d'origine est beaucoup plus gros (image perdue).
+    private static func lostVideo(input: URL, output: URL) async -> Bool {
+        let outSize = RecordingLocator.size(of: output)
+        let inSize = RecordingLocator.size(of: input)
+        guard inSize > 4 * max(outSize, 1) else { return false }
+        let tracks = try? await AVURLAsset(url: output).loadTracks(withMediaType: .video)
+        return tracks?.isEmpty == true
     }
 
     // MARK: - Programmation

@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.16.2] - 2026-11-08
+
+- Enregistrements : garde-fou contre les enregistrements « son seulement ». Si la conversion en MP4 perd l'image (vidéo MPEG-2 de certaines chaînes que le MP4 ne sait pas contenir), le fichier **.ts d'origine est conservé** au lieu d'un MP4 sans image, avec une ligne dans le Journal de lecture.
+
 ## [1.16.1] - 2026-11-08
 
 - Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l'arrêt (souris dessus, sélecteur d'heure ouvert), reste affiché 45 s au lieu de 20 s, et le sélecteur d'**heure précise** est maintenant une horloge graphique plus rapide à régler. Bandeau sans animation d'apparition, pour ne pas perturber l'affichage de la vidéo.
