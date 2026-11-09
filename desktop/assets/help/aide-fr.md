@@ -1301,6 +1301,23 @@ Kastideo cherche les nouvelles versions Android sur GitHub. Quand une version es
 - **Image figée** : voir la page « Image figée : décodage logiciel ».
 - **Le Journal de lecture** (Réglages) garde les détails des erreurs de lecture.
 
+## Kastideo Compat : Mac plus ancien (macOS 12 et 13) {#mac-compat}
+
+La version **Mac** de Kastideo demande **macOS 14 Sonoma** ou plus récent. Pour les Mac plus anciens, **Kastideo Compat** est la version « Windows / Linux » recompilée pour Mac : **macOS 12 Monterey et suivants**, processeur Intel ou Apple Silicon.
+
+**Installation.** Téléchargez `Kastideo-Compat-…-macos.dmg` sur la page [Releases](https://github.com/jihemezes/kastideo/releases) (pré-versions dont le numéro se termine par `-desktopN`), ouvrez-le et glissez **Kastideo Compat** dans **Applications**. L'application est signée et notariée par Apple. Elle peut s'installer **à côté** de la version native.
+
+**Ce qui change par rapport à la version Mac native.**
+
+- L'interface et les fonctions sont celles de la version Windows et Linux (moteur de lecture mpv) : direct, guide TV, thèmes, MultiVue, enregistrement, films et séries, YouTube…
+- Les raccourcis utilisent la touche **Commande** (⌘) à la place de Ctrl : ⌘1, ⌘2, ⌘3… pour les sections, ⌘, pour les réglages, ⌘K pour pause.
+- **Pas de mise à jour automatique** : le bandeau de nouvelle version ouvre la page de téléchargement.
+- **Cast vers un téléviseur** : il demande **ffmpeg** (par exemple `brew install ffmpeg` avec Homebrew). Sans ffmpeg, les autres fonctions marchent normalement.
+- Les enregistrements sont rangés dans **Films > Kastideo**.
+- Le lancement à l'ouverture de session et l'association des fichiers .m3u ne sont pas proposés.
+
+Les réglages et sources peuvent être transférés d'une version à l'autre avec **Sauvegarde et transfert**.
+
 ## Nouveautés {#nouveautes}
 
 Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée.

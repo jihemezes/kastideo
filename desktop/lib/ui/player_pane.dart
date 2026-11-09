@@ -218,7 +218,7 @@ class _PlayerPaneState extends State<PlayerPane> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.space): playback.togglePause,
         const SingleActivator(LogicalKeyboardKey.keyM): playback.toggleMute,
-        const SingleActivator(LogicalKeyboardKey.period, control: true): () => stopPlayback(context),
+        SingleActivator(LogicalKeyboardKey.period, control: !Device.isMac, meta: Device.isMac): () => stopPlayback(context),
         const SingleActivator(LogicalKeyboardKey.f11): _toggleFullScreen,
         if (!widget.tvMode && !Device.isAndroid) ...{
           const SingleActivator(LogicalKeyboardKey.escape): () {
@@ -232,8 +232,8 @@ class _PlayerPaneState extends State<PlayerPane> {
           const SingleActivator(LogicalKeyboardKey.arrowLeft): () => playback.jump(-10),
           const SingleActivator(LogicalKeyboardKey.arrowRight): () => playback.jump(30),
         },
-        const SingleActivator(LogicalKeyboardKey.bracketLeft, control: true): () => playback.jump(-10),
-        const SingleActivator(LogicalKeyboardKey.bracketRight, control: true): () => playback.jump(30),
+        SingleActivator(LogicalKeyboardKey.bracketLeft, control: !Device.isMac, meta: Device.isMac): () => playback.jump(-10),
+        SingleActivator(LogicalKeyboardKey.bracketRight, control: !Device.isMac, meta: Device.isMac): () => playback.jump(30),
         const SingleActivator(LogicalKeyboardKey.keyR): () => toggleRecording(context),
         const SingleActivator(LogicalKeyboardKey.keyF): () {
           final item = playback.current;

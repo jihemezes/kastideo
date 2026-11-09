@@ -12,6 +12,7 @@ String videosDirectory() {
     return '$home${sep}Videos';
   }
   final home = env['HOME'] ?? '.';
+  if (Platform.isMacOS) return '$home/Movies';
   try {
     final dirs = File('$home/.config/user-dirs.dirs');
     if (dirs.existsSync()) {

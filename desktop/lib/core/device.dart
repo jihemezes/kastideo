@@ -10,6 +10,7 @@ class Device {
   static const _channel = MethodChannel('fr.jmezes.kastideo/device');
 
   static bool get isAndroid => Platform.isAndroid;
+  static bool get isMac => Platform.isMacOS;
   static bool get isDesktop => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   /// Téléviseur ou boîtier Android TV (commandé à la télécommande). Peut être forcé avec KASTIDEO_TV=1 pour les essais.

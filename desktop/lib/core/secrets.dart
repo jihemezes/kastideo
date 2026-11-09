@@ -11,7 +11,8 @@ import 'log.dart';
 class Secrets {
   Secrets._();
   static final Secrets shared = Secrets._();
-  static const _storage = FlutterSecureStorage();
+  // macOS : trousseau classique (le trousseau « protection des données » exige un profil d'approvisionnement).
+  static const _storage = FlutterSecureStorage(mOptions: MacOsOptions(usesDataProtectionKeychain: false));
   bool _warned = false;
 
   Future<String?> read(String key) async {

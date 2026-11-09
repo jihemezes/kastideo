@@ -6,6 +6,9 @@
 *.xcworkspace/
 !Packages/**/*.xcworkspace/
 xcuserdata/
+# Projet Xcode de la version Flutter pour Mac (non généré par XcodeGen)
+!desktop/macos/Runner.xcodeproj/
+!desktop/macos/Runner.xcworkspace/
 *.xcuserstate
 DerivedData/
 build/

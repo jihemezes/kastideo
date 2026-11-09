@@ -411,6 +411,8 @@ class _StartupSectionState extends State<_StartupSection> {
 
   @override
   Widget build(BuildContext context) {
+    // Lancement à l'ouverture de session et association .m3u : Windows et Linux seulement.
+    if (Platform.isMacOS) return const SizedBox.shrink();
     return _section(tr('Démarrage et fichiers'), [
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
@@ -1079,7 +1081,7 @@ class _BackupTabState extends State<_BackupTab> {
     );
     if (location == null || !mounted) return;
     final data = await context.library
-        .makeExport(includePasswords: _includePasswords, settings: context.settings, app: Platform.isWindows ? 'windows' : 'linux');
+        .makeExport(includePasswords: _includePasswords, settings: context.settings, app: Platform.isWindows ? 'windows' : (Platform.isMacOS ? 'macos' : 'linux'));
     await File(location.path).writeAsString(const JsonEncoder.withIndent('  ').convert(data));
     setState(() => _message = '${tr('Configuration exportée')} : ${(data['sources'] as List).length} ${tr('source(s)')}, '
         '${(data['favorites'] as List).length} ${tr('favori(s)')}.');

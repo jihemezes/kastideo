@@ -1,0 +1,10 @@
+// Paramètres de l'application macOS (version Flutter, compatible macOS 12 et suivants).
+// Nom distinct de la version native (Kastideo.app, macOS 14+) pour pouvoir installer les deux côte à côte.
+
+// Nom du produit (fichier .app)
+PRODUCT_NAME = Kastideo Compat
+
+// Identifiant de l'application (différent de la version native fr.jmezes.kastideo)
+PRODUCT_BUNDLE_IDENTIFIER = fr.jmezes.kastideo.compat
+
+PRODUCT_COPYRIGHT = Copyright © 2026 Jean-Michel Mezes. Tous droits réservés.

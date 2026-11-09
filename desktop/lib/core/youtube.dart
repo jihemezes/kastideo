@@ -729,6 +729,12 @@ class YouTubePlayerHost {
           final r = await Process.run('cmd', ['/c', 'start', '', browser, '--app=$url', ..._flags]);
           if (r.exitCode == 0) return true;
         }
+      } else if (Platform.isMacOS) {
+        for (final app in const ['Google Chrome', 'Microsoft Edge', 'Brave Browser', 'Chromium']) {
+          if (!Directory('/Applications/$app.app').existsSync()) continue;
+          final r = await Process.run('open', ['-na', app, '--args', '--app=$url', ..._flags]);
+          if (r.exitCode == 0) return true;
+        }
       } else if (Platform.isLinux) {
         for (final browser in const ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'microsoft-edge', 'brave-browser']) {
           final found = await Process.run('which', [browser]);

@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.16.2-desktop1] - 2026-11-09
+
+- **Kastideo Compat : version pour Mac plus ancien (macOS 12 Monterey et 13 Ventura)**, processeur Intel ou Apple Silicon. C'est la version Windows / Linux recompilée pour Mac (`Kastideo-Compat-…-macos.dmg`, signée Developer ID et notariée), qui peut s'installer à côté de la version Mac native (macOS 14 minimum). Raccourcis avec la touche Commande (⌘), enregistrements dans Films/Kastideo, pas de mise à jour automatique, Cast avec ffmpeg installé (Homebrew). Nouvelle page d'aide « Kastideo Compat ».
+
 ## [1.16.1-android1] - 2026-11-08
 
 - Durée des enregistrements : le bandeau de choix ne se ferme plus pendant le réglage de l'arrêt (menu ou sélecteur d'heure ouverts) et reste affiché 45 s ; le sélecteur d'heure précise s'ouvre de nouveau correctement.

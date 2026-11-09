@@ -38,6 +38,8 @@ Future<String?> findFfmpeg({String? custom, String tool = 'ffmpeg'}) async {
   }
   // Android : ffmpeg livré comme bibliothèque native (libffmpeg.so), s'il est inclus dans l'application.
   if (Platform.isAndroid && Device.nativeDir != null) candidates.add('${Device.nativeDir}/lib$tool.so');
+  // macOS : une application ne reçoit pas le PATH de Homebrew.
+  if (Platform.isMacOS) candidates.addAll(['/opt/homebrew/bin/$exe', '/usr/local/bin/$exe', '/opt/local/bin/$exe']);
   final here = File(Platform.resolvedExecutable).parent.path;
   candidates
     ..add('$here${Platform.pathSeparator}$exe')

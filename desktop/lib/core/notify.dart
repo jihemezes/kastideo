@@ -20,7 +20,7 @@ class SystemNotifier {
       await Device.requestNotifications();
       return;
     }
-    if (!(Platform.isWindows || Platform.isLinux)) return;
+    if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) return;
     try {
       await localNotifier.setup(appName: 'Kastideo', shortcutPolicy: ShortcutPolicy.requireCreate);
       _ready = true;

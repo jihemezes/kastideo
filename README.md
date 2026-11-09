@@ -53,6 +53,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 | Plateforme | État | Ce qui est disponible |
 |---|---|---|
 | **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
+| **Mac plus ancien (macOS 12 et 13)** — Kastideo Compat | 🧪 Aperçu | Comme Windows (voir ci-dessous) |
 | **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète, installateur Windows et mises à jour intégrées |
 | **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
 | **Android** (téléphone, tablette) et **Android TV** (Google TV, Chromecast avec Google TV, Nvidia Shield, TV Philips, Sony, TCL…) | 🧪 Aperçu | Comme Windows, adapté au doigt (menu ☰, gestes dans le lecteur, appui long) et à la télécommande (interface TV, touches Chaîne, Lecture/Pause) ; Cast en mode direct ; mises à jour intégrées |
@@ -66,8 +67,11 @@ Les aperçus Windows et Linux sont publiés en **pré-version** sur la page [Rel
 | Votre Mac | Fichier à télécharger |
 |---|---|
 | macOS 14 Sonoma ou plus récent, processeur Apple (M1, M2, M3, M4…) ou Intel | `Kastideo-X.Y.Z.dmg` |
+| **macOS 12 Monterey ou 13 Ventura** (Mac plus ancien), processeur Apple ou Intel — **Kastideo Compat** 🧪 | `Kastideo-Compat-…-macos.dmg` (dans les pré-versions `-desktopN`) |
 
 *Pour connaître votre version de macOS : menu Pomme > **À propos de ce Mac**.*
+
+**Kastideo Compat** est la version « Windows / Linux » (Flutter) recompilée pour Mac : mêmes fonctions et même apparence que sous Windows, pour les Mac qui ne peuvent pas installer la version native (macOS 14 minimum). Elle est signée et notariée ; elle peut s'installer à côté de la version native. Pas de mise à jour automatique : téléchargez la nouvelle version sur la page Releases. Le Cast vers un téléviseur nécessite d'installer ffmpeg (par exemple avec Homebrew : `brew install ffmpeg`).
 
 Ouvrez le fichier `.dmg` et glissez Kastideo dans **Applications**. L'application est signée et vérifiée par Apple ; elle se met ensuite à jour toute seule.
 
