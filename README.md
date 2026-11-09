@@ -54,6 +54,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 |---|---|---|
 | **Mac** | ✅ Version stable | Toutes les fonctionnalités ci-dessus, mises à jour automatiques |
 | **Mac plus ancien (macOS 12 et 13)** — Kastideo Compat | 🧪 Aperçu | Comme Windows (voir ci-dessous) |
+| **iPhone et iPad** (iOS 17 ou plus récent) | 🧪 Aperçu (TestFlight) | Application native : accueil, direct avec programme en cours, films et séries, lecteur plein écran, mini-lecteur, AirPlay, import de votre configuration. Enregistrement, MultiVue et guide en grille viennent ensuite |
 | **Windows** | 🧪 Aperçu | Accueil, direct (interfaces Classique, Cinéma et TV, guide TV en grille, thèmes, différé, enregistrement immédiat ou programmé, alertes, correction des chaînes, MultiVue), téléchargements, films et séries (interfaces Classique et Cinéma, fiches TMDB, épisodes, reprise de lecture), thème clair et couleur d'accent, notifications du système, réglages, catégories, sauvegarde, aide complète, installateur Windows et mises à jour intégrées |
 | **Linux** (Zorin OS, Ubuntu, Raspberry Pi…) | 🧪 Aperçu | Comme Windows |
 | **Android** (téléphone, tablette) et **Android TV** (Google TV, Chromecast avec Google TV, Nvidia Shield, TV Philips, Sony, TCL…) | 🧪 Aperçu | Comme Windows, adapté au doigt (menu ☰, gestes dans le lecteur, appui long) et à la télécommande (interface TV, touches Chaîne, Lecture/Pause) ; Cast en mode direct ; mises à jour intégrées |
@@ -104,6 +105,10 @@ uname -m         # x86_64 = PC 64 bits, aarch64 = Raspberry Pi 64 bits
 
 - **Paquet `.deb`** : double-cliquez dessus pour l'installer avec la Logithèque, ou tapez `sudo apt install ./kastideo_…deb` dans le dossier de téléchargement. Kastideo apparaît ensuite dans le menu des applications.
 - **AppImage** : un seul fichier, sans installation. Rendez-le exécutable (clic droit > **Propriétés** > **Autoriser l'exécution**, ou `chmod +x Kastideo-…AppImage`) puis double-cliquez dessus. S'il ne démarre pas, installez `libfuse2` (`libfuse2t64` sur Ubuntu 24.04 et Zorin OS 18).
+
+### 📱 iPhone et iPad
+
+L'application iPhone / iPad est distribuée par **TestFlight** (le service d'Apple pour tester une app avant l'App Store) : on reçoit une invitation, on installe l'app **TestFlight** depuis l'App Store, puis **Kastideo** depuis TestFlight. Les mises à jour arrivent par TestFlight. Pas à pas : page d'aide « Kastideo sur iPhone et iPad ».
 
 ### 🤖 Android et Android TV
 

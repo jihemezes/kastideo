@@ -75,54 +75,6 @@ extension SportKind {
     }
 }
 
-/// Mode de la vue Thèmes.
-enum ThemeMode: String, CaseIterable, Identifiable {
-    case now, tonight, channels
-    var id: String { rawValue }
-    var label: String {
-        switch self {
-        case .now: return String(localized: "En ce moment")
-        case .tonight: return String(localized: "Ce soir")
-        case .channels: return String(localized: "Chaînes")
-        }
-    }
-}
-
-/// Qualité des chaînes proposées quand une chaîne existe en plusieurs versions.
-enum QualityPreference: String, CaseIterable, Identifiable {
-    case auto, uhd, fhd, hd, sd
-    var id: String { rawValue }
-    static let key = "live.quality"
-    static let autoTierKey = "live.autoTier"
-
-    var label: String {
-        switch self {
-        case .auto: return String(localized: "Automatique (selon la connexion)")
-        case .uhd: return "4K"
-        case .fhd: return "Full HD"
-        case .hd: return "HD"
-        case .sd: return "SD"
-        }
-    }
-
-    static var current: QualityPreference {
-        QualityPreference(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .auto
-    }
-
-    /// Qualité visée : choisie, ou ajustée automatiquement d'après la réception mesurée pendant les lectures.
-    static var target: ChannelQuality {
-        switch current {
-        case .uhd: return .uhd
-        case .fhd: return .fhd
-        case .hd: return .hd
-        case .sd: return .sd
-        case .auto:
-            let raw = UserDefaults.standard.object(forKey: autoTierKey) as? Int ?? ChannelQuality.fhd.rawValue
-            return ChannelQuality(rawValue: raw) ?? .fhd
-        }
-    }
-}
-
 /// Vue « Thèmes » du direct (colonne centrale de l'interface Classique).
 struct ThemesListView: View {
     @Environment(LibraryStore.self) private var store

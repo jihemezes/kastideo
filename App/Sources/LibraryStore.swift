@@ -58,7 +58,7 @@ enum FolderAccess {
     static func resolve(_ bookmarks: [Data]) -> [URL] {
         bookmarks.compactMap { data in
             var stale = false
-            guard let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil,
+            guard let url = try? URL(resolvingBookmarkData: data, options: .scoped, relativeTo: nil,
                                      bookmarkDataIsStale: &stale) else { return nil }
             lock.lock()
             defer { lock.unlock() }
@@ -71,7 +71,7 @@ enum FolderAccess {
     static func bookmark(for url: URL) throws -> Data {
         let granted = url.startAccessingSecurityScopedResource()
         defer { if granted { url.stopAccessingSecurityScopedResource() } }
-        return try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+        return try url.bookmarkData(options: .scoped, includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 }
 
@@ -1143,7 +1143,7 @@ final class LibraryStore {
             return try parseM3U(data, sourceID: source.id)
         case .m3uFile(let bookmark, _):
             var stale = false
-            let url = try URL(resolvingBookmarkData: bookmark, options: .withSecurityScope,
+            let url = try URL(resolvingBookmarkData: bookmark, options: .scoped,
                               relativeTo: nil, bookmarkDataIsStale: &stale)
             let granted = url.startAccessingSecurityScopedResource()
             defer { if granted { url.stopAccessingSecurityScopedResource() } }
@@ -1574,7 +1574,7 @@ extension LibraryStore {
         for key in ["interface.live", "interface.movie", "interface.series", "adult.show", "buffering", CountryKeys.codes, CountryKeys.neutral] {
             if let value = defaults.object(forKey: key) { export.settings[key] = "\(value)" }
         }
-        if includePasswords, let key = MediaInfoStore.storedTMDBKey, !key.isEmpty { export.settings["tmdbKey"] = key }
+        if includePasswords, let key = Keychain.get(account: "tmdb.apiKey"), !key.isEmpty { export.settings["tmdbKey"] = key }
         return export
     }
 

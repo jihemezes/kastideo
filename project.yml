@@ -6,12 +6,13 @@ options:
   bundleIdPrefix: fr.jmezes
   deploymentTarget:
     macOS: "14.0"
+    iOS: "17.0"
   developmentLanguage: fr
   createIntermediateGroups: true
 
 settings:
   base:
-    MARKETING_VERSION: "1.16.2"
+    MARKETING_VERSION: "1.17.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -123,4 +124,85 @@ targets:
         Release:
           # Pas de « get-task-allow » en Release (exigé par la notarisation Apple).
           CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+    scheme: {}
+
+  # App iPhone / iPad (TestFlight) : interface SwiftUI propre à iOS (iOS/Sources) + logique partagée avec le Mac.
+  KastideoiOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: iOS/Sources
+      - path: iOS/Resources
+      - path: App/Sources
+        includes:
+          - LibraryStore.swift
+          - Storage.swift
+          - NavigationModel.swift
+          - StartPage.swift
+          - Replay.swift
+          - WatchProgress.swift
+          - PlaybackController.swift
+          - PlaybackLog.swift
+          - StreamRelay.swift
+          - ReleaseNotes.swift
+          - SharedSettings.swift
+          - ConfigModels.swift
+          - LegalText.swift
+      - path: App/Resources
+        includes:
+          - fr.lproj/*
+          - en.lproj/*
+      - path: CHANGELOG.md
+        buildPhase: resources
+    dependencies:
+      - package: KastideoCore
+      - package: VLCKitSPM
+        product: VLCKitSPM
+    info:
+      path: iOS/Info.plist
+      properties:
+        CFBundleName: Kastideo
+        CFBundleDisplayName: Kastideo
+        CFBundleDevelopmentRegion: fr
+        CFBundleLocalizations:
+          - fr
+          - en
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.entertainment
+        NSHumanReadableCopyright: "© 2026 Jean-Michel Ezes"
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Le son continue écran verrouillé ou application en arrière-plan.
+        UIBackgroundModes:
+          - audio
+        # Aucun chiffrement propre à l'application : évite la question « conformité à l'exportation » à chaque build TestFlight.
+        ITSAppUsesNonExemptEncryption: false
+        # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau."
+        NSBonjourServices:
+          - _airplay._tcp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.jmezes.kastideo
+        PRODUCT_NAME: Kastideo
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
     scheme: {}

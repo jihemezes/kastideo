@@ -83,3 +83,7 @@ L'aide est un seul jeu de fichiers, partagé par l'application Mac et la version
 - `<!--mac-->…<!--/mac-->` et `<!--pc-->…<!--/pc-->` gardent un bloc pour une seule plateforme (aussi possible au milieu d'une ligne) ;
 - `[texte](help:identifiant)` renvoie à une autre page, `![texte](img:nom)` insère le schéma `docs/help/img/help-<nom>-fr.png` / `-en.png` ;
 - après une modification, lancer `scripts/sync-help.sh` (copie vers `desktop/assets/help`), puis les tests : `KastideoCoreTests` et `desktop/test/help_test.dart` vérifient que tous les liens internes existent et que les deux copies sont identiques.
+
+## App iPhone / iPad
+
+Cible `KastideoiOS` de `project.yml` : l'interface est dans `iOS/Sources` ; la logique (bibliothèque, lecture VLC, relais, progression) est partagée avec le Mac par la liste de fichiers de `App/Sources` déclarée dans la cible. Les tags `vX.Y.Z-iosN` lancent `.github/workflows/ios.yml` (archive, signature App Store automatique par clé API, envoi à TestFlight). Prérequis : app `fr.jmezes.kastideo` créée dans App Store Connect, clé API de rôle Admin. Journal des versions : `iOS/CHANGELOG.md`.

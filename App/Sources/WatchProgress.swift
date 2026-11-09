@@ -1,5 +1,4 @@
 import Foundation
-import AppKit
 import Observation
 import KastideoCore
 
@@ -51,7 +50,7 @@ final class WatchProgressStore {
         }
         watched = Set(UserDefaults.standard.stringArray(forKey: watchedKey) ?? [])
         hiddenResume = Set(UserDefaults.standard.stringArray(forKey: hiddenKey) ?? [])
-        observer = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification,
+        observer = NotificationCenter.default.addObserver(forName: .kastideoWillTerminate,
                                                           object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.flush() }
         }

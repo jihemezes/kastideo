@@ -1,5 +1,4 @@
 import Foundation
-import AppKit
 import Observation
 import VLCKitSPM
 import KastideoCore
@@ -336,7 +335,7 @@ final class PlaybackController {
             MainActor.assumeIsolated { self?.onRecordingStarted?() }
         }
         // En quittant Kastideo, on ferme proprement le flux pour que le fournisseur libère la connexion.
-        NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+        NotificationCenter.default.addObserver(forName: .kastideoWillTerminate, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 StreamRelay.shared.closeAll()
                 guard let self, self.player.media != nil else { return }

@@ -1318,6 +1318,25 @@ La version **Mac** de Kastideo demande **macOS 14 Sonoma** ou plus récent. Pour
 
 Les réglages et sources peuvent être transférés d'une version à l'autre avec **Sauvegarde et transfert**.
 
+## Kastideo sur iPhone et iPad {#ios}
+
+**Kastideo pour iPhone et iPad** (iOS 17 ou plus récent) est distribué par **TestFlight**, le service d'Apple pour tester les applications avant leur publication. Il n'y a pas de fichier à installer à la main : vous recevez une invitation, vous installez l'application **TestFlight** depuis l'App Store, puis **Kastideo** depuis TestFlight. Les mises à jour arrivent par TestFlight.
+
+**Premier lancement.** Lisez et acceptez l'avertissement. Sur l'écran d'accueil, appuyez sur **Ajouter une source** (Xtream Codes ou liste M3U), ou allez dans **Réglages > Importer une configuration…** pour reprendre vos sources, favoris et catégories depuis le Mac, Windows, Linux ou Android (voir « Sauvegarde et transfert »). Astuce : enregistrez le fichier de configuration dans **iCloud Drive** pour le retrouver sur tous vos appareils.
+
+**Ce que propose la première version.**
+
+- **Accueil** : reprendre la lecture, favoris, récents. Appui long sur une vignette : retirer de la liste ou ajouter aux favoris.
+- **Direct** : liste des chaînes avec le programme en cours et sa progression, recherche, catégories, favoris (balayez une chaîne vers la gauche).
+- **Films** et **Séries** : affiches, recherche, catégories, fiche avec résumé, reprise là où vous vous êtes arrêté, saisons et épisodes.
+- **Lecteur plein écran** : appuyez sur l'image pour afficher les commandes, faites glisser la barre pour vous déplacer, choisissez la piste audio et les sous-titres. Fermez-le avec la flèche : la lecture continue, avec un **mini-lecteur** au-dessus de la barre d'onglets. Le son continue écran verrouillé.
+- **AirPlay** : le bouton du lecteur envoie le son vers une Apple TV ou un HomePod ; pour la vidéo, utilisez la recopie d'écran d'iOS.
+- Même moteur de lecture (VLC) et mêmes réglages de mise en mémoire que sur Mac ; relais de flux pour les fournisseurs qui refusent la connexion directe.
+
+**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, guide TV en grille, thèmes, MultiVue, image dans l'image, YouTube, Cast, interface Cinéma. Une version **Apple TV** est prévue plus tard.
+
+En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
+
 ## Nouveautés {#nouveautes}
 
 Après chaque mise à jour, la fenêtre **Nouveautés** résume les changements de la version installée.

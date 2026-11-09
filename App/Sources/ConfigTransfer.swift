@@ -3,59 +3,6 @@ import AppKit
 import UniformTypeIdentifiers
 import KastideoCore
 
-/// Fichier de configuration Kastideo, commun au Mac, à Windows et à Linux (format JSON « kastideo-export » v1) :
-/// sources (avec ou sans mots de passe), favoris, récents, catégories personnalisées et quelques réglages.
-/// Les favoris et récents sont notés par rapport à leur source (« numéro de source|identifiant »),
-/// car chaque appareil attribue ses propres identifiants de source.
-struct KastideoExport: Codable {
-    var format = "kastideo-export"
-    var version = 1
-    var exportedAt = Date()
-    var app = "mac"
-    var sources: [ExportedSource] = []
-    var favorites: [String] = []
-    var recents: [String] = []
-    var categories: [String: ExportedCategories] = [:]
-    var settings: [String: String] = [:]
-    /// Fiches corrigées à la main (« numéro de source|identifiant » → correction).
-    var fiches: [String: FicheEdit]?
-
-    struct ExportedSource: Codable {
-        var name: String
-        /// « xtream », « m3uUrl », « folder » (chemins, un par ligne), « jellyfin », « emby » ou « plex »
-        /// (les fichiers M3U locaux ne sont pas exportables).
-        var kind: String
-        var address: String
-        var username: String?
-        var password: String?
-        /// Jeton d'un serveur Plex.
-        var token: String?
-        var epgUrl: String?
-        var enabled: Bool
-    }
-
-    struct ExportedCategories: Codable {
-        var order: [String] = []
-        var hidden: [String] = []
-        var renames: [String: String] = [:]
-        var keywords: [String] = []
-    }
-
-    static let kindNames: [MediaKind: String] = [.live: "live", .movie: "movie", .series: "series"]
-}
-
-/// Résultat d'une importation (affiché à l'utilisateur).
-struct ImportSummary {
-    var sourcesAdded = 0
-    var sourcesSkipped = 0
-    var favoritesAdded = 0
-    var categoriesImported = 0
-}
-
-extension MediaInfoStore {
-    static var storedTMDBKey: String? { Keychain.get(account: "tmdb.apiKey") }
-}
-
 /// Réglages > Général > Sauvegarde : exporter / importer la configuration.
 struct ConfigTransferSection: View {
     @Environment(LibraryStore.self) private var store
