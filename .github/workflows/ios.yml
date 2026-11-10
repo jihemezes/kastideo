@@ -22,7 +22,8 @@ concurrency:
 jobs:
   testflight:
     name: Compilation et envoi à TestFlight
-    runs-on: macos-15
+    # Apple n'accepte plus que les apps compilées avec le SDK iOS 26 (Xcode 26 ou plus récent).
+    runs-on: macos-26
     timeout-minutes: 75
     env:
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -31,6 +32,16 @@ jobs:
       APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Choisir Xcode 26 ou plus récent
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sed -E 's#.*/Xcode_([0-9.]+)(_[A-Za-z0-9]+)?\.app#\1 &#' | sort -V | tail -1 | cut -d' ' -f2-)
+          echo "Xcode disponibles :"; ls -d /Applications/Xcode*.app
+          if [ -z "$LATEST" ]; then echo "::error::Aucun Xcode trouvé."; exit 1; fi
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+          MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "$MAJOR" -lt 26 ]; then echo "::error::Xcode $MAJOR trouvé : Apple exige Xcode 26 ou plus récent pour TestFlight."; exit 1; fi
 
       - name: Version
         run: |

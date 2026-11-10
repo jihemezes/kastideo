@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios3] - 2026-11-10
+
+- Envoi à TestFlight : compilation avec Xcode 26 (SDK iOS 26), désormais exigé par Apple. Même contenu que 1.17.0-ios1.
+
 ## [1.17.0-ios2] - 2026-11-10
 
 - Correction de compilation (document de configuration). Même contenu que 1.17.0-ios1.
