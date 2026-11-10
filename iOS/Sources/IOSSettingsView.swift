@@ -9,7 +9,7 @@ struct ConfigDocument: FileDocument {
 
     init(data: Data) { self.data = data }
 
-    init(configuration: ReadConfigurationFileDocumentConfiguration) throws {
+    init(configuration: ReadConfiguration) throws {
         data = configuration.file.regularFileContents ?? Data()
     }
 
