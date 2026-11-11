@@ -188,12 +188,12 @@ final class IOSRecorder {
 
 /// Téléchargement d'un film ou d'un épisode (continue application fermée).
 struct IOSDownloadJob: Codable, Identifiable, Hashable {
-    enum State: String, Codable { case running, paused, failed }
+    enum State: String, Codable { case queued, running, paused, failed }
     var id = UUID()
     var name: String
     var url: URL
     var fileName: String
-    var state: State = .running
+    var state: State = .queued
     var received: Int64 = 0
     var expected: Int64 = 0
     var error: String?
@@ -249,8 +249,16 @@ final class IOSDownloads {
         let name = TMDB.cleanTitle(item.name).title
         let job = IOSDownloadJob(name: name, url: url, fileName: IOSFiles.safeName(name) + "." + ext)
         jobs.append(job)
-        launch(job)
         save()
+        startNext()
+    }
+
+    /// Un seul téléchargement à la fois (la plupart des abonnements n'autorisent qu'une connexion) :
+    /// le suivant démarre quand le précédent est terminé, en pause, en erreur ou supprimé.
+    private func startNext() {
+        guard !jobs.contains(where: { $0.state == .running }) else { return }
+        guard let next = jobs.first(where: { $0.state == .queued }) else { return }
+        launch(next)
     }
 
     func pause(_ id: UUID) {
@@ -262,13 +270,18 @@ final class IOSDownloads {
                 self.jobs[index].resumeData = data
                 self.tasks[id] = nil
                 self.save()
+                self.startNext()
             }
         })
     }
 
     func resume(_ id: UUID) {
-        guard let job = jobs.first(where: { $0.id == id }) else { return }
-        launch(job)
+        guard let index = jobs.firstIndex(where: { $0.id == id }) else { return }
+        // Remis en file : il démarre dès qu'aucun autre téléchargement n'est en cours.
+        jobs[index].state = .queued
+        jobs[index].error = nil
+        save()
+        startNext()
     }
 
     func cancel(_ id: UUID) {
@@ -276,6 +289,7 @@ final class IOSDownloads {
         tasks[id] = nil
         jobs.removeAll { $0.id == id }
         save()
+        startNext()
     }
 
     private func launch(_ job: IOSDownloadJob) {
@@ -297,13 +311,23 @@ final class IOSDownloads {
     }
 
     private func reattach(_ existing: [URLSessionDownloadTask]) {
+        var keep: UUID?
         for task in existing {
             guard let description = task.taskDescription, let id = UUID(uuidString: String(description.prefix(36))),
-                  jobs.contains(where: { $0.id == id }) else { continue }
-            tasks[id] = task
+                  jobs.contains(where: { $0.id == id }) else { task.cancel(); continue }
+            if keep == nil {
+                keep = id
+                tasks[id] = task
+            } else {
+                // Une seule connexion : les autres tâches (anciennes versions) repassent en file.
+                task.cancel()
+                if let index = jobs.firstIndex(where: { $0.id == id }) { jobs[index].state = .queued; jobs[index].resumeData = nil }
+            }
         }
-        // Un téléchargement « en cours » sans tâche (application relancée) est repris.
-        for job in jobs where job.state == .running && tasks[job.id] == nil { launch(job) }
+        // Un téléchargement « en cours » sans tâche (application relancée) repasse en file.
+        for index in jobs.indices where jobs[index].state == .running && tasks[jobs[index].id] == nil { jobs[index].state = .queued }
+        save()
+        startNext()
     }
 
     fileprivate func progress(_ id: UUID, received: Int64, expected: Int64) {
@@ -319,6 +343,7 @@ final class IOSDownloads {
         filesVersion += 1
         save()
         if name != nil { IOSNotifier.post(String(localized: "Téléchargement terminé"), job.name) }
+        startNext()
     }
 
     fileprivate func failed(_ id: UUID, message: String, resumeData: Data?) {
@@ -328,6 +353,7 @@ final class IOSDownloads {
         jobs[index].error = message
         jobs[index].resumeData = resumeData
         save()
+        startNext()
     }
 
     private func save() {

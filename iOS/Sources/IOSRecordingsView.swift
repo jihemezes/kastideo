@@ -158,6 +158,8 @@ struct IOSDownloadRow: View {
                     Button { downloads.pause(job.id) } label: { Image(systemName: "pause.fill") }.buttonStyle(.borderless)
                 case .paused, .failed:
                     Button { downloads.resume(job.id) } label: { Image(systemName: "play.fill") }.buttonStyle(.borderless)
+                case .queued:
+                    EmptyView()
                 }
                 Button(role: .destructive) { downloads.cancel(job.id) } label: { Image(systemName: "xmark") }
                     .buttonStyle(.borderless)
@@ -169,6 +171,7 @@ struct IOSDownloadRow: View {
                 Text(job.expected > 0 ? "\(job.received.byteText) / \(job.expected.byteText)" : job.received.byteText)
                     .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                 if job.state == .paused { Text("En pause").font(.caption).foregroundStyle(.secondary) }
+                if job.state == .queued { Text("En attente : un seul téléchargement à la fois").font(.caption).foregroundStyle(.secondary) }
             }
         }
         .padding(.vertical, 2)

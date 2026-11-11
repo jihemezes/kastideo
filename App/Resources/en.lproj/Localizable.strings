@@ -1265,3 +1265,6 @@
 "Répéter la file" = "Repeat the queue";
 "Démarrer sans le son" = "Start muted";
 "Sans clé, vous pouvez suivre des chaînes (collez leur lien ou @pseudo) et lire des vidéos ou playlists collées. La recherche demande une clé API Google, gratuite (environ 100 recherches par jour) :\n1. Ouvrez console.cloud.google.com, créez un projet.\n2. Activez « YouTube Data API v3 ».\n3. Créez des identifiants > Clé API, puis collez-la ici.\nLa clé reste dans le trousseau de l'iPhone. La lecture utilise le lecteur officiel de YouTube en « mode confidentialité avancée » : ce n'est pas un bloqueur de publicités et rien n'est garanti." = "Without a key you can follow channels (paste their link or @handle) and play pasted videos or playlists. Search needs a free Google API key (about 100 searches a day):\n1. Open console.cloud.google.com and create a project.\n2. Enable “YouTube Data API v3”.\n3. Create credentials > API key, then paste it here.\nThe key stays in the iPhone keychain. Playback uses YouTube's official player in “privacy-enhanced mode”: it is not an ad blocker and nothing is guaranteed.";
+
+/* iOS 1.17.0-ios9 */
+"En attente : un seul téléchargement à la fois" = "Waiting: one download at a time";
