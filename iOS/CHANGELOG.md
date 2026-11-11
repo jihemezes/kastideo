@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios7] - 2026-11-11
+
+- Correction de compilation (nom des enregistrements). Même contenu que 1.17.0-ios6.
+
 ## [1.17.0-ios6] - 2026-11-11
 
 - **Enregistrer le direct** : bouton rond rouge du lecteur (arrêt automatique réglable) ; fichiers .ts dans Fichiers > Kastideo > Enregistrements (lecture, partage, suppression).

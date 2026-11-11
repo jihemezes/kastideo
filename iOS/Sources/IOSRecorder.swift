@@ -171,7 +171,7 @@ final class IOSRecorder {
             if best == nil || date > best!.1 { best = (url, date) }
         }
         guard let url = best?.0 else { return nil }
-        let stamp = since.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits).hour(.twoDigits).minute(.twoDigits))
+        let stamp = since.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits).hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
             .replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "h")
         let ext = url.pathExtension.isEmpty ? "ts" : url.pathExtension
         let target = IOSFiles.uniqueURL(in: folder, name: IOSFiles.safeName("\(channel) – \(stamp)"), ext: ext)
