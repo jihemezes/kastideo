@@ -297,7 +297,12 @@ struct IOSItemGrid: View {
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
 
-    private var columns: [GridItem] { [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 12, alignment: .top)] }
+    @AppStorage(IOSKeys.cardSize) private var sizeRaw = IOSCardSize.medium.rawValue
+
+    private var columns: [GridItem] {
+        let side = IOSCardSize.current(sizeRaw).width
+        return [GridItem(.adaptive(minimum: side, maximum: side + 40), spacing: 12, alignment: .top)]
+    }
 
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
@@ -311,7 +316,7 @@ struct IOSItemGrid: View {
                             Text(item.name).font(.caption.weight(.medium)).lineLimit(2)
                         }
                     } else {
-                        PosterCard(item: item, progress: watch.fraction(for: item.id), width: 110)
+                        PosterCard(item: item, progress: watch.fraction(for: item.id))
                     }
                 }
                 .buttonStyle(.plain)

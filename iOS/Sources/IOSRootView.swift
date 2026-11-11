@@ -43,6 +43,9 @@ struct IOSRootView: View {
         .sheet(item: $ui.detail) { item in
             IOSDetailSheet(item: item)
         }
+        .sheet(item: $ui.editingChannel) { channel in
+            IOSChannelEditSheet(item: channel)
+        }
         .sheet(item: $ui.programme) { ref in
             IOSProgrammeSheet(ref: ref)
         }

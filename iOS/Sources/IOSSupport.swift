@@ -80,7 +80,9 @@ final class IOSUI {
     var detail: MediaItem?
     /// Programme dont la fiche est ouverte (guide, thèmes).
     var programme: ProgrammeRef?
-    var tab: IOSTab = .home
+    var tab: IOSTab = IOSTab.stored
+    /// Chaîne dont on modifie le nom, le logo ou le guide.
+    var editingChannel: MediaItem?
     var showAddSource = false
     var showDisclaimer = LegalNotice.needsAcceptance
 }
@@ -90,7 +92,8 @@ enum IOSTab: Hashable {
 }
 
 enum IOSPalette {
-    static let orange = Color(red: 1.0, green: 0.62, blue: 0.2)
+    /// Couleur d'accentuation choisie dans Réglages > Apparence (suit la teinte de l'application).
+    static var orange: Color { Color.accentColor }
     static let background = Color(red: 0.07, green: 0.06, blue: 0.11)
     static let card = Color.white.opacity(0.08)
 }

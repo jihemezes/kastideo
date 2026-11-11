@@ -10,6 +10,7 @@ struct KastideoIOSApp: App {
     @State private var navigation: NavigationModel
     @State private var ui = IOSUI()
     @AppStorage("ios.appearance") private var appearance = "dark"
+    @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
 
     init() {
         let store = LibraryStore()
@@ -47,7 +48,7 @@ struct KastideoIOSApp: App {
                 .environment(watch)
                 .environment(ui)
                 .preferredColorScheme(scheme)
-                .tint(IOSPalette.orange)
+                .tint(IOSAccent.current(accent).color)
                 .task { await store.start(autoRefresh: true) }
         }
     }

@@ -191,6 +191,7 @@ struct IOSGuideView: View {
                 store.toggleFavorite(channel.id)
             }
             replayMenu(channel)
+            Button("Modifier la chaîne…", systemImage: "pencil") { ui.editingChannel = channel }
         }
     }
 

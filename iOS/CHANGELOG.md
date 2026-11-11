@@ -2,6 +2,15 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios5] - 2026-11-11
+
+- **Gérer les catégories** (Réglages) : ordre par glisser-déposer, masquer, renommer, masquer par mot-clé, tri A→Z, réinitialiser ; **Pays et langues** pour l'affichage Cinéma.
+- **Ordre des chaînes** d'une catégorie : Direct en liste > catégorie > « Réordonner les chaînes… » (glisser, A→Z, par numéro).
+- **Modifier une chaîne** (appui long) : nom, numéro, logo (adresse ou photo), thème, chaîne du guide TV.
+- **Apparence** : couleur d'accent, taille des affiches, densité des listes, affichage par défaut de Direct, Films et Séries.
+- **Départ** : onglet au lancement, page de départ de Direct, Films et Séries.
+- **Abonnements** : choix de la source affichée, fusion des doublons entre comptes, diagnostic d'une source.
+
 ## [1.17.0-ios4] - 2026-11-11
 
 - **Direct** : le bouton en haut à gauche change l'affichage — Liste, **Cinéma** (bandeau « à la une », rangées « en ce moment » par thème, « À revoir », récents, favoris, rangées par catégorie), **Thèmes** (en ce moment, ce soir, toutes les chaînes, disciplines du sport) et **Guide TV** (jour et heure au choix, programme en cours et suivant, fiche du programme).

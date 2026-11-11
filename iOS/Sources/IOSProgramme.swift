@@ -131,6 +131,7 @@ struct IOSProgrammeRow: View {
     let programme: Programme?
     var now: Date = Date()
     var showProgress = true
+    @AppStorage(IOSKeys.density) private var densityRaw = IOSDensity.standard.rawValue
 
     var body: some View {
         HStack(spacing: 12) {
@@ -157,6 +158,7 @@ struct IOSProgrammeRow: View {
                 Image(systemName: theme.icon).font(.caption).foregroundStyle(.secondary)
             }
         }
+        .padding(.vertical, IOSDensity.current(densityRaw).padding)
         .contentShape(Rectangle())
     }
 }

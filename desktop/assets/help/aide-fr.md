@@ -1331,11 +1331,16 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 - **Guide TV** : choisissez le jour (jusqu'à 14 jours passés selon Réglages > Replay, et 3 jours à venir) et l'heure ; chaque chaîne affiche son programme à ce moment et le suivant. Touchez un programme pour sa fiche : **Regarder en direct**, **Revoir**, favori. Le guide est présenté par créneau horaire plutôt qu'en grille, mieux adapté à l'écran d'un téléphone.
 - **Replay** : sur les chaînes marquées ↺, **Revoir** un programme depuis l'archive du fournisseur (fiche du programme, ou appui long sur la chaîne > Revoir). Dans le lecteur, **Retour au direct** ; à la fin d'un replay, retour automatique au direct (réglable). Réglages > Replay : jours passés, correction de l'heure si le replay démarre au mauvais moment.
 - **Films** et **Séries** : affichage **Cinéma** (bandeau « à la une » qui défile, reprise, récents, favoris, une rangée par catégorie, filtre par pays comme sur Mac) ou **Grille** (tout le catalogue) ; recherche, fiche avec résumé, reprise là où vous vous êtes arrêté, saisons et épisodes. Réglages > Affichage Cinéma : contenu et durée du bandeau.
+- **Catégories** : Réglages > Gérer les catégories — ordre (glisser), masquer, renommer, masquer par mot-clé (ex. PAKISTAN), tri A→Z, réinitialiser ; Pays et langues pour l'affichage Cinéma. Pour réordonner les **chaînes** d'une catégorie : Direct en liste, choisissez la catégorie, menu en haut à droite > « Réordonner les chaînes… ».
+- **Modifier une chaîne** (appui long) : nom, numéro, logo (adresse web ou photo), thème, chaîne du guide TV associée quand le guide est faux.
+- **Apparence** : thème, couleur d'accent, taille des affiches, densité des listes, affichage par défaut de Direct, Films et Séries.
+- **Départ** : onglet affiché au lancement, et page de départ de Direct, Films et Séries (toutes, favoris, récents, dernière consultée ou une catégorie).
+- **Plusieurs abonnements** : Réglages > Abonnements pour afficher une seule source sans désactiver l'autre, fusion des doublons entre comptes, et **Diagnostic** d'une source (balayez-la vers la gauche).
 - **Lecteur plein écran** : appuyez sur l'image pour afficher les commandes, faites glisser la barre pour vous déplacer, choisissez la piste audio et les sous-titres. Fermez-le avec la flèche : la lecture continue, avec un **mini-lecteur** au-dessus de la barre d'onglets. Le son continue écran verrouillé.
 - **AirPlay** : le bouton du lecteur envoie le son vers une Apple TV ou un HomePod ; pour la vidéo, utilisez la recopie d'écran d'iOS.
 - Même moteur de lecture (VLC) et mêmes réglages de mise en mémoire que sur Mac ; relais de flux pour les fournisseurs qui refusent la connexion directe.
 
-**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, timeshift, alertes de programme, MultiVue, image dans l'image, YouTube et « Mes vidéos », gestion des catégories, modification d'une chaîne, apparence complète. Une version **Apple TV** est prévue plus tard.
+**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, timeshift, alertes de programme, MultiVue, image dans l'image, YouTube et « Mes vidéos ». Une version **Apple TV** est prévue plus tard.
 
 En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
 

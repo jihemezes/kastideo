@@ -28,12 +28,16 @@ extension IOSUI {
 struct PosterCard: View {
     let item: MediaItem
     var progress: Double?
-    var width: CGFloat = 120
+    /// Largeur imposée ; sinon celle choisie dans Réglages > Apparence.
+    var width: CGFloat?
+    @AppStorage(IOSKeys.cardSize) private var sizeRaw = IOSCardSize.medium.rawValue
+
+    private var side: CGFloat { width ?? IOSCardSize.current(sizeRaw).width }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
-                .frame(width: width, height: width * 1.5)
+                .frame(width: side, height: side * 1.5)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(alignment: .bottom) {
                     if let progress {
@@ -45,7 +49,7 @@ struct PosterCard: View {
             Text(item.name)
                 .font(.caption.weight(.medium))
                 .lineLimit(2)
-                .frame(width: width, alignment: .leading)
+                .frame(width: side, alignment: .leading)
         }
     }
 }
@@ -185,18 +189,12 @@ struct IOSLiveList: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
     @State private var search = ""
-    @State private var category: String?
-    @State private var favoritesOnly = false
+    @State private var scope: IOSListScope = .all
+    @State private var started = false
+    @State private var arranging: String?
 
     private var channels: [MediaItem] {
-        var list: [MediaItem]
-        if favoritesOnly {
-            list = store.items(for: .favorites).filter { $0.kind == .live }
-        } else if let category {
-            list = store.items(for: .category(.live, category))
-        } else {
-            list = store.items(for: .all(.live))
-        }
+        var list = scope.items(kind: .live, store: store)
         let key = search.kastideoSearchKey
         if !key.isEmpty { list = list.filter { $0.searchKey.contains(key) } }
         return list
@@ -216,22 +214,7 @@ struct IOSLiveList: View {
                     }
                     .tint(IOSPalette.orange)
                 }
-                .contextMenu {
-                    Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
-                           systemImage: store.isFavorite(item.id) ? "star.slash" : "star") {
-                        store.toggleFavorite(item.id)
-                    }
-                    let past = store.replayProgrammes(of: item)
-                    if !past.isEmpty {
-                        Menu("Revoir (replay)") {
-                            ForEach(past) { programme in
-                                Button("\(programme.start.formatted(.dateTime.weekday(.abbreviated).hour().minute())) — \(programme.title)") {
-                                    ui.playReplay(channel: item, programme: programme, store: store, playback: playback)
-                                }
-                            }
-                        }
-                    }
-                }
+                .contextMenu { IOSChannelMenu(channel: item) }
             }
             if list.count > 1500 {
                 Text("Affinez la recherche ou choisissez une catégorie pour voir les \(list.count - 1500) autres chaînes.")
@@ -241,27 +224,77 @@ struct IOSLiveList: View {
         .listStyle(.plain)
         .overlay {
             if list.isEmpty {
-                ContentUnavailableView(favoritesOnly ? String(localized: "Aucun favori") : String(localized: "Aucune chaîne"),
+                ContentUnavailableView(String(localized: "Aucune chaîne"),
                                        systemImage: "tv",
                                        description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
             }
         }
-        .navigationTitle(category ?? (favoritesOnly ? String(localized: "Favoris") : String(localized: "Direct")))
+        .navigationTitle(scope.title(kind: .live))
         .searchable(text: $search, prompt: "Rechercher une chaîne")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Toggle("Favoris seulement", systemImage: "star", isOn: $favoritesOnly)
+                    Button("Toutes les chaînes") { scope = .all }
+                    Button("Favoris", systemImage: "star") { scope = .favorites }
+                    Button("Récents", systemImage: "clock") { scope = .recents }
+                    if case .category(let name) = scope {
+                        Divider()
+                        Button("Réordonner les chaînes…", systemImage: "arrow.up.arrow.down") { arranging = name }
+                    }
                     Divider()
-                    Button("Toutes les catégories") { category = nil }
                     ForEach(store.categoriesByKind[.live] ?? [], id: \.self) { name in
-                        Button(name) { category = name; favoritesOnly = false }
+                        Button(name) { scope = .category(name) }
                     }
                 } label: {
                     Image(systemName: "line.3.horizontal.decrease.circle")
                 }
             }
         }
+        .sheet(item: Binding(get: { arranging.map(ArrangeTarget.init) }, set: { arranging = $0?.name })) { target in
+            IOSChannelArrangeView(category: target.name)
+        }
+        .onAppear {
+            guard !started else { return }
+            started = true
+            scope = IOSListScope.start(for: .live, store: store)
+        }
+        .onChange(of: ui.tab) { old, new in
+            if new == .live && old != .live { scope = IOSListScope.start(for: .live, store: store) }
+        }
+        .onChange(of: scope) { _, new in
+            if case .category(let name) = new { UserDefaults.standard.set(name, forKey: StartPage.lastKey(.live)) }
+        }
+    }
+}
+
+private struct ArrangeTarget: Identifiable {
+    let name: String
+    var id: String { name }
+}
+
+/// Menu d'une chaîne (appui long) : favori, replay, modification.
+struct IOSChannelMenu: View {
+    let channel: MediaItem
+    @Environment(LibraryStore.self) private var store
+    @Environment(PlaybackController.self) private var playback
+    @Environment(IOSUI.self) private var ui
+
+    var body: some View {
+        Button(store.isFavorite(channel.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
+               systemImage: store.isFavorite(channel.id) ? "star.slash" : "star") {
+            store.toggleFavorite(channel.id)
+        }
+        let past = store.replayProgrammes(of: channel)
+        if !past.isEmpty {
+            Menu("Revoir (replay)") {
+                ForEach(past) { programme in
+                    Button("\(programme.start.formatted(.dateTime.weekday(.abbreviated).hour().minute())) — \(programme.title)") {
+                        ui.playReplay(channel: channel, programme: programme, store: store, playback: playback)
+                    }
+                }
+            }
+        }
+        Button("Modifier la chaîne…", systemImage: "pencil") { ui.editingChannel = channel }
     }
 }
 
@@ -269,6 +302,7 @@ struct ChannelRow: View {
     let item: MediaItem
     var isCurrent = false
     @Environment(LibraryStore.self) private var store
+    @AppStorage(IOSKeys.density) private var densityRaw = IOSDensity.standard.rawValue
 
     var body: some View {
         HStack(spacing: 12) {
@@ -286,6 +320,7 @@ struct ChannelRow: View {
             if isCurrent { Image(systemName: "speaker.wave.2.fill").foregroundStyle(IOSPalette.orange) }
             if store.isFavorite(item.id) { Image(systemName: "star.fill").font(.caption).foregroundStyle(IOSPalette.orange) }
         }
+        .padding(.vertical, IOSDensity.current(densityRaw).padding)
         .contentShape(Rectangle())
     }
 }
@@ -299,17 +334,24 @@ struct IOSCatalogGrid: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
+    @AppStorage(IOSKeys.cardSize) private var sizeRaw = IOSCardSize.medium.rawValue
     @State private var search = ""
-    @State private var category: String?
+    @State private var scope: IOSListScope = .all
+    @State private var started = false
 
     private var items: [MediaItem] {
-        var list = category.map { store.items(for: .category(kind, $0)) } ?? store.items(for: .all(kind))
+        var list = scope.items(kind: kind, store: store)
         let key = search.kastideoSearchKey
         if !key.isEmpty { list = list.filter { $0.searchKey.contains(key) } }
         return list
     }
 
-    private var columns: [GridItem] { [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 12, alignment: .top)] }
+    private var tab: IOSTab { kind == .series ? .series : .movies }
+
+    private var columns: [GridItem] {
+        let side = IOSCardSize.current(sizeRaw).width
+        return [GridItem(.adaptive(minimum: side, maximum: side + 40), spacing: 12, alignment: .top)]
+    }
 
     var body: some View {
         let list = items
@@ -317,7 +359,7 @@ struct IOSCatalogGrid: View {
             LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                 ForEach(list.prefix(3000)) { item in
                     Button { ui.open(item, store: store, playback: playback) } label: {
-                        PosterCard(item: item, progress: watch.fraction(for: item.id), width: 110)
+                        PosterCard(item: item, progress: watch.fraction(for: item.id))
                     }
                     .buttonStyle(.plain)
                 }
@@ -334,19 +376,33 @@ struct IOSCatalogGrid: View {
                                        description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
             }
         }
-        .navigationTitle(category ?? kind.title)
+        .navigationTitle(scope.title(kind: kind))
         .searchable(text: $search, prompt: "Rechercher")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button("Toutes les catégories") { category = nil }
+                    Button("Toutes les catégories") { scope = .all }
+                    Button("Favoris", systemImage: "star") { scope = .favorites }
+                    Button("Récents", systemImage: "clock") { scope = .recents }
+                    Divider()
                     ForEach(store.categoriesByKind[kind] ?? [], id: \.self) { name in
-                        Button(name) { category = name }
+                        Button(name) { scope = .category(name) }
                     }
                 } label: {
                     Image(systemName: "line.3.horizontal.decrease.circle")
                 }
             }
+        }
+        .onAppear {
+            guard !started else { return }
+            started = true
+            scope = IOSListScope.start(for: kind, store: store)
+        }
+        .onChange(of: ui.tab) { old, new in
+            if new == tab && old != tab { scope = IOSListScope.start(for: kind, store: store) }
+        }
+        .onChange(of: scope) { _, new in
+            if case .category(let name) = new { UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind)) }
         }
     }
 }

@@ -889,6 +889,20 @@ final class LibraryStore {
                 .map { prefs.displayName($0) }
                 .filter { seen.insert($0).inserted }
         }
+        // Ordre des chaînes choisi par l'utilisateur dans une catégorie (les nouvelles chaînes passent à la suite).
+        if let order = categoryPrefs[.live]?.itemOrder, !order.isEmpty {
+            for (name, ids) in order {
+                guard let list = byCategory[.live]?[name] else { continue }
+                var rank: [String: Int] = [:]
+                for (position, id) in ids.enumerated() where rank[id] == nil { rank[id] = position }
+                let sorted = list.enumerated().sorted { left, right in
+                    let a = rank[left.element.id] ?? (ids.count + left.offset)
+                    let b = rank[right.element.id] ?? (ids.count + right.offset)
+                    return a < b
+                }
+                byCategory[.live]?[name] = sorted.map { $0.element }
+            }
+        }
         itemsByKind = byKind
         categoriesByKind = categories
         allCategoriesByKind = ordered
@@ -943,6 +957,23 @@ final class LibraryStore {
         categoryPrefs[kind] = prefs
         if let data = try? JSONEncoder().encode(prefs) { defaults.set(data, forKey: CategoryPrefs.key(kind)) }
         rebuildIndex()
+    }
+
+    /// Ordre des chaînes d'une catégorie (nom affiché).
+    func setItemOrder(_ ids: [String], category: String) {
+        updateCategories(.live) { prefs in
+            var order = prefs.itemOrder ?? [:]
+            order[category] = ids
+            prefs.itemOrder = order
+        }
+    }
+
+    func resetItemOrder(category: String) {
+        updateCategories(.live) { prefs in
+            var order = prefs.itemOrder ?? [:]
+            order[category] = nil
+            prefs.itemOrder = order.isEmpty ? nil : order
+        }
     }
 
     /// Déplace des catégories (liste complète, noms d'origine).
@@ -1257,6 +1288,8 @@ struct CategoryPrefs: Codable, Equatable {
     var renames: [String: String] = [:]
     /// Mots-clés : toute catégorie dont le nom en contient un est masquée.
     var keywords: [String] = []
+    /// Ordre choisi des chaînes dans une catégorie (nom affiché de la catégorie → identifiants). Facultatif : absent des anciens réglages.
+    var itemOrder: [String: [String]]?
 
     static let kinds: [MediaKind] = [.live, .movie, .series]
     static func key(_ kind: MediaKind) -> String { "categories.\(kind.rawValue).v1" }

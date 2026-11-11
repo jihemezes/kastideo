@@ -32,6 +32,7 @@ struct IOSSettingsView: View {
     @State private var exportDocument = ConfigDocument(data: Data())
     @State private var includePasswords = true
     @State private var message: String?
+    @State private var diagnostic: Source?
 
     var body: some View {
         NavigationStack {
@@ -59,12 +60,18 @@ struct IOSSettingsView: View {
                                 Label("Actualiser", systemImage: "arrow.clockwise")
                             }
                             .tint(.blue)
+                            Button { diagnostic = source } label: {
+                                Label("Diagnostic", systemImage: "stethoscope")
+                            }
+                            .tint(.gray)
                         }
                     }
                     Button { ui.showAddSource = true } label: { Label("Ajouter une source", systemImage: "plus.circle") }
                     Button { store.refreshAll() } label: { Label("Tout actualiser", systemImage: "arrow.clockwise") }
                         .disabled(!store.hasSources || store.isBusy)
                 }
+
+                IOSActiveSourceSection()
 
                 Section("Lecture") {
                     Picker("Mise en mémoire", selection: $buffering) {
@@ -77,15 +84,8 @@ struct IOSSettingsView: View {
                 IOSReplaySection()
                 IOSCinemaSection()
 
-                Section("Apparence") {
-                    Picker("Thème", selection: $appearance) {
-                        Text("Sombre").tag("dark")
-                        Text("Clair").tag("light")
-                        Text("Comme le système").tag("system")
-                    }
-                    Toggle("Afficher les chaînes pour adultes", isOn: $showAdult)
-                        .onChange(of: showAdult) { _, _ in store.refreshAdultFilter() }
-                }
+                IOSAppearanceSection()
+                IOSOrganisationSection()
 
                 Section {
                     Toggle("Inclure les mots de passe", isOn: $includePasswords)
@@ -109,6 +109,9 @@ struct IOSSettingsView: View {
                 }
             }
             .navigationTitle("Réglages")
+            .sheet(item: $diagnostic) { source in
+                IOSSourceDiagnosticSheet(source: source)
+            }
             .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
                 importConfig(result)
             }

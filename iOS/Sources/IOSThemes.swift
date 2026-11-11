@@ -156,6 +156,7 @@ struct IOSThemesView: View {
                    systemImage: store.isFavorite(channel.id) ? "star.slash" : "star") {
                 store.toggleFavorite(channel.id)
             }
+            Button("Modifier la chaîne…", systemImage: "pencil") { ui.editingChannel = channel }
             if group.variants.count > 1 {
                 Menu("Version") {
                     ForEach(group.variants) { variant in
