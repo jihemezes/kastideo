@@ -107,6 +107,7 @@ struct IOSHomeView: View {
                             shortcut("Direct", "tv.fill", .live)
                             shortcut("Films", "film.fill", .movies)
                             shortcut("Séries", "rectangle.stack.fill", .series)
+                            shortcut("YouTube", "play.rectangle.fill", .youtube)
                         }
                         .padding(.horizontal)
                     }

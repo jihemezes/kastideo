@@ -1251,3 +1251,17 @@
 "Dossiers de l'iPhone, d'iCloud Drive, d'une clé USB ou d'un NAS (partage réseau ajouté dans l'app Fichiers). Films et séries sont reconnus d'après les noms de fichiers." = "Folders on the iPhone, iCloud Drive, a USB drive or a NAS (network share added in the Files app). Movies and series are recognised from file names.";
 "Télécharger la saison (%lld épisodes)" = "Download the season (%lld episodes)";
 "Maintenez un épisode pour ne télécharger que celui-ci." = "Press and hold an episode to download only that one.";
+
+/* iOS 1.17.0-ios8 */
+"YouTube" = "YouTube";
+"Mettez des vidéos de côté avec un appui long. Une vidéo entamée reprend là où vous l'avez laissée ; elle quitte cette liste quand vous l'avez vue jusqu'au bout." = "Set videos aside with a long press. A started video resumes where you left off; it leaves this list once you have watched it to the end.";
+"Ajoutez des vidéos en favoris par un appui long." = "Add videos to favourites with a long press.";
+"Rechercher ou coller un lien (vidéo, playlist, chaîne, @pseudo)" = "Search or paste a link (video, playlist, channel, @handle)";
+"Collez le lien d'une chaîne ou son @pseudo dans le champ de recherche : ses dernières vidéos s'afficheront ici, sans clé ni compte." = "Paste a channel link or its @handle in the search field: its latest videos will appear here, with no key or account.";
+"Ouvrez Réglages > YouTube : la marche à suivre y est expliquée. Sans clé, vous pouvez suivre des chaînes et coller des liens de vidéos ou de playlists." = "Open Settings > YouTube: the steps are explained there. Without a key you can follow channels and paste video or playlist links.";
+"Fichier illisible." = "Unreadable file.";
+"Partager le lien" = "Share link";
+"Enchaîner les vidéos" = "Chain videos";
+"Répéter la file" = "Repeat the queue";
+"Démarrer sans le son" = "Start muted";
+"Sans clé, vous pouvez suivre des chaînes (collez leur lien ou @pseudo) et lire des vidéos ou playlists collées. La recherche demande une clé API Google, gratuite (environ 100 recherches par jour) :\n1. Ouvrez console.cloud.google.com, créez un projet.\n2. Activez « YouTube Data API v3 ».\n3. Créez des identifiants > Clé API, puis collez-la ici.\nLa clé reste dans le trousseau de l'iPhone. La lecture utilise le lecteur officiel de YouTube en « mode confidentialité avancée » : ce n'est pas un bloqueur de publicités et rien n'est garanti." = "Without a key you can follow channels (paste their link or @handle) and play pasted videos or playlists. Search needs a free Google API key (about 100 searches a day):\n1. Open console.cloud.google.com and create a project.\n2. Enable “YouTube Data API v3”.\n3. Create credentials > API key, then paste it here.\nThe key stays in the iPhone keychain. Playback uses YouTube's official player in “privacy-enhanced mode”: it is not an ad blocker and nothing is guaranteed.";

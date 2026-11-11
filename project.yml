@@ -150,6 +150,7 @@ targets:
           - ConfigModels.swift
           - LegalText.swift
           - ThemeLabels.swift
+          - YouTube.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

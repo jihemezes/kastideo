@@ -81,6 +81,7 @@ struct IOSSettingsView: View {
                     Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
                 }
 
+                IOSYouTubeSettingsSection()
                 IOSTimeshiftSection()
                 Section {
                     NavigationLink { IOSRecordingsView() } label: {

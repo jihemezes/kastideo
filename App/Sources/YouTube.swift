@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 import KastideoCore
 
 /// YouTube dans Kastideo : chaînes suivies, favoris, historique, recherche (clé API de l'utilisateur) et file de lecture.

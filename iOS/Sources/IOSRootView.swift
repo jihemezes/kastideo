@@ -24,6 +24,9 @@ struct IOSRootView: View {
             IOSCatalogHub(kind: .series)
                 .tabItem { Label("Séries", systemImage: "rectangle.stack.fill") }
                 .tag(IOSTab.series)
+            IOSYouTubeView()
+                .tabItem { Label("YouTube", systemImage: "play.rectangle.fill") }
+                .tag(IOSTab.youtube)
             IOSSettingsView()
                 .tabItem { Label("Réglages", systemImage: "gearshape.fill") }
                 .tag(IOSTab.settings)
@@ -41,6 +44,20 @@ struct IOSRootView: View {
                 .environment(store)
                 .environment(ui)
                 .environment(recorder)
+        }
+        .fullScreenCover(isPresented: Binding(get: { YouTubeStore.shared.isPlaying },
+                                              set: { if !$0 { YouTubeStore.shared.closePlayer() } })) {
+            IOSYouTubePlayerScreen()
+        }
+        .onChange(of: YouTubeStore.shared.playerSession) { _, _ in
+            // Une seule source sonore : la lecture IPTV s'arrête, sauf enregistrement en cours.
+            if YouTubeStore.shared.isPlaying, playback.current != nil, !recorder.isRecording {
+                playback.stopByUser()
+                ui.showPlayer = false
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: IOSYouTubeView.openSettingsName)) { _ in
+            ui.tab = .settings
         }
         .sheet(item: $ui.detail) { item in
             IOSDetailSheet(item: item)

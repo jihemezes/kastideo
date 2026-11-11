@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios8] - 2026-11-11
+
+- **YouTube** : onglet (et tuile de l'Accueil) avec chaînes suivies (liens, @pseudo, flux RSS), recherche avec votre clé API Google, liens de vidéos et de playlists, « À regarder plus tard », favoris, historique, reprise de lecture, import Google Takeout. Lecteur officiel de YouTube (mode confidentialité avancée) en plein écran. Réglages > YouTube : clé API, enchaînement, répétition, sans le son.
+- Le code YouTube est maintenant partagé avec le Mac (`App/Sources/YouTube.swift`).
+
 ## [1.17.0-ios7] - 2026-11-11
 
 - Correction de compilation (nom des enregistrements). Même contenu que 1.17.0-ios6.

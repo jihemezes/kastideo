@@ -1341,11 +1341,12 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 - **Direct en différé** : mettez le direct en pause, il continue d'être mémorisé. Reculez de 10 s, avancez de 30 s, glissez la ligne de temps, accélérez (×1,25 à ×2) et touchez **Retour au direct**. Durée maximale et vitesse : Réglages > Direct en différé.
 - **Alertes de programmes** (Réglages) : par mot-clé, par thème sur vos chaînes favorites, ou « Me prévenir au début » dans la fiche d'un programme. Ce sont des notifications de l'iPhone, reçues même application fermée ; touchez-en une pour ouvrir la chaîne. Autorisez les notifications quand iOS le demande.
 - **Mes vidéos** : Réglages > Ajouter une source > **Jellyfin, Emby, Plex** ou **Dossiers de vidéos** (iPhone, iCloud Drive, clé USB, NAS ajouté dans Fichiers). Dans Films et Séries, le bouton en haut à droite choisit **Tout / IPTV / Mes vidéos**.
+- **YouTube** (onglet YouTube, ou la tuile de l'Accueil) : suivez des chaînes (collez leur lien ou @pseudo dans le champ de recherche, sans clé ni compte), collez un lien de vidéo ou de playlist pour la lire, **cherchez** avec votre propre clé API Google gratuite (Réglages > YouTube, marche à suivre incluse), mettez des vidéos **de côté** (appui long), en favoris, retrouvez l'**historique** et la reprise de lecture (barre rouge sur la vignette). Importez vos abonnements depuis un export **Google Takeout** (abonnements.csv). La lecture utilise le lecteur officiel de YouTube en « mode confidentialité avancée » ; ce n'est pas un bloqueur de publicités. Lancer une vidéo arrête la lecture IPTV.
 - **Lecteur plein écran** : appuyez sur l'image pour afficher les commandes, faites glisser la barre pour vous déplacer, choisissez la piste audio et les sous-titres. Fermez-le avec la flèche : la lecture continue, avec un **mini-lecteur** au-dessus de la barre d'onglets. Le son continue écran verrouillé.
 - **AirPlay** : le bouton du lecteur envoie le son vers une Apple TV ou un HomePod ; pour la vidéo, utilisez la recopie d'écran d'iOS.
 - Même moteur de lecture (VLC) et mêmes réglages de mise en mémoire que sur Mac ; relais de flux pour les fournisseurs qui refusent la connexion directe.
 
-**Pas encore sur iPhone / iPad** : MultiVue, image dans l'image et YouTube. Une version **Apple TV** est prévue plus tard.
+**Pas encore sur iPhone / iPad** : MultiVue et image dans l'image. Une version **Apple TV** est prévue plus tard.
 
 En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
 
