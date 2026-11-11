@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios4] - 2026-11-11
+
+- **Direct** : le bouton en haut à gauche change l'affichage — Liste, **Cinéma** (bandeau « à la une », rangées « en ce moment » par thème, « À revoir », récents, favoris, rangées par catégorie), **Thèmes** (en ce moment, ce soir, toutes les chaînes, disciplines du sport) et **Guide TV** (jour et heure au choix, programme en cours et suivant, fiche du programme).
+- **Replay** des chaînes à archive (↺) : « Revoir » depuis la fiche d'un programme ou par appui long, « Retour au direct » dans le lecteur, retour automatique à la fin. Réglages > Replay : jours passés, correction de l'heure.
+- **Films et Séries** : affichage Cinéma (bandeau qui défile, reprise, récents, favoris, rangées par catégorie, filtre par pays) ou Grille. Réglages > Affichage Cinéma.
+- Appui long sur une chaîne : favori, thème de la chaîne, version (qualité), replay.
+
 ## [1.17.0-ios3] - 2026-11-10
 
 - Envoi à TestFlight : compilation avec Xcode 26 (SDK iOS 26), désormais exigé par Apple. Même contenu que 1.17.0-ios1.

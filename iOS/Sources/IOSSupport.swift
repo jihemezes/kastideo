@@ -78,6 +78,8 @@ struct AirPlayButton: UIViewRepresentable {
 final class IOSUI {
     var showPlayer = false
     var detail: MediaItem?
+    /// Programme dont la fiche est ouverte (guide, thèmes).
+    var programme: ProgrammeRef?
     var tab: IOSTab = .home
     var showAddSource = false
     var showDisclaimer = LegalNotice.needsAcceptance

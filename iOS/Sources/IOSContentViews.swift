@@ -179,7 +179,8 @@ struct IOSHomeView: View {
 
 // MARK: - Direct
 
-struct IOSLiveView: View {
+/// Liste des chaînes (le conteneur « Direct » fournit la pile de navigation).
+struct IOSLiveList: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
@@ -202,48 +203,62 @@ struct IOSLiveView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            let list = channels
-            List {
-                ForEach(list.prefix(1500)) { item in
-                    Button { ui.play(item, store: store, playback: playback) } label: {
-                        ChannelRow(item: item, isCurrent: playback.current?.id == item.id)
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .trailing) {
-                        Button { store.toggleFavorite(item.id) } label: {
-                            Label("Favori", systemImage: store.isFavorite(item.id) ? "star.slash" : "star")
-                        }
-                        .tint(IOSPalette.orange)
-                    }
+        let list = channels
+        List {
+            ForEach(list.prefix(1500)) { item in
+                Button { ui.play(item, store: store, playback: playback) } label: {
+                    ChannelRow(item: item, isCurrent: playback.current?.id == item.id)
                 }
-                if list.count > 1500 {
-                    Text("Affinez la recherche ou choisissez une catégorie pour voir les \(list.count - 1500) autres chaînes.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                .buttonStyle(.plain)
+                .swipeActions(edge: .trailing) {
+                    Button { store.toggleFavorite(item.id) } label: {
+                        Label("Favori", systemImage: store.isFavorite(item.id) ? "star.slash" : "star")
+                    }
+                    .tint(IOSPalette.orange)
+                }
+                .contextMenu {
+                    Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
+                           systemImage: store.isFavorite(item.id) ? "star.slash" : "star") {
+                        store.toggleFavorite(item.id)
+                    }
+                    let past = store.replayProgrammes(of: item)
+                    if !past.isEmpty {
+                        Menu("Revoir (replay)") {
+                            ForEach(past) { programme in
+                                Button("\(programme.start.formatted(.dateTime.weekday(.abbreviated).hour().minute())) — \(programme.title)") {
+                                    ui.playReplay(channel: item, programme: programme, store: store, playback: playback)
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            .listStyle(.plain)
-            .overlay {
-                if list.isEmpty {
-                    ContentUnavailableView(favoritesOnly ? "Aucun favori" : "Aucune chaîne",
-                                           systemImage: "tv",
-                                           description: Text(store.hasSources ? "Aucun contenu pour cette sélection." : "Ajoutez une source dans Réglages."))
-                }
+            if list.count > 1500 {
+                Text("Affinez la recherche ou choisissez une catégorie pour voir les \(list.count - 1500) autres chaînes.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
-            .navigationTitle(category ?? (favoritesOnly ? String(localized: "Favoris") : String(localized: "Direct")))
-            .searchable(text: $search, prompt: "Rechercher une chaîne")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Toggle("Favoris seulement", systemImage: "star", isOn: $favoritesOnly)
-                        Divider()
-                        Button("Toutes les catégories") { category = nil }
-                        ForEach(store.categoriesByKind[.live] ?? [], id: \.self) { name in
-                            Button(name) { category = name; favoritesOnly = false }
-                        }
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+        .listStyle(.plain)
+        .overlay {
+            if list.isEmpty {
+                ContentUnavailableView(favoritesOnly ? String(localized: "Aucun favori") : String(localized: "Aucune chaîne"),
+                                       systemImage: "tv",
+                                       description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
+            }
+        }
+        .navigationTitle(category ?? (favoritesOnly ? String(localized: "Favoris") : String(localized: "Direct")))
+        .searchable(text: $search, prompt: "Rechercher une chaîne")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Toggle("Favoris seulement", systemImage: "star", isOn: $favoritesOnly)
+                    Divider()
+                    Button("Toutes les catégories") { category = nil }
+                    ForEach(store.categoriesByKind[.live] ?? [], id: \.self) { name in
+                        Button(name) { category = name; favoritesOnly = false }
                     }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
                 }
             }
         }
@@ -277,7 +292,8 @@ struct ChannelRow: View {
 
 // MARK: - Films et séries
 
-struct IOSCatalogView: View {
+/// Grille de tous les films ou séries (le conteneur fournit la pile de navigation).
+struct IOSCatalogGrid: View {
     let kind: MediaKind
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
@@ -296,41 +312,39 @@ struct IOSCatalogView: View {
     private var columns: [GridItem] { [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 12, alignment: .top)] }
 
     var body: some View {
-        NavigationStack {
-            let list = items
-            ScrollView {
-                LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
-                    ForEach(list.prefix(3000)) { item in
-                        Button { ui.open(item, store: store, playback: playback) } label: {
-                            PosterCard(item: item, progress: watch.fraction(for: item.id), width: 110)
-                        }
-                        .buttonStyle(.plain)
+        let list = items
+        ScrollView {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
+                ForEach(list.prefix(3000)) { item in
+                    Button { ui.open(item, store: store, playback: playback) } label: {
+                        PosterCard(item: item, progress: watch.fraction(for: item.id), width: 110)
                     }
-                }
-                .padding(.horizontal)
-                if list.count > 3000 {
-                    Text("Affinez la recherche ou choisissez une catégorie pour voir la suite.")
-                        .font(.footnote).foregroundStyle(.secondary).padding()
+                    .buttonStyle(.plain)
                 }
             }
-            .overlay {
-                if list.isEmpty {
-                    ContentUnavailableView("Aucun contenu", systemImage: "film",
-                                           description: Text(store.hasSources ? "Aucun contenu pour cette sélection." : "Ajoutez une source dans Réglages."))
-                }
+            .padding(.horizontal)
+            if list.count > 3000 {
+                Text("Affinez la recherche ou choisissez une catégorie pour voir la suite.")
+                    .font(.footnote).foregroundStyle(.secondary).padding()
             }
-            .navigationTitle(category ?? kind.title)
-            .searchable(text: $search, prompt: "Rechercher")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button("Toutes les catégories") { category = nil }
-                        ForEach(store.categoriesByKind[kind] ?? [], id: \.self) { name in
-                            Button(name) { category = name }
-                        }
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+        .overlay {
+            if list.isEmpty {
+                ContentUnavailableView("Aucun contenu", systemImage: "film",
+                                       description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
+            }
+        }
+        .navigationTitle(category ?? kind.title)
+        .searchable(text: $search, prompt: "Rechercher")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Toutes les catégories") { category = nil }
+                    ForEach(store.categoriesByKind[kind] ?? [], id: \.self) { name in
+                        Button(name) { category = name }
                     }
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
                 }
             }
         }

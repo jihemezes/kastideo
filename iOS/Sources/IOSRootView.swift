@@ -14,13 +14,13 @@ struct IOSRootView: View {
             IOSHomeView()
                 .tabItem { Label("Accueil", systemImage: "house.fill") }
                 .tag(IOSTab.home)
-            IOSLiveView()
+            IOSLiveHub()
                 .tabItem { Label("Direct", systemImage: "tv.fill") }
                 .tag(IOSTab.live)
-            IOSCatalogView(kind: .movie)
+            IOSCatalogHub(kind: .movie)
                 .tabItem { Label("Films", systemImage: "film.fill") }
                 .tag(IOSTab.movies)
-            IOSCatalogView(kind: .series)
+            IOSCatalogHub(kind: .series)
                 .tabItem { Label("Séries", systemImage: "rectangle.stack.fill") }
                 .tag(IOSTab.series)
             IOSSettingsView()
@@ -42,6 +42,9 @@ struct IOSRootView: View {
         }
         .sheet(item: $ui.detail) { item in
             IOSDetailSheet(item: item)
+        }
+        .sheet(item: $ui.programme) { ref in
+            IOSProgrammeSheet(ref: ref)
         }
         .sheet(isPresented: $ui.showAddSource) {
             NavigationStack { IOSAddSourceView() }

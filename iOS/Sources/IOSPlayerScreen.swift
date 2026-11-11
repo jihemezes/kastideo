@@ -5,6 +5,7 @@ import KastideoCore
 struct IOSPlayerScreen: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
+    @Environment(LibraryStore.self) private var store
     @State private var controlsVisible = true
     @State private var hideTask: Task<Void, Never>?
     @State private var scrubbing: Double?
@@ -177,6 +178,19 @@ struct IOSPlayerScreen: View {
                 }
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.white.opacity(0.8))
+            }
+            if let item = playback.current, item.isReplay, let channel = store.replayChannel(of: item) {
+                HStack {
+                    Button {
+                        playback.play(channel)
+                    } label: {
+                        Label("Retour au direct", systemImage: "dot.radiowaves.left.and.right")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    Spacer()
+                }
             }
         }
         .padding(.horizontal, 18).padding(.bottom, 14).padding(.top, 20)

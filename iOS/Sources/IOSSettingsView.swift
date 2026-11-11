@@ -74,6 +74,9 @@ struct IOSSettingsView: View {
                     Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
                 }
 
+                IOSReplaySection()
+                IOSCinemaSection()
+
                 Section("Apparence") {
                     Picker("Thème", selection: $appearance) {
                         Text("Sombre").tag("dark")

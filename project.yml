@@ -149,6 +149,7 @@ targets:
           - SharedSettings.swift
           - ConfigModels.swift
           - LegalText.swift
+          - ThemeLabels.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

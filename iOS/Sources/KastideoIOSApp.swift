@@ -27,6 +27,11 @@ struct KastideoIOSApp: App {
         playback.onProgress = { [weak store] item, position, duration, event in
             store?.reportPlayback(item, position: position, duration: duration, event: event)
         }
+        // Fin d'un replay : retour au direct de la chaîne (réglable).
+        playback.onReplayEnded = { [weak store, weak playback] item in
+            guard ReplaySettings.returnToLive, let channel = store?.replayChannel(of: item) else { return }
+            playback?.play(channel)
+        }
         _store = State(initialValue: store)
         _navigation = State(initialValue: nav)
         _playback = State(initialValue: playback)

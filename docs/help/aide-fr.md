@@ -1324,16 +1324,18 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 
 **Premier lancement.** Lisez et acceptez l'avertissement. Sur l'écran d'accueil, appuyez sur **Ajouter une source** (Xtream Codes ou liste M3U), ou allez dans **Réglages > Importer une configuration…** pour reprendre vos sources, favoris et catégories depuis le Mac, Windows, Linux ou Android (voir « Sauvegarde et transfert »). Astuce : enregistrez le fichier de configuration dans **iCloud Drive** pour le retrouver sur tous vos appareils.
 
-**Ce que propose la première version.**
+**Ce que propose l'application.**
 
 - **Accueil** : reprendre la lecture, favoris, récents. Appui long sur une vignette : retirer de la liste ou ajouter aux favoris.
-- **Direct** : liste des chaînes avec le programme en cours et sa progression, recherche, catégories, favoris (balayez une chaîne vers la gauche).
-- **Films** et **Séries** : affiches, recherche, catégories, fiche avec résumé, reprise là où vous vous êtes arrêté, saisons et épisodes.
+- **Direct** : le bouton en haut à gauche change l'affichage — **Liste** (chaînes avec programme en cours, recherche, catégories, favoris ; balayez une chaîne vers la gauche), **Cinéma** (bandeau « à la une », rangées « en ce moment » par thème, « À revoir », récents, favoris, une rangée par catégorie), **Thèmes** (Sport, Info, Films… : en ce moment, ce soir, toutes les chaînes ; appui long : changer le thème d'une chaîne) et **Guide TV**.
+- **Guide TV** : choisissez le jour (jusqu'à 14 jours passés selon Réglages > Replay, et 3 jours à venir) et l'heure ; chaque chaîne affiche son programme à ce moment et le suivant. Touchez un programme pour sa fiche : **Regarder en direct**, **Revoir**, favori. Le guide est présenté par créneau horaire plutôt qu'en grille, mieux adapté à l'écran d'un téléphone.
+- **Replay** : sur les chaînes marquées ↺, **Revoir** un programme depuis l'archive du fournisseur (fiche du programme, ou appui long sur la chaîne > Revoir). Dans le lecteur, **Retour au direct** ; à la fin d'un replay, retour automatique au direct (réglable). Réglages > Replay : jours passés, correction de l'heure si le replay démarre au mauvais moment.
+- **Films** et **Séries** : affichage **Cinéma** (bandeau « à la une » qui défile, reprise, récents, favoris, une rangée par catégorie, filtre par pays comme sur Mac) ou **Grille** (tout le catalogue) ; recherche, fiche avec résumé, reprise là où vous vous êtes arrêté, saisons et épisodes. Réglages > Affichage Cinéma : contenu et durée du bandeau.
 - **Lecteur plein écran** : appuyez sur l'image pour afficher les commandes, faites glisser la barre pour vous déplacer, choisissez la piste audio et les sous-titres. Fermez-le avec la flèche : la lecture continue, avec un **mini-lecteur** au-dessus de la barre d'onglets. Le son continue écran verrouillé.
 - **AirPlay** : le bouton du lecteur envoie le son vers une Apple TV ou un HomePod ; pour la vidéo, utilisez la recopie d'écran d'iOS.
 - Même moteur de lecture (VLC) et mêmes réglages de mise en mémoire que sur Mac ; relais de flux pour les fournisseurs qui refusent la connexion directe.
 
-**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, guide TV en grille, thèmes, MultiVue, image dans l'image, YouTube, Cast, interface Cinéma. Une version **Apple TV** est prévue plus tard.
+**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, timeshift, alertes de programme, MultiVue, image dans l'image, YouTube et « Mes vidéos », gestion des catégories, modification d'une chaîne, apparence complète. Une version **Apple TV** est prévue plus tard.
 
 En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
 

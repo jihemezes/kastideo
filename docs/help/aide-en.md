@@ -1324,16 +1324,18 @@ Settings and sources can be moved between versions with **Backup and transfer**.
 
 **First launch.** Read and accept the disclaimer. On the home screen, tap **Add a source** (Xtream Codes or M3U list), or go to **Settings > Import configuration…** to bring over your sources, favorites and categories from Mac, Windows, Linux or Android (see “Backup and transfer”). Tip: save the configuration file in **iCloud Drive** to find it on all your devices.
 
-**What the first version offers.**
+**What the app offers.**
 
 - **Home**: continue watching, favorites, recents. Long-press a thumbnail to remove it from the list or add it to favorites.
-- **Live**: channel list with the current programme and its progress, search, categories, favorites (swipe a channel to the left).
-- **Movies** and **Series**: posters, search, categories, detail page with summary, resume where you left off, seasons and episodes.
+- **Live**: the button at the top left changes the display — **List** (channels with current programme, search, categories, favorites; swipe a channel to the left), **Cinema** (a “featured” banner, “on now” rows by theme, “Watch again”, recents, favorites, one row per category), **Themes** (Sport, News, Movies…: on now, tonight, all channels; long-press to change a channel's theme) and **TV Guide**.
+- **TV Guide**: pick the day (up to 14 past days depending on Settings > Replay, and 3 days ahead) and the hour; each channel shows its programme at that time and the next one. Tap a programme for its details: **Watch live**, **Watch again**, favorite. The guide is laid out by time slot rather than as a grid, which suits a phone screen better.
+- **Replay**: on channels marked ↺, **Watch again** a programme from the provider's archive (programme details, or long-press a channel > Watch again). In the player, **Back to live**; when a replay ends you return to live automatically (adjustable). Settings > Replay: past days, time correction if a replay starts at the wrong time.
+- **Movies** and **Series**: **Cinema** display (scrolling “featured” banner, resume, recents, favorites, one row per category, country filter as on Mac) or **Grid** (whole catalogue); search, detail page with summary, resume where you left off, seasons and episodes. Settings > Cinema display: banner content and speed.
 - **Full-screen player**: tap the picture to show the controls, drag the bar to seek, pick the audio track and subtitles. Close it with the arrow: playback continues, with a **mini player** above the tab bar. Sound continues with the screen locked.
 - **AirPlay**: the player button sends the sound to an Apple TV or HomePod; for video, use iOS screen mirroring.
 - Same playback engine (VLC) and buffering settings as on Mac; stream relay for providers that refuse direct connections.
 
-**Not yet on iPhone / iPad**: recording and downloads, TV guide grid, themes, MultiView, picture in picture, YouTube, Cast, Cinema interface. An **Apple TV** version is planned for later.
+**Not yet on iPhone / iPad**: recording and downloads, timeshift, programme alerts, MultiView, picture in picture, YouTube and “My videos”, category management, channel editing, full appearance options. An **Apple TV** version is planned for later.
 
 If playback fails: **Settings > About > Share the playback log**.
 
