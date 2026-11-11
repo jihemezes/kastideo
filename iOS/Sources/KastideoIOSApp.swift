@@ -9,6 +9,10 @@ struct KastideoIOSApp: App {
     @State private var watch: WatchProgressStore
     @State private var navigation: NavigationModel
     @State private var ui = IOSUI()
+    @State private var recorder = IOSRecorder()
+    @State private var downloads = IOSDownloads()
+    @State private var alerts = IOSAlertCenter()
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("ios.appearance") private var appearance = "dark"
     @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
 
@@ -33,6 +37,8 @@ struct KastideoIOSApp: App {
             guard ReplaySettings.returnToLive, let channel = store?.replayChannel(of: item) else { return }
             playback?.play(channel)
         }
+        IOSFiles.ensureFolders()
+        IOSNotifier.setup()
         _store = State(initialValue: store)
         _navigation = State(initialValue: nav)
         _playback = State(initialValue: playback)
@@ -47,9 +53,29 @@ struct KastideoIOSApp: App {
                 .environment(playback)
                 .environment(watch)
                 .environment(ui)
+                .environment(recorder)
+                .environment(downloads)
+                .environment(alerts)
                 .preferredColorScheme(scheme)
                 .tint(IOSAccent.current(accent).color)
                 .task { await store.start(autoRefresh: true) }
+                .task {
+                    // Alertes : notifications recalculées au lancement puis toutes les 10 minutes.
+                    while !Task.isCancelled {
+                        try? await Task.sleep(for: .seconds(20))
+                        alerts.reschedule(store: store)
+                        try? await Task.sleep(for: .seconds(580))
+                    }
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .background { alerts.reschedule(store: store) }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: IOSNotifier.openChannelName)) { note in
+                    guard let id = note.object as? String,
+                          let group = store.liveGroups.first(where: { $0.variants.contains { $0.id == id } }) else { return }
+                    let channel = group.variants.first { $0.id == id } ?? group.preferred
+                    ui.play(channel, store: store, playback: playback)
+                }
         }
     }
 

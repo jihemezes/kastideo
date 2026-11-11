@@ -2,6 +2,15 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios6] - 2026-11-11
+
+- **Enregistrer le direct** : bouton rond rouge du lecteur (arrêt automatique réglable) ; fichiers .ts dans Fichiers > Kastideo > Enregistrements (lecture, partage, suppression).
+- **Téléchargements** de films et d'épisodes (fiche, « Télécharger la saison », appui long sur un épisode) : continuent application fermée, pause / reprise, notification à la fin ; dossier Fichiers > Kastideo > Téléchargements.
+- **Direct en différé** : pause du direct, −10 s / +30 s, ligne de temps, vitesse de rattrapage, « Retour au direct » ; réglages de durée et de vitesse.
+- **Alertes de programmes** : mot-clé, thème sur les chaînes favorites, « Me prévenir au début » ; notifications locales programmées à l'avance (48 h), reçues application fermée ; un toucher ouvre la chaîne.
+- **Mes vidéos** : ajout de serveurs Jellyfin, Emby, Plex et de dossiers (iPhone, iCloud Drive, clé USB, NAS) ; sélecteur Tout / IPTV / Mes vidéos dans Films et Séries.
+- Le dossier de l'application est visible dans l'app Fichiers.
+
 ## [1.17.0-ios5] - 2026-11-11
 
 - **Gérer les catégories** (Réglages) : ordre par glisser-déposer, masquer, renommer, masquer par mot-clé, tri A→Z, réinitialiser ; **Pays et langues** pour l'affichage Cinéma.

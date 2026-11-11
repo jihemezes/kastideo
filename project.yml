@@ -193,6 +193,9 @@ targets:
         # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
+        # Dossier Kastideo visible dans l'app Fichiers : enregistrements et téléchargements.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
         NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau."
         NSBonjourServices:
           - _airplay._tcp

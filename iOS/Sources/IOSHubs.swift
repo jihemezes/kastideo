@@ -63,6 +63,7 @@ struct IOSLiveHub: View {
                         Image(systemName: mode.icon)
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) { IOSRecordingsLink() }
             }
         }
     }
@@ -73,6 +74,7 @@ struct IOSCatalogHub: View {
     let kind: MediaKind
     @AppStorage("ios.movies.mode") private var moviesMode = IOSCatalogMode.cinema.rawValue
     @AppStorage("ios.series.mode") private var seriesMode = IOSCatalogMode.cinema.rawValue
+    @Environment(LibraryStore.self) private var store
 
     private var modeRaw: Binding<String> { kind == .series ? $seriesMode : $moviesMode }
     private var mode: IOSCatalogMode { IOSCatalogMode(rawValue: modeRaw.wrappedValue) ?? .cinema }
@@ -99,6 +101,18 @@ struct IOSCatalogHub: View {
                         Image(systemName: mode.icon)
                     }
                 }
+                if store.hasLibrary {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Picker("Afficher", selection: Binding(get: { store.catalogOrigin }, set: { store.catalogOrigin = $0 })) {
+                                ForEach(CatalogOrigin.allCases) { origin in Text(origin.label).tag(origin) }
+                            }
+                        } label: {
+                            Image(systemName: "externaldrive.connected.to.line.below")
+                        }
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) { IOSRecordingsLink() }
             }
         }
     }

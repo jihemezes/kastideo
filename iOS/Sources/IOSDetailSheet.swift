@@ -8,6 +8,7 @@ struct IOSDetailSheet: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
+    @Environment(IOSDownloads.self) private var downloads
     @Environment(\.dismiss) private var dismiss
     @State private var seasons: [SeriesSeason] = []
     @State private var selectedSeason = 0
@@ -44,6 +45,13 @@ struct IOSDetailSheet: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent).controlSize(.large)
+                        }
+                        if !isSeriesWithEpisodes, IOSDownloads.canDownload(item) {
+                            Button { downloads.add(item) } label: {
+                                Image(systemName: downloads.isQueued(item) ? "checkmark.circle" : "arrow.down.circle").frame(width: 28)
+                            }
+                            .buttonStyle(.bordered).controlSize(.large)
+                            .disabled(downloads.isQueued(item))
                         }
                         Button { store.toggleFavorite(item.id) } label: {
                             Image(systemName: store.isFavorite(item.id) ? "star.fill" : "star").frame(width: 28)
@@ -91,6 +99,16 @@ struct IOSDetailSheet: View {
             }
             .pickerStyle(.menu)
             let list = seasons.indices.contains(selectedSeason) ? seasons[selectedSeason].episodes : []
+            let downloadable = list.filter { IOSDownloads.canDownload($0) && !downloads.isQueued($0) }
+            if !downloadable.isEmpty {
+                Button {
+                    for episode in downloadable { downloads.add(episode) }
+                } label: {
+                    Label("Télécharger la saison (\(downloadable.count) épisodes)", systemImage: "arrow.down.circle")
+                }
+                .buttonStyle(.bordered)
+                Text("Maintenez un épisode pour ne télécharger que celui-ci.").font(.caption).foregroundStyle(.secondary)
+            }
             VStack(spacing: 0) {
                 ForEach(list) { episode in
                     Button { play(episode) } label: {
@@ -110,6 +128,11 @@ struct IOSDetailSheet: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .contextMenu {
+                        if IOSDownloads.canDownload(episode) {
+                            Button { downloads.add(episode) } label: { Label("Télécharger", systemImage: "arrow.down.circle") }
+                        }
+                    }
                     Divider()
                 }
             }

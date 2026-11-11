@@ -36,6 +36,7 @@ struct IOSProgrammeSheet: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
+    @Environment(IOSAlertCenter.self) private var alerts
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -102,6 +103,17 @@ struct IOSProgrammeSheet: View {
                         if !airing && !replayable && programme.start > now {
                             Label("Ce programme n'est pas encore diffusé.", systemImage: "clock")
                                 .font(.footnote).foregroundStyle(.secondary)
+                        }
+                        if programme.start > now {
+                            Button {
+                                alerts.toggleOneShot(programme, channel: channel)
+                                alerts.reschedule(store: store)
+                            } label: {
+                                Label(alerts.isWatching(programme) ? String(localized: "Ne plus me prévenir") : String(localized: "Me prévenir au début"),
+                                      systemImage: alerts.isWatching(programme) ? "bell.slash" : "bell")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
                         }
                         Button {
                             store.toggleFavorite(channel.id)

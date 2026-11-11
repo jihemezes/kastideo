@@ -6,6 +6,8 @@ struct IOSPlayerScreen: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
     @Environment(LibraryStore.self) private var store
+    @Environment(IOSRecorder.self) private var recorder
+    @AppStorage("ios.record.minutes") private var recordMinutes = 0
     @State private var controlsVisible = true
     @State private var hideTask: Task<Void, Never>?
     @State private var scrubbing: Double?
@@ -64,6 +66,8 @@ struct IOSPlayerScreen: View {
         .preferredColorScheme(.dark)
         .onAppear { scheduleHide() }
         .onChange(of: playback.current?.id) { _, id in
+            // Le flux change : l'enregistrement en cours est clos.
+            recorder.streamEnded()
             if id == nil { ui.showPlayer = false }
         }
     }
@@ -78,7 +82,12 @@ struct IOSPlayerScreen: View {
                 }
                 VStack(alignment: .leading, spacing: 1) {
                     Text(playback.current?.name ?? "").font(.headline).lineLimit(1)
-                    if let startup = playback.startupTime {
+                    if recorder.isRecording, let started = recorder.startedAt {
+                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                            Text("● Enregistrement \(context.date.timeIntervalSince(started).clockString)")
+                                .font(.caption2.monospacedDigit()).foregroundStyle(.red)
+                        }
+                    } else if let startup = playback.startupTime {
                         Text("Prête en \(String(format: "%.1f", startup)) s").font(.caption2).foregroundStyle(.white.opacity(0.6))
                     }
                 }
@@ -115,6 +124,20 @@ struct IOSPlayerScreen: View {
                         Image(systemName: "captions.bubble").font(.title3)
                     }
                 }
+                if playback.isLive, !(playback.current?.isReplay ?? false) {
+                    Button {
+                        if recorder.isRecording {
+                            recorder.stop(playback: playback)
+                        } else {
+                            recorder.start(playback: playback, minutes: recordMinutes)
+                        }
+                        scheduleHide()
+                    } label: {
+                        Image(systemName: recorder.isRecording ? "stop.circle.fill" : "record.circle")
+                            .font(.title3)
+                            .foregroundStyle(.red)
+                    }
+                }
                 AirPlayButton().frame(width: 34, height: 34)
                 Button { playback.stopByUser(); ui.showPlayer = false } label: {
                     Image(systemName: "stop.fill").font(.title3)
@@ -126,7 +149,7 @@ struct IOSPlayerScreen: View {
             Spacer()
 
             HStack(spacing: 44) {
-                if !playback.isLive {
+                if !playback.isLive || playback.timeshiftSeekable {
                     Button { playback.jump(seconds: -10); scheduleHide() } label: {
                         Image(systemName: "gobackward.10").font(.system(size: 30))
                     }
@@ -134,7 +157,7 @@ struct IOSPlayerScreen: View {
                 Button { playback.togglePause(); scheduleHide() } label: {
                     Image(systemName: playback.isPlaying ? "pause.circle.fill" : "play.circle.fill").font(.system(size: 64))
                 }
-                if !playback.isLive {
+                if !playback.isLive || playback.isTimeshifted {
                     Button { playback.jump(seconds: 30); scheduleHide() } label: {
                         Image(systemName: "goforward.30").font(.system(size: 30))
                     }
@@ -153,13 +176,42 @@ struct IOSPlayerScreen: View {
     private var bottomBar: some View {
         VStack(spacing: 6) {
             if playback.isLive {
-                HStack {
-                    Text("DIRECT")
-                        .font(.caption.weight(.bold))
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(Color.red, in: Capsule())
+                if playback.isTimeshifted { IOSTimeshiftBar().frame(height: 30) }
+                HStack(spacing: 10) {
+                    if playback.isTimeshifted {
+                        Button { playback.goLive(); scheduleHide() } label: {
+                            Label("Retour au direct", systemImage: "forward.end.fill")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+                        Menu {
+                            ForEach(TimeshiftSettings.speeds, id: \.self) { speed in
+                                Button { playback.setRate(speed) } label: {
+                                    if playback.rate == speed {
+                                        Label(TimeshiftSettings.label(speed), systemImage: "checkmark")
+                                    } else {
+                                        Text(TimeshiftSettings.label(speed))
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text(TimeshiftSettings.label(playback.rate))
+                                .font(.caption.weight(.bold).monospacedDigit())
+                                .padding(.horizontal, 10).padding(.vertical, 6)
+                                .background(.white.opacity(0.18), in: Capsule())
+                        }
+                    } else {
+                        Text("DIRECT")
+                            .font(.caption.weight(.bold))
+                            .padding(.horizontal, 8).padding(.vertical, 3)
+                            .background(Color.red, in: Capsule())
+                    }
                     Spacer()
                     Text(Date.now, style: .time).font(.caption.monospacedDigit()).foregroundStyle(.white.opacity(0.8))
+                }
+                if let notice = playback.timeshiftNotice {
+                    Text(notice).font(.caption).foregroundStyle(.yellow)
                 }
             } else if playback.duration > 0 {
                 Slider(value: Binding(get: { scrubbing ?? playback.position }, set: { scrubbing = $0 }),

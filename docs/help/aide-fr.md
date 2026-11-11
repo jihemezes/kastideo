@@ -1336,11 +1336,16 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 - **Apparence** : thème, couleur d'accent, taille des affiches, densité des listes, affichage par défaut de Direct, Films et Séries.
 - **Départ** : onglet affiché au lancement, et page de départ de Direct, Films et Séries (toutes, favoris, récents, dernière consultée ou une catégorie).
 - **Plusieurs abonnements** : Réglages > Abonnements pour afficher une seule source sans désactiver l'autre, fusion des doublons entre comptes, et **Diagnostic** d'une source (balayez-la vers la gauche).
+- **Enregistrer le direct** : pendant un direct, le bouton rond rouge du lecteur enregistre la chaîne (arrêt automatique réglable). Les fichiers .ts sont dans l'app **Fichiers > Sur mon iPhone > Kastideo > Enregistrements** ; lisez-les dans Kastideo ou VLC, partagez-les ou supprimez-les (balayez). Un enregistrement programmé n'est pas possible sur iPhone (l'application ne peut pas se réveiller seule) : utilisez les alertes ou le Mac.
+- **Télécharger** un film ou un épisode : bouton ↓ de la fiche (ou « Télécharger la saison »). Le téléchargement continue application fermée ; pause, reprise et suppression dans **Enregistrements** (icône plateau en haut à droite, ou Réglages). Les fichiers vont dans Fichiers > Kastideo > Téléchargements. Beaucoup de fournisseurs n'autorisent qu'une connexion : un téléchargement peut couper la lecture en cours.
+- **Direct en différé** : mettez le direct en pause, il continue d'être mémorisé. Reculez de 10 s, avancez de 30 s, glissez la ligne de temps, accélérez (×1,25 à ×2) et touchez **Retour au direct**. Durée maximale et vitesse : Réglages > Direct en différé.
+- **Alertes de programmes** (Réglages) : par mot-clé, par thème sur vos chaînes favorites, ou « Me prévenir au début » dans la fiche d'un programme. Ce sont des notifications de l'iPhone, reçues même application fermée ; touchez-en une pour ouvrir la chaîne. Autorisez les notifications quand iOS le demande.
+- **Mes vidéos** : Réglages > Ajouter une source > **Jellyfin, Emby, Plex** ou **Dossiers de vidéos** (iPhone, iCloud Drive, clé USB, NAS ajouté dans Fichiers). Dans Films et Séries, le bouton en haut à droite choisit **Tout / IPTV / Mes vidéos**.
 - **Lecteur plein écran** : appuyez sur l'image pour afficher les commandes, faites glisser la barre pour vous déplacer, choisissez la piste audio et les sous-titres. Fermez-le avec la flèche : la lecture continue, avec un **mini-lecteur** au-dessus de la barre d'onglets. Le son continue écran verrouillé.
 - **AirPlay** : le bouton du lecteur envoie le son vers une Apple TV ou un HomePod ; pour la vidéo, utilisez la recopie d'écran d'iOS.
 - Même moteur de lecture (VLC) et mêmes réglages de mise en mémoire que sur Mac ; relais de flux pour les fournisseurs qui refusent la connexion directe.
 
-**Pas encore sur iPhone / iPad** : enregistrement et téléchargement, timeshift, alertes de programme, MultiVue, image dans l'image, YouTube et « Mes vidéos ». Une version **Apple TV** est prévue plus tard.
+**Pas encore sur iPhone / iPad** : MultiVue, image dans l'image et YouTube. Une version **Apple TV** est prévue plus tard.
 
 En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
 

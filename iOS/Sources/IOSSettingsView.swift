@@ -81,6 +81,15 @@ struct IOSSettingsView: View {
                     Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
                 }
 
+                IOSTimeshiftSection()
+                Section {
+                    NavigationLink { IOSRecordingsView() } label: {
+                        Label("Enregistrements et téléchargements", systemImage: "tray.full")
+                    }
+                    NavigationLink { IOSAlertsView() } label: {
+                        Label("Alertes de programmes", systemImage: "bell.badge")
+                    }
+                }
                 IOSReplaySection()
                 IOSCinemaSection()
 
@@ -159,114 +168,5 @@ struct IOSSettingsView: View {
         } catch {
             message = String(localized: "Fichier illisible : \(error.localizedDescription)")
         }
-    }
-}
-
-// MARK: - Ajout d'une source
-
-struct IOSAddSourceView: View {
-    @Environment(LibraryStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
-
-    enum Mode: String, CaseIterable, Identifiable {
-        case xtream, m3u
-        var id: String { rawValue }
-    }
-
-    @State private var mode: Mode = .xtream
-    @State private var name = ""
-    @State private var server = ""
-    @State private var username = ""
-    @State private var password = ""
-    @State private var playlist = ""
-    @State private var epg = ""
-
-    private var detectedXtream: XtreamCredentials? {
-        guard mode == .m3u, let url = URL(string: playlist.trimmingCharacters(in: .whitespaces)) else { return nil }
-        return XtreamCredentials.fromPlaylistURL(url)
-    }
-
-    private var isValid: Bool {
-        switch mode {
-        case .xtream:
-            return XtreamCredentials.normalizeServer(server) != nil && !username.isEmpty && !password.isEmpty
-        case .m3u:
-            guard let url = URL(string: playlist.trimmingCharacters(in: .whitespaces)), let scheme = url.scheme?.lowercased() else { return false }
-            return scheme == "http" || scheme == "https"
-        }
-    }
-
-    var body: some View {
-        Form {
-            Picker("Type", selection: $mode) {
-                Text("Xtream Codes").tag(Mode.xtream)
-                Text("Liste M3U (URL)").tag(Mode.m3u)
-            }
-            .pickerStyle(.segmented)
-
-            Section("Nom (facultatif)") {
-                TextField("Mon abonnement IPTV", text: $name)
-            }
-
-            switch mode {
-            case .xtream:
-                Section("Connexion") {
-                    TextField("Serveur (http://exemple.com:8080)", text: $server)
-                        .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
-                    TextField("Identifiant", text: $username)
-                        .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    SecureField("Mot de passe", text: $password)
-                }
-            case .m3u:
-                Section("Playlist") {
-                    TextField("https://…/playlist.m3u", text: $playlist)
-                        .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
-                    if detectedXtream != nil {
-                        Label("Adresse Xtream détectée : la source sera enregistrée en Xtream Codes (chargement plus rapide, guide TV inclus).",
-                              systemImage: "bolt.fill")
-                            .font(.footnote).foregroundStyle(IOSPalette.orange)
-                    }
-                }
-            }
-
-            Section("Guide TV (facultatif)") {
-                TextField("URL XMLTV", text: $epg)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
-            }
-        }
-        .navigationTitle("Ajouter une source")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Annuler") { dismiss() } }
-            ToolbarItem(placement: .confirmationAction) { Button("Ajouter") { save() }.disabled(!isValid) }
-        }
-    }
-
-    private func save() {
-        let kind: SourceKind
-        var pass: String?
-        var defaultName = String(localized: "Mon abonnement IPTV")
-        switch mode {
-        case .xtream:
-            guard let url = XtreamCredentials.normalizeServer(server) else { return }
-            kind = .xtream(server: url, username: username.trimmingCharacters(in: .whitespaces))
-            pass = password
-            defaultName = url.host ?? defaultName
-        case .m3u:
-            guard let url = URL(string: playlist.trimmingCharacters(in: .whitespaces)) else { return }
-            if let credentials = detectedXtream {
-                kind = .xtream(server: credentials.server, username: credentials.username)
-                pass = credentials.password
-            } else {
-                kind = .m3uURL(url)
-            }
-            defaultName = url.host ?? String(localized: "Ma playlist")
-        }
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
-        let epgText = epg.trimmingCharacters(in: .whitespaces)
-        let source = Source(name: trimmed.isEmpty ? defaultName : trimmed, kind: kind,
-                            epgURL: epgText.isEmpty ? nil : URL(string: epgText))
-        store.addSource(source, password: pass)
-        dismiss()
     }
 }

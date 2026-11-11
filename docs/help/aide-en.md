@@ -1336,11 +1336,16 @@ Settings and sources can be moved between versions with **Backup and transfer**.
 - **Appearance**: theme, accent colour, poster size, list density, default display for Live, Movies and Series.
 - **Start**: tab shown at launch, and start page of Live, Movies and Series (all, favorites, recents, last viewed or a category).
 - **Several subscriptions**: Settings > Subscriptions to show a single source without disabling the other, merge duplicates across accounts, and **Diagnostics** of a source (swipe it to the left).
+- **Record live TV**: during a live channel, the red round button in the player records it (automatic stop adjustable). The .ts files are in the **Files app > On My iPhone > Kastideo > Enregistrements**; play them in Kastideo or VLC, share or delete them (swipe). Scheduled recording is not possible on iPhone (the app cannot wake itself up): use alerts or the Mac.
+- **Download** a movie or episode: the ↓ button on its page (or “Download the season”). Downloads continue with the app closed; pause, resume and delete in **Recordings** (tray icon at the top right, or Settings). Files go to Files > Kastideo > Téléchargements. Many providers allow only one connection: a download can interrupt the playback in progress.
+- **Time-shifted live**: pause the live channel, it keeps being stored. Go back 10 s, forward 30 s, drag the timeline, speed up (×1.25 to ×2) and tap **Back to live**. Maximum length and speed: Settings > Time-shifted live.
+- **Programme alerts** (Settings): by keyword, by theme on your favourite channels, or “Notify me at the start” on a programme page. They are iPhone notifications, received even with the app closed; tap one to open the channel. Allow notifications when iOS asks.
+- **My videos**: Settings > Add a source > **Jellyfin, Emby, Plex** or **Video folders** (iPhone, iCloud Drive, USB drive, NAS added in Files). In Movies and Series, the top-right button picks **All / IPTV / My videos**.
 - **Full-screen player**: tap the picture to show the controls, drag the bar to seek, pick the audio track and subtitles. Close it with the arrow: playback continues, with a **mini player** above the tab bar. Sound continues with the screen locked.
 - **AirPlay**: the player button sends the sound to an Apple TV or HomePod; for video, use iOS screen mirroring.
 - Same playback engine (VLC) and buffering settings as on Mac; stream relay for providers that refuse direct connections.
 
-**Not yet on iPhone / iPad**: recording and downloads, timeshift, programme alerts, MultiView, picture in picture, YouTube and “My videos”. An **Apple TV** version is planned for later.
+**Not yet on iPhone / iPad**: MultiView, picture in picture and YouTube. An **Apple TV** version is planned for later.
 
 If playback fails: **Settings > About > Share the playback log**.
 

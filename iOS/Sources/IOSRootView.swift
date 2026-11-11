@@ -6,6 +6,7 @@ struct IOSRootView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
+    @Environment(IOSRecorder.self) private var recorder
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
@@ -39,6 +40,7 @@ struct IOSRootView: View {
                 .environment(playback)
                 .environment(store)
                 .environment(ui)
+                .environment(recorder)
         }
         .sheet(item: $ui.detail) { item in
             IOSDetailSheet(item: item)
