@@ -1268,3 +1268,11 @@
 
 /* iOS 1.17.0-ios9 */
 "En attente : un seul téléchargement à la fois" = "Waiting: one download at a time";
+
+/* iOS 1.17.0-ios10 */
+"Écrans" = "Screens";
+"Chaque abonnement n'autorise qu'une connexion à la fois : un second flux serait refusé par le serveur. Ajoutez une autre source de direct (liste publique, second abonnement) ou indiquez le nombre de connexions de votre abonnement dans Réglages > MultiVue." = "Each subscription allows only one connection at a time: a second stream would be refused by the server. Add another live source (public list, second subscription) or set your subscription's number of connections in Settings > MultiView.";
+"Donner le son" = "Give the sound";
+"Mettre en grand" = "Make big";
+"Source de cet écran" = "This screen's source";
+"Indiquez pour chaque abonnement le nombre de connexions qu'il autorise (1 pour la plupart, 4 pour une liste publique). Dans la MultiVue (bouton dans Direct ou dans le lecteur), choisissez ensuite le nombre d'écrans, la disposition et la source de chaque écran. Les enregistrements et téléchargements utilisent aussi une connexion." = "Enter for each subscription the number of connections it allows (1 for most, 4 for a public list). In MultiView (button in Live or in the player), then choose the number of screens, the layout and each screen's source. Recordings and downloads also use a connection.";

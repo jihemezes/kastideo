@@ -7,6 +7,7 @@ struct IOSPlayerScreen: View {
     @Environment(IOSUI.self) private var ui
     @Environment(LibraryStore.self) private var store
     @Environment(IOSRecorder.self) private var recorder
+    @Environment(MultiViewModel.self) private var multiView
     @AppStorage("ios.record.minutes") private var recordMinutes = 0
     @State private var controlsVisible = true
     @State private var hideTask: Task<Void, Never>?
@@ -136,6 +137,21 @@ struct IOSPlayerScreen: View {
                         Image(systemName: recorder.isRecording ? "stop.circle.fill" : "record.circle")
                             .font(.title3)
                             .foregroundStyle(.red)
+                    }
+                }
+                if playback.isLive, !(playback.current?.isReplay ?? false), MultiViewKeys.isAvailable(sources: store.sources) {
+                    Button {
+                        guard let item = playback.current else { return }
+                        // La connexion de la lecture principale est rendue à la MultiVue (sauf enregistrement en cours).
+                        if !recorder.isRecording { playback.stopByUser() }
+                        multiView.add(item, store: store)
+                        ui.showPlayer = false
+                        Task {
+                            try? await Task.sleep(for: .milliseconds(600))
+                            ui.showMultiView = true
+                        }
+                    } label: {
+                        Image(systemName: "rectangle.split.2x2").font(.title3)
                     }
                 }
                 AirPlayButton().frame(width: 34, height: 34)

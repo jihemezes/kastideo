@@ -1342,11 +1342,12 @@ Settings and sources can be moved between versions with **Backup and transfer**.
 - **Programme alerts** (Settings): by keyword, by theme on your favourite channels, or “Notify me at the start” on a programme page. They are iPhone notifications, received even with the app closed; tap one to open the channel. Allow notifications when iOS asks.
 - **My videos**: Settings > Add a source > **Jellyfin, Emby, Plex** or **Video folders** (iPhone, iCloud Drive, USB drive, NAS added in Files). In Movies and Series, the top-right button picks **All / IPTV / My videos**.
 - **YouTube** (YouTube tab, or the Home tile): follow channels (paste their link or @handle in the search field, no key or account), paste a video or playlist link to play it, **search** with your own free Google API key (Settings > YouTube, steps included), set videos **aside** (long press), add favourites, find your **history** and resume position (red bar on the thumbnail). Import your subscriptions from a **Google Takeout** export (subscriptions.csv). Playback uses YouTube's official player in “privacy-enhanced mode”; it is not an ad blocker. Starting a video stops IPTV playback.
+- **MultiView**: several channels at the same time (2 to 4 screens), as on Mac. It is only offered if your sources allow at least two simultaneous streams: set each subscription's number of connections in **Settings > MultiView** (1 for most; a public list allows 4). Open it with the ▦ button in **Live** or in the player (the current channel is added). Each screen is reserved to a source; pick the channels, the layout (side by side, stacked, grid, **one big + draggable thumbnails**) and the number of screens from the top menu. Tap a screen to give it the sound, double-tap a thumbnail to make it big, long-press to change channel, source or remove the screen. Opening MultiView stops the main playback (unless a recording is running).
 - **Full-screen player**: tap the picture to show the controls, drag the bar to seek, pick the audio track and subtitles. Close it with the arrow: playback continues, with a **mini player** above the tab bar. Sound continues with the screen locked.
 - **AirPlay**: the player button sends the sound to an Apple TV or HomePod; for video, use iOS screen mirroring.
 - Same playback engine (VLC) and buffering settings as on Mac; stream relay for providers that refuse direct connections.
 
-**Not yet on iPhone / iPad**: MultiView and picture in picture. An **Apple TV** version is planned for later.
+**Not yet on iPhone / iPad**: picture in picture (not available with the current playback engine). An **Apple TV** version is planned for later.
 
 If playback fails: **Settings > About > Share the playback log**.
 

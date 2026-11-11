@@ -12,6 +12,7 @@ struct KastideoIOSApp: App {
     @State private var recorder = IOSRecorder()
     @State private var downloads = IOSDownloads()
     @State private var alerts = IOSAlertCenter()
+    @State private var multiView = MultiViewModel()
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("ios.appearance") private var appearance = "dark"
     @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
@@ -56,6 +57,7 @@ struct KastideoIOSApp: App {
                 .environment(recorder)
                 .environment(downloads)
                 .environment(alerts)
+                .environment(multiView)
                 .preferredColorScheme(scheme)
                 .tint(IOSAccent.current(accent).color)
                 .task { await store.start(autoRefresh: true) }

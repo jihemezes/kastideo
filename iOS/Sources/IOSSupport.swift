@@ -84,6 +84,7 @@ final class IOSUI {
     /// Chaîne dont on modifie le nom, le logo ou le guide.
     var editingChannel: MediaItem?
     var showAddSource = false
+    var showMultiView = false
     var showDisclaimer = LegalNotice.needsAcceptance
 }
 

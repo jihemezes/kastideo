@@ -151,6 +151,7 @@ targets:
           - LegalText.swift
           - ThemeLabels.swift
           - YouTube.swift
+          - MultiViewModel.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

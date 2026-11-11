@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios10] - 2026-11-12
+
+- **MultiVue** (iPhone et iPad) : 2 à 4 chaînes en même temps, une source réservée par écran, dispositions côte à côte / empilé / grille / une grande + vignettes déplaçables (accrochées aux coins, taille réglable), son sur l'écran actif, choix de chaîne par favoris, récents et catégories de la source. Boutons dans Direct et dans le lecteur ; Réglages > MultiVue : connexions de chaque abonnement.
+- La logique de la MultiVue est partagée avec le Mac (`App/Sources/MultiViewModel.swift`, déplacée hors de `MultiView.swift`).
+
 ## [1.17.0-ios9] - 2026-11-11
 
 - **Téléchargements en file d'attente** : un seul téléchargement à la fois (une série ou une saison s'enchaîne épisode après épisode), au lieu de tous en même temps qui coupaient la connexion unique de l'abonnement. Les suivants affichent « En attente ».

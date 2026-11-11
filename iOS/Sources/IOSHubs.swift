@@ -33,6 +33,7 @@ enum IOSCatalogMode: String, CaseIterable, Identifiable {
 
 /// Onglet Direct : liste, Cinéma (à la une + rangées), Thèmes ou Guide TV.
 struct IOSLiveHub: View {
+    @Environment(LibraryStore.self) private var store
     @AppStorage("ios.live.mode") private var modeRaw = IOSLiveMode.list.rawValue
 
     private var mode: IOSLiveMode { IOSLiveMode(rawValue: modeRaw) ?? .list }
@@ -62,6 +63,9 @@ struct IOSLiveHub: View {
                     } label: {
                         Image(systemName: mode.icon)
                     }
+                }
+                if MultiViewKeys.isAvailable(sources: store.sources) {
+                    ToolbarItem(placement: .topBarTrailing) { IOSMultiViewButton() }
                 }
                 ToolbarItem(placement: .topBarTrailing) { IOSRecordingsLink() }
             }

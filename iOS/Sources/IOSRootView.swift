@@ -45,6 +45,9 @@ struct IOSRootView: View {
                 .environment(ui)
                 .environment(recorder)
         }
+        .fullScreenCover(isPresented: $ui.showMultiView) {
+            IOSMultiViewScreen()
+        }
         .fullScreenCover(isPresented: Binding(get: { YouTubeStore.shared.isPlaying },
                                               set: { if !$0 { YouTubeStore.shared.closePlayer() } })) {
             IOSYouTubePlayerScreen()
