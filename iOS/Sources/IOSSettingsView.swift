@@ -33,6 +33,7 @@ struct IOSSettingsView: View {
     @State private var includePasswords = true
     @State private var message: String?
     @State private var diagnostic: Source?
+    @State private var editing: Source?
 
     var body: some View {
         NavigationStack {
@@ -52,7 +53,14 @@ struct IOSSettingsView: View {
                             Toggle("", isOn: Binding(get: { source.isEnabled }, set: { store.setEnabled(source.id, $0) }))
                                 .labelsHidden()
                         }
+                        .contentShape(Rectangle())
+                        .onTapGesture { editing = source }
+                        .contextMenu {
+                            Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
+                        }
                         .swipeActions {
+                            Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
+                                .tint(.orange)
                             Button(role: .destructive) { store.removeSource(source.id) } label: {
                                 Label("Supprimer", systemImage: "trash")
                             }
@@ -120,6 +128,9 @@ struct IOSSettingsView: View {
                 }
             }
             .navigationTitle("Réglages")
+            .sheet(item: $editing) { source in
+                NavigationStack { IOSAddSourceView(existing: source) }
+            }
             .sheet(item: $diagnostic) { source in
                 IOSSourceDiagnosticSheet(source: source)
             }

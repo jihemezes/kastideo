@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios11] - 2026-11-12
+
+- **Modifier une source** : Réglages > Sources, toucher une source (ou balayer > Modifier) — nom, adresse, identifiants (mot de passe ou jeton vide = conservé), guide TV, dossiers ; test de connexion Xtream ; tous les types (Xtream, M3U, Jellyfin, Emby, Plex, dossiers, fichier M3U).
+
 ## [1.17.0-ios10] - 2026-11-12
 
 - **MultiVue** (iPhone et iPad) : 2 à 4 chaînes en même temps, une source réservée par écran, dispositions côte à côte / empilé / grille / une grande + vignettes déplaçables (accrochées aux coins, taille réglable), son sur l'écran actif, choix de chaîne par favoris, récents et catégories de la source. Boutons dans Direct et dans le lecteur ; Réglages > MultiVue : connexions de chaque abonnement.
