@@ -1,43 +1,44 @@
 import SwiftUI
 import KastideoCore
 
-/// Barre d'onglets (iPhone) ; sur iPad iOS 18 la barre devient une barre latérale repliable.
+/// Conteneur principal : l'écran choisi à l'accueil + barre du bas (Accueil, Contenu, Application, Aide).
 struct IOSRootView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
     @Environment(IOSRecorder.self) private var recorder
-    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    @ViewBuilder
+    private var screen: some View {
+        switch ui.tab {
+        case .home: IOSHomeView()
+        case .live: IOSLiveHub()
+        case .movies: IOSCatalogHub(kind: .movie)
+        case .series: IOSCatalogHub(kind: .series)
+        case .youtube: IOSYouTubeView()
+        case .library: IOSLibraryScreen()
+        case .resume: IOSCollectionScreen(kind: .resume)
+        case .recents: IOSCollectionScreen(kind: .recents)
+        case .favorites: IOSCollectionScreen(kind: .favorites)
+        case .guide: NavigationStack { IOSGuideView().navigationTitle("Guide TV") }
+        case .recordings: NavigationStack { IOSRecordingsView().navigationTitle("Enregistrements") }
+        case .settingsContent: IOSSettingsView(family: .content)
+        case .settingsApp: IOSSettingsView(family: .app)
+        case .help: IOSHelpView()
+        }
+    }
 
     var body: some View {
         @Bindable var ui = ui
-        TabView(selection: $ui.tab) {
-            IOSHomeView()
-                .tabItem { Label("Accueil", systemImage: "house.fill") }
-                .tag(IOSTab.home)
-            IOSLiveHub()
-                .tabItem { Label("Direct", systemImage: "tv.fill") }
-                .tag(IOSTab.live)
-            IOSCatalogHub(kind: .movie)
-                .tabItem { Label("Films", systemImage: "film.fill") }
-                .tag(IOSTab.movies)
-            IOSCatalogHub(kind: .series)
-                .tabItem { Label("Séries", systemImage: "rectangle.stack.fill") }
-                .tag(IOSTab.series)
-            IOSYouTubeView()
-                .tabItem { Label("YouTube", systemImage: "play.rectangle.fill") }
-                .tag(IOSTab.youtube)
-            IOSSettingsView()
-                .tabItem { Label("Réglages", systemImage: "gearshape.fill") }
-                .tag(IOSTab.settings)
-        }
-        .overlay(alignment: .bottom) {
+        VStack(spacing: 0) {
+            screen
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             if playback.current != nil && !ui.showPlayer {
-                // Au-dessus de la barre d'onglets (49 pt sur iPhone).
                 MiniPlayerBar()
-                    .padding(.bottom, sizeClass == .compact ? 49 : 56)
             }
+            IOSBottomBar()
         }
+        .background(IOSBrand.night.ignoresSafeArea())
         .fullScreenCover(isPresented: $ui.showPlayer) {
             IOSPlayerScreen()
                 .environment(playback)
@@ -60,7 +61,7 @@ struct IOSRootView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: IOSYouTubeView.openSettingsName)) { _ in
-            ui.tab = .settings
+            ui.tab = .settingsContent
         }
         .sheet(item: $ui.detail) { item in
             IOSDetailSheet(item: item)

@@ -161,6 +161,10 @@ targets:
           - en.lproj/*
       - path: CHANGELOG.md
         buildPhase: resources
+      - path: docs/help/aide-fr.md
+        buildPhase: resources
+      - path: docs/help/aide-en.md
+        buildPhase: resources
     dependencies:
       - package: KastideoCore
       - package: VLCKitSPM

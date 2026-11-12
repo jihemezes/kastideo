@@ -134,7 +134,7 @@ struct IOSMultiViewScreen: View {
                 .frame(maxWidth: 480)
             Button("Ouvrir les réglages") {
                 ui.showMultiView = false
-                ui.tab = .settings
+                ui.tab = .settingsApp
             }
             .buttonStyle(.borderedProminent)
         }

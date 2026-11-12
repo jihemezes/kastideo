@@ -18,7 +18,16 @@ struct ConfigDocument: FileDocument {
     }
 }
 
+/// Les réglages sont répartis en deux familles, accessibles depuis la barre du bas.
+enum IOSSettingsFamily {
+    /// Sources, organisation, fiches TMDB, YouTube, iCloud, sauvegarde.
+    case content
+    /// Lecture, MultiVue, enregistrements, replay, Cinéma, apparence, à propos.
+    case app
+}
+
 struct IOSSettingsView: View {
+    var family: IOSSettingsFamily = .content
     @Environment(LibraryStore.self) private var store
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
@@ -39,100 +48,102 @@ struct IOSSettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Sources") {
-                    ForEach(store.sources) { source in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(source.name).font(.body.weight(.medium))
-                                Text(subtitle(for: source)).font(.caption).foregroundStyle(.secondary)
-                                if let error = store.errors[source.id] {
-                                    Text(error).font(.caption).foregroundStyle(.red)
+                if family == .content {
+                    Section("Sources") {
+                        ForEach(store.sources) { source in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(source.name).font(.body.weight(.medium))
+                                    Text(subtitle(for: source)).font(.caption).foregroundStyle(.secondary)
+                                    if let error = store.errors[source.id] {
+                                        Text(error).font(.caption).foregroundStyle(.red)
+                                    }
                                 }
+                                Spacer()
+                                if store.loading.contains(source.id) { ProgressView() }
+                                Toggle("", isOn: Binding(get: { source.isEnabled }, set: { store.setEnabled(source.id, $0) }))
+                                    .labelsHidden()
                             }
-                            Spacer()
-                            if store.loading.contains(source.id) { ProgressView() }
-                            Toggle("", isOn: Binding(get: { source.isEnabled }, set: { store.setEnabled(source.id, $0) }))
-                                .labelsHidden()
+                            .contentShape(Rectangle())
+                            .onTapGesture { editing = source }
+                            .contextMenu {
+                                Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
+                            }
+                            .swipeActions {
+                                Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
+                                    .tint(.orange)
+                                Button(role: .destructive) { store.removeSource(source.id) } label: {
+                                    Label("Supprimer", systemImage: "trash")
+                                }
+                                Button { store.refresh(source) } label: {
+                                    Label("Actualiser", systemImage: "arrow.clockwise")
+                                }
+                                .tint(.blue)
+                                Button { diagnostic = source } label: {
+                                    Label("Diagnostic", systemImage: "stethoscope")
+                                }
+                                .tint(.gray)
+                            }
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture { editing = source }
-                        .contextMenu {
-                            Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
+                        Button { ui.showAddSource = true } label: { Label("Ajouter une source", systemImage: "plus.circle") }
+                        Button { store.refreshAll() } label: { Label("Tout actualiser", systemImage: "arrow.clockwise") }
+                            .disabled(!store.hasSources || store.isBusy)
+                    }
+
+                    IOSActiveSourceSection()
+                    IOSGallerySettingsSection()
+
+                    IOSOrganisationSection()
+
+                    IOSTMDBSettingsSection()
+
+                    IOSYouTubeSettingsSection()
+                    CloudSettingsSection()
+
+                    Section {
+                        Toggle("Inclure les mots de passe", isOn: $includePasswords)
+                        Button { exportConfig() } label: { Label("Exporter la configuration…", systemImage: "square.and.arrow.up") }
+                        Button { importing = true } label: { Label("Importer une configuration…", systemImage: "square.and.arrow.down") }
+                        if let message { Text(message).font(.caption).foregroundStyle(.secondary) }
+                    } header: {
+                        Text("Sauvegarde")
+                    } footer: {
+                        Text("Même fichier que sur Mac, Windows, Linux et Android : enregistrez-le dans iCloud Drive pour le retrouver sur tous vos appareils.")
+                    }
+                } else {
+                    Section("Lecture") {
+                        Picker("Mise en mémoire", selection: $buffering) {
+                            ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
                         }
-                        .swipeActions {
-                            Button { editing = source } label: { Label("Modifier", systemImage: "pencil") }
-                                .tint(.orange)
-                            Button(role: .destructive) { store.removeSource(source.id) } label: {
-                                Label("Supprimer", systemImage: "trash")
-                            }
-                            Button { store.refresh(source) } label: {
-                                Label("Actualiser", systemImage: "arrow.clockwise")
-                            }
-                            .tint(.blue)
-                            Button { diagnostic = source } label: {
-                                Label("Diagnostic", systemImage: "stethoscope")
-                            }
-                            .tint(.gray)
+                        Toggle("Reprendre les films et épisodes là où on s'est arrêté", isOn: $resume)
+                        Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
+                    }
+
+                    IOSMultiViewSettingsSection()
+                    IOSTimeshiftSection()
+                    Section {
+                        NavigationLink { IOSRecordingsView() } label: {
+                            Label("Enregistrements et téléchargements", systemImage: "tray.full")
+                        }
+                        NavigationLink { IOSAlertsView() } label: {
+                            Label("Alertes de programmes", systemImage: "bell.badge")
                         }
                     }
-                    Button { ui.showAddSource = true } label: { Label("Ajouter une source", systemImage: "plus.circle") }
-                    Button { store.refreshAll() } label: { Label("Tout actualiser", systemImage: "arrow.clockwise") }
-                        .disabled(!store.hasSources || store.isBusy)
-                }
-
-                IOSActiveSourceSection()
-                IOSGallerySettingsSection()
-
-                Section("Lecture") {
-                    Picker("Mise en mémoire", selection: $buffering) {
-                        ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
+                    IOSReplaySection()
+                    IOSCinemaSection()
+                    IOSAppearanceSection()
+                    Section("À propos") {
+                        LabeledContent("Version", value: ReleaseNotes.currentVersion)
+                        if FileManager.default.fileExists(atPath: PlaybackLog.currentFile.path) {
+                            ShareLink(item: PlaybackLog.currentFile) { Label("Partager le journal de lecture", systemImage: "doc.text") }
+                        }
+                        Button { ui.showDisclaimer = true } label: { Label("Avertissement", systemImage: "exclamationmark.shield") }
+                        Link(destination: Support.url) { Label("Offrir un café (Ko-fi)", systemImage: "cup.and.saucer") }
+                        Link(destination: URL(string: "https://github.com/jihemezes/kastideo")!) { Label("Kastideo sur GitHub", systemImage: "chevron.left.forwardslash.chevron.right") }
                     }
-                    Toggle("Reprendre les films et épisodes là où on s'est arrêté", isOn: $resume)
-                    Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
-                }
-
-                IOSMultiViewSettingsSection()
-                IOSYouTubeSettingsSection()
-                IOSTimeshiftSection()
-                Section {
-                    NavigationLink { IOSRecordingsView() } label: {
-                        Label("Enregistrements et téléchargements", systemImage: "tray.full")
-                    }
-                    NavigationLink { IOSAlertsView() } label: {
-                        Label("Alertes de programmes", systemImage: "bell.badge")
-                    }
-                }
-                IOSReplaySection()
-                IOSCinemaSection()
-                IOSTMDBSettingsSection()
-
-                IOSAppearanceSection()
-                IOSOrganisationSection()
-
-                CloudSettingsSection()
-
-                Section {
-                    Toggle("Inclure les mots de passe", isOn: $includePasswords)
-                    Button { exportConfig() } label: { Label("Exporter la configuration…", systemImage: "square.and.arrow.up") }
-                    Button { importing = true } label: { Label("Importer une configuration…", systemImage: "square.and.arrow.down") }
-                    if let message { Text(message).font(.caption).foregroundStyle(.secondary) }
-                } header: {
-                    Text("Sauvegarde")
-                } footer: {
-                    Text("Même fichier que sur Mac, Windows, Linux et Android : enregistrez-le dans iCloud Drive pour le retrouver sur tous vos appareils.")
-                }
-
-                Section("À propos") {
-                    LabeledContent("Version", value: ReleaseNotes.currentVersion)
-                    if FileManager.default.fileExists(atPath: PlaybackLog.currentFile.path) {
-                        ShareLink(item: PlaybackLog.currentFile) { Label("Partager le journal de lecture", systemImage: "doc.text") }
-                    }
-                    Button { ui.showDisclaimer = true } label: { Label("Avertissement", systemImage: "exclamationmark.shield") }
-                    Link(destination: Support.url) { Label("Offrir un café (Ko-fi)", systemImage: "cup.and.saucer") }
-                    Link(destination: URL(string: "https://github.com/jihemezes/kastideo")!) { Label("Kastideo sur GitHub", systemImage: "chevron.left.forwardslash.chevron.right") }
                 }
             }
-            .navigationTitle("Réglages")
+            .navigationTitle(family == .content ? Text("Contenu") : Text("Application"))
             .sheet(item: $editing) { source in
                 NavigationStack { IOSAddSourceView(existing: source) }
             }

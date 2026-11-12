@@ -1362,3 +1362,24 @@
 "Synchro iCloud : problème" = "iCloud sync: problem";
 "iCloud : " = "iCloud: ";
 "iCloud : en attente" = "iCloud: waiting";
+
+/* iOS 1.17.0-ios18 */
+"Recherche et abonnements" = "Search and subscriptions";
+"Galerie, dossiers et serveurs" = "Gallery, folders and servers";
+"Chaîne" = "Channel";
+"Film" = "Movie";
+"Série" = "Series";
+"Épisode" = "Episode";
+"Rien à reprendre pour le moment." = "Nothing to resume right now.";
+"L'historique est vide." = "History is empty.";
+"Aucun favori. Touchez longtemps un contenu pour l'ajouter aux favoris." = "No favorites yet. Long-press an item to add it to favorites.";
+"Tout vider" = "Clear all";
+"Retirer (%lld)" = "Remove (%lld)";
+"Vider cette liste ?" = "Clear this list?";
+"Tout retirer" = "Remove all";
+"%lld retiré(s)" = "%lld removed";
+"Aucune vidéo pour le moment." = "No videos yet.";
+"Contenu" = "Content";
+"Application" = "App";
+"Sur iPhone et iPad" = "On iPhone and iPad";
+"Le guide est commun à toutes les versions de Kastideo : certaines indications (menus, raccourcis clavier) concernent le Mac, Windows ou Linux. Une aide dédiée à l'iPhone et à l'iPad viendra compléter cette section." = "The guide is shared by all Kastideo versions: some indications (menus, keyboard shortcuts) apply to Mac, Windows or Linux. Help dedicated to iPhone and iPad will complete this section.";

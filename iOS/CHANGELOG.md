@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios18] - 2026-11-12
+
+- **Nouvel accueil**, dans l'esprit de la version de bureau : fond dégradé violet / magenta avec le gros logo flouté et transparent, titre et logo en haut, recherche, puis les grandes tuiles **Direct, Films, Séries, YouTube** et **Mes vidéos** (seulement si vous avez une galerie, un dossier ou un serveur) avec le nombre de contenus, et en dessous les petits boutons **Reprendre, Récents, Favoris, Guide TV, Enregistrements** (avec pastilles).
+- **Reprendre, Récents, Favoris** : chacun ouvre une page en grille ; retrait par appui long ou **Sélectionner**, **Tout vider**, et **Annuler** juste après (le retrait d'un élément était impossible depuis l'accueil).
+- **Barre du bas simplifiée** : plus de Direct / Films / Séries / YouTube (tout passe par l'accueil) ; **Accueil**, **Contenu** (sources, galerie, catégories, TMDB, YouTube, iCloud, sauvegarde), **Application** (lecture, MultiVue, enregistrements, replay, Cinéma, apparence, à propos) et **Aide**. Le bouton « Autre » disparaît.
+- **Aide** intégrée : pages iPhone / iPad (dont iCloud) en tête, puis le guide complet, avec recherche. Les images du guide n'y sont pas encore affichées.
+
 ## [1.17.0-ios17] - 2026-11-12
 
 - Correction de compilation de la synchronisation iCloud. Même contenu que 1.17.0-ios16.

@@ -89,7 +89,11 @@ final class IOSUI {
 }
 
 enum IOSTab: Hashable {
-    case home, live, movies, series, youtube, settings
+    case home, live, movies, series, youtube
+    /// Accès de l'accueil : Mes vidéos, Reprendre, Récents, Favoris, Guide TV, Enregistrements.
+    case library, resume, recents, favorites, guide, recordings
+    /// Réglages en deux familles (Contenu, Application) et Aide.
+    case settingsContent, settingsApp, help
 }
 
 enum IOSPalette {
