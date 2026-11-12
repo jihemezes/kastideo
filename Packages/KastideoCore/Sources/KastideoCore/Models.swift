@@ -112,7 +112,7 @@ public enum SourceKind: Codable, Hashable, Sendable {
     }
 
     /// Fichiers vidéo de l'appareil (dossiers ou galerie) : titres nettoyés et fiches TMDB par titre exact.
-    var isLocalFiles: Bool {
+    public var isLocalFiles: Bool {
         switch self {
         case .folders, .gallery: return true
         default: return false

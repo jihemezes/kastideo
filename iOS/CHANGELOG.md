@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios14] - 2026-11-12
+
+- Correction de compilation (accessibilité de `SourceKind.isLocalFiles`). Même contenu que 1.17.0-ios13.
+
 ## [1.17.0-ios13] - 2026-11-12
 
 - **Vidéos locales** : nouvelle source « Galerie de l'iPhone » (Réglages > Ajouter les vidéos de la galerie, ou Ajouter une source). Toutes les vidéos ou certains albums ; elles apparaissent dans Films sous « Mes vidéos » avec leur miniature, triées par date de prise de vue. Un film nommé correctement (titre exact) reçoit une fiche TMDB, les vidéos de la caméra n'en cherchent pas.
