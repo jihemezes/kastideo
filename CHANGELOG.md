@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.17.1] - 2026-11-12
+
+- Correction de compilation de la synchronisation iCloud (même contenu que 1.17.0).
+
 ## [1.17.0] - 2026-11-12
 
 - **Synchronisation iCloud** (Réglages > Général > iCloud) : retrouvez sur vos Mac, iPhone et iPad vos **sources, favoris, historique, catégories, réglages d'affichage, reprise de lecture et fiches corrigées**, et — au choix — les **mots de passe** (chiffrés par une phrase secrète). Choisissez le même dossier d'iCloud Drive sur chaque appareil ; la modification la plus récente l'emporte. Une petite icône nuage en bas de la barre latérale indique l'état.

@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios17] - 2026-11-12
+
+- Correction de compilation de la synchronisation iCloud. Même contenu que 1.17.0-ios16.
+
 ## [1.17.0-ios16] - 2026-11-12
 
 - **Synchronisation iCloud revue** : elle passe maintenant par un **dossier de votre iCloud Drive** (Réglages > iCloud > Dossier de synchronisation), le même que sur le Mac, au lieu du Trousseau iCloud. Les iPhone, iPad et Mac se synchronisent entre eux (sources, favoris, historique, catégories, réglages, reprise de lecture, fiches). Les **mots de passe** et la clé TMDB sont **chiffrés** par une phrase secrète (la même sur chaque appareil). Réglages d'affichage propres à chaque plateforme gardés séparément.

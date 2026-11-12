@@ -402,10 +402,12 @@ final class CloudSync {
     /// Supprime les fichiers de synchronisation du dossier (pour tous les appareils) et arrête la synchronisation.
     func eraseCloudData() async {
         if let folder = CloudFolder.resolve() {
-            var files: [String: Data?] = [Self.secretsFile: .some(nil)]
-            for domain in CloudDomain.allCases { files[domain.file] = .some(nil) }
-            files["kastideo-sync-display-ios.json"] = .some(nil)
-            files["kastideo-sync-display-mac.json"] = .some(nil)
+            let removal: Data? = nil
+            var files: [String: Data?] = [:]
+            files[Self.secretsFile] = removal
+            for domain in CloudDomain.allCases { files[domain.file] = removal }
+            files["kastideo-sync-display-ios.json"] = removal
+            files["kastideo-sync-display-mac.json"] = removal
             _ = await CloudFolder.writeAll(files, in: folder)
         }
         resetLocalState()
