@@ -14,6 +14,7 @@ struct KastideoIOSApp: App {
     @State private var alerts = IOSAlertCenter()
     @State private var multiView = MultiViewModel()
     @State private var mediaInfo: MediaInfoStore
+    @State private var cloud: IOSCloudSync
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("ios.appearance") private var appearance = "dark"
     @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
@@ -50,6 +51,7 @@ struct KastideoIOSApp: App {
             info.enrichLocal(source, store: store)
         }
         _mediaInfo = State(initialValue: info)
+        _cloud = State(initialValue: IOSCloudSync(store: store, watch: watch, info: info))
         IOSFiles.ensureFolders()
         IOSNotifier.setup()
         _store = State(initialValue: store)
@@ -71,9 +73,11 @@ struct KastideoIOSApp: App {
                 .environment(alerts)
                 .environment(multiView)
                 .environment(mediaInfo)
+                .environment(cloud)
                 .preferredColorScheme(scheme)
                 .tint(IOSAccent.current(accent).color)
                 .task { await store.start(autoRefresh: true) }
+                .task { await cloud.run() }
                 .task {
                     // Alertes : notifications recalculées au lancement puis toutes les 10 minutes.
                     while !Task.isCancelled {
@@ -84,6 +88,7 @@ struct KastideoIOSApp: App {
                 }
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .background { alerts.reschedule(store: store) }
+                    if phase != .inactive { Task { await cloud.syncNow() } }
                     if phase == .active, UserDefaults.standard.object(forKey: IOSGallery.autoRefreshKey) as? Bool ?? true {
                         for source in store.sources where source.isEnabled && !store.loading.contains(source.id) {
                             if case .gallery = source.kind { store.refresh(source) }

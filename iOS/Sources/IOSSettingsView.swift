@@ -109,6 +109,8 @@ struct IOSSettingsView: View {
                 IOSAppearanceSection()
                 IOSOrganisationSection()
 
+                IOSCloudSettingsSection()
+
                 Section {
                     Toggle("Inclure les mots de passe", isOn: $includePasswords)
                     Button { exportConfig() } label: { Label("Exporter la configuration…", systemImage: "square.and.arrow.up") }

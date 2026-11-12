@@ -1317,3 +1317,28 @@
 "Les vidéos de la galerie apparaissent dans Films, sous « Mes vidéos ». Touchez la source dans la liste ci-dessus pour choisir des albums." = "Gallery videos appear in Movies, under “My videos”. Tap the source in the list above to choose albums.";
 "Galerie de l'iPhone" = "iPhone gallery";
 "La galerie n'est disponible que sur iPhone et iPad." = "The gallery is only available on iPhone and iPad.";
+
+/* iOS 1.17.0-ios15 */
+"sources" = "sources";
+"favoris" = "favorites";
+"historique" = "history";
+"réglages" = "settings";
+"reprise de lecture" = "playback resume";
+"fiches" = "detail pages";
+"Reçu d'un autre appareil : " = "Received from another device: ";
+"Données trop volumineuses pour iCloud (%@)." = "Data too large for iCloud (%@).";
+"Trousseau iCloud indisponible (erreur %lld). Activez « Mots de passe et trousseau » dans les réglages iCloud." = "iCloud Keychain unavailable (error %lld). Turn on “Passwords & Keychain” in iCloud settings.";
+"Synchroniser avec iCloud" = "Sync with iCloud";
+"Sources, favoris, catégories et réglages" = "Sources, favorites, categories and settings";
+"Reprise de lecture" = "Playback resume";
+"Fiches corrigées et clé TMDB" = "Corrected detail pages and TMDB key";
+"Mots de passe des sources" = "Source passwords";
+"Synchroniser maintenant" = "Sync now";
+"Dernière synchronisation" = "Last sync";
+"Aucun compte iCloud n'est connecté sur cet appareil." = "No iCloud account is signed in on this device.";
+"Effacer les données iCloud de Kastideo" = "Erase Kastideo's iCloud data";
+"iCloud" = "iCloud";
+"Retrouvez vos sources, favoris et la reprise de lecture sur tous vos iPhone et iPad. Les données passent par le Trousseau iCloud (chiffré de bout en bout) : il doit être activé dans Réglages > [votre nom] > iCloud. La modification la plus récente l'emporte. Dossiers, fichiers locaux et galerie restent propres à chaque appareil." = "Find your sources, favorites and playback resume on all your iPhones and iPads. Data goes through iCloud Keychain (end-to-end encrypted): it must be turned on in Settings > [your name] > iCloud. The most recent change wins. Folders, local files and the gallery stay specific to each device.";
+"Effacer les données iCloud de Kastideo ?" = "Erase Kastideo's iCloud data?";
+"Effacer et arrêter la synchronisation" = "Erase and stop syncing";
+"Les données de cet appareil sont conservées ; celles stockées dans iCloud sont supprimées pour tous vos appareils." = "Data on this device is kept; data stored in iCloud is deleted for all your devices.";

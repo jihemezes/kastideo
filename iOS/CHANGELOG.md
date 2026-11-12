@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios15] - 2026-11-12
+
+- **Synchronisation iCloud** (Réglages > iCloud, désactivée par défaut) : retrouvez sur tous vos iPhone et iPad vos **sources** (Xtream, M3U par adresse, Jellyfin, Emby, Plex), **favoris**, **historique**, **catégories** (ordre, masquages, renommages) et **réglages d'affichage**, la **reprise de lecture** (positions et contenus vus), les **fiches corrigées** et la **clé TMDB**, et — au choix — les **mots de passe des sources**.
+- Passe par le Trousseau iCloud (chiffré de bout en bout, sans capacité iCloud à activer) : il doit être activé sur chaque appareil. La modification la plus récente l'emporte ; première synchronisation : les listes sont réunies. Choix des éléments, « Synchroniser maintenant », date de dernière synchronisation, effacement des données iCloud.
+- Dossiers, fichiers M3U et galerie restent propres à chaque appareil. Synchro automatique toutes les 30 secondes, au retour dans l'app et à sa mise en arrière-plan. Le Mac suivra dans une prochaine version.
+
 ## [1.17.0-ios14] - 2026-11-12
 
 - Correction de compilation (accessibilité de `SourceKind.isLocalFiles`). Même contenu que 1.17.0-ios13.

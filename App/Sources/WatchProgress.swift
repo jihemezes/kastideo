@@ -158,3 +158,32 @@ final class WatchProgressStore {
         lastSave = Date()
     }
 }
+
+// MARK: - Synchronisation iCloud
+
+/// Reprise de lecture échangée entre appareils.
+struct CloudProgress: Codable {
+    var entries: [String: WatchEntry]
+    var watched: [String]
+    var hidden: [String]
+}
+
+extension WatchProgressStore {
+    func cloudSnapshot() -> CloudProgress {
+        CloudProgress(entries: entries, watched: watched.sorted(), hidden: hiddenResume.sorted())
+    }
+
+    /// Fusionne l'état reçu : position la plus récente par contenu, « vus » et retraits réunis.
+    func mergeCloud(_ remote: CloudProgress) {
+        for (id, entry) in remote.entries {
+            if let local = entries[id] {
+                if entry.updatedAt > local.updatedAt { entries[id] = entry }
+            } else if !watched.contains(id) || entry.fraction < 0.95 {
+                entries[id] = entry
+            }
+        }
+        watched.formUnion(remote.watched)
+        hiddenResume.formUnion(remote.hidden)
+        flush()
+    }
+}

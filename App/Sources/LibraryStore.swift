@@ -1721,3 +1721,69 @@ struct LiveCategory: Identifiable {
     var items: [MediaItem]
     var id: String { name }
 }
+
+// MARK: - Synchronisation iCloud
+
+extension Source {
+    /// Sources que l'on peut retrouver sur un autre appareil (pas les fichiers, dossiers ni la galerie, propres à l'appareil).
+    var isCloudSyncable: Bool {
+        switch kind {
+        case .m3uURL, .xtream, .mediaServer: return true
+        case .m3uFile, .folders, .gallery: return false
+        }
+    }
+}
+
+extension LibraryStore {
+    /// Applique la liste des sources reçue d'iCloud. Retourne celles à (re)charger.
+    func applyCloudSources(_ remote: [Source]) -> [Source] {
+        var merged: [Source] = []
+        var toRefresh: [UUID] = []
+        for var incoming in remote where incoming.isCloudSyncable {
+            if let old = sources.first(where: { $0.id == incoming.id }) {
+                incoming.lastRefresh = old.lastRefresh
+                if old.kind != incoming.kind {
+                    incoming.lastRefresh = nil
+                    serverClients[incoming.id] = nil
+                    toRefresh.append(incoming.id)
+                }
+            } else {
+                incoming.lastRefresh = nil
+                toRefresh.append(incoming.id)
+            }
+            merged.append(incoming)
+        }
+        let keptIDs = Set(merged.map(\.id))
+        let removed = sources.filter { $0.isCloudSyncable && !keptIDs.contains($0.id) }
+        for source in removed { removeSource(source.id) }
+        let localOnly = sources.filter { !$0.isCloudSyncable }
+        sources = merged + localOnly
+        saveSources()
+        rebuildIndex()
+        rebuildEPG()
+        return sources.filter { $0.isEnabled && $0.isCloudSyncable && (toRefresh.contains($0.id) || contents[$0.id] == nil) }
+    }
+
+    func applyCloudFavorites(_ ids: [String]) {
+        favoriteIDs = ids
+        defaults.set(ids, forKey: Keys.favorites)
+    }
+
+    func applyCloudRecents(_ ids: [String]) {
+        recentIDs = Array(ids.prefix(60))
+        defaults.set(recentIDs, forKey: Keys.recents)
+    }
+
+    func applyCloudCategories(_ prefs: [MediaKind: CategoryPrefs]) {
+        for kind in CategoryPrefs.kinds {
+            if let value = prefs[kind] {
+                categoryPrefs[kind] = value
+                if let data = try? JSONEncoder().encode(value) { defaults.set(data, forKey: CategoryPrefs.key(kind)) }
+            } else {
+                categoryPrefs[kind] = nil
+                defaults.removeObject(forKey: CategoryPrefs.key(kind))
+            }
+        }
+        rebuildIndex()
+    }
+}
