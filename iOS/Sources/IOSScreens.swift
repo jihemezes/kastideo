@@ -219,7 +219,22 @@ enum IOSLibraryStatus: String, CaseIterable, Identifiable {
     }
 }
 
-/// Vidéos des sources locales : galerie, dossiers, serveurs Jellyfin, Emby, Plex. Tri et filtres mémorisés.
+/// Critères de regroupement de « Mes vidéos » (combinables : « Source · Catégorie »).
+enum IOSLibraryGroup: String, CaseIterable, Identifiable {
+    case source, category, type, year, month
+    var id: String { rawValue }
+    var label: LocalizedStringKey {
+        switch self {
+        case .source: return "Source"
+        case .category: return "Catégorie / dossier / album"
+        case .type: return "Type"
+        case .year: return "Année d'ajout"
+        case .month: return "Mois d'ajout"
+        }
+    }
+}
+
+/// Vidéos des sources locales : galerie, dossiers, serveurs Jellyfin, Emby, Plex. Tri, regroupements et filtres mémorisés.
 struct IOSLibraryScreen: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
@@ -230,6 +245,8 @@ struct IOSLibraryScreen: View {
     @AppStorage("ios.lib.type") private var typeRaw = IOSLibraryType.all.rawValue
     @AppStorage("ios.lib.status") private var statusRaw = IOSLibraryStatus.all.rawValue
     @AppStorage("ios.lib.source") private var sourceRaw = ""
+    @AppStorage("ios.lib.group") private var groupRaw = ""
+    @State private var collapsed: Set<String> = []
     @State private var search = ""
     @State private var sizes: [String: Int64] = [:]
     @State private var measuring = false
@@ -238,7 +255,69 @@ struct IOSLibraryScreen: View {
     private var type: IOSLibraryType { IOSLibraryType(rawValue: typeRaw) ?? .all }
     private var status: IOSLibraryStatus { IOSLibraryStatus(rawValue: statusRaw) ?? .all }
     private var sourceID: UUID? { UUID(uuidString: sourceRaw) }
-    private var isFiltered: Bool { type != .all || status != .all || sourceID != nil }
+    private var groups: [IOSLibraryGroup] {
+        let chosen = Set(groupRaw.split(separator: ",").compactMap { IOSLibraryGroup(rawValue: String($0)) })
+        return IOSLibraryGroup.allCases.filter { chosen.contains($0) }
+    }
+
+    private func setGroup(_ group: IOSLibraryGroup, _ on: Bool) {
+        var chosen = Set(groups)
+        if on { chosen.insert(group) } else { chosen.remove(group) }
+        if on, group == .year { chosen.remove(.month) }
+        if on, group == .month { chosen.remove(.year) }
+        groupRaw = IOSLibraryGroup.allCases.filter { chosen.contains($0) }.map(\.rawValue).joined(separator: ",")
+        collapsed = []
+    }
+
+    private struct LibSection: Identifiable {
+        let id: String
+        let title: String
+        let sortKey: String
+        var items: [MediaItem]
+    }
+
+    /// Titre et clé de tri d'une vidéo pour un critère de regroupement.
+    private func component(_ group: IOSLibraryGroup, _ item: MediaItem) -> (title: String, sort: String) {
+        switch group {
+        case .source:
+            let name = store.source(id: item.sourceID)?.name ?? String(localized: "Source")
+            return (name, name.lowercased())
+        case .category:
+            var name = item.group
+            let videos = String(localized: "Vidéos")
+            if name.hasPrefix(videos + " · ") { name = String(name.dropFirst(videos.count + 3)) }
+            if name == videos || name.isEmpty { name = String(localized: "Sans catégorie") }
+            return (name, name.lowercased())
+        case .type:
+            if isPersonal(item) { return (String(localized: "Mes vidéos"), "2") }
+            return item.kind == .series ? (String(localized: "Séries"), "1") : (String(localized: "Films"), "0")
+        case .year:
+            guard let date = item.added else { return (String(localized: "Sans date"), "9999") }
+            let year = Calendar.current.component(.year, from: date)
+            return (String(year), String(format: "%04d", 5000 - year))
+        case .month:
+            guard let date = item.added else { return (String(localized: "Sans date"), "9999") }
+            let parts = Calendar.current.dateComponents([.year, .month], from: date)
+            let key = String(format: "%04d%02d", 5000 - (parts.year ?? 0), 13 - (parts.month ?? 1))
+            return (date.formatted(.dateTime.month(.wide).year()).capitalized, key)
+        }
+    }
+
+    private func sections(_ items: [MediaItem]) -> [LibSection] {
+        let active = groups
+        var byID: [String: LibSection] = [:]
+        for item in items {
+            let parts = active.map { component($0, item) }
+            let id = parts.map(\.title).joined(separator: " · ")
+            if byID[id] == nil {
+                byID[id] = LibSection(id: id, title: id, sortKey: parts.map(\.sort).joined(separator: "|"), items: [])
+            }
+            byID[id]?.items.append(item)
+        }
+        return byID.values.sorted { $0.sortKey.localizedStandardCompare($1.sortKey) == .orderedAscending }
+    }
+
+    private var isFiltered: Bool { type != .all || status != .all || sourceID != nil || !groups.isEmpty }
 
     private func isPersonal(_ item: MediaItem) -> Bool {
         let videos = String(localized: "Vidéos")
@@ -308,22 +387,23 @@ struct IOSLibraryScreen: View {
                     }
                     .foregroundStyle(.secondary).padding(40).frame(maxWidth: .infinity)
                 } else {
-                    let side = IOSCardSize.current(sizeRaw).width
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: side, maximum: side + 40), spacing: 12, alignment: .top)],
-                              alignment: .leading, spacing: 16) {
-                        ForEach(list.prefix(3000)) { item in
-                            Button { ui.open(item, store: store, playback: playback) } label: {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    PosterCard(item: item, progress: watch.fraction(for: item.id))
-                                    if let text = caption(item) {
-                                        Text(text).font(.caption2).foregroundStyle(.secondary)
+                    if groups.isEmpty {
+                        grid(Array(list.prefix(3000)))
+                            .padding(.horizontal).padding(.top, 8)
+                    } else {
+                        LazyVStack(alignment: .leading, spacing: 8, pinnedViews: [.sectionHeaders]) {
+                            ForEach(sections(Array(list.prefix(3000)))) { section in
+                                Section {
+                                    if !collapsed.contains(section.id) {
+                                        grid(section.items).padding(.horizontal)
                                     }
+                                } header: {
+                                    sectionHeader(section)
                                 }
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.top, 4)
                     }
-                    .padding(.horizontal).padding(.top, 8)
                 }
             }
             .searchable(text: $search, prompt: "Rechercher")
@@ -337,10 +417,58 @@ struct IOSLibraryScreen: View {
         }
     }
 
+    private func grid(_ items: [MediaItem]) -> some View {
+        let side = IOSCardSize.current(sizeRaw).width
+        return LazyVGrid(columns: [GridItem(.adaptive(minimum: side, maximum: side + 40), spacing: 12, alignment: .top)],
+                         alignment: .leading, spacing: 16) {
+            ForEach(items) { item in
+                Button { ui.open(item, store: store, playback: playback) } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        PosterCard(item: item, progress: watch.fraction(for: item.id))
+                        if let text = caption(item) {
+                            Text(text).font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func sectionHeader(_ section: LibSection) -> some View {
+        Button {
+            if collapsed.contains(section.id) { collapsed.remove(section.id) } else { collapsed.insert(section.id) }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: collapsed.contains(section.id) ? "chevron.right" : "chevron.down")
+                    .font(.caption.weight(.bold)).frame(width: 14)
+                Text(section.title).font(.headline).lineLimit(1)
+                Text("\(section.items.count)").font(.subheadline).foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal).padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(.bar)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
     private func filterMenu(count: Int) -> some View {
         Menu {
             Picker("Trier par", selection: $sortRaw) {
                 ForEach(IOSLibrarySort.allCases) { Text($0.label).tag($0.rawValue) }
+            }
+            Menu("Regrouper par", systemImage: "rectangle.3.group") {
+                ForEach(IOSLibraryGroup.allCases) { group in
+                    Toggle(isOn: Binding(get: { groups.contains(group) }, set: { setGroup(group, $0) })) {
+                        Text(group.label)
+                    }
+                }
+                if !groups.isEmpty {
+                    Divider()
+                    Button("Ne plus regrouper", systemImage: "xmark.circle") { groupRaw = ""; collapsed = [] }
+                }
             }
             Picker("Type", selection: $typeRaw) {
                 ForEach(IOSLibraryType.allCases) { Text($0.label).tag($0.rawValue) }
@@ -360,6 +488,8 @@ struct IOSLibraryScreen: View {
                     typeRaw = IOSLibraryType.all.rawValue
                     statusRaw = IOSLibraryStatus.all.rawValue
                     sourceRaw = ""
+                    groupRaw = ""
+                    collapsed = []
                 }
             }
         } label: {

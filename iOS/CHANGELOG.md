@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios20] - 2026-11-12
+
+- **Guide TV en grille**, comme sur Mac : la journée en ligne du temps horizontale, une ligne par chaîne, **colonne des chaînes** et **heures toujours visibles**, repère « maintenant », programme en cours en orange. **Pincement pour zoomer** l'échelle du temps (ou Menu > Échelle du temps), choix du jour et saut à l'heure, filtres **favoris / récents / thème / catégorie**, appui long sur un programme (regarder, revoir, me prévenir, favori). La vue **Créneaux** reste disponible (Menu > Présentation).
+- **Mes vidéos** : **regroupement multi-critères** (Regrouper par : source, catégorie / dossier / album, type, année ou mois d'ajout, plusieurs à la fois) avec sections repliables ; le tri (récentes, taille, durée, nom…) s'applique dans chaque section.
+
 ## [1.17.0-ios19] - 2026-11-12
 
 - **Catégories** : boutons **Tout désélectionner** et **Tout sélectionner** en tête de la liste (Réglages > Contenu > Catégories) pour ne garder que quelques catégories.

@@ -1402,3 +1402,19 @@
 "Visionnage" = "Viewing";
 "Effacer les filtres" = "Clear filters";
 "Aucune vidéo ne correspond aux filtres." = "No video matches the filters.";
+
+/* iOS 1.17.0-ios20 */
+"Présentation" = "Layout";
+"Créneaux" = "Slots";
+"Échelle du temps" = "Time scale";
+"Serrée" = "Tight";
+"Normale" = "Normal";
+"Large" = "Wide";
+"Très large" = "Extra wide";
+"Regrouper par" = "Group by";
+"Ne plus regrouper" = "Stop grouping";
+"Catégorie / dossier / album" = "Category / folder / album";
+"Année d'ajout" = "Year added";
+"Mois d'ajout" = "Month added";
+"Sans catégorie" = "No category";
+"Sans date" = "No date";

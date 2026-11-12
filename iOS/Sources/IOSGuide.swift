@@ -13,11 +13,18 @@ struct IOSGuideView: View {
     @State private var scope: Scope?
     @State private var guideOnly = true
     @State private var search = ""
+    @AppStorage("ios.guide.layout") private var layoutRaw = "grid"
+    @AppStorage("ios.guide.zoom") private var zoom = 1.0
+    @State private var jumpTarget: Int?
+    @State private var jumpToken = 0
 
     enum Scope: Hashable {
-        case favorites, all
+        case favorites, recents, all
         case category(String)
+        case theme(ContentTheme)
     }
+
+    private var isGrid: Bool { layoutRaw == "grid" }
 
     private static let hours = [8, 12, 14, 18, 20, 21, 22, 23]
 
@@ -29,6 +36,8 @@ struct IOSGuideView: View {
         var list: [MediaItem]
         switch effectiveScope {
         case .favorites: list = store.items(for: .favorites).filter { $0.kind == .live }
+        case .recents: list = store.items(for: .recents).filter { $0.kind == .live }
+        case .theme(let theme): list = store.liveGroups.filter { $0.theme == theme }.map(\.preferred)
         case .all: list = store.items(for: .all(.live))
         case .category(let name): list = store.items(for: .category(.live, name))
         }
@@ -47,9 +56,14 @@ struct IOSGuideView: View {
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
                     dayChips
-                    hourChips
+                    if isGrid { gridHourChips } else { hourChips }
                 }
                 .padding(.vertical, 8)
+                if isGrid {
+                    IOSGuideGrid(channels: list, dayStart: dayStart(now: context.date), jumpTarget: jumpTarget, jumpToken: jumpToken)
+                        .id(dayOffset)
+                        .overlay { if list.isEmpty { emptyView } }
+                } else {
                 List {
                     ForEach(list.prefix(400)) { channel in
                         row(channel, at: at)
@@ -60,13 +74,7 @@ struct IOSGuideView: View {
                     }
                 }
                 .listStyle(.plain)
-                .overlay {
-                    if list.isEmpty {
-                        ContentUnavailableView("Aucune chaîne", systemImage: "calendar",
-                                               description: Text(store.epg.isEmpty
-                                                                 ? String(localized: "Le guide TV n'est pas encore chargé. Tirez pour actualiser depuis l'accueil.")
-                                                                 : String(localized: "Aucune chaîne avec guide dans cette sélection.")))
-                    }
+                .overlay { if list.isEmpty { emptyView } }
                 }
             }
         }
@@ -74,8 +82,30 @@ struct IOSGuideView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Picker("Présentation", selection: $layoutRaw) {
+                        Label("Grille", systemImage: "tablecells").tag("grid")
+                        Label("Créneaux", systemImage: "list.bullet").tag("slots")
+                    }
+                    if isGrid {
+                        Picker("Échelle du temps", selection: $zoom) {
+                            Text("Serrée").tag(0.6)
+                            Text("Normale").tag(1.0)
+                            Text("Large").tag(1.6)
+                            Text("Très large").tag(2.4)
+                        }
+                    }
+                    Divider()
                     Button { scope = .favorites } label: { check(String(localized: "Favoris"), effectiveScope == .favorites) }
+                    Button { scope = .recents } label: { check(String(localized: "Récents"), effectiveScope == .recents) }
                     Button { scope = .all } label: { check(String(localized: "Toutes les chaînes"), effectiveScope == .all) }
+                    Menu("Thèmes") {
+                        ForEach(ContentTheme.browsable) { theme in
+                            Button { scope = .theme(theme) } label: {
+                                if effectiveScope == .theme(theme) { Label(theme.label, systemImage: "checkmark") }
+                                else { Label(theme.label, systemImage: theme.icon) }
+                            }
+                        }
+                    }
                     Divider()
                     Toggle("Seulement celles avec un guide", isOn: $guideOnly)
                     Divider()
@@ -92,6 +122,35 @@ struct IOSGuideView: View {
     @ViewBuilder
     private func check(_ title: String, _ on: Bool) -> some View {
         if on { Label(title, systemImage: "checkmark") } else { Text(title) }
+    }
+
+    private var emptyView: some View {
+        ContentUnavailableView("Aucune chaîne", systemImage: "calendar",
+                               description: Text(store.epg.isEmpty
+                                                 ? String(localized: "Le guide TV n'est pas encore chargé. Tirez pour actualiser depuis l'accueil.")
+                                                 : String(localized: "Aucune chaîne avec guide dans cette sélection.")))
+            .background(Color(.systemBackground))
+    }
+
+    private func dayStart(now: Date) -> Date {
+        let calendar = Calendar.current
+        let base = calendar.date(byAdding: .day, value: dayOffset, to: now) ?? now
+        return calendar.startOfDay(for: base)
+    }
+
+    /// Heures de la vue en grille : un appui fait défiler jusqu'à l'heure.
+    private var gridHourChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                if dayOffset == 0 {
+                    chip(String(localized: "Maintenant"), selected: false) { jumpTarget = nil; jumpToken += 1 }
+                }
+                ForEach(Self.hours, id: \.self) { value in
+                    chip(String(format: "%02d:00", value), selected: false) { jumpTarget = value * 2; jumpToken += 1 }
+                }
+            }
+            .padding(.horizontal)
+        }
     }
 
     // MARK: Créneau
@@ -121,6 +180,7 @@ struct IOSGuideView: View {
                     ForEach(-pastDays...3, id: \.self) { offset in
                         chip(dayLabel(offset), selected: dayOffset == offset) {
                             dayOffset = offset
+                            jumpTarget = nil
                             if offset != 0 && hour == nil { hour = 20 }
                         }
                         .id(offset)
