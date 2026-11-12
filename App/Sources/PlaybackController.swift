@@ -348,8 +348,39 @@ final class PlaybackController {
 
     // MARK: - Commandes
 
+    /// Vidéos de la galerie : adresse « kastideo-galerie://… », convertie en fichier lisible juste avant la lecture.
+    nonisolated static let galleryScheme = "kastideo-galerie"
+    @ObservationIgnored var galleryResolver: (@MainActor (MediaItem) async throws -> URL)?
+    @ObservationIgnored private var galleryTask: Task<Void, Never>?
+
+    private func playGallery(_ item: MediaItem) {
+        guard let resolver = galleryResolver else { return }
+        galleryTask?.cancel()
+        flushProgress()
+        current = item
+        stoppedItem = nil
+        errorMessage = nil
+        isLoading = true
+        galleryTask = Task { [weak self] in
+            do {
+                let file = try await resolver(item)
+                guard let self, !Task.isCancelled, self.current?.id == item.id else { return }
+                var resolved = item
+                resolved.streamURL = file
+                self.current = nil
+                self.play(resolved)
+            } catch {
+                guard let self, !Task.isCancelled, self.current?.id == item.id else { return }
+                self.isLoading = false
+                self.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
     func play(_ item: MediaItem) {
         guard let url = item.streamURL else { return }
+        if url.scheme == Self.galleryScheme { playGallery(item); return }
+        galleryTask?.cancel()
         if current?.id == item.id, errorMessage == nil, player.media != nil {
             if !player.isPlaying { player.play() }
             return
@@ -378,6 +409,7 @@ final class PlaybackController {
     }
 
     func stop() {
+        galleryTask?.cancel()
         flushProgress()
         pendingResume = nil
         resumedAt = nil

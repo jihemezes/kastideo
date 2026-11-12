@@ -171,6 +171,7 @@ struct SourceStatusRow: View {
         case .m3uURL: return "link"
         case .m3uFile: return "doc.text"
         case .folders: return "folder"
+        case .gallery: return "photo.on.rectangle"
         case .mediaServer(let type, _, _): return type == .plex ? "play.rectangle.on.rectangle" : "server.rack"
         }
     }

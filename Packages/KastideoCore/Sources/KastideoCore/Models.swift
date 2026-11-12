@@ -89,6 +89,8 @@ public enum SourceKind: Codable, Hashable, Sendable {
     case folders(bookmarks: [Data], paths: [String])
     /// Serveur Jellyfin, Emby ou Plex (mot de passe, jeton et session dans le trousseau).
     case mediaServer(type: MediaServerType, server: URL, username: String)
+    /// Vidéos de la galerie du téléphone (iPhone, iPad) : identifiants des albums choisis (vide : toutes les vidéos).
+    case gallery(albumIDs: [String], albumNames: [String])
 
     public var typeLabel: String {
         switch self {
@@ -97,6 +99,7 @@ public enum SourceKind: Codable, Hashable, Sendable {
         case .xtream: return "Xtream Codes"
         case .folders: return "Dossiers"
         case .mediaServer(let type, _, _): return type.label
+        case .gallery: return "Galerie"
         }
     }
 
@@ -104,7 +107,15 @@ public enum SourceKind: Codable, Hashable, Sendable {
     public var isIPTV: Bool {
         switch self {
         case .m3uURL, .m3uFile, .xtream: return true
-        case .folders, .mediaServer: return false
+        case .folders, .mediaServer, .gallery: return false
+        }
+    }
+
+    /// Fichiers vidéo de l'appareil (dossiers ou galerie) : titres nettoyés et fiches TMDB par titre exact.
+    var isLocalFiles: Bool {
+        switch self {
+        case .folders, .gallery: return true
+        default: return false
         }
     }
 

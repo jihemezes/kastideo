@@ -200,6 +200,7 @@ targets:
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau."
+        NSPhotoLibraryUsageDescription: "Kastideo lit les vidéos de votre galerie (albums de votre choix) pour les ranger dans « Mes vidéos » et les lire. Rien n'est copié ni envoyé ailleurs."
         NSBonjourServices:
           - _airplay._tcp
     settings:

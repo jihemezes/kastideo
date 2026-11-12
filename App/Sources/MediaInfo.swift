@@ -258,12 +258,13 @@ final class MediaInfoStore {
     /// Affiches et résumés TMDB des films et séries d'une source « Dossiers » qui n'en ont pas encore
     /// (300 au plus par passage, 4 recherches à la fois).
     func enrichLocal(_ source: Source, store: LibraryStore) {
-        guard usesTMDB, case .folders = source.kind, !enriching.contains(source.id),
+        guard usesTMDB, source.kind.isLocalFiles, !enriching.contains(source.id),
               let content = store.content(of: source.id) else { return }
         let personal = String(localized: "Vidéos") + " · "
         let personalAllowed = UserDefaults.standard.object(forKey: "tmdb.personal") as? Bool ?? true
         let todo = content.items.filter {
-            ($0.kind == .movie || $0.kind == .series) && ($0.logoURL == nil || $0.rating == nil) && (personalAllowed || !$0.group.hasPrefix(personal))
+            ($0.kind == .movie || $0.kind == .series) && $0.epgID != GalleryHook.genericMarker
+                && ($0.logoURL == nil || $0.rating == nil) && (personalAllowed || !$0.group.hasPrefix(personal))
                 && !enrichTried.contains($0.id)
         }.prefix(300)
         guard !todo.isEmpty else { return }

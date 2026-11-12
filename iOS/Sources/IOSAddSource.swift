@@ -8,7 +8,7 @@ struct IOSAddSourceView: View {
     @Environment(\.dismiss) private var dismiss
 
     enum Mode: String, CaseIterable, Identifiable {
-        case xtream, m3u, jellyfin, emby, plex, folders
+        case xtream, m3u, jellyfin, emby, plex, folders, gallery
         /// Liste M3U importée d'un fichier (modifiable seulement : nom et guide).
         case m3uFile
         var id: String { rawValue }
@@ -20,6 +20,7 @@ struct IOSAddSourceView: View {
             case .emby: return "Emby"
             case .plex: return "Plex"
             case .folders: return String(localized: "Dossiers de vidéos")
+            case .gallery: return String(localized: "Galerie de l'iPhone")
             case .m3uFile: return String(localized: "Liste M3U (fichier)")
             }
         }
@@ -52,6 +53,8 @@ struct IOSAddSourceView: View {
     @State private var epg: String
     @State private var folders: [Folder]
     @State private var pickingFolder = false
+    @State private var galleryAll: Bool
+    @State private var galleryIDs: Set<String>
     @State private var saving = false
     @State private var testing = false
     @State private var errorText: String?
@@ -62,6 +65,7 @@ struct IOSAddSourceView: View {
         var mode = Mode.xtream
         var server = "", username = "", playlist = ""
         var folders: [Folder] = []
+        var galleryIDs: [String] = []
         if let existing {
             switch existing.kind {
             case .xtream(let url, let user):
@@ -76,8 +80,13 @@ struct IOSAddSourceView: View {
             case .mediaServer(let type, let url, let user):
                 mode = type == .plex ? .plex : (type == .emby ? .emby : .jellyfin)
                 server = url.absoluteString; username = user
+            case .gallery(let ids, _):
+                mode = .gallery
+                galleryIDs = ids
             }
         }
+        _galleryAll = State(initialValue: galleryIDs.isEmpty)
+        _galleryIDs = State(initialValue: Set(galleryIDs))
         _mode = State(initialValue: mode)
         _name = State(initialValue: existing?.name ?? "")
         _server = State(initialValue: server)
@@ -112,6 +121,8 @@ struct IOSAddSourceView: View {
             return serverURL != nil
         case .folders:
             return !folders.isEmpty
+        case .gallery:
+            return galleryAll || !galleryIDs.isEmpty
         }
     }
 
@@ -128,6 +139,7 @@ struct IOSAddSourceView: View {
                         Text("Emby").tag(Mode.emby)
                         Text("Plex").tag(Mode.plex)
                         Text("Dossiers de vidéos").tag(Mode.folders)
+                        Text("Galerie de l'iPhone").tag(Mode.gallery)
                     }
                 }
                 .pickerStyle(.menu)
@@ -190,6 +202,8 @@ struct IOSAddSourceView: View {
                 } footer: {
                     Text("Le jeton (X-Plex-Token) n'est pas nécessaire si le serveur est ouvert au réseau local.")
                 }
+            case .gallery:
+                IOSGalleryAlbumsSection(all: $galleryAll, selected: $galleryIDs)
             case .folders:
                 Section {
                     ForEach(folders) { folder in
@@ -293,6 +307,11 @@ struct IOSAddSourceView: View {
             guard let existing else { return }
             kind = existing.kind
             defaultName = existing.name
+        case .gallery:
+            let ids = galleryAll ? [] : galleryIDs.sorted()
+            let names = IOSGallery.albums().filter { galleryIDs.contains($0.id) }.map(\.name)
+            kind = .gallery(albumIDs: ids, albumNames: galleryAll ? [] : names)
+            defaultName = String(localized: "Vidéos locales")
         case .folders:
             kind = .folders(bookmarks: folders.map(\.bookmark), paths: folders.map(\.path))
             defaultName = folders.first.map { URL(fileURLWithPath: $0.path).lastPathComponent } ?? String(localized: "Mes vidéos")

@@ -1292,3 +1292,28 @@
 "Ajoutez une clé TMDB dans Réglages pour des fiches plus complètes (affiches HD, casting, bande-annonce)." = "Add a TMDB key in Settings for fuller pages (HD posters, cast, trailer).";
 "TENDANCE DE LA SEMAINE" = "TRENDING THIS WEEK";
 "Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce, résumé traduit et les tendances de la semaine dans le bandeau Cinéma." = "Information comes from your IPTV provider; with a TMDB (The Movie Database) key, Kastideo adds HD posters, actor photos, trailer, translated summary and this week's trends in the Cinema banner.";
+
+/* iOS 1.17.0-ios13 */
+"Kastideo n'a pas accès à la galerie. Autorisez-le dans Réglages de l'iPhone > Kastideo > Photos." = "Kastideo cannot access the gallery. Allow it in iPhone Settings > Kastideo > Photos.";
+"Cette vidéo n'est plus dans la galerie (supprimée, ou hors de la sélection autorisée)." = "This video is no longer in the gallery (deleted, or outside the allowed selection).";
+"Impossible de lire cette vidéo de la galerie." = "Unable to play this gallery video.";
+"Galerie" = "Gallery";
+"Vidéo" = "Video";
+"Vidéo du %@" = "Video from %@";
+"Prise le %@" = "Taken on %@";
+"Kastideo n'a pas accès à la galerie." = "Kastideo cannot access the gallery.";
+"Ouvrir les réglages de l'iPhone" = "Open iPhone Settings";
+"Autoriser l'accès aux vidéos" = "Allow access to videos";
+"Toutes les vidéos" = "All videos";
+"Aucun album avec des vidéos." = "No album with videos.";
+"Albums" = "Albums";
+"Vous n'avez autorisé qu'une sélection de photos et vidéos : seules celles-ci apparaissent." = "You only allowed a selection of photos and videos: only those appear.";
+"Les films nommés correctement (titre exact) reçoivent une affiche et un résumé TMDB ; les vidéos de la caméra gardent leur miniature." = "Movies with a proper name (exact title) get a TMDB poster and summary; camera videos keep their thumbnail.";
+"Choisir d'autres vidéos…" = "Choose more videos…";
+"Ajouter les vidéos de la galerie" = "Add the gallery videos";
+"Actualiser à l'ouverture de l'app" = "Refresh when the app opens";
+"Autoriser l'accès dans les réglages de l'iPhone" = "Allow access in iPhone Settings";
+"Vidéos locales" = "Local videos";
+"Les vidéos de la galerie apparaissent dans Films, sous « Mes vidéos ». Touchez la source dans la liste ci-dessus pour choisir des albums." = "Gallery videos appear in Movies, under “My videos”. Tap the source in the list above to choose albums.";
+"Galerie de l'iPhone" = "iPhone gallery";
+"La galerie n'est disponible que sur iPhone et iPad." = "The gallery is only available on iPhone and iPad.";

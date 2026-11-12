@@ -22,6 +22,7 @@ extension SourceKind {
         case .xtream: return String(localized: "Xtream Codes")
         case .folders: return String(localized: "Dossiers")
         case .mediaServer(let type, _, _): return type.label
+        case .gallery: return String(localized: "Galerie")
         }
     }
 }

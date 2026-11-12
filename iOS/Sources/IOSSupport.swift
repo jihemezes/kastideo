@@ -99,6 +99,19 @@ enum IOSPalette {
     static let card = Color.white.opacity(0.08)
 }
 
+/// Images du disque (miniatures de la galerie), gardées en mémoire.
+enum IOSImageCache {
+    private static let cache = NSCache<NSString, UIImage>()
+
+    static func image(at url: URL) -> UIImage? {
+        let key = url.path as NSString
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let image = UIImage(contentsOfFile: url.path) else { return nil }
+        cache.setObject(image, forKey: key)
+        return image
+    }
+}
+
 /// Pastille d'image (logo de chaîne ou affiche) avec une lettre de secours.
 struct ArtworkView: View {
     let url: URL?
@@ -108,7 +121,9 @@ struct ArtworkView: View {
     var body: some View {
         ZStack {
             Rectangle().fill(IOSPalette.card)
-            if let url {
+            if let url, url.isFileURL, let image = IOSImageCache.image(at: url) {
+                Image(uiImage: image).resizable().aspectRatio(contentMode: contentMode)
+            } else if let url {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
@@ -154,6 +169,7 @@ extension SourceKind {
         case .xtream: return String(localized: "Xtream Codes")
         case .folders: return String(localized: "Dossiers")
         case .mediaServer(let type, _, _): return type.label
+        case .gallery: return String(localized: "Galerie")
         }
     }
 }

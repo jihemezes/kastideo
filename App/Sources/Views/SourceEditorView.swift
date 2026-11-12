@@ -440,6 +440,8 @@ struct SourceEditorView: View {
             mode = type == .plex ? .plex : (type == .emby ? .emby : .jellyfin)
             server = url.absoluteString
             username = user
+        case .gallery:
+            break
         }
     }
 

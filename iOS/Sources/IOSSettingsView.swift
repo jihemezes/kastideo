@@ -81,6 +81,7 @@ struct IOSSettingsView: View {
                 }
 
                 IOSActiveSourceSection()
+                IOSGallerySettingsSection()
 
                 Section("Lecture") {
                     Picker("Mise en mémoire", selection: $buffering) {

@@ -13,7 +13,7 @@ struct KastideoIOSApp: App {
     @State private var downloads = IOSDownloads()
     @State private var alerts = IOSAlertCenter()
     @State private var multiView = MultiViewModel()
-    @State private var mediaInfo = MediaInfoStore()
+    @State private var mediaInfo: MediaInfoStore
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("ios.appearance") private var appearance = "dark"
     @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
@@ -39,6 +39,17 @@ struct KastideoIOSApp: App {
             guard ReplaySettings.returnToLive, let channel = store?.replayChannel(of: item) else { return }
             playback?.play(channel)
         }
+        // Vidéos locales : examen de la galerie et résolution du fichier avant la lecture.
+        GalleryHook.scan = { source in try await IOSGallery.scan(source) }
+        playback.galleryResolver = { item in try await IOSGallery.resolve(item) }
+        IOSGallery.purgeCaches()
+        // Dossiers et galerie : affiches et résumés TMDB pour les films reconnus (titre exact).
+        let info = MediaInfoStore()
+        store.onContentLoaded = { [weak store, weak info] source in
+            guard let store, let info else { return }
+            info.enrichLocal(source, store: store)
+        }
+        _mediaInfo = State(initialValue: info)
         IOSFiles.ensureFolders()
         IOSNotifier.setup()
         _store = State(initialValue: store)
@@ -73,6 +84,11 @@ struct KastideoIOSApp: App {
                 }
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .background { alerts.reschedule(store: store) }
+                    if phase == .active, UserDefaults.standard.object(forKey: IOSGallery.autoRefreshKey) as? Bool ?? true {
+                        for source in store.sources where source.isEnabled && !store.loading.contains(source.id) {
+                            if case .gallery = source.kind { store.refresh(source) }
+                        }
+                    }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: IOSNotifier.openChannelName)) { note in
                     guard let id = note.object as? String,

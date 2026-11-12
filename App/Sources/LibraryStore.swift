@@ -2,12 +2,20 @@ import Foundation
 import Observation
 import KastideoCore
 
+/// Lecture de la galerie de l'appareil (renseignée par l'application iPhone / iPad).
+enum GalleryHook {
+    nonisolated(unsafe) static var scan: (@Sendable (Source) async throws -> SourceContent)?
+    /// Repère les vidéos dont le nom est celui d'une caméra (IMG_1234) : pas de recherche TMDB.
+    static let genericMarker = "galerie:generique"
+}
+
 enum LibraryError: LocalizedError {
     case missingPassword
     case emptyPlaylist
     case notXtream
     case folderMissing(String)
     case noFolder
+    case galleryUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -17,6 +25,7 @@ enum LibraryError: LocalizedError {
         case .folderMissing(let paths):
             return String(localized: "Dossier introuvable (\(paths)) : disque débranché ou partage réseau non connecté ?")
         case .noFolder: return String(localized: "Choisissez au moins un dossier.")
+        case .galleryUnavailable: return String(localized: "La galerie n'est disponible que sur iPhone et iPad.")
         }
     }
 }
@@ -320,7 +329,7 @@ final class LibraryStore {
         let staleLimit = Date().addingTimeInterval(-6 * 3600)
         for source in sources where source.isEnabled {
             switch source.kind {
-            case .folders:
+            case .folders, .gallery:
                 // Dossiers : examinés à chaque lancement (fichiers ajoutés ou retirés entre-temps).
                 refresh(source)
             case .mediaServer:
@@ -406,12 +415,14 @@ final class LibraryStore {
             do {
                 var content = try await Self.fetch(source, password: password)
                 guard sources.contains(where: { $0.id == source.id }) else { loading.remove(source.id); return }
-                if case .folders = source.kind, let previous = contents[source.id] {
+                if source.kind.isLocalFiles, let previous = contents[source.id] {
                     // Affiches et résumés déjà trouvés (TMDB) gardés d'un examen à l'autre.
                     let known = Dictionary(previous.items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
                     for index in content.items.indices {
                         guard let old = known[content.items[index].id] else { continue }
-                        if content.items[index].logoURL == nil { content.items[index].logoURL = old.logoURL }
+                        if content.items[index].logoURL == nil || (source.kind.isLocalFiles && old.logoURL?.isFileURL == false && old.rating != nil) {
+                            content.items[index].logoURL = old.logoURL
+                        }
                         if content.items[index].info == nil { content.items[index].info = old.info }
                         if content.items[index].year == nil { content.items[index].year = old.year }
                         if content.items[index].genres == nil { content.items[index].genres = old.genres }
@@ -1191,6 +1202,9 @@ final class LibraryStore {
             let labels = FolderScanner.Labels(movies: String(localized: "Films"), series: String(localized: "Séries"),
                                               videos: String(localized: "Vidéos"))
             return FolderScanner.scan(roots: roots, sourceID: source.id, labels: labels)
+        case .gallery:
+            guard let scan = GalleryHook.scan else { throw LibraryError.galleryUnavailable }
+            return try await scan(source)
         case .mediaServer(let type, _, _):
             let client = try await makeServerClient(source, forceSignIn: false)
             do {
@@ -1374,8 +1388,7 @@ struct GuideChannelChoice: Identifiable, Hashable {
 extension LibraryStore {
     /// Vrai pour un fichier d'un dossier local (disque, clé USB, NAS).
     func isLocalFile(_ item: MediaItem) -> Bool {
-        if case .folders = source(id: item.sourceID)?.kind { return true }
-        return false
+        return source(id: item.sourceID)?.kind.isLocalFiles ?? false
     }
 
     /// Vrai pour un contenu de la vidéothèque (dossiers, serveurs).
@@ -1535,7 +1548,7 @@ extension LibraryStore {
                 guard let self else { return }
                 for source in self.sources where source.isEnabled && !self.loading.contains(source.id) {
                     switch source.kind {
-                    case .folders:
+                    case .folders, .gallery:
                         self.refresh(source)
                     case .mediaServer:
                         if (source.lastRefresh ?? .distantPast) < Date().addingTimeInterval(-3600) { self.refresh(source) }
@@ -1576,7 +1589,7 @@ extension LibraryStore {
                 sourceIndex[source.id] = export.sources.count
                 export.sources.append(.init(name: source.name, kind: "m3uUrl", address: url.absoluteString, username: nil,
                                             password: nil, epgUrl: source.epgURL?.absoluteString, enabled: source.isEnabled))
-            case .m3uFile:
+            case .m3uFile, .gallery:
                 continue
             case .folders(_, let paths):
                 sourceIndex[source.id] = export.sources.count

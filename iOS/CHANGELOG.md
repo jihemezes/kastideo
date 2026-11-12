@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios13] - 2026-11-12
+
+- **Vidéos locales** : nouvelle source « Galerie de l'iPhone » (Réglages > Ajouter les vidéos de la galerie, ou Ajouter une source). Toutes les vidéos ou certains albums ; elles apparaissent dans Films sous « Mes vidéos » avec leur miniature, triées par date de prise de vue. Un film nommé correctement (titre exact) reçoit une fiche TMDB, les vidéos de la caméra n'en cherchent pas.
+- **Accès limité** respecté (seules les photos et vidéos autorisées apparaissent, bouton « Choisir d'autres vidéos… »), accès refusé expliqué avec raccourci vers les réglages de l'iPhone. Vidéos iCloud téléchargées avant la lecture ; ralentis convertis pour la lecture. Réglage « Actualiser à l'ouverture de l'app ».
+- Les fiches TMDB des dossiers de vidéos fonctionnent maintenant aussi sur iPhone / iPad.
+- Core : nouveau type de source `gallery` (Mac et Windows/Linux ne le proposent pas).
+
 ## [1.17.0-ios12] - 2026-11-12
 
 - **Fiches TMDB** (comme sur Mac) : la fiche d'un film ou d'une série affiche l'affiche HD, le titre traduit, le résumé, les genres, la note, la durée, les réalisateurs, la **distribution avec photos** et la bande-annonce. Réglages > Fiches des films et séries : clé TMDB (facultative, vérifiée à l'enregistrement).
