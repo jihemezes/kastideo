@@ -9,12 +9,14 @@ enum IOSHeroKeys {
     static let categorySeries = "hero.category.series"
     static let useCategory = "hero.useCategory"
     static let useRecent = "hero.useRecent"
+    static let useTrending = "hero.useTrending"
     static let interval = "hero.interval"
 }
 
 struct IOSHeroSlide: Identifiable, Equatable {
     let item: MediaItem
     let caption: String
+    var backdrop: URL?
     var id: String { item.id }
 }
 
@@ -25,6 +27,8 @@ struct IOSHero: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
+    @Environment(MediaInfoStore.self) private var info
+    @AppStorage(IOSHeroKeys.useTrending) private var useTrending = true
     @AppStorage(IOSHeroKeys.categoryMovie) private var categoryMovie = ""
     @AppStorage(IOSHeroKeys.categorySeries) private var categorySeries = ""
     @AppStorage(IOSHeroKeys.useCategory) private var useCategory = true
@@ -36,7 +40,7 @@ struct IOSHero: View {
     @State private var index = 0
 
     private var settingsKey: String {
-        "\(kind.rawValue)|\(categoryMovie)|\(categorySeries)|\(useCategory)|\(useRecent)|\(store.count(for: kind))|\(store.liveGroups.count)|\(countryCodes)|\(countryNeutral)"
+        "\(kind.rawValue)|\(categoryMovie)|\(categorySeries)|\(useCategory)|\(useRecent)|\(useTrending)|\(info.usesTMDB)|\(store.count(for: kind))|\(store.liveGroups.count)|\(countryCodes)|\(countryNeutral)"
     }
 
     var body: some View {
@@ -98,6 +102,16 @@ struct IOSHero: View {
             }.value
             let caption = String(localized: "AJOUTÉ RÉCEMMENT")
             groups.append(newest.map { IOSHeroSlide(item: $0, caption: caption) })
+        }
+
+        if useTrending, info.usesTMDB {
+            let trends = await info.trending(isSeries: kind == .series)
+            if !trends.isEmpty {
+                let matched = await info.match(trends, in: all, kind: kind)
+                let caption = String(localized: "TENDANCE DE LA SEMAINE")
+                groups.append(matched.filter { countries.allows($0.item) }.prefix(6)
+                    .map { IOSHeroSlide(item: $0.item, caption: caption, backdrop: $0.trend.backdropURL) })
+            }
         }
 
         if useCategory {
@@ -175,7 +189,13 @@ struct IOSHeroSlideView: View {
         ZStack(alignment: .bottomLeading) {
             // L'image remplit le cadre sans l'agrandir : le texte et les boutons restent dans le bandeau.
             Color.clear
-                .overlay { ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill).blur(radius: 26).scaleEffect(1.3) }
+                .overlay {
+                    if let backdrop = slide.backdrop {
+                        ArtworkView(url: backdrop, name: item.name, contentMode: .fill)
+                    } else {
+                        ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill).blur(radius: 26).scaleEffect(1.3)
+                    }
+                }
                 .clipped()
             LinearGradient(colors: [.black.opacity(0.85), .black.opacity(0.45)], startPoint: .bottom, endPoint: .top)
             HStack(alignment: .bottom, spacing: 14) {

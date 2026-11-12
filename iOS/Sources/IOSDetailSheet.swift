@@ -9,11 +9,21 @@ struct IOSDetailSheet: View {
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
     @Environment(IOSDownloads.self) private var downloads
+    @Environment(MediaInfoStore.self) private var mediaInfo
+    @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
     @State private var seasons: [SeriesSeason] = []
     @State private var selectedSeason = 0
     @State private var loadingSeasons = false
     @State private var seasonsError: String?
+    @State private var fixing: MediaItem?
+
+    private var details: MediaDetails? { mediaInfo.details(for: item) }
+
+    private var displayTitle: String {
+        if let title = details?.title, details?.sources.contains("TMDB") == true { return title }
+        return TMDB.cleanTitle(details?.title ?? item.name).title
+    }
 
     private var isSeriesWithEpisodes: Bool { item.kind == .series && item.streamURL == nil }
 
@@ -22,12 +32,18 @@ struct IOSDetailSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(alignment: .top, spacing: 16) {
-                        ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
+                        ArtworkView(url: details?.posterURL ?? item.logoURL, name: item.name, contentMode: .fill)
                             .frame(width: 120, height: 180)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(item.name).font(.title3.bold())
+                            Text(displayTitle).font(.title3.bold())
+                            if let original = details?.originalTitle, original != displayTitle {
+                                Text(original).font(.footnote).foregroundStyle(.secondary)
+                            }
                             Text(meta).font(.subheadline).foregroundStyle(.secondary)
+                            if let tagline = details?.tagline, !tagline.isEmpty {
+                                Text(tagline).font(.footnote.italic()).foregroundStyle(.secondary)
+                            }
                             if !item.group.isEmpty { Text(item.group).font(.caption).foregroundStyle(.secondary) }
                             if let fraction = watch.fraction(for: item.id), let entry = watch.entries[item.id] {
                                 VStack(alignment: .leading, spacing: 3) {
@@ -59,9 +75,22 @@ struct IOSDetailSheet: View {
                         .buttonStyle(.bordered).controlSize(.large)
                     }
 
-                    if let info = item.info, !info.isEmpty {
-                        Text(info).font(.body)
+                    if let trailer = details?.trailerURL {
+                        Button { openURL(trailer) } label: {
+                            Label("Bande-annonce", systemImage: "film.stack")
+                        }
+                        .buttonStyle(.bordered)
                     }
+
+                    if let plot = details?.plot ?? item.info, !plot.isEmpty {
+                        Text(plot).font(.body)
+                    } else if mediaInfo.isLoading(item) {
+                        ProgressView()
+                    }
+
+                    credits
+                    castRail
+                    if item.kind == .movie || item.kind == .series { ficheFooter }
 
                     if isSeriesWithEpisodes { episodes }
                 }
@@ -73,16 +102,76 @@ struct IOSDetailSheet: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Fermer") { dismiss() } }
             }
             .task { await loadSeasons() }
+            .task(id: item.id) { await mediaInfo.load(item, store: store) }
+            .sheet(item: $fixing) { target in
+                IOSFixDetailsSheet(item: target)
+            }
         }
     }
 
     private var meta: String {
         var parts: [String] = []
-        if let year = item.year { parts.append(String(year)) }
-        if let runtime = item.runtime { parts.append("\(runtime) min") }
-        if let rating = item.rating, rating > 0 { parts.append(String(format: "★ %.1f", rating)) }
-        if let genres = item.genres, !genres.isEmpty { parts.append(genres.prefix(2).joined(separator: ", ")) }
+        if let year = details?.year ?? item.year { parts.append(String(year)) }
+        if let runtime = details?.runtime ?? item.runtime { parts.append("\(runtime) min") }
+        if let rating = details?.rating ?? item.rating, rating > 0 { parts.append(String(format: "★ %.1f", rating)) }
+        if let seasons = details?.seasonCount, seasons > 0 {
+            parts.append(seasons == 1 ? String(localized: "1 saison") : String(localized: "\(seasons) saisons"))
+        }
+        let genres = (details?.genres.isEmpty == false ? details?.genres : item.genres) ?? []
+        if !genres.isEmpty { parts.append(genres.prefix(3).joined(separator: ", ")) }
         return parts.joined(separator: " · ")
+    }
+
+    @ViewBuilder
+    private var credits: some View {
+        if let directors = details?.directors, !directors.isEmpty {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(item.kind == .series ? String(localized: "Création") : String(localized: "Réalisation"))
+                    .font(.callout.weight(.semibold)).foregroundStyle(.secondary)
+                Text(directors.joined(separator: ", ")).font(.callout)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var castRail: some View {
+        if let cast = details?.cast, !cast.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Distribution").font(.headline)
+                if cast.contains(where: { $0.photoURL != nil }) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(alignment: .top, spacing: 14) {
+                            ForEach(cast) { person in IOSCastCard(person: person) }
+                        }
+                    }
+                } else {
+                    Text(cast.map(\.name).joined(separator: ", ")).font(.callout).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var ficheFooter: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let error = mediaInfo.errors[item.id] {
+                Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange)
+            }
+            if let sources = details?.sources {
+                Text("Informations : \(sources.map { $0 == "IPTV" ? String(localized: "fournisseur IPTV") : $0 }.joined(separator: " + "))")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            if !mediaInfo.usesTMDB {
+                Text("Ajoutez une clé TMDB dans Réglages pour des fiches plus complètes (affiches HD, casting, bande-annonce).")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            HStack(spacing: 18) {
+                Button("Actualiser") { Task { await mediaInfo.reload(item, store: store) } }
+                Button("Corriger la fiche…") { fixing = item }
+            }
+            .font(.caption)
+        }
+        .padding(.top, 4)
     }
 
     @ViewBuilder
@@ -159,5 +248,23 @@ struct IOSDetailSheet: View {
         } catch {
             seasonsError = error.localizedDescription
         }
+    }
+}
+
+/// Photo et nom d'un acteur.
+struct IOSCastCard: View {
+    let person: CastMember
+
+    var body: some View {
+        VStack(spacing: 5) {
+            ArtworkView(url: person.photoURL, name: person.name, contentMode: .fill)
+                .frame(width: 72, height: 72)
+                .clipShape(Circle())
+            Text(person.name).font(.caption.weight(.semibold)).lineLimit(2).multilineTextAlignment(.center)
+            if let role = person.role {
+                Text(role).font(.caption2).foregroundStyle(.secondary).lineLimit(2).multilineTextAlignment(.center)
+            }
+        }
+        .frame(width: 88)
     }
 }

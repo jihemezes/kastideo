@@ -1284,3 +1284,11 @@
 "Liste M3U (fichier)" = "M3U list (file)";
 "Liste importée d'un fichier : seuls le nom et le guide TV sont modifiables." = "List imported from a file: only the name and the TV guide can be edited.";
 "Touchez une source pour la modifier." = "Tap a source to edit it.";
+
+/* iOS 1.17.0-ios12 */
+"Ajoutez une clé TMDB (Réglages) pour chercher les fiches." = "Add a TMDB key (Settings) to search for fiches.";
+"TMDB n'a pas répondu (vérifiez la clé dans Réglages)." = "TMDB did not respond (check the key in Settings).";
+"Chercher aussi les vidéos personnelles" = "Also look up personal videos";
+"Ajoutez une clé TMDB dans Réglages pour des fiches plus complètes (affiches HD, casting, bande-annonce)." = "Add a TMDB key in Settings for fuller pages (HD posters, cast, trailer).";
+"TENDANCE DE LA SEMAINE" = "TRENDING THIS WEEK";
+"Les informations viennent de votre fournisseur IPTV ; avec une clé TMDB (The Movie Database), Kastideo ajoute affiches HD, photos des acteurs, bande-annonce, résumé traduit et les tendances de la semaine dans le bandeau Cinéma." = "Information comes from your IPTV provider; with a TMDB (The Movie Database) key, Kastideo adds HD posters, actor photos, trailer, translated summary and this week's trends in the Cinema banner.";

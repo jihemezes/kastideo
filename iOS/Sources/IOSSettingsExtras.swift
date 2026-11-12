@@ -30,6 +30,7 @@ struct IOSCinemaSection: View {
     @AppStorage(IOSHeroKeys.enabled) private var enabled = true
     @AppStorage(IOSHeroKeys.useRecent) private var useRecent = true
     @AppStorage(IOSHeroKeys.useCategory) private var useCategory = true
+    @AppStorage(IOSHeroKeys.useTrending) private var useTrending = true
     @AppStorage(IOSHeroKeys.categoryMovie) private var categoryMovie = ""
     @AppStorage(IOSHeroKeys.categorySeries) private var categorySeries = ""
     @AppStorage(IOSHeroKeys.interval) private var interval = 8.0
@@ -39,6 +40,7 @@ struct IOSCinemaSection: View {
             Toggle("Afficher le bandeau « à la une »", isOn: $enabled)
             if enabled {
                 Toggle("Derniers ajouts du fournisseur", isOn: $useRecent)
+                Toggle("Tendances de la semaine (TMDB) disponibles dans votre catalogue", isOn: $useTrending)
                 Toggle("Sélection dans une catégorie", isOn: $useCategory)
                 if useCategory {
                     Picker("Catégorie des films", selection: $categoryMovie) {

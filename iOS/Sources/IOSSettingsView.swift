@@ -34,6 +34,7 @@ struct IOSSettingsView: View {
     @State private var message: String?
     @State private var diagnostic: Source?
     @State private var editing: Source?
+    @Environment(MediaInfoStore.self) private var mediaInfo
 
     var body: some View {
         NavigationStack {
@@ -102,6 +103,7 @@ struct IOSSettingsView: View {
                 }
                 IOSReplaySection()
                 IOSCinemaSection()
+                IOSTMDBSettingsSection()
 
                 IOSAppearanceSection()
                 IOSOrganisationSection()
@@ -177,6 +179,7 @@ struct IOSSettingsView: View {
                 return
             }
             let summary = store.importConfig(export)
+            mediaInfo.reloadEdits()
             message = String(localized: "Importation terminée : \(summary.sourcesAdded) source(s) ajoutée(s), \(summary.sourcesSkipped) déjà présente(s), \(summary.favoritesAdded) favori(s), catégories de \(summary.categoriesImported) section(s).")
         } catch {
             message = String(localized: "Fichier illisible : \(error.localizedDescription)")

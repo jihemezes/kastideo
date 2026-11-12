@@ -152,6 +152,7 @@ targets:
           - ThemeLabels.swift
           - YouTube.swift
           - MultiViewModel.swift
+          - MediaInfo.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

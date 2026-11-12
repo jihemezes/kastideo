@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios12] - 2026-11-12
+
+- **Fiches TMDB** (comme sur Mac) : la fiche d'un film ou d'une série affiche l'affiche HD, le titre traduit, le résumé, les genres, la note, la durée, les réalisateurs, la **distribution avec photos** et la bande-annonce. Réglages > Fiches des films et séries : clé TMDB (facultative, vérifiée à l'enregistrement).
+- **Corriger la fiche…** (fiche d'un film ou d'une série) : numéro ou adresse TMDB, recherche par titre, ou titre / année / affiche / résumé saisis à la main ; retirer la correction ; liste des fiches corrigées dans Réglages (elles voyagent dans la sauvegarde et se relisent à l'importation).
+- **Tendances de la semaine (TMDB)** dans le bandeau « à la une » de Films et Séries : les titres en tendance qui sont dans votre catalogue (réglable dans Affichage Cinéma).
+- La logique des fiches est partagée avec le Mac (`App/Sources/MediaInfo.swift` ; les vues Mac sont dans `Views/MediaInfoViews.swift`).
+
 ## [1.17.0-ios11] - 2026-11-12
 
 - **Modifier une source** : Réglages > Sources, toucher une source (ou balayer > Modifier) — nom, adresse, identifiants (mot de passe ou jeton vide = conservé), guide TV, dossiers ; test de connexion Xtream ; tous les types (Xtream, M3U, Jellyfin, Emby, Plex, dossiers, fichier M3U).
