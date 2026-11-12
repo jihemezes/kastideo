@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.17.1</title>
+      <pubDate>Thu, 12 Nov 2026 11:07:50 GMT</pubDate>
+      <sparkle:version>95</sparkle:version>
+      <sparkle:shortVersionString>1.17.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction de compilation de la synchronisation iCloud (même contenu que 1.17.0).&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.17.1/Kastideo-1.17.1.dmg" length="48457129" type="application/octet-stream" sparkle:edSignature="RRepEqG8bu6XV+x6YeNOvINv0d9eB34ssTRJCvLk87sSaUJDL2JMgZyiStN1tisUj9N3GzT6rveMKil9TcZCDw==" />
+    </item>
+    <item>
       <title>Kastideo 1.16.2</title>
       <pubDate>Sat, 07 Nov 2026 23:10:40 GMT</pubDate>
       <sparkle:version>93</sparkle:version>
@@ -439,17 +450,6 @@
 &lt;li&gt;&lt;b&gt;Gérer les catégories&lt;/b&gt; : une case &lt;b&gt;Tout sélectionner / désélectionner&lt;/b&gt; au-dessus de la liste coche ou décoche d&amp;#x27;un coup toutes les catégories listées (Direct, Films ou Séries). Avec une recherche, elle ne concerne que les catégories trouvées : masquer tout un pays se fait en deux clics. Le nombre de catégories affichées est indiqué à côté.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.2/Kastideo-1.2.2.dmg" length="45931145" type="application/octet-stream" sparkle:edSignature="HWePOZQCoGiZdqqmiqzcP5WeZPKNOzH44jOUh2vY29CMybBv/WzJLGl4HcdJ130B7FvcR0+8HP1MoO+qlcJICA==" />
-    </item>
-    <item>
-      <title>Kastideo 1.2.1</title>
-      <pubDate>Sun, 25 Oct 2026 21:49:58 GMT</pubDate>
-      <sparkle:version>49</sparkle:version>
-      <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Pays et langues des rangées Cinéma&lt;/b&gt; (Réglages &amp;gt; Apparence) : Kastideo repère les pays dans les noms de vos catégories (« FR| », « |PT| », « FRANCE », « VOSTFR »…) et vous laisse choisir ceux à montrer. Les derniers ajouts du bandeau « à la une », les tendances TMDB, la sélection au hasard et les rangées par catégorie de l&amp;#x27;interface Cinéma ne montrent plus que ces pays (option pour garder les catégories sans pays, comme « Action »). Les listes et la recherche restent complètes. Le choix est repris par la sauvegarde de la configuration, comme dans Kastideo pour Windows et Linux.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.2.1/Kastideo-1.2.1.dmg" length="45909963" type="application/octet-stream" sparkle:edSignature="87xJB4jM5jFNac0rJIQagu85+b44+GiljUeTvEqteFuU9wodehMmY2lUygkxFVzEcxKZYmyaB+UG6ZCdG7kxDg==" />
     </item>
   </channel>
 </rss>
