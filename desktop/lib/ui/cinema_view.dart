@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -980,7 +981,9 @@ class _HeroSlideView extends StatelessWidget {
           opacity: 0.6,
           child: ImageFiltered(
             imageFilter: ImageFilterBlurHero.blur,
-            child: Image.network(poster, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox()),
+            child: poster.startsWith('file://')
+                ? Image.file(File.fromUri(Uri.parse(poster)), fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox())
+                : Image.network(poster, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox()),
           ),
         ),
       const DecoratedBox(

@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.17.0-android1] - 2026-11-12
+
+- **Vidéos locales (Android)** : nouvelle source **Galerie** (Réglages > Sources > Ajouter les vidéos de la galerie, ou Ajouter une source > Galerie pour choisir des albums). Les vidéos du téléphone apparaissent dans **Mes vidéos** avec leur miniature, triées par date de prise de vue ; un film nommé correctement (titre exact) reçoit une fiche TMDB, les vidéos de la caméra n'en cherchent pas. Accès partiel d'Android 14 respecté (« Choisir d'autres vidéos… »), refus expliqué. Examen à chaque lancement et toutes les 20 minutes.
+
 ## [1.16.2-desktop1] - 2026-11-09
 
 - **Kastideo Compat : version pour Mac plus ancien (macOS 12 Monterey et 13 Ventura)**, processeur Intel ou Apple Silicon. C'est la version Windows / Linux recompilée pour Mac (`Kastideo-Compat-…-macos.dmg`, signée Developer ID et notariée), qui peut s'installer à côté de la version Mac native (macOS 14 minimum). Raccourcis avec la touche Commande (⌘), enregistrements dans Films/Kastideo, pas de mise à jour automatique, Cast avec ffmpeg installé (Homebrew). Nouvelle page d'aide « Kastideo Compat ».

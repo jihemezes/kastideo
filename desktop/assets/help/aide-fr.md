@@ -1285,6 +1285,7 @@ Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bann
 
 ### Différences avec l'ordinateur
 
+- **Vidéos locales (galerie)** : Réglages > Sources > **Ajouter les vidéos de la galerie** (ou Ajouter une source > **Galerie** pour **choisir des albums** : Camera, Screenshots…). Les vidéos du téléphone apparaissent dans **Mes vidéos** avec leur miniature, triées par date ; un film nommé correctement (titre exact) reçoit son affiche et son résumé TMDB. Android demande l'accès aux vidéos : à partir d'Android 14, vous pouvez n'autoriser qu'une **sélection** (bouton « Choisir d'autres vidéos… »). Rien n'est copié ni envoyé ailleurs.
 - **Cast** : sur Android, la diffusion vers un Chromecast ou une TV se fait en **mode direct** : l'adresse du flux est envoyée telle quelle au téléviseur (les chaînes passent en HLS « .m3u8 »). Les fichiers locaux (Mes vidéos) ne peuvent pas être diffusés. La conversion par ffmpeg, qui existe sur ordinateur, n'est pas disponible.
 - **Enregistrements et téléchargements** : ils sont rangés dans le dossier de l'application (`Android/data/fr.jmezes.kastideo/files/Movies`, visible depuis le gestionnaire de fichiers). Android peut interrompre une application en arrière-plan : gardez Kastideo ouvert et l'appareil branché pendant un enregistrement. Un enregistrement programmé ne démarre que si Kastideo est lancé à l'heure prévue.
 - **Pas de lancement à l'ouverture de session** ni d'association des fichiers .m3u : ajoutez vos playlists dans Réglages > Sources.

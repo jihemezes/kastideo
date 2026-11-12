@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <!-- Alertes de programmes et fin d'enregistrement (Android 13 et plus). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Vidéos locales : galerie du téléphone (accès partiel possible à partir d'Android 14). -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
     <!-- Téléviseur Android TV (télécommande, sans écran tactile) et téléphone/tablette : un seul APK. -->
     <uses-feature android:name="android.software.leanback" android:required="false"/>

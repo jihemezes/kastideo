@@ -206,7 +206,7 @@ Future<void> showSourceError(BuildContext context, Source source) {
           ],
           const SizedBox(height: 12),
           Text(
-            source.kind == SourceKind.folder
+            source.kind.isLocalFiles
                 ? tr('Vérifiez que le disque est branché ou que le partage réseau est connecté, puis Actualiser.')
                 : tr('Vérifiez l\'adresse (sans « /web/… »), l\'identifiant et le mot de passe dans Réglages > Sources. Le journal de lecture garde le détail de chaque échange.'),
             style: kText(12, color: KPalette.secondaryText),

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../l10n.dart';
 import 'details.dart';
+import 'gallery.dart';
 import 'library.dart';
 import 'log.dart';
 import 'models.dart';
@@ -39,7 +40,7 @@ class MediaInfoStore extends ChangeNotifier {
       ..plot = item.info
       ..poster = item.logo;
     final source = library.sourceOf(item);
-    final local = source?.kind == SourceKind.folder;
+    final local = source?.kind.isLocalFiles ?? false;
     final server = source?.kind.isMediaServer ?? false;
     // Dossiers locaux et serveurs : épisodes de la série ; fiche du serveur (résumé, distribution, image de fond).
     if (local || server) {
@@ -205,7 +206,7 @@ class MediaInfoStore extends ChangeNotifier {
     }
     await FicheEdits.save(edits);
     final source = library.sourceOf(item);
-    final local = source?.kind == SourceKind.folder;
+    final local = source?.kind.isLocalFiles ?? false;
     if (local) {
       if (value != null) {
         var logo = value.posterUrl;
@@ -256,14 +257,14 @@ class MediaInfoStore extends ChangeNotifier {
 
   /// Affiches et résumés TMDB des films et séries d'un dossier local qui n'en ont pas encore (par petits lots).
   Future<void> enrichLocal(Source source) async {
-    if (source.kind != SourceKind.folder || !settings.usesTMDB || _enriching) return;
+    if (!source.kind.isLocalFiles || !settings.usesTMDB || _enriching) return;
     _enriching = true;
     await _loadFixes();
     try {
       final client = TMDBClient(settings.tmdbKey, _language);
       final todo = library
           .contentOf(source.id)
-          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && (i.logo == null || i.rating == null) && (settings.tmdbPersonal || !i.group.startsWith('${tr('Vidéos')} · ')))
+          .where((i) => (i.kind == MediaKind.movie || i.kind == MediaKind.series) && i.epgId != Gallery.genericMarker && (i.logo == null || i.rating == null) && (settings.tmdbPersonal || !i.group.startsWith('${tr('Vidéos')} · ')))
           .take(300)
           .toList();
       if (todo.isEmpty) return;

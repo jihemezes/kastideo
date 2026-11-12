@@ -1285,6 +1285,7 @@ Kastideo then appears in the TV's app list with its banner.
 
 ### Differences from the computer
 
+- **Local videos (gallery)**: Settings > Sources > **Add the gallery videos** (or Add a source > **Gallery** to **choose albums**: Camera, Screenshots…). Phone videos appear in **My videos** with their thumbnail, sorted by date; a properly named movie (exact title) gets its TMDB poster and summary. Android asks for access to videos: from Android 14 you can allow only a **selection** (button “Choose more videos…”). Nothing is copied or sent elsewhere.
 - **Cast**: on Android, casting to a Chromecast or a TV uses **direct mode**: the stream address is sent as-is to the TV (channels switch to HLS ".m3u8"). Local files (My videos) cannot be cast. The ffmpeg conversion available on computers is not available.
 - **Recordings and downloads** are stored in the app's folder (`Android/data/fr.jmezes.kastideo/files/Movies`, visible from the file manager). Android may stop an app running in the background: keep Kastideo open and the device plugged in during a recording. A scheduled recording only starts if Kastideo is running at the planned time.
 - **No launch at sign-in** and no .m3u file association: add your playlists in Settings > Sources.

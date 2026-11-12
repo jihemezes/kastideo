@@ -162,9 +162,14 @@ enum SourceKind {
   folder,
   jellyfin,
   emby,
-  plex;
+  plex,
+  // Vidéos de la galerie du téléphone (Android).
+  gallery;
 
   bool get isMediaServer => this == jellyfin || this == emby || this == plex;
+
+  /// Fichiers vidéo de l'appareil (dossiers ou galerie).
+  bool get isLocalFiles => this == folder || this == gallery;
   bool get isIptv => this == xtream || this == m3uUrl || this == m3uFile;
 
   String get label => switch (this) {
@@ -174,6 +179,7 @@ enum SourceKind {
         jellyfin => 'Jellyfin',
         emby => 'Emby',
         plex => 'Plex',
+        gallery => 'Galerie',
       };
 }
 

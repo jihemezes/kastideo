@@ -7,10 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
+import android.util.Size
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
@@ -23,6 +26,7 @@ import java.io.File
 /// installation des mises à jour (APK) et verrou multicast pour la recherche des appareils Cast.
 class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
+    private var pendingGallery: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -81,6 +85,13 @@ class MainActivity : FlutterActivity() {
                             }
                             result.success(null)
                         }
+                        "galleryStatus" -> result.success(galleryStatus())
+                        "galleryRequest" -> requestGallery(result)
+                        "galleryAlbums" -> inBackground(result) { galleryAlbums() }
+                        "galleryVideos" -> {
+                            val albums = call.argument<List<String>>("albums") ?: emptyList()
+                            inBackground(result) { galleryVideos(albums) }
+                        }
                         else -> result.notImplemented()
                     }
                 } catch (e: Exception) {
@@ -88,6 +99,147 @@ class MainActivity : FlutterActivity() {
                 }
             }
         acquireMulticast()
+    }
+
+    // MARK: Galerie (vidéos du téléphone, lues avec MediaStore)
+
+    private fun galleryPermissions(): Array<String> = when {
+        Build.VERSION.SDK_INT >= 34 -> arrayOf(
+            android.Manifest.permission.READ_MEDIA_VIDEO,
+            "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+        )
+        Build.VERSION.SDK_INT >= 33 -> arrayOf(android.Manifest.permission.READ_MEDIA_VIDEO)
+        else -> arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+
+    private fun granted(permission: String) =
+        checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+
+    /// granted : toutes les vidéos ; limited : seulement celles choisies (Android 14) ; denied : aucune.
+    private fun galleryStatus(): String {
+        if (Build.VERSION.SDK_INT >= 34) {
+            if (granted(android.Manifest.permission.READ_MEDIA_VIDEO)) return "granted"
+            if (granted("android.permission.READ_MEDIA_VISUAL_USER_SELECTED")) return "limited"
+            return "denied"
+        }
+        return if (granted(galleryPermissions()[0])) "granted" else "denied"
+    }
+
+    private fun requestGallery(result: MethodChannel.Result) {
+        pendingGallery?.success(galleryStatus())
+        pendingGallery = result
+        requestPermissions(galleryPermissions(), 1002)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1002) {
+            pendingGallery?.success(galleryStatus())
+            pendingGallery = null
+        }
+    }
+
+    private fun inBackground(result: MethodChannel.Result, work: () -> Any?) {
+        Thread {
+            try {
+                val value = work()
+                runOnUiThread { result.success(value) }
+            } catch (e: Exception) {
+                runOnUiThread { result.error("gallery", e.message, null) }
+            }
+        }.start()
+    }
+
+    private fun videoCollection(): Uri =
+        if (Build.VERSION.SDK_INT >= 29) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+
+    private fun galleryAlbums(): List<Map<String, Any>> {
+        if (galleryStatus() == "denied") return emptyList()
+        val counts = LinkedHashMap<String, Pair<String, Int>>()
+        val projection = arrayOf(MediaStore.Video.Media.BUCKET_ID, MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+        contentResolver.query(videoCollection(), projection, null, null, null)?.use { cursor ->
+            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID)
+            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+            while (cursor.moveToNext()) {
+                val id = cursor.getString(idCol) ?: continue
+                val name = cursor.getString(nameCol) ?: "?"
+                val old = counts[id]
+                counts[id] = Pair(name, (old?.second ?: 0) + 1)
+            }
+        }
+        return counts.map { mapOf("id" to it.key, "name" to it.value.first, "count" to it.value.second) }
+            .sortedBy { (it["name"] as String).lowercase() }
+    }
+
+    private fun galleryVideos(albums: List<String>): List<Map<String, Any?>> {
+        if (galleryStatus() == "denied") return emptyList()
+        val thumbs = File(cacheDir, "galerie").apply { mkdirs() }
+        val projection = arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Video.Media.DATE_TAKEN,
+            MediaStore.Video.Media.DATE_ADDED,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.DATA
+        )
+        var selection: String? = null
+        var args: Array<String>? = null
+        if (albums.isNotEmpty()) {
+            selection = MediaStore.Video.Media.BUCKET_ID + " IN (" + albums.joinToString(",") { "?" } + ")"
+            args = albums.toTypedArray()
+        }
+        val list = ArrayList<Map<String, Any?>>()
+        contentResolver.query(videoCollection(), projection, selection, args, MediaStore.Video.Media.DATE_ADDED + " DESC")?.use { c ->
+            val idCol = c.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val nameCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val bucketCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+            val takenCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_TAKEN)
+            val addedCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+            val durCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val dataCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            while (c.moveToNext()) {
+                val id = c.getLong(idCol)
+                val uri = Uri.withAppendedPath(videoCollection(), id.toString())
+                val taken = c.getLong(takenCol)
+                val date = if (taken > 0) taken else c.getLong(addedCol) * 1000
+                list.add(
+                    mapOf(
+                        "id" to id.toString(),
+                        "name" to (c.getString(nameCol) ?: ""),
+                        "bucket" to (c.getString(bucketCol) ?: ""),
+                        "date" to date,
+                        "duration" to c.getLong(durCol),
+                        "path" to (c.getString(dataCol) ?: ""),
+                        "uri" to uri.toString(),
+                        "thumb" to thumbnail(uri, id, thumbs)
+                    )
+                )
+            }
+        }
+        list.sortByDescending { (it["date"] as Long) }
+        return list
+    }
+
+    /// Miniature JPEG gardée dans le cache de l'application (vide si Android n'en fournit pas).
+    private fun thumbnail(uri: Uri, id: Long, folder: File): String {
+        val file = File(folder, "$id.jpg")
+        if (file.exists() && file.length() > 0) return file.absolutePath
+        return try {
+            val bitmap: Bitmap? = if (Build.VERSION.SDK_INT >= 29) {
+                contentResolver.loadThumbnail(uri, Size(480, 480), null)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MINI_KIND, null)
+            }
+            if (bitmap == null) "" else {
+                file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }
+                file.absolutePath
+            }
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     private fun isTelevision(): Boolean {

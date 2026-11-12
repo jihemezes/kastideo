@@ -11,6 +11,7 @@ import '../core/device.dart';
 import '../core/cast_media.dart';
 import '../core/countries.dart';
 import '../core/details.dart';
+import '../core/gallery.dart';
 import '../core/guide.dart';
 import '../core/log.dart';
 import '../core/models.dart';
@@ -703,6 +704,7 @@ class _SourcesTab extends StatefulWidget {
 
 class _SourcesTabState extends State<_SourcesTab> {
   late bool _adding = widget.startAdding;
+  String? _galleryNote;
 
   /// Source en cours de modification (null : ajout d'une source).
   Source? _editing;
@@ -727,6 +729,7 @@ class _SourcesTabState extends State<_SourcesTab> {
                   style: kText(13, color: KPalette.secondaryText)),
             ),
           for (final source in library.sources) _sourceRow(source),
+          if (_galleryNote != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(_galleryNote!, style: kText(12, color: KPalette.orange))),
           const SizedBox(height: 12),
           Row(children: [
             FilledButton.icon(
@@ -739,6 +742,22 @@ class _SourcesTabState extends State<_SourcesTab> {
               label: Text(tr('Ajouter une source')),
             ),
             const SizedBox(width: 10),
+            if (Gallery.isAvailable && !library.sources.any((s) => s.kind == SourceKind.gallery)) ...[
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final access = await Gallery.request();
+                  if (access == GalleryAccess.denied) {
+                    setState(() => _galleryNote = tr('Kastideo n\'a pas accès à la galerie. Autorisez-le dans les réglages d\'Android (Applications > Kastideo > Autorisations).'));
+                    return;
+                  }
+                  setState(() => _galleryNote = null);
+                  await library.addGallery(name: '', albumIds: const []);
+                },
+                icon: const Icon(Icons.photo_library_outlined),
+                label: Text(tr('Ajouter les vidéos de la galerie')),
+              ),
+              const SizedBox(width: 10),
+            ],
             if (library.sources.isNotEmpty)
               OutlinedButton.icon(
                 onPressed: library.isBusy ? null : library.refreshAll,
@@ -766,7 +785,9 @@ class _SourcesTabState extends State<_SourcesTab> {
         : '${count(MediaKind.movie)} ${tr('films et vidéos')} · ${count(MediaKind.series)} ${tr('séries')}';
     final where = source.kind == SourceKind.folder
         ? LibraryStore.folderPaths(source).join(' · ')
-        : source.kind.isMediaServer
+        : source.kind == SourceKind.gallery
+            ? tr('Galerie du téléphone')
+            : source.kind.isMediaServer
             ? (Uri.tryParse(source.address)?.authority ?? source.address)
             : null;
     return Container(

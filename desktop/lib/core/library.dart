@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'details.dart';
+import 'gallery.dart';
 import 'epg.dart';
 import 'replay.dart';
 import 'local_media.dart';
@@ -173,7 +174,7 @@ class LibraryStore extends ChangeNotifier {
       final age = s.lastRefresh == null ? const Duration(days: 365) : DateTime.now().difference(s.lastRefresh!);
       // Dossiers : examinés à chaque lancement (rapide) ; serveurs : toutes les heures (positions de lecture).
       return switch (s.kind) {
-        SourceKind.folder => true,
+        SourceKind.folder || SourceKind.gallery => true,
         SourceKind.jellyfin || SourceKind.emby || SourceKind.plex => age > const Duration(hours: 1),
         _ => autoRefresh && age > const Duration(hours: 6),
       };
@@ -190,7 +191,7 @@ class LibraryStore extends ChangeNotifier {
     // Nouveaux fichiers et positions de lecture des serveurs : examen régulier en arrière-plan.
     _rescan = Timer.periodic(const Duration(minutes: 20), (_) async {
       if (isBusy) return;
-      for (final s in sources.where((s) => s.enabled && (s.kind == SourceKind.folder || s.kind.isMediaServer)).toList()) {
+      for (final s in sources.where((s) => s.enabled && (s.kind.isLocalFiles || s.kind.isMediaServer)).toList()) {
         await refresh(s);
       }
     });
@@ -802,15 +803,13 @@ class LibraryStore extends ChangeNotifier {
           }
           final (movies, series, videos) = (tr('Films'), tr('Séries'), tr('Vidéos'));
           content = await Isolate.run(() => scanFolders(roots, id, moviesLabel: movies, seriesLabel: series, videosLabel: videos));
-          // Affiches et résumés déjà trouvés (TMDB) gardés d'un examen à l'autre.
-          final known = {for (final i in _contentBySource[id] ?? const <MediaItem>[]) i.id: i};
-          content = SourceContent([
-            for (final i in content.items)
-              if (known[i.id] case final k? when k.logo != null || k.info != null || k.genres.isNotEmpty)
-            i.copyWith(logo: k.logo, info: k.info, year: k.year, genres: k.genres, rating: k.rating, runtime: k.runtime, country: k.country, language: k.language)
-          else
-            i,
-          ]);
+          content = _keepKnown(id, content);
+        case SourceKind.gallery:
+          final status = await Gallery.status();
+          if (status == GalleryAccess.denied) {
+            throw MediaServerException("Kastideo n'a pas accès à la galerie. Autorisez-le dans les réglages d'Android (Applications > Kastideo > Autorisations).");
+          }
+          content = _keepKnown(id, SourceContent(await Gallery.scan(id, galleryIds(source), videosLabel: tr('Vidéos'))));
         case SourceKind.jellyfin:
         case SourceKind.emby:
         case SourceKind.plex:
@@ -882,6 +881,36 @@ class LibraryStore extends ChangeNotifier {
   /// Dossiers d'une source « Dossiers » (un par ligne).
   static List<String> folderPaths(Source source) =>
       source.address.split('\n').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+
+  /// Albums (dossiers de la galerie) d'une source « Galerie » ; vide : toutes les vidéos.
+  static List<String> galleryIds(Source source) =>
+      source.address.split('\n').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+
+  Future<Source> addGallery({required String name, required List<String> albumIds}) async {
+    final source = Source(
+      id: '${DateTime.now().microsecondsSinceEpoch}',
+      name: name.trim().isEmpty ? tr('Vidéos locales') : name.trim(),
+      kind: SourceKind.gallery,
+      address: albumIds.join('\n'),
+    );
+    sources.add(source);
+    await _saveSources();
+    notifyListeners();
+    await refresh(source);
+    return source;
+  }
+
+  /// Affiches et résumés déjà trouvés (TMDB) gardés d'un examen à l'autre.
+  SourceContent _keepKnown(String id, SourceContent content) {
+    final known = {for (final i in _contentBySource[id] ?? const <MediaItem>[]) i.id: i};
+    return SourceContent([
+      for (final i in content.items)
+        if (known[i.id] case final k? when k.logo != null || k.info != null || k.genres.isNotEmpty)
+          i.copyWith(logo: k.logo, info: k.info, year: k.year, genres: k.genres, rating: k.rating, runtime: k.runtime, country: k.country, language: k.language)
+        else
+          i,
+    ]);
+  }
 
   Future<Source> addFolders({required String name, required List<String> paths}) async {
     final clean = paths.map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
@@ -1018,7 +1047,7 @@ class LibraryStore extends ChangeNotifier {
   }
 
   /// Fichier local d'une source « Dossiers » : ses sous-titres voisins sont chargés à la lecture.
-  bool isLocalFile(MediaItem item) => sourceOf(item)?.kind == SourceKind.folder;
+  bool isLocalFile(MediaItem item) => sourceOf(item)?.kind.isLocalFiles ?? false;
 
   /// Affiches et résumés trouvés sur TMDB pour les fichiers locaux (gardés dans le cache de la source).
   Future<void> applyEnrichment(String sourceId, Map<String, LocalFiche> found) async {

@@ -321,6 +321,16 @@ class PosterImage extends StatelessWidget {
               style: kRounded(width * 0.11, FontWeight.w800, color: Colors.white70)),
     );
     if (url == null) return fallback;
+    if (url!.startsWith('file://')) {
+      return Image.file(
+        File.fromUri(Uri.parse(url!)),
+        width: width,
+        height: height,
+        fit: fit,
+        cacheWidth: (width * 2).round(),
+        errorBuilder: (_, _, _) => fallback,
+      );
+    }
     return Image.network(
       url!,
       width: width,

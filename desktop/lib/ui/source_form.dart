@@ -9,6 +9,7 @@ import '../core/discovery.dart';
 import '../core/library.dart';
 import '../core/media_servers.dart';
 import '../core/models.dart';
+import '../core/gallery.dart';
 import '../l10n.dart';
 import '../theme.dart';
 
@@ -19,6 +20,7 @@ IconData sourceIcon(SourceKind kind) => switch (kind) {
   SourceKind.folder => Icons.folder_rounded,
   SourceKind.jellyfin || SourceKind.emby => Icons.video_library_rounded,
   SourceKind.plex => Icons.play_circle_outline_rounded,
+  SourceKind.gallery => Icons.photo_library_rounded,
 };
 
 /// Formulaire d'ajout ou de modification d'une source : IPTV (Xtream, M3U), dossiers (disque, clé USB, NAS) ou
@@ -45,6 +47,12 @@ class _SourceFormState extends State<SourceForm> {
   final _token = TextEditingController();
   final _networkPath = TextEditingController();
   final List<String> _folders = [];
+
+  // Galerie du téléphone (Android).
+  bool _galleryAll = true;
+  final Set<String> _galleryIds = {};
+  List<GalleryAlbum> _albums = const [];
+  GalleryAccess _galleryAccess = GalleryAccess.denied;
   bool _showPassword = false;
   bool _saving = false;
   String? _error;
@@ -81,6 +89,10 @@ class _SourceFormState extends State<SourceForm> {
         _address.text = s.address;
       case SourceKind.folder:
         _folders.addAll(LibraryStore.folderPaths(s));
+      case SourceKind.gallery:
+        _galleryIds.addAll(LibraryStore.galleryIds(s));
+        _galleryAll = _galleryIds.isEmpty;
+        await _loadGallery();
       case SourceKind.jellyfin || SourceKind.emby:
         _server.text = s.address;
         _pass.text = await library.password(s.id) ?? '';
@@ -130,6 +142,7 @@ class _SourceFormState extends State<SourceForm> {
           address: switch (editing.kind) {
             SourceKind.xtream || SourceKind.jellyfin || SourceKind.emby || SourceKind.plex => _server.text,
             SourceKind.folder => _folders.join('\n'),
+            SourceKind.gallery => _galleryAll ? '' : _galleryIds.join('\n'),
             _ => _address.text,
           },
           username: editing.kind == SourceKind.xtream || editing.kind == SourceKind.jellyfin || editing.kind == SourceKind.emby ? _user.text : null,
@@ -145,6 +158,9 @@ class _SourceFormState extends State<SourceForm> {
             await library.addM3U(name: _name.text, address: _address.text, epgUrl: _epg.text);
           case SourceKind.folder:
             await library.addFolders(name: _name.text, paths: _folders);
+          case SourceKind.gallery:
+            if (!_galleryAll && _galleryIds.isEmpty) throw MediaServerException(tr('Choisissez au moins un album.'));
+            await library.addGallery(name: _name.text, albumIds: _galleryAll ? const [] : _galleryIds.toList());
           case SourceKind.jellyfin || SourceKind.emby:
             await library.addMediaServer(kind: _kind, name: _name.text, address: _server.text, username: _user.text, password: _pass.text);
           case SourceKind.plex:
@@ -289,6 +305,7 @@ class _SourceFormState extends State<SourceForm> {
                 (SourceKind.xtream, 'Xtream Codes'),
                 (SourceKind.m3uUrl, tr('Playlist M3U')),
                 (SourceKind.folder, tr('Dossiers')),
+                if (Gallery.isAvailable) (SourceKind.gallery, tr('Galerie')),
                 (SourceKind.jellyfin, 'Jellyfin'),
                 (SourceKind.emby, 'Emby'),
                 (SourceKind.plex, 'Plex'),
@@ -298,11 +315,14 @@ class _SourceFormState extends State<SourceForm> {
                   label: Text(label),
                   selected: _kind == kind,
                   showCheckmark: false,
-                  onSelected: (_) => setState(() {
-                    _kind = kind;
-                    _error = null;
-                    _info = null;
-                  }),
+                  onSelected: (_) {
+                    setState(() {
+                      _kind = kind;
+                      _error = null;
+                      _info = null;
+                    });
+                    if (kind == SourceKind.gallery) _loadGallery();
+                  },
                 ),
             ],
           ),
@@ -311,13 +331,14 @@ class _SourceFormState extends State<SourceForm> {
         const SizedBox(height: 14),
         TextField(
           controller: _name,
-          decoration: _field(tr('Nom'), hint: _kind == SourceKind.folder ? tr('Mon disque') : tr('Mon abonnement')),
+          decoration: _field(tr('Nom'), hint: _kind == SourceKind.folder ? tr('Mon disque') : (_kind == SourceKind.gallery ? tr('Vidéos locales') : tr('Mon abonnement'))),
         ),
         const SizedBox(height: 12),
         ...switch (_kind) {
           SourceKind.xtream => _xtream(),
           SourceKind.m3uUrl || SourceKind.m3uFile => _m3u(),
           SourceKind.folder => _folderForm(),
+          SourceKind.gallery => _galleryForm(),
           SourceKind.jellyfin || SourceKind.emby => _jellyfin(),
           SourceKind.plex => _plex(),
         },
@@ -327,10 +348,10 @@ class _SourceFormState extends State<SourceForm> {
         Row(
           children: [
             if (_saving) const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-            if (_saving && (_kind == SourceKind.folder || _kind.isMediaServer)) ...[
+            if (_saving && (_kind.isLocalFiles || _kind.isMediaServer)) ...[
               const SizedBox(width: 8),
               Text(
-                _kind == SourceKind.folder ? tr('Examen des dossiers…') : tr('Chargement des bibliothèques…'),
+                _kind.isLocalFiles ? tr('Examen des dossiers…') : tr('Chargement des bibliothèques…'),
                 style: kText(12, color: KPalette.secondaryText),
               ),
             ],
@@ -444,6 +465,67 @@ class _SourceFormState extends State<SourceForm> {
       controller: _epg,
       decoration: _field(tr('Guide TV (XMLTV) — facultatif'), hint: tr('Laisser vide : guide indiqué par le fournisseur')),
     ),
+  ];
+
+  Future<void> _loadGallery() async {
+    var access = await Gallery.status();
+    if (access == GalleryAccess.denied) access = await Gallery.request();
+    final albums = access == GalleryAccess.denied ? const <GalleryAlbum>[] : await Gallery.albums();
+    if (!mounted) return;
+    setState(() {
+      _galleryAccess = access;
+      _albums = albums;
+    });
+  }
+
+  List<Widget> _galleryForm() => [
+    if (_galleryAccess == GalleryAccess.denied) ...[
+      Text(tr('Kastideo n\'a pas accès à la galerie. Autorisez-le dans les réglages d\'Android (Applications > Kastideo > Autorisations).'),
+          style: kText(13, color: KPalette.orange)),
+      const SizedBox(height: 8),
+      OutlinedButton.icon(
+        onPressed: _loadGallery,
+        icon: const Icon(Icons.photo_library_outlined),
+        label: Text(tr('Autoriser l\'accès aux vidéos')),
+      ),
+    ] else ...[
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        title: Text(tr('Toutes les vidéos'), style: kText(13, weight: FontWeight.w600)),
+        value: _galleryAll,
+        onChanged: (v) => setState(() => _galleryAll = v),
+      ),
+      if (!_galleryAll) ...[
+        if (_albums.isEmpty) Text(tr('Aucun album avec des vidéos.'), style: kText(12, color: KPalette.secondaryText)),
+        for (final album in _albums)
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(album.name, style: kText(13)),
+            secondary: Text('${album.count}', style: kText(12, color: KPalette.secondaryText)),
+            value: _galleryIds.contains(album.id),
+            onChanged: (v) => setState(() => v == true ? _galleryIds.add(album.id) : _galleryIds.remove(album.id)),
+          ),
+      ],
+      if (_galleryAccess == GalleryAccess.limited) ...[
+        const SizedBox(height: 6),
+        Text(tr('Vous n\'avez autorisé qu\'une sélection de vidéos : seules celles-ci apparaissent.'),
+            style: kText(12, color: KPalette.secondaryText)),
+        TextButton.icon(
+          onPressed: () async {
+            await Gallery.request();
+            await _loadGallery();
+          },
+          icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+          label: Text(tr('Choisir d\'autres vidéos…')),
+        ),
+      ],
+      const SizedBox(height: 4),
+      Text(tr('Les films nommés correctement (titre exact) reçoivent une affiche et un résumé TMDB ; les vidéos de la caméra gardent leur miniature.'),
+          style: kText(12, color: KPalette.secondaryText)),
+    ],
   ];
 
   List<Widget> _folderForm() => [
