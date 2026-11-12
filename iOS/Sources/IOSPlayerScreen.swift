@@ -12,6 +12,7 @@ struct IOSPlayerScreen: View {
     @State private var controlsVisible = true
     @State private var hideTask: Task<Void, Never>?
     @State private var scrubbing: Double?
+    @State private var showInfo = false
 
     var body: some View {
         ZStack {
@@ -60,6 +61,7 @@ struct IOSPlayerScreen: View {
 
             if controlsVisible {
                 controls.transition(.opacity)
+                if showInfo { infoPanel.transition(.opacity) }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: controlsVisible)
@@ -93,6 +95,7 @@ struct IOSPlayerScreen: View {
                     }
                 }
                 Spacer()
+                infoChip
                 if !playback.audioTracks.isEmpty || !playback.subtitleTracks.isEmpty {
                     Menu {
                         if playback.audioTracks.count > 1 {
@@ -191,6 +194,7 @@ struct IOSPlayerScreen: View {
     @ViewBuilder
     private var bottomBar: some View {
         VStack(spacing: 6) {
+            volumeRow
             if playback.isLive {
                 if playback.isTimeshifted { IOSTimeshiftBar().frame(height: 30) }
                 HStack(spacing: 10) {
@@ -239,8 +243,14 @@ struct IOSPlayerScreen: View {
                     scheduleHide()
                 })
                 .tint(IOSPalette.orange)
+                let shown = (scrubbing ?? playback.position) * playback.duration
+                let remaining = max(playback.duration - shown, 0)
                 HStack {
-                    Text(((scrubbing ?? playback.position) * playback.duration).clockString)
+                    Text(shown.clockString)
+                    Spacer()
+                    if remaining > 0 {
+                        Text("Reste \(remaining.clockString) · fin à \(Date.now.addingTimeInterval(remaining).formatted(date: .omitted, time: .shortened))")
+                    }
                     Spacer()
                     Text(playback.duration.clockString)
                 }
@@ -263,6 +273,111 @@ struct IOSPlayerScreen: View {
         }
         .padding(.horizontal, 18).padding(.bottom, 14).padding(.top, 20)
         .background(LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+    }
+
+    // MARK: Son
+
+    private var volumeRow: some View {
+        HStack(spacing: 12) {
+            Button {
+                playback.isMuted.toggle()
+                scheduleHide()
+            } label: {
+                Image(systemName: speakerIcon).font(.title3).frame(width: 30)
+            }
+            Slider(value: Binding(get: { playback.isMuted ? 0 : min(playback.volume, 100) },
+                                  set: { value in
+                                      playback.volume = value
+                                      playback.isMuted = value <= 0
+                                  }),
+                   in: 0...100, onEditingChanged: { _ in scheduleHide() })
+                .tint(.white)
+                .frame(maxWidth: 190)
+            Spacer()
+        }
+    }
+
+    private var speakerIcon: String {
+        if playback.isMuted || playback.volume <= 0 { return "speaker.slash.fill" }
+        if playback.volume < 34 { return "speaker.wave.1.fill" }
+        if playback.volume < 67 { return "speaker.wave.2.fill" }
+        return "speaker.wave.3.fill"
+    }
+
+    // MARK: Infos du flux
+
+    private var healthColor: Color {
+        switch playback.health.level {
+        case .good: return .green
+        case .fair: return .orange
+        case .poor: return .red
+        case .unknown: return .gray
+        }
+    }
+
+    private var qualityShort: String? {
+        guard let resolution = playback.health.resolution else { return nil }
+        let h = resolution.height
+        if h >= 2000 { return "4K" }
+        if h >= 700 { return "HD" }
+        return "SD"
+    }
+
+    private var infoChip: some View {
+        Button { showInfo.toggle(); scheduleHide() } label: {
+            HStack(spacing: 5) {
+                Circle().fill(healthColor).frame(width: 8, height: 8)
+                if playback.health.audioIssue != nil {
+                    Image(systemName: "speaker.slash.fill").foregroundStyle(.orange).font(.caption)
+                }
+                if let quality = qualityShort {
+                    Text(quality).font(.caption2.weight(.bold))
+                        .padding(.horizontal, 4).padding(.vertical, 1)
+                        .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(.white.opacity(0.6), lineWidth: 1))
+                }
+                Image(systemName: "info.circle").font(.title3)
+            }
+        }
+    }
+
+    private var infoPanel: some View {
+        let health = playback.health
+        return VStack {
+            HStack {
+                Spacer()
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        Circle().fill(healthColor).frame(width: 10, height: 10)
+                        Text(String(localized: "Réception : \(health.label)")).font(.subheadline.weight(.semibold))
+                    }
+                    if let resolution = health.resolution, let quality = health.qualityLabel {
+                        Text("\(quality) (\(Int(resolution.width))×\(Int(resolution.height)))")
+                    }
+                    if health.bitrateKbps > 0 {
+                        Text(String(localized: "Débit : \(health.bitrateKbps >= 1000 ? String(format: "%.1f Mb/s", health.bitrateKbps / 1000) : String(format: "%.0f kb/s", health.bitrateKbps))"))
+                    }
+                    if health.framesPerSecond > 0 {
+                        Text(String(format: String(localized: "Images : %.0f par seconde"), health.framesPerSecond))
+                    }
+                    if health.lostRatio > 0 {
+                        Text(String(format: String(localized: "Images perdues : %.1f %%"), health.lostRatio * 100))
+                    }
+                    Text(health.recentStalls == 0 ? String(localized: "Aucune coupure dans la dernière minute")
+                                                  : String(localized: "\(health.recentStalls) coupure(s) dans la dernière minute"))
+                    if let issue = health.audioIssue { Text(issue).foregroundStyle(.orange) }
+                    if let startup = playback.startupTime {
+                        Text("Prête en \(String(format: "%.1f", startup)) s")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.white)
+                .padding(12)
+                .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 18).padding(.top, 62)
+            Spacer()
+        }
+        .allowsHitTesting(false)
     }
 
     private func toggleControls() {

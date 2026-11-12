@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios19] - 2026-11-12
+
+- **Catégories** : boutons **Tout désélectionner** et **Tout sélectionner** en tête de la liste (Réglages > Contenu > Catégories) pour ne garder que quelques catégories.
+- **Lecteur** : bouton **haut-parleur** (coupure / rétablissement du son) avec **curseur de volume** dans la barre du bas ; pastille **infos du flux** en haut (couleur de réception, HD / 4K) qui ouvre résolution, débit, images par seconde, images perdues, coupures ; pour un film ou un épisode, **temps restant** et **heure de fin**.
+- **Mes vidéos** : bouton **tri / filtres** — tri par nom (A→Z, Z→A), date, taille ou durée ; filtres par type, visionnage (non vues, en cours, vues, favoris) et source ; la date, la taille ou la durée s'affiche sous chaque vidéo selon le tri. Choix mémorisés. Aide mise à jour.
+
 ## [1.17.0-ios18] - 2026-11-12
 
 - **Nouvel accueil**, dans l'esprit de la version de bureau : fond dégradé violet / magenta avec le gros logo flouté et transparent, titre et logo en haut, recherche, puis les grandes tuiles **Direct, Films, Séries, YouTube** et **Mes vidéos** (seulement si vous avez une galerie, un dossier ou un serveur) avec le nombre de contenus, et en dessous les petits boutons **Reprendre, Récents, Favoris, Guide TV, Enregistrements** (avec pastilles).

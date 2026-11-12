@@ -31,6 +31,29 @@ struct IOSCategoryManagerView: View {
                 .pickerStyle(.segmented)
             }
 
+            if !all.isEmpty {
+                Section {
+                    HStack(spacing: 12) {
+                        Button {
+                            store.updateCategories(kind) { $0.hidden = Set(all) }
+                        } label: {
+                            Label("Tout désélectionner", systemImage: "circle")
+                        }
+                        Spacer()
+                        Button {
+                            store.updateCategories(kind) { $0.hidden = [] }
+                        } label: {
+                            Label("Tout sélectionner", systemImage: "checkmark.circle.fill")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .labelStyle(.titleAndIcon)
+                    .font(.subheadline)
+                } footer: {
+                    Text("Désélectionner masque toutes les catégories de la section : cochez ensuite seulement celles que vous voulez voir.")
+                }
+            }
+
             Section {
                 HStack {
                     TextField("Ex. PAKISTAN, ARABIC", text: $keyword)

@@ -174,28 +174,137 @@ struct IOSCollectionScreen: View {
 
 // MARK: - Mes vidéos
 
-/// Vidéos des sources locales : galerie, dossiers, serveurs Jellyfin, Emby, Plex.
+enum IOSLibrarySort: String, CaseIterable, Identifiable {
+    case nameAsc, nameDesc, newest, oldest, largest, smallest, longest, shortest
+    var id: String { rawValue }
+    var label: LocalizedStringKey {
+        switch self {
+        case .nameAsc: return "Nom A → Z"
+        case .nameDesc: return "Nom Z → A"
+        case .newest: return "Date : plus récentes d'abord"
+        case .oldest: return "Date : plus anciennes d'abord"
+        case .largest: return "Taille : plus lourdes d'abord"
+        case .smallest: return "Taille : plus légères d'abord"
+        case .longest: return "Durée : plus longues d'abord"
+        case .shortest: return "Durée : plus courtes d'abord"
+        }
+    }
+    var needsSize: Bool { self == .largest || self == .smallest }
+}
+
+enum IOSLibraryType: String, CaseIterable, Identifiable {
+    case all, personal, movies, series
+    var id: String { rawValue }
+    var label: LocalizedStringKey {
+        switch self {
+        case .all: return "Tous les types"
+        case .personal: return "Mes vidéos"
+        case .movies: return "Films"
+        case .series: return "Séries"
+        }
+    }
+}
+
+enum IOSLibraryStatus: String, CaseIterable, Identifiable {
+    case all, unwatched, inProgress, watched, favorites
+    var id: String { rawValue }
+    var label: LocalizedStringKey {
+        switch self {
+        case .all: return "Tous"
+        case .unwatched: return "Non vues"
+        case .inProgress: return "En cours"
+        case .watched: return "Vues"
+        case .favorites: return "Favoris"
+        }
+    }
+}
+
+/// Vidéos des sources locales : galerie, dossiers, serveurs Jellyfin, Emby, Plex. Tri et filtres mémorisés.
 struct IOSLibraryScreen: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(WatchProgressStore.self) private var watch
     @Environment(IOSUI.self) private var ui
     @AppStorage(IOSKeys.cardSize) private var sizeRaw = IOSCardSize.medium.rawValue
+    @AppStorage("ios.lib.sort") private var sortRaw = IOSLibrarySort.nameAsc.rawValue
+    @AppStorage("ios.lib.type") private var typeRaw = IOSLibraryType.all.rawValue
+    @AppStorage("ios.lib.status") private var statusRaw = IOSLibraryStatus.all.rawValue
+    @AppStorage("ios.lib.source") private var sourceRaw = ""
     @State private var search = ""
+    @State private var sizes: [String: Int64] = [:]
+    @State private var measuring = false
 
-    private var items: [MediaItem] {
+    private var sort: IOSLibrarySort { IOSLibrarySort(rawValue: sortRaw) ?? .nameAsc }
+    private var type: IOSLibraryType { IOSLibraryType(rawValue: typeRaw) ?? .all }
+    private var status: IOSLibraryStatus { IOSLibraryStatus(rawValue: statusRaw) ?? .all }
+    private var sourceID: UUID? { UUID(uuidString: sourceRaw) }
+    private var isFiltered: Bool { type != .all || status != .all || sourceID != nil }
+
+    private func isPersonal(_ item: MediaItem) -> Bool {
+        let videos = String(localized: "Vidéos")
+        return item.kind == .movie && (item.group == videos || item.group.hasPrefix(videos + " · "))
+    }
+
+    private var base: [MediaItem] {
+        let all = store.libraryItems(source: sourceID)
+        let favorites = store.favoriteSet
         let key = search.kastideoSearchKey
-        let all = store.libraryItems()
-        return key.isEmpty ? all : all.filter { $0.searchKey.contains(key) }
+        return all.filter { item in
+            if !key.isEmpty, !item.searchKey.contains(key) { return false }
+            switch type {
+            case .all: break
+            case .personal: if !isPersonal(item) { return false }
+            case .movies: if item.kind != .movie || isPersonal(item) { return false }
+            case .series: if item.kind != .series { return false }
+            }
+            switch status {
+            case .all: break
+            case .unwatched: if watch.isWatched(item.id) || watch.fraction(for: item.id) != nil { return false }
+            case .inProgress: if watch.isWatched(item.id) || watch.fraction(for: item.id) == nil { return false }
+            case .watched: if !watch.isWatched(item.id) { return false }
+            case .favorites: if !favorites.contains(item.id) { return false }
+            }
+            return true
+        }
+    }
+
+    private func sorted(_ items: [MediaItem]) -> [MediaItem] {
+        func byName(_ a: MediaItem, _ b: MediaItem) -> Bool { a.name.localizedStandardCompare(b.name) == .orderedAscending }
+        switch sort {
+        case .nameAsc: return items.sorted(by: byName)
+        case .nameDesc: return items.sorted { byName($1, $0) }
+        case .newest: return items.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
+        case .oldest: return items.sorted { ($0.added ?? .distantFuture) < ($1.added ?? .distantFuture) }
+        case .largest: return items.sorted { (sizes[$0.id] ?? -1) > (sizes[$1.id] ?? -1) }
+        case .smallest: return items.sorted { (sizes[$0.id] ?? Int64.max) < (sizes[$1.id] ?? Int64.max) }
+        case .longest: return items.sorted { ($0.runtime ?? 0) > ($1.runtime ?? 0) }
+        case .shortest: return items.sorted { ($0.runtime ?? Int.max) < ($1.runtime ?? Int.max) }
+        }
+    }
+
+    /// Détail affiché sous le titre quand le tri porte sur la date, la taille ou la durée.
+    private func caption(_ item: MediaItem) -> String? {
+        switch sort {
+        case .newest, .oldest:
+            return item.added?.formatted(date: .abbreviated, time: .omitted)
+        case .largest, .smallest:
+            return sizes[item.id].map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) }
+        case .longest, .shortest:
+            return item.runtime.map { String(localized: "\($0) min") }
+        default:
+            return nil
+        }
     }
 
     var body: some View {
-        let list = items
+        let list = sorted(base)
         NavigationStack {
             ScrollView {
                 if list.isEmpty {
                     Group {
-                        if store.isBusy { Text("Chargement…") } else { Text("Aucune vidéo pour le moment.") }
+                        if store.isBusy { Text("Chargement…") }
+                        else if isFiltered || !search.isEmpty { Text("Aucune vidéo ne correspond aux filtres.") }
+                        else { Text("Aucune vidéo pour le moment.") }
                     }
                     .foregroundStyle(.secondary).padding(40).frame(maxWidth: .infinity)
                 } else {
@@ -204,7 +313,12 @@ struct IOSLibraryScreen: View {
                               alignment: .leading, spacing: 16) {
                         ForEach(list.prefix(3000)) { item in
                             Button { ui.open(item, store: store, playback: playback) } label: {
-                                PosterCard(item: item, progress: watch.fraction(for: item.id))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    PosterCard(item: item, progress: watch.fraction(for: item.id))
+                                    if let text = caption(item) {
+                                        Text(text).font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                             .buttonStyle(.plain)
                         }
@@ -214,8 +328,61 @@ struct IOSLibraryScreen: View {
             }
             .searchable(text: $search, prompt: "Rechercher")
             .navigationTitle("Mes vidéos")
+            .navigationBarTitleDisplayMode(.inline)
             .refreshable { store.refreshAll() }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { filterMenu(count: list.count) }
+            }
+            .task(id: "\(sortRaw)-\(store.libraryItems().count)") { await measureSizes() }
         }
+    }
+
+    private func filterMenu(count: Int) -> some View {
+        Menu {
+            Picker("Trier par", selection: $sortRaw) {
+                ForEach(IOSLibrarySort.allCases) { Text($0.label).tag($0.rawValue) }
+            }
+            Picker("Type", selection: $typeRaw) {
+                ForEach(IOSLibraryType.allCases) { Text($0.label).tag($0.rawValue) }
+            }
+            Picker("Visionnage", selection: $statusRaw) {
+                ForEach(IOSLibraryStatus.allCases) { Text($0.label).tag($0.rawValue) }
+            }
+            if store.librarySources.count > 1 {
+                Picker("Source", selection: $sourceRaw) {
+                    Text("Toutes les sources").tag("")
+                    ForEach(store.librarySources) { Text($0.name).tag($0.id.uuidString) }
+                }
+            }
+            if isFiltered {
+                Divider()
+                Button("Effacer les filtres", systemImage: "xmark.circle") {
+                    typeRaw = IOSLibraryType.all.rawValue
+                    statusRaw = IOSLibraryStatus.all.rawValue
+                    sourceRaw = ""
+                }
+            }
+        } label: {
+            Image(systemName: isFiltered ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+        }
+    }
+
+    /// Mesure la taille des fichiers (hors fil principal) quand le tri par taille est choisi.
+    private func measureSizes() async {
+        guard sort.needsSize, !measuring else { return }
+        measuring = true
+        defer { measuring = false }
+        let pending = store.libraryItems().filter { sizes[$0.id] == nil }
+        guard !pending.isEmpty else { return }
+        let measured = await Task.detached(priority: .utility) { () -> [String: Int64] in
+            var result: [String: Int64] = [:]
+            for item in pending {
+                if Task.isCancelled { break }
+                if let size = IOSGallery.fileSize(of: item) { result[item.id] = size }
+            }
+            return result
+        }.value
+        sizes.merge(measured) { $1 }
     }
 }
 

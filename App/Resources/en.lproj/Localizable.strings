@@ -1383,3 +1383,22 @@
 "Application" = "App";
 "Sur iPhone et iPad" = "On iPhone and iPad";
 "Le guide est commun à toutes les versions de Kastideo : certaines indications (menus, raccourcis clavier) concernent le Mac, Windows ou Linux. Une aide dédiée à l'iPhone et à l'iPad viendra compléter cette section." = "The guide is shared by all Kastideo versions: some indications (menus, keyboard shortcuts) apply to Mac, Windows or Linux. Help dedicated to iPhone and iPad will complete this section.";
+
+/* iOS 1.17.0-ios19 */
+"Désélectionner masque toutes les catégories de la section : cochez ensuite seulement celles que vous voulez voir." = "Deselecting hides every category in the section: then tick only the ones you want to see.";
+"Reste %@ · fin à %@" = "%@ left · ends at %@";
+"Réception : %@" = "Reception: %@";
+"Nom A → Z" = "Name A → Z";
+"Nom Z → A" = "Name Z → A";
+"Date : plus récentes d'abord" = "Date: newest first";
+"Date : plus anciennes d'abord" = "Date: oldest first";
+"Taille : plus lourdes d'abord" = "Size: largest first";
+"Taille : plus légères d'abord" = "Size: smallest first";
+"Durée : plus longues d'abord" = "Duration: longest first";
+"Durée : plus courtes d'abord" = "Duration: shortest first";
+"Tous les types" = "All types";
+"Non vues" = "Unwatched";
+"Trier par" = "Sort by";
+"Visionnage" = "Viewing";
+"Effacer les filtres" = "Clear filters";
+"Aucune vidéo ne correspond aux filtres." = "No video matches the filters.";

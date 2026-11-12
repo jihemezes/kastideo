@@ -199,6 +199,19 @@ enum IOSGallery {
         do { try data.write(to: file, options: .atomic); return file } catch { return nil }
     }
 
+    /// Taille d'une vidéo (octets) : fichier local ou vidéo de la galerie ; `nil` si inconnue.
+    nonisolated static func fileSize(of item: MediaItem) -> Int64? {
+        guard let url = item.streamURL else { return nil }
+        if url.isFileURL {
+            return (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map { Int64($0) }
+        }
+        guard let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "id" })?.value,
+              let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject else { return nil }
+        let resources = PHAssetResource.assetResources(for: asset)
+        let resource = resources.first { $0.type == .video || $0.type == .fullSizeVideo } ?? resources.first
+        return (resource?.value(forKey: "fileSize") as? NSNumber)?.int64Value
+    }
+
     // MARK: Lecture
 
     /// Adresse de fichier lisible pour une vidéo de la galerie (téléchargée d'iCloud si nécessaire).
