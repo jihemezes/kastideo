@@ -109,7 +109,7 @@ struct IOSSettingsView: View {
                 IOSAppearanceSection()
                 IOSOrganisationSection()
 
-                IOSCloudSettingsSection()
+                CloudSettingsSection()
 
                 Section {
                     Toggle("Inclure les mots de passe", isOn: $includePasswords)

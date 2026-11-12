@@ -14,7 +14,7 @@ struct KastideoIOSApp: App {
     @State private var alerts = IOSAlertCenter()
     @State private var multiView = MultiViewModel()
     @State private var mediaInfo: MediaInfoStore
-    @State private var cloud: IOSCloudSync
+    @State private var cloud: CloudSync
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("ios.appearance") private var appearance = "dark"
     @AppStorage(IOSKeys.accent) private var accent = IOSAccent.orange.rawValue
@@ -51,7 +51,7 @@ struct KastideoIOSApp: App {
             info.enrichLocal(source, store: store)
         }
         _mediaInfo = State(initialValue: info)
-        _cloud = State(initialValue: IOSCloudSync(store: store, watch: watch, info: info))
+        _cloud = State(initialValue: CloudSync(store: store, watch: watch, info: info))
         IOSFiles.ensureFolders()
         IOSNotifier.setup()
         _store = State(initialValue: store)

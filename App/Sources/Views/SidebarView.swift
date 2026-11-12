@@ -5,6 +5,7 @@ struct SidebarView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(RecordingCenter.self) private var recordings
     @Environment(NavigationModel.self) private var navigation
+    @Environment(CloudSync.self) private var cloud
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -118,6 +119,9 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom) {
+            if cloud.isEnabled || cloud.state != .idle { CloudStatusBadge() }
+        }
     }
 
     /// Masque une catégorie (nom affiché → nom d'origine du fournisseur).

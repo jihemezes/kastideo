@@ -153,6 +153,8 @@ targets:
           - YouTube.swift
           - MultiViewModel.swift
           - MediaInfo.swift
+          - CloudSync.swift
+          - CloudSettingsView.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

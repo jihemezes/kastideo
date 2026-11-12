@@ -11,6 +11,7 @@ struct KastideoApp: App {
     @State private var updater = UpdaterController()
     @State private var watchProgress: WatchProgressStore
     @State private var mediaInfo: MediaInfoStore
+    @State private var cloud: CloudSync
     @State private var multiView = MultiViewModel()
     @State private var alerts = ProgramAlertCenter()
     @AppStorage(SettingsKeys.appearance) private var appearance = Appearance.dark.rawValue
@@ -29,6 +30,7 @@ struct KastideoApp: App {
         _playback = State(initialValue: playback)
         _watchProgress = State(initialValue: watch)
         _mediaInfo = State(initialValue: info)
+        _cloud = State(initialValue: CloudSync(store: store, watch: watch, info: info))
         playback.watchProgress = watch
         // Jellyfin, Emby, Plex : reprise de lecture et contenus vus partagés dans les deux sens.
         store.onServerProgress = { [weak watch] progress in watch?.apply(progress) }
@@ -60,8 +62,16 @@ struct KastideoApp: App {
                 .environment(mediaInfo)
                 .environment(multiView)
                 .environment(alerts)
+                .environment(cloud)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
+                .task { await cloud.run() }
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                    Task { await cloud.syncNow() }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willResignActiveNotification)) { _ in
+                    Task { await cloud.syncNow() }
+                }
                 .onAppear {
                     playback.watchProgress = watchProgress
                     let playback = playback
@@ -117,6 +127,7 @@ struct KastideoApp: App {
                 .environment(mediaInfo)
                 .environment(multiView)
                 .environment(alerts)
+                .environment(cloud)
                 .preferredColorScheme(Appearance(rawValue: appearance)?.colorScheme)
                 .tint(AccentChoice(rawValue: accent)?.color)
         }

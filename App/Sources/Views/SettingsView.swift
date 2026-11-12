@@ -231,6 +231,7 @@ struct GeneralSettingsView: View {
             CastSettingsSection()
             YouTubeSettingsSection()
             EPGFallbackSettingsSection()
+            CloudSettingsSection()
             ConfigTransferSection()
             Toggle("Actualiser les sources au démarrage (si plus de 6 h)", isOn: $autoRefresh)
             LabeledContent("Cache") {

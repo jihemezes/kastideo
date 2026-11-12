@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.17.0] - 2026-11-12
+
+- **Synchronisation iCloud** (Réglages > Général > iCloud) : retrouvez sur vos Mac, iPhone et iPad vos **sources, favoris, historique, catégories, réglages d'affichage, reprise de lecture et fiches corrigées**, et — au choix — les **mots de passe** (chiffrés par une phrase secrète). Choisissez le même dossier d'iCloud Drive sur chaque appareil ; la modification la plus récente l'emporte. Une petite icône nuage en bas de la barre latérale indique l'état.
+- Dossiers, fichiers M3U ne sont pas synchronisés (propres à chaque appareil). Nouvelle page d'aide « Synchroniser avec iCloud ».
+- Kastideo pour iPhone et iPad est désormais développé dans le même dépôt (journal : `iOS/CHANGELOG.md`).
+
 ## [1.16.2] - 2026-11-08
 
 - Enregistrements : garde-fou contre les enregistrements « son seulement ». Si la conversion en MP4 perd l'image (vidéo MPEG-2 de certaines chaînes que le MP4 ne sait pas contenir), le fichier **.ts d'origine est conservé** au lieu d'un MP4 sans image, avec une ligne dans le Journal de lecture.

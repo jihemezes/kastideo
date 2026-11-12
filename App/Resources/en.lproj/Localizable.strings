@@ -1342,3 +1342,23 @@
 "Effacer les données iCloud de Kastideo ?" = "Erase Kastideo's iCloud data?";
 "Effacer et arrêter la synchronisation" = "Erase and stop syncing";
 "Les données de cet appareil sont conservées ; celles stockées dans iCloud sont supprimées pour tous vos appareils." = "Data on this device is kept; data stored in iCloud is deleted for all your devices.";
+
+/* iOS 1.17.0-ios16 / Mac 1.17.0 */
+"Choisissez le dossier d'iCloud Drive qui servira à la synchronisation." = "Choose the iCloud Drive folder to use for syncing.";
+"Ce dossier n'est pas accessible." = "This folder is not accessible.";
+"Données trop volumineuses pour la synchronisation (%@)." = "Data too large to sync (%@).";
+"Saisissez une phrase secrète pour synchroniser les mots de passe (la même sur chaque appareil)." = "Enter a passphrase to sync passwords (the same on every device).";
+"Phrase secrète incorrecte : elle doit être la même sur tous vos appareils." = "Wrong passphrase: it must be the same on all your devices.";
+"Synchroniser avec iCloud Drive" = "Sync with iCloud Drive";
+"Dossier de synchronisation" = "Sync folder";
+"Phrase secrète (la même sur chaque appareil)" = "Passphrase (the same on every device)";
+"Enregistrer la phrase secrète" = "Save passphrase";
+"Enregistrée" = "Saved";
+"Effacer les fichiers de synchronisation" = "Erase sync files";
+"Effacer les fichiers de synchronisation ?" = "Erase sync files?";
+"Retrouvez vos sources, favoris et la reprise de lecture sur tous vos iPhone, iPad et Mac. Choisissez sur chaque appareil le même dossier d'iCloud Drive (par exemple « Kastideo ») : Kastideo y dépose de petits fichiers. Les mots de passe y sont chiffrés avec la phrase secrète (à saisir une fois par appareil). La modification la plus récente l'emporte. Dossiers, fichiers locaux et galerie restent propres à chaque appareil." = "Find your sources, favorites and playback resume on all your iPhones, iPads and Macs. On each device, choose the same iCloud Drive folder (for example “Kastideo”): Kastideo stores small files there. Passwords are encrypted there with the passphrase (enter it once per device). The most recent change wins. Folders, local files and the gallery stay specific to each device.";
+"Les données de cet appareil sont conservées ; les fichiers du dossier iCloud Drive sont supprimés pour tous vos appareils." = "Data on this device is kept; the files in the iCloud Drive folder are deleted for all your devices.";
+"Synchronisation…" = "Syncing…";
+"Synchro iCloud : problème" = "iCloud sync: problem";
+"iCloud : " = "iCloud: ";
+"iCloud : en attente" = "iCloud: waiting";

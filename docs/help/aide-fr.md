@@ -1338,7 +1338,7 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 - **Départ** : onglet affiché au lancement, et page de départ de Direct, Films et Séries (toutes, favoris, récents, dernière consultée ou une catégorie).
 - **Modifier une source** : Réglages > Sources, touchez une source (ou balayez-la > Modifier) pour changer son nom, son adresse, ses identifiants (mot de passe ou jeton vide = conservé), son guide TV ou ses dossiers, et tester la connexion d'un compte Xtream.
 - **Vidéos locales (galerie)** : Réglages > **Ajouter les vidéos de la galerie** (ou Ajouter une source > Galerie de l'iPhone pour **choisir des albums** : Caméra, Captures d'écran…). Les vidéos apparaissent dans Films, sous **Mes vidéos**, avec leur miniature, triées par date de prise de vue ; un film nommé correctement (titre exact) reçoit son affiche et son résumé TMDB. iOS demande l'accès à vos photos : si vous n'autorisez qu'une **sélection**, seules ces vidéos apparaissent (Réglages > Vidéos locales > Choisir d'autres vidéos…). Une vidéo qui n'est que dans iCloud est téléchargée avant la lecture. Rien n'est copié ni envoyé ailleurs. Réglage : actualiser à l'ouverture de l'app.
-- **Synchronisation iCloud** : Réglages > **iCloud** > Synchroniser avec iCloud (désactivé par défaut). Vos **sources**, **favoris**, **historique**, **catégories** et réglages d'affichage, la **reprise de lecture**, les **fiches corrigées** et la clé TMDB se retrouvent sur tous vos iPhone et iPad ; en option, les **mots de passe des sources**. Tout passe par le **Trousseau iCloud** (chiffré de bout en bout) : activez-le dans Réglages de l'iPhone > [votre nom] > iCloud > Mots de passe et trousseau, sur chaque appareil. La modification la plus récente l'emporte ; à la première synchronisation, les listes sont réunies. Choisissez les éléments, touchez **Synchroniser maintenant** si besoin ; « Effacer les données iCloud » supprime tout du côté iCloud. Dossiers, fichiers M3U et galerie restent propres à chaque appareil.
+- **Synchronisation iCloud** : Réglages > **iCloud**. Retrouvez sources, favoris, reprise de lecture… sur vos iPhone, iPad et Mac, via un dossier d'iCloud Drive. Voir la page [Synchroniser avec iCloud](#icloud).
 - **Fiches TMDB** : avec une clé gratuite TMDB (Réglages > Fiches des films et séries), la fiche d'un film ou d'une série affiche l'affiche HD, le résumé traduit, les genres, la note, la distribution avec photos et la bande-annonce, et le bandeau « à la une » propose les **tendances de la semaine** présentes dans votre catalogue. Une fiche est fausse ? Dans la fiche, **Corriger la fiche…** : collez le numéro ou l'adresse de la page themoviedb.org, cherchez par titre ou saisissez titre, année, affiche et résumé à la main. **Retirer la correction** revient à la fiche automatique ; la liste des corrections est dans Réglages.
 - **Plusieurs abonnements** : Réglages > Abonnements pour afficher une seule source sans désactiver l'autre, fusion des doublons entre comptes, et **Diagnostic** d'une source (balayez-la vers la gauche).
 - **Enregistrer le direct** : pendant un direct, le bouton rond rouge du lecteur enregistre la chaîne (arrêt automatique réglable). Les fichiers .ts sont dans l'app **Fichiers > Sur mon iPhone > Kastideo > Enregistrements** ; lisez-les dans Kastideo ou VLC, partagez-les ou supprimez-les (balayez). Un enregistrement programmé n'est pas possible sur iPhone (l'application ne peut pas se réveiller seule) : utilisez les alertes ou le Mac.
@@ -1355,6 +1355,27 @@ Les réglages et sources peuvent être transférés d'une version à l'autre ave
 **Pas encore sur iPhone / iPad** : image dans l'image (non disponible avec le moteur de lecture actuel). Une version **Apple TV** est prévue plus tard.
 
 En cas de problème de lecture : **Réglages > À propos > Partager le journal de lecture**.
+
+## Synchroniser avec iCloud (iPhone, iPad, Mac) {#icloud}
+
+Kastideo peut garder **vos appareils Apple à l'identique** : iPhone, iPad et Mac se partagent vos sources, favoris, historique, catégories, réglages d'affichage, la **reprise de lecture**, les fiches corrigées et — au choix — les **mots de passe**. La synchronisation passe par un **dossier de votre iCloud Drive** : Kastideo y dépose de petits fichiers.
+
+**Mise en route (sur chaque appareil).**
+
+1. Dans iCloud Drive, créez un dossier, par exemple **Kastideo** (une seule fois). Vérifiez que iCloud Drive est activé sur chaque appareil.
+2. Ouvrez Kastideo > Réglages > **iCloud** et activez **Synchroniser avec iCloud Drive**.
+3. Touchez **Dossier de synchronisation** et choisissez **le même dossier**.
+4. Choisissez les éléments à synchroniser.
+5. Si vous synchronisez les mots de passe ou la clé TMDB, saisissez la **phrase secrète** — la même sur tous les appareils — puis **Enregistrer la phrase secrète**.
+
+**Bon à savoir.**
+
+- La modification la plus récente l'emporte. À la première synchronisation, les listes (sources, favoris, historique) sont réunies.
+- Les mots de passe sont **chiffrés** avec votre phrase secrète avant d'être déposés : sans elle, personne ne peut les lire. Notez-la : elle ne peut pas être retrouvée.
+- Les dossiers de vidéos, fichiers M3U et la galerie restent propres à chaque appareil. Les réglages d'affichage propres au Mac et à l'iPhone sont gardés séparément.
+- La synchronisation a lieu toutes les 30 secondes, au retour dans l'app et quand elle passe en arrière-plan ; **Synchroniser maintenant** la force. Sur Mac, une petite icône nuage en bas de la barre latérale indique l'état.
+- « Effacer les fichiers de synchronisation » supprime les fichiers du dossier pour tous vos appareils (vos données locales sont conservées).
+- Windows, Linux et Android ne sont pas concernés : utilisez l'export / l'import de configuration.
 
 ## Nouveautés {#nouveautes}
 
