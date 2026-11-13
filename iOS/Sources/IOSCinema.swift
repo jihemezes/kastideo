@@ -391,6 +391,21 @@ struct IOSCinemaHome: View {
         .refreshable { store.refreshAll() }
     }
 
+    /// Catégories avec rangée ; la catégorie de départ (Réglages > Organisation) passe en premier.
+    private func orderedCategories(countries: CountryFilter) -> [String] {
+        var names = (store.categoriesByKind[kind] ?? []).filter {
+            countries.allows(category: $0) || store.libraryCategories[kind]?.contains($0) == true
+        }
+        let startValue = UserDefaults.standard.string(forKey: StartPage.key(kind)) ?? "all"
+        let startName: String? = startValue == "last" ? UserDefaults.standard.string(forKey: StartPage.lastKey(kind))
+            : (startValue.hasPrefix("category:") ? String(startValue.dropFirst("category:".count)) : nil)
+        if let startName, let at = names.firstIndex(of: startName), at > 0 {
+            names.remove(at: at)
+            names.insert(startName, at: 0)
+        }
+        return names
+    }
+
     @ViewBuilder
     private var home: some View {
         let kinds: Set<MediaKind> = kind == .series ? [.series, .episode] : [kind]
@@ -400,16 +415,7 @@ struct IOSCinemaHome: View {
         let started = kind == .live ? [] : allRecents.filter { watch.inResume($0.id) }
         let recents = kind == .live ? allRecents : allRecents.filter { !watch.inResume($0.id) }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
-        var categories = (store.categoriesByKind[kind] ?? []).filter {
-            countries.allows(category: $0) || store.libraryCategories[kind]?.contains($0) == true
-        }
-        // La catégorie choisie comme page de départ (Réglages > Organisation) ouvre la série de rangées.
-        let startValue = UserDefaults.standard.string(forKey: StartPage.key(kind)) ?? "all"
-        let startName: String? = startValue == "last" ? UserDefaults.standard.string(forKey: StartPage.lastKey(kind))
-            : (startValue.hasPrefix("category:") ? String(startValue.dropFirst("category:".count)) : nil)
-        if let startName, let at = categories.firstIndex(of: startName), at > 0 {
-            categories.move(fromOffsets: IndexSet(integer: at), toOffset: 0)
-        }
+        let categories = orderedCategories(countries: countries)
         if all.isEmpty {
             ContentUnavailableView(kind.title, systemImage: "tray",
                                    description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))

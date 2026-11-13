@@ -2,7 +2,9 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
-## [1.17.0-ios25] - 2026-11-13
+## [1.17.0-ios26] - 2026-11-13
+
+*(ios25 n'a pas compilé : corrigé ici.)*
 
 - **Affichage Cinéma, ordre des rangées** : la catégorie choisie comme **page de départ** (Films, Séries, Direct) passe en **première rangée** sous le bandeau.
 - **Bandeau « à la une »** : il s'affiche maintenant dès que les derniers ajouts et la sélection de catégorie sont prêts, sans attendre les tendances TMDB (réseau), qui s'y ajoutent ensuite ; si le filtre de pays ne laisse rien, un bandeau générique est proposé.
