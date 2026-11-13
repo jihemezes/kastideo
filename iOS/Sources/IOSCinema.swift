@@ -44,9 +44,10 @@ struct IOSHero: View {
     }
 
     var body: some View {
-        Group {
+        // Jamais de EmptyView ici : les .task attachés à une vue vide ne démarrent pas, le bandeau ne se construisait donc jamais.
+        VStack(spacing: 0) {
             if slides.isEmpty {
-                EmptyView()
+                Color.clear.frame(height: 1)
             } else {
                 TabView(selection: $index) {
                     ForEach(Array(slides.enumerated()), id: \.element.id) { offset, slide in
