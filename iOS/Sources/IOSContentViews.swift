@@ -126,6 +126,7 @@ struct IOSLiveList: View {
                                        description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) { IOSScopeBar(kind: .live, scope: $scope) }
         .navigationTitle(scope.title(kind: .live))
         .searchable(text: $search, prompt: "Rechercher une chaîne")
         .toolbar {
@@ -273,6 +274,7 @@ struct IOSCatalogGrid: View {
                                        description: Text(store.hasSources ? String(localized: "Aucun contenu pour cette sélection.") : String(localized: "Ajoutez une source dans Réglages.")))
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) { IOSScopeBar(kind: kind, scope: $scope) }
         .navigationTitle(scope.title(kind: kind))
         .searchable(text: $search, prompt: "Rechercher")
         .toolbar {

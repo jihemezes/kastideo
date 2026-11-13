@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios24] - 2026-11-13
+
+- **Direct, Films, Séries : changer de catégorie** — une **barre de catégories** (Toutes, Favoris, Récents, puis chaque catégorie) s'affiche en haut des listes, avec un bouton ▦ qui ouvre la **liste complète des catégories** (recherche, nombre de contenus). Le menu en haut à droite reste disponible.
+
 ## [1.17.0-ios23] - 2026-11-13
 
 - **Lecteur, gestes** : double appui à gauche −10 s, à droite +30 s, au centre pause ; glisser verticalement à droite = volume, à gauche = luminosité ; glisser horizontalement = avancer / reculer (aperçu du temps) dans un film, **changer de chaîne** en direct.
