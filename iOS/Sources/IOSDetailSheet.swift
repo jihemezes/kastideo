@@ -231,6 +231,9 @@ struct IOSDetailSheet: View {
     }
 
     private func play(_ target: MediaItem) {
+        if target.kind == .episode, !seasons.isEmpty {
+            ui.episodeContext = IOSEpisodeContext(series: item, episodes: seasons.flatMap(\.episodes))
+        }
         ui.detail = nil
         ui.play(target, store: store, playback: playback)
     }

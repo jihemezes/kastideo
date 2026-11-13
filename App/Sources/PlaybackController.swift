@@ -119,6 +119,8 @@ final class PlaybackController {
     /// Jellyfin, Emby et Plex.
     /// Fin d'un replay (pour revenir au direct).
     @ObservationIgnored var onReplayEnded: ((MediaItem) -> Void)?
+    /// Fin d'un épisode vu jusqu'au bout (iPhone / iPad : enchaînement automatique).
+    @ObservationIgnored var onEpisodeEnded: ((MediaItem) -> Void)?
     @ObservationIgnored var onProgress: ((MediaItem, TimeInterval, TimeInterval, PlaybackEvent) -> Void)?
     /// Appelé quand VLC a fini d'écrire un enregistrement (chemin du fichier).
     @ObservationIgnored var onRecordingStopped: ((String?) -> Void)?
@@ -781,6 +783,7 @@ final class PlaybackController {
                 // Fin du film ou de l'épisode : vu jusqu'au bout.
                 watchProgress?.update(id: item.id, position: duration, duration: duration)
                 onProgress?(item, duration, duration, .stop)
+                if item.kind == .episode { onEpisodeEnded?(item) }
             }
             if current?.kind == .live {
                 errorMessage = String(localized: "Le flux s'est interrompu. Le serveur a peut-être coupé la connexion.")

@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios23] - 2026-11-13
+
+- **Lecteur, gestes** : double appui à gauche −10 s, à droite +30 s, au centre pause ; glisser verticalement à droite = volume, à gauche = luminosité ; glisser horizontalement = avancer / reculer (aperçu du temps) dans un film, **changer de chaîne** en direct.
+- **Lecteur, direct** : **programme en cours** avec barre de progression et programme suivant sous le nom de la chaîne ; boutons **chaîne précédente / suivante** (dans la catégorie) ; « Dernière chaîne ».
+- **Lecteur, menu ⋯** : **vitesse de lecture** (0,5× à 2×), **format de l'image** (ajuster, remplir l'écran, 16:9, 4:3), liste des **épisodes** d'une série.
+- **Séries** : bouton **Suivant** et **enchaînement automatique** des épisodes (Réglages > Application > Lecture).
+
 ## [1.17.0-ios22] - 2026-11-13
 
 - **Guide TV en grille, correction** : la grille défile de nouveau dans les deux sens (iPhone et iPad) ; la colonne des chaînes, la ligne des heures et le coin du jour restent visibles (suivi du défilement par l'API d'iOS 18, mesure de secours avant). Le titre de la page est compacté : plus d'espace vide entre « Guide TV » et la ligne des jours.

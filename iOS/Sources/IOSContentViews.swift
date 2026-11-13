@@ -6,6 +6,12 @@ import KastideoCore
 extension IOSUI {
     /// Lance la lecture et affiche le lecteur plein écran.
     func play(_ item: MediaItem, store: LibraryStore, playback: PlaybackController) {
+        if let current = playback.current, current.kind == .live, item.kind == .live, current.id != item.id {
+            previousChannel = current
+        }
+        if item.kind != .episode || !(episodeContext?.episodes.contains { $0.id == item.id } ?? false) {
+            episodeContext = nil
+        }
         store.recordPlay(item)
         playback.play(item)
         showPlayer = true

@@ -86,6 +86,10 @@ final class IOSUI {
     var showAddSource = false
     var showMultiView = false
     var showDisclaimer = LegalNotice.needsAcceptance
+    /// Chaîne regardée juste avant (bouton « Dernière chaîne »).
+    var previousChannel: MediaItem?
+    /// Série en cours de lecture : épisode suivant, liste des épisodes.
+    var episodeContext: IOSEpisodeContext?
 }
 
 enum IOSTab: Hashable {

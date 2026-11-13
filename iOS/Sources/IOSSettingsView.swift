@@ -36,6 +36,7 @@ struct IOSSettingsView: View {
     @AppStorage(PlaybackKeys.resume) private var resume = true
     @AppStorage("adult.show") private var showAdult = false
     @AppStorage("relay.enabled") private var relay = true
+    @AppStorage("ios.autonext") private var autoNext = true
     @State private var importing = false
     @State private var exporting = false
     @State private var exportDocument = ConfigDocument(data: Data())
@@ -116,6 +117,7 @@ struct IOSSettingsView: View {
                             ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
                         }
                         Toggle("Reprendre les films et épisodes là où on s'est arrêté", isOn: $resume)
+                        Toggle("Enchaîner les épisodes automatiquement", isOn: $autoNext)
                         Toggle("Relais de flux (si un fournisseur refuse la connexion)", isOn: $relay)
                     }
 

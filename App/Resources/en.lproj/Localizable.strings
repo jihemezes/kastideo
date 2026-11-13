@@ -1419,3 +1419,12 @@
 "Sans catégorie" = "No category";
 "Sans date" = "No date";
 
+
+/* iOS 1.17.0-ios23 */
+"Vitesse de lecture" = "Playback speed";
+"Format de l'image" = "Picture format";
+"Ajuster" = "Fit";
+"Remplir l'écran" = "Fill the screen";
+"Dernière chaîne : %@" = "Last channel: %@";
+"Épisodes…" = "Episodes…";
+"Enchaîner les épisodes automatiquement" = "Play episodes one after another";
