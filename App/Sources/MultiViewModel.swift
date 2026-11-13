@@ -367,7 +367,10 @@ final class MultiViewModel {
         guard n > 0 else { return [] }
         let w = size.width, h = size.height
         if n == 1 { return [CGRect(x: 0, y: 0, width: w, height: h)] }
-        switch layout {
+        // Zone en portrait (iPad ou iPhone tenu droit) : côte à côte et grille donneraient des vidéos minuscules
+        // en hauteur ; les écrans sont alors empilés, chacun pleine largeur.
+        let effective: MultiViewLayout = (h > w * 1.1 && (layout == .sideBySide || layout == .grid)) ? .stacked : layout
+        switch effective {
         case .sideBySide:
             let cw = (w - spacing * CGFloat(n - 1)) / CGFloat(n)
             return (0..<n).map { CGRect(x: CGFloat($0) * (cw + spacing), y: 0, width: cw, height: h) }

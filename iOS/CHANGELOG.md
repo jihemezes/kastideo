@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios30] - 2026-11-13
+
+- **MultiVue en portrait** (iPad, iPhone) : quand la zone est plus haute que large, les écrans sont **empilés** (un au-dessus de l'autre, pleine largeur) au lieu d'être côte à côte ou en grille ; ils reprennent leur disposition en paysage. La disposition « Une grande + vignettes » ne change pas.
+
 ## [1.17.0-ios29] - 2026-11-13
 
 - **TestFlight : « Quoi tester » automatique** — chaque build reçoit le texte de son entrée de ce journal (français et anglais), sans saisie dans App Store Connect.
