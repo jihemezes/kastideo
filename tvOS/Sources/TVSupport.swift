@@ -146,3 +146,25 @@ extension Programme {
         "\(start.formatted(date: .omitted, time: .shortened)) – \(stop.formatted(date: .omitted, time: .shortened))"
     }
 }
+
+extension SourceKind {
+    var title: String {
+        switch self {
+        case .m3uURL: return String(localized: "Playlist M3U (URL)")
+        case .m3uFile: return String(localized: "Playlist M3U (fichier)")
+        case .xtream: return String(localized: "Xtream Codes")
+        case .folders: return String(localized: "Dossiers")
+        case .mediaServer(let type, _, _): return type.label
+        case .gallery: return String(localized: "Galerie")
+        }
+    }
+}
+
+// TVVLCKit n'a pas l'API de diffusion vers un téléviseur (Cast) : substituts inertes pour que le code partagé compile.
+final class VLCRendererItem: NSObject {
+    var name: String { "" }
+}
+
+extension VLCMediaPlayer {
+    func setRendererItem(_ item: VLCRendererItem?) -> Bool { true }
+}

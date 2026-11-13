@@ -2,9 +2,9 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
-## [1.17.0-tvos1] - 2026-11-14
+## [1.17.0-tvos2] - 2026-11-14
 
-Première version Apple TV (tvOS 17) :
+Première version Apple TV (tvOS 17) — tvos1 n'a pas compilé (API de diffusion absente de TVVLCKit, titre des sources) :
 
 - **Direct, Films, Séries** : barre de catégories (Toutes, Favoris, Récents, catégories) et grille ; appui sur une chaîne = lecture, sur un film ou une série = fiche (résumé, lecture / reprise, favoris, saisons et épisodes).
 - **Lecteur plein écran à la télécommande** : ↑ / ↓ changent de chaîne, ← / → reculent de 10 s / avancent de 30 s (films), lecture/pause, Menu pour quitter ; bandeau d'information (programme en cours avec progression, suivant, qualité du flux).
