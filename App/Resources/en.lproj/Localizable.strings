@@ -1430,3 +1430,18 @@
 
 /* iOS 1.17.0-ios25 */
 "Page affichée en ouvrant Direct, Films ou Séries (Liste ou Grille) ; en affichage Cinéma, cette catégorie devient la première rangée. « Dernière consultée » reprend la catégorie où vous étiez." = "Page shown when opening Live, Movies or Series (List or Grid); in Cinema display this category becomes the first row. “Last viewed” goes back to the category you were in.";
+
+/* tvOS 1.17.0-tvos1 */
+"Aucun contenu pour cette section." = "No content in this section.";
+"Le guide apparaît quand une source de direct est chargée." = "The guide appears once a live source is loaded.";
+"Ensuite · %@" = "Next · %@";
+"Ajouter une source…" = "Add a source…";
+"La synchronisation iCloud n'est pas disponible sur Apple TV : saisissez votre source ici (le clavier de l'iPhone proche peut servir de saisie)." = "iCloud sync is not available on Apple TV: enter your source here (a nearby iPhone's keyboard can be used for typing).";
+"Avertissement légal" = "Legal notice";
+"Kastideo est un lecteur : il ne fournit aucun contenu." = "Kastideo is a player: it provides no content.";
+"Liste M3U (adresse)" = "M3U list (address)";
+"Serveur (http://…)" = "Server (http://…)";
+"Adresse de la liste (http://…)" = "List address (http://…)";
+"Adresse invalide." = "Invalid address.";
+"Identifiant et mot de passe requis." = "Username and password required.";
+"%lld contenus : affinez par catégorie." = "%lld items: narrow down by category.";

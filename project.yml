@@ -220,3 +220,64 @@ targets:
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: NO
     scheme: {}
+
+  # App Apple TV (TestFlight, même fiche App Store Connect que l'iPhone) : interface SwiftUI propre à tvOS (tvOS/Sources).
+  KastideotvOS:
+    type: application
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: tvOS/Sources
+      - path: tvOS/Resources
+      - path: App/Sources
+        includes:
+          - LibraryStore.swift
+          - Storage.swift
+          - NavigationModel.swift
+          - StartPage.swift
+          - Replay.swift
+          - WatchProgress.swift
+          - PlaybackController.swift
+          - PlaybackLog.swift
+          - StreamRelay.swift
+          - ReleaseNotes.swift
+          - SharedSettings.swift
+          - ConfigModels.swift
+          - LegalText.swift
+          - ThemeLabels.swift
+      - path: App/Resources
+        includes:
+          - fr.lproj/*
+          - en.lproj/*
+      - path: CHANGELOG.md
+        buildPhase: resources
+    dependencies:
+      - package: KastideoCore
+      - package: VLCKitSPM
+        product: VLCKitSPM
+    info:
+      path: tvOS/Info.plist
+      properties:
+        CFBundleName: Kastideo
+        CFBundleDisplayName: Kastideo
+        CFBundleDevelopmentRegion: fr
+        CFBundleLocalizations:
+          - fr
+          - en
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSHumanReadableCopyright: "© 2026 Jean-Michel Ezes"
+        UIUserInterfaceStyle: Dark
+        ITSAppUsesNonExemptEncryption: false
+        # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.jmezes.kastideo
+        PRODUCT_NAME: Kastideo
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
+        TARGETED_DEVICE_FAMILY: "3"
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
+    scheme: {}

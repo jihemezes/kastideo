@@ -1,0 +1,163 @@
+# App Apple TV (tvOS) : à chaque tag vX.Y.Z-tvosN (ex. v1.17.0-tvos1), compilation, signature « App Store » automatique
+# (clé API App Store Connect) et envoi à TestFlight. Rien n'est publié sur GitHub : l'app apparaît dans TestFlight
+# quelques minutes après la fin du traitement par Apple.
+# Ces tags n'interfèrent ni avec le Mac (release.yml les ignore), ni avec Windows / Linux, ni avec Android.
+#
+# Secrets requis (les mêmes que pour le Mac) :
+#   APPLE_TEAM_ID, APPLE_API_KEY (contenu du .p8, en clair ou en base64), APPLE_API_KEY_ID, APPLE_API_ISSUER_ID
+# Prérequis côté Apple :
+#   - une app « fr.jmezes.kastideo » créée dans App Store Connect (Mes apps > + > Nouvelle app, plateforme iOS), puis la plateforme tvOS ajoutée à cette même app (App Store Connect > Kastideo > + à côté de iOS > tvOS) ;
+#   - une clé API App Store Connect de rôle « Admin » (ou « App Manager » avec la signature cloud activée).
+name: Apple TV (TestFlight)
+
+on:
+  push:
+    tags: ['v*-tvos*']
+  workflow_dispatch:
+
+concurrency:
+  group: tvos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    name: Compilation Apple TV et envoi à TestFlight
+    # Apple n'accepte plus que les apps compilées avec le SDK iOS 26 (Xcode 26 ou plus récent).
+    runs-on: macos-26
+    timeout-minutes: 75
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Choisir Xcode 26 ou plus récent
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sed -E 's#.*/Xcode_([0-9.]+)(_[A-Za-z0-9]+)?\.app#\1 &#' | sort -V | tail -1 | cut -d' ' -f2-)
+          echo "Xcode disponibles :"; ls -d /Applications/Xcode*.app
+          if [ -z "$LATEST" ]; then echo "::error::Aucun Xcode trouvé."; exit 1; fi
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+          MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          if [ "$MAJOR" -lt 26 ]; then echo "::error::Xcode $MAJOR trouvé : Apple exige Xcode 26 ou plus récent pour TestFlight."; exit 1; fi
+
+      - name: Version
+        run: |
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+            echo "::error::Ce workflow doit être lancé sur un tag vX.Y.Z-tvosN (choisissez le tag dans « Use workflow from »)."
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION%%-*}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag invalide « $GITHUB_REF_NAME » (attendu : vX.Y.Z-tvosN)."
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Version : $VERSION (build $GITHUB_RUN_NUMBER)"
+          xcodebuild -version
+
+      - name: Vérifier les secrets
+        run: |
+          missing=0
+          for name in APPLE_TEAM_ID APPLE_API_KEY APPLE_API_KEY_ID APPLE_API_ISSUER_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Secret manquant : $name"; missing=1; fi
+          done
+          exit $missing
+
+      - name: Installer XcodeGen
+        run: brew install xcodegen
+
+      - name: Cache des paquets Swift (VLCKit)
+        uses: actions/cache@v4
+        with:
+          path: ~/spm-cache
+          key: spm-tvos-${{ runner.os }}-${{ hashFiles('project.yml') }}
+          restore-keys: spm-
+
+      - name: Tests du module KastideoCore
+        run: swift test --package-path Packages/KastideoCore
+
+      - name: Clé API App Store Connect
+        run: |
+          mkdir -p "$HOME/.private_keys"
+          KEY_PATH="$HOME/.private_keys/AuthKey_${APPLE_API_KEY_ID}.p8"
+          if printf '%s' "$APPLE_API_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+            printf '%s\n' "$APPLE_API_KEY" > "$KEY_PATH"
+          else
+            printf '%s' "$APPLE_API_KEY" | base64 --decode > "$KEY_PATH"
+          fi
+          echo "KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Générer le projet Xcode
+        run: xcodegen generate
+
+      - name: "Archiver (sans signature, elle est faite à l'export)"
+        run: |
+          if ! xcodebuild -project Kastideo.xcodeproj -scheme KastideotvOS -configuration Release \
+                 -clonedSourcePackagesDirPath ~/spm-cache \
+                 -destination 'generic/platform=tvOS' \
+                 -archivePath "$RUNNER_TEMP/KastideotvOS.xcarchive" \
+                 MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+                 DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+                 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+                 archive > archive.log 2>&1; then
+            echo "::group::Erreurs"
+            grep -n -i -E "error|fatal|stack dump|assertion|crash|failed with" archive.log | grep -v -E "^[0-9]+:(note|warning)|-Werror|DeveloperError" | cut -c1-600 | head -150
+            echo "::endgroup::"
+            tail -80 archive.log
+            exit 1
+          fi
+          echo "Archive créée."
+
+      - name: Exporter l'IPA (signature App Store automatique)
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>teamID</key><string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          if ! xcodebuild -exportArchive \
+                 -archivePath "$RUNNER_TEMP/KastideotvOS.xcarchive" \
+                 -exportPath "$RUNNER_TEMP/export" \
+                 -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+                 -allowProvisioningUpdates \
+                 -authenticationKeyPath "$KEY_PATH" \
+                 -authenticationKeyID "$APPLE_API_KEY_ID" \
+                 -authenticationKeyIssuerID "$APPLE_API_ISSUER_ID" > export.log 2>&1; then
+            echo "::group::Erreurs d'export"
+            cat export.log | cut -c1-600 | tail -80
+            echo "::endgroup::"
+            echo "::error::Export impossible : vérifiez que l'app fr.jmezes.kastideo existe dans App Store Connect et que la clé API a le rôle Admin."
+            exit 1
+          fi
+          ls -la "$RUNNER_TEMP/export"
+          echo "IPA_PATH=$(ls "$RUNNER_TEMP"/export/*.ipa | head -1)" >> "$GITHUB_ENV"
+
+      - name: Envoyer à TestFlight
+        run: |
+          xcrun altool --upload-app --type appletvos --file "$IPA_PATH" \
+            --apiKey "$APPLE_API_KEY_ID" --apiIssuer "$APPLE_API_ISSUER_ID" 2>&1 | tee upload.log
+          if grep -q -i -E "error|failed" upload.log && ! grep -q -i "No errors uploading" upload.log; then
+            echo "::error::Envoi à TestFlight refusé (voir le journal ci-dessus)."
+            exit 1
+          fi
+
+      - name: Conserver l'IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kastideo-tvos-${{ env.VERSION }}
+          path: ${{ env.IPA_PATH }}
+          retention-days: 14
+
