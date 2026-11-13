@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios27] - 2026-11-13
+
+- **Guide TV (iPad)** : à l'ouverture, la grille arrive **tout en haut** de la liste des chaînes (elle se centrait verticalement en allant à l'heure actuelle).
+
 ## [1.17.0-ios26] - 2026-11-13
 
 *(ios25 n'a pas compilé : corrigé ici.)*

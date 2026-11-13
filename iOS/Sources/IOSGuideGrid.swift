@@ -123,7 +123,7 @@ struct IOSGuideGrid: View {
         }
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(150))
-            proxy.scrollTo(min(max(target, 0), 47), anchor: .leading)
+            proxy.scrollTo(min(max(target, 0), 47), anchor: .topLeading)
         }
     }
 
