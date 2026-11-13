@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios29] - 2026-11-13
+
+- **TestFlight : « Quoi tester » automatique** — chaque build reçoit le texte de son entrée de ce journal (français et anglais), sans saisie dans App Store Connect.
+- **Mode démonstration** (argument de lancement, invisible en usage normal) pour les captures d'écran automatiques iPhone 6,9" et iPad 13".
+
 ## [1.17.0-ios28] - 2026-11-13
 
 - **Affichage Cinéma, bandeau « à la une »** : correction de la cause probable de son absence (iPhone et iPad) — le bandeau était attaché à une vue vide et ne se construisait jamais.

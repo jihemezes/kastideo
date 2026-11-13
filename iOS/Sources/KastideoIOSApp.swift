@@ -54,6 +54,11 @@ struct KastideoIOSApp: App {
         _cloud = State(initialValue: CloudSync(store: store, watch: watch, info: info))
         IOSFiles.ensureFolders()
         IOSNotifier.setup()
+        // Mode démonstration (captures d'écran automatiques) : source M3U publique passée en argument de lancement.
+        // Sans cet argument, rien ne change.
+        if let demo = UserDefaults.standard.string(forKey: "kastideo-demo-m3u"), let url = URL(string: demo), store.sources.isEmpty {
+            store.addSource(Source(name: "Démo", kind: .m3uURL(url)), password: nil)
+        }
         _store = State(initialValue: store)
         _navigation = State(initialValue: nav)
         _playback = State(initialValue: playback)
@@ -76,7 +81,13 @@ struct KastideoIOSApp: App {
                 .environment(cloud)
                 .preferredColorScheme(scheme)
                 .tint(IOSAccent.current(accent).color)
-                .task { await store.start(autoRefresh: true) }
+                .task {
+                    if UserDefaults.standard.string(forKey: "kastideo-demo-m3u") != nil {
+                        LegalNotice.accept()
+                        ui.showDisclaimer = false
+                    }
+                    await store.start(autoRefresh: true)
+                }
                 .task { await cloud.run() }
                 .task {
                     // Alertes : notifications recalculées au lancement puis toutes les 10 minutes.

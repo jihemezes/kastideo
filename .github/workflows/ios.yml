@@ -161,6 +161,33 @@ jobs:
           path: ${{ env.IPA_PATH }}
           retention-days: 14
 
+  # « Quoi tester » : texte du build TestFlight = section du tag dans iOS/CHANGELOG.md (fr-FR et en-US). Jamais bloquant.
+  quoi-tester:
+    name: « Quoi tester » TestFlight
+    needs: testflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    env:
+      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Renseigner « Quoi tester »
+        run: |
+          pip3 install --break-system-packages pyjwt cryptography || pip3 install pyjwt cryptography
+          mkdir -p "$HOME/.private_keys"
+          KEY_PATH="$HOME/.private_keys/AuthKey_${APPLE_API_KEY_ID}.p8"
+          if printf '%s' "$APPLE_API_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+            printf '%s\n' "$APPLE_API_KEY" > "$KEY_PATH"
+          else
+            printf '%s' "$APPLE_API_KEY" | base64 --decode > "$KEY_PATH"
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"; VERSION="${VERSION%%-*}"
+          export KEY_PATH VERSION BUILD="$GITHUB_RUN_NUMBER" TAG="$GITHUB_REF_NAME"
+          python3 scripts/testflight-whatsnew.py
+
   # Vérifie que le code partagé refactoré pour iOS compile toujours sur Mac (n'empêche pas l'envoi iOS).
   mac-check:
     name: Contrôle de la compilation Mac
