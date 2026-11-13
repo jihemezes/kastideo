@@ -58,7 +58,7 @@ struct IOSGuideView: View {
                     dayChips
                     if isGrid { gridHourChips } else { hourChips }
                 }
-                .padding(.vertical, 8)
+                .padding(.top, 4).padding(.bottom, 6)
                 if isGrid {
                     IOSGuideGrid(channels: list, dayStart: dayStart(now: context.date), jumpTarget: jumpTarget, jumpToken: jumpToken)
                         .id(dayOffset)
@@ -78,7 +78,8 @@ struct IOSGuideView: View {
                 }
             }
         }
-        .searchable(text: $search, prompt: "Rechercher une chaîne")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Rechercher une chaîne")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {

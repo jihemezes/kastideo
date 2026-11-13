@@ -2,9 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios22] - 2026-11-13
+
+- **Guide TV en grille, correction** : la grille défile de nouveau dans les deux sens (iPhone et iPad) ; la colonne des chaînes, la ligne des heures et le coin du jour restent visibles (suivi du défilement par l'API d'iOS 18, mesure de secours avant). Le titre de la page est compacté : plus d'espace vide entre « Guide TV » et la ligne des jours.
+
 ## [1.17.0-ios21] - 2026-11-13
 
-- **Guide TV en grille** : la colonne des chaînes **reste maintenant fixe à gauche** quand on fait défiler les heures vers la gauche ; elle ne défile que verticalement, en même temps que la grille. La ligne des heures reste en haut. Les chaînes s'affichent par lots de 80 (bouton « Afficher plus de chaînes » en bas).
+- Essai raté de colonne fixe (grille immobile). Remplacé par ios22.
 
 ## [1.17.0-ios20] - 2026-11-12
 

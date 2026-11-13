@@ -1,29 +1,38 @@
 import SwiftUI
 import KastideoCore
 
-/// Décalage horizontal de la grille, lu seulement par la ligne des heures (iOS 18 et plus).
+/// Décalage horizontal de la grille : lu seulement par les éléments qui restent « collés » au bord gauche.
 @MainActor @Observable
 final class IOSGuideScroll {
     var x: CGFloat = 0
 }
 
-private struct HScrollOffset: ViewModifier {
+private struct GuideOffsetKey: PreferenceKey {
+    static var defaultValue: CGPoint = .zero
+    static func reduce(value: inout CGPoint, nextValue: () -> CGPoint) { value = nextValue() }
+}
+
+/// Suit le défilement horizontal : API de défilement d'iOS 18 (exacte), sinon mesure de la position du contenu.
+private struct HScrollTracking: ViewModifier {
     let scroll: IOSGuideScroll
 
     func body(content: Content) -> some View {
         if #available(iOS 18.0, *) {
             content.onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.x }, action: { _, new in
-                scroll.x = new
+                scroll.x = max(new, 0)
             })
         } else {
             content
+                .coordinateSpace(name: "guideScroll")
+                .onPreferenceChange(GuideOffsetKey.self) { point in
+                    scroll.x = max(-point.x, 0)
+                }
         }
     }
 }
 
-/// Guide TV en grille, comme sur Mac : la journée en ligne du temps horizontale, une ligne par chaîne.
-/// La colonne des chaînes ne défile jamais horizontalement (elle reste à gauche) ; elle défile verticalement
-/// en même temps que la grille. La ligne des heures reste en haut. Repère « maintenant », zoom par pincement.
+/// Guide TV en grille, comme sur Mac : la journée en ligne du temps horizontale, une ligne par chaîne,
+/// colonne des chaînes et ligne des heures toujours visibles, repère « maintenant », zoom par pincement.
 struct IOSGuideGrid: View {
     let channels: [MediaItem]
     /// Début (minuit) du jour affiché.
@@ -41,7 +50,6 @@ struct IOSGuideGrid: View {
     @State private var zoomBase: Double?
     @State private var scroll = IOSGuideScroll()
     @State private var now = Date()
-    @State private var limit = 80
 
     private let labelW: CGFloat = 84
     private let headerH: CGFloat = 32
@@ -53,62 +61,33 @@ struct IOSGuideGrid: View {
     private var dayEnd: Date { Calendar.current.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86400) }
     private var isToday: Bool { Calendar.current.isDateInToday(dayStart) }
 
-    /// iOS 18 et plus : la ligne des heures reste en haut, au-dessus de la grille. Avant : elle fait partie de la grille.
-    private var pinnedHeader: Bool {
-        if #available(iOS 18.0, *) { return true } else { return false }
-    }
-
     private func x(_ date: Date) -> CGFloat { CGFloat(date.timeIntervalSince(dayStart) / 60) * ppm }
 
     var body: some View {
-        let shown = Array(channels.prefix(limit))
-        VStack(spacing: 0) {
-            if pinnedHeader {
-                HStack(spacing: 0) {
-                    corner
-                    headerViewport
-                }
-                .frame(height: headerH)
-                .overlay(alignment: .bottom) { Divider() }
-            }
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    HStack(alignment: .top, spacing: 0) {
-                        VStack(spacing: 0) {
-                            if !pinnedHeader { corner }
-                            ForEach(shown) { channel in
-                                IOSGuideChannelLabel(channel: channel, width: labelW, height: rowH)
-                            }
+        ScrollViewReader { proxy in
+            ScrollView([.horizontal, .vertical]) {
+                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    anchors
+                    Section {
+                        ForEach(channels.prefix(400)) { channel in
+                            row(channel)
                         }
-                        .frame(width: labelW)
-                        ScrollViewReader { proxy in
-                            ScrollView(.horizontal) {
-                                VStack(alignment: .leading, spacing: 0) {
-                                    if !pinnedHeader { header }
-                                    ForEach(shown) { channel in
-                                        strip(channel)
-                                    }
-                                }
-                                .overlay(alignment: .topLeading) { anchors }
-                            }
-                            .scrollIndicators(.hidden)
-                            .modifier(HScrollOffset(scroll: scroll))
-                            .onAppear { go(proxy) }
-                            .onChange(of: jumpToken) { _, _ in go(proxy) }
-                        }
-                    }
-                    if channels.count > limit {
-                        Button {
-                            limit += 80
-                        } label: {
-                            Text("Afficher plus de chaînes (\(channels.count - limit))")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .padding()
+                    } header: {
+                        header
                     }
                 }
+                .frame(width: labelW + totalW, alignment: .leading)
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(key: GuideOffsetKey.self,
+                                               value: geo.frame(in: .named("guideScroll")).origin)
+                    }
+                )
             }
+            .scrollIndicators(.hidden)
+            .modifier(HScrollTracking(scroll: scroll))
+            .onAppear { go(proxy) }
+            .onChange(of: jumpToken) { _, _ in go(proxy) }
         }
         .simultaneousGesture(
             MagnifyGesture()
@@ -126,11 +105,11 @@ struct IOSGuideGrid: View {
     /// Repères invisibles (un par demi-heure) vers lesquels on défile.
     private var anchors: some View {
         HStack(spacing: 0) {
+            Color.clear.frame(width: labelW, height: 0.5)
             ForEach(0..<48, id: \.self) { index in
-                Color.clear.frame(width: 30 * ppm, height: 1).id(index)
+                Color.clear.frame(width: 30 * ppm, height: 0.5).id(index)
             }
         }
-        .allowsHitTesting(false)
     }
 
     private func go(_ proxy: ScrollViewProxy) {
@@ -150,52 +129,29 @@ struct IOSGuideGrid: View {
 
     // MARK: En-tête
 
-    private var corner: some View {
-        Text(dayStart.formatted(.dateTime.weekday(.abbreviated).day()))
-            .font(.caption.weight(.semibold))
-            .frame(width: labelW, height: headerH)
-            .background(Color(.systemBackground))
-            .overlay(alignment: .trailing) { Divider() }
-    }
-
-    /// Les heures et le repère « maintenant », sur toute la journée.
-    private var timeLabels: some View {
+    private var header: some View {
         ZStack(alignment: .topLeading) {
             let step = 30 * ppm >= 62 ? 1 : 2
             ForEach(Array(stride(from: 0, to: 48, by: step)), id: \.self) { index in
                 Text(String(format: "%02d:%02d", index / 2, (index % 2) * 30))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(index % 2 == 0 ? Color.primary : Color.secondary)
-                    .offset(x: CGFloat(index) * 30 * ppm + 6, y: 8)
+                    .offset(x: labelW + CGFloat(index) * 30 * ppm + 6, y: 8)
             }
             if now >= dayStart, now < dayEnd {
                 Rectangle().fill(Color.red).frame(width: 1.5, height: headerH)
-                    .offset(x: x(now))
+                    .offset(x: labelW + x(now))
             }
+            IOSGuideCorner(scroll: scroll, width: labelW, height: headerH, day: dayStart)
         }
-        .frame(width: totalW, height: headerH, alignment: .topLeading)
-    }
-
-    /// Fenêtre sur les heures : suit le défilement horizontal de la grille.
-    private var headerViewport: some View {
-        timeLabels
-            .offset(x: -scroll.x)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: headerH)
-            .background(Color(.systemBackground))
-            .clipped()
-    }
-
-    /// Ligne des heures intégrée à la grille (iOS 17).
-    private var header: some View {
-        timeLabels
-            .background(Color(.systemBackground))
-            .overlay(alignment: .bottom) { Divider() }
+        .frame(width: labelW + totalW, height: headerH, alignment: .topLeading)
+        .background(Color(.systemBackground))
+        .overlay(alignment: .bottom) { Divider() }
     }
 
     // MARK: Lignes
 
-    private func strip(_ channel: MediaItem) -> some View {
+    private func row(_ channel: MediaItem) -> some View {
         let programmes = store.epg.programmes(for: channel.epgID).filter { $0.stop > dayStart && $0.start < dayEnd }
         return ZStack(alignment: .topLeading) {
             ForEach(programmes) { programme in
@@ -203,11 +159,13 @@ struct IOSGuideGrid: View {
             }
             if now >= dayStart, now < dayEnd {
                 Rectangle().fill(Color.red.opacity(0.8)).frame(width: 1.5, height: rowH)
-                    .offset(x: x(now))
+                    .offset(x: labelW + x(now))
                     .allowsHitTesting(false)
             }
+            IOSGuideChannelLabel(channel: channel, scroll: scroll, width: labelW, height: rowH)
+                .zIndex(1)
         }
-        .frame(width: totalW, height: rowH, alignment: .topLeading)
+        .frame(width: labelW + totalW, height: rowH, alignment: .topLeading)
         .overlay(alignment: .bottom) { Divider() }
     }
 
@@ -240,7 +198,7 @@ struct IOSGuideGrid: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
             }
             .buttonStyle(.plain)
-            .offset(x: x0 + 1, y: 3)
+            .offset(x: labelW + x0 + 1, y: 3)
             .contextMenu { menu(channel, programme, airing: airing) }
         }
     }
@@ -270,9 +228,28 @@ struct IOSGuideGrid: View {
     }
 }
 
-/// Chaîne de la ligne : la colonne de gauche, fixe horizontalement.
+/// Coin en haut à gauche : le jour affiché, collé au bord gauche.
+private struct IOSGuideCorner: View {
+    let scroll: IOSGuideScroll
+    let width: CGFloat
+    let height: CGFloat
+    let day: Date
+
+    var body: some View {
+        Text(day.formatted(.dateTime.weekday(.abbreviated).day()))
+            .font(.caption.weight(.semibold))
+            .frame(width: width, height: height)
+            .background(Color(.systemBackground))
+            .overlay(alignment: .trailing) { Divider() }
+            .offset(x: scroll.x)
+            .zIndex(2)
+    }
+}
+
+/// Chaîne de la ligne, collée au bord gauche pendant le défilement horizontal.
 private struct IOSGuideChannelLabel: View {
     let channel: MediaItem
+    let scroll: IOSGuideScroll
     let width: CGFloat
     let height: CGFloat
     @Environment(LibraryStore.self) private var store
@@ -296,7 +273,6 @@ private struct IOSGuideChannelLabel: View {
             .frame(width: width, height: height)
             .background(Color(.systemBackground))
             .overlay(alignment: .trailing) { Divider() }
-            .overlay(alignment: .bottom) { Divider() }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -308,5 +284,6 @@ private struct IOSGuideChannelLabel: View {
             }
             Button("Modifier la chaîne…", systemImage: "pencil") { ui.editingChannel = channel }
         }
+        .offset(x: scroll.x)
     }
 }
