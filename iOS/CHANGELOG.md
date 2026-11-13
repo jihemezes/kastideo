@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios25] - 2026-11-13
+
+- **Affichage Cinéma, ordre des rangées** : la catégorie choisie comme **page de départ** (Films, Séries, Direct) passe en **première rangée** sous le bandeau.
+- **Bandeau « à la une »** : il s'affiche maintenant dès que les derniers ajouts et la sélection de catégorie sont prêts, sans attendre les tendances TMDB (réseau), qui s'y ajoutent ensuite ; si le filtre de pays ne laisse rien, un bandeau générique est proposé.
+
 ## [1.17.0-ios24] - 2026-11-13
 
 - **Direct, Films, Séries : changer de catégorie** — une **barre de catégories** (Toutes, Favoris, Récents, puis chaque catégorie) s'affiche en haut des listes, avec un bouton ▦ qui ouvre la **liste complète des catégories** (recherche, nombre de contenus). Le menu en haut à droite reste disponible.

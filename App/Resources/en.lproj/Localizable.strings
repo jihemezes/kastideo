@@ -1199,7 +1199,6 @@
 "Organisation" = "Organisation";
 "Ordre, masquage et noms des catégories ; pays montrés dans l'affichage Cinéma. Pour réordonner les chaînes d'une catégorie : onglet Direct en liste, choisissez la catégorie puis « Réordonner les chaînes… »." = "Order, visibility and names of categories; countries shown in the Cinema display. To reorder the channels of a category: Live tab in list view, pick the category, then “Reorder channels…”.";
 "Onglet au lancement" = "Tab at launch";
-"Page affichée en ouvrant Direct, Films ou Séries (affichage Liste ou Grille). « Dernière consultée » reprend la catégorie où vous étiez." = "Page shown when opening Live, Movies or Series (List or Grid display). “Last viewed” goes back to the category you were in.";
 "Réordonner les chaînes…" = "Reorder channels…";
 
 /* iOS 1.17.0-ios6 */
@@ -1428,3 +1427,6 @@
 "Dernière chaîne : %@" = "Last channel: %@";
 "Épisodes…" = "Episodes…";
 "Enchaîner les épisodes automatiquement" = "Play episodes one after another";
+
+/* iOS 1.17.0-ios25 */
+"Page affichée en ouvrant Direct, Films ou Séries (Liste ou Grille) ; en affichage Cinéma, cette catégorie devient la première rangée. « Dernière consultée » reprend la catégorie où vous étiez." = "Page shown when opening Live, Movies or Series (List or Grid); in Cinema display this category becomes the first row. “Last viewed” goes back to the category you were in.";

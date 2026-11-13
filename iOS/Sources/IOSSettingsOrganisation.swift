@@ -122,7 +122,7 @@ struct IOSOrganisationSection: View {
         } header: {
             Text("Page de départ")
         } footer: {
-            Text("Page affichée en ouvrant Direct, Films ou Séries (affichage Liste ou Grille). « Dernière consultée » reprend la catégorie où vous étiez.")
+            Text("Page affichée en ouvrant Direct, Films ou Séries (Liste ou Grille) ; en affichage Cinéma, cette catégorie devient la première rangée. « Dernière consultée » reprend la catégorie où vous étiez.")
         }
     }
 

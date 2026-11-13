@@ -62,6 +62,7 @@ struct IOSHero: View {
         }
         .task(id: settingsKey) {
             let built = await buildSlides()
+            if Task.isCancelled { return }
             slides = built
             index = 0
         }
@@ -81,6 +82,12 @@ struct IOSHero: View {
         guard !all.isEmpty else { return [] }
         let countries = CountryFilter(stored: countryCodes, keepNeutral: countryNeutral)
         var groups: [[IOSHeroSlide]] = []
+        // Le bandeau s'affiche dès que les sources locales sont prêtes ; les tendances (réseau) s'y ajoutent ensuite.
+        func publish() {
+            guard !Task.isCancelled else { return }
+            let merged = Self.merge(groups)
+            if !merged.isEmpty { slides = merged }
+        }
 
         if useRecent {
             // Calcul hors du fil principal (catalogue de ~100 000 films).
@@ -102,16 +109,6 @@ struct IOSHero: View {
             }.value
             let caption = String(localized: "AJOUTÉ RÉCEMMENT")
             groups.append(newest.map { IOSHeroSlide(item: $0, caption: caption) })
-        }
-
-        if useTrending, info.usesTMDB {
-            let trends = await info.trending(isSeries: kind == .series)
-            if !trends.isEmpty {
-                let matched = await info.match(trends, in: all, kind: kind)
-                let caption = String(localized: "TENDANCE DE LA SEMAINE")
-                groups.append(matched.filter { countries.allows($0.item) }.prefix(6)
-                    .map { IOSHeroSlide(item: $0.item, caption: caption, backdrop: $0.trend.backdropURL) })
-            }
         }
 
         if useCategory {
@@ -136,7 +133,29 @@ struct IOSHero: View {
             groups.append(picked.map { IOSHeroSlide(item: $0, caption: caption) })
         }
 
-        // Mélange : une diapositive de chaque source à tour de rôle.
+        publish()
+
+        if useTrending, info.usesTMDB {
+            let trends = await info.trending(isSeries: kind == .series)
+            if !trends.isEmpty {
+                let matched = await info.match(trends, in: all, kind: kind)
+                let caption = String(localized: "TENDANCE DE LA SEMAINE")
+                groups.append(matched.filter { countries.allows($0.item) }.prefix(6)
+                    .map { IOSHeroSlide(item: $0.item, caption: caption, backdrop: $0.trend.backdropURL) })
+            }
+        }
+
+        let merged = Self.merge(groups)
+        if merged.isEmpty, countries.isActive {
+            // Filtre de pays trop strict : mieux vaut un bandeau générique que pas de bandeau.
+            let caption = String(localized: "À DÉCOUVRIR")
+            return Array(all.suffix(400).reversed().filter { $0.logoURL != nil }.prefix(6)).map { IOSHeroSlide(item: $0, caption: caption) }
+        }
+        return merged
+    }
+
+    /// Mélange : une diapositive de chaque source à tour de rôle.
+    private static func merge(_ groups: [[IOSHeroSlide]]) -> [IOSHeroSlide] {
         var result: [IOSHeroSlide] = []
         var seen = Set<String>()
         let longest = groups.map(\.count).max() ?? 0
@@ -381,8 +400,15 @@ struct IOSCinemaHome: View {
         let started = kind == .live ? [] : allRecents.filter { watch.inResume($0.id) }
         let recents = kind == .live ? allRecents : allRecents.filter { !watch.inResume($0.id) }
         let favorites = store.favoriteIDs.compactMap { store.item(id: $0) }.filter { kinds.contains($0.kind) }
-        let categories = (store.categoriesByKind[kind] ?? []).filter {
+        var categories = (store.categoriesByKind[kind] ?? []).filter {
             countries.allows(category: $0) || store.libraryCategories[kind]?.contains($0) == true
+        }
+        // La catégorie choisie comme page de départ (Réglages > Organisation) ouvre la série de rangées.
+        let startValue = UserDefaults.standard.string(forKey: StartPage.key(kind)) ?? "all"
+        let startName: String? = startValue == "last" ? UserDefaults.standard.string(forKey: StartPage.lastKey(kind))
+            : (startValue.hasPrefix("category:") ? String(startValue.dropFirst("category:".count)) : nil)
+        if let startName, let at = categories.firstIndex(of: startName), at > 0 {
+            categories.move(fromOffsets: IndexSet(integer: at), toOffset: 0)
         }
         if all.isEmpty {
             ContentUnavailableView(kind.title, systemImage: "tray",
