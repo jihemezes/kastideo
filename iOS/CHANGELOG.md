@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios21] - 2026-11-13
+
+- **Guide TV en grille** : la colonne des chaînes **reste maintenant fixe à gauche** quand on fait défiler les heures vers la gauche ; elle ne défile que verticalement, en même temps que la grille. La ligne des heures reste en haut. Les chaînes s'affichent par lots de 80 (bouton « Afficher plus de chaînes » en bas).
+
 ## [1.17.0-ios20] - 2026-11-12
 
 - **Guide TV en grille**, comme sur Mac : la journée en ligne du temps horizontale, une ligne par chaîne, **colonne des chaînes** et **heures toujours visibles**, repère « maintenant », programme en cours en orange. **Pincement pour zoomer** l'échelle du temps (ou Menu > Échelle du temps), choix du jour et saut à l'heure, filtres **favoris / récents / thème / catégorie**, appui long sur un programme (regarder, revoir, me prévenir, favori). La vue **Créneaux** reste disponible (Menu > Présentation).

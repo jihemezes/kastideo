@@ -1418,3 +1418,6 @@
 "Mois d'ajout" = "Month added";
 "Sans catégorie" = "No category";
 "Sans date" = "No date";
+
+/* iOS 1.17.0-ios21 */
+"Afficher plus de chaînes (%lld)" = "Show more channels (%lld)";
