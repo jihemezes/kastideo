@@ -7,9 +7,15 @@ struct IOSReplaySection: View {
     @AppStorage(ReplaySettings.guideDaysKey) private var guideDays = 3
     @AppStorage(ReplaySettings.returnToLiveKey) private var returnToLive = true
     @AppStorage(ReplaySettings.offsetKey) private var offset = 0
+    @AppStorage("guide.start") private var guideStart = "now"
 
     var body: some View {
         Section {
+            Picker("À l'ouverture du guide", selection: $guideStart) {
+                Text("Maintenant").tag("now")
+                Text("En haut de la liste").tag("top")
+                Text("Dernière position").tag("last")
+            }
             Toggle("Revoir les programmes passés (replay)", isOn: $enabled)
             if enabled {
                 Stepper("Jours passés dans le guide : \(guideDays)", value: $guideDays, in: 1...14)

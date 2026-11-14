@@ -1521,3 +1521,21 @@
 "Identifiant requis." = "Username required.";
 "Clé TMDB" = "TMDB key";
 "Enregistré : %@" = "Saved: %@";
+
+/* iOS 1.17.0-ios31 / tvOS 1.17.0-tvos8 */
+"À l'ouverture du guide" = "When opening the guide";
+"En haut de la liste" = "Top of the list";
+"Dernière position" = "Last position";
+"Marquer la saison comme vue" = "Mark season as watched";
+"Marquer la saison comme non vue" = "Mark season as unwatched";
+"Envoyer vers l'Apple TV…" = "Send to Apple TV…";
+"Envoyer vers l'Apple TV" = "Send to Apple TV";
+"Apple TV détectées" = "Apple TVs found";
+"Envoi" = "Send";
+"Code affiché sur le téléviseur" = "Code shown on the TV";
+"Configuration envoyée à l'Apple TV." = "Configuration sent to the Apple TV.";
+"L'Apple TV n'a pas répondu." = "The Apple TV did not answer.";
+"Délai dépassé : vérifiez que l'écran « Ajouter depuis un téléphone » est ouvert sur l'Apple TV et que l'accès au réseau local est autorisé." = "Timed out: check that the “Add from a phone” screen is open on the Apple TV and that local network access is allowed.";
+"Sur l'Apple TV : Réglages > Ajouter depuis un téléphone. Le téléviseur affiche un code à 4 chiffres ; l'iPhone et l'Apple TV doivent être sur le même réseau Wi-Fi." = "On the Apple TV: Settings > Add from a phone. The TV shows a 4-digit code; the iPhone and the Apple TV must be on the same Wi-Fi network.";
+"%lld source(s) depuis l'iPhone" = "%lld source(s) from the iPhone";
+"Depuis un iPhone ou iPad : Réglages > Sauvegarde > Envoyer vers l'Apple TV (sources, favoris et réglages d'un coup)." = "From an iPhone or iPad: Settings > Backup > Send to Apple TV (sources, favourites and settings at once).";

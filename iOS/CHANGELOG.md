@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.17.0-ios31] - 2026-11-14
+
+- **Guide TV** : nouveau réglage « À l'ouverture du guide » (Réglages > Replay) : Maintenant, En haut de la liste ou Dernière position (catégorie et heure mémorisées).
+- **Vu / non vu** : pastille sur les affiches des films et séries vus ; « Marquer comme vu / non vu » sur un film (fiche), un épisode (appui long) et pour toute une saison.
+- **Envoyer vers l'Apple TV** (Réglages > Sauvegarde) : sources, favoris, catégories et réglages envoyés à l'Apple TV par le réseau local, avec le code affiché par le téléviseur.
+
 ## [1.17.0-ios30] - 2026-11-13
 
 - **MultiVue en portrait** (iPad, iPhone) : quand la zone est plus haute que large, les écrans sont **empilés** (un au-dessus de l'autre, pleine largeur) au lieu d'être côte à côte ou en grille ; ils reprennent leur disposition en paysage. La disposition « Une grande + vignettes » ne change pas.

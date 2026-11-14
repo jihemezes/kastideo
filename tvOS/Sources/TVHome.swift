@@ -140,6 +140,7 @@ struct TVCollectionView: View {
                                     VStack(spacing: 8) {
                                         ArtworkView(url: item.logoURL, name: item.name, contentMode: item.kind == .live ? .fit : .fill)
                                             .frame(height: item.kind == .live ? 120 : 300).clipped()
+                                            .overlay(alignment: .topTrailing) { if item.kind != .live { TVWatchedMark(id: item.id) } }
                                         Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center).padding(.horizontal, 6)
                                         if let fraction = watch.fraction(for: item.id) {
                                             ProgressView(value: fraction).tint(TVPalette.orange).padding(.horizontal, 12)
@@ -197,6 +198,7 @@ struct TVLibraryView: View {
                             Button { ui.detail = item } label: {
                                 VStack(spacing: 8) {
                                     ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill).frame(height: 300).clipped()
+                                        .overlay(alignment: .topTrailing) { TVWatchedMark(id: item.id) }
                                     Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center)
                                         .padding(.horizontal, 6).padding(.bottom, 8)
                                 }

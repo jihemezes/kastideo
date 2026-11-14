@@ -105,6 +105,7 @@ struct IOSSettingsView: View {
                         Toggle("Inclure les mots de passe", isOn: $includePasswords)
                         Button { exportConfig() } label: { Label("Exporter la configuration…", systemImage: "square.and.arrow.up") }
                         Button { importing = true } label: { Label("Importer une configuration…", systemImage: "square.and.arrow.down") }
+                        NavigationLink { IOSSendToTVView() } label: { Label("Envoyer vers l'Apple TV…", systemImage: "appletv") }
                         if let message { Text(message).font(.caption).foregroundStyle(.secondary) }
                     } header: {
                         Text("Sauvegarde")

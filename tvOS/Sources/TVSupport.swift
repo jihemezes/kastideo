@@ -132,6 +132,21 @@ final class TVUI {
     }
 }
 
+/// Pastille « vu » en haut à droite d'une affiche.
+struct TVWatchedMark: View {
+    let id: String
+    @Environment(WatchProgressStore.self) private var watch
+
+    var body: some View {
+        if watch.isWatched(id) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title3)
+                .foregroundStyle(.white, TVBrand.orange)
+                .padding(10)
+        }
+    }
+}
+
 // MARK: - Vignette
 
 struct ArtworkView: View {

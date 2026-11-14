@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos8] - 2026-11-14
+
+- **Réception depuis l'iPhone / iPad** : Réglages > Ajouter depuis un téléphone accepte aussi « Envoyer vers l'Apple TV » (sources, favoris, catégories, réglages, clé TMDB) depuis l'app iPhone ou iPad, sans ressaisie.
+- **Guide TV** : réglage « À l'ouverture du guide » (Maintenant / Dernière position : catégorie et chaîne mémorisées).
+- **Vu / non vu** : pastille sur les affiches, « Marquer comme vu / non vu » sur les films, les épisodes (appui long) et les saisons.
+
 ## [1.17.0-tvos7] - 2026-11-14
 
 - **Accueil refait comme sur iPad** : fond dégradé violet / magenta avec le logo, grandes tuiles Direct, Films, Séries (et Mes vidéos si une source existe) qui tiennent à l'écran, petits boutons Reprendre, Récents, Favoris (ouvrent une liste), Guide TV, Recherche, Réglages. Plus de bandeau ni de chaînes en boutons.

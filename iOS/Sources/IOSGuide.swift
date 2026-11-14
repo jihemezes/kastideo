@@ -17,6 +17,10 @@ struct IOSGuideView: View {
     @AppStorage("ios.guide.zoom") private var zoom = 1.0
     @State private var jumpTarget: Int?
     @State private var jumpToken = 0
+    @AppStorage("guide.start") private var guideStart = "now"
+    @AppStorage("ios.guide.lastScope") private var lastScope = ""
+    @AppStorage("ios.guide.lastSlot") private var lastSlot = -1
+    @State private var restored = false
 
     enum Scope: Hashable {
         case favorites, recents, all
@@ -45,6 +49,42 @@ struct IOSGuideView: View {
         let key = search.kastideoSearchKey
         if !key.isEmpty { list = list.filter { $0.searchKey.contains(key) } }
         return list
+    }
+
+    /// « Dernière position » : catégorie et heure du dernier passage (une seule fois à l'ouverture).
+    private func restorePosition() {
+        guard !restored else { return }
+        restored = true
+        guard guideStart == "last" else { return }
+        scope = Self.decode(lastScope)
+        if lastSlot >= 0 {
+            jumpTarget = lastSlot
+            jumpToken += 1
+        }
+    }
+
+    private static func encode(_ scope: Scope?) -> String {
+        switch scope {
+        case .none: return ""
+        case .favorites: return "fav"
+        case .recents: return "rec"
+        case .all: return "all"
+        case .category(let name): return "cat:" + name
+        case .theme(let theme): return "theme:" + theme.rawValue
+        }
+    }
+
+    private static func decode(_ text: String) -> Scope? {
+        switch text {
+        case "": return nil
+        case "fav": return .favorites
+        case "rec": return .recents
+        case "all": return .all
+        default:
+            if text.hasPrefix("cat:") { return .category(String(text.dropFirst(4))) }
+            if text.hasPrefix("theme:"), let theme = ContentTheme(rawValue: String(text.dropFirst(6))) { return .theme(theme) }
+            return nil
+        }
     }
 
     private var pastDays: Int { ReplaySettings.enabled ? ReplaySettings.guideDays : 1 }
@@ -79,6 +119,9 @@ struct IOSGuideView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear(perform: restorePosition)
+        .onChange(of: scope) { _, new in lastScope = Self.encode(new) }
+        .onChange(of: jumpToken) { _, _ in lastSlot = jumpTarget ?? -1 }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Rechercher une chaîne")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

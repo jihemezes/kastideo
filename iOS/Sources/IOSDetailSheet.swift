@@ -69,6 +69,13 @@ struct IOSDetailSheet: View {
                             .buttonStyle(.bordered).controlSize(.large)
                             .disabled(downloads.isQueued(item))
                         }
+                        if !isSeriesWithEpisodes {
+                            Button { watch.setWatched(item.id, !watch.isWatched(item.id)) } label: {
+                                Image(systemName: watch.isWatched(item.id) ? "eye.fill" : "eye").frame(width: 28)
+                            }
+                            .buttonStyle(.bordered).controlSize(.large)
+                            .accessibilityLabel(Text(watch.isWatched(item.id) ? "Marquer comme non vu" : "Marquer comme vu"))
+                        }
                         Button { store.toggleFavorite(item.id) } label: {
                             Image(systemName: store.isFavorite(item.id) ? "star.fill" : "star").frame(width: 28)
                         }
@@ -198,6 +205,13 @@ struct IOSDetailSheet: View {
                 .buttonStyle(.bordered)
                 Text("Maintenez un épisode pour ne télécharger que celui-ci.").font(.caption).foregroundStyle(.secondary)
             }
+            let allWatched = !list.isEmpty && list.allSatisfy { watch.isWatched($0.id) }
+            Button {
+                for episode in list { watch.setWatched(episode.id, !allWatched) }
+            } label: {
+                Label(allWatched ? "Marquer la saison comme non vue" : "Marquer la saison comme vue", systemImage: allWatched ? "eye.slash" : "eye")
+            }
+            .buttonStyle(.bordered)
             VStack(spacing: 0) {
                 ForEach(list) { episode in
                     Button { play(episode) } label: {
@@ -218,6 +232,12 @@ struct IOSDetailSheet: View {
                     }
                     .buttonStyle(.plain)
                     .contextMenu {
+                        Button {
+                            watch.setWatched(episode.id, !watch.isWatched(episode.id))
+                        } label: {
+                            Label(watch.isWatched(episode.id) ? "Marquer comme non vu" : "Marquer comme vu",
+                                  systemImage: watch.isWatched(episode.id) ? "eye.slash" : "eye")
+                        }
                         if IOSDownloads.canDownload(episode) {
                             Button { downloads.add(episode) } label: { Label("Télécharger", systemImage: "arrow.down.circle") }
                         }

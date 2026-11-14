@@ -99,6 +99,7 @@ struct TVSearchView: View {
                                     ArtworkView(url: item.logoURL, name: item.name, contentMode: item.kind == .live ? .fit : .fill)
                                         .frame(height: item.kind == .live ? 120 : 300)
                                         .clipped()
+                                        .overlay(alignment: .topTrailing) { if item.kind != .live { TVWatchedMark(id: item.id) } }
                                     Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center).padding(.horizontal, 6)
                                     Text(item.kind == .live ? "Direct" : (item.kind == .movie ? "Film" : "Série"))
                                         .font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)

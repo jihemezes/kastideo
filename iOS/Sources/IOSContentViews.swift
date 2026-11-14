@@ -37,6 +37,7 @@ struct PosterCard: View {
     /// Largeur imposée ; sinon celle choisie dans Réglages > Apparence.
     var width: CGFloat?
     @AppStorage(IOSKeys.cardSize) private var sizeRaw = IOSCardSize.medium.rawValue
+    @Environment(WatchProgressStore.self) private var watch
 
     private var side: CGFloat { width ?? IOSCardSize.current(sizeRaw).width }
 
@@ -45,6 +46,15 @@ struct PosterCard: View {
             ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
                 .frame(width: side, height: side * 1.5)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(alignment: .topTrailing) {
+                    if item.kind != .live, watch.isWatched(item.id) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.callout)
+                            .foregroundStyle(.white, IOSPalette.orange)
+                            .padding(5)
+                            .accessibilityLabel(Text("Vu"))
+                    }
+                }
                 .overlay(alignment: .bottom) {
                     if let progress {
                         ProgressView(value: progress)

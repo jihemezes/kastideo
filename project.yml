@@ -205,10 +205,11 @@ targets:
         # Dossier Kastideo visible dans l'app Fichiers : enregistrements et téléchargements.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
-        NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau."
+        NSLocalNetworkUsageDescription: "Kastideo recherche les serveurs Jellyfin, Emby et Plex de votre réseau, ainsi que votre Apple TV pour lui envoyer votre configuration."
         NSPhotoLibraryUsageDescription: "Kastideo lit les vidéos de votre galerie (albums de votre choix) pour les ranger dans « Mes vidéos » et les lire. Rien n'est copié ni envoyé ailleurs."
         NSBonjourServices:
           - _airplay._tcp
+          - _kastideo._tcp
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: fr.jmezes.kastideo
@@ -270,7 +271,9 @@ targets:
         NSHumanReadableCopyright: "© 2026 Jean-Michel Ezes"
         UIUserInterfaceStyle: Dark
         ITSAppUsesNonExemptEncryption: false
-        NSLocalNetworkUsageDescription: "Kastideo ouvre une page sur votre réseau local pour ajouter une source depuis votre téléphone."
+        NSLocalNetworkUsageDescription: "Kastideo ouvre une page sur votre réseau local pour ajouter une source depuis votre téléphone ou recevoir la configuration de votre iPhone."
+        NSBonjourServices:
+          - _kastideo._tcp
         # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true

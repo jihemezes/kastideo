@@ -30,6 +30,7 @@ final class TVRemoteSetup {
         lastAdded = nil
         do {
             let listener = try NWListener(using: .tcp, on: NWEndpoint.Port(rawValue: port)!)
+            listener.service = NWListener.Service(name: "Kastideo Apple TV", type: "_kastideo._tcp")
             listener.newConnectionHandler = { [weak self] connection in
                 let handler = TVHTTPConnection(connection: connection) { path, fields in
                     guard let owner = self else { return "Indisponible." }
@@ -66,6 +67,18 @@ final class TVRemoteSetup {
     /// Traite un formulaire reçu ; renvoie un message d'erreur, ou nil si tout va bien.
     private func handle(_ path: String, _ f: [String: String]) async -> String? {
         guard let store else { return "Indisponible." }
+        if path.hasPrefix("/import") {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            guard let data = f["_body"]?.data(using: .utf8), let export = try? decoder.decode(KastideoExport.self, from: data),
+                  export.format == "kastideo-export" else { return "Configuration illisible." }
+            let summary = store.importConfig(export)
+            info?.reloadEdits()
+            if let key = export.settings["tmdbKey"], !key.isEmpty, info?.usesTMDB == false { info?.tmdbKey = key }
+            if store.catalogOrigin == .iptv, store.hasLibrary { store.catalogOrigin = .all }
+            lastAdded = String(localized: "\(summary.sourcesAdded) source(s) depuis l'iPhone")
+            return nil
+        }
         if path.hasPrefix("/tmdb") {
             let key = (f["tmdb"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             info?.tmdbKey = key
@@ -171,7 +184,7 @@ final class TVHTTPConnection: @unchecked Sendable {
             if error != nil { connection.cancel(); return }
             if let request = parseComplete() {
                 Task { await respond(request) }
-            } else if finished || buffer.count > 200_000 {
+            } else if finished || buffer.count > 4_000_000 {
                 connection.cancel()
             } else {
                 receive()
@@ -197,6 +210,12 @@ final class TVHTTPConnection: @unchecked Sendable {
     }
 
     private func respond(_ request: Request) async {
+        if request.method == "POST", request.path.hasPrefix("/import") {
+            let code = URLComponents(string: "http://kastideo" + request.path)?.queryItems?.first { $0.name == "code" }?.value ?? ""
+            if code != (await expectedCode()) { sendPlain(403, "Code incorrect."); return }
+            if let error = await onAdd("/import", ["code": code, "_body": request.body]) { sendPlain(400, error) } else { sendPlain(200, "OK") }
+            return
+        }
         if request.method == "POST", request.path.hasPrefix("/add") || request.path.hasPrefix("/tmdb") {
             var fields: [String: String] = [:]
             for pair in request.body.split(separator: "&") {
@@ -216,6 +235,12 @@ final class TVHTTPConnection: @unchecked Sendable {
         } else {
             send(page(message: nil, ok: true))
         }
+    }
+
+    private func sendPlain(_ status: Int, _ text: String) {
+        let body = Data(text.utf8)
+        let head = "HTTP/1.1 \(status) \(status == 200 ? "OK" : "Error")\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n"
+        connection.send(content: Data(head.utf8) + body, completion: .contentProcessed { [connection] _ in connection.cancel() })
     }
 
     private func send(_ html: String) {
@@ -287,6 +312,8 @@ struct TVRemoteSetupView: View {
                     Label("Enregistré : \(added)", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
                 }
                 if let failure = setup.failure { Text(failure).foregroundStyle(.red) }
+                Text("Depuis un iPhone ou iPad : Réglages > Sauvegarde > Envoyer vers l'Apple TV (sources, favoris et réglages d'un coup).")
+                    .font(.callout).foregroundStyle(.secondary)
                 Text("La saisie reste sur votre réseau local et n'est active que sur cet écran.")
                     .font(.callout).foregroundStyle(.secondary)
             }

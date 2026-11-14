@@ -124,6 +124,7 @@ struct TVBrowseView: View {
             VStack(spacing: 8) {
                 ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
                     .aspectRatio(2.0 / 3.0, contentMode: .fit)
+                    .overlay(alignment: .topTrailing) { TVWatchedMark(id: item.id) }
                 Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center)
                     .padding(.horizontal, 6).padding(.bottom, 8)
             }

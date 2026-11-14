@@ -43,6 +43,12 @@ struct TVDetailView: View {
                                         Label(watch.inResume(item.id) ? "Reprendre" : "Lire", systemImage: "play.fill")
                                     }
                                 }
+                                if item.kind == .movie {
+                                    Button { watch.setWatched(item.id, !watch.isWatched(item.id)) } label: {
+                                        Label(watch.isWatched(item.id) ? "Marquer comme non vu" : "Marquer comme vu",
+                                              systemImage: watch.isWatched(item.id) ? "eye.slash" : "eye")
+                                    }
+                                }
                                 Button { store.toggleFavorite(item.id) } label: {
                                     Label(store.isFavorite(item.id) ? "Retirer des favoris" : "Ajouter aux favoris",
                                           systemImage: store.isFavorite(item.id) ? "star.slash" : "star")
@@ -78,9 +84,17 @@ struct TVDetailView: View {
                 }
             }
             let list = seasons.indices.contains(selectedSeason) ? seasons[selectedSeason].episodes : []
+            let allWatched = !list.isEmpty && list.allSatisfy { watch.isWatched($0.id) }
+            Button {
+                for episode in list { watch.setWatched(episode.id, !allWatched) }
+            } label: {
+                Label(allWatched ? "Marquer la saison comme non vue" : "Marquer la saison comme vue", systemImage: allWatched ? "eye.slash" : "eye")
+            }
             ForEach(list) { episode in
                 Button { ui.episodeContext = seasons.flatMap(\.episodes); play(episode) } label: {
                     HStack {
+                        Image(systemName: watch.isWatched(episode.id) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(watch.isWatched(episode.id) ? TVBrand.orange : .secondary)
                         Text(episode.name).lineLimit(1)
                         Spacer()
                         if let fraction = watch.fraction(for: episode.id) {
@@ -88,6 +102,11 @@ struct TVDetailView: View {
                         }
                     }
                     .padding(.vertical, 6)
+                }
+                .contextMenu {
+                    Button(watch.isWatched(episode.id) ? "Marquer comme non vu" : "Marquer comme vu") {
+                        watch.setWatched(episode.id, !watch.isWatched(episode.id))
+                    }
                 }
             }
         }

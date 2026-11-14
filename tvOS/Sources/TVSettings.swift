@@ -14,6 +14,7 @@ struct TVSettingsView: View {
     @AppStorage("decode.always") private var softwareDecoding = false
     @AppStorage("tv.zapMode") private var zapMode = "confirm"
     @AppStorage("adult.show") private var adult = false
+    @AppStorage("guide.start") private var guideStart = "now"
 
     var body: some View {
         NavigationStack {
@@ -43,6 +44,12 @@ struct TVSettingsView: View {
                     startPicker(.live, $startLive)
                     startPicker(.movie, $startMovie)
                     startPicker(.series, $startSeries)
+                }
+                Section("Guide TV") {
+                    TVChoiceRow(title: String(localized: "À l'ouverture du guide"), options: [
+                        TVOption(value: "now", label: String(localized: "Maintenant")),
+                        TVOption(value: "last", label: String(localized: "Dernière position"))],
+                                selection: Binding(get: { guideStart == "last" ? "last" : "now" }, set: { guideStart = $0 }))
                 }
                 Section("Catégories") {
                     NavigationLink("Catégories du direct") { TVCategoriesView(kind: .live) }

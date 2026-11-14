@@ -10,6 +10,10 @@ struct TVGuideView: View {
     @State private var category: String?
     @State private var windowStart = TVGuideView.roundedNow()
     @State private var selected: ProgrammePick?
+    @AppStorage("guide.start") private var guideStart = "now"
+    @AppStorage("tv.guide.lastCategory") private var lastCategory = ""
+    @AppStorage("tv.guide.lastChannel") private var lastChannel = ""
+    @State private var restored = false
 
     private let windowMinutes = 180.0
     private let labelWidth: CGFloat = 250
@@ -40,6 +44,7 @@ struct TVGuideView: View {
         } else {
             GeometryReader { geo in
                 let gridWidth = max(geo.size.width - 120 - labelWidth, 600)
+                ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
                         chips
@@ -52,6 +57,8 @@ struct TVGuideView: View {
                     }
                     .padding(.horizontal, 60)
                     .padding(.vertical, 20)
+                }
+                .task { await restore(proxy) }
                 }
             }
             .confirmationDialog(selected?.programme.title ?? "", isPresented: Binding(get: { selected != nil }, set: { if !$0 { selected = nil } }),
@@ -67,12 +74,23 @@ struct TVGuideView: View {
         }
     }
 
+    /// « Dernière position » : catégorie et chaîne du dernier passage.
+    private func restore(_ proxy: ScrollViewProxy) async {
+        guard !restored else { return }
+        restored = true
+        guard guideStart == "last" else { return }
+        if categories.contains(lastCategory) { category = lastCategory }
+        guard !lastChannel.isEmpty else { return }
+        try? await Task.sleep(for: .milliseconds(400))
+        proxy.scrollTo(lastChannel, anchor: .top)
+    }
+
     private var chips: some View {
         HStack {
             TVCategoryButton(title: String(localized: "Catégorie : ") + (activeCategory ?? "—"),
                              options: categories.map { TVOption(value: TVScope.category($0), label: $0) },
                              selection: Binding(get: { .category(activeCategory ?? "") }, set: { value in
-                                 if case .category(let name) = value { category = name }
+                                 if case .category(let name) = value { category = name; lastCategory = name; lastChannel = "" }
                              }))
             Spacer()
         }
@@ -107,7 +125,7 @@ struct TVGuideView: View {
     private func row(_ channel: MediaItem, list: [MediaItem], gridWidth: CGFloat) -> some View {
         let programmes = store.epg.programmes(for: channel.epgID).filter { $0.stop > windowStart && $0.start < windowEnd }
         return HStack(spacing: 0) {
-            Button { ui.play(channel, list: list, playback: playback) } label: {
+            Button { lastChannel = channel.id; ui.play(channel, list: list, playback: playback) } label: {
                 HStack(spacing: 12) {
                     ArtworkView(url: channel.logoURL, name: channel.name)
                         .frame(width: 70, height: 50)
@@ -130,7 +148,7 @@ struct TVGuideView: View {
                     let x = gridWidth * CGFloat(from / windowMinutes)
                     let w = max(gridWidth * CGFloat((to - from) / windowMinutes) - 6, 30)
                     let airing = programme.start <= Date() && programme.stop > Date()
-                    Button { selected = ProgrammePick(channel: channel, programme: programme) } label: {
+                    Button { lastChannel = channel.id; selected = ProgrammePick(channel: channel, programme: programme) } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(programme.title).font(.caption.weight(.semibold)).lineLimit(1)
                             Text(programme.timeRange()).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
@@ -146,5 +164,6 @@ struct TVGuideView: View {
             .frame(width: gridWidth, height: rowHeight, alignment: .topLeading)
             .clipped()
         }
+        .id(channel.id)
     }
 }
