@@ -1509,3 +1509,15 @@
 "Minuterie de veille" = "Sleep timer";
 "Arrêter dans %lld min" = "Stop in %lld min";
 "Désactiver la minuterie" = "Turn off timer";
+
+/* tvOS 1.17.0-tvos7 */
+"Rien à afficher pour l'instant." = "Nothing to show yet.";
+"Serveurs" = "Servers";
+"Aucun contenu. Ajoutez un serveur Emby, Jellyfin ou Plex dans Réglages." = "No content. Add an Emby, Jellyfin or Plex server in Settings.";
+"Groupe : " = "Group: ";
+"IPTV · Liste M3U (adresse)" = "IPTV · M3U list (address)";
+"Connexion…" = "Connecting…";
+"Nouveau jeton Plex (vide = inchangé)" = "New Plex token (empty = unchanged)";
+"Identifiant requis." = "Username required.";
+"Clé TMDB" = "TMDB key";
+"Enregistré : %@" = "Saved: %@";

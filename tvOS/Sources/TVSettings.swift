@@ -126,9 +126,11 @@ struct TVSourceDetailView: View {
     @State private var server: String
     @State private var username: String
     @State private var password = ""
+    @State private var token = ""
     @State private var epg: String
     @State private var confirmDelete = false
     @State private var saved = false
+    @State private var errorText: String?
 
     init(source: Source) {
         self.source = source
@@ -137,6 +139,7 @@ struct TVSourceDetailView: View {
         switch source.kind {
         case .xtream(let url, let u): server = url.absoluteString; user = u
         case .m3uURL(let url): server = url.absoluteString
+        case .mediaServer(_, let url, let u): server = url.absoluteString; user = u
         default: break
         }
         _server = State(initialValue: server)
@@ -145,7 +148,8 @@ struct TVSourceDetailView: View {
     }
 
     private var isXtream: Bool { if case .xtream = source.kind { return true } else { return false } }
-    private var isURL: Bool { if case .m3uURL = source.kind { return true } else { return isXtream } }
+    private var serverType: MediaServerType? { source.kind.serverType }
+    private var isURL: Bool { if case .m3uURL = source.kind { return true } else { return isXtream || serverType != nil } }
 
     var body: some View {
         Form {
@@ -155,19 +159,23 @@ struct TVSourceDetailView: View {
                     TextField(isXtream ? "Serveur (http://…)" : "Adresse de la liste (http://…)", text: $server)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                 }
-                if isXtream {
+                if isXtream || (serverType != nil && serverType != .plex) {
                     TextField("Identifiant", text: $username).textInputAutocapitalization(.never).autocorrectionDisabled()
                     SecureField("Nouveau mot de passe (vide = inchangé)", text: $password)
                 }
-                if isURL {
+                if serverType == .plex {
+                    TextField("Nouveau jeton Plex (vide = inchangé)", text: $token).textInputAutocapitalization(.never).autocorrectionDisabled()
+                }
+                if isURL && serverType == nil {
                     TextField("Guide TV XMLTV (facultatif)", text: $epg).textInputAutocapitalization(.never).autocorrectionDisabled()
                 }
             }
             Section {
-                Button("Enregistrer et actualiser", action: save)
+                Button("Enregistrer et actualiser") { Task { await save() } }
                 Button("Actualiser") { store.refresh(source) }
                 Button("Supprimer cette source", role: .destructive) { confirmDelete = true }
                 if saved { Label("Enregistré", systemImage: "checkmark.circle.fill").foregroundStyle(.green) }
+                if let errorText { Text(errorText).foregroundStyle(.red) }
             }
         }
         .navigationTitle(source.name)
@@ -180,7 +188,8 @@ struct TVSourceDetailView: View {
         }
     }
 
-    private func save() {
+    private func save() async {
+        errorText = nil
         var updated = source
         let title = name.trimmingCharacters(in: .whitespaces)
         if !title.isEmpty { updated.name = title }
@@ -190,52 +199,76 @@ struct TVSourceDetailView: View {
             if let url = URL(string: text), url.host != nil {
                 if isXtream {
                     updated.kind = .xtream(server: url, username: username.trimmingCharacters(in: .whitespaces))
+                } else if let type = serverType {
+                    let normalized = (try? MediaServerHTTP.normalize(server, type: type)) ?? url
+                    updated.kind = .mediaServer(type: type, server: normalized, username: username.trimmingCharacters(in: .whitespaces))
                 } else {
                     updated.kind = .m3uURL(url)
                 }
             }
-            let guide = epg.trimmingCharacters(in: .whitespaces)
-            updated.epgURL = guide.isEmpty ? nil : URL(string: guide)
+            if serverType == nil {
+                let guide = epg.trimmingCharacters(in: .whitespaces)
+                updated.epgURL = guide.isEmpty ? nil : URL(string: guide)
+            }
         }
-        store.updateSource(updated, password: password)
+        if serverType != nil {
+            do {
+                try await store.updateMediaServer(updated, password: password, token: token.isEmpty ? nil : token, accessChanged: updated.kind != source.kind)
+            } catch {
+                var message = LibraryStore.describe(error)
+                if let detail = (error as? MediaServerError)?.detail { message += "\n" + detail }
+                errorText = message
+                return
+            }
+        } else {
+            store.updateSource(updated, password: password)
+        }
         saved = true
     }
 }
 
-/// Ajout d'une source Xtream Codes ou d'une liste M3U (adresse).
+/// Ajout d'une source : abonnement IPTV (Xtream, M3U) ou « Mes vidéos » (Jellyfin, Emby, Plex).
 struct TVAddSourceView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
-    @State private var mode = 0
+    @State private var type = "xtream"
     @State private var name = ""
     @State private var server = ""
     @State private var username = ""
     @State private var password = ""
+    @State private var token = ""
     @State private var error: String?
+    @State private var busy = false
+
+    private var typeOptions: [TVOption<String>] {
+        [TVOption(value: "xtream", label: "IPTV · Xtream Codes"), TVOption(value: "m3u", label: String(localized: "IPTV · Liste M3U (adresse)")),
+         TVOption(value: "jellyfin", label: "Mes vidéos · Jellyfin"), TVOption(value: "emby", label: "Mes vidéos · Emby"), TVOption(value: "plex", label: "Mes vidéos · Plex")]
+    }
 
     var body: some View {
         Form {
-            Picker("Type", selection: $mode) {
-                Text("Xtream Codes").tag(0)
-                Text("Liste M3U (adresse)").tag(1)
-            }
+            TVChoiceRow(title: String(localized: "Type"), options: typeOptions, selection: $type)
             TextField("Nom (facultatif)", text: $name)
-            TextField(mode == 0 ? "Serveur (http://…)" : "Adresse de la liste (http://…)", text: $server)
+            TextField(type == "m3u" ? "Adresse de la liste (http://…)" : "Serveur (http://…)", text: $server)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            if mode == 0 {
+            if type != "m3u" && type != "plex" {
                 TextField("Identifiant", text: $username)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                 SecureField("Mot de passe", text: $password)
             }
+            if type == "plex" {
+                TextField("Jeton Plex (facultatif)", text: $token).textInputAutocapitalization(.never).autocorrectionDisabled()
+            }
             if let error { Text(error).foregroundStyle(.red) }
-            Button("Ajouter", action: add)
+            Button(busy ? "Connexion…" : "Ajouter") { Task { await add() } }.disabled(busy)
         }
         .navigationTitle("Ajouter une source")
     }
 
-    private func add() {
+    private func add() async {
+        error = nil
         var text = server.trimmingCharacters(in: .whitespacesAndNewlines)
         if !text.contains("://") { text = "http://" + text }
         guard let url = URL(string: text), url.host != nil else {
@@ -243,17 +276,37 @@ struct TVAddSourceView: View {
             return
         }
         let title = name.trimmingCharacters(in: .whitespaces)
-        if mode == 0 {
-            let user = username.trimmingCharacters(in: .whitespaces)
+        let user = username.trimmingCharacters(in: .whitespaces)
+        switch type {
+        case "m3u":
+            store.addSource(Source(name: title.isEmpty ? (url.host ?? "M3U") : title, kind: .m3uURL(url)), password: nil)
+        case "xtream":
             guard !user.isEmpty, !password.isEmpty else {
                 error = String(localized: "Identifiant et mot de passe requis.")
                 return
             }
-            let source = Source(name: title.isEmpty ? (url.host ?? "Xtream") : title, kind: .xtream(server: url, username: user))
-            store.addSource(source, password: password)
-        } else {
-            let source = Source(name: title.isEmpty ? (url.host ?? "M3U") : title, kind: .m3uURL(url))
-            store.addSource(source, password: nil)
+            store.addSource(Source(name: title.isEmpty ? (url.host ?? "Xtream") : title, kind: .xtream(server: url, username: user)), password: password)
+        default:
+            guard let serverType = MediaServerType(rawValue: type), let normalized = try? MediaServerHTTP.normalize(server, type: serverType) else {
+                error = String(localized: "Adresse invalide.")
+                return
+            }
+            if serverType != .plex, user.isEmpty {
+                error = String(localized: "Identifiant et mot de passe requis.")
+                return
+            }
+            busy = true
+            defer { busy = false }
+            let source = Source(name: title.isEmpty ? (normalized.host ?? serverType.label) : title, kind: .mediaServer(type: serverType, server: normalized, username: user))
+            do {
+                try await store.addMediaServer(source, password: password, token: token.isEmpty ? nil : token)
+                if store.catalogOrigin == .iptv { store.catalogOrigin = .all }
+            } catch {
+                var message = LibraryStore.describe(error)
+                if let detail = (error as? MediaServerError)?.detail { message += "\n" + detail }
+                self.error = message
+                return
+            }
         }
         dismiss()
     }

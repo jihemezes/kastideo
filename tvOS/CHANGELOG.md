@@ -2,6 +2,14 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos7] - 2026-11-14
+
+- **Accueil refait comme sur iPad** : fond dégradé violet / magenta avec le logo, grandes tuiles Direct, Films, Séries (et Mes vidéos si une source existe) qui tiennent à l'écran, petits boutons Reprendre, Récents, Favoris (ouvrent une liste), Guide TV, Recherche, Réglages. Plus de bandeau ni de chaînes en boutons.
+- **Mes vidéos** : sources Emby, Jellyfin et Plex (ajout sur la télévision ou depuis le téléphone) ; nouvel onglet Mes vidéos, avec choix du groupe.
+- **Page web de configuration (téléphone)** : le formulaire s'adapte au type de source (Xtream, M3U, Jellyfin, Emby, Plex) et permet aussi de saisir la clé TMDB.
+- **Avertissement légal** : lu page par page avec les boutons Précédent / Suivant, sans défilement : on ne peut plus se retrouver coincé.
+- YouTube : non disponible sur Apple TV (tvOS n'a pas de navigateur intégré).
+
 ## [1.17.0-tvos6] - 2026-11-14
 
 - **Sélecteurs lisibles** : les choix des Réglages (page de départ, zapping, mémoire tampon) s'ouvrent en liste verticale avec une coche ; la catégorie de Direct, Films, Séries et Guide TV se choisit via un bouton « Catégorie : … » qui ouvre une fenêtre (fini la rangée de petits boutons).

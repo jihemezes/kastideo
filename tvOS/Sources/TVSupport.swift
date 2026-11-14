@@ -166,13 +166,34 @@ struct ArtworkView: View {
 }
 
 /// Fond dégradé de l'accueil Kastideo.
+/// Couleurs de l'application (comme sur iPad et Mac).
+enum TVBrand {
+    static let night = Color(red: 0.06, green: 0.02, blue: 0.14)
+    static let indigo = Color(red: 0.17, green: 0.13, blue: 0.58)
+    static let violet = Color(red: 0.34, green: 0.10, blue: 0.55)
+    static let magenta = Color(red: 0.80, green: 0.16, blue: 0.52)
+    static let orange = Color(red: 1.00, green: 0.60, blue: 0.20)
+}
+
+/// Fond en dégradé avec le grand logo flouté, comme l'accueil de l'iPad.
 struct TVBackground: View {
     var body: some View {
-        ZStack {
-            LinearGradient(colors: [Color(red: 0.05, green: 0.04, blue: 0.1), Color(red: 0.18, green: 0.05, blue: 0.22)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-            RadialGradient(colors: [TVPalette.magenta.opacity(0.35), .clear], center: .bottomTrailing, startRadius: 20, endRadius: 900)
-            RadialGradient(colors: [TVPalette.orange.opacity(0.15), .clear], center: .topTrailing, startRadius: 10, endRadius: 600)
+        GeometryReader { geo in
+            let side = geo.size.height * 0.95
+            ZStack {
+                LinearGradient(colors: [TVBrand.night, TVBrand.violet.opacity(0.9), TVBrand.night], startPoint: .topLeading, endPoint: .bottomTrailing)
+                RadialGradient(colors: [TVBrand.magenta.opacity(0.45), .clear], center: .bottomTrailing, startRadius: 20, endRadius: 900)
+                RadialGradient(colors: [TVBrand.orange.opacity(0.18), .clear], center: .topTrailing, startRadius: 10, endRadius: 600)
+                Image("KastideoLogo")
+                    .resizable()
+                    .frame(width: side, height: side)
+                    .opacity(0.25)
+                    .blur(radius: 6)
+                    .rotationEffect(.degrees(-8))
+                    .position(x: geo.size.width - side * 0.18, y: geo.size.height * 0.55)
+                    .allowsHitTesting(false)
+            }
+            .clipped()
         }
         .ignoresSafeArea()
     }

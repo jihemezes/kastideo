@@ -1,174 +1,213 @@
 import SwiftUI
 import KastideoCore
 
-/// Accueil : bandeau à la une (reprise ou dernier ajout) puis rangées « Reprendre », chaînes favorites et récentes,
-/// derniers films et séries (et tendances TMDB quand une clé est saisie).
+/// Accueil, comme sur iPad : grandes tuiles (Direct, Films, Séries, Mes vidéos) et petits boutons d'accès rapide.
 struct TVHomeView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(WatchProgressStore.self) private var watch
-    @Environment(MediaInfoStore.self) private var info
     @Environment(TVUI.self) private var ui
-    @State private var trendingMovies: [MediaItem] = []
-    @State private var trendingSeries: [MediaItem] = []
+    @State private var collection: TVCollection?
 
-    private var resume: [MediaItem] {
+    private var resumeItems: [MediaItem] {
         watch.entries
             .filter { watch.inResume($0.key) }
             .sorted { $0.value.updatedAt > $1.value.updatedAt }
             .compactMap { store.item(id: $0.key) }
-            .prefix(20).map { $0 }
     }
-    private var favoriteChannels: [MediaItem] {
-        store.favoriteIDs.compactMap { store.item(id: $0) }.filter { $0.kind == .live }.prefix(30).map { $0 }
-    }
-    private var recentChannels: [MediaItem] {
-        store.recentIDs.compactMap { store.item(id: $0) }.filter { $0.kind == .live }.prefix(30).map { $0 }
-    }
-    private func latest(_ kind: MediaKind) -> [MediaItem] {
-        let all = store.items(for: .all(kind))
-        let dated = all.filter { $0.added != nil }.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
-        return (dated.isEmpty ? all : dated).prefix(30).map { $0 }
-    }
-    /// Chaînes dont un programme est en cours (guide), pour une rangée « En ce moment ».
-    private var onNow: [MediaItem] {
-        guard let first = store.categoriesByKind[.live]?.first else { return [] }
-        return store.items(for: .category(.live, first)).filter { store.epg.current(for: $0.epgID) != nil }.prefix(30).map { $0 }
-    }
-    private var firstChannels: [MediaItem] {
-        guard let first = store.categoriesByKind[.live]?.first else { return [] }
-        return store.items(for: .category(.live, first)).prefix(30).map { $0 }
-    }
+    private var recentItems: [MediaItem] { store.recentIDs.compactMap { store.item(id: $0) } }
+    private var favoriteItems: [MediaItem] { store.favoriteIDs.compactMap { store.item(id: $0) } }
 
     var body: some View {
         if !store.hasSources {
             TVEmptyView(text: String(localized: "Bienvenue dans Kastideo. Ajoutez une source dans Réglages (ou depuis votre téléphone)."))
         } else {
-            let resumeItems = resume
-            let movies = latest(.movie)
-            let series = latest(.series)
-            let live = onNow.isEmpty ? firstChannels : onNow
-            ScrollView {
-                VStack(alignment: .leading, spacing: 36) {
-                    if let hero = resumeItems.first ?? movies.first ?? series.first ?? live.first {
-                        heroBanner(hero, resuming: resumeItems.first != nil)
-                    }
-                    shortcuts
-                    if !store.loading.isEmpty && movies.isEmpty && series.isEmpty && live.isEmpty {
-                        HStack(spacing: 16) { ProgressView(); Text("Chargement des sources…").foregroundStyle(.secondary) }
-                    }
-                    rail(String(localized: "Reprendre la lecture"), resumeItems, poster: true)
-                    rail(String(localized: "Chaînes favorites"), favoriteChannels, poster: false)
-                    rail(String(localized: "Chaînes récentes"), recentChannels, poster: false)
-                    rail(String(localized: "En ce moment"), live, poster: false)
-                    rail(String(localized: "Tendances · Films"), trendingMovies, poster: true)
-                    rail(String(localized: "Tendances · Séries"), trendingSeries, poster: true)
-                    rail(String(localized: "Derniers films"), movies, poster: true)
-                    rail(String(localized: "Dernières séries"), series, poster: true)
-                }
-                .padding(.horizontal, 60)
-                .padding(.vertical, 20)
+            VStack(spacing: 40) {
+                Spacer(minLength: 0)
+                tiles
+                quickButtons
+                Text("Kastideo \(ReleaseNotes.currentVersion)").font(.caption).foregroundStyle(.white.opacity(0.35))
+                Spacer(minLength: 0)
             }
-            .task(id: info.tmdbKey) { await loadTrends() }
+            .padding(.horizontal, 100)
+            .fullScreenCover(item: $collection) { TVCollectionView(collection: $0) }
         }
     }
 
-    private func loadTrends() async {
-        guard info.usesTMDB else { trendingMovies = []; trendingSeries = []; return }
-        let movieTrends = await info.trending(isSeries: false)
-        let seriesTrends = await info.trending(isSeries: true)
-        trendingMovies = await info.match(movieTrends, in: store.items(for: .all(.movie)), kind: .movie).map(\.item)
-        trendingSeries = await info.match(seriesTrends, in: store.items(for: .all(.series)), kind: .series).map(\.item)
+    // MARK: Tuiles
+
+    private var tiles: some View {
+        let showLibrary = store.hasLibrary
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 30), count: showLibrary ? 4 : 3)
+        return LazyVGrid(columns: columns, spacing: 30) {
+            tile("Direct", "tv.fill", count(.live, String(localized: "chaînes")), [TVBrand.magenta, TVBrand.orange]) { ui.tab = 1 }
+            tile("Films", "film.fill", count(.movie, String(localized: "films")), [TVBrand.violet, TVBrand.magenta]) { ui.tab = 2 }
+            tile("Séries", "rectangle.stack.fill", count(.series, String(localized: "séries")), [TVBrand.indigo, TVBrand.violet]) { ui.tab = 3 }
+            if showLibrary {
+                tile("Mes vidéos", "photo.stack.fill", libraryCount, [TVBrand.orange, TVBrand.violet]) { ui.tab = 7 }
+            }
+        }
+    }
+
+    private func tile(_ title: LocalizedStringKey, _ icon: String, _ subtitle: String, _ colors: [Color], action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 6) {
+                Image(systemName: icon).font(.system(size: 50, weight: .semibold))
+                Spacer(minLength: 0)
+                Text(title).font(.system(size: 40, weight: .bold, design: .rounded)).lineLimit(1).minimumScaleFactor(0.7)
+                Text(subtitle.isEmpty ? " " : subtitle).font(.callout).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
+            }
+            .foregroundStyle(.white)
+            .padding(26)
+            .frame(maxWidth: .infinity, minHeight: 240, maxHeight: 240, alignment: .leading)
+            .background(LinearGradient(colors: colors.map { $0.opacity(0.85) }, startPoint: .topLeading, endPoint: .bottomTrailing),
+                        in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        }
+        .buttonStyle(.card)
+    }
+
+    private func count(_ kind: MediaKind, _ label: String) -> String {
+        let n = store.count(for: kind)
+        if n == 0 { return store.loading.isEmpty ? "" : String(localized: "Chargement…") }
+        return "\(n.formatted()) \(label)"
+    }
+
+    private var libraryCount: String {
+        let n = store.libraryItems().count
+        if n == 0 { return store.loading.isEmpty ? String(localized: "Serveurs") : String(localized: "Chargement…") }
+        return n == 1 ? String(localized: "1 vidéo") : String(localized: "\(n.formatted()) vidéos")
+    }
+
+    // MARK: Petits boutons
+
+    private var quickButtons: some View {
+        HStack(spacing: 20) {
+            small("Reprendre", "play.circle.fill", resumeItems.count) { collection = TVCollection(title: String(localized: "Reprendre la lecture"), items: resumeItems) }
+            small("Récents", "clock.arrow.circlepath", recentItems.count) { collection = TVCollection(title: String(localized: "Récents"), items: recentItems) }
+            small("Favoris", "star.fill", favoriteItems.count) { collection = TVCollection(title: String(localized: "Favoris"), items: favoriteItems) }
+            small("Guide TV", "calendar", 0) { ui.tab = 4 }
+            small("Recherche", "magnifyingglass", 0) { ui.tab = 6 }
+            small("Réglages", "gearshape.fill", 0) { ui.tab = 5 }
+        }
+    }
+
+    private func small(_ title: LocalizedStringKey, _ icon: String, _ badge: Int, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon).font(.title2)
+                Text(title).font(.callout.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                Text(badge > 0 ? "\(badge)" : " ").font(.caption.monospacedDigit()).foregroundStyle(TVBrand.orange)
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, minHeight: 110)
+            .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(.card)
+    }
+}
+
+/// Liste affichée en plein écran depuis l'accueil (Reprendre, Récents, Favoris).
+struct TVCollection: Identifiable {
+    let id = UUID()
+    let title: String
+    let items: [MediaItem]
+}
+
+struct TVCollectionView: View {
+    let collection: TVCollection
+    @Environment(LibraryStore.self) private var store
+    @Environment(PlaybackController.self) private var playback
+    @Environment(WatchProgressStore.self) private var watch
+    @Environment(TVUI.self) private var ui
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            TVBackground()
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    Text(collection.title).font(.largeTitle.bold())
+                    Spacer()
+                    Button("Fermer") { dismiss() }
+                }
+                if collection.items.isEmpty {
+                    TVEmptyView(text: String(localized: "Rien à afficher pour l'instant."))
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 220, maximum: 260), spacing: 36, alignment: .top)], spacing: 40) {
+                            ForEach(collection.items.prefix(240)) { item in
+                                Button { open(item) } label: {
+                                    VStack(spacing: 8) {
+                                        ArtworkView(url: item.logoURL, name: item.name, contentMode: item.kind == .live ? .fit : .fill)
+                                            .frame(height: item.kind == .live ? 120 : 300).clipped()
+                                        Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center).padding(.horizontal, 6)
+                                        if let fraction = watch.fraction(for: item.id) {
+                                            ProgressView(value: fraction).tint(TVPalette.orange).padding(.horizontal, 12)
+                                        }
+                                    }
+                                    .padding(.bottom, 8)
+                                }
+                                .buttonStyle(.card)
+                            }
+                        }
+                        .padding(.vertical, 20)
+                    }
+                }
+            }
+            .padding(60)
+        }
     }
 
     private func open(_ item: MediaItem) {
-        switch item.kind {
-        case .live: ui.play(item, list: store.items(for: .all(.live)), playback: playback)
-        case .episode: ui.play(item, playback: playback)
-        default: ui.detail = item
-        }
-    }
-
-    private var shortcuts: some View {
-        HStack(spacing: 24) {
-            shortcut("Direct", "tv", 1, store.count(for: .live))
-            shortcut("Films", "film", 2, store.count(for: .movie))
-            shortcut("Séries", "rectangle.stack", 3, store.count(for: .series))
-            shortcut("Guide TV", "calendar", 4, nil)
-            shortcut("Réglages", "gearshape", 5, nil)
-        }
-    }
-
-    private func shortcut(_ title: String, _ icon: String, _ tab: Int, _ count: Int?) -> some View {
-        Button { ui.tab = tab } label: {
-            VStack(spacing: 8) {
-                Image(systemName: icon).font(.system(size: 44))
-                Text(LocalizedStringKey(title)).font(.callout.weight(.semibold))
-                if let count, count > 0 { Text("\(count)").font(.caption).foregroundStyle(.secondary) }
+        dismiss()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(450))
+            switch item.kind {
+            case .live: ui.play(item, list: collection.items.filter { $0.kind == .live }, playback: playback)
+            case .episode: ui.play(item, playback: playback)
+            default: ui.detail = item
             }
-            .frame(maxWidth: .infinity, minHeight: 130)
         }
-        .buttonStyle(.card)
     }
+}
 
-    private func heroBanner(_ item: MediaItem, resuming: Bool) -> some View {
-        Button { open(item) } label: {
-            ZStack(alignment: .bottomLeading) {
-                ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 420)
-                    .clipped()
-                LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .top, endPoint: .bottom)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(resuming ? "REPRENDRE" : "À DÉCOUVRIR").font(.caption.weight(.bold)).foregroundStyle(TVPalette.orange)
-                    Text(TMDB.cleanTitle(item.name).title).font(.largeTitle.bold()).lineLimit(2)
-                    if let text = item.info, !text.isEmpty {
-                        Text(text).font(.callout).foregroundStyle(.secondary).lineLimit(2).frame(maxWidth: 900, alignment: .leading)
-                    }
-                }
-                .padding(36)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 24))
-        }
-        .buttonStyle(.card)
-    }
+/// Mes vidéos : contenus des serveurs Emby, Jellyfin et Plex, par groupe.
+struct TVLibraryView: View {
+    @Environment(LibraryStore.self) private var store
+    @Environment(TVUI.self) private var ui
+    @State private var group = ""
 
-    @ViewBuilder
-    private func rail(_ title: String, _ items: [MediaItem], poster: Bool) -> some View {
-        if !items.isEmpty {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(title).font(.title3.bold())
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 30) {
-                        ForEach(items) { item in
-                            Button { open(item) } label: { card(item, poster: poster) }
-                                .buttonStyle(.card)
+    private var all: [MediaItem] { store.libraryItems().filter { $0.kind == .movie || $0.kind == .series } }
+    private var groups: [String] { Array(Set(all.map(\.group))).sorted() }
+
+    var body: some View {
+        let shown = group.isEmpty ? all : all.filter { $0.group == group }
+        if all.isEmpty {
+            TVEmptyView(text: store.loading.isEmpty ? String(localized: "Aucun contenu. Ajoutez un serveur Emby, Jellyfin ou Plex dans Réglages.") : String(localized: "Chargement des sources…"))
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    TVCategoryButton(title: String(localized: "Groupe : ") + (group.isEmpty ? String(localized: "Tous") : group),
+                                     options: [TVOption(value: TVScope.all, label: String(localized: "Tous"))] + groups.map { TVOption(value: TVScope.category($0), label: $0) },
+                                     selection: Binding(get: { group.isEmpty ? TVScope.all : TVScope.category(group) }, set: { value in
+                                         if case .category(let name) = value { group = name } else { group = "" }
+                                     }))
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 220, maximum: 260), spacing: 36, alignment: .top)], spacing: 40) {
+                        ForEach(shown.prefix(240)) { item in
+                            Button { ui.detail = item } label: {
+                                VStack(spacing: 8) {
+                                    ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill).frame(height: 300).clipped()
+                                    Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center)
+                                        .padding(.horizontal, 6).padding(.bottom, 8)
+                                }
+                            }
+                            .buttonStyle(.card)
                         }
                     }
-                    .padding(.vertical, 20)
+                    if shown.count > 240 { Text("\(shown.count) contenus : affinez par groupe ou utilisez la recherche.").foregroundStyle(.secondary) }
                 }
+                .padding(.horizontal, 60).padding(.vertical, 30)
             }
         }
-    }
-
-    private func card(_ item: MediaItem, poster: Bool) -> some View {
-        VStack(spacing: 8) {
-            if poster {
-                ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
-                    .frame(width: 200, height: 300)
-                    .clipped()
-            } else {
-                ArtworkView(url: item.logoURL, name: item.name)
-                    .frame(width: 200, height: 110)
-                    .padding(.top, 10)
-            }
-            Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(1).frame(width: 190)
-            if let fraction = watch.fraction(for: item.id) {
-                ProgressView(value: fraction).tint(TVPalette.orange).frame(width: 170)
-            } else if !poster, let programme = store.epg.current(for: item.epgID) {
-                Text(programme.title).font(.caption2).foregroundStyle(.secondary).lineLimit(1).frame(width: 190)
-            }
-        }
-        .padding(.bottom, 10)
     }
 }
