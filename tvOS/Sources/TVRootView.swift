@@ -11,6 +11,8 @@ struct TVRootView: View {
         ZStack {
             TVBackground()
             TabView {
+                TVHomeView()
+                    .tabItem { Text("Accueil") }
                 TVBrowseView(kind: .live)
                     .tabItem { Text("Direct") }
                 TVBrowseView(kind: .movie)
@@ -21,6 +23,12 @@ struct TVRootView: View {
                     .tabItem { Text("Guide TV") }
                 TVSettingsView()
                     .tabItem { Text("Réglages") }
+            }
+        }
+        .onAppear {
+            playback.onEpisodeEnded = { [weak ui, weak playback] item in
+                guard let ui, let playback else { return }
+                ui.playNext(after: item, playback: playback)
             }
         }
         .fullScreenCover(item: $ui.playing) { _ in

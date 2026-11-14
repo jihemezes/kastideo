@@ -2,14 +2,26 @@ import SwiftUI
 import KastideoCore
 
 /// Lecteur plein écran piloté à la télécommande :
-/// ↑ / ↓ changent de chaîne (direct), ← / → reculent de 10 s / avancent de 30 s (films), lecture/pause, Menu pour quitter.
+/// ↑ / ↓ changent de chaîne (direct), ← / → reculent de 10 s / avancent de 30 s (films), lecture/pause,
+/// appui central = options (audio, sous-titres, vitesse, dernière chaîne, numéro de chaîne), Menu pour quitter.
 struct TVPlayerView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(PlaybackController.self) private var playback
     @Environment(TVUI.self) private var ui
     @State private var showInfo = true
     @State private var infoTask: Task<Void, Never>?
+    @State private var dialog: PlayerDialog?
+    @State private var numberText = ""
+    @State private var askNumber = false
     @FocusState private var focused: Bool
+
+    enum PlayerDialog: Identifiable {
+        case options, audio, subtitles, speed
+        var id: Int { hashValue }
+    }
+
+    private var current: MediaItem? { ui.playing ?? playback.current }
+    private var isLive: Bool { current?.kind == .live }
 
     var body: some View {
         ZStack {
@@ -22,7 +34,7 @@ struct TVPlayerView: View {
                     .padding(24)
                     .background(.black.opacity(0.7), in: RoundedRectangle(cornerRadius: 16))
             }
-            if showInfo, let item = playback.current ?? ui.playing {
+            if showInfo, let item = current {
                 VStack {
                     Spacer()
                     infoBar(item)
@@ -40,17 +52,57 @@ struct TVPlayerView: View {
             switch direction {
             case .up: zap(-1)
             case .down: zap(1)
-            case .left: if !(playback.current?.kind == .live) { playback.jump(seconds: -10) }; flashInfo()
-            case .right: if !(playback.current?.kind == .live) { playback.jump(seconds: 30) }; flashInfo()
+            case .left: if !isLive { playback.jump(seconds: -10) }; flashInfo()
+            case .right: if !isLive { playback.jump(seconds: 30) }; flashInfo()
             @unknown default: break
             }
         }
-        .onTapGesture { flashInfo() }
+        .onTapGesture {
+            flashInfo()
+            dialog = .options
+        }
         .onPlayPauseCommand {
             playback.togglePause()
             flashInfo()
         }
         .onExitCommand { ui.stop(playback: playback) }
+        .confirmationDialog("Options", isPresented: Binding(get: { dialog == .options }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            Button("Pistes audio…") { dialog = .audio }
+            Button("Sous-titres…") { dialog = .subtitles }
+            if !isLive { Button("Vitesse de lecture…") { dialog = .speed } }
+            if isLive, let previous = ui.previousChannel {
+                Button("Dernière chaîne : \(previous.name)") { ui.play(previous, playback: playback) }
+            }
+            if isLive { Button("Aller à la chaîne n°…") { numberText = ""; askNumber = true } }
+            if let current, current.kind == .episode, let next = ui.nextEpisode(after: current) {
+                Button("Épisode suivant") { ui.play(next, playback: playback) }
+            }
+            Button("Fermer", role: .cancel) {}
+        }
+        .confirmationDialog("Pistes audio", isPresented: Binding(get: { dialog == .audio }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            ForEach(playback.audioTracks.filter { $0.id >= 0 }) { track in
+                Button(track.name + (track.id == playback.currentAudioTrack ? " ✓" : "")) { playback.selectAudioTrack(track.id) }
+            }
+            Button("Fermer", role: .cancel) {}
+        }
+        .confirmationDialog("Sous-titres", isPresented: Binding(get: { dialog == .subtitles }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            Button("Désactivés") { playback.selectSubtitleTrack(-1) }
+            ForEach(playback.subtitleTracks.filter { $0.id >= 0 }) { track in
+                Button(track.name + (track.id == playback.currentSubtitleTrack ? " ✓" : "")) { playback.selectSubtitleTrack(track.id) }
+            }
+            Button("Fermer", role: .cancel) {}
+        }
+        .confirmationDialog("Vitesse de lecture", isPresented: Binding(get: { dialog == .speed }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            ForEach([0.5, 0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { value in
+                Button(String(format: "%g×", value) + (abs(Double(playback.player.rate) - value) < 0.01 ? " ✓" : "")) { playback.player.rate = Float(value) }
+            }
+            Button("Fermer", role: .cancel) {}
+        }
+        .alert("Numéro de chaîne", isPresented: $askNumber) {
+            TextField("Numéro", text: $numberText)
+            Button("OK") { goToNumber() }
+            Button("Annuler", role: .cancel) {}
+        }
     }
 
     private func flashInfo() {
@@ -63,16 +115,23 @@ struct TVPlayerView: View {
     }
 
     private func zap(_ step: Int) {
-        guard playback.current?.kind == .live || ui.playing?.kind == .live else { flashInfo(); return }
+        guard isLive else { flashInfo(); return }
         let list = ui.zapList
-        guard list.count > 1, let current = ui.playing, let index = list.firstIndex(where: { $0.id == current.id }) else {
+        guard list.count > 1, let current, let index = list.firstIndex(where: { $0.id == current.id }) else {
             flashInfo()
             return
         }
-        let next = list[(index + step + list.count) % list.count]
-        ui.playing = next
-        playback.play(next)
+        ui.play(list[(index + step + list.count) % list.count], playback: playback)
         flashInfo()
+    }
+
+    private func goToNumber() {
+        guard let number = Int(numberText.trimmingCharacters(in: .whitespaces)) else { return }
+        let all = store.items(for: .all(.live))
+        if let target = ui.zapList.first(where: { $0.number == number }) ?? all.first(where: { $0.number == number }) {
+            ui.play(target, playback: playback)
+            flashInfo()
+        }
     }
 
     private func infoBar(_ item: MediaItem) -> some View {
@@ -86,7 +145,7 @@ struct TVPlayerView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(programme?.title ?? TMDB.cleanTitle(item.name).title).font(.title2.bold()).lineLimit(1)
                     if programme != nil {
-                        Text(TMDB.cleanTitle(item.name).title).font(.callout).foregroundStyle(.secondary)
+                        Text(TMDB.cleanTitle(item.name).title + (item.number.map { " · n°\($0)" } ?? "")).font(.callout).foregroundStyle(.secondary)
                     }
                     if let programme {
                         ProgressView(value: programme.progress()).tint(TVPalette.orange).frame(maxWidth: 700)
@@ -95,11 +154,12 @@ struct TVPlayerView: View {
                         }
                     } else if item.kind != .live, playback.duration > 0 {
                         ProgressView(value: playback.position).tint(TVPalette.orange).frame(maxWidth: 700)
+                        Text("Reste \(remaining)").font(.callout).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(playback.health.label).font(.callout).foregroundStyle(.secondary)
+                    Text(playback.health.qualityLabel ?? playback.health.label).font(.callout).foregroundStyle(.secondary)
                     if !playback.isPlaying && !playback.isLoading { Image(systemName: "pause.fill").font(.title) }
                 }
             }
@@ -108,5 +168,11 @@ struct TVPlayerView: View {
         .padding(.vertical, 36)
         .frame(maxWidth: .infinity)
         .background(LinearGradient(colors: [.clear, .black.opacity(0.9)], startPoint: .top, endPoint: .bottom))
+    }
+
+    private var remaining: String {
+        let left = max(playback.duration * (1 - playback.position), 0)
+        let minutes = Int(left / 60)
+        return minutes >= 60 ? String(format: "%d h %02d", minutes / 60, minutes % 60) : "\(minutes) min"
     }
 }

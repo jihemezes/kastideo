@@ -2,6 +2,14 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos3] - 2026-11-14
+
+- **Accueil** : bandeau à la une (reprise ou dernier ajout) et rangées Reprendre la lecture, chaînes favorites et récentes, tendances TMDB, derniers films et séries.
+- **Guide TV en grille horaire** : fenêtre de 3 h (−3 h / Maintenant / +3 h), colonne des chaînes, programmes cliquables : regarder la chaîne ou revoir le programme (replay).
+- **Lecteur** : appui central = options (pistes audio, sous-titres, vitesse 0,5–2×, dernière chaîne, aller à la chaîne n°, épisode suivant) ; l'épisode suivant démarre automatiquement.
+- **Fiches** : résumé, genres, note, distribution via TMDB (clé dans Réglages).
+- **Sources sans clavier** : Réglages > Ajouter depuis un téléphone — QR code, adresse locale et code à 4 chiffres ; formulaire Xtream / M3U sur le téléphone.
+
 ## [1.17.0-tvos2] - 2026-11-14
 
 Première version Apple TV (tvOS 17) — tvos1 n'a pas compilé (API de diffusion absente de TVVLCKit, titre des sources) :

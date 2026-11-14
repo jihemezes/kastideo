@@ -245,6 +245,7 @@ targets:
           - ConfigModels.swift
           - LegalText.swift
           - ThemeLabels.swift
+          - MediaInfo.swift
       - path: App/Resources
         includes:
           - fr.lproj/*
@@ -269,6 +270,7 @@ targets:
         NSHumanReadableCopyright: "© 2026 Jean-Michel Ezes"
         UIUserInterfaceStyle: Dark
         ITSAppUsesNonExemptEncryption: false
+        NSLocalNetworkUsageDescription: "Kastideo ouvre une page sur votre réseau local pour ajouter une source depuis votre téléphone."
         # Les sources IPTV sont souvent en http:// : on autorise toutes les connexions.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true

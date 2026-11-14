@@ -8,6 +8,7 @@ struct TVDetailView: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(WatchProgressStore.self) private var watch
     @Environment(TVUI.self) private var ui
+    @Environment(MediaInfoStore.self) private var mediaInfo
     @State private var seasons: [SeriesSeason] = []
     @State private var selectedSeason = 0
     @State private var loadError: String?
@@ -24,7 +25,16 @@ struct TVDetailView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 18))
                         VStack(alignment: .leading, spacing: 20) {
                             Text(TMDB.cleanTitle(item.name).title).font(.largeTitle.bold())
-                            if let info = item.info, !info.isEmpty {
+                            if let d = mediaInfo.details(for: item) {
+                                let meta = [d.year.map(String.init), d.runtime.map { "\($0) min" }, d.rating.map { String(format: "★ %.1f", $0) },
+                                            d.genres.prefix(3).joined(separator: ", ")].compactMap { $0 }.filter { !$0.isEmpty }
+                                if !meta.isEmpty { Text(meta.joined(separator: " · ")).font(.callout).foregroundStyle(TVPalette.orange) }
+                                if let plot = d.plot ?? item.info, !plot.isEmpty {
+                                    Text(plot).font(.callout).foregroundStyle(.secondary).lineLimit(8)
+                                }
+                                if !d.directors.isEmpty { Text("De \(d.directors.joined(separator: ", "))").font(.callout) }
+                                if !d.cast.isEmpty { Text("Avec \(d.cast.prefix(6).map(\.name).joined(separator: ", "))").font(.callout).foregroundStyle(.secondary).lineLimit(2) }
+                            } else if let info = item.info, !info.isEmpty {
                                 Text(info).font(.callout).foregroundStyle(.secondary).lineLimit(8)
                             }
                             HStack(spacing: 24) {
@@ -46,6 +56,7 @@ struct TVDetailView: View {
                 .padding(80)
             }
         }
+        .task { await mediaInfo.load(item, store: store) }
         .task { if item.kind == .series { await loadSeasons() } }
     }
 
@@ -68,7 +79,7 @@ struct TVDetailView: View {
             }
             let list = seasons.indices.contains(selectedSeason) ? seasons[selectedSeason].episodes : []
             ForEach(list) { episode in
-                Button { play(episode) } label: {
+                Button { ui.episodeContext = seasons.flatMap(\.episodes); play(episode) } label: {
                     HStack {
                         Text(episode.name).lineLimit(1)
                         Spacer()

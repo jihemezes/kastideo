@@ -81,11 +81,30 @@ final class TVUI {
     /// Fiche détaillée ouverte (film ou série).
     var detail: MediaItem?
     var showDisclaimer = LegalNotice.needsAcceptance
+    /// Chaîne regardée juste avant (« Dernière chaîne »).
+    var previousChannel: MediaItem?
+    /// Épisodes de la série en cours (épisode suivant automatique).
+    var episodeContext: [MediaItem] = []
 
     func play(_ item: MediaItem, list: [MediaItem] = [], playback: PlaybackController) {
-        zapList = item.kind == .live ? list : []
+        if item.kind == .live, let current = playing ?? playback.current, current.kind == .live, current.id != item.id {
+            previousChannel = current
+        }
+        if item.kind == .live { zapList = list.isEmpty ? zapList : list } else { zapList = [] }
+        if item.kind != .episode { episodeContext = [] }
         playing = item
         playback.play(item)
+    }
+
+    func nextEpisode(after item: MediaItem) -> MediaItem? {
+        guard let index = episodeContext.firstIndex(where: { $0.id == item.id }), index + 1 < episodeContext.count else { return nil }
+        return episodeContext[index + 1]
+    }
+
+    /// Fin d'un épisode : lance le suivant.
+    func playNext(after item: MediaItem, playback: PlaybackController) {
+        guard let next = nextEpisode(after: item) else { return }
+        play(next, playback: playback)
     }
 
     func stop(playback: PlaybackController) {

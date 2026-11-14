@@ -8,6 +8,8 @@ struct KastideoTVApp: App {
     @State private var playback: PlaybackController
     @State private var watch: WatchProgressStore
     @State private var ui = TVUI()
+    @State private var mediaInfo = MediaInfoStore()
+    @State private var setup = TVRemoteSetup()
 
     init() {
         let store = LibraryStore()
@@ -34,6 +36,8 @@ struct KastideoTVApp: App {
                 .environment(playback)
                 .environment(watch)
                 .environment(ui)
+                .environment(mediaInfo)
+                .environment(setup)
                 .preferredColorScheme(.dark)
                 .tint(TVPalette.orange)
                 .task { await store.start(autoRefresh: true) }

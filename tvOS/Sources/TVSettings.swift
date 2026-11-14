@@ -5,6 +5,7 @@ import KastideoCore
 struct TVSettingsView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(TVUI.self) private var ui
+    @Environment(MediaInfoStore.self) private var info
 
     var body: some View {
         NavigationStack {
@@ -21,13 +22,18 @@ struct TVSettingsView: View {
                             Button("Supprimer", role: .destructive) { store.removeSource(source.id) }
                         }
                     }
-                    NavigationLink("Ajouter une source…") { TVAddSourceView() }
+                    NavigationLink("Ajouter depuis un téléphone (QR code)") { TVRemoteSetupView() }
+                    NavigationLink("Ajouter une source au clavier…") { TVAddSourceView() }
                     if store.hasSources {
                         Button("Tout actualiser") { store.refreshAll() }
                     }
                 }
+                Section("TMDB") {
+                    SecureField("Clé API TMDB (facultatif)", text: Binding(get: { info.tmdbKey }, set: { info.tmdbKey = $0 }))
+                    Text("Affiches, résumés, distribution et tendances sur l'Accueil et les fiches.").font(.callout).foregroundStyle(.secondary)
+                }
                 Section {
-                    Text("La synchronisation iCloud n'est pas disponible sur Apple TV : saisissez votre source ici (le clavier de l'iPhone proche peut servir de saisie).")
+                    Text("La synchronisation iCloud n'est pas disponible sur Apple TV : ajoutez votre source depuis un téléphone (QR code) ou au clavier.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
                 Section("À propos") {
