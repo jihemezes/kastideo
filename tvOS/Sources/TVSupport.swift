@@ -103,7 +103,22 @@ final class TVUI {
     /// Épisodes de la série en cours (épisode suivant automatique).
     var episodeContext: [MediaItem] = []
 
+    /// Dernière chaîne regardée (affichage TV du direct).
+    static let lastLiveKey = "tv.lastLiveID"
+    /// L'affichage TV ne lance la dernière chaîne qu'une fois par session.
+    var tvAutoStarted = false
+
+    /// Ouvre un contenu : chaîne et épisode se lancent, film et série ouvrent leur fiche.
+    func open(_ item: MediaItem, list: [MediaItem], playback: PlaybackController) {
+        switch item.kind {
+        case .live: play(item, list: list.filter { $0.kind == .live }, playback: playback)
+        case .episode: play(item, playback: playback)
+        default: detail = item
+        }
+    }
+
     func play(_ item: MediaItem, list: [MediaItem] = [], playback: PlaybackController) {
+        if item.kind == .live { UserDefaults.standard.set(item.id, forKey: Self.lastLiveKey) }
         if item.kind == .live, let current = playing ?? playback.current, current.kind == .live, current.id != item.id {
             previousChannel = current
         }

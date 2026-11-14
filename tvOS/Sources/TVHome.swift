@@ -63,7 +63,7 @@ struct TVHomeView: View {
             .background(LinearGradient(colors: colors.map { $0.opacity(0.85) }, startPoint: .topLeading, endPoint: .bottomTrailing),
                         in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
-        .buttonStyle(.card)
+        .buttonStyle(TVTileStyle(radius: 28))
     }
 
     private func count(_ kind: MediaKind, _ label: String) -> String {
@@ -102,7 +102,7 @@ struct TVHomeView: View {
             .frame(maxWidth: .infinity, minHeight: 110)
             .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         }
-        .buttonStyle(.card)
+        .buttonStyle(TVTileStyle(radius: 22))
     }
 }
 
@@ -148,7 +148,7 @@ struct TVCollectionView: View {
                                     }
                                     .padding(.bottom, 8)
                                 }
-                                .buttonStyle(.card)
+                                .buttonStyle(TVTileStyle(radius: 18, plate: true))
                             }
                         }
                         .padding(.vertical, 20)
@@ -203,7 +203,7 @@ struct TVLibraryView: View {
                                         .padding(.horizontal, 6).padding(.bottom, 8)
                                 }
                             }
-                            .buttonStyle(.card)
+                            .buttonStyle(TVTileStyle(radius: 18, plate: true))
                         }
                     }
                     if shown.count > 240 { Text("\(shown.count) contenus : affinez par groupe ou utilisez la recherche.").foregroundStyle(.secondary) }

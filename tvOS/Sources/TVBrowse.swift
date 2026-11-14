@@ -9,59 +9,64 @@ struct TVBrowseView: View {
     @Environment(WatchProgressStore.self) private var watch
     @Environment(TVUI.self) private var ui
     @State private var scope: TVScope = .none
+    @AppStorage private var styleRaw: String
+
+    init(kind: MediaKind) {
+        self.kind = kind
+        _styleRaw = AppStorage(wrappedValue: TVStyle.classic.rawValue, TVInterface.key(kind))
+    }
+
+    private var style: TVStyle {
+        let value = TVStyle(rawValue: styleRaw) ?? .classic
+        return TVInterface.available(for: kind).contains(value) ? value : .classic
+    }
 
     private var categories: [String] { store.categoriesByKind[kind] ?? [] }
 
-    private var items: [MediaItem] {
-        switch effectiveScope {
-        case .none, .all: return store.items(for: .all(kind))
-        case .favorites: return store.favoriteIDs.compactMap { store.item(id: $0) }.filter { $0.kind == kind || (kind == .series && $0.kind == .episode) }
-        case .recents: return store.recentIDs.compactMap { store.item(id: $0) }.filter { $0.kind == kind || (kind == .series && $0.kind == .episode) }
-        case .category(let name): return store.items(for: .category(kind, name))
-        }
-    }
+    private var items: [MediaItem] { effectiveScope.items(kind: kind, store: store) }
 
-    /// Sans choix, la première catégorie (tout le catalogue d'un fournisseur serait trop lourd à afficher).
+    /// Sans choix, la page de départ du réglage (tout le catalogue d'un fournisseur serait trop lourd à afficher).
     private var effectiveScope: TVScope {
-        if scope != .none { return scope }
-        switch StartPage.destination(for: kind, categories: categories) {
-        case .favorites: return .favorites
-        case .recents: return .recents
-        case .category(_, let name): return .category(name)
-        default: break
-        }
-        if let first = categories.first { return .category(first) }
-        return .all
+        scope != .none ? scope : TVScope.start(for: kind, categories: categories)
     }
 
+    @ViewBuilder
     var body: some View {
         if !store.hasSources {
             TVEmptyView(text: String(localized: "Ajoutez une source dans Réglages."))
         } else if store.count(for: kind) == 0 {
             TVEmptyView(text: store.loading.isEmpty ? String(localized: "Aucun contenu pour cette section.") : String(localized: "Chargement des sources…"))
+        } else if style == .cinema {
+            TVCinemaView(kind: kind)
+        } else if style == .tv {
+            TVLiveTVView()
         } else {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    chips
-                    let shown = items
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
-                        ForEach(shown.prefix(240)) { item in
-                            Button { open(item, list: shown) } label: { tile(item) }
-                                .buttonStyle(.card)
-                                .contextMenu {
-                                    Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
-                                           systemImage: store.isFavorite(item.id) ? "star.slash" : "star") { store.toggleFavorite(item.id) }
-                                }
-                        }
-                    }
-                    if shown.count > 240 {
-                        Text("\(shown.count) contenus : affinez par catégorie.")
-                            .foregroundStyle(.secondary)
+            classic
+        }
+    }
+
+    private var classic: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                chips
+                let shown = items
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
+                    ForEach(shown.prefix(240)) { item in
+                        Button { open(item, list: shown) } label: { TVItemTile(item: item) }
+                            .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                            .contextMenu {
+                                Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
+                                       systemImage: store.isFavorite(item.id) ? "star.slash" : "star") { store.toggleFavorite(item.id) }
+                            }
                     }
                 }
-                .padding(.horizontal, 60)
-                .padding(.vertical, 30)
+                if shown.count > 240 {
+                    Text("\(shown.count) contenus : affinez par catégorie.")
+                        .foregroundStyle(.secondary)
+                }
             }
+            .padding(.horizontal, 60)
+            .padding(.vertical, 30)
         }
     }
 
@@ -95,6 +100,7 @@ struct TVBrowseView: View {
                                  scope = value
                                  if case .category(let name) = value { UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind)) }
                              }))
+            TVStyleButton(kind: kind)
             Spacer()
         }
         .padding(.vertical, 10)
@@ -105,29 +111,6 @@ struct TVBrowseView: View {
             ui.play(item, list: list, playback: playback)
         } else {
             ui.detail = item
-        }
-    }
-
-    @ViewBuilder
-    private func tile(_ item: MediaItem) -> some View {
-        if item.kind == .live {
-            VStack(spacing: 10) {
-                ArtworkView(url: item.logoURL, name: item.name)
-                    .frame(height: 130)
-                Text(item.name).font(.caption).lineLimit(2).multilineTextAlignment(.center)
-                if let programme = store.epg.current(for: item.epgID) {
-                    Text(programme.title).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                }
-            }
-            .padding(12)
-        } else {
-            VStack(spacing: 8) {
-                ArtworkView(url: item.logoURL, name: item.name, contentMode: .fill)
-                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
-                    .overlay(alignment: .topTrailing) { TVWatchedMark(id: item.id) }
-                Text(TMDB.cleanTitle(item.name).title).font(.caption).lineLimit(2).multilineTextAlignment(.center)
-                    .padding(.horizontal, 6).padding(.bottom, 8)
-            }
         }
     }
 }

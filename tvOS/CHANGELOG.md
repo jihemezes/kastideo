@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos9] - 2026-11-14
+
+- **Boutons corrigés** : la plaque translucide qui dépassait derrière les tuiles et les petits boutons a disparu ; chaque bouton a une seule forme arrondie, avec un liseré orange et un léger agrandissement au focus.
+- **Trois affichages** comme sur Mac et iPad : **Classique** (grille), **Cinéma** (bandeau « à la une » + rangées Reprendre, Favoris, Récents, catégories) et, pour le Direct, **TV** (la dernière chaîne démarre en plein écran, ↑ / ↓ pour zapper). Choix par type de contenu : bouton « Affichage » en haut de Direct, Films et Séries, ou Réglages > Affichage.
+
 ## [1.17.0-tvos8] - 2026-11-14
 
 - **Réception depuis l'iPhone / iPad** : Réglages > Ajouter depuis un téléphone accepte aussi « Envoyer vers l'Apple TV » (sources, favoris, catégories, réglages, clé TMDB) depuis l'app iPhone ou iPad, sans ressaisie.

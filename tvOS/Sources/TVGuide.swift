@@ -136,7 +136,7 @@ struct TVGuideView: View {
                 .padding(.horizontal, 10)
                 .frame(width: labelWidth, height: rowHeight)
             }
-            .buttonStyle(.card)
+            .buttonStyle(TVTileStyle(radius: 12, plate: true))
             ZStack(alignment: .topLeading) {
                 if programmes.isEmpty {
                     Text("Programme non disponible").font(.caption).foregroundStyle(.secondary)
@@ -157,7 +157,7 @@ struct TVGuideView: View {
                         .frame(width: w, height: rowHeight - 8, alignment: .leading)
                         .background(airing ? TVPalette.orange.opacity(0.35) : Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(TVTileStyle(radius: 10))
                     .offset(x: x, y: 4)
                 }
             }

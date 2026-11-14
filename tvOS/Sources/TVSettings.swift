@@ -15,6 +15,10 @@ struct TVSettingsView: View {
     @AppStorage("tv.zapMode") private var zapMode = "confirm"
     @AppStorage("adult.show") private var adult = false
     @AppStorage("guide.start") private var guideStart = "now"
+    @AppStorage("tv.interface.live") private var styleLive = "classic"
+    @AppStorage("tv.interface.movie") private var styleMovie = "classic"
+    @AppStorage("tv.interface.series") private var styleSeries = "classic"
+    @AppStorage("tv.autoStart") private var autoStart = true
 
     var body: some View {
         NavigationStack {
@@ -44,6 +48,12 @@ struct TVSettingsView: View {
                     startPicker(.live, $startLive)
                     startPicker(.movie, $startMovie)
                     startPicker(.series, $startSeries)
+                }
+                Section("Affichage") {
+                    TVChoiceRow(title: MediaKind.live.title, options: TVInterface.available(for: .live).map { TVOption(value: $0.rawValue, label: $0.label) }, selection: $styleLive)
+                    TVChoiceRow(title: MediaKind.movie.title, options: TVInterface.available(for: .movie).map { TVOption(value: $0.rawValue, label: $0.label) }, selection: $styleMovie)
+                    TVChoiceRow(title: MediaKind.series.title, options: TVInterface.available(for: .series).map { TVOption(value: $0.rawValue, label: $0.label) }, selection: $styleSeries)
+                    Toggle("Affichage TV : lancer la dernière chaîne à l'ouverture", isOn: $autoStart)
                 }
                 Section("Guide TV") {
                     TVChoiceRow(title: String(localized: "À l'ouverture du guide"), options: [
