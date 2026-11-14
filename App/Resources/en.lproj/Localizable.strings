@@ -1497,3 +1497,15 @@
 "Enregistré" = "Saved";
 "En ce moment" = "On now";
 "↑ ↓ pour parcourir · clic pour valider · Menu pour annuler" = "↑ ↓ to browse · click to confirm · Menu to cancel";
+
+/* tvOS 1.17.0-tvos6 */
+"Catégorie" = "Category";
+"Catégorie : " = "Category: ";
+"Recherche…" = "Searching…";
+"Saisissez au moins 2 lettres." = "Type at least 2 letters.";
+"Chaînes, films, séries" = "Channels, movies, series";
+"Minuterie de veille…" = "Sleep timer…";
+"Minuterie de veille (active)…" = "Sleep timer (active)…";
+"Minuterie de veille" = "Sleep timer";
+"Arrêter dans %lld min" = "Stop in %lld min";
+"Désactiver la minuterie" = "Turn off timer";

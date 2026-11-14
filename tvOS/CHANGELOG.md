@@ -2,6 +2,13 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos6] - 2026-11-14
+
+- **Sélecteurs lisibles** : les choix des Réglages (page de départ, zapping, mémoire tampon) s'ouvrent en liste verticale avec une coche ; la catégorie de Direct, Films, Séries et Guide TV se choisit via un bouton « Catégorie : … » qui ouvre une fenêtre (fini la rangée de petits boutons).
+- **Recherche** : nouvel onglet pour chercher dans les chaînes, films et séries.
+- **Favoris** : appui long sur une vignette, ou option du lecteur, pour ajouter / retirer des favoris.
+- **Minuterie de veille** dans les options du lecteur (30, 60, 90, 120 min).
+
 ## [1.17.0-tvos5] - 2026-11-14
 
 Retours de test sur Apple TV :

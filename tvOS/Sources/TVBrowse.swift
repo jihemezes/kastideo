@@ -48,6 +48,10 @@ struct TVBrowseView: View {
                         ForEach(shown.prefix(240)) { item in
                             Button { open(item, list: shown) } label: { tile(item) }
                                 .buttonStyle(.card)
+                                .contextMenu {
+                                    Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
+                                           systemImage: store.isFavorite(item.id) ? "star.slash" : "star") { store.toggleFavorite(item.id) }
+                                }
                         }
                     }
                     if shown.count > 240 {
@@ -67,26 +71,33 @@ struct TVBrowseView: View {
             : [GridItem(.adaptive(minimum: 220, maximum: 260), spacing: 36, alignment: .top)]
     }
 
-    private var chips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 18) {
-                chip(String(localized: "Toutes"), .all)
-                chip(String(localized: "Favoris"), .favorites)
-                chip(String(localized: "Récents"), .recents)
-                ForEach(categories, id: \.self) { name in chip(name, .category(name)) }
-            }
-            .padding(.vertical, 10)
+    private var scopeOptions: [TVOption<TVScope>] {
+        var list: [TVOption<TVScope>] = [TVOption(value: TVScope.all, label: String(localized: "Toutes")),
+                                         TVOption(value: TVScope.favorites, label: String(localized: "Favoris")),
+                                         TVOption(value: TVScope.recents, label: String(localized: "Récents"))]
+        list += categories.map { TVOption(value: TVScope.category($0), label: $0) }
+        return list
+    }
+
+    private var scopeTitle: String {
+        switch effectiveScope {
+        case .none, .all: return String(localized: "Toutes")
+        case .favorites: return String(localized: "Favoris")
+        case .recents: return String(localized: "Récents")
+        case .category(let name): return name
         }
     }
 
-    private func chip(_ title: String, _ value: TVScope) -> some View {
-        Button {
-            scope = value
-            if case .category(let name) = value { UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind)) }
-        } label: {
-            Text(title).font(.callout.weight(effectiveScope == value ? .bold : .regular)).padding(.horizontal, 10)
+    private var chips: some View {
+        HStack {
+            TVCategoryButton(title: String(localized: "Catégorie : ") + scopeTitle, options: scopeOptions,
+                             selection: Binding(get: { effectiveScope }, set: { value in
+                                 scope = value
+                                 if case .category(let name) = value { UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind)) }
+                             }))
+            Spacer()
         }
-        .tint(effectiveScope == value ? TVPalette.orange : nil)
+        .padding(.vertical, 10)
     }
 
     private func open(_ item: MediaItem, list: [MediaItem]) {

@@ -68,17 +68,15 @@ struct TVGuideView: View {
     }
 
     private var chips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 18) {
-                ForEach(categories, id: \.self) { name in
-                    Button { category = name } label: {
-                        Text(name).font(.callout.weight(activeCategory == name ? .bold : .regular))
-                    }
-                    .tint(activeCategory == name ? TVPalette.orange : nil)
-                }
-            }
-            .padding(.vertical, 10)
+        HStack {
+            TVCategoryButton(title: String(localized: "Catégorie : ") + (activeCategory ?? "—"),
+                             options: categories.map { TVOption(value: TVScope.category($0), label: $0) },
+                             selection: Binding(get: { .category(activeCategory ?? "") }, set: { value in
+                                 if case .category(let name) = value { category = name }
+                             }))
+            Spacer()
         }
+        .padding(.vertical, 10)
     }
 
     private var controls: some View {

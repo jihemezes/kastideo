@@ -21,7 +21,7 @@ struct TVPlayerView: View {
     @State private var browseTask: Task<Void, Never>?
 
     enum PlayerDialog: Identifiable {
-        case options, audio, subtitles, speed
+        case options, audio, subtitles, speed, sleep
         var id: Int { hashValue }
     }
 
@@ -80,6 +80,10 @@ struct TVPlayerView: View {
             if browsing { browsing = false } else { ui.stop(playback: playback) }
         }
         .confirmationDialog("Options", isPresented: Binding(get: { dialog == .options }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            if let current {
+                Button(store.isFavorite(current.id) ? "Retirer des favoris" : "Ajouter aux favoris") { store.toggleFavorite(current.id) }
+            }
+            Button(ui.sleepAt == nil ? "Minuterie de veille…" : "Minuterie de veille (active)…") { dialog = .sleep }
             Button("Pistes audio…") { dialog = .audio }
             Button("Sous-titres…") { dialog = .subtitles }
             if !isLive { Button("Vitesse de lecture…") { dialog = .speed } }
@@ -90,6 +94,13 @@ struct TVPlayerView: View {
             if let current, current.kind == .episode, let next = ui.nextEpisode(after: current) {
                 Button("Épisode suivant") { ui.play(next, playback: playback) }
             }
+            Button("Fermer", role: .cancel) {}
+        }
+        .confirmationDialog("Minuterie de veille", isPresented: Binding(get: { dialog == .sleep }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
+            ForEach([30, 60, 90, 120], id: \.self) { minutes in
+                Button("Arrêter dans \(minutes) min") { ui.setSleep(minutes: minutes, playback: playback) }
+            }
+            if ui.sleepAt != nil { Button("Désactiver la minuterie", role: .destructive) { ui.setSleep(minutes: nil, playback: playback) } }
             Button("Fermer", role: .cancel) {}
         }
         .confirmationDialog("Pistes audio", isPresented: Binding(get: { dialog == .audio }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {

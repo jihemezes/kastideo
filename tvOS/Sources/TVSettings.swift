@@ -51,13 +51,11 @@ struct TVSettingsView: View {
                     Toggle("Afficher les chaînes adultes", isOn: Binding(get: { adult }, set: { adult = $0; store.refreshAdultFilter() }))
                 }
                 Section("Lecture") {
-                    Picker("Zapping ↑ / ↓", selection: $zapMode) {
-                        Text("Avec confirmation (liste + clic)").tag("confirm")
-                        Text("Direct (changement immédiat)").tag("direct")
-                    }
-                    Picker("Mémoire tampon", selection: $buffering) {
-                        ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
-                    }
+                    TVChoiceRow(title: String(localized: "Zapping ↑ / ↓"), options: [
+                        TVOption(value: "confirm", label: String(localized: "Avec confirmation (liste + clic)")),
+                        TVOption(value: "direct", label: String(localized: "Direct (changement immédiat)"))], selection: $zapMode)
+                    TVChoiceRow(title: String(localized: "Mémoire tampon"),
+                                options: BufferingMode.allCases.map { TVOption(value: $0.rawValue, label: $0.label) }, selection: $buffering)
                     Toggle("Reprendre les films là où je me suis arrêté", isOn: $resume)
                     Toggle("Toujours décoder en logiciel (flux qui se figent)", isOn: $softwareDecoding)
                 }
@@ -81,13 +79,12 @@ struct TVSettingsView: View {
 
     private func startPicker(_ kind: MediaKind, _ selection: Binding<String>) -> some View {
         let names = store.categoriesByKind[kind] ?? []
-        return Picker(kind.title, selection: selection) {
-            Text("Première catégorie").tag("all")
-            Text("Favoris").tag("favorites")
-            Text("Récents").tag("recents")
-            Text("Dernière consultée").tag("last")
-            ForEach(names, id: \.self) { Text($0).tag(StartPage.categoryValue($0)) }
-        }
+        var options = [TVOption(value: "all", label: String(localized: "Première catégorie")),
+                       TVOption(value: "favorites", label: String(localized: "Favoris")),
+                       TVOption(value: "recents", label: String(localized: "Récents")),
+                       TVOption(value: "last", label: String(localized: "Dernière consultée"))]
+        options += names.map { TVOption(value: StartPage.categoryValue($0), label: $0) }
+        return TVChoiceRow(title: kind.title, options: options, selection: selection)
     }
 }
 

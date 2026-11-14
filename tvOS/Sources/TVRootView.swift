@@ -26,6 +26,9 @@ struct TVRootView: View {
                 TVGuideView()
                     .tabItem { Text("Guide TV") }
                     .tag(4)
+                TVSearchView()
+                    .tabItem { Text("Recherche") }
+                    .tag(6)
                 TVSettingsView()
                     .tabItem { Text("Réglages") }
                     .tag(5)

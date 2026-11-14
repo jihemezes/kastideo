@@ -83,6 +83,21 @@ final class TVUI {
     var showDisclaimer = LegalNotice.needsAcceptance
     /// Onglet affiché (0 Accueil, 1 Direct, 2 Films, 3 Séries, 4 Guide TV, 5 Réglages).
     var tab = 0
+    /// Heure d'arrêt programmée (minuterie de veille).
+    var sleepAt: Date?
+    @ObservationIgnored private var sleepTask: Task<Void, Never>?
+
+    func setSleep(minutes: Int?, playback: PlaybackController) {
+        sleepTask?.cancel()
+        guard let minutes else { sleepAt = nil; return }
+        sleepAt = Date().addingTimeInterval(Double(minutes) * 60)
+        sleepTask = Task { [weak self, weak playback] in
+            try? await Task.sleep(for: .seconds(Double(minutes) * 60))
+            guard !Task.isCancelled, let self, let playback else { return }
+            self.sleepAt = nil
+            self.stop(playback: playback)
+        }
+    }
     /// Chaîne regardée juste avant (« Dernière chaîne »).
     var previousChannel: MediaItem?
     /// Épisodes de la série en cours (épisode suivant automatique).
@@ -110,6 +125,8 @@ final class TVUI {
     }
 
     func stop(playback: PlaybackController) {
+        sleepTask?.cancel()
+        sleepAt = nil
         playback.stopByUser()
         playing = nil
     }
