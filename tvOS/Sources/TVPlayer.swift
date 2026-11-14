@@ -14,6 +14,11 @@ struct TVPlayerView: View {
     @State private var numberText = ""
     @State private var askNumber = false
     @FocusState private var focused: Bool
+    @AppStorage("tv.zapMode") private var zapMode = "confirm"
+    @State private var browsing = false
+    @State private var browseIndex = 0
+    @State private var lastMove = Date.distantPast
+    @State private var browseTask: Task<Void, Never>?
 
     enum PlayerDialog: Identifiable {
         case options, audio, subtitles, speed
@@ -34,7 +39,8 @@ struct TVPlayerView: View {
                     .padding(24)
                     .background(.black.opacity(0.7), in: RoundedRectangle(cornerRadius: 16))
             }
-            if showInfo, let item = current {
+            if browsing { channelList }
+            if showInfo, !browsing, let item = current {
                 VStack {
                     Spacer()
                     infoBar(item)
@@ -49,23 +55,30 @@ struct TVPlayerView: View {
             flashInfo()
         }
         .onMoveCommand { direction in
+            // Le pavé tactile de la télécommande déclenche facilement ces gestes : on les espace.
             switch direction {
-            case .up: zap(-1)
-            case .down: zap(1)
-            case .left: if !isLive { playback.jump(seconds: -10) }; flashInfo()
-            case .right: if !isLive { playback.jump(seconds: 30) }; flashInfo()
+            case .up: vertical(-1)
+            case .down: vertical(1)
+            case .left: horizontal(-10)
+            case .right: horizontal(30)
             @unknown default: break
             }
         }
         .onTapGesture {
-            flashInfo()
-            dialog = .options
+            if browsing {
+                validateBrowse()
+            } else {
+                flashInfo()
+                dialog = .options
+            }
         }
         .onPlayPauseCommand {
             playback.togglePause()
             flashInfo()
         }
-        .onExitCommand { ui.stop(playback: playback) }
+        .onExitCommand {
+            if browsing { browsing = false } else { ui.stop(playback: playback) }
+        }
         .confirmationDialog("Options", isPresented: Binding(get: { dialog == .options }, set: { if !$0 { dialog = nil } }), titleVisibility: .visible) {
             Button("Pistes audio…") { dialog = .audio }
             Button("Sous-titres…") { dialog = .subtitles }
@@ -111,6 +124,77 @@ struct TVPlayerView: View {
         infoTask = Task {
             try? await Task.sleep(for: .seconds(5))
             if !Task.isCancelled { withAnimation { showInfo = false } }
+        }
+    }
+
+    private func vertical(_ step: Int) {
+        guard isLive else { flashInfo(); return }
+        if zapMode == "direct" {
+            guard Date().timeIntervalSince(lastMove) > 0.8 else { return }
+            lastMove = Date()
+            zap(step)
+            return
+        }
+        let list = ui.zapList
+        guard list.count > 1 else { flashInfo(); return }
+        if !browsing {
+            browseIndex = current.flatMap { c in list.firstIndex(where: { $0.id == c.id }) } ?? 0
+            browsing = true
+        } else {
+            guard Date().timeIntervalSince(lastMove) > 0.18 else { return }
+            lastMove = Date()
+            browseIndex = (browseIndex + step + list.count) % list.count
+        }
+        browseTask?.cancel()
+        browseTask = Task {
+            try? await Task.sleep(for: .seconds(7))
+            if !Task.isCancelled { browsing = false }
+        }
+    }
+
+    private func horizontal(_ seconds: Int) {
+        if !isLive, Date().timeIntervalSince(lastMove) > 0.5 {
+            lastMove = Date()
+            playback.jump(seconds: seconds)
+        }
+        flashInfo()
+    }
+
+    private func validateBrowse() {
+        browseTask?.cancel()
+        browsing = false
+        let list = ui.zapList
+        guard list.indices.contains(browseIndex) else { return }
+        let target = list[browseIndex]
+        if target.id != current?.id { ui.play(target, playback: playback) }
+        flashInfo()
+    }
+
+    /// Liste de chaînes (↑ / ↓ puis clic pour valider).
+    private var channelList: some View {
+        let list = ui.zapList
+        let indices = (-4...4).map { (browseIndex + $0 + list.count * 10) % max(list.count, 1) }
+        return HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(indices.enumerated()), id: \.offset) { position, index in
+                    if list.indices.contains(index) {
+                        let item = list[index]
+                        HStack(spacing: 14) {
+                            ArtworkView(url: item.logoURL, name: item.name).frame(width: 70, height: 44)
+                            Text(item.number.map { "\($0)  " } ?? "").foregroundStyle(.secondary)
+                            Text(TMDB.cleanTitle(item.name).title).lineLimit(1)
+                            Spacer(minLength: 0)
+                        }
+                        .font(position == 4 ? .title3.bold() : .callout)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .frame(width: 520, alignment: .leading)
+                        .background(position == 4 ? TVPalette.orange.opacity(0.55) : Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                Text("↑ ↓ pour parcourir · clic pour valider · Menu pour annuler").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(.leading, 60)
+            Spacer()
         }
     }
 

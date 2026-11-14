@@ -2,6 +2,15 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos5] - 2026-11-14
+
+Retours de test sur Apple TV :
+
+- **Zapping moins sensible** : le pavé tactile de la télécommande ne change plus de chaîne au moindre effleurement. Par défaut, ↑ / ↓ affichent une liste de chaînes et un clic valide ; un mode « Direct » (changement immédiat, avec anti-rebond) est disponible dans Réglages > Lecture. Les sauts −10 s / +30 s sont aussi espacés.
+- **Sources** : chaque source s'ouvre pour être modifiée (nom, adresse, identifiant, mot de passe, guide TV), actualisée ou supprimée (avec confirmation).
+- **Réglages complétés** : page de départ (appliquée à Direct, Films, Séries), catégories à afficher / masquer, chaînes adultes, mémoire tampon, reprise de lecture, décodage logiciel.
+- **Accueil** : raccourcis vers Direct, Films, Séries, Guide TV et Réglages ; rangée « En ce moment » ; plus jamais vide (à défaut de dates d'ajout, les premiers contenus sont proposés).
+
 ## [1.17.0-tvos4] - 2026-11-14
 
 - Correction : l'avertissement légal ne pouvait pas être accepté à la télécommande (bouton hors de portée sous le texte). Le bouton « J'accepte » est maintenant toujours visible sous le texte et sélectionné d'office.

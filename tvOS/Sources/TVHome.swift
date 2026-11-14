@@ -26,7 +26,18 @@ struct TVHomeView: View {
         store.recentIDs.compactMap { store.item(id: $0) }.filter { $0.kind == .live }.prefix(30).map { $0 }
     }
     private func latest(_ kind: MediaKind) -> [MediaItem] {
-        store.items(for: .all(kind)).filter { $0.added != nil }.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }.prefix(30).map { $0 }
+        let all = store.items(for: .all(kind))
+        let dated = all.filter { $0.added != nil }.sorted { ($0.added ?? .distantPast) > ($1.added ?? .distantPast) }
+        return (dated.isEmpty ? all : dated).prefix(30).map { $0 }
+    }
+    /// Chaînes dont un programme est en cours (guide), pour une rangée « En ce moment ».
+    private var onNow: [MediaItem] {
+        guard let first = store.categoriesByKind[.live]?.first else { return [] }
+        return store.items(for: .category(.live, first)).filter { store.epg.current(for: $0.epgID) != nil }.prefix(30).map { $0 }
+    }
+    private var firstChannels: [MediaItem] {
+        guard let first = store.categoriesByKind[.live]?.first else { return [] }
+        return store.items(for: .category(.live, first)).prefix(30).map { $0 }
     }
 
     var body: some View {
@@ -36,14 +47,20 @@ struct TVHomeView: View {
             let resumeItems = resume
             let movies = latest(.movie)
             let series = latest(.series)
+            let live = onNow.isEmpty ? firstChannels : onNow
             ScrollView {
                 VStack(alignment: .leading, spacing: 36) {
-                    if let hero = resumeItems.first ?? movies.first ?? series.first {
+                    if let hero = resumeItems.first ?? movies.first ?? series.first ?? live.first {
                         heroBanner(hero, resuming: resumeItems.first != nil)
+                    }
+                    shortcuts
+                    if !store.loading.isEmpty && movies.isEmpty && series.isEmpty && live.isEmpty {
+                        HStack(spacing: 16) { ProgressView(); Text("Chargement des sources…").foregroundStyle(.secondary) }
                     }
                     rail(String(localized: "Reprendre la lecture"), resumeItems, poster: true)
                     rail(String(localized: "Chaînes favorites"), favoriteChannels, poster: false)
                     rail(String(localized: "Chaînes récentes"), recentChannels, poster: false)
+                    rail(String(localized: "En ce moment"), live, poster: false)
                     rail(String(localized: "Tendances · Films"), trendingMovies, poster: true)
                     rail(String(localized: "Tendances · Séries"), trendingSeries, poster: true)
                     rail(String(localized: "Derniers films"), movies, poster: true)
@@ -70,6 +87,28 @@ struct TVHomeView: View {
         case .episode: ui.play(item, playback: playback)
         default: ui.detail = item
         }
+    }
+
+    private var shortcuts: some View {
+        HStack(spacing: 24) {
+            shortcut("Direct", "tv", 1, store.count(for: .live))
+            shortcut("Films", "film", 2, store.count(for: .movie))
+            shortcut("Séries", "rectangle.stack", 3, store.count(for: .series))
+            shortcut("Guide TV", "calendar", 4, nil)
+            shortcut("Réglages", "gearshape", 5, nil)
+        }
+    }
+
+    private func shortcut(_ title: String, _ icon: String, _ tab: Int, _ count: Int?) -> some View {
+        Button { ui.tab = tab } label: {
+            VStack(spacing: 8) {
+                Image(systemName: icon).font(.system(size: 44))
+                Text(LocalizedStringKey(title)).font(.callout.weight(.semibold))
+                if let count, count > 0 { Text("\(count)").font(.caption).foregroundStyle(.secondary) }
+            }
+            .frame(maxWidth: .infinity, minHeight: 130)
+        }
+        .buttonStyle(.card)
     }
 
     private func heroBanner(_ item: MediaItem, resuming: Bool) -> some View {

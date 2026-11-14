@@ -24,6 +24,12 @@ struct TVBrowseView: View {
     /// Sans choix, la première catégorie (tout le catalogue d'un fournisseur serait trop lourd à afficher).
     private var effectiveScope: TVScope {
         if scope != .none { return scope }
+        switch StartPage.destination(for: kind, categories: categories) {
+        case .favorites: return .favorites
+        case .recents: return .recents
+        case .category(_, let name): return .category(name)
+        default: break
+        }
         if let first = categories.first { return .category(first) }
         return .all
     }
@@ -74,7 +80,10 @@ struct TVBrowseView: View {
     }
 
     private func chip(_ title: String, _ value: TVScope) -> some View {
-        Button { scope = value } label: {
+        Button {
+            scope = value
+            if case .category(let name) = value { UserDefaults.standard.set(name, forKey: StartPage.lastKey(kind)) }
+        } label: {
             Text(title).font(.callout.weight(effectiveScope == value ? .bold : .regular)).padding(.horizontal, 10)
         }
         .tint(effectiveScope == value ? TVPalette.orange : nil)

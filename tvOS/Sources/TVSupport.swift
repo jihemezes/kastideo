@@ -81,6 +81,8 @@ final class TVUI {
     /// Fiche détaillée ouverte (film ou série).
     var detail: MediaItem?
     var showDisclaimer = LegalNotice.needsAcceptance
+    /// Onglet affiché (0 Accueil, 1 Direct, 2 Films, 3 Séries, 4 Guide TV, 5 Réglages).
+    var tab = 0
     /// Chaîne regardée juste avant (« Dernière chaîne »).
     var previousChannel: MediaItem?
     /// Épisodes de la série en cours (épisode suivant automatique).

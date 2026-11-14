@@ -10,19 +10,25 @@ struct TVRootView: View {
         @Bindable var ui = ui
         ZStack {
             TVBackground()
-            TabView {
+            TabView(selection: $ui.tab) {
                 TVHomeView()
                     .tabItem { Text("Accueil") }
+                    .tag(0)
                 TVBrowseView(kind: .live)
                     .tabItem { Text("Direct") }
+                    .tag(1)
                 TVBrowseView(kind: .movie)
                     .tabItem { Text("Films") }
+                    .tag(2)
                 TVBrowseView(kind: .series)
                     .tabItem { Text("Séries") }
+                    .tag(3)
                 TVGuideView()
                     .tabItem { Text("Guide TV") }
+                    .tag(4)
                 TVSettingsView()
                     .tabItem { Text("Réglages") }
+                    .tag(5)
             }
         }
         .onAppear {
