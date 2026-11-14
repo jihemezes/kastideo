@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos4] - 2026-11-14
+
+- Correction : l'avertissement légal ne pouvait pas être accepté à la télécommande (bouton hors de portée sous le texte). Le bouton « J'accepte » est maintenant toujours visible sous le texte et sélectionné d'office.
+
 ## [1.17.0-tvos3] - 2026-11-14
 
 - **Accueil** : bandeau à la une (reprise ou dernier ajout) et rangées Reprendre la lecture, chaînes favorites et récentes, tendances TMDB, derniers films et séries.

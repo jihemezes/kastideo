@@ -46,30 +46,37 @@ struct TVRootView: View {
 /// Avertissement légal : à accepter au premier lancement et après chaque mise à jour.
 struct TVDisclaimerView: View {
     @Environment(TVUI.self) private var ui
+    @FocusState private var acceptFocused: Bool
 
     var body: some View {
         let code = Locale.current.language.languageCode?.identifier ?? "fr"
         let text = LegalNotice.content(for: code)
         ZStack {
             TVBackground()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    Text(text.title).font(.largeTitle.bold())
-                    Text(text.subtitle).font(.title3).foregroundStyle(.secondary)
-                    Text(text.intro)
-                    ForEach(Array(text.points.enumerated()), id: \.offset) { _, point in
-                        (Text(point.lead + " ").bold() + Text(point.body))
+            VStack(spacing: 24) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        Text(text.title).font(.largeTitle.bold())
+                        Text(text.subtitle).font(.title3).foregroundStyle(.secondary)
+                        Text(text.intro)
+                        ForEach(Array(text.points.enumerated()), id: \.offset) { _, point in
+                            (Text(point.lead + " ").bold() + Text(point.body))
+                        }
+                        Text(text.closing).foregroundStyle(.secondary)
                     }
-                    Text(text.closing).foregroundStyle(.secondary)
-                    Button(text.accept) {
-                        LegalNotice.accept()
-                        ui.showDisclaimer = false
-                    }
-                    .padding(.top, 12)
+                    .font(.callout)
+                    .padding(.horizontal, 80)
+                    .padding(.top, 40)
+                    .focusable()
                 }
-                .font(.callout)
-                .padding(80)
+                // Bouton toujours visible, hors de la zone défilante : sinon la télécommande ne peut pas l'atteindre.
+                Button(text.accept) {
+                    LegalNotice.accept()
+                    ui.showDisclaimer = false
+                }
+                .focused($acceptFocused)
+                .padding(.bottom, 40)
             }
         }
-    }
-}
+        .onAppear { acceptFocused = true }
+    }}
