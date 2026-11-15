@@ -119,6 +119,9 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Langue de l'aide intégrée : français ou anglais (les autres langues utilisent l'aide anglaise).
-    static var helpLanguage: String { effectiveCode == "fr" ? "fr" : "en" }
+    /// Langue de l'aide intégrée : fr, en, es, de, it ou pt (pt-PT et pt-BR partagent l'aide portugaise ; repli : anglais).
+    static var helpLanguage: String {
+        let base = String(effectiveCode.lowercased().prefix(2))
+        return ["fr", "es", "de", "it", "pt"].contains(base) ? base : "en"
+    }
 }

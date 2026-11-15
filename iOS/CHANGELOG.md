@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.19.0-ios33] - 2026-11-15
+
+- **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
+- Correction : quelques liens de l'aide pointaient vers la mauvaise page.
+- Page d'aide « Langue » mise à jour pour les six langues.
+
 ## [1.18.0-ios32] - 2026-11-15
 
 - **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. La langue suit celle de l'appareil (ou le réglage par app d'iOS) ; anglais si elle n'est pas gérée.

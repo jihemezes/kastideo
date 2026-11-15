@@ -73,10 +73,11 @@ struct IOSHelpView: View {
     }
 
     static func load() -> [HelpGroup] {
-        // Aide en français ou en anglais (les autres langues utilisent l'aide anglaise).
-        let language = (Bundle.main.preferredLocalizations.first ?? "en") == "fr" ? "fr" : "en"
+        // Aide dans la langue du système : fr, en, es, de, it ou pt (pt-PT et pt-BR partagent l'aide portugaise ; repli : anglais).
+        let base = String((Bundle.main.preferredLocalizations.first ?? "en").lowercased().prefix(2))
+        let language = ["fr", "es", "de", "it", "pt"].contains(base) ? base : "en"
         guard let url = Bundle.main.url(forResource: "aide-\(language)", withExtension: "md")
-                ?? Bundle.main.url(forResource: "aide-fr", withExtension: "md"),
+                ?? Bundle.main.url(forResource: "aide-en", withExtension: "md"),
               let text = try? String(contentsOf: url, encoding: .utf8) else {
             return [HelpGroup(title: "", pages: [HelpPage(id: "erreur", title: String(localized: "Aide"),
                                                           group: "", body: String(localized: "Aide introuvable."))])]

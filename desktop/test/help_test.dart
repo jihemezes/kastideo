@@ -74,7 +74,7 @@ void main() {
     expect(helpSnippet(groups[0].pages[0], 'roue'), contains('roue'));
   });
 
-  for (final lang in ['fr', 'en']) {
+  for (final lang in ['fr', 'en', 'es', 'de', 'it', 'pt']) {
     test('aide embarquée ($lang) : liens internes valides, pas de marqueur, copie identique à docs/help', () {
       final source = File('assets/help/aide-$lang.md').readAsStringSync();
       final groups = parseHelp(source);

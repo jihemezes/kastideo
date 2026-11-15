@@ -14,6 +14,8 @@
   <a href="https://github.com/jihemezes/kastideo/releases"><b>Toutes les versions (Windows, Linux)</b></a>
 </p>
 
+<p align="center"><sub>Français · <a href="docs/readme/README.en.md">English</a> · <a href="docs/readme/README.es.md">Español</a> · <a href="docs/readme/README.de.md">Deutsch</a> · <a href="docs/readme/README.it.md">Italiano</a> · <a href="docs/readme/README.pt.md">Português</a></sub></p>
+
 ---
 
 Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans une seule application claire, rapide et personnalisable : un accueil soigné, un guide TV, des fiches détaillées pour les films, l'enregistrement du direct et bien plus.
@@ -44,7 +46,7 @@ Kastideo réunit votre abonnement IPTV (chaînes en direct, films, séries) dans
 
 ### Et aussi
 - **Sauvegarde et transfert** : un fichier pour retrouver sources, favoris et réglages sur un autre ordinateur, Mac, Windows ou Linux.
-- Français et anglais, thème sombre ou clair, couleur d'accent au choix.
+- Interface en français, anglais, espagnol, allemand, italien et portugais (aide complète dans les six langues), thème sombre ou clair, couleur d'accent au choix.
 - Aide intégrée et journal de lecture pour comprendre un problème de chaîne.
 - Mots de passe rangés dans le coffre sécurisé du système ; aucune donnée n'est envoyée ailleurs que chez votre fournisseur (et TMDB pour les fiches, si vous l'activez).
 

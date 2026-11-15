@@ -87,7 +87,7 @@ final class HelpTests: XCTestCase {
     func testShippedHelp() throws {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("docs/help")
-        for lang in ["fr", "en"] {
+        for lang in ["fr", "en", "es", "de", "it", "pt"] {
             let source = try String(contentsOf: root.appendingPathComponent("aide-\(lang).md"), encoding: .utf8)
             for platform in [HelpPlatform.mac, .pc] {
                 let groups = HelpDocument.parse(source, platform: platform)

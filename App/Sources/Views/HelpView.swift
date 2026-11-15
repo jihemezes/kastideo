@@ -132,7 +132,7 @@ struct HelpView: View {
     static func load() -> [HelpGroup] {
         let language = AppLanguage.helpLanguage
         guard let url = Bundle.main.url(forResource: "aide-\(language)", withExtension: "md")
-                ?? Bundle.main.url(forResource: "aide-fr", withExtension: "md"),
+                ?? Bundle.main.url(forResource: "aide-en", withExtension: "md"),
               let text = try? String(contentsOf: url, encoding: .utf8) else {
             return [HelpGroup(title: "", pages: [HelpPage(id: "erreur", title: String(localized: "Aide"),
                                                           group: "", body: String(localized: "Aide introuvable."))])]

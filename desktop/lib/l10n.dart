@@ -35,8 +35,8 @@ class L10n {
   static bool get english => lang == 'en';
   /// Code de base : fr, en, es, de, it, pt.
   static String get base => lang.split('-').first;
-  /// Langue de l'aide (fr ou en).
-  static String get helpLang => lang == 'fr' ? 'fr' : 'en';
+  /// Langue de l'aide : fr, en, es, de, it ou pt (pt-PT et pt-BR partagent l'aide portugaise).
+  static String get helpLang => lang.startsWith('pt') ? 'pt' : (const {'fr', 'es', 'de', 'it'}.contains(lang) ? lang : 'en');
   /// Locale Flutter.
   static (String, String?) get localeParts {
     final p = lang.split('-');

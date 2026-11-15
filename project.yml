@@ -42,6 +42,14 @@ targets:
         buildPhase: resources
       - path: docs/help/aide-en.md
         buildPhase: resources
+      - path: docs/help/aide-es.md
+        buildPhase: resources
+      - path: docs/help/aide-de.md
+        buildPhase: resources
+      - path: docs/help/aide-it.md
+        buildPhase: resources
+      - path: docs/help/aide-pt.md
+        buildPhase: resources
       - path: docs/help/img/help-home-en.png
         buildPhase: resources
       - path: docs/help/img/help-home-fr.png
@@ -57,6 +65,38 @@ targets:
       - path: docs/help/img/help-youtube-en.png
         buildPhase: resources
       - path: docs/help/img/help-youtube-fr.png
+        buildPhase: resources
+      - path: docs/help/img/help-home-es.png
+        buildPhase: resources
+      - path: docs/help/img/help-home-de.png
+        buildPhase: resources
+      - path: docs/help/img/help-home-it.png
+        buildPhase: resources
+      - path: docs/help/img/help-home-pt.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-es.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-de.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-it.png
+        buildPhase: resources
+      - path: docs/help/img/help-layout-pt.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-es.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-de.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-it.png
+        buildPhase: resources
+      - path: docs/help/img/help-takeout-pt.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-es.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-de.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-it.png
+        buildPhase: resources
+      - path: docs/help/img/help-youtube-pt.png
         buildPhase: resources
       - path: CHANGELOG.md
         buildPhase: resources
@@ -175,6 +215,14 @@ targets:
       - path: docs/help/aide-fr.md
         buildPhase: resources
       - path: docs/help/aide-en.md
+        buildPhase: resources
+      - path: docs/help/aide-es.md
+        buildPhase: resources
+      - path: docs/help/aide-de.md
+        buildPhase: resources
+      - path: docs/help/aide-it.md
+        buildPhase: resources
+      - path: docs/help/aide-pt.md
         buildPhase: resources
     dependencies:
       - package: KastideoCore

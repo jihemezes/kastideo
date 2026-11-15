@@ -2,6 +2,18 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.0-desktop2] - 2026-11-15
+
+- **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
+- Correction : quelques liens de l'aide pointaient vers la mauvaise page.
+- Page d'aide « Langue » mise à jour pour les six langues.
+
+## [1.19.0-android3] - 2026-11-15
+
+- **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
+- Correction : quelques liens de l'aide pointaient vers la mauvaise page.
+- Page d'aide « Langue » mise à jour pour les six langues.
+
 ## [1.18.0-desktop1] - 2026-11-15
 
 - **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. Choix dans Réglages > Général > Langue (système par défaut, anglais si non gérée), appliqué au prochain lancement.

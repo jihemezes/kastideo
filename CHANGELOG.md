@@ -3,6 +3,13 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.19.0] - 2026-11-15
+
+- **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
+- Correction : quelques liens de l'aide pointaient vers la mauvaise page.
+- Page d'aide « Langue » mise à jour pour les six langues.
+- Documentation : README, politique de confidentialité et textes TestFlight / App Store traduits (docs/readme, docs/PRIVACY.md, docs/store).
+
 ## [1.18.0] - 2026-11-15
 
 - **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. La langue suit le système (anglais si elle n'est pas gérée) ; choix manuel dans Réglages > Général > Langue, appliqué au prochain lancement.
