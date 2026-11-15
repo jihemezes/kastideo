@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos14] - 2026-11-15
+
+- Image « Top Shelf » (à la une de l'écran d'accueil de l'Apple TV) fournie en 1x et 2x : supprime l'avertissement d'App Store Connect « ITMS-90471 : Top Shelf Image Wide 2x manquante ».
+
 ## [1.19.1-tvos13] - 2026-11-15
 
 - **Choix de la langue** : Réglages > Langue de l'application (Système, français, anglais, espagnol, allemand, italien, portugais du Portugal ou du Brésil), appliqué tout de suite.
