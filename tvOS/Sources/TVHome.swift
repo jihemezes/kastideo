@@ -148,7 +148,7 @@ struct TVCollectionView: View {
                                     }
                                     .padding(.bottom, 8)
                                 }
-                                .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                                .buttonStyle(.card)
                             }
                         }
                         .padding(.vertical, 20)
@@ -203,7 +203,7 @@ struct TVLibraryView: View {
                                         .padding(.horizontal, 6).padding(.bottom, 8)
                                 }
                             }
-                            .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                            .buttonStyle(.card)
                         }
                     }
                     if shown.count > 240 { Text("\(shown.count) contenus : affinez par groupe ou utilisez la recherche.").foregroundStyle(.secondary) }

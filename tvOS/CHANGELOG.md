@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.17.0-tvos10] - 2026-11-15
+
+- **Correctif** : l'accueil restait vide et le lecteur ne réagissait plus (ni menu au clic, ni liste de chaînes). Le nouveau style de bouton est simplifié et n'est plus utilisé que là où le fond est coloré (tuiles, petits boutons de l'accueil, programmes du guide, bandeau Cinéma) ; affiches et chaînes reviennent au style système.
+
 ## [1.17.0-tvos9] - 2026-11-14
 
 - **Boutons corrigés** : la plaque translucide qui dépassait derrière les tuiles et les petits boutons a disparu ; chaque bouton a une seule forme arrondie, avec un liseré orange et un léger agrandissement au focus.

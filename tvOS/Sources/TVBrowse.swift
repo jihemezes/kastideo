@@ -53,7 +53,7 @@ struct TVBrowseView: View {
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 40) {
                     ForEach(shown.prefix(240)) { item in
                         Button { open(item, list: shown) } label: { TVItemTile(item: item) }
-                            .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                            .buttonStyle(.card)
                             .contextMenu {
                                 Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
                                        systemImage: store.isFavorite(item.id) ? "star.slash" : "star") { store.toggleFavorite(item.id) }

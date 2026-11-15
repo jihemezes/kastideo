@@ -105,7 +105,7 @@ struct TVSearchView: View {
                                         .font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
                                 }
                             }
-                            .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                            .buttonStyle(.card)
                         }
                     }
                     .padding(.horizontal, 60)

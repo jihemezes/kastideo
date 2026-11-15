@@ -23,14 +23,10 @@ private struct TVTileBody: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         configuration.label
-            .background(plate ? Color.white.opacity(0.10) : Color.clear, in: shape)
+            .background(plate ? Color.white.opacity(0.10) : Color.clear)
             .clipShape(shape)
-            .overlay(shape.strokeBorder(TVBrand.orange, lineWidth: focused ? 6 : 0))
-            .contentShape(shape)
-            .scaleEffect(configuration.isPressed ? 0.97 : (focused ? 1.06 : 1))
-            .shadow(color: .black.opacity(focused ? 0.45 : 0), radius: 18, y: 10)
-            .animation(.easeOut(duration: 0.15), value: focused)
-            .focusEffectDisabled()
+            .overlay(shape.stroke(TVBrand.orange, lineWidth: focused ? 6 : 0))
+            .scaleEffect(focused ? 1.06 : 1)
     }
 }
 
@@ -279,7 +275,7 @@ struct TVRail: View {
                     LazyHStack(alignment: .top, spacing: 28) {
                         ForEach(shown) { item in
                             Button { ui.open(item, list: shown, playback: playback) } label: { TVItemTile(item: item) }
-                                .buttonStyle(TVTileStyle(radius: 18, plate: true))
+                                .buttonStyle(.card)
                                 .frame(width: kind == .live ? 250 : 200)
                                 .contextMenu {
                                     Button(store.isFavorite(item.id) ? String(localized: "Retirer des favoris") : String(localized: "Ajouter aux favoris"),
