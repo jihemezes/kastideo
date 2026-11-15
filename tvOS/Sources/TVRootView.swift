@@ -43,14 +43,14 @@ struct TVRootView: View {
             }
         }
         .overlay(alignment: .top) {
-            if !store.loading.isEmpty {
+            if !store.loading.isEmpty || ui.working > 0 {
                 TVLoadingBanner(names: store.sources.filter { store.loading.contains($0.id) }.map(\.name))
                     .padding(.top, 40)
                     .transition(.opacity)
                     .allowsHitTesting(false)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: store.loading.isEmpty)
+        .animation(.easeInOut(duration: 0.3), value: store.loading.isEmpty && ui.working == 0)
         .onAppear {
             playback.onEpisodeEnded = { [weak ui, weak playback] item in
                 guard let ui, let playback else { return }
@@ -150,7 +150,9 @@ struct TVLoadingBanner: View {
             ProgressView().scaleEffect(1.6)
             VStack(alignment: .leading, spacing: 6) {
                 Text("Mise à jour du catalogue").font(.title3.weight(.bold))
-                Text(String(localized: "Kastideo vérifie et télécharge les chaînes, films et séries de « \(list) ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal."))
+                Text(names.isEmpty
+                     ? String(localized: "Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l'application peut sembler figée, c'est normal.")
+                     : String(localized: "Kastideo vérifie et télécharge les chaînes, films et séries de « \(list) ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal."))
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
             }

@@ -18,7 +18,7 @@ Eine Adresse und ein Passwort mit der Fernbedienung einzutippen ist mühsam: Kas
 
 Quellentypen: **Xtream-Codes**-Abo, **M3U**-Playlist (Adresse) und **Jellyfin-, Emby-, Plex**-Server (Bereich **Meine Videos**). Die iCloud-Synchronisierung gibt es auf Apple TV nicht.
 
-Um eine Quelle zu bearbeiten, zu aktualisieren oder zu löschen: **Einstellungen > Quellen**, dann die Quelle.
+Um eine Quelle zu bearbeiten, zu aktualisieren, zu löschen oder ihre **Reihenfolge zu ändern** (Nach oben / Nach unten: Quellen oben erscheinen zuerst): **Einstellungen > Quellen**, dann die Quelle.
 
 # Kastideo benutzen
 
@@ -75,7 +75,7 @@ Ein Infobanner erscheint einige Sekunden lang (Sender, laufende Sendung).
 - **Sprache**: **Einstellungen > Sprache der App**. „System“ folgt der Sprache des Apple TV; Sie können Französisch, Englisch, Spanisch, Deutsch, Italienisch, Portugiesisch (Portugal) oder Portugiesisch (Brasilien) wählen. Die Änderung gilt sofort.
 - **Startseite**: für Live, Filme und Serien die erste Kategorie, Favoriten, Zuletzt gesehen, die zuletzt angesehene oder eine bestimmte Kategorie.
 - **Anzeige**: Klassisch, Kino oder TV, getrennt für Live, Filme und Serien.
-- **Kategorien**: Kategorien ein- oder ausblenden; Sender für Erwachsene (standardmäßig ausgeblendet).
+- **Kategorien**: Kategorien ein- oder ausblenden (**Alle ausblenden**, dann nur die gewünschten anhaken); Sender für Erwachsene (standardmäßig ausgeblendet). Das Neuberechnen der Anzeige kann einige Sekunden dauern: Ein Banner weist darauf hin.
 - **Wiedergabe**: Zappen, **Puffer** (Schnell, Ausgewogen, Stabil: wählen Sie Stabil, wenn das Bild ruckelt), Fortsetzen von Filmen und Software-Dekodierung.
 
 ## Poster und Zusammenfassungen (TMDB) {#tv-tmdb}

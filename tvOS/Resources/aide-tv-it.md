@@ -18,7 +18,7 @@ Digitare un indirizzo e una password con il telecomando è scomodo: Kastideo pro
 
 Tipi di sorgenti: abbonamento **Xtream Codes**, playlist **M3U** (indirizzo) e server **Jellyfin, Emby, Plex** (sezione **I miei video**). La sincronizzazione iCloud non esiste su Apple TV.
 
-Per modificare, aggiornare o eliminare una sorgente: **Impostazioni > Sorgenti**, poi la sorgente.
+Per modificare, aggiornare, eliminare o **cambiare l'ordine** di una sorgente (Sposta su / giù: quelle in cima compaiono per prime): **Impostazioni > Sorgenti**, poi la sorgente.
 
 # Usare Kastideo
 
@@ -75,7 +75,7 @@ Un banner informativo appare per qualche secondo (canale, programma in corso).
 - **Lingua**: **Impostazioni > Lingua dell'app**. «Sistema» segue la lingua dell'Apple TV; potete scegliere francese, inglese, spagnolo, tedesco, italiano, portoghese (Portogallo) o portoghese (Brasile). Il cambio è immediato.
 - **Pagina iniziale**: per Diretta, Film e Serie, la prima categoria, i preferiti, i recenti, l'ultima consultata o una categoria precisa.
 - **Visualizzazione**: Classica, Cinema o TV, separatamente per diretta, film e serie.
-- **Categorie**: mostrare o nascondere categorie; canali per adulti (nascosti per impostazione predefinita).
+- **Categorie**: mostrare o nascondere categorie (**Nascondi tutto**, poi spuntate solo quelle desiderate); canali per adulti (nascosti per impostazione predefinita). Il ricalcolo della visualizzazione può richiedere qualche secondo: un banner lo segnala.
 - **Riproduzione**: zapping, **Buffer** (Veloce, Bilanciato, Stabile: scegliete Stabile se l'immagine a scatti), ripresa dei film e decodifica software.
 
 ## Locandine e trame (TMDB) {#tv-tmdb}

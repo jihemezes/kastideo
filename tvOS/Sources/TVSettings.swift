@@ -72,7 +72,7 @@ struct TVSettingsView: View {
                     NavigationLink("Catégories du direct") { TVCategoriesView(kind: .live) }
                     NavigationLink("Catégories des films") { TVCategoriesView(kind: .movie) }
                     NavigationLink("Catégories des séries") { TVCategoriesView(kind: .series) }
-                    Toggle("Afficher les chaînes adultes", isOn: Binding(get: { adult }, set: { adult = $0; store.refreshAdultFilter() }))
+                    Toggle("Afficher les chaînes adultes", isOn: Binding(get: { adult }, set: { adult = $0; ui.perform { store.refreshAdultFilter() } }))
                 }
                 Section("Lecture") {
                     TVChoiceRow(title: String(localized: "Zapping ↑ / ↓"), options: [
@@ -120,17 +120,21 @@ struct TVSettingsView: View {
 struct TVCategoriesView: View {
     let kind: MediaKind
     @Environment(LibraryStore.self) private var store
+    @Environment(TVUI.self) private var ui
 
     var body: some View {
         let names = store.allCategoriesByKind[kind] ?? []
         let prefs = store.prefs(for: kind)
         List {
-            Button("Tout afficher") { store.updateCategories(kind) { $0.hidden = []; $0.keywords = [] } }
+            Button("Tout afficher") { ui.perform { store.updateCategories(kind) { $0.hidden = []; $0.keywords = [] } } }
+            Button("Tout masquer") { ui.perform { store.updateCategories(kind) { $0.hidden = Set(names) } } }
             ForEach(names, id: \.self) { name in
                 let hidden = prefs.isHidden(name)
                 Button {
-                    store.updateCategories(kind) { p in
-                        if p.hidden.contains(name) { p.hidden.remove(name) } else { p.hidden.insert(name) }
+                    ui.perform {
+                        store.updateCategories(kind) { p in
+                            if p.hidden.contains(name) { p.hidden.remove(name) } else { p.hidden.insert(name) }
+                        }
                     }
                 } label: {
                     HStack {
@@ -150,6 +154,7 @@ struct TVSourceDetailView: View {
     let source: Source
     @Environment(LibraryStore.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(TVUI.self) private var ui
     @State private var name: String
     @State private var server: String
     @State private var username: String
@@ -197,6 +202,23 @@ struct TVSourceDetailView: View {
                 if isURL && serverType == nil {
                     TextField("Guide TV XMLTV (facultatif)", text: $epg).textInputAutocapitalization(.never).autocorrectionDisabled()
                 }
+            }
+            Section("Ordre d'affichage") {
+                let position = store.sources.firstIndex(where: { $0.id == source.id })
+                let total = store.sources.count
+                Text(String(localized: "Position \((position ?? 0) + 1) sur \(total)"))
+                if let position, position > 0 {
+                    Button("Monter dans la liste") {
+                        ui.perform { store.moveSources(from: IndexSet(integer: position), to: position - 1) }
+                    }
+                }
+                if let position, position < total - 1 {
+                    Button("Descendre dans la liste") {
+                        ui.perform { store.moveSources(from: IndexSet(integer: position), to: position + 2) }
+                    }
+                }
+                Text("Les sources en haut de la liste s'affichent en premier dans Direct, Films et Séries.")
+                    .font(.callout).foregroundStyle(.secondary)
             }
             Section {
                 Button("Enregistrer et actualiser") { Task { await save() } }

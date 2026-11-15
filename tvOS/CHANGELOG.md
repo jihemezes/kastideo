@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos18] - 2026-11-15
+
+- **Ordre des sources** : Réglages > Sources > (source) > Monter / Descendre. Les sources du haut s'affichent en premier dans Direct, Films et Séries.
+- **Catégories** : nouveau bouton « Tout masquer » (puis on ne coche que celles que l'on veut), en plus de « Tout afficher ».
+- **Bandeau de chargement** aussi pendant le recalcul de l'affichage (afficher les chaînes adultes, masquer ou afficher des catégories, changer l'ordre des sources) : l'application peut se figer quelques secondes, le bandeau l'explique.
+
 ## [1.19.1-tvos17] - 2026-11-15
 
 - **Bandeau de chargement** : pendant la vérification et le téléchargement des chaînes, films et séries d'une source, un message s'affiche au premier plan pour indiquer que l'application travaille et peut sembler figée.

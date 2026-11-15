@@ -18,7 +18,7 @@ Escribir una dirección y una contraseña con el mando es incómodo: Kastideo of
 
 Tipos de fuentes: suscripción **Xtream Codes**, lista **M3U** (dirección) y servidores **Jellyfin, Emby, Plex** (sección **Mis vídeos**). La sincronización por iCloud no existe en el Apple TV.
 
-Para modificar, actualizar o eliminar una fuente: **Ajustes > Fuentes** y después la fuente.
+Para modificar, actualizar, eliminar o **cambiar el orden** de una fuente (Subir / Bajar: las de arriba se muestran primero): **Ajustes > Fuentes** y después la fuente.
 
 # Usar Kastideo
 
@@ -75,7 +75,7 @@ Un banner de información aparece unos segundos (canal, programa en curso).
 - **Idioma**: **Ajustes > Idioma de la aplicación**. «Sistema» sigue el idioma del Apple TV; puede elegir francés, inglés, español, alemán, italiano, portugués (Portugal) o portugués (Brasil). El cambio es inmediato.
 - **Página de inicio**: para En directo, Películas y Series, la primera categoría, los favoritos, los recientes, la última consultada o una categoría concreta.
 - **Visualización**: Clásica, Cine o TV, por separado para el directo, las películas y las series.
-- **Categorías**: mostrar u ocultar categorías; canales para adultos (ocultos por defecto).
+- **Categorías**: mostrar u ocultar categorías (**Ocultar todo** y marque solo las que desee); canales para adultos (ocultos por defecto). Recalcular la visualización puede tardar unos segundos: un banner lo indica.
 - **Reproducción**: zapping, **Búfer** (Rápido, Equilibrado, Estable: elija Estable si la imagen va a saltos), reanudación de películas y decodificación por software.
 
 ## Carteles y sinopsis (TMDB) {#tv-tmdb}

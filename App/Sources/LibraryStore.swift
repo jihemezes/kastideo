@@ -398,6 +398,14 @@ final class LibraryStore {
         if enabled && contents[id] == nil { refresh(sources[index]) }
     }
 
+    /// Change l'ordre des sources : les chaînes, films et séries s'affichent dans cet ordre.
+    func moveSources(from offsets: IndexSet, to destination: Int) {
+        sources.move(fromOffsets: offsets, toOffset: destination)
+        saveSources()
+        rebuildIndex()
+        rebuildEPG()
+    }
+
     func password(for source: Source) -> String? { Keychain.get(account: source.id.uuidString) }
 
     func refreshAll() {

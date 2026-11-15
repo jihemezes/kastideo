@@ -1446,3 +1446,10 @@
 "Aucune ligne." = "Nenhuma linha.";
 "Mise à jour du catalogue" = "Atualizando o catálogo";
 "Kastideo vérifie et télécharge les chaînes, films et séries de « %@ ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal." = "O Kastideo está verificando e baixando os canais, filmes e séries de «%@». Pode levar um minuto: o aplicativo pode parecer travado, é normal.";
+"Tout masquer" = "Ocultar tudo";
+"Ordre d'affichage" = "Ordem de exibição";
+"Monter dans la liste" = "Subir na lista";
+"Descendre dans la liste" = "Descer na lista";
+"Position %lld sur %lld" = "Posição %1$lld de %2$lld";
+"Les sources en haut de la liste s'affichent en premier dans Direct, Films et Séries." = "As fontes no topo da lista aparecem primeiro em Ao vivo, Filmes e Séries.";
+"Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l'application peut sembler figée, c'est normal." = "O Kastideo está recalculando os canais, filmes e séries exibidos. Pode levar alguns segundos: o aplicativo pode parecer travado, é normal.";

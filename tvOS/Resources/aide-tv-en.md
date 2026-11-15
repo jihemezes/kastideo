@@ -18,7 +18,7 @@ Typing an address and a password with the remote is tedious, so Kastideo offers 
 
 Source types: **Xtream Codes** subscription, **M3U** playlist (address) and **Jellyfin, Emby, Plex** servers (**My videos** section). iCloud sync is not available on Apple TV.
 
-To edit, refresh or delete a source: **Settings > Sources**, then the source.
+To edit, refresh, delete or **reorder** a source (Move up / Move down: sources at the top appear first): **Settings > Sources**, then the source.
 
 # Using Kastideo
 
@@ -75,7 +75,7 @@ An information banner appears for a few seconds (channel, current programme).
 - **Language**: **Settings > Application language**. “System” follows the Apple TV language; you can choose French, English, Spanish, German, Italian, Portuguese (Portugal) or Portuguese (Brazil). The change is immediate.
 - **Start page**: for Live, Movies and Series, the first category, favorites, recents, the last one viewed or a specific category.
 - **Display**: Classic, Cinema or TV, separately for live, movies and series.
-- **Categories**: show or hide categories; adult channels (hidden by default).
+- **Categories**: show or hide categories (**Hide all**, then tick only the ones you want); adult channels (hidden by default). Recalculating the display can take a few seconds: a banner says so.
 - **Playback**: zapping, **Buffer** (Fast, Balanced, Stable: pick Stable if the picture stutters), movie resume and software decoding.
 
 ## Posters and summaries (TMDB) {#tv-tmdb}

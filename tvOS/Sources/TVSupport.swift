@@ -83,6 +83,18 @@ final class TVUI {
     var showDisclaimer = LegalNotice.needsAcceptance
     /// Onglet affiché (0 Accueil, 1 Direct, 2 Films, 3 Séries, 4 Guide TV, 5 Réglages).
     var tab = 0
+    /// Nombre de calculs longs en cours (affichage recalculé) : le bandeau de chargement reste visible.
+    var working = 0
+
+    /// Lance un calcul long après avoir affiché le bandeau (l'écran peut se figer quelques secondes pendant le calcul).
+    func perform(_ work: @escaping @MainActor () -> Void) {
+        working += 1
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            work()
+            self?.working -= 1
+        }
+    }
     /// Heure d'arrêt programmée (minuterie de veille).
     var sleepAt: Date?
     @ObservationIgnored private var sleepTask: Task<Void, Never>?

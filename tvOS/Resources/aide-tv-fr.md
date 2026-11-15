@@ -18,7 +18,7 @@ Saisir une adresse et un mot de passe avec la télécommande est pénible : Kast
 
 Types de sources : abonnement **Xtream Codes**, playlist **M3U** (adresse) et serveurs **Jellyfin, Emby, Plex** (rubrique **Mes vidéos**). La synchronisation iCloud n'existe pas sur Apple TV.
 
-Pour modifier, actualiser ou supprimer une source : **Réglages > Sources**, puis la source.
+Pour modifier, actualiser, supprimer ou **changer l'ordre** d'une source (Monter / Descendre : les sources du haut s'affichent en premier) : **Réglages > Sources**, puis la source.
 
 # Utiliser Kastideo
 
@@ -75,7 +75,7 @@ Un bandeau d'information apparaît quelques secondes (chaîne, programme en cour
 - **Langue** : **Réglages > Langue de l'application**. « Système » suit la langue de l'Apple TV ; vous pouvez choisir français, anglais, espagnol, allemand, italien, portugais (Portugal) ou portugais (Brésil). Le changement est immédiat.
 - **Page de départ** : pour Direct, Films et Séries, la première catégorie, les favoris, les récents, la dernière consultée ou une catégorie précise.
 - **Affichage** : Classique, Cinéma ou TV, séparément pour le direct, les films et les séries.
-- **Catégories** : afficher ou masquer des catégories ; chaînes pour adultes (masquées par défaut).
+- **Catégories** : afficher ou masquer des catégories (**Tout masquer** puis cochez seulement celles que vous voulez) ; chaînes pour adultes (masquées par défaut). Le recalcul de l'affichage peut prendre quelques secondes : un bandeau l'indique.
 - **Lecture** : zapping, **Mémoire tampon** (Rapide, Équilibré, Stable : choisissez Stable si l'image saccade), reprise des films et décodage en logiciel.
 
 ## Affiches et résumés (TMDB) {#tv-tmdb}
