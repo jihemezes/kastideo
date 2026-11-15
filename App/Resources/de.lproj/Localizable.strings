@@ -1440,5 +1440,9 @@
 "Aucune chaîne dans cette liste." = "Kein Sender in dieser Liste.";
 "Pendant la lecture, ↑ et ↓ changent de chaîne." = "Während der Wiedergabe wechseln ↑ und ↓ den Sender.";
 "Affichage TV : lancer la dernière chaîne à l'ouverture" = "TV-Ansicht: Letzten Sender beim Öffnen starten";
-"Langue de l'application" = "Sprache der App";
 "Le changement s'applique tout de suite." = "Die Änderung gilt sofort.";
+"Lecture et relais seulement" = "Nur Wiedergabe und Relay";
+"Effacer le journal" = "Protokoll löschen";
+"Aucune ligne." = "Keine Zeilen.";
+"Mise à jour du catalogue" = "Katalog wird aktualisiert";
+"Kastideo vérifie et télécharge les chaînes, films et séries de « %@ ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal." = "Kastideo prüft und lädt die Sender, Filme und Serien von „%@“. Das kann eine Minute dauern: Die App wirkt möglicherweise eingefroren, das ist normal.";

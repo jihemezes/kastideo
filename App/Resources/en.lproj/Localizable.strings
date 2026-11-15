@@ -1548,5 +1548,9 @@
 "Aucune chaîne dans cette liste." = "No channel in this list.";
 "Pendant la lecture, ↑ et ↓ changent de chaîne." = "While playing, ↑ and ↓ change channel.";
 "Affichage TV : lancer la dernière chaîne à l'ouverture" = "TV view: start the last channel on opening";
-"Langue de l'application" = "Application language";
 "Le changement s'applique tout de suite." = "The change applies immediately.";
+"Lecture et relais seulement" = "Playback and relay only";
+"Effacer le journal" = "Clear the log";
+"Aucune ligne." = "No lines.";
+"Mise à jour du catalogue" = "Updating the catalog";
+"Kastideo vérifie et télécharge les chaînes, films et séries de « %@ ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal." = "Kastideo is checking and downloading the channels, movies and series of “%@”. This can take a minute: the app may seem frozen, which is normal.";

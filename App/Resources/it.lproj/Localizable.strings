@@ -1440,5 +1440,9 @@
 "Aucune chaîne dans cette liste." = "Nessun canale in questo elenco.";
 "Pendant la lecture, ↑ et ↓ changent de chaîne." = "Durante la riproduzione, ↑ e ↓ cambiano canale.";
 "Affichage TV : lancer la dernière chaîne à l'ouverture" = "Vista TV: avvia l'ultimo canale all'apertura";
-"Langue de l'application" = "Lingua dell'app";
 "Le changement s'applique tout de suite." = "La modifica si applica subito.";
+"Lecture et relais seulement" = "Solo riproduzione e relay";
+"Effacer le journal" = "Cancella il registro";
+"Aucune ligne." = "Nessuna riga.";
+"Mise à jour du catalogue" = "Aggiornamento del catalogo";
+"Kastideo vérifie et télécharge les chaînes, films et séries de « %@ ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal." = "Kastideo sta verificando e scaricando canali, film e serie di «%@». Può richiedere un minuto: l'app può sembrare bloccata, è normale.";

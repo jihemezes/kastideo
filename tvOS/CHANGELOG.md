@@ -2,6 +2,14 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos17] - 2026-11-15
+
+- **Bandeau de chargement** : pendant la vérification et le téléchargement des chaînes, films et séries d'une source, un message s'affiche au premier plan pour indiquer que l'application travaille et peut sembler figée.
+
+## [1.19.1-tvos16] - 2026-11-15
+
+- **Journal de lecture sur Apple TV** : Réglages > Diagnostic > Journal de lecture (dernières lignes du moteur et de l'application, identifiants masqués), pour comprendre un échec de replay ou de chaîne.
+
 ## [1.19.1-tvos15] - 2026-11-15
 
 - **Correctif** : l'aide Apple TV n'apparaissait plus (« Aide introuvable ») car ses fichiers n'étaient pas inclus dans l'application. Ils le sont maintenant.

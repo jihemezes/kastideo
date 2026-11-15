@@ -42,6 +42,15 @@ struct TVRootView: View {
                     .tag(8)
             }
         }
+        .overlay(alignment: .top) {
+            if !store.loading.isEmpty {
+                TVLoadingBanner(names: store.sources.filter { store.loading.contains($0.id) }.map(\.name))
+                    .padding(.top, 40)
+                    .transition(.opacity)
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: store.loading.isEmpty)
         .onAppear {
             playback.onEpisodeEnded = { [weak ui, weak playback] item in
                 guard let ui, let playback else { return }
@@ -128,5 +137,27 @@ struct TVDisclaimerView: View {
         }
         .onAppear { nextFocused = true }
         .onChange(of: page) { _, _ in nextFocused = true }
+    }
+}
+
+/// Bandeau au premier plan pendant le chargement du catalogue d'une source : l'écran peut se figer quelques secondes.
+struct TVLoadingBanner: View {
+    let names: [String]
+
+    var body: some View {
+        let list = names.joined(separator: ", ")
+        HStack(spacing: 24) {
+            ProgressView().scaleEffect(1.6)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Mise à jour du catalogue").font(.title3.weight(.bold))
+                Text(String(localized: "Kastideo vérifie et télécharge les chaînes, films et séries de « \(list) ». Cela peut prendre une minute : l'application peut sembler figée, c'est normal."))
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 36).padding(.vertical, 24)
+        .frame(maxWidth: 1100, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(radius: 20)
     }
 }

@@ -13,6 +13,7 @@ struct KastideoTVApp: App {
     @State private var language = TVLanguage.shared
 
     init() {
+        PlaybackLog.setDetail(.detailed, for: .playback)
         let store = LibraryStore()
         let playback = PlaybackController()
         let watch = WatchProgressStore()
