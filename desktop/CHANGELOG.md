@@ -2,6 +2,15 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.18.0-desktop1] - 2026-11-15
+
+- **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. Choix dans Réglages > Général > Langue (système par défaut, anglais si non gérée), appliqué au prochain lancement.
+- Avertissement légal traduit dans toutes les langues. L'aide reste en français ou en anglais ; les noms de genres TMDB restent en anglais.
+
+## [1.18.0-android2] - 2026-11-15
+
+- Mêmes nouveautés que la version Windows et Linux 1.18.0-desktop1 : espagnol, allemand, italien et portugais (Portugal, Brésil).
+
 ## [1.17.0-android1] - 2026-11-12
 
 - **Vidéos locales (Android)** : nouvelle source **Galerie** (Réglages > Sources > Ajouter les vidéos de la galerie, ou Ajouter une source > Galerie pour choisir des albums). Les vidéos du téléphone apparaissent dans **Mes vidéos** avec leur miniature, triées par date de prise de vue ; un film nommé correctement (titre exact) reçoit une fiche TMDB, les vidéos de la caméra n'en cherchent pas. Accès partiel d'Android 14 respecté (« Choisir d'autres vidéos… »), refus expliqué. Examen à chaque lancement et toutes les 20 minutes.

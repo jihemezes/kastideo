@@ -1,2 +1,3 @@
-/* Textes de l'Info.plist en anglais. */
+/* Textes de l'Info.plist. */
 "NSLocalNetworkUsageDescription" = "Kastideo looks for Jellyfin, Emby and Plex servers on your network, and for TVs (Chromecast, Google TV) to cast playback to.";
+"NSPhotoLibraryUsageDescription" = "Kastideo reads the videos in your photo library (the albums you choose) to file them under “My videos” and play them. Nothing is copied or sent elsewhere.";

@@ -414,9 +414,9 @@ class _VideoCard extends StatelessWidget {
     if (d == null) return null;
     final days = DateTime.now().difference(d).inDays;
     if (days < 1) return tr('aujourd\'hui');
-    if (days < 30) return L10n.english ? '$days d ago' : 'il y a $days j';
-    if (days < 365) return L10n.english ? '${days ~/ 30} mo ago' : 'il y a ${days ~/ 30} mois';
-    return L10n.english ? '${days ~/ 365} y ago' : 'il y a ${days ~/ 365} an(s)';
+    if (days < 30) return L10n.ago(days, 'd');
+    if (days < 365) return L10n.ago(days ~/ 30, 'mo');
+    return L10n.ago(days ~/ 365, 'y');
   }
 
   @override

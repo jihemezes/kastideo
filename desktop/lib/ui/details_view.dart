@@ -74,7 +74,7 @@ class _DetailsViewState extends State<DetailsView> {
                     if (widget.page) ...[_backButton(context), const SizedBox(height: 22)] else const SizedBox(height: 8),
                     _header(context, d),
                     const SizedBox(height: 22),
-                    if (d?.plot != null && isForeignText(d!.plot, L10n.english ? 'en' : 'fr') && !_showForeign)
+                    if (d?.plot != null && isForeignText(d!.plot, L10n.base) && !_showForeign)
                       _foreignPlot(context, d)
                     else if (d?.plot != null)
                       ConstrainedBox(
@@ -222,7 +222,7 @@ class _DetailsViewState extends State<DetailsView> {
                   children: [
                     const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                     const SizedBox(width: 4),
-                    Text('${d!.rating!.toStringAsFixed(1).replaceAll('.', L10n.english ? '.' : ',')} / 10', style: kTextD(13, weight: FontWeight.w600)),
+                    Text('${d!.rating!.toStringAsFixed(1).replaceAll('.', L10n.decimal)} / 10', style: kTextD(13, weight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -448,7 +448,7 @@ class _DetailsViewState extends State<DetailsView> {
   /// Résumé du fournisseur dans une autre langue que l'interface : on le signale et on indique comment l'avoir en français.
   Widget? _languageNotice(BuildContext context, MediaDetails? d) {
     final lang = guessLanguage(d?.plot);
-    final ui = L10n.english ? 'en' : 'fr';
+    final ui = L10n.base;
     if (lang == null || lang == ui || !_showForeign) return null;
     final names = {
       'fr': tr('en français'), 'es': tr('en espagnol'), 'en': tr('en anglais'), //
@@ -567,7 +567,7 @@ class _EpisodeRow extends StatelessWidget {
                         ],
                       ],
                     ),
-                    if (episode.info != null && !isForeignText(episode.info, L10n.english ? 'en' : 'fr')) ...[
+                    if (episode.info != null && !isForeignText(episode.info, L10n.base)) ...[
                       const SizedBox(height: 4),
                       Text(
                         episode.info!,

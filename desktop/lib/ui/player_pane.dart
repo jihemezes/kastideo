@@ -405,7 +405,7 @@ class _StartupBadgeState extends State<_StartupBadge> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.55), borderRadius: BorderRadius.circular(20)),
-          child: Text('${tr('Prête en')} ${(time.inMilliseconds / 1000).toStringAsFixed(1).replaceAll('.', L10n.english ? '.' : ',')} s',
+          child: Text('${tr('Prête en')} ${(time.inMilliseconds / 1000).toStringAsFixed(1).replaceAll('.', L10n.decimal)} s',
               style: kTextD(12, weight: FontWeight.w600)),
         ),
       ),

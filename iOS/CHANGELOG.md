@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.18.0-ios32] - 2026-11-15
+
+- **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. La langue suit celle de l'appareil (ou le réglage par app d'iOS) ; anglais si elle n'est pas gérée.
+- Avertissement légal traduit dans toutes les langues. L'aide reste en français ou en anglais ; les noms de genres TMDB restent en anglais.
+
 ## [1.17.0-ios31] - 2026-11-14
 
 - **Guide TV** : nouveau réglage « À l'ouverture du guide » (Réglages > Replay) : Maintenant, En haut de la liste ou Dernière position (catégorie et heure mémorisées).

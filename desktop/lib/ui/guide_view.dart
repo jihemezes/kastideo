@@ -171,13 +171,7 @@ class _GuideViewState extends State<GuideView> {
   }
 
   String _dayLabel(DateTime d) {
-    const fr = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-    const en = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const frM = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    const enM = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return L10n.english
-        ? '${en[d.weekday - 1]} ${enM[d.month - 1]} ${d.day}'
-        : '${fr[d.weekday - 1]} ${d.day} ${frM[d.month - 1]}';
+    return L10n.longDate(d);
   }
 
   /// Jours en arrière proposés : ceux que le guide a gardés pour les chaînes à replay.

@@ -72,6 +72,9 @@ Voir [Enregistrer le direct](help:enregistrer) et [Programmer un enregistrement]
 ### Comment revoir un programme déjà diffusé ?
 Si votre fournisseur propose une archive : voir [Replay](help:replay).
 
+### Comment changer la langue de Kastideo ?
+Kastideo existe en **français, anglais, espagnol, allemand, italien et portugais** (Portugal et Brésil). Par défaut, il suit la langue de votre appareil ; si elle n'est pas gérée, l'interface passe en anglais. Pour en changer : **Réglages > Général > Langue** (sur iPhone, iPad et Apple TV, Kastideo suit la langue du système : réglez-la dans les Réglages de l'appareil). Le changement s'applique au prochain lancement. L'aide reste en français ou en anglais.
+
 ### Comment retrouver mes réglages sur un autre ordinateur ?
 Voir [Sauvegarde et transfert](help:sauvegarde).
 

@@ -86,8 +86,7 @@ struct TVDisclaimerView: View {
     }
 
     var body: some View {
-        let code = Locale.current.language.languageCode?.identifier ?? "fr"
-        let text = LegalNotice.content(for: code)
+        let text = LegalNotice.content(for: Bundle.main.preferredLocalizations.first ?? "en")
         let all = pages(text)
         let last = page >= all.count - 1
         ZStack {

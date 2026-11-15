@@ -60,7 +60,6 @@ class Countries {
 
   /// Nom du pays affiché dans les réglages.
   static String name(String code) {
-    final fr = !L10n.english;
     const namesFr = {
       'FR': 'France', 'PT': 'Portugal', 'BR': 'Brésil', 'IT': 'Italie', 'ES': 'Espagne', 'EN': 'Anglais', 'UK': 'Royaume-Uni',
       'US': 'États-Unis', 'DE': 'Allemagne', 'AR': 'Arabe', 'TR': 'Turquie', 'PL': 'Pologne', 'NL': 'Pays-Bas', 'BE': 'Belgique',
@@ -77,6 +76,8 @@ class Countries {
       'EXYU': 'Ex-Yugoslavia', 'AF': 'Africa', 'MX': 'Mexico', 'IR': 'Iran', 'KU': 'Kurdish', 'SE': 'Sweden', 'NO': 'Norway',
       'DK': 'Denmark', 'FI': 'Finland', 'CN': 'China', 'JP': 'Japan', 'KR': 'Korea',
     };
-    return (fr ? namesFr : namesEn)[code] ?? code;
+    if (L10n.lang == 'en') return namesEn[code] ?? code;
+    final f = namesFr[code];
+    return f == null ? code : tr(f);
   }
 }

@@ -51,6 +51,9 @@ Kastideo brings together your **live channels, IPTV movies and series**, your **
 ### Where do I find channels to add?
 Kastideo provides neither channels nor a subscription. Your IPTV provider gives you either a server, a username and a password ([Xtream Codes](help:xtream)), or a playlist address ([M3U](help:m3u)). You can also play your own files ([Folders](help:dossiers)).
 
+### How do I change Kastideo's language?
+Kastideo is available in **French, English, Spanish, German, Italian and Portuguese** (Portugal and Brazil). By default it follows your device's language; if that language is not supported, the interface is shown in English. To change it: **Settings > General > Language** (on iPhone, iPad and Apple TV, Kastideo follows the system language: set it in the device Settings). The change applies the next time Kastideo starts. Help remains in French or English.
+
 ### A channel does not start or stutters
 <!--mac-->See [If a channel does not start](help:chaine-ne-demarre-pas) and [Troubleshooting](help:depannage).<!--/mac--><!--pc-->See [Troubleshooting](help:depannage).<!--/pc--> Very often the cause is a **second simultaneous connection** on the same subscription: see [One connection at a time](help:connexion-unique).
 

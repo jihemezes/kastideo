@@ -3,6 +3,11 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.18.0] - 2026-11-15
+
+- **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. La langue suit le système (anglais si elle n'est pas gérée) ; choix manuel dans Réglages > Général > Langue, appliqué au prochain lancement.
+- Avertissement légal traduit dans toutes les langues. L'aide reste en français ou en anglais ; les noms de genres TMDB restent en anglais.
+
 ## [1.17.1] - 2026-11-12
 
 - Correction de compilation de la synchronisation iCloud (même contenu que 1.17.0).

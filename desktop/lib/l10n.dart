@@ -1,13 +1,110 @@
 import 'dart:io';
 
-/// Traduction minimale : le texte français sert de clé (comme les Localizable.strings de la version Mac).
+import 'l10n_data.dart';
+
+/// Traduction : le texte français sert de clé (comme les Localizable.strings de la version Mac).
+/// Langues : fr, en, es, de, it, pt-PT, pt-BR. Langue non gérée → anglais.
 class L10n {
-  /// Langue de l'interface : celle du système, sauf choix dans Réglages > Général (appliqué au lancement).
-  static bool english = !Platform.localeName.toLowerCase().startsWith('fr');
+  static const codes = ['fr', 'en', 'es', 'de', 'it', 'pt-PT', 'pt-BR'];
+  static const names = {
+    'fr': 'Français', 'en': 'English', 'es': 'Español', 'de': 'Deutsch',
+    'it': 'Italiano', 'pt-PT': 'Português (Portugal)', 'pt-BR': 'Português (Brasil)',
+  };
+
+  /// Code de la langue du système, ramené à un code géré (anglais si inconnu).
+  static String systemLang() {
+    final raw = Platform.localeName.replaceAll('_', '-');
+    final parts = raw.split(RegExp(r'[-.@]'));
+    final base = parts.first.toLowerCase();
+    if (base == 'pt') {
+      final region = parts.length > 1 ? parts[1].toUpperCase() : '';
+      return region == 'BR' ? 'pt-BR' : (region.isEmpty ? 'pt-BR' : 'pt-PT');
+    }
+    return const ['fr', 'en', 'es', 'de', 'it'].contains(base) ? base : 'en';
+  }
+
+  /// Langue effective de l'interface (appliquée au lancement).
+  static String lang = systemLang();
 
   static void apply(String choice) {
-    if (choice == 'fr') english = false;
-    if (choice == 'en') english = true;
+    lang = codes.contains(choice) ? choice : systemLang();
+  }
+
+  static bool get isFrench => lang == 'fr';
+  /// Vrai pour toute langue autre que le français (anciens tests « anglais »).
+  static bool get english => lang == 'en';
+  /// Code de base : fr, en, es, de, it, pt.
+  static String get base => lang.split('-').first;
+  /// Langue de l'aide (fr ou en).
+  static String get helpLang => lang == 'fr' ? 'fr' : 'en';
+  /// Locale Flutter.
+  static (String, String?) get localeParts {
+    final p = lang.split('-');
+    return (p.first, p.length > 1 ? p[1] : null);
+  }
+  /// Langue pour TMDB.
+  static String get tmdb => switch (lang) {
+        'fr' => 'fr-FR', 'es' => 'es-ES', 'de' => 'de-DE', 'it' => 'it-IT',
+        'pt-PT' => 'pt-PT', 'pt-BR' => 'pt-BR', _ => 'en-US',
+      };
+  /// En-tête Accept-Language.
+  static String get acceptLanguage => switch (lang) {
+        'fr' => 'fr-FR,fr;q=0.9,en;q=0.8',
+        'en' => 'en-US,en;q=0.9,fr;q=0.5',
+        _ => '$tmdb,$base;q=0.9,en;q=0.5',
+      };
+  static String get decimal => (lang == 'en') ? '.' : ',';
+
+  static const _days = {
+    'fr': ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+    'en': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    'es': ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+    'de': ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
+    'it': ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'],
+    'pt-PT': ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'],
+    'pt-BR': ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'],
+  };
+  /// Nom du jour (weekday 1 = lundi), en toutes lettres ou abrégé (3 lettres).
+  static String weekday(int weekday, {bool short = false}) {
+    final n = _days[lang]![(weekday - 1) % 7];
+    if (!short) return n;
+    return base == 'fr' ? '${n.substring(0, 3).toLowerCase()}.' : n.substring(0, 3);
+  }
+
+  static const _months = {
+    'fr': ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+    'en': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    'es': ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+    'de': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+    'it': ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+    'pt': ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+  };
+
+  /// Date en toutes lettres : « lundi 5 novembre », « Monday November 5 », « lunes 5 de noviembre »…
+  static String longDate(DateTime d) {
+    final day = weekday(d.weekday);
+    final m = _months[base]![d.month - 1];
+    switch (base) {
+      case 'en': return '$day $m ${d.day}';
+      case 'de': return '$day, ${d.day}. $m';
+      case 'es':
+      case 'pt': return '${day.toLowerCase()} ${d.day} de $m';
+      default: return '${day.toLowerCase()} ${d.day} $m';
+    }
+  }
+
+  /// « il y a … » : [n] et unité (m = minutes, h, d = jours, mo = mois, y = ans).
+  static String ago(int n, String unit) {
+    const fr = {'min': 'min', 'h': 'h', 'd': 'j', 'mo': 'mois', 'y': 'an(s)'};
+    const en = {'min': 'min', 'h': 'h', 'd': 'd', 'mo': 'mo', 'y': 'y'};
+    switch (base) {
+      case 'fr': return 'il y a $n ${fr[unit]}';
+      case 'es': return 'hace $n ${en[unit] == 'y' ? 'a' : en[unit] == 'mo' ? 'meses' : en[unit]}';
+      case 'de': return 'vor $n ${en[unit] == 'y' ? 'J.' : en[unit] == 'mo' ? 'Mon.' : en[unit]}';
+      case 'it': return '$n ${en[unit] == 'y' ? 'a' : en[unit] == 'mo' ? 'mesi' : en[unit]} fa';
+      case 'pt': return 'há $n ${en[unit] == 'y' ? 'a' : en[unit] == 'mo' ? 'meses' : en[unit]}';
+      default: return '$n ${en[unit]} ago';
+    }
   }
 
   static const Map<String, String> _en = {
@@ -947,7 +1044,14 @@ class L10n {
     'Indiquez pour chaque abonnement le nombre de connexions qu\'il autorise (1 pour la plupart, 4 pour une liste publique). Dans la MultiVue, choisissez ensuite le nombre d\'écrans, la disposition et la source de chaque écran.': 'For each subscription, enter the number of connections it allows (1 for most, 4 for a public list). Then, in MultiView, choose the number of screens, the layout and each screen\'s source.',
   };
 
-  static String tr(String french) => english ? (_en[french] ?? french) : french;
+  static String tr(String french) {
+    if (lang == 'fr') return french;
+    if (lang == 'en') return _en[french] ?? french;
+    final t = kTranslations[french];
+    if (t == null) return _en[french] ?? french;
+    final v = switch (lang) { 'es' => t[0], 'de' => t[1], 'it' => t[2], 'pt-BR' => t[3], _ => t[4] };
+    return v.isEmpty ? (_en[french] ?? french) : v;
+  }
 }
 
 String tr(String french) => L10n.tr(french);

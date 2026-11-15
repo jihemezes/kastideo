@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.18.0-tvos11] - 2026-11-15
+
+- **Nouvelles langues** : espagnol, allemand, italien et portugais (Portugal et Brésil), en plus du français et de l'anglais. La langue suit celle de l'Apple TV ; anglais si elle n'est pas gérée.
+- Avertissement légal traduit dans toutes les langues. L'aide reste en français ou en anglais ; les noms de genres TMDB restent en anglais.
+
 ## [1.17.0-tvos10] - 2026-11-15
 
 - **Correctif** : l'accueil restait vide et le lecteur ne réagissait plus (ni menu au clic, ni liste de chaînes). Le nouveau style de bouton est simplifié et n'est plus utilisé que là où le fond est coloré (tuiles, petits boutons de l'accueil, programmes du guide, bandeau Cinéma) ; affiches et chaînes reviennent au style système.

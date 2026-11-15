@@ -124,8 +124,7 @@ struct IOSDisclaimerView: View {
     @AppStorage("appLanguage") private var language = ""
 
     private var content: LegalNotice.Content {
-        let code = Locale.preferredLanguages.first?.hasPrefix("fr") == true ? "fr" : "en"
-        return LegalNotice.content(for: code)
+        LegalNotice.content(for: Bundle.main.preferredLocalizations.first ?? "en")
     }
 
     var body: some View {

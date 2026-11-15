@@ -893,9 +893,7 @@ Future<void> showReplayPicker(BuildContext context, MediaItem channel) async {
   final programmes = context.guide.replayProgrammes(channel, limit: 30);
   final now = nowSeconds();
   String day(DateTime d) {
-    const fr = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
-    const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return (L10n.english ? en : fr)[d.weekday - 1];
+    return L10n.weekday(d.weekday, short: true);
   }
 
   final choice = await showKDialog<Programme>(

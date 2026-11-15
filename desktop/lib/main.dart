@@ -361,8 +361,11 @@ class _KastideoAppState extends State<KastideoApp> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         // Textes des éléments standard (calendrier, heure, boutons) dans la langue de l'interface.
-        locale: Locale(L10n.english ? 'en' : 'fr'),
-        supportedLocales: const [Locale('fr'), Locale('en')],
+        locale: Locale(L10n.localeParts.$1, L10n.localeParts.$2),
+        supportedLocales: const [
+          Locale('fr'), Locale('en'), Locale('es'), Locale('de'), Locale('it'),
+          Locale('pt', 'BR'), Locale('pt', 'PT'),
+        ],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         scrollBehavior: const KastideoScrollBehavior(),
         home: const RootView(),

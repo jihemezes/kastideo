@@ -1020,7 +1020,7 @@ class _HeroSlideView extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(meta, style: kTextD(13, weight: FontWeight.w500, color: Colors.white70)),
                 ],
-                if (d?.plot != null && height >= 300 && !isForeignText(d!.plot, L10n.english ? 'en' : 'fr')) ...[
+                if (d?.plot != null && height >= 300 && !isForeignText(d!.plot, L10n.base)) ...[
                   const SizedBox(height: 8),
                   Text(d.plot!, style: kTextD(13, color: Colors.white.withValues(alpha: 0.85)), maxLines: 3, overflow: TextOverflow.ellipsis),
                 ],

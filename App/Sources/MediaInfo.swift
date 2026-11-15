@@ -26,7 +26,18 @@ final class MediaInfoStore {
 
     var usesTMDB: Bool { !tmdbKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
-    private var language: String { (Bundle.main.preferredLocalizations.first ?? "fr") == "en" ? "en-US" : "fr-FR" }
+    /// Langue des fiches TMDB : celle de l'interface (anglais si elle n'est pas gérée).
+    private var language: String {
+        switch Bundle.main.preferredLocalizations.first ?? "en" {
+        case "fr": return "fr-FR"
+        case "es": return "es-ES"
+        case "de": return "de-DE"
+        case "it": return "it-IT"
+        case "pt-PT": return "pt-PT"
+        case "pt-BR": return "pt-BR"
+        default: return "en-US"
+        }
+    }
 
     func details(for item: MediaItem) -> MediaDetails? { cache[item.id] }
 

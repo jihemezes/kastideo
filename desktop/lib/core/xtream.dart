@@ -19,7 +19,7 @@ class XtreamException implements Exception {
 
 /// Téléchargement simple avec l'en-tête de lecteur VLC.
 /// Langues acceptées envoyées aux serveurs (langue de l'interface d'abord).
-String get acceptLanguage => L10n.english ? 'en-US,en;q=0.9,fr;q=0.5' : 'fr-FR,fr;q=0.9,en;q=0.8';
+String get acceptLanguage => L10n.acceptLanguage;
 
 Future<String> httpGetText(Uri url, {Duration timeout = const Duration(seconds: 60)}) async {
   final client = HttpClient()

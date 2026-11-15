@@ -28,8 +28,10 @@ extension SourceKind {
 }
 
 /// Langue de l'application. Le changement s'applique au prochain lancement (l'application peut se relancer seule).
+/// Langues gérées : français, anglais, espagnol, allemand, italien, portugais du Portugal et du Brésil.
+/// Si la langue du système n'est pas gérée, l'application s'affiche en anglais.
 enum AppLanguage: String, CaseIterable, Identifiable {
-    case system, fr, en
+    case system, fr, en, es, de, it, ptPT, ptBR
 
     var id: String { rawValue }
 
@@ -41,6 +43,11 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .system: return "Système / System"
         case .fr: return "Français"
         case .en: return "English"
+        case .es: return "Español"
+        case .de: return "Deutsch"
+        case .it: return "Italiano"
+        case .ptPT: return "Português (Portugal)"
+        case .ptBR: return "Português (Brasil)"
         }
     }
 
@@ -50,19 +57,42 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 
     /// Code de la langue effectivement utilisée par l'application ce lancement-ci (lu une seule fois au démarrage).
-    static let effectiveCode: String = Bundle.main.preferredLocalizations.first ?? "fr"
+    /// Valeurs possibles : fr, en, es, de, it, pt-PT, pt-BR (l'anglais quand la langue du système n'est pas gérée).
+    static let effectiveCode: String = Bundle.main.preferredLocalizations.first ?? "en"
+
+    /// Code géré correspondant à un identifiant de langue du système (« pt-BR », « es-419 »…), ou `nil`.
+    static func supportedCode(for identifier: String) -> String? {
+        let locale = Locale(identifier: identifier)
+        guard let language = locale.language.languageCode?.identifier else { return nil }
+        switch language {
+        case "fr", "en", "es", "de", "it": return language
+        case "pt":
+            // Le portugais du Brésil seulement pour « pt » ou « pt-BR » ; les autres régions (PT, AO, MZ…) suivent l'usage européen.
+            let region = locale.language.region?.identifier
+            return (region == nil || region == "BR") ? "pt-BR" : "pt-PT"
+        default: return nil
+        }
+    }
+
+    /// Première langue préférée du système parmi celles gérées (anglais si aucune).
+    static var systemCode: String {
+        for identifier in Locale.preferredLanguages {
+            if let code = supportedCode(for: identifier) { return code }
+        }
+        return "en"
+    }
 
     /// Code de langue voulu (pour le système : la première langue préférée parmi celles gérées).
     var code: String {
         switch self {
+        case .system: return Self.systemCode
         case .fr: return "fr"
         case .en: return "en"
-        case .system:
-            for language in Locale.preferredLanguages {
-                if language.hasPrefix("fr") { return "fr" }
-                if language.hasPrefix("en") { return "en" }
-            }
-            return "fr"
+        case .es: return "es"
+        case .de: return "de"
+        case .it: return "it"
+        case .ptPT: return "pt-PT"
+        case .ptBR: return "pt-BR"
         }
     }
 
@@ -72,8 +102,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         defaults.set(rawValue, forKey: Self.storageKey)
         switch self {
         case .system: defaults.removeObject(forKey: "AppleLanguages")
-        case .fr: defaults.set(["fr"], forKey: "AppleLanguages")
-        case .en: defaults.set(["en"], forKey: "AppleLanguages")
+        default: defaults.set([code], forKey: "AppleLanguages")
         }
     }
 
@@ -89,69 +118,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
             DispatchQueue.main.async { NSApp.terminate(nil) }
         }
     }
-}
 
-/// Premier lancement : choix de la langue.
-struct LanguagePickerSheet: View {
-    @Binding var chosen: String
-    @State private var selection: AppLanguage
-
-    init(chosen: Binding<String>) {
-        _chosen = chosen
-        let initial: AppLanguage = AppLanguage.system.code == "fr" ? .fr : .en
-        _selection = State(initialValue: initial)
-    }
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 72, height: 72)
-            Text("Choisissez votre langue")
-                .font(.title2.weight(.semibold))
-            Text("Choose your language")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-            HStack(spacing: 14) {
-                languageButton(.fr, flag: "🇫🇷")
-                languageButton(.en, flag: "🇬🇧")
-            }
-            Button {
-                selection.apply()
-                chosen = selection.rawValue
-                if selection.needsRelaunch { AppLanguage.relaunch() }
-            } label: {
-                Text(selection == .fr ? "Continuer" : "Continue")
-                    .frame(minWidth: 120)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .keyboardShortcut(.defaultAction)
-            Text("Vous pourrez la changer dans Réglages > Général. / You can change it later in Settings > General.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(30)
-        .frame(width: 440)
-        .interactiveDismissDisabled()
-    }
-
-    private func languageButton(_ language: AppLanguage, flag: String) -> some View {
-        let selected = selection == language
-        return Button {
-            selection = language
-        } label: {
-            VStack(spacing: 6) {
-                Text(flag).font(.system(size: 38))
-                Text(language.label).font(.headline)
-            }
-            .frame(width: 150, height: 96)
-            .background(selected ? Color.accentColor.opacity(0.22) : Color.gray.opacity(0.15),
-                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(selected ? Color.accentColor : Color.clear, lineWidth: 2))
-        }
-        .buttonStyle(.plain)
-    }
+    /// Langue de l'aide intégrée : français ou anglais (les autres langues utilisent l'aide anglaise).
+    static var helpLanguage: String { effectiveCode == "fr" ? "fr" : "en" }
 }

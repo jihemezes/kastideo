@@ -71,9 +71,7 @@ class _ScheduleDialogState extends State<_ScheduleDialog> {
     final diff = date.difference(DateTime(today.year, today.month, today.day)).inDays;
     if (diff == 0) return tr('Aujourd\'hui');
     if (diff == 1) return tr('Demain');
-    const daysFr = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-    const daysEn = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final name = (L10n.english ? daysEn : daysFr)[d.weekday - 1];
+    final name = L10n.weekday(d.weekday);
     return '$name ${two(d.day)}/${two(d.month)}';
   }
 

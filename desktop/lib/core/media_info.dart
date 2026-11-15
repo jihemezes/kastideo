@@ -26,7 +26,7 @@ class MediaInfoStore extends ChangeNotifier {
   List<SeriesSeason>? seasons(String id) => _seasons[id];
   bool isLoading(String id) => _loading.contains(id);
 
-  String get _language => L10n.english ? 'en-US' : 'fr-FR';
+  String get _language => L10n.tmdb;
 
   /// Charge la fiche (une seule fois par session) ; pour une série Xtream, aussi les saisons.
   Future<void> load(MediaItem item, {bool force = false}) async {

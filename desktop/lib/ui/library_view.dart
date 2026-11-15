@@ -357,7 +357,10 @@ String? languageName(String? code) {
     'ko': 'Korean', 'zh': 'Chinese', 'ru': 'Russian', 'nl': 'Dutch', 'sv': 'Swedish', 'da': 'Danish', 'no': 'Norwegian',
     'fi': 'Finnish', 'pl': 'Polish', 'tr': 'Turkish', 'ar': 'Arabic', 'hi': 'Hindi', 'cs': 'Czech', 'el': 'Greek', 'he': 'Hebrew',
   };
-  return (tr('Anglais') == 'English' ? en : fr)[code.toLowerCase()] ?? code;
+  final c = code.toLowerCase();
+  if (L10n.lang == 'en') return en[c] ?? code;
+  final f = fr[c];
+  return f == null ? code : tr(f);
 }
 
 final _uhdPattern = RegExp(r'(?<![a-z0-9])(2160p|4k|uhd)(?![a-z0-9])');

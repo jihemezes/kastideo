@@ -38,10 +38,9 @@ struct RootView: View {
         .durationPromptBanner()
         .overlay(alignment: .top) { UpdateBanner() }
         .overlay(alignment: .top) { ProgramAlertBanner() }
-        .sheet(isPresented: Binding(get: { appLanguage.isEmpty }, set: { _ in })) {
-            LanguagePickerSheet(chosen: $appLanguage)
-        }
-        // Avertissement : après le choix de la langue, au premier lancement et après chaque mise à jour.
+        // Première ouverture : la langue suit celle du système (réglable dans Réglages > Général).
+        .onAppear { if appLanguage.isEmpty { appLanguage = AppLanguage.system.rawValue } }
+        // Avertissement : au premier lancement et après chaque mise à jour.
         .sheet(isPresented: Binding(get: { showDisclaimer && !appLanguage.isEmpty }, set: { _ in })) {
             DisclaimerSheet {
                 showDisclaimer = false

@@ -165,7 +165,7 @@ class _GeneralTabState extends State<_GeneralTab> {
       return;
     }
     setState(() => _tmdbStatus = tr('Vérification…'));
-    final ok = await TMDBClient(settings.tmdbKey, 'fr-FR').check();
+    final ok = await TMDBClient(settings.tmdbKey, L10n.tmdb).check();
     if (mounted) setState(() => _tmdbStatus = ok ? tr('Clé valide : les fiches sont complétées par TMDB.') : tr('Clé refusée par TMDB.'));
   }
 
@@ -180,8 +180,7 @@ class _GeneralTabState extends State<_GeneralTab> {
             value: settings.language,
             items: [
               DropdownMenuItem(value: 'system', child: Text(tr('Langue du système'))),
-              const DropdownMenuItem(value: 'fr', child: Text('Français')),
-              const DropdownMenuItem(value: 'en', child: Text('English')),
+              for (final c in L10n.codes) DropdownMenuItem(value: c, child: Text(L10n.names[c]!)),
             ],
             onChanged: (v) => settings.setLanguage(v ?? 'system'),
           ),
@@ -1210,8 +1209,8 @@ class _GuideSectionState extends State<_GuideSection> {
   String _ago(DateTime date) {
     final d = DateTime.now().difference(date);
     if (d.inMinutes < 1) return tr('à l\'instant');
-    final (n, unit) = d.inHours < 1 ? (d.inMinutes, 'min') : d.inDays < 1 ? (d.inHours, 'h') : (d.inDays, L10n.english ? 'd' : 'j');
-    return L10n.english ? '$n $unit ago' : 'il y a $n $unit';
+    final (n, unit) = d.inHours < 1 ? (d.inMinutes, 'min') : d.inDays < 1 ? (d.inHours, 'h') : (d.inDays, 'd');
+    return L10n.ago(n, unit);
   }
 
   @override

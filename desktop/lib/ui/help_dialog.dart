@@ -61,7 +61,7 @@ class _HelpDialogState extends State<_HelpDialog> {
   @override
   void initState() {
     super.initState();
-    rootBundle.loadString(L10n.english ? 'assets/help/aide-en.md' : 'assets/help/aide-fr.md').then((text) {
+    rootBundle.loadString('assets/help/aide-${L10n.helpLang}.md').then((text) {
       if (!mounted) return;
       final groups = parseHelp(text, android: Device.isAndroid);
       final pages = [for (final g in groups) ...g.pages];
@@ -278,7 +278,7 @@ class _HelpDialogState extends State<_HelpDialog> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
-                  'assets/help/img/help-${block.name}-${L10n.english ? 'en' : 'fr'}.png',
+                  'assets/help/img/help-${block.name}-${L10n.helpLang}.png',
                   semanticLabel: block.text,
                   errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 ),
