@@ -88,6 +88,7 @@ struct TVHomeView: View {
             small("Guide TV", "calendar", 0) { ui.tab = 4 }
             small("Recherche", "magnifyingglass", 0) { ui.tab = 6 }
             small("Réglages", "gearshape.fill", 0) { ui.tab = 5 }
+            small("Aide", "questionmark.circle.fill", 0) { ui.tab = 8 }
         }
     }
 

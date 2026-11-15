@@ -38,6 +38,23 @@ enum LegalNotice {
         return english
     }
 
+    /// Texte pour Apple TV : même avertissement, sans la mention de YouTube (absent de cette version).
+    static func tvContent(for code: String) -> Content {
+        let base = content(for: code)
+        let replacements: [(String, String)] = [
+            ("), les vidéos de vos disques et YouTube.", ") et les vidéos de vos disques."),
+            ("), the videos on your drives and YouTube.", ") and the videos on your drives."),
+            ("), los vídeos de sus discos y YouTube.", ") y los vídeos de sus discos."),
+            ("), die Videos auf Ihren Laufwerken und YouTube ab.", ") und die Videos auf Ihren Laufwerken ab."),
+            ("), i video dei tuoi dischi e YouTube.", ") e i video dei tuoi dischi."),
+            ("), os vídeos dos seus discos e o YouTube.", ") e os vídeos dos seus discos.")
+        ]
+        var intro = base.intro
+        for (from, to) in replacements { intro = intro.replacingOccurrences(of: from, with: to) }
+        return Content(title: base.title, subtitle: base.subtitle, intro: intro, points: base.points,
+                       closing: base.closing, accept: base.accept, quit: base.quit, close: base.close)
+    }
+
     static let french = Content(
             title: "Avertissement", subtitle: "À lire avant d'utiliser Kastideo",
             intro: "Merci d'utiliser Kastideo. Kastideo est un lecteur multimédia : il lit les listes de lecture (M3U), les comptes IPTV (Xtream Codes), vos serveurs personnels (Jellyfin, Emby, Plex), les vidéos de vos disques et YouTube.",

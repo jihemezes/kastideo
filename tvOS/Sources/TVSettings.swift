@@ -6,6 +6,7 @@ struct TVSettingsView: View {
     @Environment(LibraryStore.self) private var store
     @Environment(TVUI.self) private var ui
     @Environment(MediaInfoStore.self) private var info
+    @Environment(TVLanguage.self) private var language
     @AppStorage("start.live") private var startLive = "all"
     @AppStorage("start.movie") private var startMovie = "all"
     @AppStorage("start.series") private var startSeries = "all"
@@ -43,6 +44,12 @@ struct TVSettingsView: View {
                     if store.hasSources {
                         Button("Tout actualiser") { store.refreshAll() }
                     }
+                }
+                Section("Langue") {
+                    TVChoiceRow(title: String(localized: "Langue de l'application"),
+                                options: TVLanguage.options.map { TVOption(value: $0.value, label: $0.label) },
+                                selection: Binding(get: { language.choice }, set: { language.select($0) }))
+                    Text("Le changement s'applique tout de suite.").font(.callout).foregroundStyle(.secondary)
                 }
                 Section("Page de départ") {
                     startPicker(.live, $startLive)
@@ -86,6 +93,7 @@ struct TVSettingsView: View {
                 }
                 Section("À propos") {
                     Text("Kastideo \(ReleaseNotes.currentVersion)")
+                    Button("Aide") { ui.tab = 8 }
                     Button("Avertissement légal") { ui.showDisclaimer = true }
                     Text("Kastideo est un lecteur : il ne fournit aucun contenu.").font(.callout).foregroundStyle(.secondary)
                 }

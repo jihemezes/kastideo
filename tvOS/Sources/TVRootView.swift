@@ -37,6 +37,9 @@ struct TVRootView: View {
                 TVSettingsView()
                     .tabItem { Text("Réglages") }
                     .tag(5)
+                TVHelpView()
+                    .tabItem { Text("Aide") }
+                    .tag(8)
             }
         }
         .onAppear {
@@ -86,7 +89,7 @@ struct TVDisclaimerView: View {
     }
 
     var body: some View {
-        let text = LegalNotice.content(for: Bundle.main.preferredLocalizations.first ?? "en")
+        let text = LegalNotice.tvContent(for: TVLanguage.shared.code)
         let all = pages(text)
         let last = page >= all.count - 1
         ZStack {

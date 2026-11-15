@@ -2,6 +2,12 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos13] - 2026-11-15
+
+- **Choix de la langue** : Réglages > Langue de l'application (Système, français, anglais, espagnol, allemand, italien, portugais du Portugal ou du Brésil), appliqué tout de suite.
+- **Aide dédiée à l'Apple TV** (onglet Aide, bouton Aide de l'accueil et entrée dans Réglages > À propos) : démarrage, ajout de sources, télécommande, direct, guide TV, films et séries, lecteur, réglages, dépannage. Disponible dans les six langues.
+- YouTube n'est plus mentionné sur Apple TV (avertissement légal et aide), puisqu'il n'y est pas disponible.
+
 ## [1.19.0-tvos12] - 2026-11-15
 
 - **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.

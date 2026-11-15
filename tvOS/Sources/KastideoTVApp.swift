@@ -10,6 +10,7 @@ struct KastideoTVApp: App {
     @State private var ui = TVUI()
     @State private var mediaInfo = MediaInfoStore()
     @State private var setup = TVRemoteSetup()
+    @State private var language = TVLanguage.shared
 
     init() {
         let store = LibraryStore()
@@ -38,6 +39,9 @@ struct KastideoTVApp: App {
                 .environment(ui)
                 .environment(mediaInfo)
                 .environment(setup)
+                .environment(language)
+                .environment(\.locale, Locale(identifier: language.code))
+                .id(language.revision)
                 .preferredColorScheme(.dark)
                 .tint(TVPalette.orange)
                 .task { await store.start(autoRefresh: true) }
