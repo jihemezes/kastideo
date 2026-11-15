@@ -295,6 +295,20 @@ targets:
     sources:
       - path: tvOS/Sources
       - path: tvOS/Resources
+        excludes:
+          - "aide-tv-*.md"
+      - path: tvOS/Resources/aide-tv-fr.md
+        buildPhase: resources
+      - path: tvOS/Resources/aide-tv-en.md
+        buildPhase: resources
+      - path: tvOS/Resources/aide-tv-es.md
+        buildPhase: resources
+      - path: tvOS/Resources/aide-tv-de.md
+        buildPhase: resources
+      - path: tvOS/Resources/aide-tv-it.md
+        buildPhase: resources
+      - path: tvOS/Resources/aide-tv-pt.md
+        buildPhase: resources
       - path: App/Sources
         includes:
           - LibraryStore.swift

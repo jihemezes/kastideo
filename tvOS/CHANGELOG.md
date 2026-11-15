@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos15] - 2026-11-15
+
+- **Correctif** : l'aide Apple TV n'apparaissait plus (« Aide introuvable ») car ses fichiers n'étaient pas inclus dans l'application. Ils le sont maintenant.
+
 ## [1.19.1-tvos14] - 2026-11-15
 
 - Image « Top Shelf » (à la une de l'écran d'accueil de l'Apple TV) fournie en 1x et 2x : supprime l'avertissement d'App Store Connect « ITMS-90471 : Top Shelf Image Wide 2x manquante ».
