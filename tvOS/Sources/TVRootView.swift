@@ -57,7 +57,14 @@ struct TVRootView: View {
                 ui.playNext(after: item, playback: playback)
             }
         }
-        .fullScreenCover(item: $ui.playing) { _ in
+        .fullScreenCover(item: $ui.playing, onDismiss: {
+            // Le bouton Menu peut fermer le lecteur sans passer par notre code : le flux doit toujours être fermé,
+            // sinon l'abonnement (une seule connexion) reste occupé et la chaîne suivante est refusée.
+            if ui.playing == nil, playback.current != nil || playback.isPlaying {
+                PlaybackLog.shared.note("Lecteur fermé : arrêt du flux", topic: .playback)
+                playback.stopByUser()
+            }
+        }) { _ in
             TVPlayerView()
         }
         .fullScreenCover(item: $ui.detail) { item in

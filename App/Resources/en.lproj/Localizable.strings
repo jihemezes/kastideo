@@ -1561,3 +1561,4 @@
 "Position %lld sur %lld" = "Position %1$lld of %2$lld";
 "Les sources en haut de la liste s'affichent en premier dans Direct, Films et Séries." = "Sources at the top of the list appear first in Live, Movies and Series.";
 "Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l'application peut sembler figée, c'est normal." = "Kastideo is recalculating the channels, movies and series shown. This can take a few seconds: the app may seem frozen, which is normal.";
+"Les changements s'appliquent en quittant cet écran." = "Changes apply when you leave this screen.";

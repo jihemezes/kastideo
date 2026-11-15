@@ -2,6 +2,15 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.1-tvos20] - 2026-11-15
+
+- **Catégories** : cocher ou décocher une catégorie, « Tout afficher » et « Tout masquer » sont maintenant instantanés. Le recalcul du catalogue (long) se fait une seule fois, en quittant l'écran.
+
+## [1.19.1-tvos19] - 2026-11-15
+
+- **Correctif important** : quand on quittait le lecteur avec le bouton Menu, le flux restait ouvert chez le fournisseur ; avec un abonnement à une seule connexion, la chaîne demandée ensuite était refusée (« votre abonnement n'autorise peut-être qu'un seul flux »). Le flux est maintenant toujours fermé à la sortie du lecteur.
+- Journal de lecture : les clics de la télécommande dans le lecteur et les choix de chaîne y sont notés, pour diagnostiquer le clic de la liste des chaînes.
+
 ## [1.19.1-tvos18] - 2026-11-15
 
 - **Ordre des sources** : Réglages > Sources > (source) > Monter / Descendre. Les sources du haut s'affichent en premier dans Direct, Films et Séries.

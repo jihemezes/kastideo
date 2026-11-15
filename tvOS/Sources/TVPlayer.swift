@@ -65,6 +65,7 @@ struct TVPlayerView: View {
             }
         }
         .onTapGesture {
+            PlaybackLog.shared.note("Télécommande : clic (\(browsing ? "liste des chaînes" : "options"))", topic: .playback)
             if browsing {
                 validateBrowse()
             } else {
@@ -177,6 +178,7 @@ struct TVPlayerView: View {
         let list = ui.zapList
         guard list.indices.contains(browseIndex) else { return }
         let target = list[browseIndex]
+        PlaybackLog.shared.note("Zapping : choix de « \(target.name) »" + (target.id == current?.id ? " (chaîne déjà à l'écran)" : ""), topic: .playback)
         if target.id != current?.id { ui.play(target, playback: playback) }
         flashInfo()
     }

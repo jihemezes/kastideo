@@ -1453,3 +1453,4 @@
 "Position %lld sur %lld" = "Posizione %1$lld di %2$lld";
 "Les sources en haut de la liste s'affichent en premier dans Direct, Films et Séries." = "Le sorgenti in cima all'elenco compaiono per prime in Diretta, Film e Serie.";
 "Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l'application peut sembler figée, c'est normal." = "Kastideo sta ricalcolando canali, film e serie mostrati. Può richiedere qualche secondo: l'app può sembrare bloccata, è normale.";
+"Les changements s'appliquent en quittant cet écran." = "Le modifiche si applicano quando lasciate questa schermata.";

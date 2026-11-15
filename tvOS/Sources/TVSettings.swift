@@ -121,21 +121,35 @@ struct TVCategoriesView: View {
     let kind: MediaKind
     @Environment(LibraryStore.self) private var store
     @Environment(TVUI.self) private var ui
+    /// Brouillon : les choix s'affichent aussitôt, le recalcul du catalogue (long) se fait une seule fois en quittant l'écran.
+    @State private var draft: Set<String> = []
+    @State private var keywordsCleared = false
+    @State private var loaded = false
+    @State private var dirty = false
 
     var body: some View {
         let names = store.allCategoriesByKind[kind] ?? []
         let prefs = store.prefs(for: kind)
-        List {
-            Button("Tout afficher") { ui.perform { store.updateCategories(kind) { $0.hidden = []; $0.keywords = [] } } }
-            Button("Tout masquer") { ui.perform { store.updateCategories(kind) { $0.hidden = Set(names) } } }
+        let keywordHidden = Set(names.filter { prefs.isHiddenByKeyword($0) })
+        func isHidden(_ name: String) -> Bool { draft.contains(name) || (!keywordsCleared && keywordHidden.contains(name)) }
+        return List {
+            Text("Les changements s'appliquent en quittant cet écran.").font(.callout).foregroundStyle(.secondary)
+            Button("Tout afficher") { draft = []; keywordsCleared = true; dirty = true }
+            Button("Tout masquer") { draft = Set(names); dirty = true }
             ForEach(names, id: \.self) { name in
-                let hidden = prefs.isHidden(name)
+                let hidden = isHidden(name)
                 Button {
-                    ui.perform {
-                        store.updateCategories(kind) { p in
-                            if p.hidden.contains(name) { p.hidden.remove(name) } else { p.hidden.insert(name) }
+                    if hidden {
+                        if keywordHidden.contains(name) && !keywordsCleared {
+                            // Masquée par mot-clé : on garde les autres masquées, celle-ci redevient visible.
+                            draft.formUnion(keywordHidden.subtracting([name]))
+                            keywordsCleared = true
                         }
+                        draft.remove(name)
+                    } else {
+                        draft.insert(name)
                     }
+                    dirty = true
                 } label: {
                     HStack {
                         Text(prefs.renames[name] ?? name).foregroundStyle(hidden ? .secondary : .primary)
@@ -146,6 +160,25 @@ struct TVCategoriesView: View {
             }
         }
         .navigationTitle(kind.title)
+        .onAppear {
+            guard !loaded else { return }
+            loaded = true
+            draft = prefs.hidden
+        }
+        .onDisappear { commit() }
+    }
+
+    /// Enregistre les choix et recalcule le catalogue (une seule fois).
+    private func commit() {
+        guard dirty else { return }
+        dirty = false
+        let hidden = draft, clear = keywordsCleared
+        ui.perform {
+            store.updateCategories(kind) { p in
+                p.hidden = hidden
+                if clear { p.keywords = [] }
+            }
+        }
     }
 }
 
