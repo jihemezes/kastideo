@@ -67,13 +67,20 @@ private enum YouTubeTab: String, CaseIterable, Identifiable {
 
 struct YouTubeBrowser: View {
     private let youtube = YouTubeStore.shared
-    @State private var tab: YouTubeTab = .channels
-    @State private var field = ""
-    @State private var query = ""
-    @State private var order: YouTubeOrder = .relevance
-    @State private var results: [YouTubeVideo] = []
-    @State private var nextToken: String?
-    @State private var previousToken: String?
+    // Onglet, saisie et résultats de recherche : conservés dans le magasin (retour de la lecture sans tout perdre).
+    private var tab: YouTubeTab {
+        get { YouTubeTab.allCases.indices.contains(youtube.browser.tab) ? YouTubeTab.allCases[youtube.browser.tab] : .channels }
+        nonmutating set { youtube.browser.tab = YouTubeTab.allCases.firstIndex(of: newValue) ?? 0 }
+    }
+    private var field: String { get { youtube.browser.field } nonmutating set { youtube.browser.field = newValue } }
+    private var query: String { get { youtube.browser.query } nonmutating set { youtube.browser.query = newValue } }
+    private var order: YouTubeOrder { get { youtube.browser.order } nonmutating set { youtube.browser.order = newValue } }
+    private var results: [YouTubeVideo] { get { youtube.browser.results } nonmutating set { youtube.browser.results = newValue } }
+    private var nextToken: String? { get { youtube.browser.nextToken } nonmutating set { youtube.browser.nextToken = newValue } }
+    private var previousToken: String? { get { youtube.browser.previousToken } nonmutating set { youtube.browser.previousToken = newValue } }
+    private var tabBinding: Binding<YouTubeTab> { Binding(get: { tab }, set: { tab = $0 }) }
+    private var fieldBinding: Binding<String> { Binding(get: { field }, set: { field = $0 }) }
+    private var orderBinding: Binding<YouTubeOrder> { Binding(get: { order }, set: { order = $0 }) }
     @State private var searching = false
     @State private var message: String?
     @State private var working = false
@@ -110,14 +117,14 @@ struct YouTubeBrowser: View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: "play.rectangle.fill").foregroundStyle(.red).font(.title2)
-                TextField("Rechercher sur YouTube ou coller un lien (vidéo, playlist, chaîne, @pseudo)", text: $field)
+                TextField("Rechercher sur YouTube ou coller un lien (vidéo, playlist, chaîne, @pseudo)", text: fieldBinding)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(submit)
                 Button("OK", action: submit)
                     .disabled(field.trimmingCharacters(in: .whitespaces).isEmpty || working)
                 if working || youtube.loadingFeeds { ProgressView().controlSize(.small) }
             }
-            Picker("", selection: $tab) {
+            Picker("", selection: tabBinding) {
                 ForEach(YouTubeTab.allCases) { Text($0.label).tag($0) }
             }
             .pickerStyle(.segmented)
@@ -243,7 +250,7 @@ struct YouTubeBrowser: View {
             HStack {
                 if !query.isEmpty { Text("Résultats pour « \(query) »").font(.headline) }
                 Spacer()
-                Picker("Tri", selection: $order) {
+                Picker("Tri", selection: orderBinding) {
                     Text("Pertinence").tag(YouTubeOrder.relevance)
                     Text("Date").tag(YouTubeOrder.date)
                     Text("Vues").tag(YouTubeOrder.viewCount)
@@ -492,8 +499,7 @@ struct YouTubeWebView: NSViewRepresentable {
 
     static func dismantleNSView(_ web: WKWebView, coordinator: Coordinator) {
         // Le son doit s'arrêter avec la page.
-        web.configuration.userContentController.removeScriptMessageHandler(forName: "kastideo")
-        web.loadHTMLString("", baseURL: nil)
+        Task { @MainActor in YouTubeWebCleanup.shutdown(web) }
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
@@ -616,6 +622,29 @@ struct YouTubeCastMenu: View {
                     Button(device.name) { Task { await cast.castYouTube(video, to: device) } }
                 }
             }
+        }
+    }
+}
+
+/// Arrête vraiment le son d'une page de lecture YouTube : sans cela, la page peut continuer en arrière-plan
+/// (et enchaîner la vidéo suivante) après la fermeture du lecteur.
+enum YouTubeWebCleanup {
+    @MainActor private static var dying: [WKWebView] = []
+
+    @MainActor static func shutdown(_ web: WKWebView) {
+        dying.append(web)   // garde la page en vie le temps de l'arrêter proprement
+        web.configuration.userContentController.removeScriptMessageHandler(forName: "kastideo")
+        web.evaluateJavaScript("""
+            try { document.querySelectorAll('video,audio').forEach(function(m){ m.pause(); m.removeAttribute('src'); m.load(); }); } catch (e) {}
+            try { document.querySelectorAll('iframe').forEach(function(f){ f.src = 'about:blank'; f.remove(); }); } catch (e) {}
+            try { if (window.player && player.destroy) player.destroy(); } catch (e) {}
+            """, completionHandler: nil)
+        web.pauseAllMediaPlayback(completionHandler: nil)
+        web.stopLoading()
+        web.load(URLRequest(url: URL(string: "about:blank")!))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            web.removeFromSuperview()
+            dying.removeAll { $0 === web }
         }
     }
 }

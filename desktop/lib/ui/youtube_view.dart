@@ -50,12 +50,13 @@ class YouTubeBrowser extends StatefulWidget {
 
 class _YouTubeBrowserState extends State<YouTubeBrowser> {
   final _store = YouTubeStore.shared;
-  final _field = TextEditingController();
-  _Tab _tab = _Tab.channels;
-  String _query = '';
-  YouTubeOrder _order = YouTubeOrder.relevance;
-  List<YouTubeVideo> _results = [];
-  String? _next, _previous;
+  // État conservé quand on revient de la lecture ou d'une autre section.
+  static final _field = TextEditingController();
+  static _Tab _tab = _Tab.channels;
+  static String _query = '';
+  static YouTubeOrder _order = YouTubeOrder.relevance;
+  static List<YouTubeVideo> _results = [];
+  static String? _next, _previous;
   bool _searching = false;
   bool _working = false;
   String? _message;
@@ -74,7 +75,6 @@ class _YouTubeBrowserState extends State<YouTubeBrowser> {
 
   @override
   void dispose() {
-    _field.dispose();
     super.dispose();
   }
 

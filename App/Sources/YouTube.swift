@@ -45,6 +45,18 @@ final class YouTubeStore {
         }
     }
 
+    /// État du navigateur YouTube (onglet, recherche, résultats) : conservé quand on revient de la lecture.
+    struct BrowserState {
+        var tab = 0
+        var field = ""
+        var query = ""
+        var order: YouTubeOrder = .relevance
+        var results: [YouTubeVideo] = []
+        var nextToken: String?
+        var previousToken: String?
+    }
+    var browser = BrowserState()
+
     // File de lecture en cours.
     private(set) var queue: [YouTubeVideo] = []
     private(set) var startIndex = 0

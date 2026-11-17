@@ -3,6 +3,14 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.19.4] - 2026-11-17
+
+- Correction **YouTube** : la recherche (texte, tri, résultats, page) et l'onglet choisi sont conservés quand on revient de la lecture ; plus besoin de refaire la recherche.
+
+## [1.19.3] - 2026-11-17
+
+- Correction **YouTube** : en quittant une vidéo (bouton « Navigateur YouTube », changement de section ou fermeture), le son s'arrête réellement. Avant, la page pouvait continuer en arrière-plan et enchaîner la vidéo suivante en même temps que la nouvelle lecture.
+
 ## [1.19.2] - 2026-11-17
 
 - **Bandeau « Mise à jour du catalogue »** : pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement, et pendant le recalcul des listes après un changement de catégories ou l'affichage des contenus adultes, un bandeau s'affiche au premier plan pour indiquer que l'application n'est pas plantée. Le recalcul est décalé de 300 ms et regroupé quand les changements sont rapprochés.
