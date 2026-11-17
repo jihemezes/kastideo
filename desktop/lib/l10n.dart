@@ -108,6 +108,9 @@ class L10n {
   }
 
   static const Map<String, String> _en = {
+    'Mise à jour du catalogue': 'Updating the catalog',
+    'Kastideo vérifie et télécharge les chaînes, films et séries de « %s ». Cela peut prendre une minute : l\'application peut sembler figée, c\'est normal.': 'Kastideo is checking and downloading the channels, movies and series of “%s”. This can take a minute: the app may seem frozen, which is normal.',
+    'Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l\'application peut sembler figée, c\'est normal.': 'Kastideo is recalculating the channels, movies and series shown. This can take a few seconds: the app may seem frozen, which is normal.',
     'À regarder': 'Watch later',
     'Importer mes abonnements…': 'Import my subscriptions…',
     'Comment obtenir mon fichier ?': 'How do I get my file?',

@@ -7,9 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_secure_storage_linux
   local_notifier
   media_kit_libs_linux
-  media_kit_video
   screen_retriever_linux
   url_launcher_linux
+  media_kit_video
   window_manager
 )
 

@@ -221,6 +221,8 @@ Einstellungen > Allgemein > **TV-Programm**: Ein Ersatz-Guide füllt Sender ohne
 Einstellungen > **Quellen**: eine Quelle **bearbeiten** (Stiftsymbol: Name, Server, Benutzername, Passwort, Adresse der Wiedergabeliste, TV-Programm — Favoriten, Zuletzt-Liste und Sender-Korrekturen bleiben erhalten), aktualisieren, löschen und den Zustand ihres TV-Programms sehen. Die Schaltfläche mit dem **Auge** zeigt das Passwort (oder den TMDB-Schlüssel) zur Kontrolle an. Quellen werden beim Start aktualisiert, wenn ihre letzte Aktualisierung mehr als 6 Stunden zurückliegt (einstellbar). Liefert eine Aktualisierung einen leeren Abschnitt, bleibt der vorherige erhalten.
 <!--/pc-->
 
+Während die Sender, Filme und Serien eines Abos geprüft oder geladen werden (und wenn die Listen nach einer Kategorieänderung neu berechnet werden), erscheint oben im Fenster ein Banner **Katalog wird aktualisiert**. Die App wirkt dann einige Sekunden lang, bei großen Katalogen bis zu einer Minute, möglicherweise eingefroren: Das ist normal, das Banner verschwindet von selbst.
+
 # Navigieren
 
 ## Der Startbildschirm {#accueil}

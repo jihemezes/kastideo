@@ -2,11 +2,19 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.2-desktop3] - 2026-11-17
+
+- **Bandeau « Mise à jour du catalogue »** : pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement, et pendant le recalcul des listes après un changement de catégories ou l'affichage des contenus adultes, un bandeau s'affiche au premier plan pour indiquer que l'application n'est pas plantée. Le recalcul est décalé de 300 ms et regroupé quand les changements sont rapprochés.
+
 ## [1.19.0-desktop2] - 2026-11-15
 
 - **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
+
+## [1.19.2-android4] - 2026-11-17
+
+- **Bandeau « Mise à jour du catalogue »** affiché pendant le chargement des abonnements et le recalcul des listes.
 
 ## [1.19.0-android3] - 2026-11-15
 

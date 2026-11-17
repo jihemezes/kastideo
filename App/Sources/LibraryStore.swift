@@ -98,6 +98,9 @@ final class LibraryStore {
     /// Historique avant la dernière suppression (pour pouvoir l'annuler).
     private(set) var recentsBackup: RecentsBackup?
     private(set) var loading: Set<UUID> = []
+    /// Recalcul des listes affichées en attente ou en cours (le bandeau de mise à jour s'affiche pendant ce temps).
+    private(set) var indexing = false
+    @ObservationIgnored private var indexTask: Task<Void, Never>?
     private(set) var errors: [UUID: String] = [:]
     private(set) var epgErrors: [UUID: String] = [:]
     private(set) var epgLoadingCount = 0
@@ -797,7 +800,20 @@ final class LibraryStore {
     }
 
     /// Réaffiche ou masque les contenus adultes (réglage).
-    func refreshAdultFilter() { rebuildIndex() }
+    func refreshAdultFilter() { scheduleRebuild() }
+
+    /// Recalcule les listes un instant plus tard (regroupe les changements rapprochés) : le bandeau a le temps de s'afficher
+    /// avant que le calcul, long sur un gros catalogue, ne fige l'écran.
+    private func scheduleRebuild() {
+        indexing = true
+        indexTask?.cancel()
+        indexTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled, let self else { return }
+            self.rebuildIndex()
+            self.indexing = false
+        }
+    }
 
     private func rebuildIndex() {
         let showAdult = UserDefaults.standard.bool(forKey: "adult.show")
@@ -975,7 +991,7 @@ final class LibraryStore {
         change(&prefs)
         categoryPrefs[kind] = prefs
         if let data = try? JSONEncoder().encode(prefs) { defaults.set(data, forKey: CategoryPrefs.key(kind)) }
-        rebuildIndex()
+        scheduleRebuild()
     }
 
     /// Ordre des chaînes d'une catégorie (nom affiché).

@@ -221,6 +221,8 @@ Apri **Kastideo > Impostazioni… (⌘,)**, scheda **Sorgenti**, oppure fai clic
 Impostazioni > **Sorgenti**: **modifica** una sorgente (pulsante a forma di matita: nome, server, nome utente, password, indirizzo della playlist, guida TV — preferiti, recenti e correzioni dei canali vengono conservati), aggiornala, eliminala, vedi lo stato della sua guida TV. Il pulsante a forma di **occhio** mostra la password (o la chiave TMDB) per poterla verificare. Le sorgenti si aggiornano all'avvio quando l'ultimo aggiornamento risale a più di 6 ore fa (regolabile). Se un aggiornamento restituisce una sezione vuota, quella precedente viene conservata.
 <!--/pc-->
 
+Mentre i canali, i film e le serie di un abbonamento vengono verificati o scaricati (e quando le liste vengono ricalcolate dopo una modifica delle categorie), in alto compare un banner **Aggiornamento del catalogo**. L'app può sembrare bloccata per qualche secondo, fino a un minuto con un catalogo grande: è normale e il banner scompare da solo.
+
 # Navigare
 
 ## La schermata Home {#accueil}

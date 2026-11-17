@@ -221,6 +221,8 @@ Ouvrez **Kastideo > Réglages… (⌘,)**, onglet **Sources**, ou cliquez sur le
 Réglages > **Sources** : **modifier** une source (bouton crayon : nom, serveur, identifiant, mot de passe, adresse de la playlist, guide TV — favoris, récents et corrections de chaînes sont gardés), l'actualiser, la supprimer, voir l'état de son guide TV. Le bouton **œil** affiche le mot de passe (ou la clé TMDB) pour le vérifier. Les sources sont actualisées au démarrage si leur dernière mise à jour date de plus de 6 heures (réglable). Si une actualisation renvoie une section vide, la précédente est gardée.
 <!--/pc-->
 
+Pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement (et quand les listes sont recalculées après un changement de catégories), un bandeau **Mise à jour du catalogue** s'affiche en haut de l'écran. L'application peut sembler figée quelques secondes, voire une minute sur un gros catalogue : c'est normal, le bandeau disparaît tout seul.
+
 # Naviguer
 
 ## L'écran d'accueil {#accueil}

@@ -43,14 +43,14 @@ struct TVRootView: View {
             }
         }
         .overlay(alignment: .top) {
-            if !store.loading.isEmpty || ui.working > 0 {
+            if !store.loading.isEmpty || store.indexing || ui.working > 0 {
                 TVLoadingBanner(names: store.sources.filter { store.loading.contains($0.id) }.map(\.name))
                     .padding(.top, 40)
                     .transition(.opacity)
                     .allowsHitTesting(false)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: store.loading.isEmpty && ui.working == 0)
+        .animation(.easeInOut(duration: 0.3), value: store.loading.isEmpty && !store.indexing && ui.working == 0)
         .onAppear {
             playback.onEpisodeEnded = { [weak ui, weak playback] item in
                 guard let ui, let playback else { return }

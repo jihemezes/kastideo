@@ -39,6 +39,10 @@ struct IOSRootView: View {
             IOSBottomBar()
         }
         .background(IOSBrand.night.ignoresSafeArea())
+        .overlay(alignment: .top) {
+            if store.showsUpdateBanner { LoadingBanner(names: store.loadingSourceNames) }
+        }
+        .animation(.easeInOut(duration: 0.3), value: store.showsUpdateBanner)
         .fullScreenCover(isPresented: $ui.showPlayer) {
             IOSPlayerScreen()
                 .environment(playback)

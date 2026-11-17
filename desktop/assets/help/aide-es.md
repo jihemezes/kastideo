@@ -221,6 +221,8 @@ Abra **Kastideo > Ajustes… (⌘,)**, pestaña **Fuentes**, o haga clic en el b
 Ajustes > **Fuentes**: **edite** una fuente (botón del lápiz: nombre, servidor, usuario, contraseña, dirección de la lista, guía de TV — se conservan los favoritos, los recientes y las correcciones de canales), actualícela, elimínela y consulte el estado de su guía de TV. El botón del **ojo** muestra la contraseña (o la clave TMDB) para que pueda comprobarla. Las fuentes se actualizan al iniciar cuando su última actualización tiene más de 6 horas (ajustable). Si una actualización devuelve una sección vacía, se conserva la anterior.
 <!--/pc-->
 
+Mientras se comprueban o descargan los canales, películas y series de una suscripción (y cuando se recalculan las listas tras cambiar las categorías), aparece un banner **Actualizando el catálogo** en la parte superior de la pantalla. La aplicación puede parecer bloqueada unos segundos, o hasta un minuto con un catálogo grande: es normal y el banner desaparece solo.
+
 # Navegar
 
 ## La pantalla de inicio {#accueil}

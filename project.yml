@@ -183,6 +183,7 @@ targets:
       - path: App/Sources
         includes:
           - LibraryStore.swift
+          - LoadingBanner.swift
           - Storage.swift
           - NavigationModel.swift
           - StartPage.swift

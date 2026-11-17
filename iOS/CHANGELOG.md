@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.19.2-ios34] - 2026-11-17
+
+- **Bandeau « Mise à jour du catalogue »** : pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement, et pendant le recalcul des listes après un changement de catégories ou l'affichage des contenus adultes, un bandeau s'affiche au premier plan pour indiquer que l'application n'est pas plantée. Le recalcul est décalé de 300 ms et regroupé quand les changements sont rapprochés.
+
 ## [1.19.0-ios33] - 2026-11-15
 
 - **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.

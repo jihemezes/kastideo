@@ -43,6 +43,23 @@ class LibraryStore extends ChangeNotifier {
   List<String> favoriteIds = [];
   List<String> recentIds = [];
   bool isBusy = false;
+
+  /// Recalcul des listes affichées en attente ou en cours (bandeau de mise à jour).
+  bool indexing = false;
+  Timer? _indexTimer;
+
+  /// Recalcule les listes un instant plus tard (regroupe les changements rapprochés) : le bandeau a le temps
+  /// de s'afficher avant que le calcul, long sur un gros catalogue, ne fige l'écran.
+  void _scheduleRebuild() {
+    indexing = true;
+    notifyListeners();
+    _indexTimer?.cancel();
+    _indexTimer = Timer(const Duration(milliseconds: 300), () {
+      _rebuild();
+      indexing = false;
+      notifyListeners();
+    });
+  }
   String? lastError;
 
   /// Réglages de l'application (replay).
@@ -429,7 +446,7 @@ class LibraryStore extends ChangeNotifier {
     change(p);
     _categoryPrefs[kind] = p;
     _prefs.setString('categories.${kind.name}.v1', jsonEncode(p.toJson()));
-    _rebuild();
+    _scheduleRebuild();
   }
 
   /// Enregistre l'ordre des contenus d'une catégorie (noms d'origine, identifiants dans l'ordre voulu).
@@ -542,7 +559,7 @@ class LibraryStore extends ChangeNotifier {
   void setShowAdult(bool value) {
     showAdult = value;
     _prefs.setBool('adult.show', value);
-    _rebuild();
+    _scheduleRebuild();
   }
 
   // MARK: Sources

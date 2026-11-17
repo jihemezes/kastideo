@@ -221,6 +221,8 @@ Open **Kastideo > Settings… (⌘,)**, **Sources** tab, or click the **Sources*
 Settings > **Sources**: **edit** a source (pencil button: name, server, username, password, playlist address, TV guide — favorites, recents and channel fixes are kept), refresh it, delete it, see the state of its TV guide. The **eye** button shows the password (or the TMDB key) so you can check it. Sources refresh at startup when their last update is more than 6 hours old (adjustable). If a refresh returns an empty section, the previous one is kept.
 <!--/pc-->
 
+While the channels, movies and series of a subscription are being checked or downloaded (and when the lists are recalculated after a category change), an **Updating the catalog** banner appears at the top of the screen. The app may seem frozen for a few seconds, or up to a minute on a large catalog: this is normal, and the banner disappears by itself.
+
 # Navigating
 
 ## The Home screen {#accueil}

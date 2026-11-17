@@ -310,3 +310,55 @@ Future<void> showWhatsNew(BuildContext context, {String? since}) async {
     ),
   );
 }
+
+/// Bandeau au premier plan pendant le chargement ou le recalcul du catalogue : l'écran peut se figer quelques secondes.
+class CatalogLoadingBanner extends StatelessWidget {
+  const CatalogLoadingBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final library = context.library;
+    return ListenableBuilder(
+      listenable: library,
+      builder: (context, _) {
+        final loading = library.sources.where((s) => library.loadingSources.contains(s.id)).map((s) => s.name).toList();
+        final show = loading.isNotEmpty || library.indexing;
+        return IgnorePointer(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: !show
+                ? const SizedBox.shrink()
+                : Container(
+                    key: const ValueKey('catalog-loading'),
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 18, 12),
+                    decoration: BoxDecoration(
+                      color: KPalette.menuDark,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: KPalette.accentDark.withValues(alpha: 0.6)),
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 16)],
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                      const SizedBox(width: 14),
+                      Flexible(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                          Text(tr('Mise à jour du catalogue'), style: kTextD(13, weight: FontWeight.w700)),
+                          const SizedBox(height: 2),
+                          Text(
+                            loading.isEmpty
+                                ? tr('Kastideo recalcule les chaînes, films et séries affichés. Cela peut prendre quelques secondes : l\'application peut sembler figée, c\'est normal.')
+                                : tr('Kastideo vérifie et télécharge les chaînes, films et séries de « %s ». Cela peut prendre une minute : l\'application peut sembler figée, c\'est normal.')
+                                    .replaceAll('%s', loading.join(', ')),
+                            style: kTextD(11, color: Colors.white70),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                  ),
+          ),
+        );
+      },
+    );
+  }
+}

@@ -2,6 +2,11 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.2-tvos21] - 2026-11-17
+
+- **Bandeau « Mise à jour du catalogue »** : pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement, et pendant le recalcul des listes après un changement de catégories ou l'affichage des contenus adultes, un bandeau s'affiche au premier plan pour indiquer que l'application n'est pas plantée. Le recalcul est décalé de 300 ms et regroupé quand les changements sont rapprochés.
+- Le bandeau couvre aussi le recalcul des listes (changement des catégories, contenus adultes).
+
 ## [1.19.1-tvos20] - 2026-11-15
 
 - **Catégories** : cocher ou décocher une catégorie, « Tout afficher » et « Tout masquer » sont maintenant instantanés. Le recalcul du catalogue (long) se fait une seule fois, en quittant l'écran.

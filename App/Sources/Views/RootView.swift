@@ -37,6 +37,10 @@ struct RootView: View {
         .resumeUndoBanner()
         .durationPromptBanner()
         .overlay(alignment: .top) { UpdateBanner() }
+        .overlay(alignment: .top) {
+            if store.showsUpdateBanner { LoadingBanner(names: store.loadingSourceNames) }
+        }
+        .animation(.easeInOut(duration: 0.3), value: store.showsUpdateBanner)
         .overlay(alignment: .top) { ProgramAlertBanner() }
         // Première ouverture : la langue suit celle du système (réglable dans Réglages > Général).
         .onAppear { if appLanguage.isEmpty { appLanguage = AppLanguage.system.rawValue } }
