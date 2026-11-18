@@ -6,3 +6,6 @@
 - `../PRIVACY.md` : politique de confidentialité (FR/EN/ES/DE/IT/PT).
 - Captures d'écran : Actions > « iOS (captures d'écran) » > Run workflow (artefact `captures-ios`, iPhone 6,9" et iPad 13").
 - « Quoi tester » : automatique à chaque tag `vX.Y.Z-iosN` (job `quoi-tester` de `ios.yml`).
+- `SOUMISSION.md` : liste pas à pas pour soumettre iPhone/iPad/Apple TV à l'App Store (Mac hors Store).
+- `review-notes-en.md` : notes à coller pour l'équipe de revue ; `review-responses-en.md` : réponses types en cas de refus.
+- Captures Apple TV : Actions > « tvOS (captures d'écran) » (artefact `captures-tvos`).

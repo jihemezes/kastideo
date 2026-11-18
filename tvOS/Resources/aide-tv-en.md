@@ -10,7 +10,7 @@ The home screen shows large **Live**, **Movies** and **Series** tiles (and **My 
 
 ## Add a source {#tv-sources}
 
-Typing an address and a password with the remote is tedious, so Kastideo offers three ways.
+Typing an address and a password with the remote is tedious, so Kastideo offers three ways. To try it without a subscription, select **Try the demo**: Kastideo adds a few royalty-free videos.
 
 1. **From a phone (QR code)**: **Settings > Sources > Add from a phone**. Scan the QR code with a phone, or open the address shown on a computer on the same Wi-Fi network, fill in the form and enter the **4-digit code** shown on screen. Keep this screen open while you type.
 2. **From an iPhone or iPad**: in Kastideo on the iPhone, **Settings > Backup > Send to Apple TV** sends your sources, favorites and settings in one go (same Wi-Fi network, same 4-digit code).

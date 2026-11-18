@@ -1,0 +1,66 @@
+# Captures d'écran Apple TV (3840×2160) pour App Store Connect, avec une playlist de démonstration (aucune donnée personnelle).
+# Lancement manuel : Actions > « tvOS (captures d'écran) » > Run workflow. Les PNG sont dans l'artefact « captures-tvos ».
+# La navigation à la télécommande est simple : triez les images obtenues et gardez les 3 à 5 meilleures.
+name: tvOS (captures d'écran)
+
+on:
+  workflow_dispatch:
+    inputs:
+      m3u:
+        description: "URL de la playlist M3U de démonstration"
+        default: "https://raw.githubusercontent.com/jihemezes/kastideo/main/docs/store/demo.m3u"
+      lang:
+        description: "Langue des captures (fr ou en)"
+        default: "fr"
+
+jobs:
+  screenshots:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer XcodeGen et PyYAML
+        run: |
+          brew install xcodegen
+          pip3 install --break-system-packages pyyaml || pip3 install pyyaml
+      - name: Cache des paquets Swift (VLCKit)
+        uses: actions/cache@v4
+        with:
+          path: ~/spm-cache
+          key: spm-tvos-${{ runner.os }}-${{ hashFiles('project.yml') }}
+          restore-keys: spm-
+      - name: Projet avec cible de captures
+        run: |
+          python3 scripts/screenshots/make-project.py
+          xcodegen generate --spec project-screens.yml
+      - name: Captures
+        env:
+          LANGCODE: ${{ github.event.inputs.lang }}
+          DEMO_M3U_URL: ${{ github.event.inputs.m3u }}
+        run: |
+          mkdir -p "$PWD/captures/tvos"
+          TV=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys,re
+          best=''
+          for rt,devs in json.load(sys.stdin)['devices'].items():
+              if 'tvOS' not in rt: continue
+              for d in devs:
+                  if re.search('Apple TV 4K',d['name']): best=d['udid']
+          print(best)")
+          echo "Apple TV: $TV"
+          [ -z "$TV" ] && { echo "::error::Aucun simulateur Apple TV 4K"; exit 1; }
+          xcrun simctl boot "$TV" || true
+          export TEST_RUNNER_DEMO_M3U="$DEMO_M3U_URL"
+          export TEST_RUNNER_SHOTS_DIR="$PWD/captures/tvos"
+          export TEST_RUNNER_SHOTS_LANG="$LANGCODE"
+          export TEST_RUNNER_SHOTS_LOCALE=$([ "$LANGCODE" = en ] && echo en_US || echo fr_FR)
+          xcodebuild test -project Kastideo.xcodeproj -scheme KastideotvOS -configuration Debug \
+            -clonedSourcePackagesDirPath ~/spm-cache -destination "id=$TV" \
+            -only-testing:KastideotvOSUITests CODE_SIGNING_ALLOWED=NO > test-tvos.log 2>&1 || {
+              grep -n -i "error" test-tvos.log | cut -c1-400 | head -60; echo "::warning::Tests tvOS en échec"; }
+          find captures -name '*.png' | sort
+      - uses: actions/upload-artifact@v4
+        with:
+          name: captures-tvos
+          path: captures
+          retention-days: 14

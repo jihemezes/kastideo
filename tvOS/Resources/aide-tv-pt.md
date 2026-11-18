@@ -10,7 +10,7 @@ A tela inicial mostra grandes blocos **Ao vivo**, **Filmes** e **Séries** (e **
 
 ## Adicionar uma fonte {#tv-sources}
 
-Digitar um endereço e uma senha com o controle remoto é incômodo: o Kastideo oferece três soluções.
+Digitar um endereço e uma senha com o controle remoto é incômodo: o Kastideo oferece três soluções. Para experimentar sem assinatura, selecione **Experimentar a demo**: o Kastideo adiciona alguns vídeos livres de direitos.
 
 1. **A partir de um celular (código QR)**: **Ajustes > Fontes > Adicionar a partir de um celular**. Escaneie o código QR com um celular ou abra o endereço mostrado num computador da mesma rede Wi-Fi, preencha o formulário e digite o **código de 4 dígitos** exibido na tela. Esta tela deve permanecer aberta durante a digitação.
 2. **A partir de um iPhone ou iPad**: no Kastideo do iPhone, **Ajustes > Backup > Enviar para a Apple TV** transmite de uma vez suas fontes, favoritos e ajustes (mesma rede Wi-Fi, mesmo código de 4 dígitos).

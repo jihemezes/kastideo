@@ -263,6 +263,12 @@ struct IOSHomeView: View {
                 Label("Ajouter une source", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent).controlSize(.large).tint(IOSBrand.magenta)
+            Button { store.addDemoSource() } label: {
+                Label("Essayer la démo", systemImage: "play.circle").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered).controlSize(.large).tint(.white)
+            Text("La démo ajoute quelques vidéos libres de droits pour essayer Kastideo sans abonnement.")
+                .font(.footnote).multilineTextAlignment(.center).foregroundStyle(.white.opacity(0.6))
         }
         .foregroundStyle(.white)
         .padding(20)

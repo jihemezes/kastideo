@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.19.4-ios37] - 2026-11-18
+
+- **Préparation de l'App Store** : bouton **Essayer la démo** à l'accueil (playlist de vidéos libres de droits, pour essayer sans abonnement et pour la revue Apple) ; liens de don (Ko-fi) retirés de l'application et de son aide ; nouveau workflow de captures d'écran Apple TV ; documents de soumission dans `docs/store/`.
+
 ## [1.19.4-ios36] - 2026-11-17
 
 - Correction **YouTube** : la recherche (texte, tri, résultats, page) et l'onglet choisi sont conservés quand on revient de la lecture ; plus besoin de refaire la recherche.

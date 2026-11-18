@@ -20,7 +20,15 @@ struct TVHomeView: View {
 
     var body: some View {
         if !store.hasSources {
-            TVEmptyView(text: String(localized: "Bienvenue dans Kastideo. Ajoutez une source dans Réglages (ou depuis votre téléphone)."))
+            VStack(spacing: 30) {
+                TVEmptyView(text: String(localized: "Bienvenue dans Kastideo. Ajoutez une source dans Réglages (ou depuis votre téléphone)."))
+                Button { store.addDemoSource() } label: {
+                    Label("Essayer la démo", systemImage: "play.circle").font(.title3.weight(.semibold)).padding(.horizontal, 20)
+                }
+                Text("La démo ajoute quelques vidéos libres de droits pour essayer Kastideo sans abonnement.")
+                    .font(.callout).foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+            }
         } else {
             VStack(spacing: 40) {
                 Spacer(minLength: 0)

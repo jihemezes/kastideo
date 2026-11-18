@@ -10,7 +10,7 @@ L'écran d'accueil propose de grandes tuiles **Direct**, **Films**, **Séries** 
 
 ## Ajouter une source {#tv-sources}
 
-Saisir une adresse et un mot de passe avec la télécommande est pénible : Kastideo propose trois solutions.
+Saisir une adresse et un mot de passe avec la télécommande est pénible : Kastideo propose trois solutions. Pour essayer sans abonnement, sélectionnez **Essayer la démo** : Kastideo ajoute quelques vidéos libres de droits.
 
 1. **Depuis un téléphone (QR code)** : **Réglages > Sources > Ajouter depuis un téléphone**. Scannez le QR code avec un téléphone ou ouvrez l'adresse affichée sur un ordinateur du même réseau Wi-Fi, remplissez le formulaire et saisissez le **code à 4 chiffres** affiché à l'écran. Cet écran doit rester ouvert pendant la saisie.
 2. **Depuis un iPhone ou un iPad** : dans Kastideo sur l'iPhone, **Réglages > Sauvegarde > Envoyer vers l'Apple TV** transmet d'un coup vos sources, favoris et réglages (même réseau Wi-Fi, même code à 4 chiffres).

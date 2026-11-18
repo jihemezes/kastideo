@@ -360,6 +360,15 @@ final class LibraryStore {
 
     // MARK: - Gestion des sources
 
+    /// Playlist de démonstration publique (vidéos libres de droits) : essai sans abonnement, revue App Store.
+    static let demoPlaylistURL = URL(string: "https://raw.githubusercontent.com/jihemezes/kastideo/main/docs/store/demo.m3u")!
+
+    /// Ajoute la source de démonstration (une seule fois).
+    func addDemoSource() {
+        guard !sources.contains(where: { $0.kind == .m3uURL(Self.demoPlaylistURL) }) else { return }
+        addSource(Source(name: String(localized: "Source de démonstration"), kind: .m3uURL(Self.demoPlaylistURL)), password: nil)
+    }
+
     func addSource(_ source: Source, password: String?) {
         if let password, !password.isEmpty { Keychain.set(password, account: source.id.uuidString) }
         sources.append(source)

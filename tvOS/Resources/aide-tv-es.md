@@ -10,7 +10,7 @@ La pantalla de inicio muestra grandes mosaicos **En directo**, **Películas** y 
 
 ## Añadir una fuente {#tv-sources}
 
-Escribir una dirección y una contraseña con el mando es incómodo: Kastideo ofrece tres soluciones.
+Escribir una dirección y una contraseña con el mando es incómodo: Kastideo ofrece tres soluciones. Para probar sin suscripción, seleccione **Probar la demo**: Kastideo añade unos vídeos libres de derechos.
 
 1. **Desde un teléfono (código QR)**: **Ajustes > Fuentes > Añadir desde un teléfono**. Escanee el código QR con un teléfono o abra la dirección mostrada en un ordenador de la misma red Wi-Fi, rellene el formulario e introduzca el **código de 4 cifras** que aparece en pantalla. Esta pantalla debe seguir abierta mientras escribe.
 2. **Desde un iPhone o un iPad**: en Kastideo en el iPhone, **Ajustes > Copia de seguridad > Enviar al Apple TV** transmite de una vez sus fuentes, favoritos y ajustes (misma red Wi-Fi, mismo código de 4 cifras).

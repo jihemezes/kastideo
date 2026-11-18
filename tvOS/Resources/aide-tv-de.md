@@ -10,7 +10,7 @@ Der Startbildschirm zeigt große Kacheln **Live**, **Filme** und **Serien** (und
 
 ## Eine Quelle hinzufügen {#tv-sources}
 
-Eine Adresse und ein Passwort mit der Fernbedienung einzutippen ist mühsam: Kastideo bietet drei Wege.
+Eine Adresse und ein Passwort mit der Fernbedienung einzutippen ist mühsam: Kastideo bietet drei Wege. Zum Ausprobieren ohne Abo wählen Sie **Demo ausprobieren**: Kastideo fügt einige lizenzfreie Videos hinzu.
 
 1. **Von einem Telefon (QR-Code)**: **Einstellungen > Quellen > Von einem Telefon hinzufügen**. Scannen Sie den QR-Code mit einem Telefon oder öffnen Sie die angezeigte Adresse auf einem Computer im selben WLAN, füllen Sie das Formular aus und geben Sie den **4-stelligen Code** ein, der auf dem Bildschirm steht. Dieser Bildschirm muss während der Eingabe geöffnet bleiben.
 2. **Von einem iPhone oder iPad**: In Kastideo auf dem iPhone überträgt **Einstellungen > Sicherung > An Apple TV senden** Quellen, Favoriten und Einstellungen auf einmal (gleiches WLAN, gleicher 4-stelliger Code).

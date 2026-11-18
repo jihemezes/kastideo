@@ -82,7 +82,10 @@ struct IOSHelpView: View {
             return [HelpGroup(title: "", pages: [HelpPage(id: "erreur", title: String(localized: "Aide"),
                                                           group: "", body: String(localized: "Aide introuvable."))])]
         }
-        return HelpDocument.parse(text, platform: .mac)
+        // Pas de page de dons dans les apps de l'App Store (iPhone, iPad).
+        return HelpDocument.parse(text, platform: .mac).map { group in
+            HelpGroup(title: group.title, pages: group.pages.filter { $0.id != "soutenir" })
+        }.filter { !$0.pages.isEmpty }
     }
 }
 

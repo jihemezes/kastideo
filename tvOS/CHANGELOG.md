@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.4-tvos22] - 2026-11-18
+
+- **Préparation de l'App Store** : bouton **Essayer la démo** sur l'écran de bienvenue (playlist de vidéos libres de droits, pour essayer sans saisir d'adresse et pour la revue Apple) ; mode de captures d'écran automatiques.
+
 ## [1.19.2-tvos21] - 2026-11-17
 
 - **Bandeau « Mise à jour du catalogue »** : pendant la vérification ou le téléchargement des chaînes, films et séries d'un abonnement, et pendant le recalcul des listes après un changement de catégories ou l'affichage des contenus adultes, un bandeau s'affiche au premier plan pour indiquer que l'application n'est pas plantée. Le recalcul est décalé de 300 ms et regroupé quand les changements sont rapprochés.

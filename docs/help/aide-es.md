@@ -1382,7 +1382,7 @@ Los ajustes y las fuentes se pueden trasladar entre versiones con **Copia de seg
 
 **Kastideo para iPhone y iPad** (iOS 17 o posterior) se distribuye mediante **TestFlight**, el servicio de Apple para probar aplicaciones antes de su lanzamiento. No hay ningún archivo que instalar a mano: recibe una invitación, instala la aplicación **TestFlight** desde la App Store y después **Kastideo** desde TestFlight. Las actualizaciones llegan a través de TestFlight.
 
-**Primer inicio.** Lea y acepte el aviso legal. En la pantalla de inicio, pulse **Añadir una fuente** (Xtream Codes o lista M3U), o vaya a **Ajustes > Importar la configuración…** para traer sus fuentes, favoritos y categorías desde Mac, Windows, Linux o Android (véase «Copia de seguridad y transferencia»). Consejo: guarde el archivo de configuración en **iCloud Drive** para encontrarlo en todos sus dispositivos.
+**Primer inicio.** Lea y acepte el aviso legal. En la pantalla de inicio, pulse **Añadir una fuente** (Xtream Codes o lista M3U), o vaya a **Ajustes > Importar la configuración…** para traer sus fuentes, favoritos y categorías desde Mac, Windows, Linux o Android (véase «Copia de seguridad y transferencia»). Consejo: guarde el archivo de configuración en **iCloud Drive** para encontrarlo en todos sus dispositivos. Para probar sin suscripción, toque **Probar la demo**: Kastideo añade unos vídeos libres de derechos.
 
 **Qué ofrece la aplicación.**
 

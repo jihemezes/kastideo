@@ -10,7 +10,7 @@ La schermata iniziale mostra grandi riquadri **Diretta**, **Film** e **Serie** (
 
 ## Aggiungere una sorgente {#tv-sources}
 
-Digitare un indirizzo e una password con il telecomando è scomodo: Kastideo propone tre soluzioni.
+Digitare un indirizzo e una password con il telecomando è scomodo: Kastideo propone tre soluzioni. Per provare senza abbonamento, seleziona **Prova la demo**: Kastideo aggiunge alcuni video liberi da diritti.
 
 1. **Da un telefono (codice QR)**: **Impostazioni > Sorgenti > Aggiungi da un telefono**. Inquadrate il codice QR con un telefono o aprite l'indirizzo mostrato su un computer della stessa rete Wi-Fi, compilate il modulo e inserite il **codice a 4 cifre** visualizzato sullo schermo. Questa schermata deve restare aperta durante l'inserimento.
 2. **Da un iPhone o un iPad**: in Kastideo sull'iPhone, **Impostazioni > Backup > Invia all'Apple TV** trasmette in un colpo solo sorgenti, preferiti e impostazioni (stessa rete Wi-Fi, stesso codice a 4 cifre).

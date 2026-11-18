@@ -26,6 +26,11 @@ struct KastideoTVApp: App {
         playback.onProgress = { [weak store] item, position, duration, event in
             store?.reportPlayback(item, position: position, duration: duration, event: event)
         }
+        // Mode démonstration (captures d'écran automatiques) : source M3U publique passée en argument de lancement.
+        // Sans cet argument, rien ne change.
+        if let demo = UserDefaults.standard.string(forKey: "kastideo-demo-m3u"), let url = URL(string: demo), store.sources.isEmpty {
+            store.addSource(Source(name: "Démo", kind: .m3uURL(url)), password: nil)
+        }
         _store = State(initialValue: store)
         _playback = State(initialValue: playback)
         _watch = State(initialValue: watch)
@@ -45,7 +50,13 @@ struct KastideoTVApp: App {
                 .id(language.revision)
                 .preferredColorScheme(.dark)
                 .tint(TVPalette.orange)
-                .task { await store.start(autoRefresh: true) }
+                .task {
+                    if UserDefaults.standard.string(forKey: "kastideo-demo-m3u") != nil {
+                        LegalNotice.accept()
+                        ui.showDisclaimer = false
+                    }
+                    await store.start(autoRefresh: true)
+                }
         }
     }
 }

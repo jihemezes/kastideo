@@ -17,5 +17,18 @@ spec["targets"]["KastideoiOSUITests"] = {
     }},
 }
 spec["targets"]["KastideoiOS"].setdefault("scheme", {})["testTargets"] = ["KastideoiOSUITests"]
+spec["targets"]["KastideotvOSUITests"] = {
+    "type": "bundle.ui-testing",
+    "platform": "tvOS",
+    "deploymentTarget": "17.0",
+    "sources": [{"path": "tvOS/ScreenshotTests"}],
+    "dependencies": [{"target": "KastideotvOS"}],
+    "settings": {"base": {
+        "GENERATE_INFOPLIST_FILE": "YES",
+        "PRODUCT_BUNDLE_IDENTIFIER": "fr.jmezes.kastideo.tvuitests",
+        "SWIFT_VERSION": "5.0",
+    }},
+}
+spec["targets"]["KastideotvOS"].setdefault("scheme", {})["testTargets"] = ["KastideotvOSUITests"]
 yaml.safe_dump(spec, open("project-screens.yml", "w"), allow_unicode=True, sort_keys=False)
 print("project-screens.yml écrit")

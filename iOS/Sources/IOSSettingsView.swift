@@ -141,7 +141,6 @@ struct IOSSettingsView: View {
                             ShareLink(item: PlaybackLog.currentFile) { Label("Partager le journal de lecture", systemImage: "doc.text") }
                         }
                         Button { ui.showDisclaimer = true } label: { Label("Avertissement", systemImage: "exclamationmark.shield") }
-                        Link(destination: Support.url) { Label("Offrir un café (Ko-fi)", systemImage: "cup.and.saucer") }
                         Link(destination: URL(string: "https://github.com/jihemezes/kastideo")!) { Label("Kastideo sur GitHub", systemImage: "chevron.left.forwardslash.chevron.right") }
                     }
                 }
