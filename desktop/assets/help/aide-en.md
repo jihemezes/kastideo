@@ -1352,7 +1352,7 @@ Kastideo then appears in the TV's app list with its banner.
 
 ### Updates
 
-Kastideo looks for new Android versions on GitHub. When one is offered, **Install** downloads the APK and Android asks you to confirm. The first time, Android also asks you to allow Kastideo to install apps (the setting opens by itself).
+Kastideo looks for new Android versions on GitHub. When one is offered, **Install** downloads the APK and Android asks you to confirm. The first time, Android also asks you to allow Kastideo to install apps (the setting opens by itself). Once the update is installed, **reopen Kastideo**: Android closes the app during the installation.
 
 ### If something goes wrong
 

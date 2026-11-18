@@ -1352,7 +1352,7 @@ Kastideo compare poi nell'elenco delle app del televisore con il suo banner.
 
 ### Aggiornamenti
 
-Kastideo cerca nuove versioni Android su GitHub. Quando ne viene proposta una, **Installa** scarica l'APK e Android ti chiede di confermare. La prima volta, Android ti chiede anche di consentire a Kastideo di installare app (l'impostazione si apre da sola).
+Kastideo cerca nuove versioni Android su GitHub. Quando ne viene proposta una, **Installa** scarica l'APK e Android ti chiede di confermare. La prima volta, Android ti chiede anche di consentire a Kastideo di installare app (l'impostazione si apre da sola). Dopo l'installazione dell'aggiornamento, **riapri Kastideo**: Android chiude l'app durante l'installazione.
 
 ### Se qualcosa va storto
 

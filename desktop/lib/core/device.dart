@@ -99,11 +99,16 @@ class Device {
   }
 
   /// Lance l'installation d'un APK déjà téléchargé.
+  static String installError = '';
+
   static Future<bool> installApk(String path) async {
     if (!isAndroid) return false;
     try {
-      return (await _channel.invokeMethod<bool>('installApk', {'path': path})) ?? false;
-    } catch (_) {
+      final result = await _channel.invokeMethod<Object>('installApk', {'path': path});
+      installError = result is String ? result : '';
+      return result == true || installError.isEmpty;
+    } catch (e) {
+      installError = '$e';
       return false;
     }
   }

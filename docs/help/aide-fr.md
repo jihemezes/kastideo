@@ -1353,7 +1353,7 @@ Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bann
 
 ### Mises à jour
 
-Kastideo cherche les nouvelles versions Android sur GitHub. Quand une version est proposée, **Installer** télécharge l'APK puis Android vous demande de confirmer. La première fois, Android demande aussi d'autoriser Kastideo à installer des applications (réglage qui s'ouvre tout seul).
+Kastideo cherche les nouvelles versions Android sur GitHub. Quand une version est proposée, **Installer** télécharge l'APK puis Android vous demande de confirmer. La première fois, Android demande aussi d'autoriser Kastideo à installer des applications (réglage qui s'ouvre tout seul). Une fois la mise à jour installée, **rouvrez Kastideo** : Android ferme l'application pendant l'installation.
 
 ### En cas de problème
 

@@ -316,7 +316,8 @@ class UpdateService extends ChangeNotifier {
         state = UpdateState.available;
         progress = null;
         notifyListeners();
-        return started ? null : 'android-install';
+        if (!started) PlaybackLog.shared.error('Installation de la mise à jour Android : ${Device.installError}', topic: LogTopic.updates);
+        return started ? null : 'android-install:${Device.installError}';
       }
       final file = await _download(release.assets[name]!, File('${tmp.path}$sep$name'));
       state = UpdateState.installing;

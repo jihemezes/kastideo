@@ -1,10 +1,12 @@
 package fr.jmezes.kastideo
 
 import android.app.NotificationChannel
+import android.app.PendingIntent
 import android.app.NotificationManager
 import android.app.UiModeManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -21,6 +23,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.io.FileInputStream
 
 /// Pont entre Flutter et Android : détection du téléviseur, dossiers, luminosité, notifications,
 /// installation des mises à jour (APK) et verrou multicast pour la recherche des appareils Cast.
@@ -251,16 +254,46 @@ class MainActivity : FlutterActivity() {
             (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN) && pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY))
     }
 
-    /// Ouvre l'installateur d'Android pour l'APK téléchargé (l'utilisateur confirme).
-    private fun installApk(path: String): Boolean {
+    /// Installe l'APK téléchargé avec l'installateur de paquets d'Android (session PackageInstaller : aucun
+    /// fournisseur de fichiers, aucune application tierce) ; Android demande une confirmation à l'utilisateur.
+    /// Renvoie "" si l'installation est lancée, sinon le motif de l'échec.
+    private fun installApk(path: String): String {
         val file = File(path)
-        if (!file.exists()) return false
-        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "application/vnd.android.package-archive")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
-        return true
+        if (!file.exists()) return "fichier introuvable : $path"
+        try {
+            val installer = packageManager.packageInstaller
+            val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+            }
+            val id = installer.createSession(params)
+            installer.openSession(id).use { session ->
+                FileInputStream(file).use { input ->
+                    session.openWrite("kastideo.apk", 0, file.length()).use { out ->
+                        input.copyTo(out)
+                        session.fsync(out)
+                    }
+                }
+                val intent = Intent(this, InstallReceiver::class.java).setAction(InstallReceiver.ACTION)
+                val flags = PendingIntent.FLAG_UPDATE_CURRENT or
+                    (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0)
+                val pending = PendingIntent.getBroadcast(this, id, intent, flags)
+                session.commit(pending.intentSender)
+            }
+            return ""
+        } catch (e: Exception) {
+            // Repli : ouverture classique de l'APK.
+            return try {
+                val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+                val intent = Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(uri, "application/vnd.android.package-archive")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                ""
+            } catch (e2: Exception) {
+                "${e.javaClass.simpleName}: ${e.message} / ${e2.javaClass.simpleName}: ${e2.message}"
+            }
+        }
     }
 
     private fun notify(title: String, body: String) {

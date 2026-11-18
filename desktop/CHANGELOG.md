@@ -26,6 +26,10 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android7] - 2026-11-18
+
+- Correction **mise à jour Android** : l'installation passe maintenant par l'installateur de paquets d'Android (plus de fournisseur de fichiers ni d'application tierce), avec un repli sur l'ouverture classique de l'APK. En cas d'échec, le motif exact est affiché sous le message et ajouté au Journal. Après l'installation, rouvrez Kastideo (Android ferme l'application pendant la mise à jour).
+
 ## [1.19.4-android6] - 2026-11-18
 
 - **Mise à niveau sur l'iPhone/iPad** (Windows, Linux, Android) :

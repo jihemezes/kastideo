@@ -95,8 +95,9 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       setState(() => _message = tr('Autorisez Kastideo à installer des applications (réglage qui vient de s\'ouvrir), puis revenez ici et réessayez.'));
       return;
     }
-    if (result == 'android-install') {
-      setState(() => _message = tr('Android n\'a pas pu ouvrir l\'installation. Téléchargez l\'APK depuis GitHub.'));
+    if (result.startsWith('android-install')) {
+      final detail = result.contains(':') ? result.substring(result.indexOf(':') + 1) : '';
+      setState(() => _message = '${tr('Android n\'a pas pu ouvrir l\'installation. Téléchargez l\'APK depuis GitHub.')}${detail.isEmpty ? '' : '\n$detail'}');
       return;
     }
     if (result.startsWith('deb:')) {
