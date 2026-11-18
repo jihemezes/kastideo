@@ -10,6 +10,7 @@ import '../core/models.dart';
 import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import '../main.dart' show mediaSync;
 import 'catalog_screen.dart' show showItemMenu;
 import 'widgets.dart';
 
@@ -365,6 +366,31 @@ class _DetailsViewState extends State<DetailsView> {
           children: [
             Text(tr('Épisodes'), style: kTextD(18, weight: FontWeight.w600)),
             const Spacer(),
+            PopupMenuButton<(bool, bool)>(
+              tooltip: tr('Vu / non vu'),
+              color: const Color(0xF02C2C2E),
+              onSelected: (v) async {
+                final (wholeSeries, watched) = v;
+                final list = wholeSeries ? [for (final s in seasons) ...s.episodes] : current.episodes;
+                for (final e in list) {
+                  await mediaSync.setPlayed(e, watched);
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: (false, true), child: Text(tr('Marquer la saison %s comme vue').replaceAll('%s', '${current.number}'), style: kTextD(13))),
+                PopupMenuItem(value: (false, false), child: Text(tr('Marquer la saison %s comme non vue').replaceAll('%s', '${current.number}'), style: kTextD(13))),
+                PopupMenuItem(value: (true, true), child: Text(tr('Marquer toute la série comme vue'), style: kTextD(13))),
+                PopupMenuItem(value: (true, false), child: Text(tr('Marquer toute la série comme non vue'), style: kTextD(13))),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.check_circle_outline_rounded, size: 18, color: KPalette.accentDark),
+                  const SizedBox(width: 6),
+                  Text(tr('Vu / non vu'), style: kTextD(13, color: KPalette.accentDark)),
+                ]),
+              ),
+            ),
             if (!context.library.isLocalFile(current.episodes.first))
               PopupMenuButton<bool>(
                 tooltip: tr('Télécharger la saison'),

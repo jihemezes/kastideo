@@ -451,6 +451,26 @@ class _LibraryGridState extends State<_LibraryGrid> {
       case LibrarySort.runtime:
         items.sort((a, b) => (b.runtime ?? 0).compareTo(a.runtime ?? 0));
     }
+    // Sens du tri et regroupement en sections (réglages mémorisés).
+    final reverse = context.settings.libraryReverse;
+    if (reverse) items.setAll(0, items.reversed.toList());
+    final groupBy = context.settings.libraryGroupBy;
+    String groupLabel(MediaItem i, String criterion) => switch (criterion) {
+          'source' => library.sourceOf(i)?.name ?? '',
+          'folder' => i.group,
+          'type' => i.kind == MediaKind.series ? tr('Séries') : isPersonalVideo(i) ? tr('Vidéos') : tr('Films'),
+          'year' => yearOf(i)?.toString() ?? tr('Année inconnue'),
+          'month' => i.added == null ? tr('Date inconnue') : '${i.added!.year}-${i.added!.month.toString().padLeft(2, '0')}',
+          _ => '',
+        };
+    final sections = <String, List<MediaItem>>{};
+    if (groupBy.isNotEmpty) {
+      for (final i in items) {
+        final key = groupBy.map((c) => groupLabel(i, c)).where((t) => t.isNotEmpty).join(' · ');
+        (sections[key.isEmpty ? tr('Autres') : key] ??= []).add(i);
+      }
+    }
+    final sectionKeys = sections.keys.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     final title = switch (view) {
       LibraryView.movies => tr('Films'),
       LibraryView.series => tr('Séries'),
@@ -538,6 +558,42 @@ class _LibraryGridState extends State<_LibraryGrid> {
                 ],
                 (v) => navigation.setLibrary(sort: v ?? LibrarySort.title),
               ),
+              Tooltip(
+                message: reverse ? tr('Ordre décroissant') : tr('Ordre croissant'),
+                child: IconButton(
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => context.settings.setBool('library.reverse', !reverse),
+                  icon: Icon(reverse ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded, size: 18),
+                ),
+              ),
+              PopupMenuButton<String>(
+                tooltip: tr('Regrouper par'),
+                color: KPalette.menu,
+                onSelected: (c) {
+                  final now = [...groupBy];
+                  now.contains(c) ? now.remove(c) : now.add(c);
+                  context.settings.setString('library.groupBy', now.join(','));
+                },
+                itemBuilder: (_) => [
+                  for (final (c, label) in [
+                    ('source', tr('Source')),
+                    ('folder', tr('Catégorie / dossier / album')),
+                    ('type', tr('Type')),
+                    ('year', tr('Année')),
+                    ('month', tr('Mois d\'ajout')),
+                  ])
+                    CheckedPopupMenuItem<String>(value: c, checked: groupBy.contains(c), child: Text(label, style: kText(13))),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(color: KPalette.ink.withValues(alpha: groupBy.isEmpty ? 0.06 : 0.16), borderRadius: BorderRadius.circular(8)),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.view_agenda_outlined, size: 16),
+                    const SizedBox(width: 6),
+                    Text(groupBy.isEmpty ? tr('Regrouper par') : '${tr('Regrouper par')} (${groupBy.length})', style: kText(13)),
+                  ]),
+                ),
+              ),
               if (navigation.hasLibraryFilters)
                 TextButton(onPressed: navigation.resetLibraryFilters, child: Text(tr('Réinitialiser'), style: kText(13))),
             ]),
@@ -549,6 +605,27 @@ class _LibraryGridState extends State<_LibraryGrid> {
           hasScrollBody: false,
           child: Center(child: Text(tr('Aucun résultat'), style: kText(14, color: KPalette.secondaryText))),
         )
+      else if (groupBy.isNotEmpty)
+        for (final key in sectionKeys) ...[
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+            sliver: SliverToBoxAdapter(
+              child: Row(children: [
+                Flexible(child: Text(key, style: kText(17, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                const SizedBox(width: 8),
+                Text('${sections[key]!.length}', style: kText(13, color: KPalette.secondaryText)),
+              ]),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: kPosterWidth + 20, mainAxisExtent: kPosterWidth * 1.5 + 52, crossAxisSpacing: 16, mainAxisSpacing: 16),
+              delegate: SliverChildBuilderDelegate((context, i) => MediaCard(item: sections[key]![i]), childCount: sections[key]!.length),
+            ),
+          ),
+        ]
       else
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 30),

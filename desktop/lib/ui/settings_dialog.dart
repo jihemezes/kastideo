@@ -191,6 +191,12 @@ class _GeneralTabState extends State<_GeneralTab> {
         _section(tr('Lecture'), [
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
+            title: Text(tr('Enchaîner automatiquement l\'épisode suivant d\'une série'), style: kText(14)),
+            value: settings.autoNextEpisode,
+            onChanged: (v) => settings.setBool('player.autoNext', v),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
             title: Text(tr('Reprendre les films et épisodes là où vous vous êtes arrêté'), style: kText(14)),
             value: settings.resumePlayback,
             onChanged: settings.setResume,
@@ -1574,6 +1580,20 @@ class _StartPageSection extends StatelessWidget {
       row(tr('Direct'), MediaKind.live),
       row(tr('Films'), MediaKind.movie),
       row(tr('Séries'), MediaKind.series),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [
+          SizedBox(width: 230, child: Text(tr('À l\'ouverture du guide'), style: kText(14))),
+          Flexible(
+            child: PickerField<String>(
+              title: tr('À l\'ouverture du guide'),
+              value: settings.guideStart,
+              options: [('now', tr('Maintenant')), ('last', tr('Dernière position'))],
+              onChanged: (v) => settings.setString('guide.start', v),
+            ),
+          ),
+        ]),
+      ),
       Text(
           tr('Page affichée en ouvrant Direct, Films ou Séries depuis une autre section. « Dernière consultée » reprend la catégorie où vous étiez. '
               'Clic droit sur une catégorie de la barre latérale : « Définir comme catégorie de départ ».'),

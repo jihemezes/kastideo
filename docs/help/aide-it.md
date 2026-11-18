@@ -300,6 +300,10 @@ Un banner **Annulla** resta visibile per qualche secondo. Un elemento rimosso **
 
 ## Ordinare e filtrare I miei video {#filtres-videos}
 
+<!--pc-->
+Su **Windows, Linux e Android**, la **freccia** inverte l'ordine e **Raggruppa per** dispone le locandine in **sezioni** (sorgente, categoria / cartella / album, tipo, anno, mese di aggiunta; più criteri insieme). Tutto viene ricordato.
+<!--/pc-->
+
 In **I miei video**, le viste **Film**, **Serie** e **Video** hanno una barra dei filtri. Le tue scelte vengono **ricordate** e ripristinate al successivo avvio. **Reimposta** cancella tutti i filtri (l'ordinamento viene mantenuto).
 
 - **Sorgente**: quando sono state aggiunte più sorgenti (cartella locale, Emby, Jellyfin, Plex…), mostra solo una di esse. Nella vista «tutte le sorgenti», un **badge** su ogni locandina indica da dove proviene il film.
@@ -406,6 +410,10 @@ Il canale riempie l'intero fotogramma, come su un televisore. La prima volta che
 
 ## La guida TV a griglia {#guide-grille}
 
+<!--pc-->
+Impostazioni > Generale > Pagina iniziale > **All'apertura della guida**: **Adesso** (ora attuale) o **Ultima posizione** (ora e categoria dell'ultima visita). Nella scheda di una serie, **Visto / non visto** segna una stagione o l'intera serie.
+<!--/pc-->
+
 <!--mac-->
 La sezione **Guida TV** (barra laterale, scheda **Guida TV** delle interfacce Cinema e TV, **⌘7**, oppure il tasto **G** nell'interfaccia TV). I canali sono nelle righe, le ore nelle colonne; la linea rossa indica l'ora corrente.
 
@@ -447,6 +455,10 @@ Barra laterale > **Temi**: **In questo momento**, **Stasera** (20–23) o **Cana
 # Riproduzione
 
 ## L'essenziale {#lecture}
+
+<!--pc-->
+Su **Windows, Linux e Android**, il menu **⋯** della barra del lettore offre **velocità** (film, episodi), **tracce audio**, **sottotitoli** e **formato dell'immagine** (adatta, riempi lo schermo, 16:9, 4:3). In diretta, **◀◀ / ▶▶** passano al canale precedente o successivo della categoria e la barra mostra il **programma in corso** con l'avanzamento e il successivo. Per un episodio compaiono **Successivo** ed **Episodi…**, e l'episodio seguente parte da solo alla fine (disattivabile in Impostazioni > Generale > Riproduzione).
+<!--/pc-->
 
 <!--mac-->
 Kastideo riproduce tutti i contenuti con il motore **VLC**: MPEG-TS (.ts) in diretta, HLS (.m3u8), MP4, MKV, AVI…

@@ -116,6 +116,22 @@ class AppSettings extends ChangeNotifier {
     if (startLast(kind) != value) _prefs.setString('start.last.${kind.name}', value);
   }
 
+  /// Guide TV à l'ouverture : « now » (heure actuelle) ou « last » (heure et catégorie de la dernière visite).
+  String get guideStart => _prefs.getString('guide.start') ?? 'now';
+  int? get guideLastStart => _prefs.getInt('guide.last.start');
+  String get guideLastCategory => _prefs.getString('guide.last.category') ?? '';
+  void rememberGuide(int startS, String category) {
+    _prefs.setInt('guide.last.start', startS);
+    _prefs.setString('guide.last.category', category);
+  }
+
+  /// Vidéothèque : sens du tri et regroupement en sections (source, folder, type, year, month).
+  bool get libraryReverse => _prefs.getBool('library.reverse') ?? false;
+  List<String> get libraryGroupBy => (_prefs.getString('library.groupBy') ?? '').split(',').where((e) => e.isNotEmpty).toList();
+
+  /// Enchaîner automatiquement l'épisode suivant d'une série.
+  bool get autoNextEpisode => _prefs.getBool('player.autoNext') ?? true;
+
   void setInt(String key, int value) {
     _prefs.setInt(key, value);
     notifyListeners();

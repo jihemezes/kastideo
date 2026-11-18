@@ -208,6 +208,14 @@ Future<void> main(List<String> args) async {
     if (channel != null && settings.replayReturnToLive) playback.play(channel);
   };
   final info = MediaInfoStore(library, settings);
+  // Fin d'un épisode : enchaîne le suivant (réglage « Enchaîner automatiquement »).
+  playback.onEpisodeEnded = (item) async {
+    if (!settings.autoNextEpisode) return;
+    final next = await nextEpisodeOf(library, info, item);
+    if (next == null || playback.current?.id != item.id) return;
+    playback.play(next);
+    library.noteRecent(next);
+  };
   final guide = GuideStore(library);
   final recordings = RecordingCenter(settings, playback, library);
   final downloads = DownloadManager(settings, playback);

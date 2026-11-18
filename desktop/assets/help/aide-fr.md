@@ -300,6 +300,10 @@ Un bandeau **Annuler** reste affiché quelques secondes. Un contenu retiré **r�
 
 ## Trier et filtrer Mes vidéos {#filtres-videos}
 
+<!--pc-->
+Sur **Windows, Linux et Android**, le bouton **flèche** inverse le sens du tri et **Regrouper par** range les affiches en **sections** (source, catégorie / dossier / album, type, année, mois d'ajout ; plusieurs critères à la fois). Le tout est mémorisé.
+<!--/pc-->
+
 Dans **Mes vidéos**, les vues **Films**, **Séries** et **Vidéos** ont une barre de filtres. Vos choix sont **mémorisés** : ils sont retrouvés au prochain lancement. Le bouton **Réinitialiser** remet tous les filtres à zéro (le tri est conservé).
 
 - **Source** : quand plusieurs sources sont ajoutées (dossier local, Emby, Jellyfin, Plex…), choisissez de n'afficher que l'une d'elles. Dans la vue « toutes les sources », une **pastille** sur chaque affiche indique d'où vient le film.
@@ -406,6 +410,10 @@ La chaîne occupe tout le cadre, comme sur une télévision. Au premier affichag
 
 ## Le Guide TV en grille {#guide-grille}
 
+<!--pc-->
+Réglages > Général > Page de départ > **À l'ouverture du guide** : **Maintenant** (heure actuelle) ou **Dernière position** (l'heure et la catégorie de votre dernière visite). Sur la fiche d'une série, **Vu / non vu** marque une saison ou toute la série.
+<!--/pc-->
+
 <!--mac-->
 Section **Guide TV** (barre latérale, onglet **Guide TV** des interfaces Cinéma et TV, **⌘7**, ou touche **G** en interface TV). Les chaînes sont en lignes, les heures en colonnes ; le trait rouge marque l'heure actuelle.
 
@@ -447,6 +455,10 @@ Barre latérale > **Thèmes** : **En ce moment**, **Ce soir** (20 h – 23 h) ou
 # Lecture
 
 ## L'essentiel {#lecture}
+
+<!--pc-->
+Sur **Windows, Linux et Android**, le menu **⋯** de la barre du lecteur donne la **vitesse** (films, épisodes), les **pistes audio**, les **sous-titres** et le **format de l'image** (ajuster, remplir l'écran, 16:9, 4:3). En direct, **◀◀ / ▶▶** passent à la chaîne précédente ou suivante de la catégorie, et la barre affiche le **programme en cours** avec sa progression et le programme suivant. Pour un épisode, **Suivant** et **Épisodes…** apparaissent, et l'épisode suivant démarre tout seul à la fin (désactivable dans Réglages > Général > Lecture).
+<!--/pc-->
 
 <!--mac-->
 Kastideo lit tous les contenus avec le moteur **VLC** : direct au format MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…

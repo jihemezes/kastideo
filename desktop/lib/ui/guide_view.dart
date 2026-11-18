@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../app_state.dart';
 import '../core/epg.dart';
 import '../core/models.dart';
+import '../core/settings.dart';
 import '../core/text.dart';
 import '../core/themes.dart';
 import '../l10n.dart';
@@ -144,8 +145,29 @@ class _GuideViewState extends State<GuideView> {
     _minute = Timer.periodic(const Duration(minutes: 1), (_) => mounted ? setState(() {}) : null);
   }
 
+  /// Réglage « À l'ouverture du guide : dernière position » : heure et catégorie de la dernière visite.
+  AppSettings? _settings;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_settings == null) {
+      _settings = context.settings;
+      _restoreLast(_settings!);
+    }
+  }
+
+  void _restoreLast(AppSettings settings) {
+    if (settings.guideStart != 'last') return;
+    final start = settings.guideLastStart;
+    if (start != null) _start = DateTime.fromMillisecondsSinceEpoch(start * 1000);
+    final category = settings.guideLastCategory;
+    if (category.isNotEmpty) _filter = CategoryChannels(category);
+  }
+
   @override
   void dispose() {
+    _settings?.rememberGuide(_start.millisecondsSinceEpoch ~/ 1000, switch (_filter) { CategoryChannels(:final name) => name, _ => '' });
     _minute?.cancel();
     _search.dispose();
     super.dispose();

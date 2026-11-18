@@ -300,6 +300,10 @@ Um banner **Desfazer** permanece visível por alguns segundos. Um item removido 
 
 ## Ordenar e filtrar Meus vídeos {#filtres-videos}
 
+<!--pc-->
+No **Windows, Linux e Android**, o botão de **seta** inverte a ordem e **Agrupar por** organiza os cartazes em **seções** (fonte, categoria / pasta / álbum, tipo, ano, mês de adição; vários critérios ao mesmo tempo). Tudo é lembrado.
+<!--/pc-->
+
 Em **Meus vídeos**, as visualizações **Filmes**, **Séries** e **Vídeos** têm uma barra de filtros. Suas escolhas são **lembradas** e restauradas na próxima abertura. **Redefinir** limpa todos os filtros (a ordenação é mantida).
 
 - **Fonte**: quando várias fontes foram adicionadas (pasta local, Emby, Jellyfin, Plex…), mostre apenas uma delas. Na visualização de «todas as fontes», um **selo** em cada pôster mostra de onde o filme vem.
@@ -406,6 +410,10 @@ O canal ocupa todo o quadro, como em uma televisão. Na primeira vez que aparece
 
 ## O guia de TV em grade {#guide-grille}
 
+<!--pc-->
+Ajustes > Geral > Página inicial > **Ao abrir o guia**: **Agora** (hora atual) ou **Última posição** (hora e categoria da última visita). Na ficha de uma série, **Visto / não visto** marca uma temporada ou a série inteira.
+<!--/pc-->
+
 <!--mac-->
 A seção **Guia de TV** (barra lateral, aba **Guia de TV** das interfaces Cinema e TV, **⌘7**, ou a tecla **G** na interface TV). Os canais ficam nas linhas, as horas nas colunas; a linha vermelha marca a hora atual.
 
@@ -447,6 +455,10 @@ Barra lateral > **Temas**: **Agora mesmo**, **Hoje à noite** (20h–23h) ou **C
 # Reprodução
 
 ## O essencial {#lecture}
+
+<!--pc-->
+No **Windows, Linux e Android**, o menu **⋯** da barra do reprodutor oferece **velocidade** (filmes, episódios), **faixas de áudio**, **legendas** e **formato da imagem** (ajustar, preencher a tela, 16:9, 4:3). Ao vivo, **◀◀ / ▶▶** passam ao canal anterior ou seguinte da categoria, e a barra mostra o **programa em andamento** com o progresso e o próximo. Em um episódio aparecem **Próximo** e **Episódios…**, e o episódio seguinte começa sozinho no fim (pode ser desativado em Ajustes > Geral > Reprodução).
+<!--/pc-->
 
 <!--mac-->
 O Kastideo reproduz todos os conteúdos com o motor **VLC**: MPEG-TS (.ts) ao vivo, HLS (.m3u8), MP4, MKV, AVI…

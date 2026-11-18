@@ -300,6 +300,10 @@ An **Undo** banner stays visible for a few seconds. A removed item **comes back*
 
 ## Sort and filter My videos {#filtres-videos}
 
+<!--pc-->
+On **Windows, Linux and Android**, the **arrow** button reverses the sort order and **Group by** arranges posters in **sections** (source, category / folder / album, type, year, month added; several criteria at once). Everything is remembered.
+<!--/pc-->
+
 In **My videos**, the **Movies**, **Series** and **Videos** views have a filter bar. Your choices are **remembered** and restored at the next launch. **Reset** clears every filter (the sort order is kept).
 
 - **Source**: when several sources are added (local folder, Emby, Jellyfin, Plex…), show only one of them. In the "all sources" view, a **badge** on each poster shows where the movie comes from.
@@ -406,6 +410,10 @@ The channel fills the whole frame, like on a television. The first time it appea
 
 ## The TV Guide grid {#guide-grille}
 
+<!--pc-->
+Settings > General > Start page > **When opening the guide**: **Now** (current time) or **Last position** (the time and category of your last visit). On a series page, **Watched / unwatched** marks a season or the whole series.
+<!--/pc-->
+
 <!--mac-->
 The **TV Guide** section (sidebar, **TV Guide** tab of the Cinema and TV interfaces, **⌘7**, or the **G** key in the TV interface). Channels are in rows, hours in columns; the red line marks the current time.
 
@@ -447,6 +455,10 @@ Sidebar > **Themes**: **Right now**, **Tonight** (8–11 pm) or **Channels**, fi
 # Playback
 
 ## The essentials {#lecture}
+
+<!--pc-->
+On **Windows, Linux and Android**, the **⋯** menu in the player bar offers **speed** (movies, episodes), **audio tracks**, **subtitles** and **picture format** (fit, fill the screen, 16:9, 4:3). In live TV, **◀◀ / ▶▶** switch to the previous or next channel of the category, and the bar shows the **current programme** with its progress and the next one. For an episode, **Next** and **Episodes…** appear, and the next episode starts by itself at the end (can be turned off in Settings > General > Playback).
+<!--/pc-->
 
 <!--mac-->
 Kastideo plays all content with the **VLC** engine: live MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI…

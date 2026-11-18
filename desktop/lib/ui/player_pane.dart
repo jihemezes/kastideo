@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart' show AudioTrack, SubtitleTrack;
 import 'package:media_kit_video/media_kit_video.dart';
+import '../core/details.dart' show SeriesSeason;
+import '../core/epg.dart' show nowSeconds;
 import '../core/desk.dart';
 import '../core/device.dart';
 
@@ -262,7 +265,17 @@ class _PlayerPaneState extends State<PlayerPane> {
                     if (playback.casting)
                       const CastPanel()
                     else
-                      Video(controller: playback.video, controls: NoVideoControls, fill: Colors.black),
+                      Video(
+                        controller: playback.video,
+                        controls: NoVideoControls,
+                        fill: Colors.black,
+                        fit: playback.videoFormat == VideoFormat.fill ? BoxFit.cover : BoxFit.contain,
+                        aspectRatio: switch (playback.videoFormat) {
+                          VideoFormat.wide => 16 / 9,
+                          VideoFormat.standard => 4 / 3,
+                          _ => null,
+                        },
+                      ),
                     if (playback.isLoading && playback.errorMessage == null)
                       const Center(child: CircularProgressIndicator(color: Colors.white)),
                     if (playback.errorMessage != null) _ErrorView(message: playback.errorMessage!),
@@ -478,6 +491,14 @@ class ControlsBar extends StatelessWidget {
               tooltip: tr('Arrêter la lecture (Ctrl+.)'),
               onTap: () => stopPlayback(context),
             ),
+            if (playback.isLive) ...[
+              _BarButton(icon: Icons.skip_previous_rounded, tooltip: tr('Chaîne précédente'), onTap: () => zapChannel(context, -1)),
+              _BarButton(icon: Icons.skip_next_rounded, tooltip: tr('Chaîne suivante'), onTap: () => zapChannel(context, 1)),
+            ],
+            if (playback.current?.kind == MediaKind.episode) ...[
+              _BarButton(icon: Icons.skip_next_rounded, tooltip: tr('Épisode suivant'), onTap: () => _playNextEpisode(context)),
+              _BarButton(icon: Icons.list_rounded, tooltip: tr('Épisodes…'), onTap: () => _showEpisodes(context)),
+            ],
             if (playback.isSeekable) ...[
               const SizedBox(width: 8),
               _BarButton(icon: Icons.replay_10_rounded, tooltip: tr('Reculer de 10 s (←)'), onTap: () => playback.jump(-10)),
@@ -510,6 +531,7 @@ class ControlsBar extends StatelessWidget {
             const SizedBox(width: 14),
             Flexible(child: _NowTitle(playback.current)),
             const SizedBox(width: 14),
+            const _PlayerOptionsMenu(),
             _BarButton(
               icon: playback.muted || playback.volume == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
               tooltip: tr('Couper / rétablir le son'),
@@ -793,10 +815,35 @@ class _NowTitle extends StatelessWidget {
       listenable: context.guide,
       builder: (context, _) {
         final p = context.guide.current(current);
+        final next = context.guide.next(current);
+        final title = Text(p == null ? current.displayName : '${current.displayName} · ${p.title}',
+            style: style, maxLines: 1, overflow: TextOverflow.ellipsis);
+        final tip = p == null
+            ? current.name
+            : '${p.title} · ${timeRange(p)}${p.desc == null ? '' : '\n\n${p.desc}'}${next == null ? '' : '\n\n${tr('Ensuite')} : ${next.title} · ${timeRange(next)}'}';
+        // Programme en cours : barre de progression sous le titre, programme suivant en dessous.
+        final total = p == null ? 0 : p.stopS - p.startS;
+        final fraction = p != null && total > 0 ? ((nowSeconds() - p.startS) / total).clamp(0.0, 1.0) : null;
         return Tooltip(
-          message: p == null ? current.name : '${p.title} · ${timeRange(p)}${p.desc == null ? '' : '\n\n${p.desc}'}',
-          child: Text(p == null ? current.displayName : '${current.displayName} · ${p.title}',
-              style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+          message: tip,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            title,
+            if (fraction != null) ...[
+              const SizedBox(height: 3),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: fraction.toDouble(),
+                  minHeight: 3,
+                  color: KPalette.orange,
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                ),
+              ),
+            ],
+            if (next != null)
+              Text('${tr('Ensuite')} : ${next.title}',
+                  style: kTextD(11, color: Colors.white.withValues(alpha: 0.5)), maxLines: 1, overflow: TextOverflow.ellipsis),
+          ]),
         );
       },
     );
@@ -904,6 +951,134 @@ class _TimeshiftBarState extends State<TimeshiftBar> {
           ),
         ],
       ]),
+    );
+  }
+}
+
+Future<void> _playNextEpisode(BuildContext context) async {
+  final playback = context.playback;
+  final current = playback.current;
+  if (current == null) return;
+  final next = await nextEpisodeOf(context.library, context.info, current);
+  if (!context.mounted) return;
+  if (next == null) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('Dernier épisode de la série.'))));
+    return;
+  }
+  playback.play(next);
+  context.library.noteRecent(next);
+}
+
+Future<void> _showEpisodes(BuildContext context) async {
+  final playback = context.playback;
+  final current = playback.current;
+  if (current == null) return;
+  final seasons = await seasonsOfEpisode(context.library, context.info, current);
+  if (!context.mounted) return;
+  final picked = await showKDialog<MediaItem>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(tr('Épisodes')),
+      content: SizedBox(
+        width: 460,
+        height: 460,
+        child: seasons.isEmpty
+            ? Text(tr('Aucun épisode.'))
+            : ListView(children: [
+                for (final SeriesSeason s in seasons) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
+                    child: Text('${tr('Saison')} ${s.number}', style: kTextD(13, weight: FontWeight.w700, color: KPalette.orange)),
+                  ),
+                  for (final e in s.episodes)
+                    ListTile(
+                      dense: true,
+                      selected: e.id == current.id,
+                      leading: context.watch.isWatched(e.id) ? const Icon(Icons.check_circle_rounded, size: 18, color: Colors.greenAccent) : null,
+                      title: Text('${e.number != null ? '${e.number}. ' : ''}${e.name}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                      onTap: () => Navigator.pop(c, e),
+                    ),
+                ],
+              ]),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(c), child: Text(tr('Fermer')))],
+    ),
+  );
+  if (picked == null || !context.mounted) return;
+  playback.play(picked);
+  context.library.noteRecent(picked);
+}
+
+/// Menu ⋯ du lecteur : vitesse (films, épisodes), pistes audio, sous-titres, format de l'image.
+class _PlayerOptionsMenu extends StatelessWidget {
+  const _PlayerOptionsMenu();
+
+  @override
+  Widget build(BuildContext context) {
+    final playback = context.playback;
+    String trackName(String? title, String? language, String id, int index) {
+      final parts = [if (title != null && title.isNotEmpty) title, if (language != null && language.isNotEmpty) language];
+      return parts.isEmpty ? '${tr('Piste')} ${index + 1}' : parts.join(' · ');
+    }
+
+    PopupMenuItem<Object> header(String text) => PopupMenuItem<Object>(
+          enabled: false,
+          height: 28,
+          child: Text(text, style: kTextD(11, weight: FontWeight.w700, color: Colors.white54)),
+        );
+    PopupMenuItem<Object> entry(Object value, String text, bool selected) => PopupMenuItem<Object>(
+          value: value,
+          height: 34,
+          child: Row(children: [
+            SizedBox(width: 20, child: selected ? const Icon(Icons.check_rounded, size: 16) : null),
+            Flexible(child: Text(text, style: kTextD(13), overflow: TextOverflow.ellipsis)),
+          ]),
+        );
+    return PopupMenuButton<Object>(
+      tooltip: tr('Options du lecteur'),
+      color: const Color(0xF02C2C2E),
+      icon: const Icon(Icons.more_horiz_rounded, size: 22, color: Colors.white),
+      padding: EdgeInsets.zero,
+      onSelected: (v) {
+        if (v is double) {
+          playback.setRate(v);
+        } else if (v is VideoFormat) {
+          playback.setVideoFormat(v);
+        } else if (v is AudioTrack) {
+          playback.selectAudioTrack(v);
+        } else if (v is SubtitleTrack) {
+          playback.selectSubtitleTrack(v);
+        }
+      },
+      itemBuilder: (_) {
+        final audio = playback.audioTracks;
+        final subs = playback.subtitleTracks;
+        final selectedAudio = playback.selectedAudio.id;
+        final selectedSub = playback.selectedSubtitle.id;
+        return [
+          if (!playback.isLive && playback.isSeekable) ...[
+            header(tr('Vitesse de lecture')),
+            for (final r in const [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])
+              entry(r, '×${r.toString().replaceAll('.0', '').replaceAll('.', ',')}', playback.rate == r),
+          ],
+          if (audio.length > 1) ...[
+            header(tr('Audio')),
+            for (var i = 0; i < audio.length; i++)
+              entry(audio[i], trackName(audio[i].title, audio[i].language, audio[i].id, i), audio[i].id == selectedAudio),
+          ],
+          if (subs.isNotEmpty) ...[
+            header(tr('Sous-titres')),
+            entry(SubtitleTrack.no(), tr('Aucun'), selectedSub == 'no'),
+            for (var i = 0; i < subs.length; i++)
+              entry(subs[i], trackName(subs[i].title, subs[i].language, subs[i].id, i), subs[i].id == selectedSub),
+          ],
+          header(tr('Format de l\'image')),
+          entry(VideoFormat.fit, tr('Ajuster'), playback.videoFormat == VideoFormat.fit),
+          entry(VideoFormat.fill, tr('Remplir l\'écran'), playback.videoFormat == VideoFormat.fill),
+          entry(VideoFormat.wide, '16:9', playback.videoFormat == VideoFormat.wide),
+          entry(VideoFormat.standard, '4:3', playback.videoFormat == VideoFormat.standard),
+        ];
+      },
     );
   }
 }

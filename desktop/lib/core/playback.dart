@@ -72,6 +72,8 @@ class PlaybackController extends ChangeNotifier {
         notifyListeners();
       }),
       player.stream.error.listen(_onError),
+      player.stream.tracks.listen((_) => notifyListeners()),
+      player.stream.track.listen((_) => notifyListeners()),
       player.stream.log.listen((log) {
         final level = log.level == 'error' || log.level == 'fatal' ? 0 : 1;
         PlaybackLog.shared.engine('[${log.prefix}] ${log.text.trim()}', level: level);
@@ -86,8 +88,10 @@ class PlaybackController extends ChangeNotifier {
           errorMessage = 'Le flux s\'est interrompu. Le serveur a peut-être coupé la connexion.';
           notifyListeners();
         } else if (current != null) {
-          onProgress?.call(current!, duration.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.stop);
-          watchProgress?.clear(current!.id); // film terminé : plus de reprise
+          final finished = current!;
+          onProgress?.call(finished, duration.inMilliseconds / 1000, duration.inMilliseconds / 1000, PlaybackEvent.stop);
+          watchProgress?.clear(finished.id); // film terminé : plus de reprise
+          if (finished.kind == MediaKind.episode) onEpisodeEnded?.call(finished);
         }
       }),
     ]);
@@ -126,6 +130,33 @@ class PlaybackController extends ChangeNotifier {
 
   /// Fin d'un replay (pour revenir au direct).
   void Function(MediaItem item)? onReplayEnded;
+
+  /// Fin d'un épisode : l'application enchaîne le suivant (réglage « Enchaîner automatiquement »).
+  void Function(MediaItem item)? onEpisodeEnded;
+
+  /// Format de l'image : ajuster, remplir l'écran, 16:9, 4:3.
+  VideoFormat videoFormat = VideoFormat.fit;
+
+  void setVideoFormat(VideoFormat value) {
+    videoFormat = value;
+    notifyListeners();
+  }
+
+  /// Pistes audio et sous-titres proposées par le flux (hors « auto » et « aucune »).
+  List<AudioTrack> get audioTracks => player.state.tracks.audio.where((t) => t.id != 'auto' && t.id != 'no').toList();
+  List<SubtitleTrack> get subtitleTracks => player.state.tracks.subtitle.where((t) => t.id != 'auto' && t.id != 'no').toList();
+  AudioTrack get selectedAudio => player.state.track.audio;
+  SubtitleTrack get selectedSubtitle => player.state.track.subtitle;
+
+  Future<void> selectAudioTrack(AudioTrack track) async {
+    await player.setAudioTrack(track);
+    notifyListeners();
+  }
+
+  Future<void> selectSubtitleTrack(SubtitleTrack track) async {
+    await player.setSubtitleTrack(track);
+    notifyListeners();
+  }
 
   /// Lecture d'un contenu d'un serveur (Jellyfin, Emby, Plex) : début, progression, pause, fin — transmis au serveur.
   void Function(MediaItem item, double position, double duration, PlaybackEvent event)? onProgress;
@@ -791,3 +822,6 @@ class PlaybackController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Format de l'image dans le lecteur.
+enum VideoFormat { fit, fill, wide, standard }

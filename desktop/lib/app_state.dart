@@ -4,6 +4,7 @@ import 'l10n.dart';
 import 'theme.dart';
 import 'core/alerts.dart';
 import 'core/cast_controller.dart';
+import 'core/details.dart' show SeriesSeason;
 import 'core/downloads.dart';
 import 'core/epg.dart';
 import 'core/guide.dart';
@@ -479,6 +480,49 @@ Future<void> watchReplay(
 }
 
 /// Lance la lecture d'un film ou d'un épisode et affiche le lecteur (dans sa section, avec sa fiche derrière).
+/// Épisode qui suit celui-ci dans sa série (saisons dans l'ordre), ou null.
+Future<MediaItem?> nextEpisodeOf(LibraryStore library, MediaInfoStore info, MediaItem episode) async {
+  final series = library.seriesOf(episode);
+  if (series == null) return null;
+  var seasons = info.seasons(series.id) ?? await library.seasonsFor(series);
+  if (seasons == null) {
+    await info.load(series);
+    seasons = info.seasons(series.id);
+  }
+  if (seasons == null) return null;
+  final all = [for (final s in seasons) ...s.episodes];
+  final i = all.indexWhere((e) => e.id == episode.id);
+  return i >= 0 && i + 1 < all.length ? all[i + 1] : null;
+}
+
+/// Tous les épisodes de la série d'un épisode (liste du lecteur).
+Future<List<SeriesSeason>> seasonsOfEpisode(LibraryStore library, MediaInfoStore info, MediaItem episode) async {
+  final series = library.seriesOf(episode);
+  if (series == null) return const [];
+  var seasons = info.seasons(series.id) ?? await library.seasonsFor(series);
+  if (seasons == null) {
+    await info.load(series);
+    seasons = info.seasons(series.id);
+  }
+  return seasons ?? const [];
+}
+
+/// Chaîne précédente (-1) ou suivante (+1) dans la catégorie de la chaîne regardée.
+Future<void> zapChannel(BuildContext context, int direction) async {
+  final playback = context.playback;
+  final library = context.library;
+  final current = playback.current;
+  if (current == null || current.kind != MediaKind.live) return;
+  var list = library.itemsInCategory(MediaKind.live, current.group);
+  if (!list.any((i) => i.id == current.id)) list = library.items(MediaKind.live);
+  final index = list.indexWhere((i) => i.id == current.id);
+  if (index < 0 || list.length < 2) return;
+  final target = list[(index + direction + list.length) % list.length];
+  if (!await confirmConnection(context, target)) return;
+  playback.play(target);
+  library.noteRecent(target);
+}
+
 Future<void> playItem(BuildContext context, MediaItem item) async {
   if (!await confirmConnection(context, item)) return;
   if (!context.mounted) return;

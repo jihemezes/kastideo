@@ -2,6 +2,16 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.4-desktop5] - 2026-11-18
+
+- **Mise à niveau sur l'iPhone/iPad** (Windows, Linux, Android) :
+  - Lecteur : menu **⋯** avec **pistes audio**, **sous-titres**, **format de l'image** (ajuster, remplir, 16:9, 4:3) et **vitesse** des films et épisodes.
+  - Séries : boutons **Épisode suivant** et **Épisodes…** dans le lecteur, **enchaînement automatique** de l'épisode suivant (réglable).
+  - Direct : boutons **chaîne précédente / suivante**, **programme en cours** avec barre de progression et programme suivant.
+  - Guide TV : réglage **À l'ouverture du guide** (Maintenant ou Dernière position).
+  - Vu / non vu : sur la fiche d'une série, marquer une saison ou toute la série ; « Marquer comme vu » aussi pour les contenus IPTV.
+  - Mes vidéos : **sens du tri** et **Regrouper par** (source, catégorie / dossier / album, type, année, mois d'ajout ; plusieurs critères).
+
 ## [1.19.4-desktop4] - 2026-11-17
 
 - Correction **YouTube** : la recherche (texte, tri, résultats, page) et l'onglet choisi sont conservés quand on revient de la lecture ; plus besoin de refaire la recherche.
@@ -15,6 +25,16 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - **Aide traduite** en espagnol, allemand, italien et portugais (une seule version portugaise pour le Portugal et le Brésil), avec les images de l'aide dans chaque langue. L'aide suit la langue de l'interface ; anglais si elle n'est pas gérée.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
+
+## [1.19.4-android6] - 2026-11-18
+
+- **Mise à niveau sur l'iPhone/iPad** (Windows, Linux, Android) :
+  - Lecteur : menu **⋯** avec **pistes audio**, **sous-titres**, **format de l'image** (ajuster, remplir, 16:9, 4:3) et **vitesse** des films et épisodes.
+  - Séries : boutons **Épisode suivant** et **Épisodes…** dans le lecteur, **enchaînement automatique** de l'épisode suivant (réglable).
+  - Direct : boutons **chaîne précédente / suivante**, **programme en cours** avec barre de progression et programme suivant.
+  - Guide TV : réglage **À l'ouverture du guide** (Maintenant ou Dernière position).
+  - Vu / non vu : sur la fiche d'une série, marquer une saison ou toute la série ; « Marquer comme vu » aussi pour les contenus IPTV.
+  - Mes vidéos : **sens du tri** et **Regrouper par** (source, catégorie / dossier / album, type, année, mois d'ajout ; plusieurs critères).
 
 ## [1.19.4-android5] - 2026-11-17
 

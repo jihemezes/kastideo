@@ -771,7 +771,7 @@ Future<void> showItemMenu(BuildContext context, MediaItem item, Offset position)
         ),
       if ((item.kind == MediaKind.movie || item.kind == MediaKind.episode) && !library.isLocalFile(item))
         PopupMenuItem(value: 'night', enabled: !context.downloads.contains(item.id), child: Text(tr('Télécharger cette nuit'), style: kText(13))),
-      if ((item.kind == MediaKind.movie || item.kind == MediaKind.episode) && !(library.sourceOf(item)?.kind.isIptv ?? true))
+      if (item.kind == MediaKind.movie || item.kind == MediaKind.episode)
         PopupMenuItem(
           value: context.watch.isWatched(item.id) ? 'unwatched' : 'watched',
           child: Text(context.watch.isWatched(item.id) ? tr('Marquer comme non vu') : tr('Marquer comme vu'), style: kText(13)),

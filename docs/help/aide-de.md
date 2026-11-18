@@ -300,6 +300,10 @@ Ein Banner **Rückgängig** bleibt einige Sekunden sichtbar. Ein entfernter Eint
 
 ## Meine Videos sortieren und filtern {#filtres-videos}
 
+<!--pc-->
+Unter **Windows, Linux und Android** kehrt der **Pfeil** die Sortierung um, und **Gruppieren nach** ordnet die Poster in **Abschnitte** (Quelle, Kategorie / Ordner / Album, Typ, Jahr, Monat des Hinzufügens; mehrere Kriterien gleichzeitig). Alles wird gemerkt.
+<!--/pc-->
+
 In **Meine Videos** haben die Ansichten **Filme**, **Serien** und **Videos** eine Filterleiste. Ihre Auswahl wird **gespeichert** und beim nächsten Start wiederhergestellt. **Zurücksetzen** löscht alle Filter (die Sortierung bleibt erhalten).
 
 - **Quelle**: Wenn mehrere Quellen hinzugefügt sind (lokaler Ordner, Emby, Jellyfin, Plex …), zeigen Sie nur eine davon an. In der Ansicht „alle Quellen“ zeigt ein **Abzeichen** auf jedem Poster, woher der Film stammt.
@@ -406,6 +410,10 @@ Der Sender füllt das gesamte Bild, wie im Fernsehen. Beim ersten Erscheinen set
 
 ## Das TV-Programm-Raster {#guide-grille}
 
+<!--pc-->
+Einstellungen > Allgemein > Startseite > **Beim Öffnen des Programms**: **Jetzt** (aktuelle Uhrzeit) oder **Letzte Position** (Uhrzeit und Kategorie des letzten Besuchs). Auf der Serienseite markiert **Gesehen / nicht gesehen** eine Staffel oder die ganze Serie.
+<!--/pc-->
+
 <!--mac-->
 Der Bereich **TV-Programm** (Seitenleiste, Tab **TV-Programm** der Kino- und TV-Oberflächen, **⌘7** oder die Taste **G** in der TV-Oberfläche). Die Sender stehen in Zeilen, die Uhrzeiten in Spalten; die rote Linie markiert die aktuelle Zeit.
 
@@ -447,6 +455,10 @@ Seitenleiste > **Themen**: **Gerade jetzt**, **Heute Abend** (20–23 Uhr) oder 
 # Wiedergabe
 
 ## Das Wichtigste {#lecture}
+
+<!--pc-->
+Unter **Windows, Linux und Android** bietet das Menü **⋯** der Player-Leiste **Geschwindigkeit** (Filme, Folgen), **Tonspuren**, **Untertitel** und **Bildformat** (anpassen, Bildschirm füllen, 16:9, 4:3). Live schalten **◀◀ / ▶▶** zum vorherigen oder nächsten Sender der Kategorie; die Leiste zeigt die **laufende Sendung** mit Fortschritt und die nächste. Bei einer Folge erscheinen **Weiter** und **Folgen…**, und die nächste Folge startet am Ende von selbst (abschaltbar unter Einstellungen > Allgemein > Wiedergabe).
+<!--/pc-->
 
 <!--mac-->
 Kastideo spielt alle Inhalte mit der **VLC**-Engine ab: Live-MPEG-TS (.ts), HLS (.m3u8), MP4, MKV, AVI …
