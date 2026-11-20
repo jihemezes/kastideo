@@ -131,6 +131,7 @@ ThemeData buildTheme({bool? light}) {
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
     hoverColor: ink.withValues(alpha: 0.06),
+    focusColor: accent.withValues(alpha: 0.35),
     iconTheme: IconThemeData(color: ink),
     dialogTheme: DialogThemeData(backgroundColor: isLight ? Colors.white : KPalette.panelDark),
     popupMenuTheme: PopupMenuThemeData(color: isLight ? const Color(0xF8FAFAFC) : KPalette.menuDark),
@@ -145,9 +146,11 @@ ThemeData buildTheme({bool? light}) {
       overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
     ),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(backgroundColor: accent, foregroundColor: Colors.white, textStyle: kText(13, weight: FontWeight.w600, color: Colors.white)),
+      style: FilledButton.styleFrom(backgroundColor: accent, foregroundColor: Colors.white, textStyle: kText(13, weight: FontWeight.w600, color: Colors.white)).copyWith(side: _focusSide(accent), overlayColor: _focusOverlay(accent)),
     ),
-    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: accent)),
+    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: accent).copyWith(side: _focusSide(accent), overlayColor: _focusOverlay(accent))),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: ButtonStyle(side: _focusSide(accent), overlayColor: _focusOverlay(accent))),
+    iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: _focusSide(accent), overlayColor: _focusOverlay(accent))),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.all(Colors.white),
       trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? accent : ink.withValues(alpha: 0.24)),
@@ -201,3 +204,10 @@ Future<T?> showKDialog<T>({required BuildContext context, required WidgetBuilder
       barrierDismissible: barrierDismissible,
       builder: (c) => Theme(data: buildTheme(), child: Builder(builder: builder)),
     );
+
+/// Contour de l'élément ayant le focus (télécommande, clavier) : bien visible à distance.
+WidgetStateProperty<BorderSide?> _focusSide(Color accent) =>
+    WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.focused) ? BorderSide(color: accent, width: 3) : null);
+
+WidgetStateProperty<Color?> _focusOverlay(Color accent) =>
+    WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.focused) ? accent.withValues(alpha: 0.30) : null);

@@ -149,6 +149,8 @@ class _CloseHandler with WindowListener {
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await Device.init();
+  // Téléviseur : contour de focus toujours visible, même avant la première touche.
+  if (Device.isTv) FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
   await windowManager.ensureInitialized();
   final openPath = _playlistArgument(args);
   final minimized = args.contains('--minimized');
@@ -529,6 +531,18 @@ class _RootViewState extends State<RootView> {
       },
       child: Focus(
         autofocus: true,
+        // Télécommande : tant que le focus est sur ce nœud racine (plein écran), les flèches ne trouvent aucun voisin.
+        // Au premier appui, on le donne au premier élément utilisable de l'écran.
+        onKeyEvent: (node, event) {
+          if (!Device.isAndroid || event is! KeyDownEvent) return KeyEventResult.ignored;
+          if (FocusManager.instance.primaryFocus != node) return KeyEventResult.ignored;
+          final key = event.logicalKey;
+          final move = key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.arrowUp ||
+              key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.arrowRight ||
+              key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.enter;
+          if (!move) return KeyEventResult.ignored;
+          return node.nextFocus() ? KeyEventResult.handled : KeyEventResult.ignored;
+        },
         child: Stack(
           children: [
             Positioned.fill(
