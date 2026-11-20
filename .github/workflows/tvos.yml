@@ -149,7 +149,7 @@ jobs:
         run: |
           xcrun altool --upload-app --type appletvos --file "$IPA_PATH" \
             --apiKey "$APPLE_API_KEY_ID" --apiIssuer "$APPLE_API_ISSUER_ID" 2>&1 | tee upload.log
-          if grep -q -i -E "error|failed" upload.log && ! grep -q -i "No errors uploading" upload.log; then
+          if ! grep -q "UPLOAD SUCCEEDED" upload.log; then
             echo "::error::Envoi à TestFlight refusé (voir le journal ci-dessus)."
             exit 1
           fi

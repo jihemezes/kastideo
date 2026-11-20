@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.19.4-ios38] - 2026-11-20
+
+- Correction de l'envoi à TestFlight : un avertissement d'Apple (« 1 warning ») ne fait plus échouer l'étape ; seul l'absence de « UPLOAD SUCCEEDED » est une erreur.
+
 ## [1.19.4-ios37] - 2026-11-18
 
 - **Préparation de l'App Store** : bouton **Essayer la démo** à l'accueil (playlist de vidéos libres de droits, pour essayer sans abonnement et pour la revue Apple) ; liens de don (Ko-fi) retirés de l'application et de son aide ; nouveau workflow de captures d'écran Apple TV ; documents de soumission dans `docs/store/`.

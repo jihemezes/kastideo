@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.4-tvos23] - 2026-11-20
+
+- Correction de l'envoi à TestFlight : l'avertissement d'Apple sur la version du SDK (90994) ne fait plus échouer l'étape ; l'envoi était pourtant réussi.
+
 ## [1.19.4-tvos22] - 2026-11-18
 
 - **Préparation de l'App Store** : bouton **Essayer la démo** sur l'écran de bienvenue (playlist de vidéos libres de droits, pour essayer sans saisir d'adresse et pour la revue Apple) ; mode de captures d'écran automatiques.
