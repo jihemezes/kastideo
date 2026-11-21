@@ -1338,7 +1338,8 @@ Kastideo erscheint dann mit seinem Banner in der App-Liste des Fernsehers.
 
 Auf Android TV zeigt Kastideo Bildschirme für die Fernbedienung: Das gewählte Element ist **orange umrandet, vergrößert und leuchtend**, wie bei Apple TV.
 - **Pfeiltasten** bewegen die Auswahl; **OK** bestätigt; **Zurück** geht eine Stufe zurück (Player → Folgen → Details → Liste → Start).
-- **Start**: Live, Filme, Serien, dann Einstellungen und Protokoll.
+- **Startseite**: Kacheln Live, Filme, Serien (und Meine Videos), dann **Weiterschauen** (Poster begonnener Filme und Folgen, **OK** öffnet die Seite), dann die Schaltflächen Suche, Favoriten, Zuletzt, TV-Guide, Hilfe, Einstellungen und Protokoll.
+- **Suche, Favoriten, Zuletzt, Hilfe**: In der Suche öffnet **OK** auf dem Feld die Tastatur des Fernsehers; bestätigen, dann **▼**, um die Ergebnisse (Sender, Filme, Serien, meine Videos) zu durchsuchen. Favoriten und Zuletzt: Postergitter, **OK** öffnet das Element. Hilfe: diese Hilfe, mit der Fernbedienung lesbar (**▲ ▼** scrollen).
 - **Filme und Serien**: Kategorien oben (**←/→**), Cover darunter. **OK** öffnet die Details; bei einer Serie zeigt **Folgen** die Staffeln (**←/→**) und Folgen (**↑/↓**).
 - **Live**: **↑ / ↓** oder **Programm +/−** wechseln den Sender, **Ziffern** geben eine Nummer ein, **←** öffnet die Senderliste, **→** zeigt die Infoleiste. In der Liste bewegen **↑ / ↓** die Auswahl **ohne den Sender zu wechseln**, **OK** startet den markierten Sender; **←** wechselt zur Spalte der **Kategorien** (**↑ / ↓** wechseln die Kategorie), **→** oder **OK** zurück zu den Sendern; **Menü** fügt zu den Favoriten hinzu.
 - **Während der Wiedergabe**: **OK** = Pause, **←/→** = −10 s / +30 s, **↑ / ↓** = Lautstärke; Wiedergabe/Pause und Vor-/Zurückspulen werden unterstützt.

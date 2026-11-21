@@ -1338,7 +1338,8 @@ Kastideo then appears in the TV's app list with its banner.
 
 On Android TV, Kastideo shows screens designed for the remote: the selected item is **outlined in orange, enlarged and glowing**, as on Apple TV.
 - **Arrows** move the selection; **OK** confirms; **Back** goes back (player → episodes → details → list → home).
-- **Home**: Live, Movies, Series, then Settings and Log.
+- **Home**: tiles Live, Movies, Series (and My videos), then **Continue watching** (posters of started movies and episodes, **OK** opens the page), then the buttons Search, Favorites, Recents, TV Guide, Help, Settings and Log.
+- **Search, Favorites, Recents, Help**: in Search, **OK** on the field opens the TV keyboard; confirm, then **▼** to browse results (channels, movies, series, my videos). Favorites and Recents: poster grid, **OK** opens the item. Help: this help, readable with the remote (**▲ ▼** scroll).
 - **Movies and series**: categories on top (**←/→**), posters below. **OK** opens the details; for a series, **Episodes** shows the seasons (**←/→**) and episodes (**↑/↓**).
 - **Live**: **↑ / ↓** or **Channel +/−** change channel, **digits** enter a number, **←** opens the channel list, **→** shows the info banner. In the list, **↑ / ↓** browse the channels **without changing channel** and **OK** plays the highlighted one; **←** moves to the **categories** column (**↑ / ↓** change category), **→** or **OK** goes back to the channels; **Menu** adds to favourites.
 - **While playing**: **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; Play/Pause and Fast-forward/Rewind keys are supported.

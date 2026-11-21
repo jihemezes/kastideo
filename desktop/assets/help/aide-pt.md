@@ -1338,7 +1338,8 @@ O Kastideo então aparece na lista de aplicativos da TV com o seu banner.
 
 No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item selecionado fica **com contorno laranja, ampliado e luminoso**, como na Apple TV.
 - **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).
-- **Início**: Ao vivo, Filmes, Séries, depois Ajustes e Registro.
+- **Início**: blocos Ao vivo, Filmes, Séries (e Meus vídeos), depois **Continuar a ver** (capas de filmes e episódios iniciados, **OK** abre a ficha), depois os botões Pesquisa, Favoritos, Recentes, Guia de TV, Ajuda, Ajustes e Registro.
+- **Pesquisa, Favoritos, Recentes, Ajuda**: em Pesquisa, **OK** no campo abre o teclado da TV; confirme e use **▼** para percorrer os resultados (canais, filmes, séries, meus vídeos). Favoritos e Recentes: grelha de capas, **OK** abre o item. Ajuda: esta ajuda, legível com o comando (**▲ ▼** deslocam).
 - **Filmes e séries**: categorias no alto (**←/→**), pôsteres abaixo. **OK** abre a ficha; em uma série, **Episódios** mostra as temporadas (**←/→**) e os episódios (**↑/↓**).
 - **Ao vivo**: **↑ / ↓** ou **Canal +/−** mudam de canal, os **números** digitam um canal, **←** abre a lista de canais, **→** mostra a faixa de informações. Na lista, **↑ / ↓** percorrem os canais **sem mudar de canal** e **OK** reproduz o destacado; **←** vai para a coluna das **categorias** (**↑ / ↓** mudam de categoria), **→** ou **OK** voltam aos canais; **Menu** adiciona aos favoritos.
 - **Durante a reprodução**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; as teclas Play/Pausa e Avançar/Retroceder são aceitas.

@@ -1338,7 +1338,8 @@ Kastideo compare poi nell'elenco delle app del televisore con il suo banner.
 
 Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento selezionato è **evidenziato in arancione, ingrandito e luminoso**, come su Apple TV.
 - **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).
-- **Home**: Diretta, Film, Serie, poi Impostazioni e Registro.
+- **Home**: riquadri Diretta, Film, Serie (e I miei video), poi **Continua a guardare** (locandine di film ed episodi iniziati, **OK** apre la scheda), poi i pulsanti Cerca, Preferiti, Recenti, Guida TV, Aiuto, Impostazioni e Registro.
+- **Cerca, Preferiti, Recenti, Aiuto**: in Cerca, **OK** sul campo apre la tastiera della TV; conferma, poi **▼** per scorrere i risultati (canali, film, serie, i miei video). Preferiti e Recenti: griglia di locandine, **OK** apre l'elemento. Aiuto: questa guida, leggibile col telecomando (**▲ ▼** scorrono).
 - **Film e serie**: categorie in alto (**←/→**), locandine sotto. **OK** apre la scheda; per una serie, **Episodi** mostra le stagioni (**←/→**) e gli episodi (**↑/↓**).
 - **Diretta**: **↑ / ↓** o **Canale +/−** cambiano canale, i **numeri** inseriscono un canale, **←** apre l'elenco dei canali, **→** mostra il banner informativo. Nell'elenco, **↑ / ↓** scorrono i canali **senza cambiare canale** e **OK** avvia quello evidenziato; **←** passa alla colonna delle **categorie** (**↑ / ↓** cambiano categoria), **→** o **OK** tornano ai canali; **Menu** aggiunge ai preferiti.
 - **Durante la riproduzione**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; i tasti Play/Pausa e Avanti/Indietro veloce sono supportati.

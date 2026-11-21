@@ -119,177 +119,20 @@ class TvHints extends StatelessWidget {
   }
 }
 
-// MARK: Accueil
-
-/// Accueil Android TV : grands pavés Direct, Films, Séries, puis Réglages et Journal.
-class TvHome extends StatefulWidget {
-  const TvHome({super.key});
-
-  @override
-  State<TvHome> createState() => _TvHomeState();
-}
-
-class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
-  int _row = 0; // 0 pavés, 1 boutons
-  int _col = 0;
-  bool _placed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    startTvKeys();
-  }
-
-  @override
-  void dispose() {
-    stopTvKeys();
-    super.dispose();
-  }
-
-  int get _count => 3;
-
-  @override
-  bool onTvKey(TvKey key) {
-    setState(() {
-      switch (key) {
-        case TvKey.left:
-          _col = (_col - 1 + _count) % _count;
-        case TvKey.right:
-          _col = (_col + 1) % _count;
-        case TvKey.up:
-          if (_row == 1) {
-            _row = 0;
-            _col = _col.clamp(0, 2);
-          }
-        case TvKey.down:
-          if (_row == 0) {
-            _row = 1;
-            _col = _col.clamp(0, 2);
-          }
-        case TvKey.menu:
-          openTvLog(context);
-        case TvKey.ok:
-          _activate();
-      }
-    });
-    return true;
-  }
-
-  void _activate() {
-    final nav = context.navigation;
-    if (_row == 0) {
-      nav.go([Screen.live, Screen.movies, Screen.series][_col]);
-    } else if (_col == 0) {
-      nav.go(Screen.guide);
-    } else if (_col == 1) {
-      openTvSettings(context);
-    } else {
-      openTvLog(context);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final library = context.library;
-    return ListenableBuilder(
-      listenable: library,
-      builder: (context, _) {
-        if (!_placed) {
-          _placed = true;
-          // Sans source : le curseur commence sur Réglages, pour ajouter la première.
-          if (library.sources.isEmpty) {
-            _row = 1;
-            _col = 1;
-          }
-        }
-        final tiles = [
-          (tr('Direct'), Icons.live_tv_rounded, '${library.items(MediaKind.live).length} ${tr('chaînes')}', const [Color(0xFFD02F8A), Color(0xFFFF9933)]),
-          (tr('Films'), Icons.movie_rounded, '${library.items(MediaKind.movie).length} ${tr('films')}', const [Color(0xFF6B3FD6), Color(0xFFD02F8A)]),
-          (tr('Séries'), Icons.video_library_rounded, '${library.items(MediaKind.series).length} ${tr('séries')}', const [Color(0xFF3C4BD8), Color(0xFF6B3FD6)]),
-        ];
-        return TvBackground(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(80, 50, 80, 30),
-            child: Column(
-              children: [
-                Row(children: [
-                  Text('Kastideo', style: kTextD(46, weight: FontWeight.w800)),
-                  const Spacer(),
-                  Text('v$kVersion · Android TV', style: kTextD(18, color: Colors.white54)),
-                ]),
-                const Spacer(),
-                if (library.sources.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 28),
-                    child: Text(tr('Aucune source. Choisissez Réglages, puis « Ajouter une source avec mon téléphone ».'),
-                        textAlign: TextAlign.center, style: kTextD(22, color: Colors.white)),
-                  ),
-                Row(children: [
-                  for (var i = 0; i < tiles.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 36),
-                    Expanded(
-                      child: TvFocusBox(
-                        selected: _row == 0 && _col == i,
-                        radius: 28,
-                        child: Container(
-                          height: 230,
-                          padding: const EdgeInsets.all(28),
-                          decoration: BoxDecoration(gradient: LinearGradient(colors: tiles[i].$4, begin: Alignment.topLeft, end: Alignment.bottomRight)),
-                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Icon(tiles[i].$2, size: 56, color: Colors.white),
-                            const Spacer(),
-                            Text(tiles[i].$1, style: kTextD(40, weight: FontWeight.w800)),
-                            Text(tiles[i].$3, style: kTextD(18, color: Colors.white70)),
-                          ]),
-                        ),
-                      ),
-                    ),
-                  ],
-                ]),
-                const SizedBox(height: 36),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  _small(0, Icons.calendar_month_rounded, tr('Guide TV')),
-                  const SizedBox(width: 28),
-                  _small(1, Icons.settings_rounded, tr('Réglages')),
-                  const SizedBox(width: 28),
-                  _small(2, Icons.receipt_long_rounded, tr('Journal')),
-                ]),
-                const Spacer(),
-                const TvHints(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _small(int index, IconData icon, String label) => SizedBox(
-        width: 240,
-        child: TvFocusBox(
-          selected: _row == 1 && _col == index,
-          radius: 22,
-          child: Container(
-            height: 84,
-            color: Colors.white.withValues(alpha: 0.14),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(icon, color: Colors.white, size: 30),
-              const SizedBox(width: 12),
-              Text(label, style: kTextD(22, weight: FontWeight.w700)),
-            ]),
-          ),
-        ),
-      );
-}
-
 // MARK: Films et séries
 
 enum _Mode { grid, detail, episodes, player }
 
 /// Films ou séries : catégories en haut, affiches en dessous, fiche, épisodes puis lecteur plein cadre.
 class TvCatalog extends StatefulWidget {
-  const TvCatalog({super.key, required this.kind});
+  const TvCatalog({super.key, required this.kind, this.library = false});
   final MediaKind kind;
+
+  /// « Mes vidéos » : vidéothèque (dossiers, serveurs, galerie) au lieu du catalogue IPTV.
+  final bool library;
+
+  /// Élément à ouvrir directement sur sa fiche (depuis l'accueil, la recherche, les favoris…).
+  static MediaItem? pendingOpen;
 
   /// Touche Retour : revient d'un cran (lecteur, épisodes, fiche). Vrai si quelque chose a été refermé.
   static bool Function()? onBack;
@@ -317,6 +160,13 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     super.initState();
     startTvKeys();
     TvCatalog.onBack = _back;
+    final pending = TvCatalog.pendingOpen;
+    if (pending != null) {
+      TvCatalog.pendingOpen = null;
+      _item = pending;
+      _mode = _Mode.detail;
+      WidgetsBinding.instance.addPostFrameCallback((_) => mounted ? context.info.load(pending) : null);
+    }
   }
 
   @override
@@ -348,12 +198,21 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
 
   List<String> get _chipNames {
     final library = context.library;
+    if (widget.library) return [tr('Tout'), tr('Favoris'), tr('Récents')];
     return [tr('Tout'), tr('Favoris'), tr('Récents'), ...library.categories(widget.kind)];
   }
 
   List<MediaItem> get _items {
     final library = context.library;
     final kind = widget.kind;
+    if (widget.library) {
+      final all = library.libraryItems();
+      return switch (_chip) {
+        0 => all,
+        1 => [for (final i in all) if (library.isFavorite(i.id)) i],
+        _ => [for (final i in library.recents) if (library.isLibraryItem(i)) i],
+      };
+    }
     return switch (_chip) {
       0 => library.items(kind),
       1 => library.favoritesOf(kind),
@@ -544,7 +403,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   Widget _gridView(BuildContext context) {
     final names = _chipNames;
     final items = _items;
-    final title = widget.kind == MediaKind.movie ? tr('Films') : tr('Séries');
+    final title = widget.library ? tr('Mes vidéos') : (widget.kind == MediaKind.movie ? tr('Films') : tr('Séries'));
     return Padding(
       padding: const EdgeInsets.fromLTRB(60, 36, 60, 24),
       child: Column(

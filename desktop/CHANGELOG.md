@@ -26,6 +26,12 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android18] - 2026-11-21
+
+- **Android TV : accueil complet, comme sur Apple TV** : pavés Direct, Films, Séries (et Mes vidéos), rail **Reprendre la lecture** (affiches, barre de progression, **OK** ouvre la fiche), et boutons **Recherche**, **Favoris**, **Récents**, **Guide TV**, **Aide**, **Réglages**, **Journal**.
+- **Recherche** à la télécommande (clavier de la télévision) dans les chaînes, films, séries et vidéos personnelles ; **Favoris** et **Récents** en grille d'affiches ; **Aide** lisible à la télécommande.
+- Mes vidéos : catalogue en grille avec la même ergonomie.
+
 ## [1.19.5-android17] - 2026-11-21
 
 - **Android TV : Guide TV en grille à la télécommande** (bouton **Guide TV** de l'accueil) : grille chaînes × heures (2 h), **◀ ▶** de programme en programme, **▲ ▼** de chaîne en chaîne, **OK** regarde le programme en cours ; **Menu** = options du programme (Regarder, **Revoir** en replay, Enregistrer, M'alerter, Programmer l'enregistrement, Enregistrer ce replay). **▲** depuis la première chaîne atteint **Maintenant**, le **jour** (jours à revoir compris) et le **filtre** (favoris, récents, thèmes, catégories). Résumé du programme sous la grille ; réglage « À l'ouverture du guide » respecté.

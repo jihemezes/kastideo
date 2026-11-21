@@ -307,6 +307,8 @@ class L10n {
     'Journal de lecture': 'Playback log',
     'Filtre': 'Filter',
     'Options': 'Options',
+    'Appuyez sur OK pour saisir': 'Press OK to type',
+    'Saisir / Ouvrir': 'Type / Open',
     'Programme': 'Programme',
     'Indisponible en rendu direct': 'Unavailable in direct rendering',
     'Rendu vidéo direct (recommandé)': 'Direct video rendering (recommended)',

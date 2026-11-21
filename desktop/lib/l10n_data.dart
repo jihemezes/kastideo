@@ -201,6 +201,8 @@ const Map<String, List<String>> kTranslations = {
   'Oui · au prochain lancement': ['Sí · en el próximo inicio', 'Ja · beim nächsten Start', 'Sì · al prossimo avvio', 'Sim · no próximo arranque', 'Sim · no próximo arranque'],
   'Indisponible en rendu direct': ['No disponible en renderizado directo', 'Im direkten Rendering nicht verfügbar', 'Non disponibile nel rendering diretto', 'Indisponível na renderização direta', 'Indisponível na renderização direta'],
   'Filtre': ['Filtro', 'Filter', 'Filtro', 'Filtro', 'Filtro'],
+  'Appuyez sur OK pour saisir': ['Pulse OK para escribir', 'OK drücken zum Eingeben', 'Premi OK per digitare', 'Prima OK para escrever', 'Prima OK para escrever'],
+  'Saisir / Ouvrir': ['Escribir / Abrir', 'Eingeben / Öffnen', 'Digita / Apri', 'Escrever / Abrir', 'Escrever / Abrir'],
   'Options': ['Opciones', 'Optionen', 'Opzioni', 'Opções', 'Opções'],
   'Programme': ['Programa', 'Programm', 'Programma', 'Programa', 'Programa'],
   'Journal de lecture': ['Registro de reproducción', 'Wiedergabeprotokoll', 'Registro di riproduzione', 'Registro de reprodução', 'Registo de reprodução'],

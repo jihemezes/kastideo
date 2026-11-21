@@ -1338,7 +1338,8 @@ Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bann
 ### Utilisation à la télécommande (Android TV)
 
 Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'élément sélectionné est **entouré d'orange, agrandi et lumineux**, comme sur Apple TV.
-- **Flèches** : déplacent la sélection ; **OK** valide ; **Retour** revient en arrière (du lecteur aux épisodes, puis à la fiche, puis à la liste, puis à l'accueil).
+- **Accueil** : pavés Direct, Films, Séries (et Mes vidéos), puis **Reprendre la lecture** (affiches des films et épisodes commencés, **OK** ouvre la fiche), puis les boutons Recherche, Favoris, Récents, Guide TV, Aide, Réglages et Journal.
+- **Recherche, Favoris, Récents, Aide** : dans Recherche, **OK** sur le champ ouvre le clavier de la télévision ; validez, puis **▼** pour parcourir les résultats (chaînes, films, séries, mes vidéos). Favoris et Récents : grille d'affiches, **OK** ouvre l'élément. Aide : cette aide, lisible à la télécommande (**▲ ▼** font défiler).
 - **Accueil** : Direct, Films, Séries, puis Guide TV, Réglages et Journal.
 - **Films et séries** : catégories en haut (**←/→**), affiches en dessous. **OK** ouvre la fiche ; pour une série, **Épisodes** affiche les saisons (**←/→**) et les épisodes (**↑/↓**).
 - **Direct** : **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes (catégories à gauche : **↑ / ↓** changent de catégorie ; chaînes à droite), **→** affiche le bandeau d'information. Dans la liste, **↑ / ↓** parcourent les chaînes **sans changer de chaîne** et **OK** lance la chaîne surlignée ; **←** passe à la colonne des **catégories** (**↑ / ↓** changent de catégorie), **→** ou **OK** reviennent aux chaînes ; **Menu** ajoute aux favoris.
