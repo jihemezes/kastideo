@@ -1336,11 +1336,14 @@ Kastideo erscheint dann mit seinem Banner in der App-Liste des Fernsehers.
 
 ### Bedienung per Fernbedienung (Android TV)
 
-- **Die Pfeile** bewegen die Auswahl (farbig umrandet); **OK** bestätigt; **Zurück** geht zurück.
-- **Menütaste** bei einem Sender oder Film: das Kontextmenü.
-- **Live**: Die TV-Oberfläche öffnet sich standardmäßig. **↑ / ↓** oder **Programm +/−** wechseln den Sender, **die Ziffern** geben eine Nummer ein, **←** öffnet die Senderliste, **→** zeigt das Info-Banner, **OK** öffnet oder schließt die Liste.
-- **Filme und Serien**: Die Kino-Oberfläche öffnet sich standardmäßig. Während der Wiedergabe: **OK** = Pause, **←/→** = −10 s / +30 s, **↑ / ↓** = Lautstärke; **↓** blendet die Steuerleiste ein, auf der sich die Pfeile dann bewegen.
-- Die Tasten **Wiedergabe/Pause** und **Vorspulen/Zurückspulen** der Fernbedienung werden unterstützt.
+Auf Android TV zeigt Kastideo Bildschirme für die Fernbedienung: Das gewählte Element ist **orange umrandet, vergrößert und leuchtend**, wie bei Apple TV.
+- **Pfeiltasten** bewegen die Auswahl; **OK** bestätigt; **Zurück** geht eine Stufe zurück (Player → Folgen → Details → Liste → Start).
+- **Start**: Live, Filme, Serien, dann Einstellungen und Protokoll.
+- **Filme und Serien**: Kategorien oben (**←/→**), Cover darunter. **OK** öffnet die Details; bei einer Serie zeigt **Folgen** die Staffeln (**←/→**) und Folgen (**↑/↓**).
+- **Live**: **↑ / ↓** oder **Programm +/−** wechseln den Sender, **Ziffern** geben eine Nummer ein, **←** öffnet die Senderliste, **→** zeigt die Infoleiste.
+- **Während der Wiedergabe**: **OK** = Pause, **←/→** = −10 s / +30 s, **↑ / ↓** = Lautstärke; Wiedergabe/Pause und Vor-/Zurückspulen werden unterstützt.
+- **Quelle ohne Tastatur hinzufügen**: Einstellungen > **Quelle mit dem Telefon hinzufügen**. Der Fernseher zeigt einen **QR-Code** und einen 4-stelligen Code; öffne auf dem Telefon (gleiches WLAN) die Adresse, gib den Code und die Angaben der Quelle ein (Xtream oder M3U-Liste). **Quelle entfernen** finden Sie am selben Ort.
+- **Protokoll**: Schaltfläche Protokoll auf dem Startbildschirm oder die Taste **Menü**, **Info** oder **Rot** der Fernbedienung auf jedem Bildschirm. **↑ / ↓** scrollen, **OK** zeigt nur Fehler.
 
 ### Unterschiede zum Computer
 

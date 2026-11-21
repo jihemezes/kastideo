@@ -39,6 +39,7 @@ import 'ui/multiview_view.dart';
 import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
+import 'ui/tv_shell.dart';
 import 'ui/tv_view.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
@@ -397,6 +398,7 @@ class _RootViewState extends State<RootView> {
   void initState() {
     super.initState();
     pendingOpen.addListener(_openPending);
+    TvLogShortcut.install(() => context);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       await LegalNotice.showIfNeeded(context);
@@ -458,6 +460,8 @@ class _RootViewState extends State<RootView> {
   bool goBack(BuildContext context) {
     final navigation = context.navigation;
     final playback = context.playback;
+    // Android TV : les écrans Films/Séries de la télécommande referment d'abord lecteur, épisodes et fiche.
+    if (Device.isTv && (TvCatalog.onBack?.call() ?? false)) return true;
     if (navigation.theater) {
       navigation.exitTheater();
       return true;
@@ -549,10 +553,10 @@ class _RootViewState extends State<RootView> {
               child: ListenableBuilder(
                 listenable: navigation,
                 builder: (context, _) => switch (navigation.screen) {
-                  Screen.home => const HomeScreen(),
+                  Screen.home => Device.isTv ? const TvHome() : const HomeScreen(),
                   Screen.live => const CatalogScreen(kind: MediaKind.live),
-                  Screen.movies => const CatalogScreen(kind: MediaKind.movie),
-                  Screen.series => const CatalogScreen(kind: MediaKind.series),
+                  Screen.movies => Device.isTv ? const TvCatalog(kind: MediaKind.movie) : const CatalogScreen(kind: MediaKind.movie),
+                  Screen.series => Device.isTv ? const TvCatalog(kind: MediaKind.series) : const CatalogScreen(kind: MediaKind.series),
                   Screen.guide => const GuideScreen(),
                   Screen.recordings => const RecordingsScreen(),
                   Screen.multiview => const MultiViewScreen(),

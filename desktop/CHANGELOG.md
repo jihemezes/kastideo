@@ -26,6 +26,15 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android9] - 2026-11-21
+
+- **Android TV : interface dédiée à la télécommande** (ui/tv_shell.dart). Les flèches ne déplaçaient rien dans l'accueil et les écrans à boutons : ils sont remplacés, sur téléviseur, par des écrans à sélection gérée par l'application. L'élément sélectionné est entouré d'orange, agrandi et lumineux (comme sur Apple TV).
+  - Accueil (Direct, Films, Séries, Réglages, Journal), Films et Séries (catégories, affiches, fiche, saisons et épisodes, lecteur plein cadre), Retour revient d'un cran.
+  - **Ajouter une source avec mon téléphone** : QR code + code à 4 chiffres, le téléphone ouvre une page de saisie servie sur le réseau local (Xtream ou M3U) ; **Retirer une source**.
+  - **Journal de lecture** lisible à la télécommande, ouvert par le bouton Journal ou les touches Menu, Info ou rouge depuis n'importe quel écran.
+  - Un appareil sans écran tactile est désormais considéré comme un téléviseur.
+- Aide Android TV mise à jour (6 langues).
+
 ## [1.19.5-android8] - 2026-11-20
 
 - **Android TV : télécommande** — les flèches ne déplaçaient rien (le focus restait sur la fenêtre entière) et aucun contour n'indiquait la sélection. Le premier appui sur une flèche ou OK sélectionne maintenant le premier élément, le contour de focus est toujours visible sur téléviseur, et les boutons ont un contour orange épais quand ils sont sélectionnés.

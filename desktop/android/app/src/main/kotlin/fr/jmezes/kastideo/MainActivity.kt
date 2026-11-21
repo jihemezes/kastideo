@@ -249,6 +249,8 @@ class MainActivity : FlutterActivity() {
         val ui = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
         if (ui.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) return true
         val pm = packageManager
+        // Sans écran tactile : appareil commandé à la télécommande.
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)) return true
         return pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
             pm.hasSystemFeature("android.hardware.type.television") ||
             (!pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN) && pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY))

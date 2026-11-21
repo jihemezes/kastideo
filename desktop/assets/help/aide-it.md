@@ -1336,11 +1336,14 @@ Kastideo compare poi nell'elenco delle app del televisore con il suo banner.
 
 ### Uso del telecomando (Android TV)
 
-- **Le frecce** spostano la selezione (evidenziata a colori); **OK** conferma; **Indietro** torna indietro.
-- **Tasto Menu** su un canale o un film: il menu contestuale.
-- **Diretta**: l'interfaccia TV si apre per impostazione predefinita. **↑ / ↓** o **Canale +/−** cambiano canale, **le cifre** digitano un numero, **←** apre l'elenco dei canali, **→** mostra il banner informativo, **OK** apre o chiude l'elenco.
-- **Film e serie**: l'interfaccia Cinema si apre per impostazione predefinita. Durante la riproduzione: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; **↓** fa comparire la barra di controllo, lungo la quale si spostano poi le frecce.
-- I tasti **Play/Pausa** e **Avanti veloce/Indietro veloce** del telecomando sono supportati.
+Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento selezionato è **evidenziato in arancione, ingrandito e luminoso**, come su Apple TV.
+- **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).
+- **Home**: Diretta, Film, Serie, poi Impostazioni e Registro.
+- **Film e serie**: categorie in alto (**←/→**), locandine sotto. **OK** apre la scheda; per una serie, **Episodi** mostra le stagioni (**←/→**) e gli episodi (**↑/↓**).
+- **Diretta**: **↑ / ↓** o **Canale +/−** cambiano canale, i **numeri** inseriscono un canale, **←** apre l'elenco dei canali, **→** mostra il banner informativo.
+- **Durante la riproduzione**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; i tasti Play/Pausa e Avanti/Indietro veloce sono supportati.
+- **Aggiungere una sorgente senza tastiera**: Impostazioni > **Aggiungi una sorgente con il telefono**. La TV mostra un **codice QR** e un codice di 4 cifre; dal telefono (stessa rete Wi-Fi) apri l'indirizzo, inserisci il codice e i dati della sorgente (Xtream o lista M3U). **Rimuovi una sorgente** è nello stesso posto.
+- **Registro**: pulsante Registro della home, o tasto **Menu**, **Info** o **rosso** del telecomando da qualsiasi schermata. **↑ / ↓** scorrono, **OK** mostra solo gli errori.
 
 ### Differenze rispetto al computer
 

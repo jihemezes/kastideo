@@ -1336,11 +1336,14 @@ Kastideo aparece entonces en la lista de aplicaciones del televisor con su banne
 
 ### Uso del mando a distancia (Android TV)
 
-- **Las flechas** mueven la selección (resaltada en color); **OK** confirma; **Atrás** retrocede.
-- **Tecla Menú** en un canal o una película: el menú contextual.
-- **Directo**: la interfaz TV se abre por defecto. **↑ / ↓** o **Canal +/−** cambian de canal, **las cifras** introducen un número, **←** abre la lista de canales, **→** muestra el banner de información, **OK** abre o cierra la lista.
-- **Películas y series**: la interfaz Cine se abre por defecto. Durante la reproducción: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volumen; **↓** muestra la barra de control, por la que se mueven entonces las flechas.
-- Las teclas **Reproducir/Pausa** y **Avance rápido/Rebobinado** del mando están admitidas.
+En Android TV, Kastideo muestra pantallas pensadas para el mando: el elemento seleccionado aparece **con contorno naranja, ampliado y luminoso**, como en Apple TV.
+- **Flechas**: mueven la selección; **OK** confirma; **Atrás** vuelve (reproductor → episodios → ficha → lista → inicio).
+- **Inicio**: Directo, Películas, Series, luego Ajustes y Registro.
+- **Películas y series**: categorías arriba (**←/→**), carátulas debajo. **OK** abre la ficha; en una serie, **Episodios** muestra las temporadas (**←/→**) y los episodios (**↑/↓**).
+- **Directo**: **↑ / ↓** o **Canal +/−** cambian de canal, los **números** introducen un canal, **←** abre la lista de canales, **→** muestra el banner de información.
+- **Durante la reproducción**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volumen; se admiten las teclas Reproducir/Pausa y Avance/Retroceso rápido.
+- **Añadir una fuente sin teclado**: Ajustes > **Añadir una fuente con mi teléfono**. El televisor muestra un **código QR** y un código de 4 cifras; en el teléfono (misma red Wi-Fi), abre la dirección, introduce el código y los datos de la fuente (Xtream o lista M3U). **Quitar una fuente** está en el mismo sitio.
+- **Registro**: botón Registro del inicio, o tecla **Menú**, **Info** o **roja** del mando desde cualquier pantalla. **↑ / ↓** desplazan, **OK** muestra solo los errores.
 
 ### Diferencias con el ordenador
 

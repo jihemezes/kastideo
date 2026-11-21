@@ -1337,11 +1337,14 @@ Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bann
 
 ### Utilisation à la télécommande (Android TV)
 
-- **Flèches** : déplacent la sélection (entourée d'un liseré de couleur) ; **OK** valide ; **Retour** revient en arrière.
-- **Touche Menu** (ou ☰ de la télécommande) sur une chaîne ou un film : le menu contextuel.
-- **Direct** : l'interface TV s'ouvre par défaut. **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes, **→** affiche le bandeau d'information, **OK** ouvre ou ferme la liste.
-- **Films et séries** : l'interface Cinéma s'ouvre par défaut. Pendant la lecture : **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume ; **↓** fait apparaître la barre de contrôle que les flèches parcourent ensuite.
-- Les touches **Lecture/Pause**, **Avance/Retour rapide** de la télécommande sont prises en charge.
+Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'élément sélectionné est **entouré d'orange, agrandi et lumineux**, comme sur Apple TV.
+- **Flèches** : déplacent la sélection ; **OK** valide ; **Retour** revient en arrière (du lecteur aux épisodes, puis à la fiche, puis à la liste, puis à l'accueil).
+- **Accueil** : Direct, Films, Séries, puis Réglages et Journal.
+- **Films et séries** : catégories en haut (**←/→**), affiches en dessous. **OK** ouvre la fiche ; pour une série, **Épisodes** affiche les saisons (**←/→**) et les épisodes (**↑/↓**).
+- **Direct** : **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes, **→** affiche le bandeau d'information.
+- **Pendant la lecture** : **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume ; les touches Lecture/Pause et Avance/Retour rapide sont prises en charge.
+- **Ajouter une source sans clavier** : Réglages > **Ajouter une source avec mon téléphone**. La télévision affiche un **QR code** et un code à 4 chiffres ; sur le téléphone (même Wi-Fi), ouvrez l'adresse, saisissez le code puis les informations de la source (Xtream ou liste M3U). **Retirer une source** se trouve au même endroit.
+- **Journal** : bouton Journal de l'accueil, ou touche **Menu**, **Info** ou **rouge** de la télécommande, depuis n'importe quel écran. **↑ / ↓** font défiler, **OK** n'affiche que les erreurs.
 
 ### Différences avec l'ordinateur
 

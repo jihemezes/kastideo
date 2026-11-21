@@ -1336,11 +1336,14 @@ O Kastideo então aparece na lista de aplicativos da TV com o seu banner.
 
 ### Uso do controle remoto (Android TV)
 
-- **As setas** movem a seleção (destacada em cor); **OK** confirma; **Voltar** retorna.
-- **Tecla Menu** em um canal ou filme: o menu de contexto.
-- **Ao vivo**: a interface de TV abre por padrão. **↑ / ↓** ou **Canal +/−** trocam de canal, **os dígitos** digitam um número, **←** abre a lista de canais, **→** mostra o banner de informações, **OK** abre ou fecha a lista.
-- **Filmes e séries**: a interface Cinema abre por padrão. Durante a reprodução: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; **↓** exibe a barra de controle, na qual as setas então se movem.
-- As teclas **Reproduzir/Pausar** e **Avançar/Retroceder** do controle remoto são compatíveis.
+No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item selecionado fica **com contorno laranja, ampliado e luminoso**, como na Apple TV.
+- **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).
+- **Início**: Ao vivo, Filmes, Séries, depois Ajustes e Registro.
+- **Filmes e séries**: categorias no alto (**←/→**), pôsteres abaixo. **OK** abre a ficha; em uma série, **Episódios** mostra as temporadas (**←/→**) e os episódios (**↑/↓**).
+- **Ao vivo**: **↑ / ↓** ou **Canal +/−** mudam de canal, os **números** digitam um canal, **←** abre a lista de canais, **→** mostra a faixa de informações.
+- **Durante a reprodução**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; as teclas Play/Pausa e Avançar/Retroceder são aceitas.
+- **Adicionar uma fonte sem teclado**: Ajustes > **Adicionar uma fonte com o celular**. A TV mostra um **QR code** e um código de 4 dígitos; no celular (mesmo Wi-Fi), abra o endereço, digite o código e os dados da fonte (Xtream ou lista M3U). **Remover uma fonte** fica no mesmo lugar.
+- **Registro**: botão Registro do início, ou tecla **Menu**, **Info** ou **vermelha** do controle em qualquer tela. **↑ / ↓** rolam, **OK** mostra só os erros.
 
 ### Diferenças em relação ao computador
 
