@@ -26,6 +26,11 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android14] - 2026-11-21
+
+- **Android TV : image saccadée même en SD** — le journal montrait un décodeur sans perte mais des images perdues à l'affichage et un écart son/image croissant : le rendu était trop lourd pour le processeur graphique du téléviseur. Rendu mpv allégé (mode simplifié, filtres bilinéaires, sans débanding/dither/interpolation, tampon audio plus large, 2 fils de décodage).
+- **Réglages TV › Rendu vidéo direct (expérimental)** : MediaCodec écrit directement sur la surface, sans recopie dans Flutter (pris en compte au prochain lancement). À essayer si la saccade persiste ; sous-titres non affichés dans ce mode.
+
 ## [1.19.5-android13] - 2026-11-21
 
 - **Android TV, direct : panneau à deux colonnes** (catégories à gauche, chaînes à droite) : ↑/↓ dans la colonne des catégories changent de catégorie et la liste suit immédiatement ; → ou OK passent aux chaînes ; ◀ revient aux catégories ; OK sur une chaîne la lance.

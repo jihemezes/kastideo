@@ -316,6 +316,14 @@ class AppSettings extends ChangeNotifier {
   /// Tout lire en décodage logiciel (désactive le décodeur matériel).
   bool get softwareAlways => _prefs.getBool('decode.always') ?? false;
 
+  /// Android TV : rendu vidéo direct (MediaCodec vers la surface, sans recopie dans Flutter). Pris en compte au lancement.
+  bool get tvDirectRender => _prefs.getBool('tv.directRender') ?? false;
+
+  void setTvDirectRender(bool value) {
+    _prefs.setBool('tv.directRender', value);
+    notifyListeners();
+  }
+
   /// Basculer seul en logiciel quand l'image se fige.
   bool get softwareAuto => _prefs.getBool('decode.autoFallback') ?? true;
 

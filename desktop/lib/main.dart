@@ -199,7 +199,7 @@ Future<void> main(List<String> args) async {
   final watch = WatchProgressStore();
   await watch.load();
   final library = LibraryStore()..settings = settings;
-  final playback = PlaybackController()
+  final playback = PlaybackController(directRender: Device.isTv && settings.tvDirectRender)
     ..settings = settings
     ..watchProgress = watch;
   final navigation = NavigationModel()

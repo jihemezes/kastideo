@@ -805,7 +805,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: context.library,
+      listenable: Listenable.merge([context.library, context.settings]),
       builder: (context, _) {
         final entries = widget.entries(context);
         _index = _index.clamp(0, entries.isEmpty ? 0 : entries.length - 1);
@@ -856,6 +856,8 @@ void openTvSettings(BuildContext context) {
       entries: (context) => [
         TvEntry(tr('Ajouter une source avec mon téléphone'), (c) => openTvQr(c), icon: Icons.qr_code_2_rounded),
         TvEntry(tr('Retirer une source'), (c) => openTvRemoveSource(c), detail: '${context.library.sources.length}'),
+        TvEntry(tr('Rendu vidéo direct (expérimental)'), (c) => c.settings.setTvDirectRender(!c.settings.tvDirectRender),
+            detail: context.settings.tvDirectRender ? tr('Oui · au prochain lancement') : tr('Non')),
         TvEntry(tr('Journal de lecture'), (c) => openTvLog(c), icon: Icons.receipt_long_rounded),
       ],
     ),

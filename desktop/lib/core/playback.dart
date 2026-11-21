@@ -31,7 +31,7 @@ abstract class CastRemote {
 
 /// Lecteur unique (moteur mpv) : une seule connexion au fournisseur à la fois.
 class PlaybackController extends ChangeNotifier {
-  PlaybackController() {
+  PlaybackController({this.directRender = false}) {
     player = Player(
       configuration: const PlayerConfiguration(
         title: 'Kastideo',
@@ -39,7 +39,12 @@ class PlaybackController extends ChangeNotifier {
         bufferSize: 64 * 1024 * 1024,
       ),
     );
-    video = VideoController(player);
+    video = VideoController(
+      player,
+      configuration: directRender
+          ? const VideoControllerConfiguration(vo: 'mediacodec_embed', hwdec: 'mediacodec')
+          : const VideoControllerConfiguration(),
+    );
     _subscriptions.addAll([
       player.stream.playing.listen((v) {
         if (casting) return;
@@ -109,6 +114,9 @@ class PlaybackController extends ChangeNotifier {
 
   late final Player player;
   late final VideoController video;
+
+  /// Android TV : MediaCodec écrit directement sur la surface (mode expérimental, réglage de la télévision).
+  final bool directRender;
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   MediaItem? current;
@@ -186,7 +194,7 @@ class PlaybackController extends ChangeNotifier {
 
   /// Décodeur matériel : MediaCodec avec copie des images sur Android. Le mode direct (« mediacodec ») échoue ici
   /// (« Both surface and native_window are NULL ») et mpv retombait sur le décodage logiciel, donc une image saccadée.
-  static String get _hardwareDecoder => Platform.isAndroid ? 'mediacodec-copy' : 'auto-safe';
+  String get _hardwareDecoder => Platform.isAndroid ? (directRender ? 'mediacodec' : 'mediacodec-copy') : 'auto-safe';
 
   /// Mesures de fluidité écrites dans le journal (téléviseur) : images perdues, écart son/image, débit, tampon.
   Future<void> _logStats() async {
@@ -207,6 +215,34 @@ class PlaybackController extends ChangeNotifier {
     final speed = await get('cache-speed');
     final cache = await get('demuxer-cache-duration');
     PlaybackLog.shared.note('Mesures : $fps i/s, perdues décodeur $dec / affichage $out, écart son-image $sync s, débit réseau $speed o/s, tampon $cache s');
+  }
+
+  /// Rendu allégé pour téléviseur Android (processeur graphique modeste) : le journal montrait des images perdues à
+  /// l'affichage et un écart son/image croissant alors que le décodeur ne perdait rien.
+  Future<void> _lightRendering(NativePlayer native) async {
+    const options = {
+      'gpu-dumb-mode': 'yes',
+      'scale': 'bilinear',
+      'cscale': 'bilinear',
+      'dscale': 'bilinear',
+      'correct-downscaling': 'no',
+      'sigmoid-upscaling': 'no',
+      'deband': 'no',
+      'dither-depth': 'no',
+      'interpolation': 'no',
+      'hdr-compute-peak': 'no',
+      'blend-subtitles': 'no',
+      'video-sync': 'audio',
+      'framedrop': 'vo',
+      'audio-buffer': '0.6',
+      'vd-lavc-threads': '2',
+    };
+    for (final e in options.entries) {
+      try {
+        await native.setProperty(e.key, e.value);
+      } catch (_) {}
+    }
+    PlaybackLog.shared.note('Rendu allégé téléviseur${directRender ? ' + rendu direct (MediaCodec)' : ''}');
   }
 
   Future<void> _logDecoder() async {
@@ -232,6 +268,7 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('cache', 'yes');
       await native.setProperty('demuxer-readahead-secs', '2');
       await native.setProperty('hwdec', _hardwareDecoder);
+      if (Platform.isAndroid && Device.isTv) await _lightRendering(native);
       await native.setProperty('ytdl', 'no');
       // Sous-titres placés à côté d'un fichier local (« film.srt », « film.fr.srt »…) chargés automatiquement.
       await native.setProperty('sub-auto', 'fuzzy');
