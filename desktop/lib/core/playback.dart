@@ -188,6 +188,27 @@ class PlaybackController extends ChangeNotifier {
   /// (« Both surface and native_window are NULL ») et mpv retombait sur le décodage logiciel, donc une image saccadée.
   static String get _hardwareDecoder => Platform.isAndroid ? 'mediacodec-copy' : 'auto-safe';
 
+  /// Mesures de fluidité écrites dans le journal (téléviseur) : images perdues, écart son/image, débit, tampon.
+  Future<void> _logStats() async {
+    final native = player.platform;
+    if (native is! NativePlayer || current == null) return;
+    Future<String> get(String name) async {
+      try {
+        final v = await native.getProperty(name, waitForInitialization: false);
+        return v.isEmpty ? '?' : v;
+      } catch (_) {
+        return '?';
+      }
+    }
+    final fps = await get('estimated-vf-fps');
+    final dec = await get('decoder-frame-drop-count');
+    final out = await get('frame-drop-count');
+    final sync = await get('avsync');
+    final speed = await get('cache-speed');
+    final cache = await get('demuxer-cache-duration');
+    PlaybackLog.shared.note('Mesures : $fps i/s, perdues décodeur $dec / affichage $out, écart son-image $sync s, débit réseau $speed o/s, tampon $cache s');
+  }
+
   Future<void> _logDecoder() async {
     final native = player.platform;
     if (native is! NativePlayer) return;
@@ -763,6 +784,11 @@ class PlaybackController extends ChangeNotifier {
     startupTime = DateTime.now().difference(_startedAt!);
     PlaybackLog.shared.note('Lecture démarrée en ${(startupTime!.inMilliseconds / 1000).toStringAsFixed(2)} s');
     Future.delayed(const Duration(seconds: 3), _logDecoder);
+    if (Platform.isAndroid) {
+      for (final seconds in const [6, 15, 30]) {
+        Future.delayed(Duration(seconds: seconds), _logStats);
+      }
+    }
     _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       _evaluateHealth();
       _checkFreeze();

@@ -26,6 +26,11 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android13] - 2026-11-21
+
+- **Android TV, direct : panneau à deux colonnes** (catégories à gauche, chaînes à droite) : ↑/↓ dans la colonne des catégories changent de catégorie et la liste suit immédiatement ; → ou OK passent aux chaînes ; ◀ revient aux catégories ; OK sur une chaîne la lance.
+- Journal : « Mesures » 6, 15 et 30 s après le début de la lecture sur Android (images/s, images perdues, écart son-image, débit réseau, tampon) pour diagnostiquer les saccades.
+
 ## [1.19.5-android12] - 2026-11-21
 
 - **Android : image saccadée** — le journal d'un téléviseur montrait « h264_mediacodec : Both surface and native_window are NULL » puis « Audio/Video desynchronisation » : le décodage matériel direct échouait et mpv retombait sur le décodage logiciel. Android utilise maintenant MediaCodec avec copie des images (`mediacodec-copy`).

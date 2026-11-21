@@ -1340,7 +1340,7 @@ No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item s
 - **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).
 - **Início**: Ao vivo, Filmes, Séries, depois Ajustes e Registro.
 - **Filmes e séries**: categorias no alto (**←/→**), pôsteres abaixo. **OK** abre a ficha; em uma série, **Episódios** mostra as temporadas (**←/→**) e os episódios (**↑/↓**).
-- **Ao vivo**: **↑ / ↓** ou **Canal +/−** mudam de canal, os **números** digitam um canal, **←** abre a lista de canais, **→** mostra a faixa de informações. Na lista, **↑ / ↓** percorrem os canais **sem mudar de canal** e **OK** reproduz o destacado; suba até o topo para escolher a **categoria** com **←/→**; **Menu** adiciona aos favoritos.
+- **Ao vivo**: **↑ / ↓** ou **Canal +/−** mudam de canal, os **números** digitam um canal, **←** abre a lista de canais, **→** mostra a faixa de informações. Na lista, **↑ / ↓** percorrem os canais **sem mudar de canal** e **OK** reproduz o destacado; **←** vai para a coluna das **categorias** (**↑ / ↓** mudam de categoria), **→** ou **OK** voltam aos canais; **Menu** adiciona aos favoritos.
 - **Durante a reprodução**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; as teclas Play/Pausa e Avançar/Retroceder são aceitas.
 - **Adicionar uma fonte sem teclado**: Ajustes > **Adicionar uma fonte com o celular**. A TV mostra um **QR code** e um código de 4 dígitos; no celular (mesmo Wi-Fi), abra o endereço, digite o código e os dados da fonte (Xtream ou lista M3U). **Remover uma fonte** fica no mesmo lugar.
 - **Registro**: botão Registro do início, ou tecla **Menu**, **Info** ou **vermelha** do controle em qualquer tela. **↑ / ↓** rolam, **OK** mostra só os erros.

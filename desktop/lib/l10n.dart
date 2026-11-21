@@ -108,6 +108,7 @@ class L10n {
   }
 
   static const Map<String, String> _en = {
+    'Catégorie': 'Category',
     'Chargement du catalogue en cours… (une à deux minutes)': 'Loading the catalogue… (one to two minutes)',
     'Parcourir': 'Browse',
     'Favori': 'Favourite',

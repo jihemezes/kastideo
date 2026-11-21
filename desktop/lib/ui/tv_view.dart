@@ -100,6 +100,7 @@ class _TVViewState extends State<TVView> {
     _focus.dispose();
     _searchFocus.dispose();
     _listController.dispose();
+    _catController.dispose();
     super.dispose();
   }
 
@@ -234,16 +235,6 @@ class _TVViewState extends State<TVView> {
         _ => false,
       };
 
-  void _cycleFilter(int delta) {
-    final options = _filterOptions();
-    var index = options.indexWhere((o) => _sameFilter(o, _filter));
-    if (index < 0) index = 0;
-    setState(() {
-      _filter = options[(index + delta + options.length) % options.length];
-      _hi = 0;
-    });
-    if (_listController.hasClients) _listController.jumpTo(0);
-  }
 
   /// Touches du panneau des chaînes à la télécommande : on se déplace dans la liste SANS changer de chaîne ;
   /// OK lance la chaîne surlignée.
@@ -251,17 +242,34 @@ class _TVViewState extends State<TVView> {
     final key = event.logicalKey;
     final list = _channels;
     _touchPanel();
+    final ok = key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.gameButtonA;
+    if (_zone == 0) {
+      // Colonne des catégories : ↑/↓ changent de catégorie, → ou OK passent aux chaînes.
+      if (key == LogicalKeyboardKey.arrowUp) {
+        _moveFilter(-1);
+      } else if (key == LogicalKeyboardKey.arrowDown) {
+        _moveFilter(1);
+      } else if (key == LogicalKeyboardKey.channelUp || key == LogicalKeyboardKey.pageUp) {
+        _moveFilter(-6);
+      } else if (key == LogicalKeyboardKey.channelDown || key == LogicalKeyboardKey.pageDown) {
+        _moveFilter(6);
+      } else if (key == LogicalKeyboardKey.arrowRight || ok) {
+        if (list.isNotEmpty) setState(() => _zone = 1);
+      } else if (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.escape) {
+        _closePanel();
+      } else {
+        return KeyEventResult.ignored;
+      }
+      return KeyEventResult.handled;
+    }
+    // Colonne des chaînes : on se déplace SANS changer de chaîne ; OK lance la chaîne surlignée.
     if (key == LogicalKeyboardKey.arrowUp) {
-      if (_zone == 1 && _hi > 0) {
+      if (_hi > 0) {
         setState(() => _hi--);
         _followHighlight();
-      } else if (_zone == 1) {
-        setState(() => _zone = 0);
       }
     } else if (key == LogicalKeyboardKey.arrowDown) {
-      if (_zone == 0) {
-        setState(() => _zone = 1);
-      } else if (_hi < list.length - 1) {
+      if (_hi < list.length - 1) {
         setState(() => _hi++);
         _followHighlight();
       }
@@ -272,29 +280,47 @@ class _TVViewState extends State<TVView> {
       setState(() => _hi = (_hi + 8).clamp(0, list.isEmpty ? 0 : list.length - 1));
       _followHighlight();
     } else if (key == LogicalKeyboardKey.arrowLeft) {
-      if (_zone == 0) _cycleFilter(-1);
+      setState(() => _zone = 0);
     } else if (key == LogicalKeyboardKey.arrowRight) {
-      if (_zone == 0) {
-        _cycleFilter(1);
-      } else {
-        _closePanel();
-      }
-    } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.gameButtonA) {
-      if (_zone == 0) {
-        _cycleFilter(1);
-      } else if (list.isNotEmpty) {
+      _closePanel();
+    } else if (ok) {
+      if (list.isNotEmpty) {
         _select(list[_hi.clamp(0, list.length - 1)]);
         _closePanel();
       }
     } else if (key == LogicalKeyboardKey.escape) {
       _closePanel();
-    } else if (key == LogicalKeyboardKey.contextMenu && _zone == 1 && list.isNotEmpty) {
+    } else if (key == LogicalKeyboardKey.contextMenu && list.isNotEmpty) {
       context.library.toggleFavorite(list[_hi.clamp(0, list.length - 1)].id);
       setState(() {});
     } else {
       return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
+  }
+
+  final _catController = ScrollController();
+
+  /// Change de catégorie de [delta] crans (sans retour au début : la liste s'arrête aux extrémités).
+  void _moveFilter(int delta) {
+    final options = _filterOptions();
+    var index = options.indexWhere((o) => _sameFilter(o, _filter));
+    if (index < 0) index = 0;
+    final next = (index + delta).clamp(0, options.length - 1);
+    if (next == index) return;
+    setState(() {
+      _filter = options[next];
+      _hi = 0;
+    });
+    if (_listController.hasClients) _listController.jumpTo(0);
+    if (_catController.hasClients) {
+      final top = next * 64.0;
+      final view = _catController.position.viewportDimension;
+      var target = _catController.offset;
+      if (top < target) target = top;
+      if (top + 64 > target + view) target = top + 64 - view;
+      _catController.jumpTo(target.clamp(0.0, _catController.position.maxScrollExtent));
+    }
   }
 
   void _flashBanner() {
@@ -533,10 +559,10 @@ class _TVViewState extends State<TVView> {
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOut,
-                left: _panel ? 0 : (Device.isTv ? -560 : -380),
+                left: _panel ? 0 : (Device.isTv ? -740 : -380),
                 top: 0,
                 bottom: 0,
-                width: Device.isTv ? 540 : 360,
+                width: Device.isTv ? 720 : 360,
                 child: _panelView(context),
               ),
             ]);
@@ -551,55 +577,90 @@ class _TVViewState extends State<TVView> {
   Widget _tvPanel(BuildContext context) {
     final channels = _channels;
     final currentId = _current?.id;
-    final headerFocused = _zone == 0;
+    final options = _filterOptions();
+    final selectedFilter = options.indexWhere((o) => _sameFilter(o, _filter));
+    final inCategories = _zone == 0;
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xF2121218),
         border: Border(right: BorderSide(color: KPalette.separatorDark)),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 14),
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 12),
       child: Column(children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          height: 72,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: headerFocused ? KPalette.orange : Colors.transparent, width: 4),
-          ),
-          child: Row(children: [
-            Icon(Icons.chevron_left_rounded, size: 36, color: headerFocused ? KPalette.orange : Colors.white38),
-            Expanded(
-              child: Text(channelFilterTitle(context, _filter),
-                  textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(24, weight: FontWeight.w800)),
-            ),
-            Icon(Icons.chevron_right_rounded, size: 36, color: headerFocused ? KPalette.orange : Colors.white38),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text('${channels.length} ${tr('chaînes')}', style: kTextD(16, color: KPalette.secondaryDark)),
-        ),
         Expanded(
-          child: channels.isEmpty
-              ? Center(child: Text(tr('Aucune chaîne'), style: kTextD(20, color: KPalette.secondaryDark)))
-              : ListView.builder(
-                  controller: _listController,
-                  padding: EdgeInsets.zero,
-                  itemCount: channels.length,
-                  itemExtent: 80,
-                  itemBuilder: (context, i) => _ChannelRow(
-                    item: channels[i],
-                    current: channels[i].id == currentId,
-                    big: true,
-                    focused: _zone == 1 && i == _hi,
-                    onTap: () {},
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // Colonne des catégories.
+            SizedBox(
+              width: 240,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
+                  child: Text(tr('Catégories'), style: kTextD(18, weight: FontWeight.w800, color: inCategories ? KPalette.orange : KPalette.secondaryDark)),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _catController,
+                    padding: EdgeInsets.zero,
+                    itemCount: options.length,
+                    itemExtent: 64,
+                    itemBuilder: (context, i) {
+                      final selected = i == selectedFilter;
+                      final focused = selected && inCategories;
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        alignment: Alignment.centerLeft,
+                        decoration: BoxDecoration(
+                          color: selected ? (focused ? KPalette.orange : KPalette.orange.withValues(alpha: 0.30)) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: focused ? Colors.white : Colors.transparent, width: 3),
+                        ),
+                        child: Text(channelFilterTitle(context, options[i]),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: kTextD(18, weight: selected ? FontWeight.w800 : FontWeight.w500, color: focused ? Colors.black : Colors.white)),
+                      );
+                    },
                   ),
                 ),
+              ]),
+            ),
+            const SizedBox(width: 10),
+            Container(width: 1, color: KPalette.separatorDark),
+            const SizedBox(width: 10),
+            // Colonne des chaînes.
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 8),
+                  child: Text('${tr('Chaînes')} · ${channels.length}',
+                      style: kTextD(18, weight: FontWeight.w800, color: inCategories ? KPalette.secondaryDark : KPalette.orange)),
+                ),
+                Expanded(
+                  child: channels.isEmpty
+                      ? Center(child: Text(tr('Aucune chaîne'), style: kTextD(20, color: KPalette.secondaryDark)))
+                      : ListView.builder(
+                          controller: _listController,
+                          padding: EdgeInsets.zero,
+                          itemCount: channels.length,
+                          itemExtent: 80,
+                          itemBuilder: (context, i) => _ChannelRow(
+                            item: channels[i],
+                            current: channels[i].id == currentId,
+                            big: true,
+                            focused: !inCategories && i == _hi,
+                            onTap: () {},
+                          ),
+                        ),
+                ),
+              ]),
+            ),
+          ]),
         ),
         const SizedBox(height: 8),
-        const TvHints(items: [('OK', 'Regarder'), ('▲ ▼', 'Parcourir'), ('Menu', 'Favori'), ('Retour', 'Fermer')]),
+        TvHints(items: inCategories
+            ? const [('▲ ▼', 'Catégorie'), ('▶ / OK', 'Chaînes'), ('Retour', 'Fermer')]
+            : const [('OK', 'Regarder'), ('▲ ▼', 'Parcourir'), ('◀', 'Catégories'), ('Menu', 'Favori')]),
       ]),
     );
   }

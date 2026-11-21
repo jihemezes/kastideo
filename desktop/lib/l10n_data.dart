@@ -2,6 +2,7 @@
 // Ordre des colonnes : es, de, it, ptBR, ptPT.
 // ignore_for_file: prefer_single_quotes
 const Map<String, List<String>> kTranslations = {
+  'Catégorie': ['Categoría', 'Kategorie', 'Categoria', 'Categoria', 'Categoria'],
   'Chargement du catalogue en cours… (une à deux minutes)': ['Cargando el catálogo… (uno o dos minutos)', 'Katalog wird geladen… (ein bis zwei Minuten)', 'Caricamento del catalogo… (uno o due minuti)', 'Carregando o catálogo… (um a dois minutos)', 'A carregar o catálogo… (um a dois minutos)'],
   'Parcourir': ['Explorar', 'Durchsuchen', 'Sfoglia', 'Navegar', 'Navegar'],
   'Favori': ['Favorito', 'Favorit', 'Preferito', 'Favorito', 'Favorito'],
