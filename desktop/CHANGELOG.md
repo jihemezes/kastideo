@@ -26,6 +26,10 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android10] - 2026-11-21
+
+- Même contenu que android9 (interface Android TV à la télécommande) ; correction d'un avertissement d'analyse qui bloquait la CI.
+
 ## [1.19.5-android9] - 2026-11-21
 
 - **Android TV : interface dédiée à la télécommande** (ui/tv_shell.dart). Les flèches ne déplaçaient rien dans l'accueil et les écrans à boutons : ils sont remplacés, sur téléviseur, par des écrans à sélection gérée par l'application. L'élément sélectionné est entouré d'orange, agrandi et lumineux (comme sur Apple TV).

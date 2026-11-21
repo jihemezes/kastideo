@@ -559,7 +559,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               itemCount: names.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
               itemBuilder: (context, i) {
                 final selected = i == _chip;
                 final focused = selected && _inChips;
