@@ -10,6 +10,7 @@ import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import 'tv_settings.dart';
 import 'tv_shell.dart';
 import 'widgets.dart';
 

@@ -11,7 +11,6 @@ import '../core/models.dart';
 import '../core/tv_setup.dart';
 import '../l10n.dart';
 import '../theme.dart';
-import '../version.dart';
 import 'player_pane.dart';
 import 'widgets.dart';
 
@@ -633,6 +632,19 @@ class TvMenuPage extends StatefulWidget {
 
 class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
   int _index = 0;
+  final _scroll = ScrollController();
+  static const _rowHeight = 98.0; // 82 de hauteur + 16 d'espace
+
+  void _follow() {
+    if (!_scroll.hasClients) return;
+    final top = _index * _rowHeight;
+    final view = _scroll.position.viewportDimension;
+    if (top < _scroll.offset) {
+      _scroll.jumpTo(top);
+    } else if (top + _rowHeight > _scroll.offset + view) {
+      _scroll.jumpTo(top + _rowHeight - view);
+    }
+  }
 
   @override
   void initState() {
@@ -643,6 +655,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
   @override
   void dispose() {
     stopTvKeys();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -662,6 +675,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
       case TvKey.right:
         break;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _follow());
     return true;
   }
 
@@ -679,7 +693,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
               Text(widget.title, style: kTextD(42, weight: FontWeight.w800)),
               const SizedBox(height: 28),
               Expanded(
-                child: ListView(children: [
+                child: ListView(controller: _scroll, children: [
                   for (var i = 0; i < entries.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
@@ -709,38 +723,6 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
       },
     );
   }
-}
-
-void openTvSettings(BuildContext context) {
-  Navigator.of(context).push(MaterialPageRoute<void>(
-    builder: (_) => TvMenuPage(
-      title: tr('Réglages'),
-      footer: 'Kastideo $kVersion',
-      entries: (context) => [
-        TvEntry(tr('Ajouter une source avec mon téléphone'), (c) => openTvQr(c), icon: Icons.qr_code_2_rounded),
-        TvEntry(tr('Retirer une source'), (c) => openTvRemoveSource(c), detail: '${context.library.sources.length}'),
-        TvEntry(tr('Rendu vidéo direct (recommandé)'), (c) => c.settings.setTvDirectRender(!c.settings.tvDirectRender),
-            detail: context.settings.tvDirectRender ? tr('Oui · au prochain lancement') : tr('Non')),
-        TvEntry(tr('Journal de lecture'), (c) => openTvLog(c), icon: Icons.receipt_long_rounded),
-      ],
-    ),
-  ));
-}
-
-void openTvRemoveSource(BuildContext context) {
-  Navigator.of(context).push(MaterialPageRoute<void>(
-    builder: (_) => TvMenuPage(
-      title: tr('Retirer une source'),
-      footer: tr('OK retire immédiatement la source choisie.'),
-      entries: (context) {
-        final sources = context.library.sources;
-        if (sources.isEmpty) return [TvEntry(tr('Aucune source'), null)];
-        return [
-          for (final s in List.of(sources)) TvEntry(s.name, (c) => c.library.removeSource(s), icon: Icons.delete_outline_rounded),
-        ];
-      },
-    ),
-  ));
 }
 
 void openTvQr(BuildContext context) {

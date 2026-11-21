@@ -1348,6 +1348,7 @@ On Android TV, Kastideo shows screens designed for the remote: the selected item
 - **TV Guide** (Home button): channels × time grid. **◀ ▶** move programme by programme, **▲ ▼** channel by channel; **OK** watches the current programme (or opens its options if it is past or upcoming); **Menu** opens the options: **Watch**, **Replay**, **Record**, **Alert me**, **Schedule recording**. **▲** from the first channel reaches **Now**, the **day** (including replay days) and the **filter** (favorites, recents, themes, categories).
 - **Player options**: during playback, the **Menu** key opens the options list: **audio**, **subtitles**, **speed** (movies and episodes), **picture format**, **next episode**, **episode list**, **auto-play next**, and in Live **favorite** and **previous channel**. **OK** applies the choice.
 - **Direct video rendering**: on a TV, video is decoded straight to the screen (smooth even in 4K on an older TV). Settings > **Direct video rendering** turns it off (applied at next launch); in this mode subtitles are not displayed.
+- **Settings** (Home button): **Sources** (enable, disable, refresh, move up, move down, remove), **Categories** for Live, Movies and Series (show, hide, move, sort A to Z), **Language**, **Playback** (automatic next episode, direct rendering, replay, software decoding, relay), **TV Guide** (opening position, backup guide, reload), **TMDB key** (typed with the TV keyboard), **Help** and **Log**.
 
 ### Differences from the computer
 

@@ -769,6 +769,24 @@ class LibraryStore extends ChangeNotifier {
     if (guideChanged && !accessChanged) onSourceRefreshed?.call(source);
   }
 
+  /// Déplace une source dans la liste (−1 : plus haut, +1 : plus bas).
+  Future<void> moveSource(Source source, int delta) async {
+    final from = sources.indexWhere((s) => s.id == source.id);
+    final to = from + delta;
+    if (from < 0 || to < 0 || to >= sources.length) return;
+    sources.insert(to, sources.removeAt(from));
+    await _saveSources();
+    _rebuild();
+  }
+
+  /// Active ou désactive une source sans la supprimer.
+  Future<void> setSourceEnabled(Source source, bool enabled) async {
+    source.enabled = enabled;
+    await _saveSources();
+    _rebuild();
+    if (enabled && !_contentBySource.containsKey(source.id)) await refresh(source);
+  }
+
   Future<void> removeSource(Source source) async {
     sources.removeWhere((s) => s.id == source.id);
     _contentBySource.remove(source.id);
