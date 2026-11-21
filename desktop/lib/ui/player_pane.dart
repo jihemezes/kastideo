@@ -317,16 +317,20 @@ class _PlayerPaneState extends State<PlayerPane> {
                           child: Text(_hud!, style: kTextD(18, weight: FontWeight.w700)),
                         ),
                       ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 18,
-                      child: AnimatedOpacity(
-                        opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
-                        duration: const Duration(milliseconds: 250),
-                        child: Center(child: ControlsBar(onFullScreen: _toggleFullScreen)),
-                      ),
-                    ),
+                    // Direct à la télécommande : pas de barre (le bandeau, le panneau et la touche Menu la remplacent).
+                    if (!(Device.isTv && widget.tvMode))
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 18,
+                        child: AnimatedOpacity(
+                          opacity: _controlsVisible || !playback.isPlaying ? 1 : 0,
+                          duration: const Duration(milliseconds: 250),
+                          child: Center(child: ControlsBar(onFullScreen: _toggleFullScreen)),
+                        ),
+                      )
+                    else if (!playback.isPlaying && !playback.isLoading && playback.errorMessage == null && playback.current != null)
+                      const Center(child: Icon(Icons.pause_circle_filled_rounded, size: 96, color: Colors.white70)),
                   ]);
                 },
               ),

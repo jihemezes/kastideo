@@ -26,8 +26,14 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android17] - 2026-11-21
+
+- **Android TV : Guide TV en grille à la télécommande** (bouton **Guide TV** de l'accueil) : grille chaînes × heures (2 h), **◀ ▶** de programme en programme, **▲ ▼** de chaîne en chaîne, **OK** regarde le programme en cours ; **Menu** = options du programme (Regarder, **Revoir** en replay, Enregistrer, M'alerter, Programmer l'enregistrement, Enregistrer ce replay). **▲** depuis la première chaîne atteint **Maintenant**, le **jour** (jours à revoir compris) et le **filtre** (favoris, récents, thèmes, catégories). Résumé du programme sous la grille ; réglage « À l'ouverture du guide » respecté.
+- Inclut les options du lecteur et la suppression de la barre du Direct d'android16.
+
 ## [1.19.5-android16] - 2026-11-21
 
+- **Android TV, Direct : la barre de lecture inutilisable est supprimée** (elle ne disparaissait jamais et ↓ changeait de chaîne). Une icône pause s'affiche quand la lecture est en pause.
 - **Android TV : options du lecteur à la télécommande** (étape 1 pour retrouver les fonctions de l'Apple TV) : la touche **Menu** pendant la lecture ouvre pistes **audio**, **sous-titres** (indisponibles en rendu direct), **vitesse**, **format de l'image**, **épisode suivant**, **liste des épisodes**, **enchaînement automatique** ; en Direct, aussi **favori** et **chaîne précédente**.
 
 ## [1.19.5-android15] - 2026-11-21

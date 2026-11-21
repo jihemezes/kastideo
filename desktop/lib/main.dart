@@ -39,6 +39,7 @@ import 'ui/multiview_view.dart';
 import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
+import 'ui/tv_guide.dart';
 import 'ui/tv_shell.dart';
 import 'ui/tv_view.dart';
 import 'ui/widgets.dart';
@@ -557,7 +558,7 @@ class _RootViewState extends State<RootView> {
                   Screen.live => const CatalogScreen(kind: MediaKind.live),
                   Screen.movies => Device.isTv ? const TvCatalog(kind: MediaKind.movie) : const CatalogScreen(kind: MediaKind.movie),
                   Screen.series => Device.isTv ? const TvCatalog(kind: MediaKind.series) : const CatalogScreen(kind: MediaKind.series),
-                  Screen.guide => const GuideScreen(),
+                  Screen.guide => Device.isTv ? const TvGuide() : const GuideScreen(),
                   Screen.recordings => const RecordingsScreen(),
                   Screen.multiview => const MultiViewScreen(),
                   Screen.library => const LibraryScreen(),

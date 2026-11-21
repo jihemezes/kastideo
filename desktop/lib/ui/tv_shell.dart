@@ -146,7 +146,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
     super.dispose();
   }
 
-  int get _count => _row == 0 ? 3 : 2;
+  int get _count => 3;
 
   @override
   bool onTvKey(TvKey key) {
@@ -164,7 +164,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
         case TvKey.down:
           if (_row == 0) {
             _row = 1;
-            _col = _col.clamp(0, 1);
+            _col = _col.clamp(0, 2);
           }
         case TvKey.menu:
           openTvLog(context);
@@ -180,6 +180,8 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
     if (_row == 0) {
       nav.go([Screen.live, Screen.movies, Screen.series][_col]);
     } else if (_col == 0) {
+      nav.go(Screen.guide);
+    } else if (_col == 1) {
       openTvSettings(context);
     } else {
       openTvLog(context);
@@ -197,7 +199,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
           // Sans source : le curseur commence sur Réglages, pour ajouter la première.
           if (library.sources.isEmpty) {
             _row = 1;
-            _col = 0;
+            _col = 1;
           }
         }
         final tiles = [
@@ -246,9 +248,11 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
                 ]),
                 const SizedBox(height: 36),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  _small(0, Icons.settings_rounded, tr('Réglages')),
+                  _small(0, Icons.calendar_month_rounded, tr('Guide TV')),
                   const SizedBox(width: 28),
-                  _small(1, Icons.receipt_long_rounded, tr('Journal')),
+                  _small(1, Icons.settings_rounded, tr('Réglages')),
+                  const SizedBox(width: 28),
+                  _small(2, Icons.receipt_long_rounded, tr('Journal')),
                 ]),
                 const Spacer(),
                 const TvHints(),
@@ -261,7 +265,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
   }
 
   Widget _small(int index, IconData icon, String label) => SizedBox(
-        width: 260,
+        width: 240,
         child: TvFocusBox(
           selected: _row == 1 && _col == index,
           radius: 22,
