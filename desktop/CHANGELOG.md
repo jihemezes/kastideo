@@ -26,6 +26,10 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android16] - 2026-11-21
+
+- **Android TV : options du lecteur à la télécommande** (étape 1 pour retrouver les fonctions de l'Apple TV) : la touche **Menu** pendant la lecture ouvre pistes **audio**, **sous-titres** (indisponibles en rendu direct), **vitesse**, **format de l'image**, **épisode suivant**, **liste des épisodes**, **enchaînement automatique** ; en Direct, aussi **favori** et **chaîne précédente**.
+
 ## [1.19.5-android15] - 2026-11-21
 
 - **Android TV : rendu vidéo direct activé par défaut** — essayé sur le téléviseur (lecture fluide même en 4K). Réglage « Rendu vidéo direct (recommandé) » pour le désactiver ; sans sous-titres dans ce mode.

@@ -199,6 +199,7 @@ const Map<String, List<String>> kTranslations = {
   'Réessayer': ['Reintentar', 'Erneut versuchen', 'Riprova', 'Tentar novamente', 'Tentar novamente'],
   'Rendu vidéo direct (recommandé)': ['Renderizado de vídeo directo (recomendado)', 'Direktes Videorendering (empfohlen)', 'Rendering video diretto (consigliato)', 'Renderização de vídeo direta (recomendada)', 'Renderização de vídeo direta (recomendada)'],
   'Oui · au prochain lancement': ['Sí · en el próximo inicio', 'Ja · beim nächsten Start', 'Sì · al prossimo avvio', 'Sim · no próximo arranque', 'Sim · no próximo arranque'],
+  'Indisponible en rendu direct': ['No disponible en renderizado directo', 'Im direkten Rendering nicht verfügbar', 'Non disponibile nel rendering diretto', 'Indisponível na renderização direta', 'Indisponível na renderização direta'],
   'Journal de lecture': ['Registro de reproducción', 'Wiedergabeprotokoll', 'Registro di riproduzione', 'Registro de reprodução', 'Registo de reprodução'],
   'Copier': ['Copiar', 'Kopieren', 'Copia', 'Copiar', 'Copiar'],
   'Effacer': ['Borrar', 'Löschen', 'Cancella', 'Limpar', 'Limpar'],

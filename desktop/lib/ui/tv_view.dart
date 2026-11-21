@@ -12,7 +12,8 @@ import '../theme.dart';
 import 'catalog_screen.dart';
 import 'guide_view.dart';
 import 'player_pane.dart';
-import 'tv_shell.dart' show TvHints;
+import 'tv_player_menu.dart';
+import 'tv_shell.dart' show TvEntry, TvHints;
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'widgets.dart';
@@ -420,7 +421,20 @@ class _TVViewState extends State<TVView> {
     } else if (key == LogicalKeyboardKey.mediaPlayPause || key == LogicalKeyboardKey.mediaPlay || key == LogicalKeyboardKey.mediaPause) {
       context.playback.togglePause();
     } else if (key == LogicalKeyboardKey.contextMenu) {
-      _toggleFavorite();
+      final item = _current;
+      final favorite = item != null && context.library.isFavorite(item.id);
+      openTvPlayerOptions(context, extra: [
+        if (item != null)
+          TvEntry(favorite ? tr('Retirer des favoris') : tr('Ajouter aux favoris'), (c) {
+            _toggleFavorite();
+            Navigator.of(c).pop();
+          }, icon: favorite ? Icons.star_rounded : Icons.star_border_rounded),
+        if (_previousId != null)
+          TvEntry(tr('Chaîne précédente'), (c) {
+            _goBack();
+            Navigator.of(c).pop();
+          }, icon: Icons.history_rounded),
+      ]);
     } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.select) {
       _typed.isNotEmpty ? _commitNumber() : _togglePanel();
     } else if (key == LogicalKeyboardKey.escape) {

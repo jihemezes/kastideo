@@ -1344,6 +1344,7 @@ Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento 
 - **Durante la riproduzione**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; i tasti Play/Pausa e Avanti/Indietro veloce sono supportati.
 - **Aggiungere una sorgente senza tastiera**: Impostazioni > **Aggiungi una sorgente con il telefono**. La TV mostra un **codice QR** e un codice di 4 cifre; dal telefono (stessa rete Wi-Fi) apri l'indirizzo, inserisci il codice e i dati della sorgente (Xtream o lista M3U). **Rimuovi una sorgente** è nello stesso posto.
 - **Registro**: pulsante Registro della home, o tasto **Menu**, **Info** o **rosso** del telecomando da qualsiasi schermata. **↑ / ↓** scorrono, **OK** mostra solo gli errori.
+- **Opzioni del lettore**: durante la riproduzione, il tasto **Menu** apre le opzioni: **audio**, **sottotitoli**, **velocità** (film ed episodi), **formato dell'immagine**, **episodio successivo**, **elenco episodi**, **concatenamento automatico** e, in Diretta, **preferito** e **canale precedente**. **OK** applica la scelta.
 - **Rendering video diretto**: sulla TV il video è decodificato direttamente sullo schermo (fluido anche in 4K su un televisore datato). Impostazioni > **Rendering video diretto** lo disattiva (al prossimo avvio); in questa modalità i sottotitoli non vengono mostrati.
 
 ### Differenze rispetto al computer

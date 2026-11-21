@@ -20,6 +20,7 @@ import 'pip_view.dart';
 import '../core/multiview.dart';
 import 'multiview_view.dart' show openMultiView;
 import 'themes_view.dart';
+import 'tv_player_menu.dart';
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
 class PlayerPane extends StatefulWidget {
@@ -85,6 +86,11 @@ class _PlayerPaneState extends State<PlayerPane> {
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
     if (Device.isAndroid) _poke();
+    // Télévision : Menu ouvre les options du lecteur (pistes, vitesse, format, épisodes…).
+    if (Device.isTv && !widget.tvMode && event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.contextMenu) {
+      openTvPlayerOptions(context);
+      return KeyEventResult.handled;
+    }
     if (!Device.isAndroid || !node.hasPrimaryFocus || widget.tvMode) return KeyEventResult.ignored;
     final playback = context.playback;
     final key = event.logicalKey;
