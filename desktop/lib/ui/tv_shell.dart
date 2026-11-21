@@ -11,7 +11,10 @@ import '../core/models.dart';
 import '../core/tv_setup.dart';
 import '../l10n.dart';
 import '../theme.dart';
+import '../core/settings.dart' show InterfaceStyle;
 import 'player_pane.dart';
+import 'tv_cinema.dart';
+import 'tv_view.dart';
 import 'widgets.dart';
 
 // Interface Android TV : écrans pensés pour la télécommande (flèches, OK, Retour).
@@ -153,12 +156,19 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   double _rowHeight = 300;
   final _scroll = ScrollController();
   final _chipScroll = ScrollController();
+  final _rails = GlobalKey<TvRailsState>();
+
+  bool get _useRails => !widget.library && context.settings.interfaceFor(widget.kind) == InterfaceStyle.cinema;
+  bool get _live => widget.kind == MediaKind.live && !widget.library;
 
   @override
   void initState() {
     super.initState();
     startTvKeys();
     TvCatalog.onBack = _back;
+    if (widget.kind == MediaKind.live && !widget.library && context.playback.current?.kind == MediaKind.live) {
+      _mode = _Mode.player; // une chaîne est déjà lancée (depuis l'accueil, le guide…)
+    }
     final pending = TvCatalog.pendingOpen;
     if (pending != null) {
       TvCatalog.pendingOpen = null;
@@ -180,9 +190,10 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   bool _back() {
     switch (_mode) {
       case _Mode.player:
+        if (_live && (TVView.onBack?.call() ?? false)) return true;
         final playback = context.playback;
         if (playback.current != null) playback.stop();
-        setState(() => _mode = _item?.kind == MediaKind.series ? _Mode.episodes : _Mode.detail);
+        setState(() => _mode = _live ? _Mode.grid : (_item?.kind == MediaKind.series ? _Mode.episodes : _Mode.detail));
         return true;
       case _Mode.episodes:
         setState(() => _mode = _Mode.detail);
@@ -226,7 +237,11 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     setState(() {
       switch (_mode) {
         case _Mode.grid:
-          _gridKey(key);
+          if (_useRails) {
+            _rails.currentState?.handle(key);
+          } else {
+            _gridKey(key);
+          }
         case _Mode.detail:
           _detailKey(key);
         case _Mode.episodes:
@@ -275,18 +290,27 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
           _inChips = true;
         }
       case TvKey.ok:
-        if (items.isNotEmpty) {
-          _item = items[_cell.clamp(0, items.length - 1)];
-          _mode = _Mode.detail;
-          _button = 0;
-          _season = 0;
-          _episode = 0;
-          context.info.load(_item!);
-        }
+        if (items.isNotEmpty) _openItem(items[_cell.clamp(0, items.length - 1)]);
       case TvKey.menu:
         break;
     }
     _ensureCellVisible();
+  }
+
+  /// Ouvre un élément : une chaîne est lancée aussitôt ; un film ou une série ouvre sa fiche.
+  void _openItem(MediaItem item) {
+    if (item.kind == MediaKind.live) {
+      _play(item);
+      return;
+    }
+    setState(() {
+      _item = item;
+      _mode = _Mode.detail;
+      _button = 0;
+      _season = 0;
+      _episode = 0;
+    });
+    context.info.load(item);
   }
 
   void _ensureCellVisible() {
@@ -384,10 +408,10 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   @override
   Widget build(BuildContext context) {
     if (_mode == _Mode.player) {
-      return const DarkZone(child: PlayerPane());
+      return _live ? const TVView() : const DarkZone(child: PlayerPane());
     }
     return ListenableBuilder(
-      listenable: Listenable.merge([context.library, context.info, context.watch]),
+      listenable: Listenable.merge([context.library, context.info, context.watch, context.settings]),
       builder: (context, _) => TvBackground(
         child: switch (_mode) {
           _Mode.grid => _gridView(context),
@@ -402,7 +426,13 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   Widget _gridView(BuildContext context) {
     final names = _chipNames;
     final items = _items;
-    final title = widget.library ? tr('Mes vidéos') : (widget.kind == MediaKind.movie ? tr('Films') : tr('Séries'));
+    final title = widget.library ? tr('Mes vidéos') : (_live ? tr('Direct') : (widget.kind == MediaKind.movie ? tr('Films') : tr('Séries')));
+    if (_useRails) {
+      return Column(children: [
+        Expanded(child: TvRails(key: _rails, kind: widget.kind, onOpen: _openItem)),
+        const Padding(padding: EdgeInsets.only(bottom: 14), child: TvHints()),
+      ]);
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(60, 36, 60, 24),
       child: Column(
@@ -446,7 +476,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                     const spacing = 22.0;
                     _columns = 6;
                     final width = (box.maxWidth - 24 - spacing * (_columns - 1)) / _columns;
-                    final height = width * 1.5;
+                    final height = _live ? width * 0.66 : width * 1.5;
                     _rowHeight = height + 44 + spacing;
                     return GridView.builder(
                       controller: _scroll,
@@ -467,7 +497,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                             selected: selected,
                             radius: 14,
                             child: Stack(children: [
-                              PosterImage(url: item.logo, name: item.name, width: width, height: height),
+                              PosterImage(url: item.logo, name: item.name, width: width, height: height, fit: _live ? BoxFit.contain : BoxFit.cover),
                               if (context.watch.isWatched(item.id))
                                 const Positioned(top: 8, right: 8, child: Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 28)),
                               if (fraction != null && fraction > 0 && fraction < 1)

@@ -26,6 +26,12 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android20] - 2026-11-22
+
+- **Android TV : styles d'affichage Classique / Cinéma / TV** (Réglages > **Style d'affichage**), au choix pour **Direct** (TV par défaut, Classique = grille des chaînes, Cinéma = bannière et rangées), **Films** et **Séries** (Classique par défaut, Cinéma = bannière et rangées Reprendre la lecture, Favoris, Récents, catégories), comme sur l'Apple TV.
+- Les chaînes se lancent directement depuis la grille ou les rangées, avec le zapping de l'interface TV.
+- Libellé « Revenir » traduit dans la barre d'aide de la télécommande.
+
 ## [1.19.5-android19] - 2026-11-21
 
 - **Android TV : réglages complets à la télécommande** : **Sources** (activer, désactiver, actualiser, monter, descendre, retirer), **Catégories** de Direct, Films et Séries (afficher, masquer, monter, descendre, trier A→Z, ordre du fournisseur), **Langue**, **Lecture** (épisode suivant, rendu direct, replay, décodage logiciel, relais, mise à jour automatique), **Guide TV** (ouverture, guide de secours, recharger), **Clé TMDB** (clavier de la télévision), **Aide**, **Journal**.

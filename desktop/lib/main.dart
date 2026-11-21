@@ -553,10 +553,10 @@ class _RootViewState extends State<RootView> {
           children: [
             Positioned.fill(
               child: ListenableBuilder(
-                listenable: navigation,
+                listenable: Listenable.merge([navigation, context.settings]),
                 builder: (context, _) => switch (navigation.screen) {
                   Screen.home => Device.isTv ? const TvHome() : const HomeScreen(),
-                  Screen.live => const CatalogScreen(kind: MediaKind.live),
+                  Screen.live => Device.isTv && context.settings.interfaceFor(MediaKind.live) != InterfaceStyle.tv ? const TvCatalog(kind: MediaKind.live) : const CatalogScreen(kind: MediaKind.live),
                   Screen.movies => Device.isTv ? const TvCatalog(kind: MediaKind.movie) : const CatalogScreen(kind: MediaKind.movie),
                   Screen.series => Device.isTv ? const TvCatalog(kind: MediaKind.series) : const CatalogScreen(kind: MediaKind.series),
                   Screen.guide => Device.isTv ? const TvGuide() : const GuideScreen(),

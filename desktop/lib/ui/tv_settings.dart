@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../app_state.dart';
 import '../core/models.dart';
+import '../core/settings.dart' show InterfaceStyle;
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
@@ -22,6 +23,7 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Ajouter une source avec mon téléphone'), (c) => openTvQr(c), icon: Icons.qr_code_2_rounded),
           TvEntry(tr('Sources'), (c) => _openSources(c), detail: '${context.library.sources.length}'),
           TvEntry(tr('Catégories'), (c) => _openCategoryKinds(c)),
+          TvEntry(tr('Style d\'affichage'), (c) => _openStyles(c)),
           TvEntry(tr('Langue'), (c) => _openLanguage(c), detail: s.language == 'system' ? tr('Langue du système') : L10n.names[s.language]),
           TvEntry(tr('Lecture'), (c) => _openPlayback(c)),
           TvEntry(tr('Guide TV'), (c) => _openGuide(c)),
@@ -176,6 +178,32 @@ void _openCategory(BuildContext context, MediaKind kind, String name) {
           TvEntry(tr('Descendre'), (c) => move(c, 1), icon: Icons.arrow_downward_rounded),
         ];
       },
+    ),
+  );
+}
+
+// MARK: Styles d'affichage
+
+String _styleName(InterfaceStyle s) => switch (s) {
+      InterfaceStyle.classic => tr('Classique'),
+      InterfaceStyle.cinema => tr('Cinéma'),
+      InterfaceStyle.tv => tr('TV'),
+    };
+
+void _openStyles(BuildContext context) {
+  _push(
+    context,
+    TvMenuPage(
+      title: tr('Style d\'affichage'),
+      footer: tr('Classique : grille. Cinéma : bannière et rangées. TV : chaîne en plein écran (Direct).'),
+      entries: (context) => [
+        for (final (kind, label) in [(MediaKind.live, tr('Direct')), (MediaKind.movie, tr('Films')), (MediaKind.series, tr('Séries'))])
+          TvEntry(label, (c) {
+            final options = [InterfaceStyle.classic, InterfaceStyle.cinema, if (kind == MediaKind.live) InterfaceStyle.tv];
+            _choose(c, label, [for (final o in options) (o.name, _styleName(o))], c.settings.interfaceFor(kind).name,
+                (v) => c.settings.setInterface(kind, InterfaceStyle.values.firstWhere((x) => x.name == v)));
+          }, detail: _styleName(context.settings.interfaceFor(kind))),
+      ],
     ),
   );
 }
