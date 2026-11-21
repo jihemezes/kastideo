@@ -26,6 +26,11 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android12] - 2026-11-21
+
+- **Android : image saccadée** — le journal d'un téléviseur montrait « h264_mediacodec : Both surface and native_window are NULL » puis « Audio/Video desynchronisation » : le décodage matériel direct échouait et mpv retombait sur le décodage logiciel. Android utilise maintenant MediaCodec avec copie des images (`mediacodec-copy`).
+- **Cache** : « Failed to create file cache » (pas de dossier temporaire utilisable) → cache en mémoire, réduit (64 Mo sur téléviseur au lieu de 512 Mo) ; différé du direct limité à 1 min sur téléviseur.
+
 ## [1.19.5-android11] - 2026-11-21
 
 - **Android TV, direct** : dans la liste des chaînes, ↑/↓ ne changent plus la chaîne à l'écran (elles surlignent seulement) ; **OK** lance la chaîne surlignée. En haut de la liste, **←/→** choisissent la catégorie (Toutes, Favoris, Récents, puis chaque catégorie). Lignes agrandies, contour orange, pas de champ de recherche (le clavier s'ouvrait). Menu = favori.

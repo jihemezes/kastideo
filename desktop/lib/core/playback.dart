@@ -7,6 +7,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'decoder_fallback.dart';
+import 'device.dart';
 import 'log.dart';
 import 'media_servers.dart' show PlaybackEvent;
 import 'models.dart';
@@ -183,9 +184,9 @@ class PlaybackController extends ChangeNotifier {
   static const releaseDelay = Duration(milliseconds: 1500);
   static const startTimeout = Duration(seconds: 20);
 
-  /// Décodeur matériel : MediaCodec sur Android (sans lui, un téléviseur modeste affiche une image saccadée),
-  /// choix automatique et sûr ailleurs.
-  static String get _hardwareDecoder => Platform.isAndroid ? 'mediacodec,mediacodec-copy' : 'auto-safe';
+  /// Décodeur matériel : MediaCodec avec copie des images sur Android. Le mode direct (« mediacodec ») échoue ici
+  /// (« Both surface and native_window are NULL ») et mpv retombait sur le décodage logiciel, donc une image saccadée.
+  static String get _hardwareDecoder => Platform.isAndroid ? 'mediacodec-copy' : 'auto-safe';
 
   Future<void> _logDecoder() async {
     final native = player.platform;
@@ -244,21 +245,24 @@ class PlaybackController extends ChangeNotifier {
     final native = player.platform;
     if (native is! NativePlayer) return;
     final minutes = settings?.timeshiftMinutes ?? 60;
-    await native.setProperty('cache-on-disk', 'yes');
+    // Android : pas de dossier temporaire exploitable par mpv (« Failed to create file cache ») → cache en mémoire,
+    // modeste (un téléviseur a peu de RAM : 512 Mo de cache le ralentissait).
+    await native.setProperty('cache-on-disk', Platform.isAndroid ? 'no' : 'yes');
     _diskCache = (await native.getProperty('cache-on-disk')) == 'yes';
-    // Environ 1 Mo par seconde pour une chaîne HD ; sans cache disque, 512 Mo au plus en mémoire.
-    final bytes = _diskCache ? minutes * 60 * 1024 * 1024 : 512 * 1024 * 1024;
+    final memory = Platform.isAndroid ? (Device.isTv ? 64 : 160) : 512;
+    // Environ 1 Mo par seconde pour une chaîne HD ; sans cache disque, la taille ci-dessus au plus en mémoire.
+    final bytes = _diskCache ? minutes * 60 * 1024 * 1024 : memory * 1024 * 1024;
     await native.setProperty('cache-secs', '${minutes * 60}');
     await native.setProperty('demuxer-max-bytes', '$bytes');
     await native.setProperty('demuxer-max-back-bytes', '$bytes');
     await native.setProperty('demuxer-seekable-cache', 'yes');
     // Un direct n'est pas « seekable » pour mpv : on autorise quand même le déplacement dans le cache.
     await native.setProperty('force-seekable', 'yes');
-    PlaybackLog.shared.note('Différé : jusqu\'à $minutes min, cache ${_diskCache ? 'sur disque' : 'en mémoire (512 Mo)'}');
+    PlaybackLog.shared.note('Différé : jusqu\'à $minutes min, cache ${_diskCache ? 'sur disque' : 'en mémoire ($memory Mo)'}');
   }
 
   /// Durée maximale réelle du différé (secondes).
-  double get maxDelay => _diskCache ? (settings?.timeshiftMinutes ?? 60) * 60.0 : 480;
+  double get maxDelay => _diskCache ? (settings?.timeshiftMinutes ?? 60) * 60.0 : (Platform.isAndroid && Device.isTv ? 60 : 480);
 
   void _startShiftTimer() {
     _shiftTimer?.cancel();
