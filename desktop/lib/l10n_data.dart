@@ -2,6 +2,9 @@
 // Ordre des colonnes : es, de, it, ptBR, ptPT.
 // ignore_for_file: prefer_single_quotes
 const Map<String, List<String>> kTranslations = {
+  'Chargement du catalogue en cours… (une à deux minutes)': ['Cargando el catálogo… (uno o dos minutos)', 'Katalog wird geladen… (ein bis zwei Minuten)', 'Caricamento del catalogo… (uno o due minuti)', 'Carregando o catálogo… (um a dois minutos)', 'A carregar o catálogo… (um a dois minutos)'],
+  'Parcourir': ['Explorar', 'Durchsuchen', 'Sfoglia', 'Navegar', 'Navegar'],
+  'Favori': ['Favorito', 'Favorit', 'Preferito', 'Favorito', 'Favorito'],
   '1. Branchez le téléphone sur le même Wi-Fi.': ['1. Conecta el teléfono a la misma red Wi-Fi.', '1. Verbinde das Telefon mit demselben WLAN.', '1. Collega il telefono alla stessa rete Wi-Fi.', '1. Conecte o telefone ao mesmo Wi-Fi.', '1. Ligue o telemóvel ao mesmo Wi-Fi.'],
   '2. Scannez le code, ou ouvrez cette adresse :': ['2. Escanea el código o abre esta dirección:', '2. Scanne den Code oder öffne diese Adresse:', '2. Scansiona il codice o apri questo indirizzo:', '2. Escaneie o código ou abra este endereço:', '2. Leia o código ou abra este endereço:'],
   '3. Saisissez ce code, puis les informations de la source :': ['3. Introduce este código y los datos de la fuente:', '3. Gib diesen Code ein, dann die Angaben der Quelle:', '3. Inserisci questo codice, poi i dati della sorgente:', '3. Digite este código e depois os dados da fonte:', '3. Introduza este código e depois os dados da fonte:'],

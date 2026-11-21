@@ -1340,7 +1340,7 @@ Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento 
 - **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).
 - **Home**: Diretta, Film, Serie, poi Impostazioni e Registro.
 - **Film e serie**: categorie in alto (**←/→**), locandine sotto. **OK** apre la scheda; per una serie, **Episodi** mostra le stagioni (**←/→**) e gli episodi (**↑/↓**).
-- **Diretta**: **↑ / ↓** o **Canale +/−** cambiano canale, i **numeri** inseriscono un canale, **←** apre l'elenco dei canali, **→** mostra il banner informativo.
+- **Diretta**: **↑ / ↓** o **Canale +/−** cambiano canale, i **numeri** inseriscono un canale, **←** apre l'elenco dei canali, **→** mostra il banner informativo. Nell'elenco, **↑ / ↓** scorrono i canali **senza cambiare canale** e **OK** avvia quello evidenziato; sali in cima per scegliere la **categoria** con **←/→**; **Menu** aggiunge ai preferiti.
 - **Durante la riproduzione**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; i tasti Play/Pausa e Avanti/Indietro veloce sono supportati.
 - **Aggiungere una sorgente senza tastiera**: Impostazioni > **Aggiungi una sorgente con il telefono**. La TV mostra un **codice QR** e un codice di 4 cifre; dal telefono (stessa rete Wi-Fi) apri l'indirizzo, inserisci il codice e i dati della sorgente (Xtream o lista M3U). **Rimuovi una sorgente** è nello stesso posto.
 - **Registro**: pulsante Registro della home, o tasto **Menu**, **Info** o **rosso** del telecomando da qualsiasi schermata. **↑ / ↓** scorrono, **OK** mostra solo gli errori.

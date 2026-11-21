@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_state.dart';
+import '../core/device.dart';
 import '../core/models.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import 'catalog_screen.dart';
 import 'guide_view.dart';
 import 'player_pane.dart';
+import 'tv_shell.dart' show TvHints;
 import 'settings_dialog.dart';
 import 'themes_view.dart';
 import 'widgets.dart';
@@ -34,6 +36,9 @@ class _TVViewState extends State<TVView> {
   final _searchFocus = FocusNode();
   final _listController = ScrollController();
   bool _panel = false;
+  // Télécommande : zone active du panneau (0 = filtre de catégorie, 1 = liste) et chaîne surlignée (sans changer de chaîne).
+  int _zone = 1;
+  int _hi = 0;
   bool _banner = false;
   bool _topBar = true;
   String _typed = '';
@@ -46,7 +51,11 @@ class _TVViewState extends State<TVView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _startWithLastChannel());
     _clock = Timer.periodic(const Duration(seconds: 30), (_) => mounted && _banner ? setState(() {}) : null);
-    _pokeTopBar();
+    if (Device.isTv) {
+      _topBar = false;
+    } else {
+      _pokeTopBar();
+    }
     HardwareKeyboard.instance.addHandler(_hardwareKey);
     TVView.onBack = _back;
   }
@@ -153,7 +162,12 @@ class _TVViewState extends State<TVView> {
   // MARK: Panneau, bandeau, barre du haut
 
   void _openPanel() {
-    setState(() => _panel = true);
+    setState(() {
+      _panel = true;
+      _zone = 1;
+      final index = _current == null ? -1 : _channels.indexWhere((i) => i.id == _current!.id);
+      _hi = index < 0 ? 0 : index;
+    });
     _touchPanel();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrent());
   }
@@ -169,18 +183,118 @@ class _TVViewState extends State<TVView> {
   /// Le panneau se referme après 8 s sans activité.
   void _touchPanel() {
     _panelTimer?.cancel();
-    _panelTimer = Timer(const Duration(seconds: 8), () {
+    _panelTimer = Timer(Duration(seconds: Device.isTv ? 20 : 8), () {
       if (mounted && !_searchFocus.hasFocus) _closePanel();
     });
   }
 
+  double get _rowHeight => Device.isTv ? 80.0 : 56.0;
+
   void _scrollToCurrent() {
-    final current = _current;
-    if (current == null || !_listController.hasClients) return;
-    final index = _channels.indexWhere((i) => i.id == current.id);
+    if (!_listController.hasClients) return;
+    final int index;
+    if (Device.isTv) {
+      index = _hi;
+    } else {
+      final current = _current;
+      if (current == null) return;
+      index = _channels.indexWhere((i) => i.id == current.id);
+    }
     if (index < 0) return;
-    final target = (index * 56.0 - 200).clamp(0.0, _listController.position.maxScrollExtent);
+    final target = (index * _rowHeight - 3 * _rowHeight).clamp(0.0, _listController.position.maxScrollExtent);
     _listController.jumpTo(target);
+  }
+
+  /// Garde la chaîne surlignée visible (télécommande).
+  void _followHighlight() {
+    if (!_listController.hasClients) return;
+    final top = _hi * _rowHeight;
+    final view = _listController.position.viewportDimension;
+    var target = _listController.offset;
+    if (top < target) target = top;
+    if (top + _rowHeight > target + view) target = top + _rowHeight - view;
+    if (target != _listController.offset) {
+      _listController.animateTo(target.clamp(0.0, _listController.position.maxScrollExtent), duration: const Duration(milliseconds: 90), curve: Curves.easeOut);
+    }
+  }
+
+  /// Filtres proposés à la télécommande : toutes, favoris, récents, puis chaque catégorie.
+  List<ChannelFilter> _filterOptions() => [
+        const AllChannels(),
+        const FavoriteChannels(),
+        const RecentChannels(),
+        for (final c in context.library.categories(MediaKind.live)) CategoryChannels(c),
+      ];
+
+  bool _sameFilter(ChannelFilter a, ChannelFilter b) => switch ((a, b)) {
+        (AllChannels(), AllChannels()) => true,
+        (FavoriteChannels(), FavoriteChannels()) => true,
+        (RecentChannels(), RecentChannels()) => true,
+        (CategoryChannels(name: final x), CategoryChannels(name: final y)) => x == y,
+        _ => false,
+      };
+
+  void _cycleFilter(int delta) {
+    final options = _filterOptions();
+    var index = options.indexWhere((o) => _sameFilter(o, _filter));
+    if (index < 0) index = 0;
+    setState(() {
+      _filter = options[(index + delta + options.length) % options.length];
+      _hi = 0;
+    });
+    if (_listController.hasClients) _listController.jumpTo(0);
+  }
+
+  /// Touches du panneau des chaînes à la télécommande : on se déplace dans la liste SANS changer de chaîne ;
+  /// OK lance la chaîne surlignée.
+  KeyEventResult _panelKey(KeyEvent event) {
+    final key = event.logicalKey;
+    final list = _channels;
+    _touchPanel();
+    if (key == LogicalKeyboardKey.arrowUp) {
+      if (_zone == 1 && _hi > 0) {
+        setState(() => _hi--);
+        _followHighlight();
+      } else if (_zone == 1) {
+        setState(() => _zone = 0);
+      }
+    } else if (key == LogicalKeyboardKey.arrowDown) {
+      if (_zone == 0) {
+        setState(() => _zone = 1);
+      } else if (_hi < list.length - 1) {
+        setState(() => _hi++);
+        _followHighlight();
+      }
+    } else if (key == LogicalKeyboardKey.channelUp || key == LogicalKeyboardKey.pageUp) {
+      setState(() => _hi = (_hi - 8).clamp(0, list.isEmpty ? 0 : list.length - 1));
+      _followHighlight();
+    } else if (key == LogicalKeyboardKey.channelDown || key == LogicalKeyboardKey.pageDown) {
+      setState(() => _hi = (_hi + 8).clamp(0, list.isEmpty ? 0 : list.length - 1));
+      _followHighlight();
+    } else if (key == LogicalKeyboardKey.arrowLeft) {
+      if (_zone == 0) _cycleFilter(-1);
+    } else if (key == LogicalKeyboardKey.arrowRight) {
+      if (_zone == 0) {
+        _cycleFilter(1);
+      } else {
+        _closePanel();
+      }
+    } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.gameButtonA) {
+      if (_zone == 0) {
+        _cycleFilter(1);
+      } else if (list.isNotEmpty) {
+        _select(list[_hi.clamp(0, list.length - 1)]);
+        _closePanel();
+      }
+    } else if (key == LogicalKeyboardKey.escape) {
+      _closePanel();
+    } else if (key == LogicalKeyboardKey.contextMenu && _zone == 1 && list.isNotEmpty) {
+      context.library.toggleFavorite(list[_hi.clamp(0, list.length - 1)].id);
+      setState(() {});
+    } else {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
   }
 
   void _flashBanner() {
@@ -261,6 +375,7 @@ class _TVViewState extends State<TVView> {
       }
       return KeyEventResult.ignored;
     }
+    if (Device.isTv && _panel) return _panelKey(event);
     final keys = HardwareKeyboard.instance;
     if (keys.isControlPressed || keys.isAltPressed || keys.isMetaPressed) return KeyEventResult.ignored;
     final key = event.logicalKey;
@@ -418,10 +533,10 @@ class _TVViewState extends State<TVView> {
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOut,
-                left: _panel ? 0 : -380,
+                left: _panel ? 0 : (Device.isTv ? -560 : -380),
                 top: 0,
                 bottom: 0,
-                width: 360,
+                width: Device.isTv ? 540 : 360,
                 child: _panelView(context),
               ),
             ]);
@@ -431,7 +546,66 @@ class _TVViewState extends State<TVView> {
     );
   }
 
+  /// Panneau des chaînes pour la télécommande : sans flou (lourd sur un téléviseur), sans champ de recherche
+  /// (le clavier à l'écran s'ouvrirait) ; catégorie choisie avec ◀ ▶ dans l'en-tête.
+  Widget _tvPanel(BuildContext context) {
+    final channels = _channels;
+    final currentId = _current?.id;
+    final headerFocused = _zone == 0;
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xF2121218),
+        border: Border(right: BorderSide(color: KPalette.separatorDark)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 22, 16, 14),
+      child: Column(children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          height: 72,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: headerFocused ? KPalette.orange : Colors.transparent, width: 4),
+          ),
+          child: Row(children: [
+            Icon(Icons.chevron_left_rounded, size: 36, color: headerFocused ? KPalette.orange : Colors.white38),
+            Expanded(
+              child: Text(channelFilterTitle(context, _filter),
+                  textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(24, weight: FontWeight.w800)),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 36, color: headerFocused ? KPalette.orange : Colors.white38),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text('${channels.length} ${tr('chaînes')}', style: kTextD(16, color: KPalette.secondaryDark)),
+        ),
+        Expanded(
+          child: channels.isEmpty
+              ? Center(child: Text(tr('Aucune chaîne'), style: kTextD(20, color: KPalette.secondaryDark)))
+              : ListView.builder(
+                  controller: _listController,
+                  padding: EdgeInsets.zero,
+                  itemCount: channels.length,
+                  itemExtent: 80,
+                  itemBuilder: (context, i) => _ChannelRow(
+                    item: channels[i],
+                    current: channels[i].id == currentId,
+                    big: true,
+                    focused: _zone == 1 && i == _hi,
+                    onTap: () {},
+                  ),
+                ),
+        ),
+        const SizedBox(height: 8),
+        const TvHints(items: [('OK', 'Regarder'), ('▲ ▼', 'Parcourir'), ('Menu', 'Favori'), ('Retour', 'Fermer')]),
+      ]),
+    );
+  }
+
   Widget _panelView(BuildContext context) {
+    if (Device.isTv) return _tvPanel(context);
     final channels = _channels;
     final currentId = _current?.id;
     return MouseRegion(
@@ -601,15 +775,43 @@ class _TopBar extends StatelessWidget {
 }
 
 class _ChannelRow extends StatelessWidget {
-  const _ChannelRow({required this.item, required this.current, required this.onTap});
+  const _ChannelRow({required this.item, required this.current, required this.onTap, this.big = false, this.focused = false});
   final MediaItem item;
   final bool current;
   final VoidCallback onTap;
+
+  /// Télécommande : ligne agrandie, contour orange quand elle est surlignée.
+  final bool big;
+  final bool focused;
 
   @override
   Widget build(BuildContext context) {
     final p = context.guide.current(item);
     final favorite = context.library.isFavorite(item.id);
+    if (big) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: focused ? Colors.white.withValues(alpha: 0.16) : (current ? KPalette.accentDark.withValues(alpha: 0.35) : Colors.transparent),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: focused ? KPalette.orange : Colors.transparent, width: 4),
+        ),
+        child: Row(children: [
+          if (item.number != null) SizedBox(width: 48, child: Text('${item.number}', textAlign: TextAlign.right, style: kTextD(18, color: KPalette.secondaryDark))),
+          const SizedBox(width: 10),
+          LogoView(url: item.logo, name: item.name, size: 52),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(item.displayName, style: kTextD(20, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+              if (p != null) Text(p.title, style: kTextD(15, color: KPalette.secondaryDark), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ]),
+          ),
+          if (favorite) const Icon(Icons.star_rounded, size: 24, color: Colors.amber),
+        ]),
+      );
+    }
     return MenuTap(
       onMenu: (d) => showItemMenu(context, item, d.globalPosition),
       child: Hover(
@@ -662,21 +864,23 @@ class _Glass extends StatelessWidget {
   final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
+  Widget build(BuildContext context) {
+    // Téléviseur : fond uni, sans flou (trop lourd pour la carte graphique, image saccadée).
+    final tv = Device.isTv;
+    final box = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: tv ? const Color(0xEE202024) : const Color(0xB0202024),
         borderRadius: BorderRadius.circular(radius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: const Color(0xB0202024),
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-            ),
-            child: child,
-          ),
-        ),
-      );
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: child,
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: tv ? box : BackdropFilter(filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22), child: box),
+    );
+  }
 }
 
 /// Bandeau d'information affiché à chaque changement de chaîne.

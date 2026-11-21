@@ -892,7 +892,7 @@ class TvQrPage extends StatefulWidget {
 
 class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
   TvSetupServer? _server;
-  String? _added;
+  Source? _added;
   bool _ready = false;
 
   @override
@@ -900,8 +900,11 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
     super.initState();
     startTvKeys();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final server = TvSetupServer(context.library, onAdded: (name) {
-        if (mounted) setState(() => _added = name.isEmpty ? tr('Source') : name);
+      final library = context.library;
+      final server = TvSetupServer(library, onAdded: (source) {
+        // Le catalogue se charge ici, avec un suivi visible (la page du téléphone n'attend pas).
+        library.refresh(source);
+        if (mounted) setState(() => _added = source);
       });
       _server = server;
       await server.start();
@@ -961,8 +964,7 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
                             Text(server!.code, style: kTextD(64, weight: FontWeight.w800)),
                             if (_added != null) ...[
                               const SizedBox(height: 18),
-                              Text('✓ ${tr('Source ajoutée')} : $_added', style: kTextD(26, weight: FontWeight.w800, color: Colors.greenAccent)),
-                              Text(tr('OK pour terminer, ou ajoutez-en une autre.'), style: kTextD(20, color: Colors.white70)),
+                              _AddedStatus(source: _added!),
                             ],
                           ]),
                         ),
@@ -971,6 +973,45 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
           const TvHints(items: [('OK', 'Terminer'), ('Retour', 'Revenir')]),
         ]),
       ),
+    );
+  }
+}
+
+/// Suivi du chargement d'une source tout juste ajoutée : en cours, terminé (avec les totaux) ou en erreur.
+class _AddedStatus extends StatelessWidget {
+  const _AddedStatus({required this.source});
+  final Source source;
+
+  @override
+  Widget build(BuildContext context) {
+    final library = context.library;
+    return ListenableBuilder(
+      listenable: library,
+      builder: (context, _) {
+        final loading = library.loadingSources.contains(source.id) || library.indexing;
+        final error = library.sourceErrors[source.id];
+        if (loading) {
+          return Row(children: [
+            const SizedBox(width: 34, height: 34, child: CircularProgressIndicator(strokeWidth: 4, color: KPalette.orange)),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text('${tr('Source ajoutée')} : ${source.name}\n${tr('Chargement du catalogue en cours… (une à deux minutes)')}',
+                  style: kTextD(22, weight: FontWeight.w700, color: KPalette.orange)),
+            ),
+          ]);
+        }
+        if (error != null) {
+          return Text('${source.name} : ${error.$1}', style: kTextD(22, weight: FontWeight.w700, color: Colors.redAccent));
+        }
+        final live = library.items(MediaKind.live).where((i) => i.sourceId == source.id).length;
+        final movies = library.items(MediaKind.movie).where((i) => i.sourceId == source.id).length;
+        final series = library.items(MediaKind.series).where((i) => i.sourceId == source.id).length;
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('✓ ${source.name} : $live ${tr('chaînes')}, $movies ${tr('films')}, $series ${tr('séries')}',
+              style: kTextD(24, weight: FontWeight.w800, color: Colors.greenAccent)),
+          Text(tr('OK pour terminer, ou ajoutez-en une autre.'), style: kTextD(20, color: Colors.white70)),
+        ]);
+      },
     );
   }
 }

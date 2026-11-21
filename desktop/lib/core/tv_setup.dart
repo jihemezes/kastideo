@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'library.dart';
+import 'models.dart' show Source;
 import 'log.dart';
 
 /// Ajout d'une source depuis un téléphone (Android TV, sans clavier) : la télévision affiche un QR code,
@@ -10,7 +11,7 @@ import 'log.dart';
 class TvSetupServer {
   TvSetupServer(this.library, {this.onAdded});
   final LibraryStore library;
-  final void Function(String name)? onAdded;
+  final void Function(Source source)? onAdded;
 
   HttpServer? _server;
   String code = '';
@@ -100,15 +101,17 @@ class TvSetupServer {
     }
     final name = (f['name'] ?? '').trim();
     try {
+      // La source est enregistrée tout de suite ; son catalogue (long) se charge ensuite, en arrière-plan, avec le suivi affiché sur la télévision.
+      final Source source;
       if (f['type'] == 'xtream') {
-        await library.addXtream(
-            name: name, server: (f['server'] ?? '').trim(), username: (f['user'] ?? '').trim(), password: f['pass'] ?? '');
+        source = await library.addXtream(
+            name: name, server: (f['server'] ?? '').trim(), username: (f['user'] ?? '').trim(), password: f['pass'] ?? '', refreshNow: false);
       } else {
         final url = (f['url'] ?? '').trim();
         if (url.isEmpty) return 'Adresse vide.';
-        await library.addM3U(name: name.isEmpty ? 'Playlist' : name, address: url);
+        source = await library.addM3U(name: name.isEmpty ? 'Playlist' : name, address: url, refreshNow: false);
       }
-      onAdded?.call(name);
+      onAdded?.call(source);
       return 'OK';
     } catch (e) {
       return 'Source refusée : $e';
@@ -120,7 +123,7 @@ class TvSetupServer {
     final note = result == null
         ? ''
         : ok
-            ? '<p class="ok">Source ajoutée. Elle se charge sur la télévision.</p>'
+            ? '<p class="ok">Source ajoutée. Le chargement du catalogue continue sur la télévision (une à deux minutes).</p>'
             : '<p class="ko">${_esc(result)}</p>';
     return '''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kastideo</title><style>

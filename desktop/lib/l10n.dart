@@ -108,6 +108,9 @@ class L10n {
   }
 
   static const Map<String, String> _en = {
+    'Chargement du catalogue en cours… (une à deux minutes)': 'Loading the catalogue… (one to two minutes)',
+    'Parcourir': 'Browse',
+    'Favori': 'Favourite',
     '1. Branchez le téléphone sur le même Wi-Fi.': '1. Connect your phone to the same Wi-Fi.',
     '2. Scannez le code, ou ouvrez cette adresse :': '2. Scan the code, or open this address:',
     '3. Saisissez ce code, puis les informations de la source :': '3. Enter this code, then the source details:',

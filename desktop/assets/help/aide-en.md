@@ -1340,7 +1340,7 @@ On Android TV, Kastideo shows screens designed for the remote: the selected item
 - **Arrows** move the selection; **OK** confirms; **Back** goes back (player → episodes → details → list → home).
 - **Home**: Live, Movies, Series, then Settings and Log.
 - **Movies and series**: categories on top (**←/→**), posters below. **OK** opens the details; for a series, **Episodes** shows the seasons (**←/→**) and episodes (**↑/↓**).
-- **Live**: **↑ / ↓** or **Channel +/−** change channel, **digits** enter a number, **←** opens the channel list, **→** shows the info banner.
+- **Live**: **↑ / ↓** or **Channel +/−** change channel, **digits** enter a number, **←** opens the channel list, **→** shows the info banner. In the list, **↑ / ↓** browse the channels **without changing channel** and **OK** plays the highlighted one; go to the very top to choose the **category** with **←/→**; **Menu** adds to favourites.
 - **While playing**: **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; Play/Pause and Fast-forward/Rewind keys are supported.
 - **Add a source without a keyboard**: Settings > **Add a source with my phone**. The TV shows a **QR code** and a 4-digit code; on your phone (same Wi-Fi), open the address, enter the code, then the source details (Xtream or M3U list). **Remove a source** is in the same place.
 - **Log**: the Log button on the home screen, or the remote's **Menu**, **Info** or **red** key from any screen. **↑ / ↓** scroll, **OK** shows errors only.

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
@@ -182,6 +183,21 @@ class PlaybackController extends ChangeNotifier {
   static const releaseDelay = Duration(milliseconds: 1500);
   static const startTimeout = Duration(seconds: 20);
 
+  /// Décodeur matériel : MediaCodec sur Android (sans lui, un téléviseur modeste affiche une image saccadée),
+  /// choix automatique et sûr ailleurs.
+  static String get _hardwareDecoder => Platform.isAndroid ? 'mediacodec,mediacodec-copy' : 'auto-safe';
+
+  Future<void> _logDecoder() async {
+    final native = player.platform;
+    if (native is! NativePlayer) return;
+    try {
+      final hw = await native.getProperty('hwdec-current');
+      final codec = await native.getProperty('video-format');
+      final fps = await native.getProperty('container-fps');
+      PlaybackLog.shared.note('Décodeur : ${hw.isEmpty || hw == 'no' ? 'logiciel' : hw} (codec $codec, $fps i/s)');
+    } catch (_) {}
+  }
+
   Future<void> _prepare() async {
     _prefs = await SharedPreferences.getInstance();
     volume = _prefs?.getDouble('volume') ?? 100;
@@ -193,7 +209,7 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('network-timeout', '20');
       await native.setProperty('cache', 'yes');
       await native.setProperty('demuxer-readahead-secs', '2');
-      await native.setProperty('hwdec', 'auto-safe');
+      await native.setProperty('hwdec', _hardwareDecoder);
       await native.setProperty('ytdl', 'no');
       // Sous-titres placés à côté d'un fichier local (« film.srt », « film.fr.srt »…) chargés automatiquement.
       await native.setProperty('sub-auto', 'fuzzy');
@@ -671,7 +687,7 @@ class PlaybackController extends ChangeNotifier {
     final native = player.platform;
     if (native is! NativePlayer) return;
     final software = isSoftwareDecoding;
-    await native.setProperty('hwdec', software ? 'no' : 'auto-safe');
+    await native.setProperty('hwdec', software ? 'no' : _hardwareDecoder);
     if (software) PlaybackLog.shared.note('Ouverture en décodage logiciel (sans le décodeur matériel)');
   }
 
@@ -742,6 +758,7 @@ class PlaybackController extends ChangeNotifier {
     _watchdog?.cancel();
     startupTime = DateTime.now().difference(_startedAt!);
     PlaybackLog.shared.note('Lecture démarrée en ${(startupTime!.inMilliseconds / 1000).toStringAsFixed(2)} s');
+    Future.delayed(const Duration(seconds: 3), _logDecoder);
     _healthTimer = Timer.periodic(const Duration(seconds: 2), (_) {
       _evaluateHealth();
       _checkFreeze();

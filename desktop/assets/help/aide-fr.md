@@ -1341,7 +1341,7 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 - **Flèches** : déplacent la sélection ; **OK** valide ; **Retour** revient en arrière (du lecteur aux épisodes, puis à la fiche, puis à la liste, puis à l'accueil).
 - **Accueil** : Direct, Films, Séries, puis Réglages et Journal.
 - **Films et séries** : catégories en haut (**←/→**), affiches en dessous. **OK** ouvre la fiche ; pour une série, **Épisodes** affiche les saisons (**←/→**) et les épisodes (**↑/↓**).
-- **Direct** : **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes, **→** affiche le bandeau d'information.
+- **Direct** : **↑ / ↓** ou **Chaîne +/−** changent de chaîne, **chiffres** saisissent un numéro, **←** ouvre la liste des chaînes, **→** affiche le bandeau d'information. Dans la liste, **↑ / ↓** parcourent les chaînes **sans changer de chaîne** et **OK** lance la chaîne surlignée ; montez tout en haut pour choisir la **catégorie** avec **←/→** ; **Menu** ajoute aux favoris.
 - **Pendant la lecture** : **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume ; les touches Lecture/Pause et Avance/Retour rapide sont prises en charge.
 - **Ajouter une source sans clavier** : Réglages > **Ajouter une source avec mon téléphone**. La télévision affiche un **QR code** et un code à 4 chiffres ; sur le téléphone (même Wi-Fi), ouvrez l'adresse, saisissez le code puis les informations de la source (Xtream ou liste M3U). **Retirer une source** se trouve au même endroit.
 - **Journal** : bouton Journal de l'accueil, ou touche **Menu**, **Info** ou **rouge** de la télécommande, depuis n'importe quel écran. **↑ / ↓** font défiler, **OK** n'affiche que les erreurs.

@@ -26,6 +26,12 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android11] - 2026-11-21
+
+- **Android TV, direct** : dans la liste des chaînes, ↑/↓ ne changent plus la chaîne à l'écran (elles surlignent seulement) ; **OK** lance la chaîne surlignée. En haut de la liste, **←/→** choisissent la catégorie (Toutes, Favoris, Récents, puis chaque catégorie). Lignes agrandies, contour orange, pas de champ de recherche (le clavier s'ouvrait). Menu = favori.
+- **Fluidité** : décodage matériel MediaCodec sur Android (la lecture pouvait être logicielle, donc saccadée) ; plus de flou d'arrière-plan sur téléviseur. Le journal indique désormais le décodeur utilisé (« Décodeur : mediacodec… »).
+- **Ajout d'une source avec le téléphone** : la source est enregistrée tout de suite, le téléphone n'attend plus ; la télévision affiche un suivi (chargement, totaux chaînes/films/séries ou erreur).
+
 ## [1.19.5-android10] - 2026-11-21
 
 - Même contenu que android9 (interface Android TV à la télécommande) ; correction d'un avertissement d'analyse qui bloquait la CI.
