@@ -26,6 +26,12 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android15] - 2026-11-21
+
+- **Android TV : rendu vidéo direct activé par défaut** — essayé sur le téléviseur (lecture fluide même en 4K). Réglage « Rendu vidéo direct (recommandé) » pour le désactiver ; sans sous-titres dans ce mode.
+- Journal : l'avertissement « Input packet is missing PTS » (un par paquet en direct) n'est plus affiché.
+- Aide mise à jour (6 langues).
+
 ## [1.19.5-android14] - 2026-11-21
 
 - **Android TV : image saccadée même en SD** — le journal montrait un décodeur sans perte mais des images perdues à l'affichage et un écart son/image croissant : le rendu était trop lourd pour le processeur graphique du téléviseur. Rendu mpv allégé (mode simplifié, filtres bilinéaires, sans débanding/dither/interpolation, tampon audio plus large, 2 fils de décodage).

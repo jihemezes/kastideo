@@ -1345,6 +1345,7 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 - **Pendant la lecture** : **OK** = pause, **←/→** = −10 s / +30 s, **↑ / ↓** = volume ; les touches Lecture/Pause et Avance/Retour rapide sont prises en charge.
 - **Ajouter une source sans clavier** : Réglages > **Ajouter une source avec mon téléphone**. La télévision affiche un **QR code** et un code à 4 chiffres ; sur le téléphone (même Wi-Fi), ouvrez l'adresse, saisissez le code puis les informations de la source (Xtream ou liste M3U). **Retirer une source** se trouve au même endroit.
 - **Journal** : bouton Journal de l'accueil, ou touche **Menu**, **Info** ou **rouge** de la télécommande, depuis n'importe quel écran. **↑ / ↓** font défiler, **OK** n'affiche que les erreurs.
+- **Rendu vidéo direct** : sur télévision, la vidéo est décodée directement vers l'écran (fluide même en 4K sur un vieux téléviseur). Réglages > **Rendu vidéo direct** le désactive (pris en compte au prochain lancement) ; dans ce mode, les sous-titres ne s'affichent pas.
 
 ### Différences avec l'ordinateur
 

@@ -305,7 +305,7 @@ class L10n {
         'Add your IPTV subscription (Xtream Codes or M3U playlist) to get started.',
     'Réessayer': 'Retry',
     'Journal de lecture': 'Playback log',
-    'Rendu vidéo direct (expérimental)': 'Direct video rendering (experimental)',
+    'Rendu vidéo direct (recommandé)': 'Direct video rendering (recommended)',
     'Oui · au prochain lancement': 'Yes · at next launch',
     'Copier': 'Copy',
     'Effacer': 'Clear',

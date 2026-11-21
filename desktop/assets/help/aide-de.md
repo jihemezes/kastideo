@@ -1344,6 +1344,7 @@ Auf Android TV zeigt Kastideo Bildschirme für die Fernbedienung: Das gewählte 
 - **Während der Wiedergabe**: **OK** = Pause, **←/→** = −10 s / +30 s, **↑ / ↓** = Lautstärke; Wiedergabe/Pause und Vor-/Zurückspulen werden unterstützt.
 - **Quelle ohne Tastatur hinzufügen**: Einstellungen > **Quelle mit dem Telefon hinzufügen**. Der Fernseher zeigt einen **QR-Code** und einen 4-stelligen Code; öffne auf dem Telefon (gleiches WLAN) die Adresse, gib den Code und die Angaben der Quelle ein (Xtream oder M3U-Liste). **Quelle entfernen** finden Sie am selben Ort.
 - **Protokoll**: Schaltfläche Protokoll auf dem Startbildschirm oder die Taste **Menü**, **Info** oder **Rot** der Fernbedienung auf jedem Bildschirm. **↑ / ↓** scrollen, **OK** zeigt nur Fehler.
+- **Direktes Videorendering**: Auf dem Fernseher wird das Video direkt auf den Bildschirm dekodiert (flüssig auch in 4K auf einem älteren Gerät). Einstellungen > **Direktes Videorendering** schaltet es aus (beim nächsten Start); in diesem Modus werden keine Untertitel angezeigt.
 
 ### Unterschiede zum Computer
 

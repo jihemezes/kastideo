@@ -856,7 +856,7 @@ void openTvSettings(BuildContext context) {
       entries: (context) => [
         TvEntry(tr('Ajouter une source avec mon téléphone'), (c) => openTvQr(c), icon: Icons.qr_code_2_rounded),
         TvEntry(tr('Retirer une source'), (c) => openTvRemoveSource(c), detail: '${context.library.sources.length}'),
-        TvEntry(tr('Rendu vidéo direct (expérimental)'), (c) => c.settings.setTvDirectRender(!c.settings.tvDirectRender),
+        TvEntry(tr('Rendu vidéo direct (recommandé)'), (c) => c.settings.setTvDirectRender(!c.settings.tvDirectRender),
             detail: context.settings.tvDirectRender ? tr('Oui · au prochain lancement') : tr('Non')),
         TvEntry(tr('Journal de lecture'), (c) => openTvLog(c), icon: Icons.receipt_long_rounded),
       ],

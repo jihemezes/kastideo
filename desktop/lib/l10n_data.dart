@@ -197,7 +197,7 @@ const Map<String, List<String>> kTranslations = {
   'Aucune source': ['Ninguna fuente', 'Keine Quelle', 'Nessuna sorgente', 'Nenhuma fonte', 'Nenhuma fonte'],
   'Ajoutez votre abonnement IPTV (Xtream Codes ou playlist M3U) pour commencer.': ['Añada su suscripción IPTV (Xtream Codes o lista M3U) para empezar.', 'Fügen Sie Ihr IPTV-Abo hinzu (Xtream Codes oder M3U-Playlist), um zu beginnen.', 'Aggiungi il tuo abbonamento IPTV (Xtream Codes o playlist M3U) per iniziare.', 'Adicione sua assinatura IPTV (Xtream Codes ou playlist M3U) para começar.', 'Adicione a sua subscrição IPTV (Xtream Codes ou playlist M3U) para começar.'],
   'Réessayer': ['Reintentar', 'Erneut versuchen', 'Riprova', 'Tentar novamente', 'Tentar novamente'],
-  'Rendu vidéo direct (expérimental)': ['Renderizado de vídeo directo (experimental)', 'Direktes Videorendering (experimentell)', 'Rendering video diretto (sperimentale)', 'Renderização de vídeo direta (experimental)', 'Renderização de vídeo direta (experimental)'],
+  'Rendu vidéo direct (recommandé)': ['Renderizado de vídeo directo (recomendado)', 'Direktes Videorendering (empfohlen)', 'Rendering video diretto (consigliato)', 'Renderização de vídeo direta (recomendada)', 'Renderização de vídeo direta (recomendada)'],
   'Oui · au prochain lancement': ['Sí · en el próximo inicio', 'Ja · beim nächsten Start', 'Sì · al prossimo avvio', 'Sim · no próximo arranque', 'Sim · no próximo arranque'],
   'Journal de lecture': ['Registro de reproducción', 'Wiedergabeprotokoll', 'Registro di riproduzione', 'Registro de reprodução', 'Registo de reprodução'],
   'Copier': ['Copiar', 'Kopieren', 'Copia', 'Copiar', 'Copiar'],

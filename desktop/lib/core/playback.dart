@@ -82,6 +82,8 @@ class PlaybackController extends ChangeNotifier {
       player.stream.tracks.listen((_) => notifyListeners()),
       player.stream.track.listen((_) => notifyListeners()),
       player.stream.log.listen((log) {
+        // Flux TS en direct : cet avertissement revient à chaque paquet et noie le journal.
+        if (log.text.contains('Input packet is missing PTS')) return;
         final level = log.level == 'error' || log.level == 'fatal' ? 0 : 1;
         PlaybackLog.shared.engine('[${log.prefix}] ${log.text.trim()}', level: level);
         if (FreezeDetector.isHardwareDecoderError('${log.prefix} ${log.text}')) _decoderErrors++;

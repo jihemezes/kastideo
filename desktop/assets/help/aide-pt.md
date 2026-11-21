@@ -1344,6 +1344,7 @@ No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item s
 - **Durante a reprodução**: **OK** = pausa, **←/→** = −10 s / +30 s, **↑ / ↓** = volume; as teclas Play/Pausa e Avançar/Retroceder são aceitas.
 - **Adicionar uma fonte sem teclado**: Ajustes > **Adicionar uma fonte com o celular**. A TV mostra um **QR code** e um código de 4 dígitos; no celular (mesmo Wi-Fi), abra o endereço, digite o código e os dados da fonte (Xtream ou lista M3U). **Remover uma fonte** fica no mesmo lugar.
 - **Registro**: botão Registro do início, ou tecla **Menu**, **Info** ou **vermelha** do controle em qualquer tela. **↑ / ↓** rolam, **OK** mostra só os erros.
+- **Renderização de vídeo direta**: na televisão, o vídeo é decodificado diretamente para o ecrã (fluido mesmo em 4K num televisor antigo). Definições > **Renderização de vídeo direta** desativa-a (no próximo arranque); neste modo as legendas não são apresentadas.
 
 ### Diferenças em relação ao computador
 
