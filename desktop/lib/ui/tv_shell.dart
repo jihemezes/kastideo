@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -74,7 +75,7 @@ class TvBackground extends StatelessWidget {
       );
 }
 
-/// Élément sélectionné : contour orange épais, halo et agrandissement (comme Apple TV).
+/// Élément sélectionné : contour orange épais et agrandissement (sans halo).
 class TvFocusBox extends StatelessWidget {
   const TvFocusBox({super.key, required this.selected, required this.child, this.radius = 18});
   final bool selected;
@@ -90,11 +91,34 @@ class TvFocusBox extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: selected ? KPalette.orange : Colors.transparent, width: 5),
-            boxShadow: selected ? [BoxShadow(color: KPalette.orange.withValues(alpha: 0.55), blurRadius: 28, spreadRadius: 1)] : null,
           ),
           child: ClipRRect(borderRadius: BorderRadius.circular(radius - 4), child: child),
         ),
       );
+}
+
+/// Logo de l'application en grand, en transparence derrière l'accueil et les écrans Cinéma.
+class TvWatermark extends StatelessWidget {
+  const TvWatermark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, box) {
+      final side = math.min(math.max(box.maxHeight * 0.95, 400.0), 900.0);
+      return Stack(children: [
+        Positioned(
+          left: box.maxWidth - side * 0.28 - side / 2,
+          top: box.maxHeight * 0.52 - side / 2,
+          child: IgnorePointer(
+            child: Transform.rotate(
+              angle: -8 * math.pi / 180,
+              child: Opacity(opacity: 0.22, child: Image.asset('assets/images/icon_rounded.png', width: side, height: side, filterQuality: FilterQuality.medium)),
+            ),
+          ),
+        ),
+      ]);
+    });
+  }
 }
 
 /// Rappel des touches, en bas de l'écran.

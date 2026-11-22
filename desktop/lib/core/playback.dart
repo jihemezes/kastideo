@@ -185,6 +185,26 @@ class PlaybackController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sous-titres au démarrage (Réglages > Lecture > Sous-titres) : aucun, langue de l'interface, ou choix automatique du lecteur.
+  Future<void> _applySubtitleStart() async {
+    final native = player.platform;
+    final s = settings;
+    if (s == null || native is! NativePlayer) return;
+    try {
+      switch (s.subStart) {
+        case 'off':
+          await native.setProperty('sid', 'no');
+        case 'ui':
+          final lang = s.language == 'system' ? PlatformDispatcher.instance.locale.languageCode : s.language.split('-').first;
+          await native.setProperty('slang', lang);
+          await native.setProperty('sid', 'auto');
+        default:
+          await native.setProperty('slang', '');
+          await native.setProperty('sid', 'auto');
+      }
+    } catch (_) {}
+  }
+
   /// Applique la taille, la couleur et la position des sous-titres (réglages mémorisés).
   Future<void> applySubtitleStyle() async {
     final s = settings;
@@ -891,6 +911,7 @@ class PlaybackController extends ChangeNotifier {
       }
     });
     await applySubtitleStyle();
+    await _applySubtitleStart();
     if (subDelay != 0) await setSubDelay(0);
     await player.open(Media(source, httpHeaders: const {'User-Agent': kUserAgent}), play: true);
   }

@@ -11,7 +11,18 @@ import '../l10n.dart';
 import 'player_pane.dart' show toggleRecording;
 import 'tv_multiview.dart';
 import 'tv_settings.dart' show openTvSubtitleStyle;
+import '../theme.dart' show kTextD;
 import 'tv_shell.dart';
+
+/// Ajoute un film ou un épisode à la file de téléchargement (dossier Films / Séries du dossier Kastideo).
+void tvDownload(BuildContext context, MediaItem item) {
+  final remote = item.stream != null && item.stream!.startsWith('http');
+  final text = !remote
+      ? tr('Ce contenu est déjà sur la télévision.')
+      : (context.downloads.contains(item.id) ? tr('Déjà dans les téléchargements (Enregistrements).') : tr('Téléchargement ajouté : suivez-le dans Enregistrements.'));
+  if (remote) context.downloads.enqueue(item);
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(text, style: kTextD(20)), duration: const Duration(seconds: 3)));
+}
 
 /// Options du lecteur à la télécommande (touche Menu pendant la lecture) : pistes audio, sous-titres, vitesse, format
 /// de l'image, épisode suivant, liste des épisodes, enchaînement automatique, journal.
@@ -166,6 +177,11 @@ void openTvPlayerOptions(BuildContext context, {List<TvEntry> extra = const []})
               toggleRecording(c);
               Navigator.of(c).pop();
             }, icon: recording ? Icons.stop_circle_rounded : Icons.fiber_manual_record_rounded),
+          if (!isLive && current != null && (current.stream ?? '').startsWith('http'))
+            TvEntry(tr('Télécharger'), (c) {
+              tvDownload(c, current);
+              Navigator.of(c).pop();
+            }, icon: Icons.download_rounded),
           if (isLive && c.settings.multiviewAvailableFor(library.selectableSources))
             TvEntry(tr('MultiVue'), (c) {
               Navigator.of(c).pop();

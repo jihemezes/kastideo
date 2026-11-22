@@ -68,10 +68,14 @@ class _PlayerPaneState extends State<PlayerPane> {
   // Barre d'options de la télécommande.
   int _barIndex = 0;
   Timer? _barTimer;
+  // Indication « OK : options », quelques secondes au début d'une lecture sur téléviseur.
+  bool _hint = Device.isTv;
+  Timer? _hintTimer;
 
   @override
   void initState() {
     super.initState();
+    if (_hint) _hintTimer = Timer(const Duration(seconds: 7), () => mounted ? setState(() => _hint = false) : null);
     _tvBarOpen.addListener(_barChanged);
   }
 
@@ -104,6 +108,7 @@ class _PlayerPaneState extends State<PlayerPane> {
       if (!playback.directRender && playback.subtitleTracks.isNotEmpty) (Icons.text_fields_rounded, tr('Réglage'), () => openTvSubtitleStyle(context)),
       if (!live && playback.isSeekable) (Icons.speed_rounded, tr('Vitesse'), () => tvChooseRate(context, pops: 1)),
       (Icons.aspect_ratio_rounded, tr('Format'), () => tvChooseFormat(context, pops: 1)),
+      if (!live && current != null && (current.stream ?? '').startsWith('http')) (Icons.download_rounded, tr('Télécharger'), () => tvDownload(context, current)),
       if (live) (recording ? Icons.stop_circle_rounded : Icons.fiber_manual_record_rounded, recording ? tr('Arrêter') : tr('Enregistrer'), () => toggleRecording(context)),
       if (live && context.settings.multiviewAvailableFor(context.library.selectableSources)) (Icons.grid_view_rounded, tr('MultiVue'), () => openTvMultiView(context, add: current)),
       if (isEpisode) (Icons.skip_next_rounded, tr('Suivant'), () => tvNextEpisode(context)),
@@ -197,6 +202,7 @@ class _PlayerPaneState extends State<PlayerPane> {
   void dispose() {
     _tvBarOpen.removeListener(_barChanged);
     _tvBarOpen.value = false;
+    _hintTimer?.cancel();
     _barTimer?.cancel();
     PipController.shared.close();
     _hideTimer?.cancel();
@@ -468,6 +474,21 @@ class _PlayerPaneState extends State<PlayerPane> {
                       ),
                     // Direct à la télécommande : pas de barre (le bandeau, le panneau et la touche Menu la remplacent).
                     if (Device.isTv && !widget.tvMode && _tvBarOpen.value) _tvBar(),
+                    if (_hint && Device.isTv && !widget.tvMode && !_tvBarOpen.value)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 28,
+                        child: IgnorePointer(
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)),
+                              child: Text(tr('OK : options (sous-titres, audio, téléchargement…)'), style: kTextD(18, weight: FontWeight.w700)),
+                            ),
+                          ),
+                        ),
+                      ),
                     if (!Device.isTv)
                       Positioned(
                         left: 0,

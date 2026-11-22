@@ -1357,6 +1357,8 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 
 **Ficha de filme / série no Android TV**: a fila de botões desloca-se com a seleção (▶ chega a todos os botões) e a ficha mostra a imagem de fundo, o slogan, a duração, a nota, o país, o realizador e o elenco. Estes dados vêm do TMDB: sem chave (Ajustes > Chave TMDB) a ficha fica limitada e é indicado.
 
+**Atualização, legendas e transferência no Android TV**: uma nova versão abre numa página própria (Instalar e reiniciar, Mais tarde, Ignorar esta versão) que o telecomando alcança diretamente. Durante um filme ou episódio, **OK** abre a barra de opções: legendas (escolher o idioma ou **Nenhuma**), áudio, velocidade, formato e **Transferir** (o ficheiro vai para a pasta Filmes / Séries e acompanha-se em **Gravações**). As legendas estão **desativadas ao iniciar** por predefinição; Ajustes > Reprodução > Legendas > **Ao iniciar** permite escolher Nenhuma, o idioma da interface ou Automático. O halo à volta do elemento selecionado foi removido e o modo Cinema já não tem faixa: o logótipo Kastideo arredondado aparece como marca de água atrás dos cartazes.
+
 **Sem som no Android TV?** Abra Ajustes > Reprodução > **Diagnóstico de áudio** (depois de iniciar um canal): mostra o volume, a faixa de áudio, o codec, o formato do fluxo e o enviado para a televisão. **Saída de áudio** permite escolher Estéreo (predefinição, a mais segura por HDMI), Automático (multicanal) ou Passthrough Dolby / DTS (amplificador ou barra de som). Se os valores estiverem corretos mas não sair nada, verifique o cabo HDMI, o volume da televisão (as colunas podem ser fracas) e a saída de áudio da box nas definições do Android.
 
 **Gravação, legendas, MultiVista e visto / não visto no Android TV**

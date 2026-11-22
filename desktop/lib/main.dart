@@ -49,6 +49,7 @@ import 'ui/tv_view.dart';
 import 'ui/widgets.dart';
 import 'ui/notices.dart';
 import 'ui/legal_notice.dart';
+import 'ui/tv_update.dart';
 import 'ui/update_view.dart';
 import 'ui/youtube_view.dart';
 import 'core/models.dart';
@@ -586,6 +587,7 @@ class _RootViewState extends State<RootView> {
             const Positioned(top: 60, left: 0, right: 0, child: Center(child: Material(type: MaterialType.transparency, child: RecordingDurationBanner()))),
             // Mise à jour disponible : en bas à droite, pour ne pas cacher les boutons du haut.
             const Positioned(bottom: 14, right: 14, child: Material(type: MaterialType.transparency, child: UpdateBanner())),
+            const TvUpdatePrompt(),
           ],
         ),
       ),

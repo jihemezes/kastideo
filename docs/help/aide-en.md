@@ -1358,6 +1358,8 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 
 **Movie / series page on Android TV**: the button row now scrolls with the selection (▶ reaches every button) and the page shows the backdrop, tagline, runtime, rating, country, director and cast. This information comes from TMDB: without a key (Settings > TMDB key) the page stays limited and a message says so.
 
+**Updates, subtitles and download on Android TV**: a new version opens on its own page (Install and restart, Later, Ignore this version) that the remote reaches directly. During a movie or episode, **OK** opens the options bar: subtitles (choose a language or **None**), audio, speed, format and **Download** (the file goes to the Films / Series folder and is followed in **Recordings**). Subtitles are **off at start** by default; Settings > Playback > Subtitles > **At start** lets you choose None, the interface language or Automatic. The glow around the selected item has been removed and Cinema mode no longer has a banner: the rounded Kastideo logo appears as a watermark behind the posters.
+
 **No sound on Android TV?** Open Settings > Playback > **Audio diagnostics** (after starting a channel): it shows the volume, audio track, codec, stream format and the format sent to the TV. **Audio output** chooses Stereo (default, safest over HDMI), Automatic (multichannel) or Dolby / DTS passthrough (amplifier or soundbar). If these values look right but nothing comes out, check the HDMI cable, the TV volume (its speakers can be weak) and the box's audio output in Android settings.
 
 **Recording, subtitles, MultiView and watched / unwatched on Android TV**

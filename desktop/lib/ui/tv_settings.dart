@@ -743,6 +743,9 @@ void openTvSubtitleStyle(BuildContext context) {
       entries: (c) {
         final s = c.settings;
         return [
+          TvEntry(tr('Au démarrage'), (c) => _choose(c, tr('Au démarrage'),
+              [('off', tr('Aucun sous-titre')), ('ui', tr('Langue de l\'interface')), ('auto', tr('Automatique'))], s.subStart, (v) => c.settings.setString('sub.start', v)),
+              detail: switch (s.subStart) { 'ui' => tr('Langue de l\'interface'), 'auto' => tr('Automatique'), _ => tr('Aucun sous-titre') }),
           TvEntry(tr('Taille'), (c) {
             final i = sizes.indexWhere((x) => x >= s.subScale - 0.01);
             c.settings.setDouble('sub.scale', sizes[((i < 0 ? 2 : i) + 1) % sizes.length]);

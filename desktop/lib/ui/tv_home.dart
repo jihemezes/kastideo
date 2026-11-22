@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -186,19 +185,13 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
         final rows = _rows;
         return TvBackground(
           child: Stack(children: [
-            const Positioned.fill(child: _Watermark()),
+            const Positioned.fill(child: TvWatermark()),
             Padding(
             padding: const EdgeInsets.fromLTRB(70, 28, 70, 16),
             child: Column(
               children: [
                 Row(children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [BoxShadow(color: KPalette.magenta.withValues(alpha: 0.7), blurRadius: 24)],
-                    ),
-                    child: ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.asset('assets/images/icon.png', width: 58, height: 58)),
-                  ),
+                  Image.asset('assets/images/icon_rounded.png', width: 58, height: 58, filterQuality: FilterQuality.medium),
                   const SizedBox(width: 16),
                   Text('Kastideo', style: kTextD(40, weight: FontWeight.w800)),
                   const Spacer(),
@@ -301,42 +294,6 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
           );
         },
       );
-    });
-  }
-}
-
-/// Logo de l'application en grand, en transparence derrière l'accueil (comme sur les autres versions).
-class _Watermark extends StatelessWidget {
-  const _Watermark();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, box) {
-      final side = math.min(math.max(box.maxHeight * 0.95, 400.0), 900.0);
-      return Stack(children: [
-        Positioned(
-          left: box.maxWidth - side * 0.28 - side / 2,
-          top: box.maxHeight * 0.52 - side / 2,
-          child: IgnorePointer(
-            child: Transform.rotate(
-              angle: -8 * math.pi / 180,
-              child: Opacity(
-                opacity: 0.30,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(side * 0.2237),
-                    boxShadow: [BoxShadow(color: KPalette.magenta.withValues(alpha: 0.6), blurRadius: 140)],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(side * 0.2237),
-                    child: Image.asset('assets/images/icon.png', width: side, height: side, filterQuality: FilterQuality.medium),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ]);
     });
   }
 }

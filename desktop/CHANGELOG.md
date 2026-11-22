@@ -2,6 +2,13 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android28] - 2026-11-22
+
+- **Android TV** : la **mise à jour** s'ouvre en page à part, atteignable à la télécommande (Installer et relancer / Plus tard / Ignorer), au lieu d'un bandeau en arrière-plan de l'accueil.
+- **Sous-titres désactivés au démarrage** par défaut (Réglages > Lecture > Sous-titres > Au démarrage : Aucun, langue de l'interface, Automatique). Indication « OK : options » au début d'un film, et nouveau bouton **Télécharger** dans la barre OK et les Options du lecteur ; les téléchargements se suivent dans Enregistrements.
+- **Halo** autour de l'élément sélectionné supprimé partout.
+- Mode **Cinéma** : plus de grand bandeau gris ; logo Kastideo en filigrane derrière les affiches. Logo **arrondi** (comme l'icône) pour les filigranes et l'en-tête de l'accueil.
+
 ## [1.19.5-android27] - 2026-11-22
 
 - **Android TV** : pas de son ? Nouveau **Diagnostic audio** (Réglages > Lecture) : volume, piste, codec, format du flux et format envoyé à l'écran, également inscrits dans le journal. Nouveau réglage **Sortie audio** (Stéréo par défaut, Automatique multicanal, Passthrough Dolby / DTS) et **Volume du lecteur**. Le son n'est plus jamais « coupé » au démarrage sur téléviseur.

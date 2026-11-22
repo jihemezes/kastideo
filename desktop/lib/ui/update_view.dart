@@ -4,12 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_state.dart';
+import '../core/device.dart';
 import '../core/updater.dart';
 import '../l10n.dart';
 import '../main.dart' show appShutdown;
 import '../theme.dart';
 import '../version.dart';
 import 'support_button.dart';
+import 'tv_update.dart';
 
 /// Bandeau « Nouvelle version » en haut à droite (proposé hors visionnage, comme sur Mac).
 class UpdateBanner extends StatelessWidget {
@@ -24,7 +26,8 @@ class UpdateBanner extends StatelessWidget {
       listenable: Listenable.merge([updates, playback, multiview]),
       builder: (context, _) {
         final watching = playback.current != null || multiview.isRunning;
-        if (!updates.shouldPropose || watching) return const SizedBox.shrink();
+        // Télévision : la mise à jour s'ouvre en page à part (TvUpdatePrompt), pas en bandeau que la télécommande ne peut pas atteindre.
+        if (!updates.shouldPropose || watching || Device.isTv) return const SizedBox.shrink();
         final release = updates.latest!;
         return Container(
           constraints: const BoxConstraints(maxWidth: 440),
@@ -62,7 +65,10 @@ class UpdateBanner extends StatelessWidget {
 }
 
 /// Fenêtre de mise à jour : nouveautés de la version, Installer, Ignorer cette version, Plus tard.
-Future<void> showUpdateDialog(BuildContext context) => showKDialog(context: context, barrierDismissible: false, builder: (_) => const _UpdateDialog());
+Future<void> showUpdateDialog(BuildContext context) async {
+  if (Device.isTv) return openTvUpdate(context);
+  return showKDialog(context: context, barrierDismissible: false, builder: (_) => const _UpdateDialog());
+}
 
 class _UpdateDialog extends StatefulWidget {
   const _UpdateDialog();

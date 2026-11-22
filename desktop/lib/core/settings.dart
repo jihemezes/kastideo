@@ -337,6 +337,8 @@ class AppSettings extends ChangeNotifier {
 
   /// Sous-titres (Android TV) : taille (1 = normale), couleur, position verticale (100 = bas de l'image, plus petit = plus haut).
   double get subScale => _prefs.getDouble('sub.scale') ?? 1.0;
+  /// Sous-titres au démarrage d'une lecture : « off » (aucun, défaut sur téléviseur), « ui » (langue de l'interface), « auto » (choix du lecteur).
+  String get subStart => _prefs.getString('sub.start') ?? (Device.isTv ? 'off' : 'auto');
   String get subColor => _prefs.getString('sub.color') ?? '#FFFFFF';
   int get subPos => _prefs.getInt('sub.pos') ?? 100;
 

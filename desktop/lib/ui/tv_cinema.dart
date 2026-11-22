@@ -156,41 +156,28 @@ class TvRailsState extends State<TvRails> {
       if (d != null && d.genres.isNotEmpty) d.genres.take(3).join(', '),
     ];
     final title = widget.kind == MediaKind.live ? tr('Direct') : (widget.kind == MediaKind.movie ? tr('Films') : tr('Séries'));
-    return Column(children: [
-      SizedBox(
-        height: 214,
-        child: Stack(children: [
-          Positioned.fill(
-            child: ShaderMask(
-              shaderCallback: (r) => const LinearGradient(colors: [Colors.transparent, Colors.black], begin: Alignment.centerLeft, end: Alignment.centerRight, stops: [0.25, 0.9]).createShader(r),
-              blendMode: BlendMode.dstIn,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: FractionallySizedBox(
-                  widthFactor: 0.62,
-                  child: PosterImage(url: d?.backdrop ?? d?.poster ?? focus.logo, name: focus.name, width: double.infinity, height: 214, fit: _live ? BoxFit.contain : BoxFit.cover),
-                ),
-              ),
+    return Stack(children: [
+      const Positioned.fill(child: TvWatermark()),
+      Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(60, 16, 60, 4),
+        child: SizedBox(
+          height: 118,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.6,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(title, style: kTextD(16, color: KPalette.orange, weight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text(d?.title ?? focus.displayName, style: kTextD(30, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                if (parts.isNotEmpty) Text(parts.join('  ·  '), style: kTextD(16, color: Colors.white70)),
+                const SizedBox(height: 4),
+                if (d?.plot != null) Text(d!.plot!, style: kTextD(16, color: Colors.white70), maxLines: 2, overflow: TextOverflow.ellipsis),
+              ]),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(60, 16, 60, 6),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: 0.5,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Text(title, style: kTextD(16, color: KPalette.orange, weight: FontWeight.w800)),
-                  const SizedBox(height: 4),
-                  Text(d?.title ?? focus.displayName, style: kTextD(32, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  if (parts.isNotEmpty) Text(parts.join('  ·  '), style: kTextD(16, color: Colors.white70)),
-                  const SizedBox(height: 6),
-                  if (d?.plot != null) Text(d!.plot!, style: kTextD(16, color: Colors.white70), maxLines: 3, overflow: TextOverflow.ellipsis),
-                ]),
-              ),
-            ),
-          ),
-        ]),
+        ),
       ),
       Expanded(
         child: ListView.builder(
@@ -241,6 +228,7 @@ class TvRailsState extends State<TvRails> {
           },
         ),
       ),
+    ]),
     ]);
   }
 }
