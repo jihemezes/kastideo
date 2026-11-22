@@ -402,13 +402,9 @@ class _TvItemsPageState extends State<TvItemsPage> with TvKeys<TvItemsPage> {
       }
     });
     if (_scroll.hasClients && _zone == 1) {
-      final top = (_cell ~/ _columns) * _rowHeight;
       final view = _scroll.position.viewportDimension;
-      if (top < _scroll.offset) {
-        _scroll.jumpTo(top);
-      } else if (top + _rowHeight > _scroll.offset + view) {
-        _scroll.jumpTo(top + _rowHeight - view);
-      }
+      final target = ((_cell ~/ _columns) * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
+      _scroll.animateTo(target, duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
     }
     return true;
   }

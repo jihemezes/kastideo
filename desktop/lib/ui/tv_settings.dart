@@ -134,16 +134,26 @@ void _openCategories(BuildContext context, MediaKind kind, String label) {
         final library = context.library;
         final prefs = library.prefs(kind);
         return [
-          TvEntry(tr('Tout afficher'), (c) => c.library.updateCategories(kind, (p) {
-                p.hidden.clear();
-                p.keywords.clear();
-              }), icon: Icons.visibility_rounded),
+          TvEntry(tr('Tout afficher'), (c) {
+            final names = c.library.allCategories(kind);
+            final before = names.where((n) => c.library.prefs(kind).isHidden(n)).length;
+            c.library.updateCategories(kind, (p) {
+              p.hidden = <String>{};
+              p.keywords = <String>[];
+            });
+            _toast(c, before == 0 ? tr('Toutes les catégories sont déjà affichées.') : '$before ${tr('catégories affichées')}');
+          }, icon: Icons.visibility_rounded),
+          TvEntry(tr('Tout masquer'), (c) {
+            c.library.updateCategories(kind, (p) => p.hidden = {...c.library.allCategories(kind)});
+            _toast(c, tr('Toutes les catégories sont masquées.'));
+          }, icon: Icons.visibility_off_rounded),
           TvEntry(tr('Trier de A à Z'), (c) => c.library.updateCategories(kind, (p) {
                 p.order = List.of(c.library.allCategories(kind))..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
               }), icon: Icons.sort_by_alpha_rounded),
           TvEntry(tr('Ordre du fournisseur'), (c) => c.library.updateCategories(kind, (p) => p.order = []), icon: Icons.restart_alt_rounded),
           for (final name in library.allCategories(kind))
-            TvEntry(prefs.displayName(name), (c) => _openCategory(c, kind, name), detail: prefs.isHidden(name) ? tr('Masquée') : null),
+            TvEntry(prefs.displayName(name), (c) => _openCategory(c, kind, name),
+                detail: prefs.hidden.contains(name) ? tr('Masquée') : (prefs.isHidden(name) ? tr('Masquée (mot-clé)') : null)),
         ];
       },
     ),
@@ -170,6 +180,8 @@ void _openCategory(BuildContext context, MediaKind kind, String name) {
           TvEntry(hidden ? tr('Afficher') : tr('Masquer'), (c) => c.library.updateCategories(kind, (p) {
                 if (hidden) {
                   p.hidden.remove(name);
+                  final lower = name.toLowerCase();
+                  p.keywords.removeWhere((k) => k.trim().isNotEmpty && lower.contains(k.trim().toLowerCase()));
                 } else {
                   p.hidden.add(name);
                 }

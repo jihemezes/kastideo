@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../core/epg.dart';
+import '../core/log.dart';
 import '../core/models.dart';
 import '../core/settings.dart' show AppSettings;
 import '../core/themes.dart';
@@ -128,13 +129,8 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
   void _scrollToRow() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
-      final top = _row * _rowHeight;
-      final cur = _scroll.offset;
-      if (top < cur) {
-        _scroll.jumpTo(top);
-      } else if (top + _rowHeight > cur + _viewH) {
-        _scroll.jumpTo(top + _rowHeight - _viewH);
-      }
+      final target = (_row * _rowHeight - (_viewH - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
+      _scroll.jumpTo(target);
     });
   }
 
@@ -183,9 +179,9 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
       if (_zone == 0) {
         switch (key) {
           case TvKey.left:
-            _head = (_head - 1 + 3) % 3;
+            _head = (_head - 1 + 4) % 4;
           case TvKey.right:
-            _head = (_head + 1) % 3;
+            _head = (_head + 1) % 4;
           case TvKey.down:
             _zone = 1;
           case TvKey.up:
@@ -223,14 +219,39 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
     return true;
   }
 
+  /// Bouton « Replay » : saute à hier soir (programmes passés à revoir) ou explique pourquoi le replay n'est pas disponible.
+  void _replayShortcut() {
+    final library = context.library;
+    final settings = library.settings;
+    if (!(settings?.replayEnabled ?? true)) {
+      _notice(tr('Le replay est désactivé : Réglages > Lecture > Revoir une émission.'));
+      return;
+    }
+    final days = _replayDays;
+    if (days <= 0) {
+      final withArchive = library.items(MediaKind.live).where((i) => (i.archiveDays ?? 0) > 0).length;
+      PlaybackLog.shared.note('Replay : $withArchive chaînes avec archive, jours gardés dans le guide ${settings?.replayGuideDays}');
+      _notice(withArchive == 0 ? tr('Aucune chaîne de vos sources n\'annonce de replay (archive).') : tr('Aucun jour de replay à afficher.'));
+      return;
+    }
+    _jumpToDay(-1);
+    _notice('${tr('Replay')} : ${tr('choisissez un programme passé (icône ↺), puis OK.')}');
+  }
+
+  void _notice(String text) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(text, style: kTextD(20)), duration: const Duration(seconds: 4)));
+  }
+
   void _headAction() {
     switch (_head) {
       case 0:
         _jumpToDay(0);
       case 1:
         _pickDay();
-      default:
+      case 2:
         _pickFilter();
+      default:
+        _replayShortcut();
     }
   }
 
@@ -381,6 +402,8 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
               _headButton(1, Icons.calendar_today_rounded, L10n.longDate(_start)),
               const SizedBox(width: 12),
               _headButton(2, Icons.filter_list_rounded, channelFilterTitle(context, _filter)),
+              const SizedBox(width: 12),
+              _headButton(3, Icons.replay_rounded, tr('Replay')),
             ]),
             const SizedBox(height: 14),
             Expanded(child: _rows.isEmpty ? _empty(context) : _grid(context)),

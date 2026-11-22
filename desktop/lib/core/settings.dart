@@ -271,8 +271,8 @@ class AppSettings extends ChangeNotifier {
 
   InterfaceStyle interfaceFor(MediaKind kind) {
     final raw = _prefs.getString('interface.${kind.name}');
-    // Sur Android TV, par défaut : interface TV pour le direct, grille Classique pour les films et séries (télécommande).
-    final fallback = Device.isTv && kind == MediaKind.live ? InterfaceStyle.tv : InterfaceStyle.classic;
+    // Sur Android TV, par défaut : Direct en Classique (grille), Films et Séries en Cinéma (bannière et rangées).
+    final fallback = Device.isTv && kind != MediaKind.live ? InterfaceStyle.cinema : InterfaceStyle.classic;
     final style = InterfaceStyle.values.where((s) => s.name == raw).firstOrNull ?? fallback;
     // L'interface TV n'existe que pour le direct (comme sur Mac).
     return style == InterfaceStyle.tv && kind != MediaKind.live ? InterfaceStyle.classic : style;

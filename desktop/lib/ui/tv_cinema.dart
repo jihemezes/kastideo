@@ -103,18 +103,14 @@ class TvRailsState extends State<TvRails> {
 
   void _follow() {
     if (_vertical.hasClients) {
-      final top = _row * _rowExtent;
       final view = _vertical.position.viewportDimension;
-      if (top < _vertical.offset) {
-        _vertical.jumpTo(top);
-      } else if (top + _rowExtent > _vertical.offset + view) {
-        _vertical.jumpTo(top + _rowExtent - view);
-      }
+      final target = (_row * _rowExtent - (view - _rowExtent) / 2).clamp(0.0, _vertical.position.maxScrollExtent);
+      _vertical.animateTo(target, duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
     }
     final h = _horizontal[_row];
     if (h != null && h.hasClients) {
       final step = _cardW + 16;
-      final target = (_col * step - step * 2).clamp(0.0, h.position.maxScrollExtent);
+      final target = (_col * step - (h.position.viewportDimension - _cardW) / 2).clamp(0.0, h.position.maxScrollExtent);
       h.animateTo(target, duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
     }
   }

@@ -316,11 +316,8 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   void _ensureCellVisible() {
     if (!_scroll.hasClients) return;
     final row = _cell ~/ _columns;
-    final top = row * _rowHeight;
     final view = _scroll.position.viewportDimension;
-    var target = _scroll.offset;
-    if (top < _scroll.offset) target = top;
-    if (top + _rowHeight > _scroll.offset + view) target = top + _rowHeight - view;
+    final target = (row * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
     if (target != _scroll.offset) _scroll.animateTo(target, duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
   }
 
@@ -663,17 +660,14 @@ class TvMenuPage extends StatefulWidget {
 class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
   int _index = 0;
   final _scroll = ScrollController();
-  static const _rowHeight = 98.0; // 82 de hauteur + 16 d'espace
+  static const _rowHeight = 86.0; // 70 de hauteur + 16 d'espace
 
   void _follow() {
     if (!_scroll.hasClients) return;
-    final top = _index * _rowHeight;
+    // L'élément choisi reste au milieu de l'écran (sauf aux deux bouts de la liste).
     final view = _scroll.position.viewportDimension;
-    if (top < _scroll.offset) {
-      _scroll.jumpTo(top);
-    } else if (top + _rowHeight > _scroll.offset + view) {
-      _scroll.jumpTo(top + _rowHeight - view);
-    }
+    final target = (_index * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
+    _scroll.animateTo(target, duration: const Duration(milliseconds: 110), curve: Curves.easeOut);
   }
 
   @override
@@ -718,12 +712,12 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
         _index = _index.clamp(0, entries.isEmpty ? 0 : entries.length - 1);
         return TvBackground(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(120, 50, 120, 30),
+            padding: const EdgeInsets.fromLTRB(70, 40, 70, 24),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.title, style: kTextD(42, weight: FontWeight.w800)),
-              const SizedBox(height: 28),
+              Text(widget.title, style: kTextD(38, weight: FontWeight.w800)),
+              const SizedBox(height: 16),
               Expanded(
-                child: ListView(controller: _scroll, children: [
+                child: ListView(controller: _scroll, padding: const EdgeInsets.fromLTRB(34, 10, 34, 40), children: [
                   for (var i = 0; i < entries.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
@@ -731,14 +725,14 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
                         selected: i == _index,
                         radius: 18,
                         child: Container(
-                          height: 82,
-                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          height: 70,
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
                           color: Colors.white.withValues(alpha: 0.13),
                           child: Row(children: [
-                            Expanded(child: Text(entries[i].label, style: kTextD(24, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            if (entries[i].detail != null) Text(entries[i].detail!, style: kTextD(19, color: Colors.white60)),
+                            Expanded(child: Text(entries[i].label, style: kTextD(22, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            if (entries[i].detail != null) Flexible(child: Text(entries[i].detail!, style: kTextD(18, color: Colors.white60), maxLines: 1, overflow: TextOverflow.ellipsis)),
                             const SizedBox(width: 10),
-                            Icon(entries[i].icon, color: Colors.white70, size: 32),
+                            Icon(entries[i].icon, color: Colors.white70, size: 28),
                           ]),
                         ),
                       ),
@@ -778,9 +772,9 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
     startTvKeys();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final library = context.library;
-      final server = TvSetupServer(library, onAdded: (source) {
+      final server = TvSetupServer(library, settings: context.settings, onAdded: (source) {
         // Le catalogue se charge ici, avec un suivi visible (la page du téléphone n'attend pas).
-        library.refresh(source);
+        if (source.kind.isIptv) library.refresh(source);
         if (mounted) setState(() => _added = source);
       });
       _server = server;

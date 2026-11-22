@@ -26,6 +26,15 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android21] - 2026-11-22
+
+Retours de test sur Android TV :
+- **Listes** : boutons moins larges et plus bas (plus de débordement à droite et à gauche), et défilement dès le milieu de l'écran : l'élément choisi reste centré dans les listes, grilles, rangées Cinéma et Guide TV.
+- **Guide TV** : nouveau bouton **Replay** dans l'en-tête (saute à hier, ou explique pourquoi le replay n'est pas disponible : désactivé, aucune chaîne avec archive).
+- **Configuration par téléphone** : ajout de la **clé TMDB**, et de **Mes vidéos** (serveurs Jellyfin, Emby, Plex et dossiers/partages lisibles par la télévision).
+- **Styles par défaut** : Direct = Classique, Films et Séries = Cinéma.
+- **Catégories** : « Tout afficher » retire aussi les mots-clés et annonce le nombre de catégories affichées ; ajout de « Tout masquer » ; une catégorie masquée par mot-clé est signalée.
+
 ## [1.19.5-android20] - 2026-11-22
 
 - **Android TV : styles d'affichage Classique / Cinéma / TV** (Réglages > **Style d'affichage**), au choix pour **Direct** (TV par défaut, Classique = grille des chaînes, Cinéma = bannière et rangées), **Films** et **Séries** (Classique par défaut, Cinéma = bannière et rangées Reprendre la lecture, Favoris, Récents, catégories), comme sur l'Apple TV.
