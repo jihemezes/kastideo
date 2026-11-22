@@ -8,6 +8,7 @@ import 'package:qr/qr.dart';
 import '../app_state.dart';
 import '../core/device.dart';
 import '../core/details.dart' show SeriesSeason;
+import '../core/downloads.dart' show DownloadStatus;
 import '../core/log.dart';
 import '../core/models.dart';
 import '../core/tv_setup.dart';
@@ -177,7 +178,9 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   MediaItem? _item;
   int _button = 0; // fiche : Lecture, Épisodes, Favori
   int _season = 0;
-  int _episode = 0;
+  int _episode = 0; // -1 : en-tête (saison, OK = télécharger la saison)
+  bool _epIcon = false; // le focus est sur l'icône de téléchargement de l'épisode
+  final _epScroll = ScrollController();
   int _columns = 6;
   double _rowHeight = 300;
   final _scroll = ScrollController();
@@ -434,26 +437,63 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     if (seasons.isEmpty) return;
     _season = _season.clamp(0, seasons.length - 1);
     final episodes = seasons[_season].episodes;
+    _episode = _episode.clamp(-1, episodes.isEmpty ? -1 : episodes.length - 1);
     switch (key) {
       case TvKey.left:
-        if (_season > 0) {
-          _season--;
-          _episode = 0;
+        if (_episode == -1) {
+          if (_season > 0) _season--;
+        } else if (_epIcon) {
+          _epIcon = false;
         }
       case TvKey.right:
-        if (_season < seasons.length - 1) {
-          _season++;
-          _episode = 0;
+        if (_episode == -1) {
+          if (_season < seasons.length - 1) _season++;
+        } else if (episodes.isNotEmpty) {
+          _epIcon = true;
         }
       case TvKey.up:
-        if (_episode > 0) _episode--;
+        _epIcon = false;
+        if (_episode > -1) _episode--;
       case TvKey.down:
+        _epIcon = false;
         if (_episode < episodes.length - 1) _episode++;
       case TvKey.ok:
-        if (episodes.isNotEmpty) _play(episodes[_episode.clamp(0, episodes.length - 1)]);
+        if (_episode == -1) {
+          _downloadEpisodes(episodes, seasons[_season].number);
+        } else if (episodes.isNotEmpty) {
+          final e = episodes[_episode];
+          if (_epIcon) {
+            _downloadEpisodes([e], seasons[_season].number);
+          } else {
+            _play(e);
+          }
+        }
       case TvKey.menu:
         if (episodes.isNotEmpty) _episodeMenu(seasons, _season, episodes[_episode.clamp(0, episodes.length - 1)]);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _followEpisode());
+  }
+
+  void _followEpisode() {
+    if (!_epScroll.hasClients) return;
+    const row = 76.0;
+    final view = _epScroll.position.viewportDimension;
+    final target = _episode < 0 ? 0.0 : (_episode * row - (view - row) / 2).clamp(0.0, _epScroll.position.maxScrollExtent);
+    _epScroll.animateTo(target, duration: const Duration(milliseconds: 110), curve: Curves.easeOut);
+  }
+
+  /// Ajoute des épisodes à la file de téléchargement (dossier Séries du dossier Kastideo).
+  void _downloadEpisodes(List<MediaItem> list, int season) {
+    final downloads = context.downloads;
+    var added = 0;
+    for (final e in list) {
+      if ((e.stream ?? '').startsWith('http') && !downloads.contains(e.id)) {
+        downloads.enqueue(e, season: season);
+        added++;
+      }
+    }
+    final text = added == 0 ? tr('Déjà dans les téléchargements (Enregistrements).') : (added == 1 ? tr('Téléchargement ajouté : suivez-le dans Enregistrements.') : '$added ${tr('téléchargements ajoutés : suivez-les dans Enregistrements.')}');
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(text, style: kTextD(20)), duration: const Duration(seconds: 3)));
   }
 
   /// Vu / non vu d'un film ou, pour une série, de tous ses épisodes.
@@ -749,50 +789,95 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     }
     final s = _season.clamp(0, seasons.length - 1);
     final episodes = seasons[s].episodes;
-    final selected = _episode.clamp(0, episodes.isEmpty ? 0 : episodes.length - 1);
-    // Fenêtre de 8 épisodes autour de la sélection.
-    final start = (selected - 3).clamp(0, (episodes.length - 8).clamp(0, episodes.length));
-    final shown = episodes.skip(start).take(8).toList();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(80, 44, 80, 30),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(item.displayName, style: kTextD(38, weight: FontWeight.w800)),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 60,
-          child: Row(children: [
-            Icon(Icons.chevron_left_rounded, color: s > 0 ? Colors.white : Colors.white24, size: 36),
-            Text('${tr('Saison')} ${seasons[s].number}', style: kTextD(26, weight: FontWeight.w800, color: KPalette.orange)),
-            Icon(Icons.chevron_right_rounded, color: s < seasons.length - 1 ? Colors.white : Colors.white24, size: 36),
-            const SizedBox(width: 18),
-            Text('${episodes.length} ${tr('épisodes')}', style: kTextD(18, color: Colors.white60)),
-          ]),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: Column(children: [
-            for (var i = 0; i < shown.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TvFocusBox(
-                  selected: start + i == selected,
-                  radius: 16,
-                  child: Container(
-                    height: 64,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    color: Colors.white.withValues(alpha: 0.12),
-                    child: Row(children: [
-                      SizedBox(width: 70, child: Text('${shown[i].number ?? start + i + 1}', style: kTextD(22, weight: FontWeight.w800, color: KPalette.orange))),
-                      Expanded(child: Text(shown[i].displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(21, weight: FontWeight.w600))),
-                      if (context.watch.isWatched(shown[i].id)) const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 28),
-                    ]),
-                  ),
+    final selected = _episode.clamp(-1, episodes.isEmpty ? -1 : episodes.length - 1);
+    final downloads = context.downloads;
+    final headerSelected = selected == -1;
+    return ListenableBuilder(
+      listenable: downloads,
+      builder: (context, _) => Padding(
+        padding: const EdgeInsets.fromLTRB(80, 36, 80, 18),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(item.displayName, style: kTextD(36, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 760,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: TvFocusBox(
+                selected: headerSelected,
+                radius: 16,
+                child: Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  color: Colors.white.withValues(alpha: 0.12),
+                  child: Row(children: [
+                    Icon(Icons.chevron_left_rounded, color: s > 0 ? Colors.white : Colors.white24, size: 32),
+                    Text('${tr('Saison')} ${seasons[s].number}', style: kTextD(24, weight: FontWeight.w800, color: KPalette.orange)),
+                    Icon(Icons.chevron_right_rounded, color: s < seasons.length - 1 ? Colors.white : Colors.white24, size: 32),
+                    const SizedBox(width: 12),
+                    Text('${episodes.length} ${tr('épisodes')}', style: kTextD(17, color: Colors.white60)),
+                    const Spacer(),
+                    Icon(Icons.download_rounded, color: headerSelected ? Colors.white : Colors.white54, size: 26),
+                    const SizedBox(width: 6),
+                    Text(tr('Télécharger la saison'), style: kTextD(16, weight: FontWeight.w700, color: headerSelected ? Colors.white : Colors.white60)),
+                  ]),
                 ),
               ),
-          ]),
-        ),
-        const TvHints(items: [('OK', 'Lire'), ('▲ ▼', 'Épisode'), ('◀ ▶', 'Saison'), ('Menu', 'Vu / non vu'), ('Retour', 'Fiche')]),
-      ]),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 760,
+                child: ListView.builder(
+                  controller: _epScroll,
+                  itemExtent: 76,
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 40),
+                  itemCount: episodes.length,
+                  itemBuilder: (context, i) {
+                    final e = episodes[i];
+                    final isSel = i == selected;
+                    final task = downloads.tasks.where((t) => t.id == e.id).firstOrNull;
+                    final icon = switch (task?.status) {
+                      DownloadStatus.done => Icons.download_done_rounded,
+                      DownloadStatus.running || DownloadStatus.queued => Icons.downloading_rounded,
+                      _ => Icons.download_rounded,
+                    };
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TvFocusBox(
+                        selected: isSel && !_epIcon,
+                        radius: 16,
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 20, right: 8),
+                          color: Colors.white.withValues(alpha: 0.12),
+                          child: Row(children: [
+                            SizedBox(width: 56, child: Text('${e.number ?? i + 1}', style: kTextD(21, weight: FontWeight.w800, color: KPalette.orange))),
+                            Expanded(child: Text(e.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(20, weight: FontWeight.w600))),
+                            if (context.watch.isWatched(e.id)) const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 26)),
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isSel && _epIcon ? KPalette.orange : Colors.white.withValues(alpha: 0.1),
+                              ),
+                              child: Icon(icon, size: 26, color: isSel && _epIcon ? Colors.black : Colors.white70),
+                            ),
+                          ]),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+          const TvHints(items: [('OK', 'Lire'), ('▲ ▼', 'Se déplacer'), ('▶', 'Télécharger'), ('Menu', 'Vu / non vu'), ('Retour', 'Fiche')]),
+        ]),
+      ),
     );
   }
 }

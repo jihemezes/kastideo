@@ -406,6 +406,7 @@ class L10n {
     'Déjà dans les téléchargements (Enregistrements).': 'Already in downloads (Recordings).',
     'Téléchargement ajouté : suivez-le dans Enregistrements.': 'Download added: follow it in Recordings.',
     'Annuler le téléchargement': 'Cancel the download',
+    'téléchargements ajoutés : suivez-les dans Enregistrements.': 'downloads added: follow them in Recordings.',
     'Options': 'Options',
     'Masquée (mot-clé)': 'Hidden (keyword)',
     'Tout masquer': 'Hide all',

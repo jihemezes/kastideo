@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android31] - 2026-11-22
+
+- **Android TV, Séries** : la liste des épisodes défile désormais avec la sélection (elle sortait de l'écran en bas), les boutons sont moins larges. Nouveau **téléchargement** : icône sur chaque épisode (▶ puis OK) et bouton **Télécharger la saison** dans l'en-tête (▲ depuis le premier épisode ; ◀ ▶ y changent de saison). Contient android29 et android30.
+
 ## [1.19.5-android30] - 2026-11-22
 
 - **Android TV** : les réglages en panneaux s'affichaient mal à partir du 3e niveau (par exemple Sources > une source > Connexions simultanées, ou les choix de Lecture) : les panneaux se superposaient et leur texte sortait de l'écran à gauche. Le panneau actif occupe maintenant toujours les 3/5 de droite, son parent reste visible en partie derrière lui, et les niveaux plus anciens sont rangés hors de l'écran. Contient aussi les correctifs de android29.

@@ -335,6 +335,7 @@ const Map<String, List<String>> kTranslations = {
   'Déjà dans les téléchargements (Enregistrements).': ['Ya está en las descargas (Grabaciones).', 'Bereits in den Downloads (Aufnahmen).', 'Già nei download (Registrazioni).', 'Já está nas transferências (Gravações).', 'Já está nas transferências (Gravações).'],
   'Téléchargement ajouté : suivez-le dans Enregistrements.': ['Descarga añadida: sígala en Grabaciones.', 'Download hinzugefügt: Verfolgen Sie ihn unter Aufnahmen.', 'Download aggiunto: lo segua in Registrazioni.', 'Transferência adicionada: acompanhe-a em Gravações.', 'Transferência adicionada: acompanhe-a em Gravações.'],
   'Annuler le téléchargement': ['Cancelar la descarga', 'Download abbrechen', 'Annulla il download', 'Cancelar a transferência', 'Cancelar a transferência'],
+  'téléchargements ajoutés : suivez-les dans Enregistrements.': ['descargas añadidas: sígalas en Grabaciones.', 'Downloads hinzugefügt: Verfolgen Sie sie unter Aufnahmen.', 'download aggiunti: li segua in Registrazioni.', 'transferências adicionadas: acompanhe-as em Gravações.', 'transferências adicionadas: acompanhe-as em Gravações.'],
   'Options': ['Opciones', 'Optionen', 'Opzioni', 'Opções', 'Opções'],
   'Programme': ['Programa', 'Programm', 'Programma', 'Programa', 'Programa'],
   'Journal de lecture': ['Registro de reproducción', 'Wiedergabeprotokoll', 'Registro di riproduzione', 'Registro de reprodução', 'Registo de reprodução'],
