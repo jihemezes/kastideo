@@ -299,6 +299,15 @@ void _openPlayback(BuildContext context) {
           TvEntry(tr('Qualité maximale des chaînes'), (c) => _choose(c, tr('Qualité maximale des chaînes'),
               [('none', tr('Aucune limite')), ('uhd', '4K'), ('fhd', 'Full HD'), ('hd', 'HD'), ('sd', 'SD')], s.maxQuality, (v) => c.settings.setString('quality.max', v)),
               detail: switch (s.maxQuality) { 'uhd' => '4K', 'fhd' => 'Full HD', 'hd' => 'HD', 'sd' => 'SD', _ => tr('Aucune limite') }),
+          TvEntry(tr('Sortie audio'), (c) => _choose(c, tr('Sortie audio'),
+              [('stereo', tr('Stéréo (recommandé)')), ('auto', tr('Automatique (multicanal)')), ('passthrough', tr('Passthrough Dolby / DTS'))], s.audioOutput, (v) {
+            c.settings.setString('audio.output', v);
+            c.playback.applyAudioOutput();
+          }), detail: switch (s.audioOutput) { 'auto' => tr('Automatique (multicanal)'), 'passthrough' => tr('Passthrough Dolby / DTS'), _ => tr('Stéréo (recommandé)') }),
+          TvEntry(tr('Volume du lecteur'), (c) => _choose(c, tr('Volume du lecteur'),
+              [for (final v in const [100, 80, 60, 40]) ('$v', '$v %')], '${c.playback.volume.round()}', (v) => c.playback.setVolume(double.parse(v))),
+              detail: '${context.playback.volume.round()} %'),
+          TvEntry(tr('Diagnostic audio'), (c) => _openAudioDiag(c), icon: Icons.volume_up_rounded),
           TvEntry(tr('Sous-titres'), (c) => openTvSubtitleStyle(c)),
           TvEntry(tr('Revoir une émission (replay)'), (c) => c.settings.setBool('replay.enabled', !s.replayEnabled), detail: _yes(s.replayEnabled)),
           TvEntry(tr('Revenir au direct à la fin d\'un replay'), (c) => c.settings.setBool('replay.returnToLive', !s.replayReturnToLive), detail: _yes(s.replayReturnToLive)),
@@ -307,6 +316,22 @@ void _openPlayback(BuildContext context) {
           TvEntry(tr('Mise à jour automatique des catalogues'), (c) => c.settings.setAutoRefresh(!s.autoRefresh), detail: _yes(s.autoRefresh)),
         ];
       },
+    ),
+  );
+}
+
+Future<void> _openAudioDiag(BuildContext context) async {
+  final playback = context.playback;
+  final rows = await playback.audioDiagnostics();
+  if (!context.mounted) return;
+  _open(
+    context,
+    TvPanelSpec(
+      title: tr('Diagnostic audio'),
+      footer: playback.current == null
+          ? tr('Lancez une chaîne ou un film, puis rouvrez cette page. Si tout est correct ici mais que rien ne sort : vérifiez le câble HDMI, le volume du téléviseur et la sortie audio de la box (Paramètres Android > Son).')
+          : tr('Si le flux et le format envoyé sont corrects mais que rien ne sort : vérifiez le câble HDMI, le volume du téléviseur et la sortie audio de la box (Paramètres Android > Son).'),
+      entries: (_) => [for (final r in rows) TvEntry(tr(r.$1), null, detail: tr(r.$2))],
     ),
   );
 }

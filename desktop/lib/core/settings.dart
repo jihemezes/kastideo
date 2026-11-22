@@ -328,6 +328,10 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Android : sortie audio. « stereo » (défaut, mélange tout en stéréo : le plus sûr en HDMI), « auto » (multicanal si l'écran l'annonce),
+  /// « passthrough » (Dolby / DTS envoyés tels quels à un ampli ou une barre de son).
+  String get audioOutput => _prefs.getString('audio.output') ?? 'stereo';
+
   /// Qualité maximale choisie pour les chaînes proposées en plusieurs versions (SD, HD, Full HD, 4K) ; « none » : aucune limite (comportement habituel).
   String get maxQuality => _prefs.getString('quality.max') ?? 'none';
 

@@ -289,10 +289,55 @@ class PlaybackController extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Sortie audio Android (Réglages > Lecture > Sortie audio) : stéréo, automatique ou passthrough.
+  Future<void> applyAudioOutput() async {
+    final native = player.platform;
+    if (native is! NativePlayer || !Platform.isAndroid) return;
+    final mode = settings?.audioOutput ?? 'stereo';
+    try {
+      await native.setProperty('audio-channels', mode == 'stereo' ? 'stereo' : 'auto-safe');
+      await native.setProperty('audio-spdif', mode == 'passthrough' ? 'ac3,eac3,dts,dts-hd,truehd' : '');
+    } catch (_) {}
+    PlaybackLog.shared.note('Sortie audio : ${switch (mode) { 'auto' => 'automatique', 'passthrough' => 'passthrough', _ => 'stéréo' }}');
+  }
+
+  /// Valeurs lues dans mpv pour comprendre une absence de son (journal et écran de diagnostic).
+  Future<List<(String, String)>> audioDiagnostics() async {
+    final native = player.platform;
+    final rows = <(String, String)>[
+      ('Volume', muted ? 'coupé (muet)' : '${volume.round()} %'),
+      ('Lecture', player.state.playing ? 'en cours' : 'arrêtée'),
+    ];
+    if (native is! NativePlayer) return rows;
+    Future<String> get(String name) async {
+      try {
+        final v = await native.getProperty(name);
+        return v.isEmpty ? '—' : v;
+      } catch (_) {
+        return '—';
+      }
+    }
+    rows.addAll([
+      ('Piste audio', await get('current-tracks/audio/id')),
+      ('Codec audio', await get('audio-codec-name')),
+      ('Format du flux', '${await get('audio-params/format')} · ${await get('audio-params/samplerate')} Hz · ${await get('audio-params/channel-count')} voies'),
+      ('Format envoyé à l\'écran', '${await get('audio-out-params/format')} · ${await get('audio-out-params/samplerate')} Hz · ${await get('audio-out-params/channel-count')} voies'),
+      ('Sortie audio', await get('current-ao')),
+      ('Position audio', await get('audio-pts')),
+    ]);
+    return rows;
+  }
+
+  Future<void> _logAudio() async {
+    final rows = await audioDiagnostics();
+    PlaybackLog.shared.note('Audio : ${rows.map((r) => '${r.$1} ${r.$2}').join(' | ')}');
+  }
+
   Future<void> _prepare() async {
     _prefs = await SharedPreferences.getInstance();
     volume = _prefs?.getDouble('volume') ?? 100;
-    muted = _prefs?.getBool('muted') ?? false;
+    // Sur téléviseur il n'y a pas de bouton « muet » : un ancien réglage ne doit jamais rester sans son.
+    muted = (Platform.isAndroid && Device.isTv) ? false : (_prefs?.getBool('muted') ?? false);
     await _applyVolume();
     final native = player.platform;
     if (native is NativePlayer) {
@@ -302,6 +347,7 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('demuxer-readahead-secs', '2');
       await native.setProperty('hwdec', _hardwareDecoder);
       if (Platform.isAndroid && Device.isTv) await _lightRendering(native);
+      await applyAudioOutput();
       await native.setProperty('ytdl', 'no');
       // Sous-titres placés à côté d'un fichier local (« film.srt », « film.fr.srt »…) chargés automatiquement.
       await native.setProperty('sub-auto', 'fuzzy');
@@ -857,6 +903,7 @@ class PlaybackController extends ChangeNotifier {
     startupTime = DateTime.now().difference(_startedAt!);
     PlaybackLog.shared.note('Lecture démarrée en ${(startupTime!.inMilliseconds / 1000).toStringAsFixed(2)} s');
     Future.delayed(const Duration(seconds: 3), _logDecoder);
+    Future.delayed(const Duration(seconds: 4), _logAudio);
     if (Platform.isAndroid) {
       for (final seconds in const [6, 15, 30]) {
         Future.delayed(Duration(seconds: seconds), _logStats);

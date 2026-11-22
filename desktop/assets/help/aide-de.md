@@ -1357,6 +1357,8 @@ Auf Android TV öffnen sich die **Einstellungen** in Panels: Das Menü belegt di
 
 **Film-/Serienseite auf Android TV**: Die Tastenreihe scrollt mit der Auswahl (▶ erreicht alle Tasten) und die Seite zeigt Hintergrundbild, Slogan, Laufzeit, Bewertung, Land, Regie und Besetzung. Diese Angaben stammen von TMDB: Ohne Schlüssel (Einstellungen > TMDB-Schlüssel) bleibt die Seite eingeschränkt und ein Hinweis erscheint.
 
+**Kein Ton auf Android TV?** Öffnen Sie Einstellungen > Wiedergabe > **Audiodiagnose** (nach dem Start eines Senders): Sie zeigt Lautstärke, Tonspur, Codec, Stream-Format und das an den Fernseher gesendete Format. **Audioausgabe** wählt Stereo (Standard, per HDMI am sichersten), Automatisch (Mehrkanal) oder Dolby-/DTS-Passthrough (Verstärker oder Soundbar). Wenn die Werte stimmen, aber nichts zu hören ist, prüfen Sie das HDMI-Kabel, die Lautstärke des Fernsehers (seine Lautsprecher sind manchmal schwach) und den Audioausgang der Box in den Android-Einstellungen.
+
 **Aufnahme, Untertitel, Mehrfachansicht und gesehen / nicht gesehen auf Android TV**
 
 - **OK während der Wiedergabe** (Film, Folge, Aufnahme, Sender) öffnet die Optionsleiste am unteren Rand: Pause, −10 s / +30 s, Audio, Untertitel, Untertiteleinstellungen (Größe, Farbe, Position, Versatz), Tempo, Bildformat, nächste Folge, Aufnehmen, Mehrfachansicht. ▲ ▼ oder Zurück schließen sie.

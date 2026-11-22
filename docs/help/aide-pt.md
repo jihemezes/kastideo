@@ -1357,6 +1357,8 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 
 **Ficha de filme / série no Android TV**: a fila de botões desloca-se com a seleção (▶ chega a todos os botões) e a ficha mostra a imagem de fundo, o slogan, a duração, a nota, o país, o realizador e o elenco. Estes dados vêm do TMDB: sem chave (Ajustes > Chave TMDB) a ficha fica limitada e é indicado.
 
+**Sem som no Android TV?** Abra Ajustes > Reprodução > **Diagnóstico de áudio** (depois de iniciar um canal): mostra o volume, a faixa de áudio, o codec, o formato do fluxo e o enviado para a televisão. **Saída de áudio** permite escolher Estéreo (predefinição, a mais segura por HDMI), Automático (multicanal) ou Passthrough Dolby / DTS (amplificador ou barra de som). Se os valores estiverem corretos mas não sair nada, verifique o cabo HDMI, o volume da televisão (as colunas podem ser fracas) e a saída de áudio da box nas definições do Android.
+
 **Gravação, legendas, MultiVista e visto / não visto no Android TV**
 
 - **OK durante a reprodução** (filme, episódio, gravação, canal) abre a barra de opções na parte inferior: pausa, −10 s / +30 s, áudio, legendas, ajustes das legendas (tamanho, cor, posição, atraso), velocidade, formato da imagem, próximo episódio, gravar, MultiVista. ▲ ▼ ou Voltar a fecham.

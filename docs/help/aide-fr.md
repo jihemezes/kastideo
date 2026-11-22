@@ -1358,6 +1358,8 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 
 **Fiche film / série sur Android TV** : la rangée de boutons défile maintenant avec la sélection (▶ atteint tous les boutons) et la fiche affiche l'image de fond, l'accroche, la durée, la note, le pays, le réalisateur et la distribution. Ces informations viennent de TMDB : sans clé (Réglages > Clé TMDB), la fiche reste limitée et un message le signale.
 
+**Pas de son sur Android TV ?** Ouvrez Réglages > Lecture > **Diagnostic audio** (après avoir lancé une chaîne) : il affiche le volume, la piste audio, le codec, le format du flux et celui envoyé à l'écran. **Sortie audio** choisit Stéréo (par défaut, le plus sûr en HDMI), Automatique (multicanal) ou Passthrough Dolby / DTS (ampli ou barre de son). Si ces valeurs sont correctes mais que rien ne sort, vérifiez le câble HDMI, le volume du téléviseur (ses haut-parleurs sont parfois faibles) et la sortie audio de la box dans les paramètres Android.
+
 **Enregistrement, sous-titres, MultiVue et vu / non vu sur Android TV**
 
 - **OK pendant la lecture** (film, épisode, enregistrement, chaîne) ouvre la barre d'options en bas de l'écran : pause, −10 s / +30 s, audio, sous-titres, réglage des sous-titres (taille, couleur, position, décalage), vitesse, format de l'image, épisode suivant, enregistrer, MultiVue. ▲ ▼ ou Retour la referment.

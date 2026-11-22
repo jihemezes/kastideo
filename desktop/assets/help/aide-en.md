@@ -1358,6 +1358,8 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 
 **Movie / series page on Android TV**: the button row now scrolls with the selection (▶ reaches every button) and the page shows the backdrop, tagline, runtime, rating, country, director and cast. This information comes from TMDB: without a key (Settings > TMDB key) the page stays limited and a message says so.
 
+**No sound on Android TV?** Open Settings > Playback > **Audio diagnostics** (after starting a channel): it shows the volume, audio track, codec, stream format and the format sent to the TV. **Audio output** chooses Stereo (default, safest over HDMI), Automatic (multichannel) or Dolby / DTS passthrough (amplifier or soundbar). If these values look right but nothing comes out, check the HDMI cable, the TV volume (its speakers can be weak) and the box's audio output in Android settings.
+
 **Recording, subtitles, MultiView and watched / unwatched on Android TV**
 
 - **OK during playback** (movie, episode, recording, channel) opens the options bar at the bottom of the screen: pause, −10 s / +30 s, audio, subtitles, subtitle settings (size, colour, position, delay), speed, picture format, next episode, record, MultiView. ▲ ▼ or Back closes it.

@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android27] - 2026-11-22
+
+- **Android TV** : pas de son ? Nouveau **Diagnostic audio** (Réglages > Lecture) : volume, piste, codec, format du flux et format envoyé à l'écran, également inscrits dans le journal. Nouveau réglage **Sortie audio** (Stéréo par défaut, Automatique multicanal, Passthrough Dolby / DTS) et **Volume du lecteur**. Le son n'est plus jamais « coupé » au démarrage sur téléviseur.
+
 ## [1.19.5-android26] - 2026-11-22
 
 - **Android TV** : fiche film / série — la rangée de boutons défile avec la sélection (tous les boutons atteignables) ; fiche enrichie (image de fond, accroche, durée, note, pays, réalisateur, distribution) et message quand la clé TMDB manque ou qu'aucune fiche n'est trouvée.
