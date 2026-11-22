@@ -443,7 +443,7 @@ Los temas se ofrecen también en otros lugares: filas «Deportes ahora», «Pel�
 
 En **Deportes**, una segunda fila filtra por **disciplina**: Fútbol, Rugby, Tenis, Baloncesto, Deportes de combate, Golf, Ciclismo, Balonmano, Motor, Deportes de invierno, Hípica, Atletismo y natación (a partir de los títulos, géneros y descripciones de los programas).
 
-**Contenido para adultos**: los canales y contenidos cuyo nombre contiene «|XX|» (o que están en una categoría para adultos) se **ocultan en todas partes** por defecto. Para mostrarlos, junto con el tema **Adultos**: Ajustes > General > Reproducción > **Mostrar contenido para adultos**.
+**Contenido para adultos**: los canales y contenidos cuyo nombre contiene «|XX|» (o que están en una categoría para adultos) se **ocultan en todas partes** por defecto. Para mostrarlos, junto con el tema **Adultos**: Ajustes > General > Reproducción > **Mostrar contenido para adultos**. Un **código PIN** opcional de 4 dígitos protege este ajuste: una vez definido (Ajustes > Contenido adulto > Código PIN, en todas las versiones de Android, Windows y Linux), se pide para mostrar u ocultar el contenido adulto y para cambiarlo o eliminarlo. Se incluye en la exportación de la configuración.
 
 **Alertas de programas** (botón 🔔 de la vista Temas): Kastideo le avisa dos minutos antes de que empiece un programa cuyo título contenga una palabra elegida («PSG», «Fórmula 1»…), de un tema en sus canales favoritos, o un programa concreto. Aparecen una notificación y un banner **Ver**.
 <!--/mac-->

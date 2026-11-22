@@ -443,7 +443,7 @@ Themes are also offered elsewhere: “Sports On Now”, “Movies On Now”… r
 
 In **Sports**, a second row filters by **discipline**: Football, Rugby, Tennis, Basketball, Combat sports, Golf, Cycling, Handball, Motorsport, Winter sports, Horse racing, Athletics & swimming (from program titles, genres and descriptions).
 
-**Adult content**: channels and content whose name contains “|XX|” (or in an adult category) are **hidden everywhere** by default. To show them, and the **Adult** theme: Settings > General > Playback > **Show adult content**.
+**Adult content**: channels and content whose name contains “|XX|” (or in an adult category) are **hidden everywhere** by default. To show them, and the **Adult** theme: Settings > General > Playback > **Show adult content**. An optional 4-digit **PIN code** protects this setting: once set (Settings > Adult content > PIN code, on all Android, Windows and Linux versions), it is asked to show or hide adult content, and to change or remove it. It is included in the configuration export.
 
 **Program alerts** (🔔 button of the Themes view): Kastideo alerts you two minutes before a program starts whose title contains a chosen word (“PSG”, “Formula 1”…), of a theme on your favorite channels, or a specific program. A notification and a **Watch** banner appear.
 <!--/mac-->

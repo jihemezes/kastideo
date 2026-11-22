@@ -27,6 +27,7 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Catégories'), (c) => _openCategoryKinds(c)),
           TvEntry(tr('Style d\'affichage'), (c) => _openStyles(c)),
           TvEntry(tr('Page de départ'), (c) => _openStartPages(c)),
+          TvEntry(tr('Contenus adultes'), (c) => _openAdult(c), detail: _yes(context.library.showAdult)),
           TvEntry(tr('Langue'), (c) => _openLanguage(c), detail: s.language == 'system' ? tr('Langue du système') : L10n.names[s.language]),
           TvEntry(tr('Lecture'), (c) => _openPlayback(c)),
           TvEntry(tr('Guide TV'), (c) => _openGuide(c)),
@@ -448,6 +449,152 @@ class _TvTextPageState extends State<TvTextPage> with TvKeys<TvTextPage> {
           const TvHints(items: [('OK', 'Choisir'), ('▲ ▼', 'Se déplacer'), ('Retour', 'Revenir')]),
         ]),
       ),
+    );
+  }
+}
+
+// MARK: Contenus adultes et code PIN
+
+Future<String?> _askPin(BuildContext context, String title) => Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => TvPinPage(title: title)));
+
+Future<bool> _verifyPin(BuildContext context) async {
+  final library = context.library;
+  if (!library.hasAdultPin) return true;
+  final pin = await _askPin(context, tr('Code PIN'));
+  if (pin == null) return false;
+  if (library.checkAdultPin(pin)) return true;
+  if (context.mounted) _toast(context, tr('Code PIN incorrect'));
+  return false;
+}
+
+void _openAdult(BuildContext context) {
+  _open(
+    context,
+    TvPanelSpec(
+      title: tr('Contenus adultes'),
+      footer: tr('Chaînes et contenus « |XX| » ou rangés dans une catégorie adulte. Un code PIN à 4 chiffres, facultatif, protège ce réglage.'),
+      entries: (context) => [
+        TvEntry(tr('Afficher les contenus adultes'), (c) async {
+          final library = c.library;
+          if (await _verifyPin(c)) library.setShowAdult(!library.showAdult);
+        }, detail: _yes(context.library.showAdult)),
+        TvEntry(tr('Code PIN'), (c) async {
+          final library = c.library;
+          if (library.hasAdultPin) {
+            if (!await _verifyPin(c) || !c.mounted) return;
+            _open(c, TvPanelSpec(title: tr('Code PIN'), entries: (_) => [
+              TvEntry(tr('Modifier le code'), (c2) async {
+                TvPanelHost.close(c2);
+                if (c2.mounted) await _newPin(c2);
+              }),
+              TvEntry(tr('Supprimer le code'), (c2) {
+                library.setAdultPin(null);
+                TvPanelHost.close(c2);
+              }),
+            ]));
+          } else {
+            await _newPin(c);
+          }
+        }, detail: context.library.hasAdultPin ? tr('Activé') : tr('Désactivé')),
+      ],
+    ),
+  );
+}
+
+Future<void> _newPin(BuildContext context) async {
+  final library = context.library;
+  final first = await _askPin(context, tr('Nouveau code PIN (4 chiffres)'));
+  if (first == null || !context.mounted) return;
+  final again = await _askPin(context, tr('Confirmez le code PIN'));
+  if (again == null || !context.mounted) return;
+  if (first != again) {
+    _toast(context, tr('Les deux codes sont différents'));
+    return;
+  }
+  library.setAdultPin(first);
+}
+
+/// Saisie d'un code à 4 chiffres à la télécommande : ▲ ▼ changent le chiffre, ◀ ▶ changent de case, OK valide.
+class TvPinPage extends StatefulWidget {
+  const TvPinPage({super.key, required this.title});
+  final String title;
+
+  @override
+  State<TvPinPage> createState() => _TvPinPageState();
+}
+
+class _TvPinPageState extends State<TvPinPage> with TvKeys<TvPinPage> {
+  final _digits = [0, 0, 0, 0];
+  int _pos = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    startTvKeys();
+  }
+
+  @override
+  void dispose() {
+    stopTvKeys();
+    super.dispose();
+  }
+
+  @override
+  bool onTvKey(TvKey key) {
+    setState(() {
+      switch (key) {
+        case TvKey.up:
+          _digits[_pos] = (_digits[_pos] + 1) % 10;
+        case TvKey.down:
+          _digits[_pos] = (_digits[_pos] + 9) % 10;
+        case TvKey.left:
+          if (_pos > 0) _pos--;
+        case TvKey.right:
+          if (_pos < 3) _pos++;
+        case TvKey.ok:
+          if (_pos < 3) {
+            _pos++;
+          } else {
+            Navigator.of(context).pop(_digits.join());
+          }
+        case TvKey.menu:
+          break;
+      }
+    });
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TvBackground(
+      child: Column(children: [
+        Expanded(
+          child: Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(widget.title, style: kTextD(40, weight: FontWeight.w800)),
+              const SizedBox(height: 36),
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                for (var i = 0; i < 4; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TvFocusBox(
+                      selected: i == _pos,
+                      radius: 18,
+                      child: Container(
+                        width: 100,
+                        height: 120,
+                        alignment: Alignment.center,
+                        color: Colors.white.withValues(alpha: 0.13),
+                        child: Text(i == _pos ? '${_digits[i]}' : (i < _pos ? '●' : '○'), style: kTextD(54, weight: FontWeight.w800)),
+                      ),
+                    ),
+                  ),
+              ]),
+            ]),
+          ),
+        ),
+        const Padding(padding: EdgeInsets.only(bottom: 14), child: TvHints(items: [('▲ ▼', 'Changer le chiffre'), ('◀ ▶', 'Changer de case'), ('OK', 'Valider'), ('Retour', 'Annuler')])),
+      ]),
     );
   }
 }

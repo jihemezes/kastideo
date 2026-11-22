@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -559,6 +561,30 @@ class LibraryStore extends ChangeNotifier {
     liveGeneration++;
     notifyListeners();
   }
+
+  /// Code PIN facultatif protégeant le réglage d'affichage des contenus adultes (stocké salé et haché).
+  bool get hasAdultPin => (_prefs.getString('adult.pin') ?? '').contains(':');
+
+  bool checkAdultPin(String pin) {
+    final stored = _prefs.getString('adult.pin') ?? '';
+    final i = stored.indexOf(':');
+    if (i < 0) return true;
+    return _pinHash(stored.substring(0, i), pin) == stored.substring(i + 1);
+  }
+
+  /// Définit le code (4 à 8 chiffres) ; `null` le supprime.
+  void setAdultPin(String? pin) {
+    if (pin == null || pin.isEmpty) {
+      _prefs.remove('adult.pin');
+    } else {
+      final r = Random.secure();
+      final salt = base64UrlEncode(List<int>.generate(9, (_) => r.nextInt(256)));
+      _prefs.setString('adult.pin', '$salt:${_pinHash(salt, pin)}');
+    }
+    notifyListeners();
+  }
+
+  static String _pinHash(String salt, String pin) => sha256.convert(utf8.encode('kastideo:$salt:$pin')).toString();
 
   void setShowAdult(bool value) {
     showAdult = value;
@@ -1244,6 +1270,7 @@ class LibraryStore extends ChangeNotifier {
       for (final kind in categoryKinds)
         'interface.${kind.name}': ?settings.rawSetting('interface.${kind.name}'),
       'adult.show': showAdult ? '1' : '0',
+      if (hasAdultPin) 'adult.pin': _prefs.getString('adult.pin')!,
       if (countries.isNotEmpty) 'catalog.countries': (countries.toList()..sort()).join(','),
       'catalog.countries.neutral': countryNeutral ? '1' : '0',
       ...settings.exportedHero(),
@@ -1395,6 +1422,7 @@ class LibraryStore extends ChangeNotifier {
         showAdult = adult == '1' || adult == 'true';
         _prefs.setBool('adult.show', showAdult);
       }
+      if (s['adult.pin'] case final String pin when pin.contains(':')) _prefs.setString('adult.pin', pin);
       settings.importHero(Map<String, dynamic>.from(s));
       if (s['catalog.countries'] case final String c) {
         countries = c.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toSet();

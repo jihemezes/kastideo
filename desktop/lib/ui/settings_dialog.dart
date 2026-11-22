@@ -25,6 +25,7 @@ import '../theme.dart';
 import 'widgets.dart';
 import '../version.dart';
 import '../core/library.dart';
+import 'adult_pin.dart';
 import 'help_dialog.dart';
 import 'log_dialog.dart';
 import 'source_diag.dart';
@@ -262,10 +263,20 @@ class _GeneralTabState extends State<_GeneralTab> {
               contentPadding: EdgeInsets.zero,
               title: Text(tr('Afficher les contenus adultes'), style: kText(14)),
               value: context.library.showAdult,
-              onChanged: context.library.setShowAdult,
+              onChanged: (v) => setAdultVisible(context, v),
             ),
           ),
-          _caption(tr('Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes) tant que l\'option est désactivée.')),
+          ListenableBuilder(
+            listenable: context.library,
+            builder: (context, _) => Row(children: [
+              OutlinedButton.icon(
+                onPressed: () => editAdultPin(context),
+                icon: const Icon(Icons.lock_outline, size: 18),
+                label: Text(context.library.hasAdultPin ? tr('Code PIN activé : modifier ou supprimer') : tr('Protéger par un code PIN')),
+              ),
+            ]),
+          ),
+          _caption(tr('Chaînes et contenus dont le nom contient « |XX| » ou rangés dans une catégorie adulte : masqués partout (listes, recherche, thèmes) tant que l\'option est désactivée. Un code PIN à 4 chiffres, facultatif, protège ce réglage.')),
         ]),
         _section(tr('Fiches des films et séries (TMDB)'), [
           Row(children: [

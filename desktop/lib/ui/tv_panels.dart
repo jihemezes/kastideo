@@ -39,6 +39,7 @@ class TvPanelHost extends StatefulWidget {
 
 class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
   late final List<_Level> _levels = [_Level(widget.root)..shown = true];
+  BuildContext? _inner; // contexte d'un descendant : c'est lui qui retrouve l'hôte (findAncestorState exclut l'état lui-même)
   static const _rowHeight = 78.0; // 64 de hauteur + 14 d'espace
 
   @override
@@ -72,7 +73,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
     setState(() => _levels.removeLast().scroll.dispose());
   }
 
-  List<TvEntry> _entries(_Level level) => level.spec.entries(context);
+  List<TvEntry> _entries(_Level level) => level.spec.entries(_inner ?? context);
 
   @override
   bool onTvKey(TvKey key) {
@@ -87,7 +88,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
       case TvKey.right:
         if (entries.isNotEmpty && (key == TvKey.ok || _levels.length < 4)) {
           final e = entries[level.index.clamp(0, entries.length - 1)];
-          if (key == TvKey.ok || e.icon == Icons.chevron_right_rounded) e.onTap?.call(context);
+          if (key == TvKey.ok || e.icon == Icons.chevron_right_rounded) e.onTap?.call(_inner ?? context);
         }
       case TvKey.left:
         if (_levels.length > 1) close();
@@ -117,6 +118,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
         child: ListenableBuilder(
           listenable: Listenable.merge([context.library, context.settings]),
           builder: (context, _) => LayoutBuilder(builder: (context, box) {
+            _inner = context;
             final w = box.maxWidth;
             final depth = _levels.length;
             final shift = depth >= 3 ? 0.3 * w * (depth - 2) : 0.0;

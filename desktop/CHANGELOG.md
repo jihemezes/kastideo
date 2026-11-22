@@ -26,6 +26,11 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android23] - 2026-11-22
+
+- **Android TV** : correction des réglages (les menus n'ouvraient pas leurs sous-menus).
+- **Contenus adultes** : nouvelle entrée dans les réglages Android TV (afficher / masquer) et **code PIN facultatif à 4 chiffres** protégeant ce réglage, sur toutes les versions Android, Windows et Linux ; le code (haché) est inclus dans l'export de configuration.
+
 ## [1.19.5-android22] - 2026-11-22
 
 Retours de test sur Android TV :
