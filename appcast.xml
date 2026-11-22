@@ -6,6 +6,19 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.19.5</title>
+      <pubDate>Sun, 22 Nov 2026 14:24:20 GMT</pubDate>
+      <sparkle:version>99</sparkle:version>
+      <sparkle:shortVersionString>1.19.5</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Correction &lt;b&gt;chaînes du direct sans son&lt;/b&gt; : le passage automatique en &lt;b&gt;image seule&lt;/b&gt; (son coupé quand l&amp;#x27;horloge du flux est incohérente) n&amp;#x27;est plus mémorisé d&amp;#x27;un lancement à l&amp;#x27;autre : il ne vaut que pour la session en cours, et la chaîne est rouverte avec le son au lancement suivant.&lt;/li&gt;
+&lt;li&gt;Un bandeau &lt;b&gt;« Réactiver le son »&lt;/b&gt; s&amp;#x27;affiche sous la barre de lecture quand une chaîne est en image seule.&lt;/li&gt;
+&lt;li&gt;Les réparations mémorisées (horloge, décodage logiciel, image seule choisie à la main) &lt;b&gt;expirent au bout de 7 jours&lt;/b&gt; : la chaîne est alors retestée normalement. Les anciens « image seule » automatiques sont oubliés.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.19.5/Kastideo-1.19.5.dmg" length="49528346" type="application/octet-stream" sparkle:edSignature="PCcPrHp6pMJQW0onY+ZnuYc8Gp/QxLii92tc57ViDbtyl7ai9X4WfqGuzSDWpPCqVwRllOP4UAAoEK8UM9u1Aw==" />
+    </item>
+    <item>
       <title>Kastideo 1.19.4</title>
       <pubDate>Tue, 17 Nov 2026 23:08:26 GMT</pubDate>
       <sparkle:version>98</sparkle:version>
@@ -429,24 +442,6 @@
 &lt;li&gt;Plus d&amp;#x27;alerte « aucune adresse de guide connue » pour les sources Emby, Jellyfin, Plex et dossiers.&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.4/Kastideo-1.3.4.dmg" length="46956014" type="application/octet-stream" sparkle:edSignature="aq1Q6leqdBBudImnb5E4xwGTb1Tu/wLHet2Iyk0scac3z4BAjd5Qf/QncMwYWZnGBNDeET9VHpqVyO/ioIJGAQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.3.3</title>
-      <pubDate>Wed, 28 Oct 2026 20:14:32 GMT</pubDate>
-      <sparkle:version>54</sparkle:version>
-      <sparkle:shortVersionString>1.3.3</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;p&gt;&lt;b&gt;Diagnostic : comprendre ce que fait Kastideo, en particulier avec le guide TV.&lt;/b&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Journal par sujets&lt;/b&gt; (⌥⌘L) : *Guide TV*, *Lecture et relais*, *Sources et catalogues*, *Enregistrements*, *Fiches TMDB*, *Mises à jour*, *Affichage et divers*. Filtre par sujet (avec le nombre de lignes), &lt;b&gt;recherche&lt;/b&gt;, erreurs et alertes seulement, &lt;b&gt;Copier l&amp;#x27;affichage&lt;/b&gt; (uniquement ce qui est filtré).&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Niveau de détail par sujet&lt;/b&gt; : Normal, Détaillé (par défaut pour le Guide TV) ou Débogage.&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Journal conservé sur disque&lt;/b&gt; : choix entre la &lt;b&gt;session en cours&lt;/b&gt; et la &lt;b&gt;session précédente&lt;/b&gt; (utile pour les problèmes au démarrage).&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Guide TV détaillé&lt;/b&gt; : chaque tentative est journalisée — adresse demandée, réponse du fournisseur (code HTTP, taille, durée, compression), chaînes et programmes reçus, période couverte, nombre de vos chaînes reliées au guide du fournisseur, au guide de secours ou à aucun, début de la réponse quand elle est inutilisable. Les refus du fournisseur (HTTP 4xx/5xx) et les pannes réseau sont désormais notés dans le journal. Au démarrage, le journal indique aussi si le guide a été conservé ou rechargé.&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Bouton « Recharger le guide TV »&lt;/b&gt; par source (Réglages &amp;gt; Sources) et nombre de programmes reçus affiché sous la source.&lt;/li&gt;
-&lt;li&gt;Sources : chargement journalisé (chaînes, films, séries, chaînes ayant un identifiant de guide, adresse du guide connue ou non).&lt;/li&gt;
-&lt;li&gt;Contient le correctif de compilation de la 1.3.2.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.3/Kastideo-1.3.3.dmg" length="46937237" type="application/octet-stream" sparkle:edSignature="vyyfllRlmlLvKh9OzC/jYOprJHCeXvo9gnYtviwOezWv2BtbOGVcRoakEThRsObkQDsFPRpNQb86CgA8sFZQBw==" />
     </item>
   </channel>
 </rss>
