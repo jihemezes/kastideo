@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android33] - 2026-11-22
+
+- **Android TV, Catégories** : afficher ou masquer une catégorie (ou tout afficher / tout masquer, monter, descendre) ne déclenche plus le recalcul immédiat des listes, très long sur un gros catalogue. Les choix sont enregistrés tout de suite et le recalcul n'a lieu qu'une fois, à la sortie du menu Catégories, comme sur Apple TV. Un rappel s'affiche en bas du menu.
+
 ## [1.19.5-android32] - 2026-11-22
 
 - **Android TV** : l'élément sélectionné (épisodes, en-tête de saison, lignes des réglages) grossissait trop et ses extrémités gauche et droite sortaient de l'affichage. L'agrandissement est maintenant proportionné à la largeur de l'élément, qui reste entièrement visible.

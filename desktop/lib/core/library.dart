@@ -53,7 +53,31 @@ class LibraryStore extends ChangeNotifier {
 
   /// Recalcule les listes un instant plus tard (regroupe les changements rapprochés) : le bandeau a le temps
   /// de s'afficher avant que le calcul, long sur un gros catalogue, ne fige l'écran.
+  int _holds = 0;
+  bool _rebuildPending = false;
+
+  /// Suspend le recalcul des listes (par exemple pendant la gestion des catégories à la télécommande) :
+  /// les réglages sont enregistrés tout de suite, le recalcul n'a lieu qu'au [releaseRebuild] correspondant.
+  void holdRebuild() => _holds++;
+
+  void releaseRebuild() {
+    if (_holds > 0) _holds--;
+    if (_holds == 0 && _rebuildPending) {
+      _rebuildPending = false;
+      // Après la fermeture de l'écran : évite de notifier pendant la destruction des widgets.
+      Future.microtask(_scheduleRebuild);
+    }
+  }
+
+  /// Catégories dans l'ordre choisi, même si le recalcul des listes est suspendu.
+  List<String> orderedCategories(MediaKind kind) => prefs(kind).apply(allCategories(kind));
+
   void _scheduleRebuild() {
+    if (_holds > 0) {
+      _rebuildPending = true;
+      notifyListeners();
+      return;
+    }
     indexing = true;
     notifyListeners();
     _indexTimer?.cancel();

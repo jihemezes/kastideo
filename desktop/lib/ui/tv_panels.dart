@@ -7,10 +7,13 @@ import 'tv_shell.dart';
 
 /// Un menu de la pile : titre, boutons et note de bas de panneau.
 class TvPanelSpec {
-  const TvPanelSpec({required this.title, required this.entries, this.footer});
+  const TvPanelSpec({required this.title, required this.entries, this.footer, this.onClose});
   final String title;
   final List<TvEntry> Function(BuildContext context) entries;
   final String? footer;
+
+  /// Appelé quand le panneau est fermé (retour ou sortie des réglages).
+  final VoidCallback? onClose;
 }
 
 class _Level {
@@ -53,6 +56,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
     stopTvKeys();
     for (final l in _levels) {
       l.scroll.dispose();
+      l.spec.onClose?.call();
     }
     super.dispose();
   }
@@ -70,7 +74,11 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
       Navigator.of(context).maybePop();
       return;
     }
-    setState(() => _levels.removeLast().scroll.dispose());
+    setState(() {
+      final level = _levels.removeLast();
+      level.scroll.dispose();
+      level.spec.onClose?.call();
+    });
   }
 
   List<TvEntry> _entries(_Level level) => level.spec.entries(_inner ?? context);

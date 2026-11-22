@@ -126,10 +126,14 @@ void _openSource(BuildContext context, Source source) {
 // MARK: Catégories
 
 void _openCategoryKinds(BuildContext context) {
+  // Le recalcul des listes (long sur un gros catalogue) attend la sortie du menu Catégories.
+  final library = context.library..holdRebuild();
   _open(
     context,
     TvPanelSpec(
       title: tr('Catégories'),
+      footer: tr('Les changements sont appliqués en quittant ce menu.'),
+      onClose: library.releaseRebuild,
       entries: (context) => [
         for (final (kind, label) in [(MediaKind.live, tr('Direct')), (MediaKind.movie, tr('Films')), (MediaKind.series, tr('Séries'))])
           TvEntry(label, (c) => _openCategories(c, kind, label), detail: '${context.library.allCategories(kind).length}'),
@@ -143,13 +147,13 @@ void _openCategories(BuildContext context, MediaKind kind, String label) {
     context,
     TvPanelSpec(
       title: label,
-      footer: tr('OK : afficher, masquer, monter ou descendre la catégorie.'),
+      footer: tr('OK : afficher, masquer, monter ou descendre. Les changements sont appliqués en quittant le menu Catégories.'),
       entries: (context) {
         final library = context.library;
         final prefs = library.prefs(kind);
         return [
           TvEntry(tr('Tout afficher'), (c) {
-            final names = c.library.allCategories(kind);
+            final names = c.library.orderedCategories(kind);
             final before = names.where((n) => c.library.prefs(kind).isHidden(n)).length;
             c.library.updateCategories(kind, (p) {
               p.hidden = <String>{};
@@ -158,14 +162,14 @@ void _openCategories(BuildContext context, MediaKind kind, String label) {
             _toast(c, before == 0 ? tr('Toutes les catégories sont déjà affichées.') : '$before ${tr('catégories affichées')}');
           }, icon: Icons.visibility_rounded),
           TvEntry(tr('Tout masquer'), (c) {
-            c.library.updateCategories(kind, (p) => p.hidden = {...c.library.allCategories(kind)});
+            c.library.updateCategories(kind, (p) => p.hidden = {...c.library.orderedCategories(kind)});
             _toast(c, tr('Toutes les catégories sont masquées.'));
           }, icon: Icons.visibility_off_rounded),
           TvEntry(tr('Trier de A à Z'), (c) => c.library.updateCategories(kind, (p) {
-                p.order = List.of(c.library.allCategories(kind))..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+                p.order = List.of(c.library.orderedCategories(kind))..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
               }), icon: Icons.sort_by_alpha_rounded),
           TvEntry(tr('Ordre du fournisseur'), (c) => c.library.updateCategories(kind, (p) => p.order = []), icon: Icons.restart_alt_rounded),
-          for (final name in library.allCategories(kind))
+          for (final name in library.orderedCategories(kind))
             TvEntry(prefs.displayName(name), (c) => _openCategory(c, kind, name),
                 detail: prefs.hidden.contains(name) ? tr('Masquée') : (prefs.isHidden(name) ? tr('Masquée (mot-clé)') : null)),
         ];
@@ -176,7 +180,7 @@ void _openCategories(BuildContext context, MediaKind kind, String label) {
 
 void _openCategory(BuildContext context, MediaKind kind, String name) {
   void move(BuildContext c, int delta) {
-    final list = List.of(c.library.allCategories(kind));
+    final list = List.of(c.library.orderedCategories(kind));
     final from = list.indexOf(name);
     final to = from + delta;
     if (from < 0 || to < 0 || to >= list.length) return;
