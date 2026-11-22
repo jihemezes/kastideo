@@ -31,6 +31,13 @@ class MainActivity : FlutterActivity() {
     private var multicastLock: WifiManager.MulticastLock? = null
     private var pendingGallery: MethodChannel.Result? = null
 
+    /// Architecture de CE processus : sur un boîtier 64 bits qui fait tourner l'APK 32 bits, c'est armeabi-v7a
+    /// (Build.SUPPORTED_ABIS donnerait arm64-v8a et la mise à jour téléchargerait le mauvais APK).
+    private fun processAbi(): String {
+        val abis = if (android.os.Process.is64Bit()) Build.SUPPORTED_64_BIT_ABIS else Build.SUPPORTED_32_BIT_ABIS
+        return abis.firstOrNull() ?: Build.SUPPORTED_ABIS.firstOrNull() ?: ""
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "fr.jmezes.kastideo/device")
@@ -38,7 +45,7 @@ class MainActivity : FlutterActivity() {
                 try {
                     when (call.method) {
                         "isTv" -> result.success(isTelevision())
-                        "abi" -> result.success(Build.SUPPORTED_ABIS.firstOrNull() ?: "")
+                        "abi" -> result.success(processAbi())
                         "mediaFolder" -> {
                             val dir = getExternalFilesDir(Environment.DIRECTORY_MOVIES) ?: filesDir
                             dir.mkdirs()

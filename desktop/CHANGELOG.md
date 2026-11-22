@@ -2,6 +2,12 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android29] - 2026-11-22
+
+- **Android** : correction de « Application non installée » en installant un APK à la main. Les APK 64 bits avaient un numéro de version interne plus élevé que les APK 32 bits : installer un v7a par-dessus un arm64 (ou l'inverse après un retour en arrière) était refusé comme une rétrogradation. Tous les APK partagent désormais le même numéro (plus élevé que tous les anciens), et s'installent donc les uns par-dessus les autres.
+- La mise à jour intégrée choisit l'APK de l'architecture du processus réellement lancé (un boîtier 64 bits qui fait tourner l'APK 32 bits reçoit désormais le v7a, plus l'arm64).
+- Vérifié : les 4 APK de android28 (v7a, arm64, x86_64, universel) ont la même signature, le même paquet et une archive intacte.
+
 ## [1.19.5-android28] - 2026-11-22
 
 - **Android TV** : la **mise à jour** s'ouvre en page à part, atteignable à la télécommande (Installer et relancer / Plus tard / Ignorer), au lieu d'un bandeau en arrière-plan de l'accueil.

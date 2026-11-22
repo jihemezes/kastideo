@@ -54,9 +54,12 @@ jobs:
           esac
           NAME="$(echo "$VERSION" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
           N="$(echo "$VERSION" | sed -E 's/.*-android([0-9]+)$/\1/')"
-          # Numéro de version Android : 1.9.0 + android 3 -> 1009003 (toujours croissant).
+          # Numéro de version Android : 1.19.5 + android 29 -> 101190529 (toujours croissant, identique pour toutes les architectures :
+          # l'option force-version-code-ignoring-abi ci-dessous supprime le décalage par architecture de Flutter, qui rendait un APK
+          # 32 bits « plus ancien » qu'un APK 64 bits déjà installé -> « Application non installée »).
+          # Le préfixe 100000000 place ce numéro au-dessus de tous les anciens (au plus 1194528 avec le décalage).
           IFS=. read -r MAJ MIN PAT <<< "$NAME"
-          CODE=$(( MAJ * 1000000 + MIN * 10000 + PAT * 100 + N ))
+          CODE=$(( 100000000 + MAJ * 1000000 + MIN * 10000 + PAT * 100 + N ))
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
@@ -90,10 +93,10 @@ jobs:
       - name: APK par architecture
         working-directory: desktop
         run: |
-          flutter build apk --release --split-per-abi \
+          flutter build apk --release --split-per-abi -Pforce-version-code-ignoring-abi=true \
             --build-name="${{ steps.version.outputs.name }}" --build-number="${{ steps.version.outputs.code }}" \
             --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
-          flutter build apk --release \
+          flutter build apk --release -Pforce-version-code-ignoring-abi=true \
             --build-name="${{ steps.version.outputs.name }}" --build-number="${{ steps.version.outputs.code }}" \
             --dart-define=KASTIDEO_VERSION="${{ steps.version.outputs.version }}"
 
