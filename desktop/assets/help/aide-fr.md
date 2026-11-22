@@ -1340,7 +1340,7 @@ Sur Android TV, les **Réglages** s'ouvrent en panneaux : le menu occupe les 2/5
 ### Utilisation à la télécommande (Android TV)
 
 Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'élément sélectionné est **entouré d'orange, agrandi et lumineux**, comme sur Apple TV.
-- **Accueil** : pavés Direct, Films, Séries (et Mes vidéos), puis **Reprendre la lecture** (affiches des films et épisodes commencés, **OK** ouvre la fiche), puis les boutons Recherche, Favoris, Récents, Guide TV, Aide, Réglages et Journal.
+- **Accueil** : pavés Direct, Films, Séries (et Mes vidéos), puis **Reprendre la lecture** (affiches des films et épisodes commencés, **OK** ouvre la fiche), puis les boutons Recherche, Favoris, Récents, Guide TV, Enregistrements, MultiVue (si vos sources autorisent deux connexions), Aide et Réglages.
 - **Recherche, Favoris, Récents, Aide** : dans Recherche, **OK** sur le champ ouvre le clavier de la télévision ; validez, puis **▼** pour parcourir les résultats (chaînes, films, séries, mes vidéos). Favoris et Récents : grille d'affiches, **OK** ouvre l'élément. Aide : cette aide, lisible à la télécommande (**▲ ▼** font défiler).
 - **Accueil** : Direct, Films, Séries, puis Guide TV, Réglages et Journal.
 - **Films et séries** : catégories en haut (**←/→**), affiches en dessous. **OK** ouvre la fiche ; pour une série, **Épisodes** affiche les saisons (**←/→**) et les épisodes (**↑/↓**).
@@ -1354,6 +1354,16 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 - **Rendu vidéo direct** : sur télévision, la vidéo est décodée directement vers l'écran (fluide même en 4K sur un vieux téléviseur). Réglages > **Rendu vidéo direct** le désactive (pris en compte au prochain lancement) ; dans ce mode, les sous-titres ne s'affichent pas.
 - **Réglages** (bouton de l'accueil) : **Sources** (activer, désactiver, actualiser, monter, descendre, retirer), **Catégories** de Direct, Films et Séries (afficher, masquer, monter, descendre, trier de A à Z), **Langue**, **Lecture** (épisode suivant automatique, rendu direct, replay, décodage logiciel, relais), **Guide TV** (ouverture, guide de secours, recharger), **Clé TMDB** (saisie avec le clavier de la télévision), **Aide** et **Journal**.
 - **Style d'affichage** (Réglages > **Style d'affichage**) : par type de contenu. **Direct** : *TV* (chaîne en plein écran), *Classique* (grille des chaînes par catégorie, par défaut) ou *Cinéma* (bannière et rangées de chaînes) ; **Films** et **Séries** : *Classique* (grille) ou *Cinéma* (par défaut ; bannière de l'élément sélectionné, puis rangées Reprendre la lecture, Favoris, Récents et catégories ; **◀ ▶** dans une rangée, **▲ ▼** de rangée en rangée, **OK** ouvre la fiche ou lance la chaîne).
+
+
+**Enregistrement, sous-titres, MultiVue et vu / non vu sur Android TV**
+
+- **OK pendant la lecture** (film, épisode, enregistrement, chaîne) ouvre la barre d'options en bas de l'écran : pause, −10 s / +30 s, audio, sous-titres, réglage des sous-titres (taille, couleur, position, décalage), vitesse, format de l'image, épisode suivant, enregistrer, MultiVue. ▲ ▼ ou Retour la referment.
+- **Sous-titres** : le « Rendu vidéo direct » (fluide en 4K) ne les affiche pas ; choisir « Sous-titres » propose de passer en rendu classique (Kastideo se ferme : rouvrez-le).
+- **Enregistrer** : Menu > Enregistrer cette chaîne, ou Guide TV > Programmer l'enregistrement (Kastideo doit être ouvert et la télévision allumée). Réglages > Enregistrements : support de stockage (mémoire interne, clé USB ou carte SD détectée : Kastideo y crée son dossier), durée par défaut, format, suppression automatique des anciens (par âge ou espace maximal). Accueil > Enregistrements : lire, supprimer, annuler une programmation.
+- **MultiVue** : Accueil > MultiVue, ou Menu > MultiVue pendant un direct. Elle apparaît si vos sources autorisent au moins deux connexions en tout (Réglages > Sources > la source > Connexions simultanées). OK sur une vignette : écouter, changer de chaîne, mettre en grand, plein écran, retirer.
+- **Vu / non vu** : touche Menu sur un épisode de la liste, ou bouton « Marquer comme vu » sur la fiche d'un film ou d'une série.
+- **Qualité maximale** (Réglages > Lecture) : pour les chaînes proposées en plusieurs versions (SD, HD, Full HD, 4K), choisit la plus haute version qui ne dépasse pas la limite. « Aucune limite » garde le comportement habituel (Full HD).
 
 ### Différences avec l'ordinateur
 

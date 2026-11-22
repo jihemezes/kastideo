@@ -6,10 +6,12 @@ import 'package:qr/qr.dart';
 
 import '../app_state.dart';
 import '../core/device.dart';
+import '../core/details.dart' show SeriesSeason;
 import '../core/log.dart';
 import '../core/models.dart';
 import '../core/tv_setup.dart';
 import '../l10n.dart';
+import '../main.dart' show mediaSync;
 import '../theme.dart';
 import '../core/settings.dart' show InterfaceStyle;
 import 'player_pane.dart';
@@ -367,6 +369,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     return [
       if (item.kind != MediaKind.series) tr('Lecture') else tr('Épisodes'),
       library.isFavorite(item.id) ? tr('Retirer des favoris') : tr('Ajouter aux favoris'),
+      if (item.kind == MediaKind.series || widget.kind != MediaKind.live) context.watch.isWatched(item.id) ? tr('Marquer comme non vu') : tr('Marquer comme vu'),
       tr('Retour'),
     ];
   }
@@ -390,6 +393,8 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
           }
         } else if (_button == 1) {
           context.library.toggleFavorite(item.id);
+        } else if (_button == 2 && _buttons.length > 3) {
+          _markWatched(item);
         } else {
           _mode = _Mode.grid;
         }
@@ -423,8 +428,60 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
       case TvKey.ok:
         if (episodes.isNotEmpty) _play(episodes[_episode.clamp(0, episodes.length - 1)]);
       case TvKey.menu:
-        break;
+        if (episodes.isNotEmpty) _episodeMenu(seasons, _season, episodes[_episode.clamp(0, episodes.length - 1)]);
     }
+  }
+
+  /// Vu / non vu d'un film ou, pour une série, de tous ses épisodes.
+  Future<void> _markWatched(MediaItem item) async {
+    if (item.kind == MediaKind.series) {
+      final seasons = context.info.seasons(item.id) ?? const [];
+      final all = [for (final s in seasons) ...s.episodes];
+      final watched = all.isNotEmpty && all.every((e) => context.watch.isWatched(e.id));
+      for (final e in all) {
+        await mediaSync.setPlayed(e, !watched);
+      }
+    } else {
+      await mediaSync.setPlayed(item, !context.watch.isWatched(item.id));
+    }
+  }
+
+  /// Menu d'un épisode (touche Menu) : vu / non vu pour l'épisode, la saison ou toute la série.
+  void _episodeMenu(List<SeriesSeason> seasons, int season, MediaItem episode) {
+    final watch = context.watch;
+    final seasonNumber = seasons[season].number;
+    Future<void> mark(Iterable<MediaItem> list, bool watched) async {
+      for (final e in list) {
+        await mediaSync.setPlayed(e, watched);
+      }
+    }
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => TvMenuPage(
+        title: episode.displayName,
+        entries: (_) => [
+          TvEntry(watch.isWatched(episode.id) ? tr('Marquer comme non vu') : tr('Marquer comme vu'), (c) async {
+            await mark([episode], !watch.isWatched(episode.id));
+            if (c.mounted) Navigator.of(c).pop();
+          }, icon: Icons.check_circle_outline_rounded),
+          TvEntry(tr('Marquer la saison %s comme vue').replaceAll('%s', '$seasonNumber'), (c) async {
+            await mark(seasons[season].episodes, true);
+            if (c.mounted) Navigator.of(c).pop();
+          }),
+          TvEntry(tr('Marquer la saison %s comme non vue').replaceAll('%s', '$seasonNumber'), (c) async {
+            await mark(seasons[season].episodes, false);
+            if (c.mounted) Navigator.of(c).pop();
+          }),
+          TvEntry(tr('Marquer toute la série comme vue'), (c) async {
+            await mark([for (final s in seasons) ...s.episodes], true);
+            if (c.mounted) Navigator.of(c).pop();
+          }),
+          TvEntry(tr('Marquer toute la série comme non vue'), (c) async {
+            await mark([for (final s in seasons) ...s.episodes], false);
+            if (c.mounted) Navigator.of(c).pop();
+          }),
+        ],
+      ),
+    ));
   }
 
   Future<void> _play(MediaItem item) async {
@@ -662,7 +719,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
               ),
           ]),
         ),
-        const TvHints(items: [('OK', 'Lire'), ('▲ ▼', 'Épisode'), ('◀ ▶', 'Saison'), ('Retour', 'Fiche')]),
+        const TvHints(items: [('OK', 'Lire'), ('▲ ▼', 'Épisode'), ('◀ ▶', 'Saison'), ('Menu', 'Vu / non vu'), ('Retour', 'Fiche')]),
       ]),
     );
   }
@@ -739,7 +796,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([context.library, context.settings]),
+      listenable: Listenable.merge([context.library, context.settings, context.playback, context.recordings]),
       builder: (context, _) {
         final entries = widget.entries(context);
         _index = _index.clamp(0, entries.isEmpty ? 0 : entries.length - 1);

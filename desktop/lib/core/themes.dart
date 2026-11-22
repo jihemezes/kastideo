@@ -332,8 +332,10 @@ class LiveChannelGroup {
   final String epgId;
 
   /// Version proposée (Full HD si elle existe, sinon la plus proche).
-  late final MediaItem preferred =
-      ChannelQuality.pick(variants, ChannelQuality.fhd, (MediaItem i) => ChannelQuality.of(i.name)) ?? variants.first;
+  MediaItem get preferred => ChannelQuality.pick(variants, qualityTarget(), (MediaItem i) => ChannelQuality.of(i.name)) ?? variants.first;
+
+  /// Qualité visée pour choisir la version d'une chaîne (Full HD par défaut ; réglage « Qualité maximale »).
+  static ChannelQuality Function() qualityTarget = () => ChannelQuality.fhd;
 
   static List<LiveChannelGroup> build(List<MediaItem> live, EPGIndex epg, Map<String, ContentTheme> overrides) {
     final order = <String>[];

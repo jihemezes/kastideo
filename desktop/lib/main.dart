@@ -27,6 +27,7 @@ import 'core/recording.dart';
 import 'core/library.dart';
 import 'core/media_info.dart';
 import 'core/settings.dart';
+import 'core/themes.dart';
 import 'l10n.dart';
 import 'core/playback.dart';
 import 'theme.dart';
@@ -36,6 +37,8 @@ import 'ui/library_view.dart';
 import 'ui/catalog_screen.dart';
 import 'ui/guide_view.dart';
 import 'ui/multiview_view.dart';
+import 'ui/tv_multiview.dart';
+import 'ui/player_pane.dart' show closeTvPlayerBar;
 import 'ui/recordings_view.dart';
 import 'ui/log_dialog.dart';
 import 'ui/settings_dialog.dart';
@@ -201,6 +204,12 @@ Future<void> main(List<String> args) async {
   final watch = WatchProgressStore();
   await watch.load();
   final library = LibraryStore()..settings = settings;
+  LiveChannelGroup.qualityTarget = () => switch (settings.maxQuality) {
+        'sd' => ChannelQuality.sd,
+        'hd' => ChannelQuality.hd,
+        'uhd' => ChannelQuality.uhd,
+        _ => ChannelQuality.fhd,
+      };
   final playback = PlaybackController(directRender: Device.isTv && settings.tvDirectRender)
     ..settings = settings
     ..watchProgress = watch;
@@ -463,6 +472,11 @@ class _RootViewState extends State<RootView> {
     final navigation = context.navigation;
     final playback = context.playback;
     // Android TV : les écrans Films/Séries de la télécommande referment d'abord lecteur, épisodes et fiche.
+    if (Device.isTv && closeTvPlayerBar()) return true;
+    if (Device.isTv && navigation.screen == Screen.multiview) {
+      closeMultiView(context);
+      return true;
+    }
     if (Device.isTv && (TvCatalog.onBack?.call() ?? false)) return true;
     if (navigation.theater) {
       navigation.exitTheater();
@@ -561,7 +575,7 @@ class _RootViewState extends State<RootView> {
                   Screen.series => Device.isTv ? const TvCatalog(kind: MediaKind.series) : const CatalogScreen(kind: MediaKind.series),
                   Screen.guide => Device.isTv ? const TvGuide() : const GuideScreen(),
                   Screen.recordings => const RecordingsScreen(),
-                  Screen.multiview => const MultiViewScreen(),
+                  Screen.multiview => Device.isTv ? const TvMultiViewScreen() : const MultiViewScreen(),
                   Screen.library => Device.isTv ? const TvCatalog(kind: MediaKind.movie, library: true) : const LibraryScreen(),
                   Screen.youtube => const YouTubeScreen(),
                 },

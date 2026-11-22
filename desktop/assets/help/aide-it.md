@@ -1340,7 +1340,7 @@ Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento 
 
 Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di sinistra e il suo contenuto si sviluppa nei 3/5 di destra; un livello in più scorre a sinistra coprendo in parte il menu genitore (◀ per tornare). L'impostazione **Pagina iniziale** sceglie la categoria mostrata entrando in Diretta, Film o Serie. La Home mostra il logo accanto al nome e come filigrana.
 - **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).
-- **Home**: riquadri Diretta, Film, Serie (e I miei video), poi **Continua a guardare** (locandine di film ed episodi iniziati, **OK** apre la scheda), poi i pulsanti Cerca, Preferiti, Recenti, Guida TV, Aiuto, Impostazioni e Registro.
+- **Home**: riquadri Diretta, Film, Serie (e I miei video), poi **Continua a guardare** (locandine di film ed episodi iniziati, **OK** apre la scheda), poi i pulsanti Cerca, Preferiti, Recenti, Guida TV, Registrazioni, MultiVista (se le sorgenti consentono due connessioni), Aiuto e Impostazioni.
 - **Cerca, Preferiti, Recenti, Aiuto**: in Cerca, **OK** sul campo apre la tastiera della TV; conferma, poi **▼** per scorrere i risultati (canali, film, serie, i miei video). Preferiti e Recenti: griglia di locandine, **OK** apre l'elemento. Aiuto: questa guida, leggibile col telecomando (**▲ ▼** scorrono).
 - **Film e serie**: categorie in alto (**←/→**), locandine sotto. **OK** apre la scheda; per una serie, **Episodi** mostra le stagioni (**←/→**) e gli episodi (**↑/↓**).
 - **Diretta**: **↑ / ↓** o **Canale +/−** cambiano canale, i **numeri** inseriscono un canale, **←** apre l'elenco dei canali, **→** mostra il banner informativo. Nell'elenco, **↑ / ↓** scorrono i canali **senza cambiare canale** e **OK** avvia quello evidenziato; **←** passa alla colonna delle **categorie** (**↑ / ↓** cambiano categoria), **→** o **OK** tornano ai canali; **Menu** aggiunge ai preferiti.
@@ -1353,6 +1353,16 @@ Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di
 - **Rendering video diretto**: sulla TV il video è decodificato direttamente sullo schermo (fluido anche in 4K su un televisore datato). Impostazioni > **Rendering video diretto** lo disattiva (al prossimo avvio); in questa modalità i sottotitoli non vengono mostrati.
 - **Impostazioni** (pulsante della Home): **Sorgenti** (attiva, disattiva, aggiorna, sposta su, sposta giù, rimuovi), **Categorie** di Diretta, Film e Serie (mostra, nascondi, sposta, ordina dalla A alla Z), **Lingua**, **Riproduzione** (episodio successivo automatico, rendering diretto, replay, decodifica software, relay), **Guida TV** (apertura, guida di riserva, ricarica), **Chiave TMDB** (con la tastiera della TV), **Aiuto** e **Registro**.
 - **Stile di visualizzazione** (Impostazioni > **Stile di visualizzazione**): per tipo di contenuto. **Diretta**: *TV* (canale a schermo intero), *Classico* (griglia dei canali per categoria, predefinito) o *Cinema* (banner e righe di canali); **Film** e **Serie**: *Classico* (griglia) o *Cinema* (predefinito; banner dell'elemento selezionato, poi righe Continua a guardare, Preferiti, Recenti e categorie; **◀ ▶** in una riga, **▲ ▼** tra le righe, **OK** apre la scheda o avvia il canale).
+
+
+**Registrazione, sottotitoli, MultiVista e visto / non visto su Android TV**
+
+- **OK durante la riproduzione** (film, episodio, registrazione, canale) apre la barra delle opzioni in basso: pausa, −10 s / +30 s, audio, sottotitoli, impostazioni dei sottotitoli (dimensione, colore, posizione, ritardo), velocità, formato dell'immagine, episodio successivo, registra, MultiVista. ▲ ▼ o Indietro la chiudono.
+- **Sottotitoli**: il «Rendering video diretto» (fluido in 4K) non li mostra; scegliendo «Sottotitoli» si propone di passare al rendering classico (Kastideo si chiude: riaprilo).
+- **Registrare**: Menu > Registra questo canale, o Guida TV > Programma la registrazione (Kastideo deve essere aperto e il televisore acceso). Impostazioni > Registrazioni: supporto di archiviazione (memoria interna, chiavetta USB o scheda SD rilevata: Kastideo vi crea la sua cartella), durata predefinita, formato, eliminazione automatica delle vecchie (per età o spazio massimo). Home > Registrazioni: riproduci, elimina, annulla una programmazione.
+- **MultiVista**: Home > MultiVista, o Menu > MultiVista durante una diretta. Compare se le sorgenti consentono almeno due connessioni in totale (Impostazioni > Sorgenti > la sorgente > Connessioni simultanee). OK su un riquadro: ascolta, cambia canale, ingrandisci, schermo intero, rimuovi.
+- **Visto / non visto**: tasto Menu su un episodio dell'elenco, o pulsante «Segna come visto» nella scheda di un film o di una serie.
+- **Qualità massima** (Impostazioni > Riproduzione): per i canali offerti in più versioni (SD, HD, Full HD, 4K), sceglie la versione più alta che non supera il limite. «Nessun limite» mantiene il comportamento abituale (Full HD).
 
 ### Differenze rispetto al computer
 

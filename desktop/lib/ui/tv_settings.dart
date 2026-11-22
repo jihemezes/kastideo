@@ -3,12 +3,15 @@ import 'package:flutter/services.dart';
 
 import '../app_state.dart';
 import '../core/models.dart';
+import '../core/paths.dart' show sizeText;
 import '../core/settings.dart' show InterfaceStyle;
+import '../core/volumes.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
 import 'tv_home.dart';
 import 'tv_panels.dart';
+import 'tv_recordings.dart';
 import 'tv_shell.dart';
 
 /// Réglages de l'Android TV, à la télécommande : sources, catégories, langue, lecture, guide, TMDB, aide.
@@ -31,6 +34,7 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Langue'), (c) => _openLanguage(c), detail: s.language == 'system' ? tr('Langue du système') : L10n.names[s.language]),
           TvEntry(tr('Lecture'), (c) => _openPlayback(c)),
           TvEntry(tr('Guide TV'), (c) => _openGuide(c)),
+          TvEntry(tr('Enregistrements'), (c) => _openRecordings(c)),
           TvEntry(tr('Clé TMDB'), (c) => _editTmdb(c), detail: s.usesTMDB ? tr('Oui') : tr('Non')),
           TvEntry(tr('Actualiser les catalogues'), (c) => _refreshAll(c), icon: Icons.refresh_rounded),
           TvEntry(tr('Aide'), (c) => _push(c, const TvHelpPage()), icon: Icons.help_outline_rounded),
@@ -105,6 +109,9 @@ void _openSource(BuildContext context, Source source) {
           c.library.refresh(source);
           _toast(c, tr('Actualisation en cours…'));
         }, icon: Icons.refresh_rounded),
+        if (source.kind.isIptv)
+          TvEntry(tr('Connexions simultanées (MultiVue)'), (c) => _choose(c, tr('Connexions simultanées (MultiVue)'), [for (var n = 1; n <= 4; n++) ('$n', '$n')], '${c.settings.multiviewLimit(source)}',
+              (v) => c.settings.setMultiviewLimit(source, int.parse(v))), detail: '${context.settings.multiviewLimit(source)}'),
         TvEntry(tr('Monter'), (c) => c.library.moveSource(source, -1), icon: Icons.arrow_upward_rounded),
         TvEntry(tr('Descendre'), (c) => c.library.moveSource(source, 1), icon: Icons.arrow_downward_rounded),
         TvEntry(tr('Retirer'), (c) async {
@@ -289,6 +296,10 @@ void _openPlayback(BuildContext context) {
           TvEntry(tr('Enchaîner automatiquement l\'épisode suivant d\'une série'), (c) => c.settings.setBool('player.autoNext', !s.autoNextEpisode), detail: _yes(s.autoNextEpisode)),
           TvEntry(tr('Rendu vidéo direct (recommandé)'), (c) => c.settings.setTvDirectRender(!s.tvDirectRender),
               detail: s.tvDirectRender ? tr('Oui · au prochain lancement') : tr('Non')),
+          TvEntry(tr('Qualité maximale des chaînes'), (c) => _choose(c, tr('Qualité maximale des chaînes'),
+              [('none', tr('Aucune limite')), ('uhd', '4K'), ('fhd', 'Full HD'), ('hd', 'HD'), ('sd', 'SD')], s.maxQuality, (v) => c.settings.setString('quality.max', v)),
+              detail: switch (s.maxQuality) { 'uhd' => '4K', 'fhd' => 'Full HD', 'hd' => 'HD', 'sd' => 'SD', _ => tr('Aucune limite') }),
+          TvEntry(tr('Sous-titres'), (c) => openTvSubtitleStyle(c)),
           TvEntry(tr('Revoir une émission (replay)'), (c) => c.settings.setBool('replay.enabled', !s.replayEnabled), detail: _yes(s.replayEnabled)),
           TvEntry(tr('Revenir au direct à la fin d\'un replay'), (c) => c.settings.setBool('replay.returnToLive', !s.replayReturnToLive), detail: _yes(s.replayReturnToLive)),
           TvEntry(tr('Toujours en décodage logiciel'), (c) => c.settings.setSoftwareAlways(!s.softwareAlways), detail: _yes(s.softwareAlways)),
@@ -627,4 +638,108 @@ class _TvPinPageState extends State<TvPinPage> with TvKeys<TvPinPage> {
       ]),
     );
   }
+}
+
+// MARK: Enregistrements
+
+Future<void> _openRecordings(BuildContext context) async {
+  final volumes = await storageVolumes();
+  if (!context.mounted) return;
+  String minutes(int m) => m == 0 ? tr('Sans limite') : (m < 60 ? '$m min' : '${m ~/ 60} h');
+  String days(int d) => d == 0 ? tr('Toujours') : '$d ${tr('jours')}';
+  String volumeName(StorageVolume v) => v.removable ? v.label : tr('Mémoire interne');
+  _open(
+    context,
+    TvPanelSpec(
+      title: tr('Enregistrements'),
+      footer: context.recordings.folder,
+      entries: (context) {
+        final s = context.settings;
+        final current = context.recordings.folder;
+        final where = volumes.where((v) => v.path == current).firstOrNull;
+        return [
+          TvEntry(tr('Voir les enregistrements'), (c) => openTvRecordings(c), icon: Icons.video_library_rounded),
+          TvEntry(tr('Support de stockage'), (c) {
+            _open(
+              c,
+              TvPanelSpec(
+                title: tr('Support de stockage'),
+                footer: tr('Les enregistrements sont placés dans le dossier Kastideo du support choisi (clé USB, disque, carte SD).'),
+                entries: (_) => [
+                  TvEntry(tr('Par défaut (dossier Vidéos)'), (c) {
+                    c.settings.setString('recordings.folder', '');
+                    c.recordings.scanFiles();
+                    TvPanelHost.close(c);
+                  }, icon: s.recordingsFolder.isEmpty ? Icons.check_circle_rounded : Icons.circle_outlined),
+                  for (final v in volumes)
+                    TvEntry(volumeName(v), (c) {
+                      c.settings.setString('recordings.folder', v.path);
+                      c.recordings.scanFiles();
+                      TvPanelHost.close(c);
+                    }, detail: v.freeBytes == null ? null : '${sizeText(v.freeBytes!)} ${tr('libres')}', icon: v.path == current ? Icons.check_circle_rounded : Icons.circle_outlined),
+                  if (volumes.isEmpty) TvEntry(tr('Aucun support détecté'), null, icon: Icons.info_outline_rounded),
+                ],
+              ),
+            );
+          }, detail: where != null ? volumeName(where) : (s.recordingsFolder.isEmpty ? tr('Par défaut') : tr('Personnalisé'))),
+          TvEntry(tr('Durée par défaut'), (c) => _choose(c, tr('Durée par défaut'), [for (final m in const [30, 60, 120, 180, 240, 0]) ('$m', minutes(m))], '${s.recordingDefaultMinutes}',
+              (v) => c.settings.setInt('recordings.defaultMinutes', int.parse(v))), detail: minutes(s.recordingDefaultMinutes)),
+          TvEntry(tr('Format des fichiers'), (c) => _choose(c, tr('Format des fichiers'), [('mkv', 'MKV'), ('ts', 'TS')], s.recordingFormat, (v) => c.settings.setString('recordings.format', v)),
+              detail: s.recordingFormat.toUpperCase()),
+          TvEntry(tr('Supprimer les anciens après'), (c) => _choose(c, tr('Supprimer les anciens après'), [for (final d in const [0, 7, 15, 30, 90]) ('$d', days(d))], '${s.recordingsKeepDays}',
+              (v) {
+            c.settings.setInt('recordings.keepDays', int.parse(v));
+            c.recordings.scanFiles();
+          }), detail: days(s.recordingsKeepDays)),
+          TvEntry(tr('Espace maximal'), (c) => _choose(c, tr('Espace maximal'), [for (final g in const [0, 10, 20, 50, 100]) ('$g', g == 0 ? tr('Sans limite') : '$g ${tr('Go')}')], '${s.recordingsMaxGB}',
+              (v) {
+            c.settings.setInt('recordings.maxGB', int.parse(v));
+            c.recordings.scanFiles();
+          }), detail: s.recordingsMaxGB == 0 ? tr('Sans limite') : '${s.recordingsMaxGB} ${tr('Go')}'),
+        ];
+      },
+    ),
+  );
+}
+
+// MARK: Sous-titres
+
+/// Taille, couleur et position des sous-titres (réglages mémorisés, appliqués tout de suite) et décalage de la lecture en cours.
+void openTvSubtitleStyle(BuildContext context) {
+  final playback = context.playback;
+  const colors = [('#FFFFFF', 'Blanc'), ('#FFE066', 'Jaune'), ('#7FE9FF', 'Cyan'), ('#9BFF9B', 'Vert')];
+  const sizes = [0.7, 0.85, 1.0, 1.25, 1.5, 2.0];
+  const positions = [(100, 'Bas'), (92, 'Un peu plus haut'), (84, 'Plus haut'), (70, 'Milieu bas')];
+  void apply(BuildContext c) => playback.applySubtitleStyle();
+  Navigator.of(context).push(MaterialPageRoute<void>(
+    builder: (_) => TvMenuPage(
+      title: tr('Sous-titres'),
+      footer: tr('Les sous-titres ne s\'affichent pas en rendu vidéo direct (Réglages > Lecture).'),
+      entries: (c) {
+        final s = c.settings;
+        return [
+          TvEntry(tr('Taille'), (c) {
+            final i = sizes.indexWhere((x) => x >= s.subScale - 0.01);
+            c.settings.setDouble('sub.scale', sizes[((i < 0 ? 2 : i) + 1) % sizes.length]);
+            apply(c);
+          }, detail: '${(s.subScale * 100).round()} %'),
+          TvEntry(tr('Couleur'), (c) {
+            final i = colors.indexWhere((x) => x.$1 == s.subColor);
+            c.settings.setString('sub.color', colors[((i < 0 ? 0 : i) + 1) % colors.length].$1);
+            apply(c);
+          }, detail: tr(colors.firstWhere((x) => x.$1 == s.subColor, orElse: () => colors.first).$2)),
+          TvEntry(tr('Position'), (c) {
+            final i = positions.indexWhere((x) => x.$1 == s.subPos);
+            c.settings.setInt('sub.pos', positions[((i < 0 ? 0 : i) + 1) % positions.length].$1);
+            apply(c);
+          }, detail: tr(positions.firstWhere((x) => x.$1 == s.subPos, orElse: () => positions.first).$2)),
+          if (playback.current != null) ...[
+            TvEntry(tr('Décalage : plus tôt (−0,5 s)'), (c) => playback.setSubDelay(playback.subDelay - 0.5), detail: '${playback.subDelay} s'),
+            TvEntry(tr('Décalage : plus tard (+0,5 s)'), (c) => playback.setSubDelay(playback.subDelay + 0.5), detail: '${playback.subDelay} s'),
+            TvEntry(tr('Décalage : remettre à zéro'), (c) => playback.setSubDelay(0)),
+          ],
+        ];
+      },
+    ),
+  ));
 }

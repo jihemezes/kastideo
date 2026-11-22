@@ -1340,7 +1340,7 @@ En Android TV, Kastideo muestra pantallas pensadas para el mando: el elemento se
 
 En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la izquierda y su contenido se despliega en los 3/5 de la derecha; un nivel más se desliza a la izquierda cubriendo en parte el menú padre (◀ para volver). El ajuste **Página de inicio** elige la categoría mostrada al entrar en Directo, Películas o Series. El Inicio muestra el logotipo junto al nombre y como marca de agua.
 - **Flechas**: mueven la selección; **OK** confirma; **Atrás** vuelve (reproductor → episodios → ficha → lista → inicio).
-- **Inicio**: mosaicos Directo, Películas, Series (y Mis vídeos), luego **Continuar viendo** (carteles de películas y episodios empezados, **OK** abre la ficha), luego los botones Búsqueda, Favoritos, Recientes, Guía TV, Ayuda, Ajustes y Registro.
+- **Inicio**: mosaicos Directo, Películas, Series (y Mis vídeos), luego **Continuar viendo** (carteles de películas y episodios empezados, **OK** abre la ficha), luego los botones Búsqueda, Favoritos, Recientes, Guía TV, Grabaciones, MultiVista (si sus fuentes permiten dos conexiones), Ayuda y Ajustes.
 - **Búsqueda, Favoritos, Recientes, Ayuda**: en Búsqueda, **OK** en el campo abre el teclado del televisor; valide y pulse **▼** para recorrer los resultados (canales, películas, series, mis vídeos). Favoritos y Recientes: cuadrícula de carteles, **OK** abre el elemento. Ayuda: esta ayuda, legible con el mando (**▲ ▼** desplazan).
 - **Películas y series**: categorías arriba (**←/→**), carátulas debajo. **OK** abre la ficha; en una serie, **Episodios** muestra las temporadas (**←/→**) y los episodios (**↑/↓**).
 - **Directo**: **↑ / ↓** o **Canal +/−** cambian de canal, los **números** introducen un canal, **←** abre la lista de canales, **→** muestra el banner de información. En la lista, **↑ / ↓** recorren los canales **sin cambiar de canal** y **OK** reproduce el resaltado; **←** pasa a la columna de **categorías** (**↑ / ↓** cambian de categoría), **→** u **OK** vuelven a los canales; **Menú** añade a favoritos.
@@ -1354,6 +1354,16 @@ En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la
 - **Renderizado de vídeo directo**: en la televisión, el vídeo se decodifica directamente a la pantalla (fluido incluso en 4K en un televisor antiguo). Ajustes > **Renderizado de vídeo directo** lo desactiva (al próximo inicio); en este modo no se muestran los subtítulos.
 - **Ajustes** (botón de Inicio): **Fuentes** (activar, desactivar, actualizar, subir, bajar, quitar), **Categorías** de Directo, Películas y Series (mostrar, ocultar, mover, ordenar de A a Z), **Idioma**, **Reproducción** (episodio siguiente automático, renderizado directo, replay, decodificación por software, relé), **Guía TV** (apertura, guía de respaldo, recargar), **Clave TMDB** (con el teclado del televisor), **Ayuda** y **Registro**.
 - **Estilo de visualización** (Ajustes > **Estilo de visualización**): por tipo de contenido. **Directo**: *TV* (canal a pantalla completa), *Clásico* (cuadrícula de canales por categoría, por defecto) o *Cine* (banner y filas de canales); **Películas** y **Series**: *Clásico* (cuadrícula) o *Cine* (por defecto; banner del elemento seleccionado y filas Continuar viendo, Favoritos, Recientes y categorías; **◀ ▶** en una fila, **▲ ▼** entre filas, **OK** abre la ficha o reproduce el canal).
+
+
+**Grabación, subtítulos, MultiVista y visto / no visto en Android TV**
+
+- **OK durante la reproducción** (película, episodio, grabación, canal) abre la barra de opciones en la parte inferior: pausa, −10 s / +30 s, audio, subtítulos, ajuste de subtítulos (tamaño, color, posición, desfase), velocidad, formato de imagen, episodio siguiente, grabar, MultiVista. ▲ ▼ o Atrás la cierran.
+- **Subtítulos**: el «Renderizado de vídeo directo» (fluido en 4K) no los muestra; al elegir «Subtítulos» se propone pasar al renderizado clásico (Kastideo se cierra: vuelva a abrirlo).
+- **Grabar**: Menú > Grabar este canal, o Guía TV > Programar la grabación (Kastideo debe estar abierto y el televisor encendido). Ajustes > Grabaciones: soporte de almacenamiento (memoria interna, llave USB o tarjeta SD detectada: Kastideo crea allí su carpeta), duración predeterminada, formato, eliminación automática de las antiguas (por antigüedad o espacio máximo). Inicio > Grabaciones: reproducir, eliminar, cancelar una programación.
+- **MultiVista**: Inicio > MultiVista, o Menú > MultiVista durante un directo. Aparece si sus fuentes permiten al menos dos conexiones en total (Ajustes > Fuentes > la fuente > Conexiones simultáneas). OK sobre un mosaico: escuchar, cambiar de canal, ampliar, pantalla completa, quitar.
+- **Visto / no visto**: tecla Menú sobre un episodio de la lista, o botón «Marcar como visto» en la ficha de una película o serie.
+- **Calidad máxima** (Ajustes > Reproducción): para los canales ofrecidos en varias versiones (SD, HD, Full HD, 4K), elige la versión más alta que no supere el límite. «Sin límite» mantiene el comportamiento habitual (Full HD).
 
 ### Diferencias con el ordenador
 

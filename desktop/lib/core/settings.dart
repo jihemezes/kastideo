@@ -65,6 +65,10 @@ class AppSettings extends ChangeNotifier {
   /// Dossier des enregistrements et téléchargements (vide : Vidéos/Kastideo).
   String get recordingsFolder => _prefs.getString('recordings.folder') ?? '';
 
+  /// Nettoyage automatique des enregistrements (dossier « Enregistrements » seulement) : âge maximal en jours et taille maximale en Go ; 0 = jamais.
+  int get recordingsKeepDays => _prefs.getInt('recordings.keepDays') ?? 0;
+  int get recordingsMaxGB => _prefs.getInt('recordings.maxGB') ?? 0;
+
   /// Format des enregistrements du direct : « mkv » ou « ts ».
   String get recordingFormat => _prefs.getString('recordings.format') ?? 'mkv';
   int get marginBefore => _prefs.getInt('recordings.marginBefore') ?? 2;
@@ -323,6 +327,14 @@ class AppSettings extends ChangeNotifier {
     _prefs.setBool('tv.directRender', value);
     notifyListeners();
   }
+
+  /// Qualité maximale choisie pour les chaînes proposées en plusieurs versions (SD, HD, Full HD, 4K) ; « none » : aucune limite (comportement habituel).
+  String get maxQuality => _prefs.getString('quality.max') ?? 'none';
+
+  /// Sous-titres (Android TV) : taille (1 = normale), couleur, position verticale (100 = bas de l'image, plus petit = plus haut).
+  double get subScale => _prefs.getDouble('sub.scale') ?? 1.0;
+  String get subColor => _prefs.getString('sub.color') ?? '#FFFFFF';
+  int get subPos => _prefs.getInt('sub.pos') ?? 100;
 
   /// Basculer seul en logiciel quand l'image se fige.
   bool get softwareAuto => _prefs.getBool('decode.autoFallback') ?? true;

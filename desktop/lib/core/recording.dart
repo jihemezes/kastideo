@@ -780,6 +780,53 @@ class RecordingCenter extends ChangeNotifier {
     result.sort((a, b) => b.modified.compareTo(a.modified));
     files = result;
     notifyListeners();
+    if (!_cleaning) unawaited(_cleanOld());
+  }
+
+  bool _cleaning = false;
+
+  /// Supprime les anciens enregistrements du dossier « Enregistrements » (âge ou taille maximale choisis dans les réglages).
+  /// Jamais le fichier en cours, ni ceux d'un autre dossier (films et séries téléchargés).
+  Future<void> _cleanOld() async {
+    final days = settings.recordingsKeepDays;
+    final maxBytes = settings.recordingsMaxGB * 1024 * 1024 * 1024;
+    if (days <= 0 && maxBytes <= 0) return;
+    _cleaning = true;
+    try {
+      final sep = Platform.pathSeparator;
+      final root = '$folder${sep}Enregistrements$sep';
+      final mine = [for (final f in files) if (f.path.startsWith(root) && f.path != active?.path && !converting.contains(f.path)) f]
+        ..sort((a, b) => a.modified.compareTo(b.modified));
+      final doomed = <RecordedFile>[];
+      if (days > 0) {
+        final limit = DateTime.now().subtract(Duration(days: days));
+        doomed.addAll(mine.where((f) => f.modified.isBefore(limit)));
+      }
+      if (maxBytes > 0) {
+        var total = mine.fold<int>(0, (n, f) => n + f.size) - doomed.fold<int>(0, (n, f) => n + f.size);
+        for (final f in mine) {
+          if (total <= maxBytes) break;
+          if (doomed.contains(f)) continue;
+          doomed.add(f);
+          total -= f.size;
+        }
+      }
+      if (doomed.isEmpty) return;
+      var removed = 0;
+      for (final f in doomed) {
+        try {
+          await File(f.path).delete();
+          removed++;
+        } catch (_) {}
+      }
+      if (removed > 0) {
+        PlaybackLog.shared.note('Nettoyage automatique : $removed ancien(s) enregistrement(s) supprimé(s).');
+        files = files.where((f) => !doomed.contains(f) || File(f.path).existsSync()).toList();
+        notifyListeners();
+      }
+    } finally {
+      _cleaning = false;
+    }
   }
 
   /// Retire des enregistrements de la liste ; avec [deleteFiles], supprime aussi leurs fichiers du stockage.

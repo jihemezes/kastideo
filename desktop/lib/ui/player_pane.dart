@@ -20,7 +20,19 @@ import 'pip_view.dart';
 import '../core/multiview.dart';
 import 'multiview_view.dart' show openMultiView;
 import 'themes_view.dart';
+import 'tv_multiview.dart';
 import 'tv_player_menu.dart';
+import 'tv_settings.dart' show openTvSubtitleStyle;
+
+/// Barre d'options du lecteur à la télécommande (OK pendant la lecture) : ouverte ou non.
+final ValueNotifier<bool> _tvBarOpen = ValueNotifier(false);
+
+/// Retour : referme la barre d'options si elle est ouverte (vrai) ; sinon ne fait rien.
+bool closeTvPlayerBar() {
+  if (!_tvBarOpen.value) return false;
+  _tvBarOpen.value = false;
+  return true;
+}
 
 /// Lecteur : image, barre de contrôles compacte qui se cache seule, chargement, erreur (comme sur Mac).
 class PlayerPane extends StatefulWidget {
@@ -53,6 +65,126 @@ class _PlayerPaneState extends State<PlayerPane> {
   bool _dragLeftHalf = false;
   Axis? _dragAxis;
 
+  // Barre d'options de la télécommande.
+  int _barIndex = 0;
+  Timer? _barTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tvBarOpen.addListener(_barChanged);
+  }
+
+  void _barChanged() {
+    _barTimer?.cancel();
+    if (_tvBarOpen.value) _barTimer = Timer(const Duration(seconds: 10), () => _tvBarOpen.value = false);
+    if (mounted) setState(() {});
+  }
+
+  void _barKeepOpen() {
+    _barTimer?.cancel();
+    _barTimer = Timer(const Duration(seconds: 10), () => _tvBarOpen.value = false);
+  }
+
+  /// Boutons de la barre : icône, texte et action (les pages de choix se referment seules après le choix).
+  List<(IconData, String, VoidCallback)> _barItems() {
+    final playback = context.playback;
+    final current = playback.current;
+    final live = playback.isLive;
+    final isEpisode = current != null && context.library.seriesOf(current) != null;
+    final recording = current != null && context.recordings.isRecording(current);
+    return [
+      (playback.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded, playback.isPlaying ? tr('Pause') : tr('Lecture'), playback.togglePause),
+      if (!live && playback.isSeekable) (Icons.replay_10_rounded, '−10 s', () => playback.jump(-10)),
+      if (!live && playback.isSeekable) (Icons.forward_30_rounded, '+30 s', () => playback.jump(30)),
+      if (playback.audioTracks.length > 1) (Icons.audiotrack_rounded, tr('Audio'), () => tvChooseAudio(context, pops: 1)),
+      (Icons.subtitles_rounded, tr('Sous-titres'), () => playback.subtitleTracks.isEmpty && !playback.directRender
+          ? ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(tr('Aucun sous-titre dans ce flux.'), style: kTextD(20))))
+          : tvChooseSubtitles(context, pops: 1)),
+      if (!playback.directRender && playback.subtitleTracks.isNotEmpty) (Icons.text_fields_rounded, tr('Réglage'), () => openTvSubtitleStyle(context)),
+      if (!live && playback.isSeekable) (Icons.speed_rounded, tr('Vitesse'), () => tvChooseRate(context, pops: 1)),
+      (Icons.aspect_ratio_rounded, tr('Format'), () => tvChooseFormat(context, pops: 1)),
+      if (live) (recording ? Icons.stop_circle_rounded : Icons.fiber_manual_record_rounded, recording ? tr('Arrêter') : tr('Enregistrer'), () => toggleRecording(context)),
+      if (live && context.settings.multiviewAvailableFor(context.library.selectableSources)) (Icons.grid_view_rounded, tr('MultiVue'), () => openTvMultiView(context, add: current)),
+      if (isEpisode) (Icons.skip_next_rounded, tr('Suivant'), () => tvNextEpisode(context)),
+      if (isEpisode) (Icons.video_library_rounded, tr('Épisodes'), () => tvEpisodeList(context, pops: 1)),
+      (Icons.more_horiz_rounded, tr('Options'), () => openTvPlayerOptions(context)),
+    ];
+  }
+
+  /// Touches pendant que la barre est ouverte : ◀ ▶ choisissent un bouton, OK l'active, ▲ ▼ ou Retour la referment.
+  KeyEventResult _barKey(KeyEvent event) {
+    final key = event.logicalKey;
+    final items = _barItems();
+    _barIndex = _barIndex.clamp(0, items.length - 1);
+    _barKeepOpen();
+    if (key == LogicalKeyboardKey.arrowLeft) {
+      setState(() => _barIndex = (_barIndex - 1 + items.length) % items.length);
+    } else if (key == LogicalKeyboardKey.arrowRight) {
+      setState(() => _barIndex = (_barIndex + 1) % items.length);
+    } else if (key == LogicalKeyboardKey.select || key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
+      if (event is KeyDownEvent) items[_barIndex].$3();
+    } else if (key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.escape || key == LogicalKeyboardKey.goBack) {
+      _tvBarOpen.value = false;
+    } else if (key == LogicalKeyboardKey.mediaPlayPause || key == LogicalKeyboardKey.mediaPlay || key == LogicalKeyboardKey.mediaPause) {
+      context.playback.togglePause();
+    } else if (key == LogicalKeyboardKey.contextMenu && event is KeyDownEvent) {
+      openTvPlayerOptions(context);
+    } else {
+      return KeyEventResult.ignored;
+    }
+    return KeyEventResult.handled;
+  }
+
+  Widget _tvBar() {
+    final playback = context.playback;
+    final items = _barItems();
+    final index = _barIndex.clamp(0, items.length - 1);
+    final total = playback.duration.inMilliseconds;
+    final fraction = total <= 0 || playback.isLive ? null : (playback.position.inMilliseconds / total).clamp(0.0, 1.0);
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(40, 60, 40, 22),
+        decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Color(0xDD000000)])),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            Expanded(child: Text(playback.current?.displayName ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(24, weight: FontWeight.w800))),
+            if (fraction != null) Text('${formatClock(playback.position)} / ${formatClock(playback.duration)}', style: kTextD(18, color: Colors.white70)),
+          ]),
+          if (fraction != null) ...[
+            const SizedBox(height: 8),
+            ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: fraction, minHeight: 6, color: KPalette.orange, backgroundColor: Colors.white24)),
+          ],
+          const SizedBox(height: 14),
+          Row(children: [
+            for (var i = 0; i < items.length; i++)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 120),
+                    height: 78,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: i == index ? 0.28 : 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: i == index ? KPalette.orange : Colors.transparent, width: 4),
+                    ),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Icon(items[i].$1, size: 30, color: Colors.white),
+                      Text(items[i].$2, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(14, weight: FontWeight.w700)),
+                    ]),
+                  ),
+                ),
+              ),
+          ]),
+        ]),
+      ),
+    );
+  }
+
   void _showHud(String text) {
     setState(() => _hud = text);
     _hudTimer?.cancel();
@@ -63,6 +195,9 @@ class _PlayerPaneState extends State<PlayerPane> {
 
   @override
   void dispose() {
+    _tvBarOpen.removeListener(_barChanged);
+    _tvBarOpen.value = false;
+    _barTimer?.cancel();
     PipController.shared.close();
     _hideTimer?.cancel();
     _hudTimer?.cancel();
@@ -86,6 +221,14 @@ class _PlayerPaneState extends State<PlayerPane> {
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
     if (Device.isAndroid) _poke();
+    if (Device.isTv && !widget.tvMode && _tvBarOpen.value) return _barKey(event);
+    // Télévision : OK ouvre la barre d'options (audio, sous-titres, vitesse, format, enregistrement…).
+    if (Device.isTv && !widget.tvMode && event is KeyDownEvent &&
+        (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+      _barIndex = 0;
+      _tvBarOpen.value = true;
+      return KeyEventResult.handled;
+    }
     // Télévision : Menu ouvre les options du lecteur (pistes, vitesse, format, épisodes…).
     if (Device.isTv && !widget.tvMode && event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.contextMenu) {
       openTvPlayerOptions(context);
@@ -219,7 +362,13 @@ class _PlayerPaneState extends State<PlayerPane> {
   }
 
   @override
-  Widget build(BuildContext context) => DarkZone(child: Builder(builder: _buildDark));
+  Widget build(BuildContext context) => PopScope(
+        canPop: !_tvBarOpen.value,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) closeTvPlayerBar();
+        },
+        child: DarkZone(child: Builder(builder: _buildDark)),
+      );
 
   Widget _buildDark(BuildContext context) {
     final playback = context.playback;
@@ -318,7 +467,8 @@ class _PlayerPaneState extends State<PlayerPane> {
                         ),
                       ),
                     // Direct à la télécommande : pas de barre (le bandeau, le panneau et la touche Menu la remplacent).
-                    if (!(Device.isTv && widget.tvMode))
+                    if (Device.isTv && !widget.tvMode && _tvBarOpen.value) _tvBar(),
+                    if (!Device.isTv)
                       Positioned(
                         left: 0,
                         right: 0,

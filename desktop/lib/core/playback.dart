@@ -171,6 +171,36 @@ class PlaybackController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Décalage des sous-titres (secondes, positif = plus tard) ; propre à la lecture en cours.
+  double subDelay = 0;
+
+  Future<void> setSubDelay(double seconds) async {
+    subDelay = double.parse(seconds.clamp(-30.0, 30.0).toStringAsFixed(1));
+    final native = player.platform;
+    if (native is NativePlayer) {
+      try {
+        await native.setProperty('sub-delay', '$subDelay');
+      } catch (_) {}
+    }
+    notifyListeners();
+  }
+
+  /// Applique la taille, la couleur et la position des sous-titres (réglages mémorisés).
+  Future<void> applySubtitleStyle() async {
+    final s = settings;
+    final native = player.platform;
+    if (s == null || native is! NativePlayer) return;
+    const options = {'sub-border-size': '3.2', 'sub-shadow-offset': '1'};
+    try {
+      await native.setProperty('sub-scale', '${s.subScale}');
+      await native.setProperty('sub-color', s.subColor);
+      await native.setProperty('sub-pos', '${s.subPos}');
+      for (final e in options.entries) {
+        await native.setProperty(e.key, e.value);
+      }
+    } catch (_) {}
+  }
+
   /// Lecture d'un contenu d'un serveur (Jellyfin, Emby, Plex) : début, progression, pause, fin — transmis au serveur.
   void Function(MediaItem item, double position, double duration, PlaybackEvent event)? onProgress;
   AppSettings? settings;
@@ -275,6 +305,7 @@ class PlaybackController extends ChangeNotifier {
       await native.setProperty('ytdl', 'no');
       // Sous-titres placés à côté d'un fichier local (« film.srt », « film.fr.srt »…) chargés automatiquement.
       await native.setProperty('sub-auto', 'fuzzy');
+      await applySubtitleStyle();
     }
     await applyCacheSettings();
     await StreamRelay.shared.start();
@@ -813,6 +844,8 @@ class PlaybackController extends ChangeNotifier {
             'ou refuse la connexion (abonnement limité à une connexion : vérifiez qu\'aucun autre appareil ne regarde).');
       }
     });
+    await applySubtitleStyle();
+    if (subDelay != 0) await setSubDelay(0);
     await player.open(Media(source, httpHeaders: const {'User-Agent': kUserAgent}), play: true);
   }
 

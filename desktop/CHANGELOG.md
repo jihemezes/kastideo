@@ -26,6 +26,14 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android25] - 2026-11-22
+
+- **Android TV, enregistrement** : choix du support de stockage (mémoire interne, clé USB, carte SD), durée par défaut, format, suppression automatique des anciens (âge ou espace maximal), écran **Enregistrements** (lire, supprimer, annuler une programmation) et « Enregistrer cette chaîne » dans les options du lecteur ; programmation depuis le Guide TV.
+- **Android TV, lecteur** : **OK** pendant la lecture ouvre une barre d'options en bas (pause, ±, audio, sous-titres, réglage des sous-titres, vitesse, format, épisode suivant, enregistrer, MultiVue). Sous-titres : taille, couleur, position, décalage ; en rendu vidéo direct, choisir un sous-titre propose de passer au rendu classique.
+- **Android TV, MultiVue** : écran dédié à la télécommande (bouton d'accueil, ou Menu pendant un direct) ; nombre de connexions simultanées réglable par source.
+- **Vu / non vu** : touche Menu sur un épisode (épisode, saison, série) et bouton sur les fiches.
+- **Qualité maximale** des chaînes proposées en plusieurs versions (Réglages > Lecture), sans jamais l'imposer par défaut.
+
 ## [1.19.5-android24] - 2026-11-22
 
 - **Android TV** : le code PIN se saisit aussi avec le pavé numérique de la télécommande (validation automatique au 4e chiffre).

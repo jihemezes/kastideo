@@ -11,6 +11,8 @@ import '../core/text.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import 'tv_multiview.dart';
+import 'tv_recordings.dart';
 import 'tv_settings.dart';
 import 'tv_shell.dart';
 import 'widgets.dart';
@@ -67,7 +69,9 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
     super.dispose();
   }
 
-  static const _buttonCount = 7;
+  /// Boutons du bas : Recherche, Favoris, Récents, Guide TV, Enregistrements, [MultiVue], Aide, Réglages.
+  int get _buttonCount => _buttonIds.length;
+  List<String> get _buttonIds => ['search', 'favorites', 'recents', 'guide', 'recordings', if (context.settings.multiviewAvailableFor(context.library.selectableSources)) 'multiview', 'help', 'settings'];
   List<String> get _rows => ['tiles', if (_rail.isNotEmpty) 'rail', 'buttons'];
   int _count(String row) => switch (row) {
         'tiles' => _tiles,
@@ -114,21 +118,23 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
     } else if (row == 'rail') {
       tvOpenItem(context, _rail[_col.clamp(0, _rail.length - 1)]);
     } else {
-      switch (_col) {
-        case 0:
+      switch (_buttonIds[_col.clamp(0, _buttonIds.length - 1)]) {
+        case 'search':
           Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TvItemsPage(title: 'Recherche', search: true)));
-        case 1:
+        case 'favorites':
           Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => TvItemsPage(title: 'Favoris', items: _favorites)));
-        case 2:
+        case 'recents':
           Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => TvItemsPage(title: 'Récents', items: _recents)));
-        case 3:
+        case 'guide':
           nav.go(Screen.guide);
-        case 4:
+        case 'recordings':
+          openTvRecordings(context);
+        case 'multiview':
+          openTvMultiView(context);
+        case 'help':
           Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TvHelpPage()));
-        case 5:
-          openTvSettings(context);
         default:
-          openTvLog(context);
+          openTvSettings(context);
       }
     }
   }
@@ -157,7 +163,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
           // Sans source : le curseur commence sur Réglages, pour ajouter la première.
           if (library.sources.isEmpty) {
             _row = _rows.length - 1;
-            _col = 5;
+            _col = _buttonCount - 1;
           }
         }
         _row = _row.clamp(0, _rows.length - 1);
@@ -172,9 +178,10 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
           (Icons.star_rounded, tr('Favoris')),
           (Icons.history_rounded, tr('Récents')),
           (Icons.calendar_month_rounded, tr('Guide TV')),
+          (Icons.fiber_manual_record_rounded, tr('Enregistrements')),
+          if (context.settings.multiviewAvailableFor(library.selectableSources)) (Icons.grid_view_rounded, tr('MultiVue')),
           (Icons.help_outline_rounded, tr('Aide')),
           (Icons.settings_rounded, tr('Réglages')),
-          (Icons.receipt_long_rounded, tr('Journal')),
         ];
         final rows = _rows;
         return TvBackground(

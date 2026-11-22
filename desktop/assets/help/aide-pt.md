@@ -1340,7 +1340,7 @@ No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item s
 
 No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda e o conteúdo se desenvolve nos 3/5 da direita; um nível a mais desliza para a esquerda cobrindo em parte o menu pai (◀ para voltar). O ajuste **Página inicial** escolhe a categoria mostrada ao entrar em Direto, Filmes ou Séries. O Início mostra o logo ao lado do nome e como marca-d'água.
 - **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).
-- **Início**: blocos Ao vivo, Filmes, Séries (e Meus vídeos), depois **Continuar a ver** (capas de filmes e episódios iniciados, **OK** abre a ficha), depois os botões Pesquisa, Favoritos, Recentes, Guia de TV, Ajuda, Ajustes e Registro.
+- **Início**: blocos Ao vivo, Filmes, Séries (e Meus vídeos), depois **Continuar a ver** (capas de filmes e episódios iniciados, **OK** abre a ficha), depois os botões Pesquisa, Favoritos, Recentes, Guia de TV, Gravações, MultiVista (se as fontes permitirem duas conexões), Ajuda e Ajustes.
 - **Pesquisa, Favoritos, Recentes, Ajuda**: em Pesquisa, **OK** no campo abre o teclado da TV; confirme e use **▼** para percorrer os resultados (canais, filmes, séries, meus vídeos). Favoritos e Recentes: grelha de capas, **OK** abre o item. Ajuda: esta ajuda, legível com o comando (**▲ ▼** deslocam).
 - **Filmes e séries**: categorias no alto (**←/→**), pôsteres abaixo. **OK** abre a ficha; em uma série, **Episódios** mostra as temporadas (**←/→**) e os episódios (**↑/↓**).
 - **Ao vivo**: **↑ / ↓** ou **Canal +/−** mudam de canal, os **números** digitam um canal, **←** abre a lista de canais, **→** mostra a faixa de informações. Na lista, **↑ / ↓** percorrem os canais **sem mudar de canal** e **OK** reproduz o destacado; **←** vai para a coluna das **categorias** (**↑ / ↓** mudam de categoria), **→** ou **OK** voltam aos canais; **Menu** adiciona aos favoritos.
@@ -1353,6 +1353,16 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 - **Renderização de vídeo direta**: na televisão, o vídeo é decodificado diretamente para o ecrã (fluido mesmo em 4K num televisor antigo). Definições > **Renderização de vídeo direta** desativa-a (no próximo arranque); neste modo as legendas não são apresentadas.
 - **Ajustes** (botão do Início): **Fontes** (ativar, desativar, atualizar, subir, descer, remover), **Categorias** de Ao vivo, Filmes e Séries (mostrar, ocultar, mover, ordenar de A a Z), **Idioma**, **Reprodução** (episódio seguinte automático, renderização direta, replay, descodificação por software, relé), **Guia de TV** (abertura, guia de reserva, recarregar), **Chave TMDB** (com o teclado da TV), **Ajuda** e **Registro**.
 - **Estilo de visualização** (Ajustes > **Estilo de visualização**): por tipo de conteúdo. **Ao vivo**: *TV* (canal em ecrã inteiro), *Clássico* (grelha de canais por categoria, predefinido) ou *Cinema* (faixa e filas de canais); **Filmes** e **Séries**: *Clássico* (grelha) ou *Cinema* (predefinido; faixa do item selecionado e filas Continuar a ver, Favoritos, Recentes e categorias; **◀ ▶** numa fila, **▲ ▼** entre filas, **OK** abre a ficha ou inicia o canal).
+
+
+**Gravação, legendas, MultiVista e visto / não visto no Android TV**
+
+- **OK durante a reprodução** (filme, episódio, gravação, canal) abre a barra de opções na parte inferior: pausa, −10 s / +30 s, áudio, legendas, ajustes das legendas (tamanho, cor, posição, atraso), velocidade, formato da imagem, próximo episódio, gravar, MultiVista. ▲ ▼ ou Voltar a fecham.
+- **Legendas**: a «Renderização de vídeo direta» (fluida em 4K) não as mostra; ao escolher «Legendas» é proposto mudar para a renderização clássica (o Kastideo fecha: abra-o de novo).
+- **Gravar**: Menu > Gravar este canal, ou Guia de TV > Programar a gravação (o Kastideo deve estar aberto e a TV ligada). Ajustes > Gravações: suporte de armazenamento (memória interna, pen USB ou cartão SD detetado: o Kastideo cria lá a sua pasta), duração predefinida, formato, eliminação automática das antigas (por idade ou espaço máximo). Início > Gravações: reproduzir, eliminar, cancelar uma programação.
+- **MultiVista**: Início > MultiVista, ou Menu > MultiVista durante um direto. Aparece se as suas fontes permitirem pelo menos duas conexões no total (Ajustes > Fontes > a fonte > Conexões simultâneas). OK num bloco: ouvir, mudar de canal, ampliar, tela cheia, remover.
+- **Visto / não visto**: tecla Menu num episódio da lista, ou botão «Marcar como visto» na ficha de um filme ou série.
+- **Qualidade máxima** (Ajustes > Reprodução): para os canais oferecidos em várias versões (SD, HD, Full HD, 4K), escolhe a versão mais alta que não ultrapasse o limite. «Sem limite» mantém o comportamento habitual (Full HD).
 
 ### Diferenças em relação ao computador
 

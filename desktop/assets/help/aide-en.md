@@ -1340,7 +1340,7 @@ On Android TV, Kastideo shows screens designed for the remote: the selected item
 
 On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its content unfolds in the right 3/5; one more level slides left and partly covers the parent menu (◀ to go back). The **Start page** setting chooses the category shown when entering Live, Movies or Series. Home shows the logo next to the name and as a watermark.
 - **Arrows** move the selection; **OK** confirms; **Back** goes back (player → episodes → details → list → home).
-- **Home**: tiles Live, Movies, Series (and My videos), then **Continue watching** (posters of started movies and episodes, **OK** opens the page), then the buttons Search, Favorites, Recents, TV Guide, Help, Settings and Log.
+- **Home**: tiles Live, Movies, Series (and My videos), then **Continue watching** (posters of started movies and episodes, **OK** opens the page), then the buttons Search, Favorites, Recents, TV Guide, Recordings, MultiView (if your sources allow two connections), Help and Settings.
 - **Search, Favorites, Recents, Help**: in Search, **OK** on the field opens the TV keyboard; confirm, then **▼** to browse results (channels, movies, series, my videos). Favorites and Recents: poster grid, **OK** opens the item. Help: this help, readable with the remote (**▲ ▼** scroll).
 - **Movies and series**: categories on top (**←/→**), posters below. **OK** opens the details; for a series, **Episodes** shows the seasons (**←/→**) and episodes (**↑/↓**).
 - **Live**: **↑ / ↓** or **Channel +/−** change channel, **digits** enter a number, **←** opens the channel list, **→** shows the info banner. In the list, **↑ / ↓** browse the channels **without changing channel** and **OK** plays the highlighted one; **←** moves to the **categories** column (**↑ / ↓** change category), **→** or **OK** goes back to the channels; **Menu** adds to favourites.
@@ -1354,6 +1354,16 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 - **Direct video rendering**: on a TV, video is decoded straight to the screen (smooth even in 4K on an older TV). Settings > **Direct video rendering** turns it off (applied at next launch); in this mode subtitles are not displayed.
 - **Settings** (Home button): **Sources** (enable, disable, refresh, move up, move down, remove), **Categories** for Live, Movies and Series (show, hide, move, sort A to Z), **Language**, **Playback** (automatic next episode, direct rendering, replay, software decoding, relay), **TV Guide** (opening position, backup guide, reload), **TMDB key** (typed with the TV keyboard), **Help** and **Log**.
 - **Display style** (Settings > **Display style**): per content type. **Live**: *TV* (full-screen channel), *Classic* (channel grid by category, default) or *Cinema* (banner and channel rows); **Movies** and **Series**: *Classic* (grid) or *Cinema* (default; banner of the selected item, then rows Continue watching, Favorites, Recents and categories; **◀ ▶** inside a row, **▲ ▼** between rows, **OK** opens the page or plays the channel).
+
+
+**Recording, subtitles, MultiView and watched / unwatched on Android TV**
+
+- **OK during playback** (movie, episode, recording, channel) opens the options bar at the bottom of the screen: pause, −10 s / +30 s, audio, subtitles, subtitle settings (size, colour, position, delay), speed, picture format, next episode, record, MultiView. ▲ ▼ or Back closes it.
+- **Subtitles**: “Direct video rendering” (smooth in 4K) cannot show them; choosing “Subtitles” offers to switch to classic rendering (Kastideo closes: reopen it).
+- **Recording**: Menu > Record this channel, or TV Guide > Schedule recording (Kastideo must be open and the TV on). Settings > Recordings: storage device (internal storage, USB key or SD card detected: Kastideo creates its folder there), default duration, format, automatic deletion of old recordings (by age or maximum space). Home > Recordings: play, delete, cancel a scheduled recording.
+- **MultiView**: Home > MultiView, or Menu > MultiView during live TV. It appears if your sources allow at least two connections in total (Settings > Sources > the source > Simultaneous connections). OK on a tile: listen, change channel, make large, full screen, remove.
+- **Watched / unwatched**: Menu key on an episode in the list, or the “Mark as watched” button on a movie or series page.
+- **Maximum quality** (Settings > Playback): for channels offered in several versions (SD, HD, Full HD, 4K), picks the highest version not above the limit. “No limit” keeps the usual behaviour (Full HD).
 
 ### Differences from the computer
 
