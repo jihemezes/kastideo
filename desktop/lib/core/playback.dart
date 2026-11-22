@@ -12,6 +12,7 @@ import 'log.dart';
 import 'media_servers.dart' show PlaybackEvent;
 import 'models.dart';
 import 'relay.dart';
+import 'smb.dart';
 import 'settings.dart';
 import 'xtream.dart';
 
@@ -803,7 +804,7 @@ class PlaybackController extends ChangeNotifier {
     _freeze.reset();
     _decoderErrorsSeen = _decoderErrors;
     await _applyDecoder();
-    final source = StreamRelay.shared.playbackUrl(url, live: (isLive || (current?.isReplay ?? false)) && (settings?.relayEnabled ?? true));
+    final source = url.startsWith('smb://') ? await SmbProxy.shared.urlFor(url) : StreamRelay.shared.playbackUrl(url, live: (isLive || (current?.isReplay ?? false)) && (settings?.relayEnabled ?? true));
     PlaybackLog.shared.note('Ouverture de $url${source == url ? '' : ' (via le relais)'}');
     _watchdog = Timer(startTimeout, () {
       if (_currentUrl == url && !didStart && errorMessage == null) {

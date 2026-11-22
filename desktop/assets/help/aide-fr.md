@@ -130,7 +130,7 @@ Avec une **clé TMDB** (Réglages > Général), les films et séries reçoivent 
 <!--/mac-->
 
 <!--pc-->
-Réglages > Sources > **Ajouter une source** > **Dossiers**, puis **Ajouter un dossier…** (disque interne, disque ou clé USB) ou saisissez un **chemin réseau** et cliquez sur **+** : `\\NAS\Vidéos` ou un lecteur réseau (`Z:\`) sous Windows, un partage monté (`/mnt/nas/videos`, `/media/…`) sous Linux. Plusieurs dossiers peuvent former une même source.
+Réglages > Sources > **Ajouter une source** > **Dossiers**, puis **Ajouter un dossier…** (disque interne, disque ou clé USB) ou saisissez un **chemin réseau** et cliquez sur **+** : `\\NAS\Vidéos` ou un lecteur réseau (`Z:\`) sous Windows, un partage monté (`/mnt/nas/videos`, `/media/…`) sous Linux. Plusieurs dossiers peuvent former une même source. Sur **Android TV** (et Android), un chemin **SMB** est aussi accepté : `smb://NAS/Vidéos` (ou `\\NAS\Vidéos`) ; renseignez l'identifiant et le mot de passe du partage, ou laissez vide pour un accès invité. SMB 2.1 ou plus ancien uniquement.
 
 - **Films** reconnus par leur nom : « Inception (2010).mkv », « The.Matrix.1999.1080p.BluRay.mkv », dossier « Le Fabuleux Destin (2001) ». Rubrique « Films · nom du dossier ».
 - **Séries** : « Breaking.Bad.S01E02.mkv », « Friends 1x05.mp4 », dossiers « Série/Saison 1/… ». Les épisodes sont regroupés par série et par saison dans **Séries**.
@@ -1335,6 +1335,8 @@ Kastideo apparaît ensuite dans la liste des applications de la TV, avec sa bann
 - **Retour** (geste ou bouton d'Android) : referme le lecteur, puis revient à l'accueil.
 - Tournez l'appareil en **paysage** : la chaîne en cours passe en plein écran.
 
+
+Sur Android TV, les **Réglages** s'ouvrent en panneaux : le menu occupe les 2/5 de gauche et son contenu se déploie dans les 3/5 de droite ; un niveau de plus glisse vers la gauche en recouvrant en partie le menu parent (◀ pour revenir). Le réglage **Page de départ** choisit la catégorie affichée en entrant dans Direct, Films ou Séries. L'accueil affiche le logo à côté du nom et en filigrane.
 ### Utilisation à la télécommande (Android TV)
 
 Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'élément sélectionné est **entouré d'orange, agrandi et lumineux**, comme sur Apple TV.

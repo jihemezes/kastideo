@@ -141,7 +141,7 @@ class TvSetupServer {
               kind: kind, name: name, address: address, username: (f['mu'] ?? '').trim(), password: f['mp'] ?? '', token: (f['mt'] ?? '').trim().isEmpty ? null : f['mt']!.trim());
         case 'folder':
           final paths = (f['fp'] ?? '').split(RegExp(r'[\r\n]+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-          source = await library.addFolders(name: name, paths: paths);
+          source = await library.addFolders(name: name, paths: paths, username: (f['fu'] ?? '').trim(), password: f['fq'] ?? '');
         default:
           return 'Type inconnu.';
       }
@@ -177,7 +177,7 @@ button{margin-top:22px;width:100%;padding:14px;font-size:17px;border:0;border-ra
 <option value="jellyfin">Mes vidéos : serveur Jellyfin</option>
 <option value="emby">Mes vidéos : serveur Emby</option>
 <option value="plex">Mes vidéos : serveur Plex</option>
-<option value="folder">Mes vidéos : dossiers / partage vus par la télévision</option></select>
+<option value="folder">Mes vidéos : partage réseau SMB ou dossiers</option></select>
 <label>Nom</label><input name="name">
 <div id="xt"><label>Serveur (http://exemple.com:8080)</label><input name="xs" autocapitalize="off">
 <label>Identifiant</label><input name="xu" autocapitalize="off"><label>Mot de passe</label><input name="xp" type="password"></div>
@@ -185,8 +185,10 @@ button{margin-top:22px;width:100%;padding:14px;font-size:17px;border:0;border-ra
 <div id="ms" class="x"><label>Adresse du serveur (http://192.168.1.20:8096)</label><input name="ms" autocapitalize="off">
 <div id="mc"><label>Identifiant</label><input name="mu" autocapitalize="off"><label>Mot de passe (ou clé d'API)</label><input name="mp" type="password"></div>
 <div id="mt" class="x"><label>Jeton Plex</label><input name="mt" autocapitalize="off"><small>Vide : serveur Plex ouvert au réseau local.</small></div></div>
-<div id="fo" class="x"><label>Dossiers (un par ligne)</label><textarea name="fp" rows="4" autocapitalize="off" placeholder="/storage/emulated/0/Movies"></textarea>
-<small>Chemins lisibles par la télévision : disque USB (/storage/…) ou partage réseau déjà monté sur l'appareil.</small></div>
+<div id="fo" class="x"><label>Dossiers ou partages (un par ligne)</label><textarea name="fp" rows="4" autocapitalize="off" placeholder="smb://NAS/Videos/Films&#10;/storage/emulated/0/Movies"></textarea>
+<small>Partage réseau SMB : smb://serveur/partage/dossier. Disque USB : /storage/…</small>
+<label>Identifiant du partage SMB (vide : invité)</label><input name="fu" autocapitalize="off">
+<label>Mot de passe du partage SMB</label><input name="fq" type="password"></div>
 <button>Envoyer à la télévision</button></form>
 <form method="post" action="/tmdb">
 <h2>Clé TMDB (affiches et résumés)</h2>

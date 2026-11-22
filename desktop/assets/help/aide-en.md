@@ -130,7 +130,7 @@ With a **TMDB key** (Settings > General), movies and series automatically get a 
 <!--/mac-->
 
 <!--pc-->
-Settings > Sources > **Add a source** > **Folders**, then **Add a folder…** (internal disk, USB disk or stick) or type a **network path** and click **+**: `\\NAS\Videos` or a network drive (`Z:\`) on Windows, a mounted share (`/mnt/nas/videos`, `/media/…`) on Linux. Several folders can make up one source.
+Settings > Sources > **Add a source** > **Folders**, then **Add a folder…** (internal disk, USB disk or stick) or type a **network path** and click **+**: `\\NAS\Videos` or a network drive (`Z:\`) on Windows, a mounted share (`/mnt/nas/videos`, `/media/…`) on Linux. Several folders can make up one source. On **Android TV** (and Android), an **SMB** path is also accepted: `smb://NAS/Videos` (or `\\NAS\Videos`); enter the share's user and password, or leave them empty for guest access. SMB 2.1 or older only.
 
 - **Movies** recognized from their names: “Inception (2010).mkv”, “The.Matrix.1999.1080p.BluRay.mkv”, folder “Amélie (2001)”. Category “Movies · folder name”.
 - **Series**: “Breaking.Bad.S01E02.mkv”, “Friends 1x05.mp4”, folders “Show/Season 1/…”. Episodes are grouped by series and season in **Series**.
@@ -1337,6 +1337,8 @@ Kastideo then appears in the TV's app list with its banner.
 ### Using the remote (Android TV)
 
 On Android TV, Kastideo shows screens designed for the remote: the selected item is **outlined in orange, enlarged and glowing**, as on Apple TV.
+
+On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its content unfolds in the right 3/5; one more level slides left and partly covers the parent menu (◀ to go back). The **Start page** setting chooses the category shown when entering Live, Movies or Series. Home shows the logo next to the name and as a watermark.
 - **Arrows** move the selection; **OK** confirms; **Back** goes back (player → episodes → details → list → home).
 - **Home**: tiles Live, Movies, Series (and My videos), then **Continue watching** (posters of started movies and episodes, **OK** opens the page), then the buttons Search, Favorites, Recents, TV Guide, Help, Settings and Log.
 - **Search, Favorites, Recents, Help**: in Search, **OK** on the field opens the TV keyboard; confirm, then **▼** to browse results (channels, movies, series, my videos). Favorites and Recents: poster grid, **OK** opens the item. Help: this help, readable with the remote (**▲ ▼** scroll).

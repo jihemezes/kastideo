@@ -130,7 +130,7 @@ Com uma **chave TMDB** (Ajustes > Geral), filmes e séries recebem automaticamen
 <!--/mac-->
 
 <!--pc-->
-Ajustes > Fontes > **Adicionar uma fonte** > **Pastas**, depois **Adicionar uma pasta…** (disco interno, disco ou pen drive USB) ou digite um **caminho de rede** e clique em **+**: `\\NAS\Videos` ou uma unidade de rede (`Z:\`) no Windows, um compartilhamento montado (`/mnt/nas/videos`, `/media/…`) no Linux. Várias pastas podem formar uma única fonte.
+Ajustes > Fontes > **Adicionar uma fonte** > **Pastas**, depois **Adicionar uma pasta…** (disco interno, disco ou pen drive USB) ou digite um **caminho de rede** e clique em **+**: `\\NAS\Videos` ou uma unidade de rede (`Z:\`) no Windows, um compartilhamento montado (`/mnt/nas/videos`, `/media/…`) no Linux. Várias pastas podem formar uma única fonte. No **Android TV** (e Android) também é aceito um caminho **SMB**: `smb://NAS/Vídeos` (ou `\\NAS\Vídeos`); informe usuário e senha do compartilhamento, ou deixe vazio para acesso de convidado. Apenas SMB 2.1 ou anterior.
 
 - **Filmes** reconhecidos pelo nome: «Inception (2010).mkv», «The.Matrix.1999.1080p.BluRay.mkv», pasta «Amélie (2001)». Categoria «Filmes · nome da pasta».
 - **Séries**: «Breaking.Bad.S01E02.mkv», «Friends 1x05.mp4», pastas «Série/Season 1/…». Os episódios são agrupados por série e temporada em **Séries**.
@@ -1337,6 +1337,8 @@ O Kastideo então aparece na lista de aplicativos da TV com o seu banner.
 ### Uso do controle remoto (Android TV)
 
 No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item selecionado fica **com contorno laranja, ampliado e luminoso**, como na Apple TV.
+
+No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda e o conteúdo se desenvolve nos 3/5 da direita; um nível a mais desliza para a esquerda cobrindo em parte o menu pai (◀ para voltar). O ajuste **Página inicial** escolhe a categoria mostrada ao entrar em Direto, Filmes ou Séries. O Início mostra o logo ao lado do nome e como marca-d'água.
 - **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).
 - **Início**: blocos Ao vivo, Filmes, Séries (e Meus vídeos), depois **Continuar a ver** (capas de filmes e episódios iniciados, **OK** abre a ficha), depois os botões Pesquisa, Favoritos, Recentes, Guia de TV, Ajuda, Ajustes e Registro.
 - **Pesquisa, Favoritos, Recentes, Ajuda**: em Pesquisa, **OK** no campo abre o teclado da TV; confirme e use **▼** para percorrer os resultados (canais, filmes, séries, meus vídeos). Favoritos e Recentes: grelha de capas, **OK** abre o item. Ajuda: esta ajuda, legível com o comando (**▲ ▼** deslocam).

@@ -66,6 +66,20 @@ class TvRailsState extends State<TvRails> {
       final items = library.itemsInCategory(kind, name).take(40).toList();
       if (items.isNotEmpty) rails.add(_Rail(library.prefs(kind).displayName(name), items));
     }
+    // Page de départ choisie dans les Réglages : sa rangée passe en premier.
+    final settings = context.settings;
+    var mode = settings.startPage(kind);
+    if (mode == 'last') mode = settings.startLast(kind);
+    final first = switch (mode) {
+      'favorites' => tr('Favoris'),
+      'recents' => tr('Récents'),
+      _ when mode.startsWith('cat:') => library.prefs(kind).displayName(mode.substring(4)),
+      _ => null,
+    };
+    if (first != null) {
+      final i = rails.indexWhere((r) => r.title == first);
+      if (i > 0) rails.insert(0, rails.removeAt(i));
+    }
     return rails;
   }
 

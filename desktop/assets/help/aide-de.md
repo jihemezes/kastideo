@@ -130,7 +130,7 @@ Mit einem **TMDB-Schlüssel** (Einstellungen > Allgemein) erhalten Filme und Ser
 <!--/mac-->
 
 <!--pc-->
-Einstellungen > Quellen > **Quelle hinzufügen** > **Ordner**, dann **Ordner hinzufügen …** (interne Festplatte, USB-Festplatte oder -Stick) oder geben Sie einen **Netzwerkpfad** ein und klicken Sie auf **+**: `\\NAS\Videos` oder ein Netzlaufwerk (`Z:\`) unter Windows, eine eingehängte Freigabe (`/mnt/nas/videos`, `/media/…`) unter Linux. Mehrere Ordner können eine Quelle bilden.
+Einstellungen > Quellen > **Quelle hinzufügen** > **Ordner**, dann **Ordner hinzufügen …** (interne Festplatte, USB-Festplatte oder -Stick) oder geben Sie einen **Netzwerkpfad** ein und klicken Sie auf **+**: `\\NAS\Videos` oder ein Netzlaufwerk (`Z:\`) unter Windows, eine eingehängte Freigabe (`/mnt/nas/videos`, `/media/…`) unter Linux. Mehrere Ordner können eine Quelle bilden. Auf **Android TV** (und Android) wird auch ein **SMB**-Pfad akzeptiert: `smb://NAS/Videos` (oder `\\NAS\Videos`); geben Sie Benutzer und Passwort der Freigabe an oder lassen Sie sie für Gastzugang leer. Nur SMB 2.1 oder älter.
 
 - **Filme**, erkannt an ihren Namen: „Inception (2010).mkv“, „The.Matrix.1999.1080p.BluRay.mkv“, Ordner „Amélie (2001)“. Kategorie „Filme · Ordnername“.
 - **Serien**: „Breaking.Bad.S01E02.mkv“, „Friends 1x05.mp4“, Ordner „Serie/Season 1/…“. Die Folgen werden unter **Serien** nach Serie und Staffel gruppiert.
@@ -1337,6 +1337,8 @@ Kastideo erscheint dann mit seinem Banner in der App-Liste des Fernsehers.
 ### Bedienung per Fernbedienung (Android TV)
 
 Auf Android TV zeigt Kastideo Bildschirme für die Fernbedienung: Das gewählte Element ist **orange umrandet, vergrößert und leuchtend**, wie bei Apple TV.
+
+Auf Android TV öffnen sich die **Einstellungen** in Panels: Das Menü belegt die linken 2/5, sein Inhalt entfaltet sich in den rechten 3/5; eine weitere Ebene gleitet nach links und überdeckt das übergeordnete Menü teilweise (◀ zurück). Die Einstellung **Startseite** wählt die Kategorie beim Öffnen von Live, Filme oder Serien. Der Start zeigt das Logo neben dem Namen und als Wasserzeichen.
 - **Pfeiltasten** bewegen die Auswahl; **OK** bestätigt; **Zurück** geht eine Stufe zurück (Player → Folgen → Details → Liste → Start).
 - **Startseite**: Kacheln Live, Filme, Serien (und Meine Videos), dann **Weiterschauen** (Poster begonnener Filme und Folgen, **OK** öffnet die Seite), dann die Schaltflächen Suche, Favoriten, Zuletzt, TV-Guide, Hilfe, Einstellungen und Protokoll.
 - **Suche, Favoriten, Zuletzt, Hilfe**: In der Suche öffnet **OK** auf dem Feld die Tastatur des Fernsehers; bestätigen, dann **▼**, um die Ergebnisse (Sender, Filme, Serien, meine Videos) zu durchsuchen. Favoriten und Zuletzt: Postergitter, **OK** öffnet das Element. Hilfe: diese Hilfe, mit der Fernbedienung lesbar (**▲ ▼** scrollen).

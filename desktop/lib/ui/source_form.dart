@@ -9,6 +9,7 @@ import '../core/discovery.dart';
 import '../core/library.dart';
 import '../core/media_servers.dart';
 import '../core/models.dart';
+import '../core/smb.dart';
 import '../core/gallery.dart';
 import '../l10n.dart';
 import '../theme.dart';
@@ -89,6 +90,8 @@ class _SourceFormState extends State<SourceForm> {
         _address.text = s.address;
       case SourceKind.folder:
         _folders.addAll(LibraryStore.folderPaths(s));
+        _user.text = s.username ?? '';
+        _pass.text = await library.password(s.id) ?? '';
       case SourceKind.gallery:
         _galleryIds.addAll(LibraryStore.galleryIds(s));
         _galleryAll = _galleryIds.isEmpty;
@@ -145,8 +148,8 @@ class _SourceFormState extends State<SourceForm> {
             SourceKind.gallery => _galleryAll ? '' : _galleryIds.join('\n'),
             _ => _address.text,
           },
-          username: editing.kind == SourceKind.xtream || editing.kind == SourceKind.jellyfin || editing.kind == SourceKind.emby ? _user.text : null,
-          password: editing.kind == SourceKind.xtream || editing.kind == SourceKind.jellyfin || editing.kind == SourceKind.emby ? _pass.text : null,
+          username: editing.kind == SourceKind.xtream || editing.kind == SourceKind.jellyfin || editing.kind == SourceKind.emby || editing.kind == SourceKind.folder ? _user.text : null,
+          password: editing.kind == SourceKind.xtream || editing.kind == SourceKind.jellyfin || editing.kind == SourceKind.emby || editing.kind == SourceKind.folder ? _pass.text : null,
           token: editing.kind == SourceKind.plex && _token.text.trim().isNotEmpty ? _token.text : null,
           epgUrl: _epg.text,
         );
@@ -157,7 +160,7 @@ class _SourceFormState extends State<SourceForm> {
           case SourceKind.m3uUrl || SourceKind.m3uFile:
             await library.addM3U(name: _name.text, address: _address.text, epgUrl: _epg.text);
           case SourceKind.folder:
-            await library.addFolders(name: _name.text, paths: _folders);
+            await library.addFolders(name: _name.text, paths: _folders, username: _user.text, password: _pass.text);
           case SourceKind.gallery:
             if (!_galleryAll && _galleryIds.isEmpty) throw MediaServerException(tr('Choisissez au moins un album.'));
             await library.addGallery(name: _name.text, albumIds: _galleryAll ? const [] : _galleryIds.toList());
@@ -558,7 +561,8 @@ class _SourceFormState extends State<SourceForm> {
         Expanded(
           child: TextField(
             controller: _networkPath,
-            decoration: _field(tr('ou chemin réseau'), hint: r'\\NAS\Vidéos  —  /mnt/nas/videos'),
+            decoration: _field(tr('ou chemin réseau'), hint: r'smb://NAS/Vidéos  —  \\NAS\Vidéos  —  /mnt/nas/videos'),
+            onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _addNetworkPath(),
           ),
         ),
@@ -566,6 +570,14 @@ class _SourceFormState extends State<SourceForm> {
         IconButton(tooltip: tr('Ajouter'), onPressed: _addNetworkPath, icon: const Icon(Icons.add_rounded)),
       ],
     ),
+    if (_folders.any(SmbLocation.isSmb) || _networkPath.text.trim().toLowerCase().startsWith('smb://')) ...[
+      const SizedBox(height: 8),
+      Text(tr('Identifiants du partage réseau (SMB)'), style: kText(13, weight: FontWeight.w600)),
+      const SizedBox(height: 6),
+      TextField(controller: _user, decoration: _field(tr('Identifiant'), hint: tr('vide : accès invité')), autocorrect: false),
+      const SizedBox(height: 6),
+      TextField(controller: _pass, obscureText: true, decoration: _field(tr('Mot de passe'))),
+    ],
     const SizedBox(height: 8),
     Text(
       tr(

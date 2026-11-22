@@ -15,6 +15,7 @@ import 'local_media.dart';
 import 'log.dart';
 import 'm3u.dart';
 import 'media_servers.dart';
+import 'smb.dart';
 import 'countries.dart';
 import 'models.dart';
 import 'secrets.dart';
@@ -149,6 +150,9 @@ class LibraryStore extends ChangeNotifier {
       for (final e in (jsonDecode(raw) as List)) {
         sources.add(Source.fromJson(Map<String, dynamic>.from(e as Map)));
       }
+    }
+    for (final s in sources) {
+      registerSmb(s);
     }
     showAdult = _prefs.getBool('adult.show') ?? false;
     _loadCountries();
@@ -765,6 +769,7 @@ class LibraryStore extends ChangeNotifier {
     }
     await _saveSources();
     _rebuild();
+    await registerSmb(source);
     if (accessChanged) await refresh(source);
     if (guideChanged && !accessChanged) onSourceRefreshed?.call(source);
   }
@@ -832,12 +837,30 @@ class LibraryStore extends ChangeNotifier {
           content = await Isolate.run(() => M3UParser.parse(File(path).readAsStringSync(), id));
         case SourceKind.folder:
           final roots = folderPaths(source);
-          final missing = roots.where((r) => !Directory(r).existsSync()).toList();
-          if (missing.length == roots.length) {
+          final smbRoots = [for (final r in roots) if (SmbLocation.isSmb(r)) r];
+          final localRoots = [for (final r in roots) if (!SmbLocation.isSmb(r)) r];
+          final missing = localRoots.where((r) => !Directory(r).existsSync()).toList();
+          if (smbRoots.isEmpty && missing.length == localRoots.length) {
             throw MediaServerException('Dossier introuvable (${missing.join(', ')}) : disque débranché ou partage réseau non connecté ?');
           }
           final (movies, series, videos) = (tr('Films'), tr('Séries'), tr('Vidéos'));
-          content = await Isolate.run(() => scanFolders(roots, id, moviesLabel: movies, seriesLabel: series, videosLabel: videos));
+          final found = [...await Isolate.run(() => collectFolderFiles(localRoots))];
+          if (smbRoots.isNotEmpty) await registerSmb(source);
+          String? smbError;
+          for (final root in smbRoots) {
+            try {
+              final files = await SmbHub.shared.listVideos(root, (name) {
+                final ext = name.contains('.') ? name.split('.').last.toLowerCase() : '';
+                return LocalNameParser.videoExtensions.contains(ext);
+              });
+              found.add(FolderFiles(root, files));
+            } catch (e) {
+              smbError = '$e';
+              PlaybackLog.shared.error('SMB $root : $e');
+            }
+          }
+          if (found.isEmpty && smbError != null) throw MediaServerException(smbError.replaceFirst('Exception: ', ''));
+          content = await Isolate.run(() => assembleFolders(found, id, moviesLabel: movies, seriesLabel: series, videosLabel: videos));
           content = _keepKnown(id, content);
         case SourceKind.gallery:
           final status = await Gallery.status();
@@ -914,6 +937,16 @@ class LibraryStore extends ChangeNotifier {
   // MARK: Dossiers locaux et serveurs multimédias
 
   /// Dossiers d'une source « Dossiers » (un par ligne).
+  /// Donne au relais SMB les identifiants des partages réseau d'une source « Dossiers ».
+  Future<void> registerSmb(Source source) async {
+    if (source.kind != SourceKind.folder) return;
+    final password = await this.password(source.id) ?? '';
+    for (final root in folderPaths(source)) {
+      final location = SmbLocation.parse(root);
+      if (location != null) SmbHub.shared.register(location.host, SmbCredentials(source.username ?? '', password));
+    }
+  }
+
   static List<String> folderPaths(Source source) =>
       source.address.split('\n').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
 
@@ -947,7 +980,7 @@ class LibraryStore extends ChangeNotifier {
     ]);
   }
 
-  Future<Source> addFolders({required String name, required List<String> paths}) async {
+  Future<Source> addFolders({required String name, required List<String> paths, String username = '', String password = ''}) async {
     final clean = paths.map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     if (clean.isEmpty) throw MediaServerException('Choisissez au moins un dossier.');
     final source = Source(
@@ -955,7 +988,9 @@ class LibraryStore extends ChangeNotifier {
       name: name.trim().isEmpty ? clean.first.split(RegExp(r'[\\/]')).where((p) => p.isNotEmpty).last : name.trim(),
       kind: SourceKind.folder,
       address: clean.join('\n'),
+      username: username.trim().isEmpty ? null : username.trim(),
     );
+    if (password.isNotEmpty) await _secrets.write('password.${source.id}', password);
     sources.add(source);
     await _saveSources();
     notifyListeners();

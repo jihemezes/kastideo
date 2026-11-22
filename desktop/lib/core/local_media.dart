@@ -126,22 +126,51 @@ class LocalNameParser {
 
 /// Examine les dossiers d'une source (disque, clé USB, NAS monté) : films, séries (épisodes regroupés) et vidéos.
 /// À lancer dans un isolat (catalogues de plusieurs milliers de fichiers).
-SourceContent scanFolders(List<String> roots, String sourceId, {String videosLabel = 'Vidéos', String moviesLabel = 'Films', String seriesLabel = 'Séries'}) {
+SourceContent scanFolders(List<String> roots, String sourceId, {String videosLabel = 'Vidéos', String moviesLabel = 'Films', String seriesLabel = 'Séries'}) =>
+    assembleFolders(collectFolderFiles(roots), sourceId, videosLabel: videosLabel, moviesLabel: moviesLabel, seriesLabel: seriesLabel);
+
+/// Vidéos trouvées sous un dossier (disque, ou partage réseau SMB : chemins « smb://… »), avec leur date.
+class FolderFiles {
+  const FolderFiles(this.root, this.files);
+  final String root;
+  final List<(String path, DateTime? modified)> files;
+}
+
+/// Parcourt les dossiers locaux (à lancer dans un isolat).
+List<FolderFiles> collectFolderFiles(List<String> roots) {
+  bool isVideo(String path) {
+    final name = path.split(RegExp(r'[\\/]')).last;
+    final ext = name.contains('.') ? name.split('.').last.toLowerCase() : '';
+    return LocalNameParser.videoExtensions.contains(ext);
+  }
+
+  return [
+    for (final root in roots)
+      if (Directory(root).existsSync())
+        FolderFiles(root, [
+          for (final path in videoFiles(Directory(root)).where(isVideo))
+            (path, () {
+              try {
+                return File(path).statSync().modified;
+              } catch (_) {
+                return null;
+              }
+            }()),
+        ]),
+  ];
+}
+
+/// Classe les vidéos trouvées : films, séries (épisodes regroupés) et vidéos personnelles.
+SourceContent assembleFolders(List<FolderFiles> found, String sourceId, {String videosLabel = 'Vidéos', String moviesLabel = 'Films', String seriesLabel = 'Séries'}) {
   final items = <MediaItem>[];
   final seriesIds = <String, String>{};
   final seriesNames = <String, String>{};
   final seriesRoots = <String, String>{};
-  for (final root in roots) {
-    final dir = Directory(root);
-    if (!dir.existsSync()) continue;
+  for (final folder in found) {
+    final root = folder.root;
     final rootName = root.split(RegExp(r'[\\/]')).where((p) => p.isNotEmpty).lastOrNull ?? root;
-    bool isVideo(String path) {
-      final name = path.split(RegExp(r'[\\/]')).last;
-      final ext = name.contains('.') ? name.split('.').last.toLowerCase() : '';
-      return LocalNameParser.videoExtensions.contains(ext);
-    }
-
-    final videos = videoFiles(dir).where(isVideo).toList();
+    final modifiedOf = {for (final f in folder.files) f.$1: f.$2};
+    final videos = [for (final f in folder.files) f.$1];
     final perFolder = <String, int>{};
     String parentOf(String path) => path.substring(0, path.lastIndexOf(RegExp(r'[\\/]')).clamp(0, path.length));
     for (final path in videos) {
@@ -150,10 +179,7 @@ SourceContent scanFolders(List<String> roots, String sourceId, {String videosLab
     for (final path in videos) {
       final relative = path.substring(root.length).replaceFirst(RegExp(r'^[\\/]+'), '');
       if (RegExp(r'(^|[\\/])(sample|trailers?|extras?|featurettes?)([\\/]|$)', caseSensitive: false).hasMatch(relative)) continue;
-      DateTime? modified;
-      try {
-        modified = File(path).statSync().modified;
-      } catch (_) {}
+      final DateTime? modified = modifiedOf[path];
       final entry = LocalNameParser.parse(relative, aloneInFolder: perFolder[parentOf(path)] == 1);
       final key = stableHash(path);
       switch (entry.kind) {

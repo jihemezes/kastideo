@@ -166,6 +166,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     super.initState();
     startTvKeys();
     TvCatalog.onBack = _back;
+    if (!widget.library) _chip = _startChip();
     if (widget.kind == MediaKind.live && !widget.library && context.playback.current?.kind == MediaKind.live) {
       _mode = _Mode.player; // une chaîne est déjà lancée (depuis l'accueil, le guide…)
     }
@@ -185,6 +186,37 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     _scroll.dispose();
     _chipScroll.dispose();
     super.dispose();
+  }
+
+  /// Puce de départ d'après Réglages > Page de départ (Toutes, Favoris, Récents, Dernière consultée ou une catégorie).
+  int _startChip() {
+    final settings = context.settings;
+    final kind = widget.kind;
+    var mode = settings.startPage(kind);
+    if (mode == 'last') mode = settings.startLast(kind);
+    switch (mode) {
+      case 'favorites':
+        return 1;
+      case 'recents':
+        return 2;
+    }
+    if (mode.startsWith('cat:')) {
+      final i = context.library.categories(kind).indexOf(mode.substring(4));
+      if (i >= 0) return 3 + i;
+    }
+    return 0;
+  }
+
+  /// Mémorise la page consultée (option « Dernière consultée »).
+  void _rememberChip() {
+    if (widget.library) return;
+    final value = switch (_chip) {
+      0 => 'all',
+      1 => 'favorites',
+      2 => 'recents',
+      _ => 'cat:${context.library.categories(widget.kind)[(_chip - 3).clamp(0, context.library.categories(widget.kind).length - 1)]}',
+    };
+    context.settings.rememberStart(widget.kind, value);
   }
 
   bool _back() {
@@ -274,6 +306,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
       }
       _scroll.hasClients ? _scroll.jumpTo(0) : null;
       _ensureChipVisible();
+      if (key == TvKey.left || key == TvKey.right) _rememberChip();
       return;
     }
     switch (key) {

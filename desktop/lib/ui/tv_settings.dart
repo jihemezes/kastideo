@@ -8,13 +8,15 @@ import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
 import 'tv_home.dart';
+import 'tv_panels.dart';
 import 'tv_shell.dart';
 
 /// Réglages de l'Android TV, à la télécommande : sources, catégories, langue, lecture, guide, TMDB, aide.
 void openTvSettings(BuildContext context) {
   _push(
     context,
-    TvMenuPage(
+    TvPanelHost(
+      root: TvPanelSpec(
       title: tr('Réglages'),
       footer: 'Kastideo $kVersion',
       entries: (context) {
@@ -24,6 +26,7 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Sources'), (c) => _openSources(c), detail: '${context.library.sources.length}'),
           TvEntry(tr('Catégories'), (c) => _openCategoryKinds(c)),
           TvEntry(tr('Style d\'affichage'), (c) => _openStyles(c)),
+          TvEntry(tr('Page de départ'), (c) => _openStartPages(c)),
           TvEntry(tr('Langue'), (c) => _openLanguage(c), detail: s.language == 'system' ? tr('Langue du système') : L10n.names[s.language]),
           TvEntry(tr('Lecture'), (c) => _openPlayback(c)),
           TvEntry(tr('Guide TV'), (c) => _openGuide(c)),
@@ -33,11 +36,14 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Journal de lecture'), (c) => openTvLog(c), icon: Icons.receipt_long_rounded),
         ];
       },
+      ),
     ),
   );
 }
 
 void _push(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+
+void _open(BuildContext context, TvPanelSpec spec) => TvPanelHost.open(context, spec);
 
 String _yes(bool v) => v ? tr('Oui') : tr('Non');
 
@@ -52,15 +58,15 @@ void _toast(BuildContext context, String text) {
 
 /// Choix dans une liste ; le choix actuel est marqué ✓ et la page se ferme après la sélection.
 void _choose(BuildContext context, String title, List<(String value, String label)> options, String current, void Function(String) pick) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: title,
       entries: (_) => [
         for (final o in options)
           TvEntry(o.$2, (c) {
             pick(o.$1);
-            Navigator.of(c).pop();
+            TvPanelHost.close(c);
           }, icon: o.$1 == current ? Icons.check_circle_rounded : Icons.circle_outlined),
       ],
     ),
@@ -70,9 +76,9 @@ void _choose(BuildContext context, String title, List<(String value, String labe
 // MARK: Sources
 
 void _openSources(BuildContext context) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: tr('Sources'),
       footer: tr('OK ouvre les actions de la source.'),
       entries: (context) {
@@ -88,9 +94,9 @@ void _openSources(BuildContext context) {
 }
 
 void _openSource(BuildContext context, Source source) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: source.name,
       entries: (context) => [
         TvEntry(source.enabled ? tr('Désactiver') : tr('Activer'), (c) => c.library.setSourceEnabled(source, !source.enabled), detail: _yes(source.enabled)),
@@ -102,7 +108,7 @@ void _openSource(BuildContext context, Source source) {
         TvEntry(tr('Descendre'), (c) => c.library.moveSource(source, 1), icon: Icons.arrow_downward_rounded),
         TvEntry(tr('Retirer'), (c) async {
           await c.library.removeSource(source);
-          if (c.mounted) Navigator.of(c).pop();
+          if (c.mounted) TvPanelHost.close(c);
         }, icon: Icons.delete_outline_rounded),
       ],
     ),
@@ -112,9 +118,9 @@ void _openSource(BuildContext context, Source source) {
 // MARK: Catégories
 
 void _openCategoryKinds(BuildContext context) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: tr('Catégories'),
       entries: (context) => [
         for (final (kind, label) in [(MediaKind.live, tr('Direct')), (MediaKind.movie, tr('Films')), (MediaKind.series, tr('Séries'))])
@@ -125,9 +131,9 @@ void _openCategoryKinds(BuildContext context) {
 }
 
 void _openCategories(BuildContext context, MediaKind kind, String label) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: label,
       footer: tr('OK : afficher, masquer, monter ou descendre la catégorie.'),
       entries: (context) {
@@ -170,9 +176,9 @@ void _openCategory(BuildContext context, MediaKind kind, String name) {
     c.library.updateCategories(kind, (p) => p.order = list);
   }
 
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: context.library.prefs(kind).displayName(name),
       entries: (context) {
         final hidden = context.library.prefs(kind).isHidden(name);
@@ -203,9 +209,9 @@ String _styleName(InterfaceStyle s) => switch (s) {
     };
 
 void _openStyles(BuildContext context) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: tr('Style d\'affichage'),
       footer: tr('Classique : grille. Cinéma : bannière et rangées. TV : chaîne en plein écran (Direct).'),
       entries: (context) => [
@@ -218,6 +224,42 @@ void _openStyles(BuildContext context) {
       ],
     ),
   );
+}
+
+// MARK: Page de départ
+
+void _openStartPages(BuildContext context) {
+  _open(
+    context,
+    TvPanelSpec(
+      title: tr('Page de départ'),
+      footer: tr('Ce qui s\'affiche en entrant dans Direct, Films ou Séries.'),
+      entries: (context) => [
+        for (final (kind, label) in [(MediaKind.live, tr('Direct')), (MediaKind.movie, tr('Films')), (MediaKind.series, tr('Séries'))])
+          TvEntry(label, (c) {
+            final library = c.library;
+            _choose(c, label, [
+              ('all', tr('Toutes')),
+              ('favorites', tr('Favoris')),
+              ('recents', tr('Récents')),
+              ('last', tr('Dernière consultée')),
+              for (final name in library.categories(kind)) ('cat:$name', library.categoryName(kind, name)),
+            ], c.settings.startPage(kind), (v) => c.settings.setString('start.${kind.name}', v));
+          }, detail: _startLabel(context, kind)),
+      ],
+    ),
+  );
+}
+
+String _startLabel(BuildContext context, MediaKind kind) {
+  final mode = context.settings.startPage(kind);
+  return switch (mode) {
+    'favorites' => tr('Favoris'),
+    'recents' => tr('Récents'),
+    'last' => tr('Dernière consultée'),
+    _ when mode.startsWith('cat:') => context.library.categoryName(kind, mode.substring(4)),
+    _ => tr('Toutes'),
+  };
 }
 
 // MARK: Langue, lecture, guide
@@ -236,9 +278,9 @@ void _openLanguage(BuildContext context) {
 }
 
 void _openPlayback(BuildContext context) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: tr('Lecture'),
       entries: (context) {
         final s = context.settings;
@@ -258,9 +300,9 @@ void _openPlayback(BuildContext context) {
 }
 
 void _openGuide(BuildContext context) {
-  _push(
+  _open(
     context,
-    TvMenuPage(
+    TvPanelSpec(
       title: tr('Guide TV'),
       entries: (context) {
         final s = context.settings;

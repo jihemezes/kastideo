@@ -130,7 +130,7 @@ Con una **chiave TMDB** (Impostazioni > Generali), film e serie ottengono automa
 <!--/mac-->
 
 <!--pc-->
-Impostazioni > Sorgenti > **Aggiungi una sorgente** > **Cartelle**, poi **Aggiungi una cartella…** (disco interno, disco o chiavetta USB) oppure digita un **percorso di rete** e fai clic su **+**: `\\NAS\Videos` o un'unità di rete (`Z:\`) su Windows, una condivisione montata (`/mnt/nas/videos`, `/media/…`) su Linux. Più cartelle possono formare un'unica sorgente.
+Impostazioni > Sorgenti > **Aggiungi una sorgente** > **Cartelle**, poi **Aggiungi una cartella…** (disco interno, disco o chiavetta USB) oppure digita un **percorso di rete** e fai clic su **+**: `\\NAS\Videos` o un'unità di rete (`Z:\`) su Windows, una condivisione montata (`/mnt/nas/videos`, `/media/…`) su Linux. Più cartelle possono formare un'unica sorgente. Su **Android TV** (e Android) è accettato anche un percorso **SMB**: `smb://NAS/Video` (o `\\NAS\Video`); inserisca utente e password della condivisione, o li lasci vuoti per l'accesso ospite. Solo SMB 2.1 o precedente.
 
 - **Film** riconosciuti dal nome: «Inception (2010).mkv», «The.Matrix.1999.1080p.BluRay.mkv», cartella «Amélie (2001)». Categoria «Film · nome della cartella».
 - **Serie**: «Breaking.Bad.S01E02.mkv», «Friends 1x05.mp4», cartelle «Serie/Season 1/…». Gli episodi sono raggruppati per serie e stagione in **Serie**.
@@ -1337,6 +1337,8 @@ Kastideo compare poi nell'elenco delle app del televisore con il suo banner.
 ### Uso del telecomando (Android TV)
 
 Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento selezionato è **evidenziato in arancione, ingrandito e luminoso**, come su Apple TV.
+
+Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di sinistra e il suo contenuto si sviluppa nei 3/5 di destra; un livello in più scorre a sinistra coprendo in parte il menu genitore (◀ per tornare). L'impostazione **Pagina iniziale** sceglie la categoria mostrata entrando in Diretta, Film o Serie. La Home mostra il logo accanto al nome e come filigrana.
 - **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).
 - **Home**: riquadri Diretta, Film, Serie (e I miei video), poi **Continua a guardare** (locandine di film ed episodi iniziati, **OK** apre la scheda), poi i pulsanti Cerca, Preferiti, Recenti, Guida TV, Aiuto, Impostazioni e Registro.
 - **Cerca, Preferiti, Recenti, Aiuto**: in Cerca, **OK** sul campo apre la tastiera della TV; conferma, poi **▼** per scorrere i risultati (canali, film, serie, i miei video). Preferiti e Recenti: griglia di locandine, **OK** apre l'elemento. Aiuto: questa guida, leggibile col telecomando (**▲ ▼** scorrono).

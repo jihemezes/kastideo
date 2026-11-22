@@ -130,7 +130,7 @@ Con una **clave TMDB** (Ajustes > General), las películas y series obtienen aut
 <!--/mac-->
 
 <!--pc-->
-Ajustes > Fuentes > **Añadir una fuente** > **Carpetas**, y después **Añadir una carpeta…** (disco interno, disco o memoria USB) o escriba una **ruta de red** y haga clic en **+**: `\\NAS\Videos` o una unidad de red (`Z:\`) en Windows, un recurso compartido montado (`/mnt/nas/videos`, `/media/…`) en Linux. Varias carpetas pueden formar una sola fuente.
+Ajustes > Fuentes > **Añadir una fuente** > **Carpetas**, y después **Añadir una carpeta…** (disco interno, disco o memoria USB) o escriba una **ruta de red** y haga clic en **+**: `\\NAS\Videos` o una unidad de red (`Z:\`) en Windows, un recurso compartido montado (`/mnt/nas/videos`, `/media/…`) en Linux. Varias carpetas pueden formar una sola fuente. En **Android TV** (y Android) también se acepta una ruta **SMB**: `smb://NAS/Vídeos` (o `\\NAS\Vídeos`); indique usuario y contraseña del recurso, o déjelos vacíos para acceso de invitado. Solo SMB 2.1 o anterior.
 
 - **Películas** reconocidas por su nombre: «Inception (2010).mkv», «The.Matrix.1999.1080p.BluRay.mkv», carpeta «Amélie (2001)». Categoría «Películas · nombre de la carpeta».
 - **Series**: «Breaking.Bad.S01E02.mkv», «Friends 1x05.mp4», carpetas «Serie/Season 1/…». Los episodios se agrupan por serie y temporada en **Series**.
@@ -1337,6 +1337,8 @@ Kastideo aparece entonces en la lista de aplicaciones del televisor con su banne
 ### Uso del mando a distancia (Android TV)
 
 En Android TV, Kastideo muestra pantallas pensadas para el mando: el elemento seleccionado aparece **con contorno naranja, ampliado y luminoso**, como en Apple TV.
+
+En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la izquierda y su contenido se despliega en los 3/5 de la derecha; un nivel más se desliza a la izquierda cubriendo en parte el menú padre (◀ para volver). El ajuste **Página de inicio** elige la categoría mostrada al entrar en Directo, Películas o Series. El Inicio muestra el logotipo junto al nombre y como marca de agua.
 - **Flechas**: mueven la selección; **OK** confirma; **Atrás** vuelve (reproductor → episodios → ficha → lista → inicio).
 - **Inicio**: mosaicos Directo, Películas, Series (y Mis vídeos), luego **Continuar viendo** (carteles de películas y episodios empezados, **OK** abre la ficha), luego los botones Búsqueda, Favoritos, Recientes, Guía TV, Ayuda, Ajustes y Registro.
 - **Búsqueda, Favoritos, Recientes, Ayuda**: en Búsqueda, **OK** en el campo abre el teclado del televisor; valide y pulse **▼** para recorrer los resultados (canales, películas, series, mis vídeos). Favoritos y Recientes: cuadrícula de carteles, **OK** abre el elemento. Ayuda: esta ayuda, legible con el mando (**▲ ▼** desplazan).

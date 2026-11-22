@@ -26,6 +26,14 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android22] - 2026-11-22
+
+Retours de test sur Android TV :
+- **Dossiers / Mes vidéos** : chemins **SMB** (`smb://NAS/Vidéos`) avec identifiant et mot de passe (accès invité possible), aussi dans la configuration par téléphone. SMB 2.1 ou plus ancien.
+- **Accueil** : logo à gauche du nom et en filigrane en arrière-plan.
+- **Direct / Films / Séries** : la catégorie de départ respecte désormais le réglage « Page de départ » (nouvelle entrée dans les réglages TV).
+- **Réglages** : nouvelle présentation en panneaux (menu sur 2/5 à gauche, contenu sur 3/5 à droite, sous-niveaux glissant vers la gauche et recouvrant en partie le parent).
+
 ## [1.19.5-android21] - 2026-11-22
 
 Retours de test sur Android TV :
