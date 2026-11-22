@@ -1355,6 +1355,8 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 - **Estilo de visualização** (Ajustes > **Estilo de visualização**): por tipo de conteúdo. **Ao vivo**: *TV* (canal em ecrã inteiro), *Clássico* (grelha de canais por categoria, predefinido) ou *Cinema* (faixa e filas de canais); **Filmes** e **Séries**: *Clássico* (grelha) ou *Cinema* (predefinido; faixa do item selecionado e filas Continuar a ver, Favoritos, Recentes e categorias; **◀ ▶** numa fila, **▲ ▼** entre filas, **OK** abre a ficha ou inicia o canal).
 
 
+**Ficha de filme / série no Android TV**: a fila de botões desloca-se com a seleção (▶ chega a todos os botões) e a ficha mostra a imagem de fundo, o slogan, a duração, a nota, o país, o realizador e o elenco. Estes dados vêm do TMDB: sem chave (Ajustes > Chave TMDB) a ficha fica limitada e é indicado.
+
 **Gravação, legendas, MultiVista e visto / não visto no Android TV**
 
 - **OK durante a reprodução** (filme, episódio, gravação, canal) abre a barra de opções na parte inferior: pausa, −10 s / +30 s, áudio, legendas, ajustes das legendas (tamanho, cor, posição, atraso), velocidade, formato da imagem, próximo episódio, gravar, MultiVista. ▲ ▼ ou Voltar a fecham.

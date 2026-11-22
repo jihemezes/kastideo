@@ -1355,6 +1355,8 @@ Auf Android TV öffnen sich die **Einstellungen** in Panels: Das Menü belegt di
 - **Anzeigestil** (Einstellungen > **Anzeigestil**): pro Inhaltstyp. **Live**: *TV* (Sender im Vollbild), *Klassisch* (Senderraster nach Kategorie, Standard) oder *Kino* (Banner und Senderreihen); **Filme** und **Serien**: *Klassisch* (Raster) oder *Kino* (Standard; Banner des gewählten Elements, dann Reihen Weiterschauen, Favoriten, Zuletzt und Kategorien; **◀ ▶** innerhalb einer Reihe, **▲ ▼** zwischen Reihen, **OK** öffnet die Seite oder startet den Sender).
 
 
+**Film-/Serienseite auf Android TV**: Die Tastenreihe scrollt mit der Auswahl (▶ erreicht alle Tasten) und die Seite zeigt Hintergrundbild, Slogan, Laufzeit, Bewertung, Land, Regie und Besetzung. Diese Angaben stammen von TMDB: Ohne Schlüssel (Einstellungen > TMDB-Schlüssel) bleibt die Seite eingeschränkt und ein Hinweis erscheint.
+
 **Aufnahme, Untertitel, Mehrfachansicht und gesehen / nicht gesehen auf Android TV**
 
 - **OK während der Wiedergabe** (Film, Folge, Aufnahme, Sender) öffnet die Optionsleiste am unteren Rand: Pause, −10 s / +30 s, Audio, Untertitel, Untertiteleinstellungen (Größe, Farbe, Position, Versatz), Tempo, Bildformat, nächste Folge, Aufnehmen, Mehrfachansicht. ▲ ▼ oder Zurück schließen sie.

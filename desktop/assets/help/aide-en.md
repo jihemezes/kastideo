@@ -1356,6 +1356,8 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 - **Display style** (Settings > **Display style**): per content type. **Live**: *TV* (full-screen channel), *Classic* (channel grid by category, default) or *Cinema* (banner and channel rows); **Movies** and **Series**: *Classic* (grid) or *Cinema* (default; banner of the selected item, then rows Continue watching, Favorites, Recents and categories; **◀ ▶** inside a row, **▲ ▼** between rows, **OK** opens the page or plays the channel).
 
 
+**Movie / series page on Android TV**: the button row now scrolls with the selection (▶ reaches every button) and the page shows the backdrop, tagline, runtime, rating, country, director and cast. This information comes from TMDB: without a key (Settings > TMDB key) the page stays limited and a message says so.
+
 **Recording, subtitles, MultiView and watched / unwatched on Android TV**
 
 - **OK during playback** (movie, episode, recording, channel) opens the options bar at the bottom of the screen: pause, −10 s / +30 s, audio, subtitles, subtitle settings (size, colour, position, delay), speed, picture format, next episode, record, MultiView. ▲ ▼ or Back closes it.

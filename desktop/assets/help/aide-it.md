@@ -1355,6 +1355,8 @@ Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di
 - **Stile di visualizzazione** (Impostazioni > **Stile di visualizzazione**): per tipo di contenuto. **Diretta**: *TV* (canale a schermo intero), *Classico* (griglia dei canali per categoria, predefinito) o *Cinema* (banner e righe di canali); **Film** e **Serie**: *Classico* (griglia) o *Cinema* (predefinito; banner dell'elemento selezionato, poi righe Continua a guardare, Preferiti, Recenti e categorie; **◀ ▶** in una riga, **▲ ▼** tra le righe, **OK** apre la scheda o avvia il canale).
 
 
+**Scheda film / serie su Android TV**: la riga dei pulsanti scorre con la selezione (▶ raggiunge tutti i pulsanti) e la scheda mostra sfondo, slogan, durata, voto, paese, regista e cast. Questi dati arrivano da TMDB: senza chiave (Impostazioni > Chiave TMDB) la scheda resta limitata e viene segnalato.
+
 **Registrazione, sottotitoli, MultiVista e visto / non visto su Android TV**
 
 - **OK durante la riproduzione** (film, episodio, registrazione, canale) apre la barra delle opzioni in basso: pausa, −10 s / +30 s, audio, sottotitoli, impostazioni dei sottotitoli (dimensione, colore, posizione, ritardo), velocità, formato dell'immagine, episodio successivo, registra, MultiVista. ▲ ▼ o Indietro la chiudono.

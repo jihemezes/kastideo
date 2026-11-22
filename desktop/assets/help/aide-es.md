@@ -1356,6 +1356,8 @@ En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la
 - **Estilo de visualización** (Ajustes > **Estilo de visualización**): por tipo de contenido. **Directo**: *TV* (canal a pantalla completa), *Clásico* (cuadrícula de canales por categoría, por defecto) o *Cine* (banner y filas de canales); **Películas** y **Series**: *Clásico* (cuadrícula) o *Cine* (por defecto; banner del elemento seleccionado y filas Continuar viendo, Favoritos, Recientes y categorías; **◀ ▶** en una fila, **▲ ▼** entre filas, **OK** abre la ficha o reproduce el canal).
 
 
+**Ficha de película / serie en Android TV**: la fila de botones se desplaza con la selección (▶ llega a todos los botones) y la ficha muestra la imagen de fondo, el eslogan, la duración, la nota, el país, el director y el reparto. Estos datos vienen de TMDB: sin clave (Ajustes > Clave TMDB) la ficha queda limitada y se avisa.
+
 **Grabación, subtítulos, MultiVista y visto / no visto en Android TV**
 
 - **OK durante la reproducción** (película, episodio, grabación, canal) abre la barra de opciones en la parte inferior: pausa, −10 s / +30 s, audio, subtítulos, ajuste de subtítulos (tamaño, color, posición, desfase), velocidad, formato de imagen, episodio siguiente, grabar, MultiVista. ▲ ▼ o Atrás la cierran.

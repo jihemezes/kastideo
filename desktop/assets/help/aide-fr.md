@@ -1356,6 +1356,8 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 - **Style d'affichage** (Réglages > **Style d'affichage**) : par type de contenu. **Direct** : *TV* (chaîne en plein écran), *Classique* (grille des chaînes par catégorie, par défaut) ou *Cinéma* (bannière et rangées de chaînes) ; **Films** et **Séries** : *Classique* (grille) ou *Cinéma* (par défaut ; bannière de l'élément sélectionné, puis rangées Reprendre la lecture, Favoris, Récents et catégories ; **◀ ▶** dans une rangée, **▲ ▼** de rangée en rangée, **OK** ouvre la fiche ou lance la chaîne).
 
 
+**Fiche film / série sur Android TV** : la rangée de boutons défile maintenant avec la sélection (▶ atteint tous les boutons) et la fiche affiche l'image de fond, l'accroche, la durée, la note, le pays, le réalisateur et la distribution. Ces informations viennent de TMDB : sans clé (Réglages > Clé TMDB), la fiche reste limitée et un message le signale.
+
 **Enregistrement, sous-titres, MultiVue et vu / non vu sur Android TV**
 
 - **OK pendant la lecture** (film, épisode, enregistrement, chaîne) ouvre la barre d'options en bas de l'écran : pause, −10 s / +30 s, audio, sous-titres, réglage des sous-titres (taille, couleur, position, décalage), vitesse, format de l'image, épisode suivant, enregistrer, MultiVue. ▲ ▼ ou Retour la referment.

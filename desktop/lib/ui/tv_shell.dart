@@ -604,6 +604,8 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     );
   }
 
+  final _buttonKeys = List.generate(8, (_) => GlobalKey());
+
   Widget _detailView(BuildContext context) {
     final item = _item!;
     final d = context.info.details(item.id);
@@ -613,58 +615,104 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
       if (d?.runtime != null) '${d!.runtime} min',
       if (d?.rating != null) '★ ${d!.rating!.toStringAsFixed(1)}',
       if (d != null && d.genres.isNotEmpty) d.genres.take(3).join(', '),
+      if (d?.country != null && d!.country!.isNotEmpty) d.country!,
+      if (d?.seasonCount != null) '${d!.seasonCount} ${tr('saisons')}',
     ];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(80, 50, 80, 30),
-      child: Column(children: [
-        Expanded(
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: PosterImage(url: d?.poster ?? item.logo, name: item.name, width: 340, height: 510),
-            ),
-            const SizedBox(width: 48),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(d?.title ?? item.displayName, style: kTextD(44, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 10),
-                Text(parts.join('  ·  '), style: kTextD(20, color: Colors.white70)),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Text(
-                      d?.plot ?? (context.info.isLoading(item.id) ? tr('Chargement…') : ''),
-                      maxLines: 9,
-                      overflow: TextOverflow.ellipsis,
-                      style: kTextD(20, color: Colors.white).copyWith(height: 1.4),
+    final directors = d == null || d.directors.isEmpty ? null : d.directors.take(3).join(', ');
+    final cast = d == null || d.cast.isEmpty ? null : d.cast.take(7).map((c) => c.name).join(', ');
+    // Le bouton choisi reste visible quand la rangée dépasse la largeur de l'écran.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _buttonKeys[_button.clamp(0, _buttonKeys.length - 1)];
+      final ctx = key.currentContext;
+      if (ctx != null) Scrollable.ensureVisible(ctx, alignment: 0.5, duration: const Duration(milliseconds: 150), curve: Curves.easeOut);
+    });
+    return Stack(children: [
+      if (d?.backdrop != null)
+        Positioned.fill(
+          child: Opacity(opacity: 0.28, child: PosterImage(url: d!.backdrop, name: item.name, width: double.infinity, height: double.infinity, fit: BoxFit.cover)),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(80, 44, 80, 24),
+        child: Column(children: [
+          Expanded(
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: PosterImage(url: d?.poster ?? item.logo, name: item.name, width: 330, height: 495),
+              ),
+              const SizedBox(width: 44),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(d?.title ?? item.displayName, style: kTextD(42, weight: FontWeight.w800), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  if (d?.tagline != null && d!.tagline!.isNotEmpty)
+                    Padding(padding: const EdgeInsets.only(top: 4), child: Text(d.tagline!, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(20, color: Colors.white60).copyWith(fontStyle: FontStyle.italic))),
+                  const SizedBox(height: 8),
+                  Text(parts.join('  ·  '), style: kTextD(20, color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Flexible(
+                        child: Text(
+                          d?.plot ?? (context.info.isLoading(item.id) ? tr('Chargement…') : ''),
+                          maxLines: 7,
+                          overflow: TextOverflow.ellipsis,
+                          style: kTextD(20, color: Colors.white).copyWith(height: 1.4),
+                        ),
+                      ),
+                      if (directors != null) ...[
+                        const SizedBox(height: 12),
+                        Text('${tr('De')} : $directors', maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(18, color: Colors.white70)),
+                      ],
+                      if (cast != null) ...[
+                        const SizedBox(height: 6),
+                        Text('${tr('Avec')} : $cast', maxLines: 2, overflow: TextOverflow.ellipsis, style: kTextD(18, color: Colors.white70)),
+                      ],
+                      if (!context.settings.usesTMDB) ...[
+                        const SizedBox(height: 10),
+                        Text(tr('Fiche limitée : ajoutez une clé TMDB (Réglages > Clé TMDB) pour l\'affiche, le résumé et la distribution.'), style: kTextD(16, color: KPalette.orange)),
+                      ] else if (d != null && d.tmdbId == null && !context.info.isLoading(item.id)) ...[
+                        const SizedBox(height: 10),
+                        Text(tr('Aucune fiche TMDB trouvée pour ce titre.'), style: kTextD(16, color: Colors.white54)),
+                      ],
+                    ]),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    height: 92,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      clipBehavior: Clip.none,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Row(children: [
+                        for (var i = 0; i < buttons.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 16),
+                          KeyedSubtree(
+                            key: _buttonKeys[i],
+                            child: TvFocusBox(
+                              selected: _button == i,
+                              radius: 20,
+                              child: Container(
+                                height: 72,
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                alignment: Alignment.center,
+                                color: i == 0 ? KPalette.orange : Colors.white.withValues(alpha: 0.16),
+                                child: Text(buttons[i], style: kTextD(20, weight: FontWeight.w800, color: i == 0 ? Colors.black : Colors.white)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ]),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Row(children: [
-                  for (var i = 0; i < buttons.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 20),
-                    TvFocusBox(
-                      selected: _button == i,
-                      radius: 22,
-                      child: Container(
-                        height: 76,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        alignment: Alignment.center,
-                        color: i == 0 ? KPalette.orange : Colors.white.withValues(alpha: 0.16),
-                        child: Text(buttons[i], style: kTextD(22, weight: FontWeight.w800, color: i == 0 ? Colors.black : Colors.white)),
-                      ),
-                    ),
-                  ],
                 ]),
-              ]),
-            ),
-          ]),
-        ),
-        const TvHints(),
-      ]),
-    );
+              ),
+            ]),
+          ),
+          const TvHints(),
+        ]),
+      ),
+    ]);
   }
 
   Widget _episodesView(BuildContext context) {

@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android26] - 2026-11-22
+
+- **Android TV** : fiche film / série — la rangée de boutons défile avec la sélection (tous les boutons atteignables) ; fiche enrichie (image de fond, accroche, durée, note, pays, réalisateur, distribution) et message quand la clé TMDB manque ou qu'aucune fiche n'est trouvée.
+
 ## [1.19.4-desktop5] - 2026-11-18
 
 - **Mise à niveau sur l'iPhone/iPad** (Windows, Linux, Android) :
