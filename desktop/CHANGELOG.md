@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.6-android35] - 2026-11-22
+
+- **Historiques** : nouvelle section dans les Réglages (sur Android TV : Réglages > **Historiques**) pour vider, après confirmation, les **Récents**, les **Vus et la reprise de lecture** (marques « vu » et positions) et l'**historique YouTube**, un par un ou avec **Tout effacer**. Les favoris, les sources et les réglages ne sont pas touchés. Remplace le bouton « Effacer les récents » de Windows / Linux / Android. Version de référence 1.19.6.
+
 ## [1.19.5-android34] - 2026-11-22
 
 - **Android TV, listes des Réglages** : la liste commence maintenant à défiler dès que la sélection atteint le milieu de l'écran, y compris pour les dernières lignes (une marge basse égale à la moitié de la liste les laisse venir au milieu). La dernière ligne n'est plus masquée par le bandeau d'aide en bas de l'écran. Même principe pour les menus à une colonne (Catégories de MultiVue, etc.) et pour la liste des épisodes d'une série. Hauteur de ligne fixe, défilement plus régulier.

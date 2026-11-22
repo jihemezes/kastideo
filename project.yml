@@ -198,6 +198,7 @@ targets:
           - LegalText.swift
           - ThemeLabels.swift
           - YouTube.swift
+          - HistoriesSection.swift
           - MultiViewModel.swift
           - MediaInfo.swift
           - CloudSync.swift
@@ -327,6 +328,7 @@ targets:
           - LegalText.swift
           - ThemeLabels.swift
           - MediaInfo.swift
+          - HistoriesSection.swift
       - path: App/Resources
         includes:
           - fr.lproj/*

@@ -67,6 +67,7 @@ An information banner appears for a few seconds (channel, current programme).
 - **Resume**: movies and episodes you started resume where you stopped (adjustable in **Settings > Playback**). With Jellyfin, Emby and Plex, resume is shared with the server.
 - **Watched**: a watched episode is marked; long press to change it.
 - **Recents**: the latest content you watched.
+- **Clear**: Settings > **History** clears **Recents** and **Watched and resume points**, one by one or with **Clear all** (confirmation required). Favourites and sources are not affected.
 
 # Settings
 

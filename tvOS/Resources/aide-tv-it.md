@@ -67,6 +67,7 @@ Un banner informativo appare per qualche secondo (canale, programma in corso).
 - **Riprendi**: film ed episodi iniziati riprendono da dove vi eravate fermati (regolabile in **Impostazioni > Riproduzione**). Con Jellyfin, Emby e Plex la ripresa è condivisa con il server.
 - **Visto**: un episodio visto è segnato; pressione prolungata per cambiare.
 - **Recenti**: gli ultimi contenuti guardati.
+- **Cancella**: Impostazioni > **Cronologie** cancella i **Recenti** e i **Visti e la ripresa**, uno alla volta o con **Cancella tutto** (con conferma). Preferiti e sorgenti non vengono toccati.
 
 # Impostazioni
 

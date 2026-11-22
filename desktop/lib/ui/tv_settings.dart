@@ -9,6 +9,7 @@ import '../core/volumes.dart';
 import '../l10n.dart';
 import '../theme.dart';
 import '../version.dart';
+import 'histories.dart';
 import 'tv_home.dart';
 import 'tv_panels.dart';
 import 'tv_recordings.dart';
@@ -35,6 +36,7 @@ void openTvSettings(BuildContext context) {
           TvEntry(tr('Lecture'), (c) => _openPlayback(c)),
           TvEntry(tr('Guide TV'), (c) => _openGuide(c)),
           TvEntry(tr('Enregistrements'), (c) => _openRecordings(c)),
+          TvEntry(tr('Historiques'), (c) => _openHistories(c)),
           TvEntry(tr('Clé TMDB'), (c) => _editTmdb(c), detail: s.usesTMDB ? tr('Oui') : tr('Non')),
           TvEntry(tr('Actualiser les catalogues'), (c) => _refreshAll(c), icon: Icons.refresh_rounded),
           TvEntry(tr('Aide'), (c) => _push(c, const TvHelpPage()), icon: Icons.help_outline_rounded),
@@ -119,6 +121,46 @@ void _openSource(BuildContext context, Source source) {
           if (c.mounted) TvPanelHost.close(c);
         }, icon: Icons.delete_outline_rounded),
       ],
+    ),
+  );
+}
+
+// MARK: Historiques
+
+void _openHistories(BuildContext context) {
+  void confirm(BuildContext c, String title, String message, void Function(BuildContext) clear) {
+    _open(
+      c,
+      TvPanelSpec(
+        title: title,
+        footer: message,
+        entries: (_) => [
+          TvEntry(tr('Effacer'), (c) {
+            clear(c);
+            TvPanelHost.close(c);
+            _toast(c, tr('Historique effacé.'));
+          }, icon: Icons.delete_outline_rounded),
+          TvEntry(tr('Annuler'), (c) => TvPanelHost.close(c), icon: Icons.close_rounded),
+        ],
+      ),
+    );
+  }
+
+  _open(
+    context,
+    TvPanelSpec(
+      title: tr('Historiques'),
+      footer: tr('Les favoris, les sources et les réglages ne sont pas touchés.'),
+      entries: (context) {
+        final kinds = historyKinds(context);
+        return [
+          for (final h in kinds)
+            TvEntry(h.title, h.count == 0 ? null : (c) => confirm(c, h.title, h.detail, (_) => h.clear()), detail: '${h.count}', icon: Icons.delete_outline_rounded),
+          TvEntry(tr('Tout effacer'), kinds.every((h) => h.count == 0)
+              ? null
+              : (c) => confirm(c, tr('Tout effacer'), tr('Efface tous les historiques ci-dessus.'), clearAllHistories), icon: Icons.delete_sweep_rounded),
+        ];
+      },
     ),
   );
 }

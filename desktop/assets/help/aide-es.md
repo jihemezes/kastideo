@@ -995,7 +995,7 @@ Estrella en la barra del reproductor, tecla **F** o clic derecho > Añadir a fav
 
 - **Editar** (junto al título «Recientes»): marque elementos y después **Quitar la selección**, o la cruz de una fila para quitarla sola; **Seleccionar todo** y **Vaciar todo** (de la sección mostrada). **Terminado** vuelve a la lista.
 - Clic derecho en un elemento > **Quitar de recientes**.
-- Ajustes > General > **Vaciar recientes** los borra todos, de todas las secciones.
+- Ajustes > **Historiales** > **Recientes** > **Borrar** los borra todos, de todas las secciones.
 <!--/pc-->
 
 ## Alertas y notificaciones {#alertes}
@@ -1363,6 +1363,8 @@ En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la
 **Actualización, subtítulos y descarga en Android TV**: una nueva versión se abre en una página aparte (Instalar y reiniciar, Más tarde, Ignorar esta versión) a la que el mando llega directamente. Durante una película o un episodio, **OK** abre la barra de opciones: subtítulos (elegir idioma o **Ninguno**), audio, velocidad, formato y **Descargar** (el archivo va a la carpeta Películas / Series y se sigue en **Grabaciones**). Los subtítulos están **desactivados al iniciar** por defecto; Ajustes > Reproducción > Subtítulos > **Al iniciar** permite elegir Ninguno, el idioma de la interfaz o Automático. Se ha quitado el halo alrededor del elemento seleccionado y el modo Cine ya no tiene banner: el logo redondeado de Kastideo aparece como marca de agua detrás de los carteles. **Series**: la lista de episodios se desplaza bajo la selección (nunca fuera de la pantalla); ▲ desde el primer episodio llega a la cabecera (◀ ▶ cambian de temporada, OK descarga toda la temporada); ▶ sobre un episodio llega a su icono de descarga, OK lo añade a la cola.
 
 **Categorías en Android TV**: Ajustes > Categorías permite mostrar, ocultar, subir o bajar categorías sin esperar: las opciones se guardan al instante, pero las listas solo se recalculan al **salir del menú Categorías** (◀ o Atrás), lo que evita largas esperas con un catálogo grande.
+
+**Historiales**: Ajustes > **Historiales** (Android TV: Ajustes > Historiales) borra, tras confirmar, los **Recientes**, los **Vistos y la reanudación** (marcas «visto» y posiciones) y el **historial de YouTube**, uno por uno o con **Borrar todo**. Los favoritos, las fuentes y los ajustes no se tocan. Con la sincronización iCloud de la reanudación o un servidor Jellyfin / Emby / Plex, las posiciones pueden volver desde otro dispositivo: bórrelas también allí.
 
 **¿Sin sonido en Android TV?** Abra Ajustes > Reproducción > **Diagnóstico de audio** (tras iniciar un canal): muestra el volumen, la pista de audio, el códec, el formato del flujo y el enviado al televisor. **Salida de audio** permite elegir Estéreo (por defecto, lo más seguro por HDMI), Automático (multicanal) o Passthrough Dolby / DTS (amplificador o barra de sonido). Si los valores son correctos pero no sale nada, compruebe el cable HDMI, el volumen del televisor (sus altavoces pueden ser débiles) y la salida de audio de la caja en los ajustes de Android.
 

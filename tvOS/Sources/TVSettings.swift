@@ -91,6 +91,7 @@ struct TVSettingsView: View {
                     Text("La synchronisation iCloud n'est pas disponible sur Apple TV : ajoutez votre source depuis un téléphone (QR code) ou au clavier.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
+                HistoriesSection()
                 Section("Diagnostic") {
                     NavigationLink("Journal de lecture") { TVLogView() }
                 }

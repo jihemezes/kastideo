@@ -27,6 +27,7 @@ import '../version.dart';
 import '../core/library.dart';
 import 'adult_pin.dart';
 import 'help_dialog.dart';
+import 'histories.dart';
 import 'log_dialog.dart';
 import 'source_diag.dart';
 import 'source_form.dart';
@@ -240,9 +241,6 @@ class _GeneralTabState extends State<_GeneralTab> {
             value: settings.autoRefresh,
             onChanged: settings.setAutoRefresh,
           ),
-          Row(children: [
-            OutlinedButton(onPressed: context.library.clearRecents, child: Text(tr('Effacer les récents'))),
-          ]),
           const SizedBox(height: 12),
           const _ConnectionsRow(),
         ]),
@@ -317,6 +315,7 @@ class _GeneralTabState extends State<_GeneralTab> {
         ]),
         const _CastSection(),
         const _YouTubeSection(),
+        const _HistoriesSection(),
         if (!Device.isAndroid) const _StartupSection(),
         const _UpdatesSection(),
       ]),
@@ -2005,6 +2004,61 @@ class _FicheEditsListState extends State<_FicheEditsList> {
               ),
           ],
         );
+      },
+    );
+  }
+}
+
+
+/// Réglages > Historiques : vider les récents, les positions de reprise et l'historique YouTube.
+class _HistoriesSection extends StatelessWidget {
+  const _HistoriesSection();
+
+  Future<void> _confirm(BuildContext context, String title, String message, VoidCallback clear) async {
+    final ok = await showKDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('Annuler'))),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('Effacer'))),
+        ],
+      ),
+    );
+    if (ok == true) clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([context.library, context.watch, YouTubeStore.shared]),
+      builder: (context, _) {
+        final kinds = historyKinds(context);
+        return _section(tr('Historiques'), [
+          for (final h in kinds)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(children: [
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${h.title} (${h.count})', style: kText(14, weight: FontWeight.w600)),
+                    Text(h.detail, style: kText(12, color: KPalette.ink54)),
+                  ]),
+                ),
+                OutlinedButton(onPressed: h.count == 0 ? null : () => _confirm(context, h.title, tr('Effacer cet historique ?'), h.clear), child: Text(tr('Effacer'))),
+              ]),
+            ),
+          const SizedBox(height: 8),
+          Row(children: [
+            FilledButton.tonal(
+              onPressed: kinds.every((h) => h.count == 0) ? null : () => _confirm(context, tr('Tout effacer'), tr('Efface tous les historiques ci-dessus.'), () => clearAllHistories(context)),
+              child: Text(tr('Tout effacer')),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          Text(tr('Les favoris, les sources et les réglages ne sont pas touchés.'), style: kText(12, color: KPalette.ink54)),
+        ]);
       },
     );
   }

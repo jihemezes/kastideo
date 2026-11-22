@@ -67,6 +67,7 @@ Um banner de informações aparece por alguns segundos (canal, programa em andam
 - **Continuar**: filmes e episódios iniciados retomam de onde você parou (ajustável em **Ajustes > Reprodução**). Com Jellyfin, Emby e Plex, a retomada é compartilhada com o servidor.
 - **Visto**: um episódio visto fica marcado; toque longo para mudar.
 - **Recentes**: os últimos conteúdos assistidos.
+- **Apagar**: Definições > **Históricos** apaga os **Recentes** e os **Vistos e a retoma**, um a um ou com **Apagar tudo** (com confirmação). Os favoritos e as fontes não são afetados.
 
 # Ajustes
 

@@ -67,6 +67,7 @@ Ein Infobanner erscheint einige Sekunden lang (Sender, laufende Sendung).
 - **Fortsetzen**: begonnene Filme und Folgen werden dort fortgesetzt, wo Sie aufgehört haben (einstellbar unter **Einstellungen > Wiedergabe**). Bei Jellyfin, Emby und Plex wird die Fortsetzung mit dem Server geteilt.
 - **Gesehen**: Eine gesehene Folge wird markiert; langes Drücken zum Ändern.
 - **Zuletzt**: die zuletzt angesehenen Inhalte.
+- **Löschen**: Einstellungen > **Verläufe** leert die **Zuletzt-Liste** und **Gesehen und Fortsetzen**, einzeln oder mit **Alles löschen** (mit Bestätigung). Favoriten und Quellen bleiben unberührt.
 
 # Einstellungen
 

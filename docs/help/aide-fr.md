@@ -995,7 +995,7 @@ Si « renvoyés par le fournisseur » diffère entre vos deux comptes, la diffé
 
 - **Modifier** (à droite du titre « Récents ») : cochez des éléments puis **Retirer la sélection**, ou la croix d'une ligne pour la retirer seule ; **Tout sélectionner** et **Tout effacer** (pour la section affichée). **Terminé** revient à la liste.
 - Clic droit sur un contenu > **Retirer des récents**.
-- Réglages > Général > **Effacer les récents** les efface tous, toutes sections confondues.
+- Réglages > **Historiques** > **Récents** > **Effacer** les efface tous, toutes sections confondues.
 <!--/pc-->
 
 ## Alertes et notifications {#alertes}
@@ -1363,6 +1363,8 @@ Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'
 **Mise à jour, sous-titres et téléchargement sur Android TV** : une nouvelle version s'ouvre dans une page à part (Installer et relancer, Plus tard, Ignorer cette version) que la télécommande atteint directement. Pendant un film ou un épisode, **OK** ouvre la barre d'options : sous-titres (choix de la langue ou **Aucun**), audio, vitesse, format et **Télécharger** (le fichier arrive dans le dossier Films / Séries et se suit dans **Enregistrements**). Les sous-titres sont **désactivés au démarrage** par défaut ; Réglages > Lecture > Sous-titres > **Au démarrage** permet de choisir Aucun, la langue de l'interface ou Automatique. Le halo autour de l'élément sélectionné a été supprimé et le mode Cinéma n'a plus de bandeau : le logo Kastideo arrondi apparaît en filigrane derrière les affiches. **Séries** : la liste des épisodes défile maintenant sous la sélection (jamais hors de l'écran) ; ▲ depuis le premier épisode atteint l'en-tête (◀ ▶ changent de saison, OK télécharge la saison entière) ; ▶ sur un épisode atteint son icône de téléchargement, OK l'ajoute à la file.
 
 **Catégories sur Android TV** : Réglages > Catégories permet d'afficher, masquer, monter ou descendre les catégories sans attendre : les choix sont enregistrés tout de suite, mais les listes ne sont recalculées qu'à la **sortie du menu Catégories** (◀ ou Retour), ce qui évite des minutes d'attente sur un gros catalogue.
+
+**Historiques** : Réglages > **Historiques** (Android TV : Réglages > Historiques) vide, après confirmation, les **Récents**, les **Vus et la reprise de lecture** (marques « vu » et positions) et l'**historique YouTube**, un par un ou avec **Tout effacer**. Les favoris, les sources et les réglages ne sont pas touchés. Avec la synchronisation iCloud de la reprise de lecture ou un serveur Jellyfin / Emby / Plex, les positions peuvent revenir d'un autre appareil : videz-les aussi sur celui-ci.
 
 **Pas de son sur Android TV ?** Ouvrez Réglages > Lecture > **Diagnostic audio** (après avoir lancé une chaîne) : il affiche le volume, la piste audio, le codec, le format du flux et celui envoyé à l'écran. **Sortie audio** choisit Stéréo (par défaut, le plus sûr en HDMI), Automatique (multicanal) ou Passthrough Dolby / DTS (ampli ou barre de son). Si ces valeurs sont correctes mais que rien ne sort, vérifiez le câble HDMI, le volume du téléviseur (ses haut-parleurs sont parfois faibles) et la sortie audio de la box dans les paramètres Android.
 

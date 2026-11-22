@@ -479,6 +479,18 @@ class WatchProgressStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Nombre de contenus dont la position ou l'état « vu » est mémorisé.
+  int get count => _entries.length;
+
+  /// Efface toutes les positions de reprise et les marques « vu » (et les retraits de « Reprendre la lecture »).
+  void clearAll() {
+    _entries.clear();
+    hiddenResume.clear();
+    notifyListeners();
+    flush();
+    _saveHidden();
+  }
+
   void clear(String id) {
     _entries.remove(id);
     notifyListeners();

@@ -244,12 +244,7 @@ struct GeneralSettingsView: View {
                     }
                 }
             }
-            LabeledContent("Historique") {
-                HStack {
-                    Button("Effacer les récents") { store.clearRecents() }
-                    Button("Oublier les positions de lecture") { watch.clearAll() }
-                }
-            }
+            HistoriesSection()
             LabeledContent("Version") {
                 Text(appVersion).foregroundStyle(.secondary)
             }

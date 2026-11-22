@@ -135,6 +135,7 @@ struct IOSSettingsView: View {
                     IOSReplaySection()
                     IOSCinemaSection()
                     IOSAppearanceSection()
+                    HistoriesSection()
                     Section("À propos") {
                         LabeledContent("Version", value: ReleaseNotes.currentVersion)
                         if FileManager.default.fileExists(atPath: PlaybackLog.currentFile.path) {

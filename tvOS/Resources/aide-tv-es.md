@@ -67,6 +67,7 @@ Un banner de información aparece unos segundos (canal, programa en curso).
 - **Reanudar**: las películas y episodios empezados se reanudan donde los dejó (ajustable en **Ajustes > Reproducción**). Con Jellyfin, Emby y Plex, la reanudación se comparte con el servidor.
 - **Visto**: un episodio visto queda marcado; pulsación larga para cambiarlo.
 - **Recientes**: los últimos contenidos vistos.
+- **Borrar**: Ajustes > **Historiales** borra los **Recientes** y los **Vistos y la reanudación**, uno por uno o con **Borrar todo** (se pide confirmación). Los favoritos y las fuentes no se tocan.
 
 # Ajustes
 

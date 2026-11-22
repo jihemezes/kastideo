@@ -67,6 +67,7 @@ Un bandeau d'information apparaît quelques secondes (chaîne, programme en cour
 - **Reprendre** : les films et épisodes commencés reprennent là où vous vous êtes arrêté (réglable dans **Réglages > Lecture**). Avec Jellyfin, Emby et Plex, la reprise est partagée avec le serveur.
 - **Vu** : un épisode vu est marqué ; appui long pour changer.
 - **Récents** : les derniers contenus regardés.
+- **Effacer** : Réglages > **Historiques** vide les **Récents** et les **Vus et reprise de lecture**, un par un ou avec **Tout effacer** (confirmation demandée). Les favoris et les sources ne sont pas touchés.
 
 # Réglages
 

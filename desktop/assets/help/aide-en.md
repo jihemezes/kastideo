@@ -995,7 +995,7 @@ Star in the player bar, **F** key or right-click > Add to favorites. Recents kee
 
 - **Edit** (next to the "Recents" title): tick items then **Remove selection**, or a row's cross to remove it alone; **Select all** and **Clear all** (for the section shown). **Done** goes back to the list.
 - Right-click an item > **Remove from recents**.
-- Settings > General > **Clear recents** clears them all, every section.
+- Settings > **History** > **Recents** > **Clear** clears them all, every section.
 <!--/pc-->
 
 ## Alerts and notifications {#alertes}
@@ -1363,6 +1363,8 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 **Updates, subtitles and download on Android TV**: a new version opens on its own page (Install and restart, Later, Ignore this version) that the remote reaches directly. During a movie or episode, **OK** opens the options bar: subtitles (choose a language or **None**), audio, speed, format and **Download** (the file goes to the Films / Series folder and is followed in **Recordings**). Subtitles are **off at start** by default; Settings > Playback > Subtitles > **At start** lets you choose None, the interface language or Automatic. The glow around the selected item has been removed and Cinema mode no longer has a banner: the rounded Kastideo logo appears as a watermark behind the posters. **Series**: the episode list now scrolls under the selection (never off screen); ▲ from the first episode reaches the header (◀ ▶ change season, OK downloads the whole season); ▶ on an episode reaches its download icon, OK adds it to the queue.
 
 **Categories on Android TV**: Settings > Categories lets you show, hide, move up or down categories without waiting: your choices are saved immediately, but the lists are only recalculated when you **leave the Categories menu** (◀ or Back), which avoids long waits on a large catalogue.
+
+**History**: Settings > **History** (Android TV: Settings > History) clears, after confirmation, **Recents**, **Watched and resume points** (“watched” marks and positions) and the **YouTube history**, one by one or with **Clear all**. Favourites, sources and settings are not affected. With iCloud sync of playback progress, or a Jellyfin / Emby / Plex server, positions can come back from another device: clear them there too.
 
 **No sound on Android TV?** Open Settings > Playback > **Audio diagnostics** (after starting a channel): it shows the volume, audio track, codec, stream format and the format sent to the TV. **Audio output** chooses Stereo (default, safest over HDMI), Automatic (multichannel) or Dolby / DTS passthrough (amplifier or soundbar). If these values look right but nothing comes out, check the HDMI cable, the TV volume (its speakers can be weak) and the box's audio output in Android settings.
 

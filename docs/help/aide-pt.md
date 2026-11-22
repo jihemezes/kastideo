@@ -995,7 +995,7 @@ Estrela na barra do player, tecla **F** ou clique com o botão direito > Adicion
 
 - **Editar** (ao lado do título «Recentes»): marque itens e depois **Remover a seleção**, ou a cruz de uma linha para removê-la sozinha; **Selecionar tudo** e **Limpar tudo** (da seção exibida). **Concluído** volta à lista.
 - Clique com o botão direito em um item > **Remover dos recentes**.
-- Ajustes > Geral > **Limpar recentes** apaga todos, em todas as seções.
+- Definições > **Históricos** > **Recentes** > **Apagar** apaga todos, em todas as secções.
 <!--/pc-->
 
 ## Alertas e notificações {#alertes}
@@ -1362,6 +1362,8 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 **Atualização, legendas e transferência no Android TV**: uma nova versão abre numa página própria (Instalar e reiniciar, Mais tarde, Ignorar esta versão) que o telecomando alcança diretamente. Durante um filme ou episódio, **OK** abre a barra de opções: legendas (escolher o idioma ou **Nenhuma**), áudio, velocidade, formato e **Transferir** (o ficheiro vai para a pasta Filmes / Séries e acompanha-se em **Gravações**). As legendas estão **desativadas ao iniciar** por predefinição; Ajustes > Reprodução > Legendas > **Ao iniciar** permite escolher Nenhuma, o idioma da interface ou Automático. O halo à volta do elemento selecionado foi removido e o modo Cinema já não tem faixa: o logótipo Kastideo arredondado aparece como marca de água atrás dos cartazes. **Séries**: a lista de episódios desloca-se com a seleção (nunca fora do ecrã); ▲ a partir do primeiro episódio chega ao cabeçalho (◀ ▶ mudam de temporada, OK transfere a temporada inteira); ▶ num episódio chega ao seu ícone de transferência, OK adiciona-o à fila.
 
 **Categorias no Android TV**: Definições > Categorias permite mostrar, ocultar, subir ou descer categorias sem esperar: as escolhas são guardadas de imediato, mas as listas só são recalculadas ao **sair do menu Categorias** (◀ ou Voltar), o que evita longas esperas com um catálogo grande.
+
+**Históricos**: Definições > **Históricos** (Android TV: Definições > Históricos) apaga, após confirmação, os **Recentes**, os **Vistos e a retoma** (marcas «visto» e posições) e o **histórico do YouTube**, um a um ou com **Apagar tudo**. Os favoritos, as fontes e as definições não são afetados. Com a sincronização iCloud da retoma ou um servidor Jellyfin / Emby / Plex, as posições podem voltar de outro dispositivo: apague-as também aí.
 
 **Sem som no Android TV?** Abra Ajustes > Reprodução > **Diagnóstico de áudio** (depois de iniciar um canal): mostra o volume, a faixa de áudio, o codec, o formato do fluxo e o enviado para a televisão. **Saída de áudio** permite escolher Estéreo (predefinição, a mais segura por HDMI), Automático (multicanal) ou Passthrough Dolby / DTS (amplificador ou barra de som). Se os valores estiverem corretos mas não sair nada, verifique o cabo HDMI, o volume da televisão (as colunas podem ser fracas) e a saída de áudio da box nas definições do Android.
 

@@ -995,7 +995,7 @@ Stella nella barra del player, tasto **F** oppure clic destro > Aggiungi ai pref
 
 - **Modifica** (accanto al titolo «Recenti»): spunta gli elementi poi **Rimuovi la selezione**, oppure la croce di una riga per rimuoverla da sola; **Seleziona tutto** e **Svuota tutto** (per la sezione mostrata). **Fine** torna all'elenco.
 - Clic destro su un elemento > **Rimuovi dai recenti**.
-- Impostazioni > Generali > **Svuota i recenti** li cancella tutti, in ogni sezione.
+- Impostazioni > **Cronologie** > **Recenti** > **Cancella** li cancella tutti, in ogni sezione.
 <!--/pc-->
 
 ## Avvisi e notifiche {#alertes}
@@ -1362,6 +1362,8 @@ Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di
 **Aggiornamento, sottotitoli e download su Android TV**: una nuova versione si apre in una pagina a parte (Installa e riavvia, Più tardi, Ignora questa versione) raggiungibile direttamente con il telecomando. Durante un film o un episodio, **OK** apre la barra delle opzioni: sottotitoli (scelta della lingua o **Nessuno**), audio, velocità, formato e **Scarica** (il file va nella cartella Film / Serie e si segue in **Registrazioni**). I sottotitoli sono **disattivati all'avvio** per impostazione predefinita; Impostazioni > Riproduzione > Sottotitoli > **All'avvio** permette di scegliere Nessuno, la lingua dell'interfaccia o Automatico. L'alone attorno all'elemento selezionato è stato rimosso e la modalità Cinema non ha più il banner: il logo Kastideo arrotondato appare come filigrana dietro le locandine. **Serie**: l'elenco degli episodi scorre con la selezione (mai fuori schermo); ▲ dal primo episodio raggiunge l'intestazione (◀ ▶ cambiano stagione, OK scarica l'intera stagione); ▶ su un episodio raggiunge la sua icona di download, OK lo aggiunge alla coda.
 
 **Categorie su Android TV**: Impostazioni > Categorie permette di mostrare, nascondere, spostare su o giù le categorie senza attese: le scelte sono salvate subito, ma gli elenchi vengono ricalcolati solo **uscendo dal menu Categorie** (◀ o Indietro), evitando lunghe attese con un catalogo grande.
+
+**Cronologie**: Impostazioni > **Cronologie** (Android TV: Impostazioni > Cronologie) cancella, dopo conferma, i **Recenti**, i **Visti e la ripresa** (segni «visto» e posizioni) e la **cronologia YouTube**, uno alla volta o con **Cancella tutto**. Preferiti, sorgenti e impostazioni non vengono toccati. Con la sincronizzazione iCloud della ripresa o un server Jellyfin / Emby / Plex, le posizioni possono tornare da un altro dispositivo: cancellale anche lì.
 
 **Nessun audio su Android TV?** Apra Impostazioni > Riproduzione > **Diagnostica audio** (dopo aver avviato un canale): mostra volume, traccia audio, codec, formato del flusso e quello inviato al televisore. **Uscita audio** permette di scegliere Stereo (predefinito, il più sicuro via HDMI), Automatico (multicanale) o Passthrough Dolby / DTS (amplificatore o soundbar). Se i valori sono corretti ma non esce nulla, controlli il cavo HDMI, il volume del televisore (gli altoparlanti possono essere deboli) e l'uscita audio del box nelle impostazioni Android.
 

@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.19.6] - 2026-11-22
+
+- Nouvelle section **Historiques** dans les Réglages (Mac, iPhone / iPad, Apple TV, et Windows / Linux / Android) : vider, après confirmation, les **Récents**, les **Vus et la reprise de lecture** (marques « vu » et positions, y compris les retraits de « Reprendre la lecture ») et l'**historique YouTube**, un par un ou avec **Tout effacer**. Les favoris, les sources et les réglages ne sont jamais touchés. Remplace les boutons « Effacer les récents » et « Oublier les positions de lecture » du Mac.
+
 ## [1.19.5] - 2026-11-22
 
 - Correction **chaînes du direct sans son** : le passage automatique en **image seule** (son coupé quand l'horloge du flux est incohérente) n'est plus mémorisé d'un lancement à l'autre : il ne vaut que pour la session en cours, et la chaîne est rouverte avec le son au lancement suivant.

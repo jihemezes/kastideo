@@ -995,7 +995,7 @@ Stern in der Player-Leiste, Taste **F** oder Rechtsklick > Zu Favoriten hinzufü
 
 - **Bearbeiten** (neben dem Titel „Zuletzt gesehen“): Elemente ankreuzen, dann **Auswahl entfernen**, oder das Kreuz einer Zeile, um sie allein zu entfernen; **Alle auswählen** und **Alles leeren** (für den angezeigten Bereich). **Fertig** kehrt zur Liste zurück.
 - Rechtsklick auf ein Element > **Aus „Zuletzt gesehen“ entfernen**.
-- Einstellungen > Allgemein > **Zuletzt gesehen leeren** löscht alle, in jedem Bereich.
+- Einstellungen > **Verläufe** > **Zuletzt** > **Löschen** löscht alle, in jedem Bereich.
 <!--/pc-->
 
 ## Erinnerungen und Mitteilungen {#alertes}
@@ -1362,6 +1362,8 @@ Auf Android TV öffnen sich die **Einstellungen** in Panels: Das Menü belegt di
 **Update, Untertitel und Download auf Android TV**: Eine neue Version öffnet sich auf einer eigenen Seite (Installieren und neu starten, Später, Diese Version ignorieren), die die Fernbedienung direkt erreicht. Während eines Films oder einer Episode öffnet **OK** die Optionsleiste: Untertitel (Sprache wählen oder **Keine**), Ton, Geschwindigkeit, Format und **Herunterladen** (die Datei landet im Ordner Filme / Serien und lässt sich unter **Aufnahmen** verfolgen). Untertitel sind standardmäßig **beim Start aus**; unter Einstellungen > Wiedergabe > Untertitel > **Beim Start** wählen Sie Keine, die Sprache der Oberfläche oder Automatisch. Der Schein um das ausgewählte Element wurde entfernt und der Kino-Modus hat kein Banner mehr: Das abgerundete Kastideo-Logo erscheint als Wasserzeichen hinter den Postern. **Serien**: Die Episodenliste scrollt mit der Auswahl (nie aus dem Bild); ▲ vom ersten Eintrag erreicht die Kopfzeile (◀ ▶ wechseln die Staffel, OK lädt die ganze Staffel herunter); ▶ auf einer Episode erreicht ihr Download-Symbol, OK fügt sie der Warteschlange hinzu.
 
 **Kategorien auf Android TV**: Unter Einstellungen > Kategorien lassen sich Kategorien ohne Wartezeit ein- und ausblenden oder verschieben: Die Auswahl wird sofort gespeichert, die Listen werden aber erst beim **Verlassen des Kategorien-Menüs** (◀ oder Zurück) neu berechnet. So entfallen lange Wartezeiten bei großen Katalogen.
+
+**Verläufe**: Einstellungen > **Verläufe** (Android TV: Einstellungen > Verläufe) löscht nach Bestätigung die **Zuletzt-Liste**, **Gesehen und Fortsetzen** („Gesehen“-Markierungen und Positionen) und den **YouTube-Verlauf**, einzeln oder mit **Alles löschen**. Favoriten, Quellen und Einstellungen bleiben unberührt. Bei iCloud-Synchronisierung des Fortsetzens oder mit einem Jellyfin-/Emby-/Plex-Server können Positionen von einem anderen Gerät zurückkommen: löschen Sie sie dort ebenfalls.
 
 **Kein Ton auf Android TV?** Öffnen Sie Einstellungen > Wiedergabe > **Audiodiagnose** (nach dem Start eines Senders): Sie zeigt Lautstärke, Tonspur, Codec, Stream-Format und das an den Fernseher gesendete Format. **Audioausgabe** wählt Stereo (Standard, per HDMI am sichersten), Automatisch (Mehrkanal) oder Dolby-/DTS-Passthrough (Verstärker oder Soundbar). Wenn die Werte stimmen, aber nichts zu hören ist, prüfen Sie das HDMI-Kabel, die Lautstärke des Fernsehers (seine Lautsprecher sind manchmal schwach) und den Audioausgang der Box in den Android-Einstellungen.
 

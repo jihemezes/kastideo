@@ -112,9 +112,15 @@ final class WatchProgressStore {
         flush()
     }
 
+    /// Nombre de contenus dont la position ou l'état « vu » est mémorisé.
+    var count: Int { entries.count + watched.count }
+
+    /// Efface toutes les positions de reprise, les marques « vu » et les retraits de « Reprendre la lecture ».
     func clearAll() {
         entries = [:]
         watched = []
+        hiddenResume = []
+        resumeUndo = nil
         flush()
     }
 
