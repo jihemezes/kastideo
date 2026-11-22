@@ -531,12 +531,42 @@ class _TvPinPageState extends State<TvPinPage> with TvKeys<TvPinPage> {
   void initState() {
     super.initState();
     startTvKeys();
+    HardwareKeyboard.instance.addHandler(_digitKey);
   }
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_digitKey);
     stopTvKeys();
     super.dispose();
+  }
+
+  static const _digitKeys = [
+    (LogicalKeyboardKey.digit0, LogicalKeyboardKey.numpad0),
+    (LogicalKeyboardKey.digit1, LogicalKeyboardKey.numpad1),
+    (LogicalKeyboardKey.digit2, LogicalKeyboardKey.numpad2),
+    (LogicalKeyboardKey.digit3, LogicalKeyboardKey.numpad3),
+    (LogicalKeyboardKey.digit4, LogicalKeyboardKey.numpad4),
+    (LogicalKeyboardKey.digit5, LogicalKeyboardKey.numpad5),
+    (LogicalKeyboardKey.digit6, LogicalKeyboardKey.numpad6),
+    (LogicalKeyboardKey.digit7, LogicalKeyboardKey.numpad7),
+    (LogicalKeyboardKey.digit8, LogicalKeyboardKey.numpad8),
+    (LogicalKeyboardKey.digit9, LogicalKeyboardKey.numpad9),
+  ];
+
+  /// Pavé numérique de la télécommande : le chiffre remplit la case, la saisie avance et valide à la 4e.
+  bool _digitKey(KeyEvent event) {
+    if (!mounted || event is! KeyDownEvent) return false;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    final n = _digitKeys.indexWhere((k) => k.$1 == event.logicalKey || k.$2 == event.logicalKey);
+    if (n < 0) return false;
+    setState(() => _digits[_pos] = n);
+    if (_pos < 3) {
+      setState(() => _pos++);
+    } else {
+      Navigator.of(context).pop(_digits.join());
+    }
+    return true;
   }
 
   @override
@@ -593,7 +623,7 @@ class _TvPinPageState extends State<TvPinPage> with TvKeys<TvPinPage> {
             ]),
           ),
         ),
-        const Padding(padding: EdgeInsets.only(bottom: 14), child: TvHints(items: [('▲ ▼', 'Changer le chiffre'), ('◀ ▶', 'Changer de case'), ('OK', 'Valider'), ('Retour', 'Annuler')])),
+        const Padding(padding: EdgeInsets.only(bottom: 14), child: TvHints(items: [('0-9', 'Saisir le code'), ('▲ ▼', 'Changer le chiffre'), ('◀ ▶', 'Changer de case'), ('OK', 'Valider'), ('Retour', 'Annuler')])),
       ]),
     );
   }

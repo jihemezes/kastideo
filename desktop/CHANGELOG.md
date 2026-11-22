@@ -26,6 +26,10 @@ Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.
 - Correction : quelques liens de l'aide pointaient vers la mauvaise page.
 - Page d'aide « Langue » mise à jour pour les six langues.
 
+## [1.19.5-android24] - 2026-11-22
+
+- **Android TV** : le code PIN se saisit aussi avec le pavé numérique de la télécommande (validation automatique au 4e chiffre).
+
 ## [1.19.5-android23] - 2026-11-22
 
 - **Android TV** : correction des réglages (les menus n'ouvraient pas leurs sous-menus).

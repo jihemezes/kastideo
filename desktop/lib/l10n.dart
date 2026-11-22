@@ -325,6 +325,7 @@ class L10n {
     'Changer le chiffre': 'Change digit',
     'Changer de case': 'Change box',
     'Chaînes et contenus « |XX| » ou rangés dans une catégorie adulte. Un code PIN à 4 chiffres, facultatif, protège ce réglage.': 'Channels and content marked “|XX|” or in an adult category. An optional 4-digit PIN protects this setting.',
+    'Saisir le code': 'Enter the code',
     'Options': 'Options',
     'Masquée (mot-clé)': 'Hidden (keyword)',
     'Tout masquer': 'Hide all',

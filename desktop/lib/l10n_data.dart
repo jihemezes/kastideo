@@ -254,6 +254,7 @@ const Map<String, List<String>> kTranslations = {
   'Changer le chiffre': ['Cambiar dígito', 'Ziffer ändern', 'Cambia cifra', 'Mudar dígito', 'Mudar dígito'],
   'Changer de case': ['Cambiar de casilla', 'Feld wechseln', 'Cambia casella', 'Mudar de caixa', 'Mudar de caixa'],
   'Chaînes et contenus « |XX| » ou rangés dans une catégorie adulte. Un code PIN à 4 chiffres, facultatif, protège ce réglage.': ['Canales y contenidos «|XX|» o en una categoría adulta. Un código PIN opcional de 4 dígitos protege este ajuste.', 'Sender und Inhalte mit „|XX|“ oder in einer Erwachsenenkategorie. Ein optionaler 4-stelliger PIN schützt diese Einstellung.', 'Canali e contenuti «|XX|» o in una categoria per adulti. Un codice PIN facoltativo a 4 cifre protegge questa impostazione.', 'Canais e conteúdos «|XX|» ou numa categoria adulta. Um código PIN opcional de 4 dígitos protege esta definição.', 'Canais e conteúdos «|XX|» ou em uma categoria adulta. Um código PIN opcional de 4 dígitos protege este ajuste.'],
+  'Saisir le code': ['Introducir el código', 'Code eingeben', 'Inserisci il codice', 'Introduzir o código', 'Digitar o código'],
   'Options': ['Opciones', 'Optionen', 'Opzioni', 'Opções', 'Opções'],
   'Programme': ['Programa', 'Programm', 'Programma', 'Programa', 'Programa'],
   'Journal de lecture': ['Registro de reproducción', 'Wiedergabeprotokoll', 'Registro di riproduzione', 'Registro de reprodução', 'Registo de reprodução'],
