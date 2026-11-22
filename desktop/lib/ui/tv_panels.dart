@@ -121,7 +121,6 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
             _inner = context;
             final w = box.maxWidth;
             final depth = _levels.length;
-            final shift = depth >= 3 ? 0.3 * w * (depth - 2) : 0.0;
             return Column(children: [
               Expanded(
                 child: Stack(children: [
@@ -143,7 +142,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
                         ),
                       ),
                     ),
-                  for (var i = 0; i < depth; i++) _panel(i, w, shift, box.maxHeight, i == depth - 1),
+                  for (var i = 0; i < depth; i++) _panel(i, depth, w, i == depth - 1),
                 ]),
               ),
               const Padding(padding: EdgeInsets.fromLTRB(0, 4, 0, 14), child: TvHints(items: [('OK', 'Choisir'), ('▲ ▼', 'Se déplacer'), ('◀', 'Revenir'), ('Retour', 'Revenir')])),
@@ -154,12 +153,22 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
     );
   }
 
-  Widget _panel(int i, double w, double shift, double h, bool active) {
+  Widget _panel(int i, int depth, double w, bool active) {
     final level = _levels[i];
     final root = i == 0;
     final width = root ? 0.4 * w : 0.6 * w;
-    final base = root ? 0.0 : 0.4 * w;
-    final left = level.shown ? base - shift : w;
+    // Le niveau actif occupe les 3/5 de droite ; son parent direct reste visible en partie à gauche (derrière lui) ;
+    // les niveaux plus anciens sont rangés hors de l'écran (sinon leur texte apparaît coupé sur le bord gauche).
+    final distance = depth - 1 - i;
+    final double position;
+    if (distance == 0) {
+      position = root ? 0.0 : 0.4 * w;
+    } else if (distance == 1) {
+      position = root ? 0.0 : 0.1 * w;
+    } else {
+      position = -w;
+    }
+    final left = level.shown ? position : w;
     final entries = _entries(level);
     level.index = level.index.clamp(0, entries.isEmpty ? 0 : entries.length - 1);
     return AnimatedPositioned(

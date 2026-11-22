@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android30] - 2026-11-22
+
+- **Android TV** : les réglages en panneaux s'affichaient mal à partir du 3e niveau (par exemple Sources > une source > Connexions simultanées, ou les choix de Lecture) : les panneaux se superposaient et leur texte sortait de l'écran à gauche. Le panneau actif occupe maintenant toujours les 3/5 de droite, son parent reste visible en partie derrière lui, et les niveaux plus anciens sont rangés hors de l'écran. Contient aussi les correctifs de android29.
+
 ## [1.19.5-android29] - 2026-11-22
 
 - **Android** : correction de « Application non installée » en installant un APK à la main. Les APK 64 bits avaient un numéro de version interne plus élevé que les APK 32 bits : installer un v7a par-dessus un arm64 (ou l'inverse après un retour en arrière) était refusé comme une rétrogradation. Tous les APK partagent désormais le même numéro (plus élevé que tous les anciens), et s'installent donc les uns par-dessus les autres.
