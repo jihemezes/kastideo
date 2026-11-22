@@ -3,6 +3,12 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.19.5] - 2026-11-22
+
+- Correction **chaînes du direct sans son** : le passage automatique en **image seule** (son coupé quand l'horloge du flux est incohérente) n'est plus mémorisé d'un lancement à l'autre : il ne vaut que pour la session en cours, et la chaîne est rouverte avec le son au lancement suivant.
+- Un bandeau **« Réactiver le son »** s'affiche sous la barre de lecture quand une chaîne est en image seule.
+- Les réparations mémorisées (horloge, décodage logiciel, image seule choisie à la main) **expirent au bout de 7 jours** : la chaîne est alors retestée normalement. Les anciens « image seule » automatiques sont oubliés.
+
 ## [1.19.4] - 2026-11-17
 
 - Correction **YouTube** : la recherche (texte, tri, résultats, page) et l'onglet choisi sont conservés quand on revient de la lecture ; plus besoin de refaire la recherche.

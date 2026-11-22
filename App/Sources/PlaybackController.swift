@@ -644,7 +644,9 @@ final class PlaybackController {
             media.addOption(":no-ts-trust-pcr")
             PlaybackLog.shared.note("Ouverture sans l'horloge du fournisseur (son réparé pour cette chaîne)")
         }
-        if let item = current, item.kind == .live, Self.videoOnlyIDs.contains(item.id) {
+        videoOnlyActive = false
+        if let item = current, item.kind == .live, Self.isVideoOnlyID(item.id) {
+            videoOnlyActive = true
             // Son inutilisable sur cette chaîne : image seule. Sans piste son, VLC n'attend plus un son mal horodaté
             // et l'image ne se fige plus.
             media.addOption(":no-audio")
@@ -959,22 +961,40 @@ final class PlaybackController {
     /// Chaînes dont l'horloge (PCR) est fausse : on les ouvre sans s'y fier (mémorisé d'une session à l'autre).
     /// Oublie les réglages d'horloge mémorisés (Réglages > Lecture).
     static func resetClockFixes() {
-        UserDefaults.standard.removeObject(forKey: "audio.clockFix")
-        UserDefaults.standard.removeObject(forKey: "audio.videoOnly")
-        UserDefaults.standard.removeObject(forKey: "decode.software")
+        for key in ["audio.clockFix", "audio.videoOnly", "decode.software"] {
+            UserDefaults.standard.removeObject(forKey: key)
+            UserDefaults.standard.removeObject(forKey: key + ".t")
+        }
+        Task { @MainActor in sessionVideoOnly.removeAll() }
     }
     /// Chaînes lues en image seule (son inutilisable) : choix automatique ou manuel, mémorisé.
+    /// Seul le choix MANUEL (clic droit) est mémorisé, et pendant 7 jours. Le passage automatique en image seule
+    /// n'est valable que pour la session en cours : au prochain lancement, la chaîne est rouverte avec le son.
     static var videoOnlyIDs: Set<String> {
-        get { Set(UserDefaults.standard.stringArray(forKey: "audio.videoOnly") ?? []) }
-        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.videoOnly") }
+        get { TimedIDSet.read("audio.videoOnly", migrateLegacy: false) }
+        set { TimedIDSet.write("audio.videoOnly", newValue) }
     }
+    /// Chaînes passées automatiquement en image seule pendant cette session (non mémorisé).
+    @MainActor static var sessionVideoOnly = Set<String>()
+    @MainActor static func isVideoOnlyID(_ id: String) -> Bool { sessionVideoOnly.contains(id) || videoOnlyIDs.contains(id) }
 
     /// La chaîne en cours est lue sans le son.
-    var isVideoOnly: Bool { current.map { $0.kind == .live && Self.videoOnlyIDs.contains($0.id) } ?? false }
+    var isVideoOnly: Bool { videoOnlyActive }
+    /// Mis à jour à chaque ouverture (observable par les vues).
+    var videoOnlyActive = false
+
+    /// Rouvre la chaîne en cours avec le son (bandeau « Réactiver le son »).
+    func restoreSound() {
+        guard let item = current else { return }
+        setVideoOnly(false, for: item)
+    }
 
     /// Active ou désactive l'image seule pour une chaîne ; rouvre la chaîne si elle est en cours de lecture.
     func setVideoOnly(_ on: Bool, for item: MediaItem) {
-        if on { Self.videoOnlyIDs.insert(item.id) } else { Self.videoOnlyIDs.remove(item.id) }
+        if on { Self.videoOnlyIDs.insert(item.id) } else {
+            Self.videoOnlyIDs.remove(item.id)
+            Self.sessionVideoOnly.remove(item.id)
+        }
         PlaybackLog.shared.note(on ? "Image seule activée pour cette chaîne" : "Image seule désactivée : retour du son")
         guard current?.id == item.id, let url = currentURL else { return }
         audioIssue = nil
@@ -983,8 +1003,8 @@ final class PlaybackController {
         start(url)
     }
     static var clockFixIDs: Set<String> {
-        get { Set(UserDefaults.standard.stringArray(forKey: "audio.clockFix") ?? []) }
-        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "audio.clockFix") }
+        get { TimedIDSet.read("audio.clockFix") }
+        set { TimedIDSet.write("audio.clockFix", newValue) }
     }
     static let maxAudioRepairs = 4
 
@@ -992,8 +1012,8 @@ final class PlaybackController {
 
     /// Chaînes (ou contenus) lus en décodage logiciel : choix automatique après une image figée, ou manuel. Mémorisé.
     static var softwareIDs: Set<String> {
-        get { Set(UserDefaults.standard.stringArray(forKey: "decode.software") ?? []) }
-        set { UserDefaults.standard.set(Array(newValue.suffix(500)), forKey: "decode.software") }
+        get { TimedIDSet.read("decode.software") }
+        set { TimedIDSet.write("decode.software", newValue) }
     }
 
     /// Réglages > Lecture : tout décoder en logiciel.
@@ -1064,9 +1084,9 @@ final class PlaybackController {
         if newLate >= 10, isLive {
             // Déjà rouvert sans l'horloge du fournisseur et toujours incohérent : le son du flux est défectueux.
             // On passe en image seule (l'image ne se fige plus), et on s'en souvient pour cette chaîne.
-            if let item = current, !Self.videoOnlyIDs.contains(item.id), let url = currentURL {
-                Self.videoOnlyIDs.insert(item.id)
-                PlaybackLog.shared.note("Horloge toujours incohérente après réouverture : passage en image seule (sans le son)")
+            if let item = current, !Self.isVideoOnlyID(item.id), let url = currentURL {
+                Self.sessionVideoOnly.insert(item.id)
+                PlaybackLog.shared.note("Horloge toujours incohérente après réouverture : passage en image seule (sans le son), pour cette session seulement")
                 audioIssue = nil
                 sameURLRetries = 1
                 sessionQuality = nil
@@ -1299,5 +1319,41 @@ struct StreamHealth: Equatable {
         if h >= 1000 { return "Full HD 1080p" }
         if h >= 700 { return "HD 720p" }
         return "SD \(Int(h))p"
+    }
+}
+
+
+/// Ensemble d'identifiants mémorisé avec la date d'ajout : les entrées expirent après 7 jours (la chaîne est retestée).
+enum TimedIDSet {
+    static let ttl: TimeInterval = 7 * 86_400
+
+    private static func load(_ key: String, migrateLegacy: Bool) -> [String: Double] {
+        let defaults = UserDefaults.standard
+        if let map = defaults.dictionary(forKey: key + ".t") as? [String: Double] { return map }
+        // Ancien format (simple liste) : repris avec la date du jour, sauf si on veut l'abandonner.
+        guard migrateLegacy, let legacy = defaults.stringArray(forKey: key) else {
+            defaults.removeObject(forKey: key)
+            return [:]
+        }
+        let now = Date().timeIntervalSince1970
+        return Dictionary(legacy.map { ($0, now) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    static func read(_ key: String, migrateLegacy: Bool = true) -> Set<String> {
+        let limit = Date().timeIntervalSince1970 - ttl
+        return Set(load(key, migrateLegacy: migrateLegacy).filter { $0.value >= limit }.keys)
+    }
+
+    static func write(_ key: String, _ ids: Set<String>) {
+        let now = Date().timeIntervalSince1970
+        let limit = now - ttl
+        var map = load(key, migrateLegacy: true).filter { $0.value >= limit && ids.contains($0.key) }
+        for id in ids where map[id] == nil { map[id] = now }
+        if map.count > 500 {
+            map = Dictionary(uniqueKeysWithValues: map.sorted { $0.value > $1.value }.prefix(500).map { ($0.key, $0.value) })
+        }
+        let defaults = UserDefaults.standard
+        defaults.set(map, forKey: key + ".t")
+        defaults.removeObject(forKey: key)
     }
 }

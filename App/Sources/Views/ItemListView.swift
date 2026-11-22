@@ -225,7 +225,7 @@ struct ItemActionsMenu: View {
                 }
             }
             Button("Modifier la chaîne…") { navigation.editingChannel = item }
-            let videoOnly = PlaybackController.videoOnlyIDs.contains(item.id)
+            let videoOnly = PlaybackController.isVideoOnlyID(item.id)
             Button {
                 playback.setVideoOnly(!videoOnly, for: item)
             } label: {

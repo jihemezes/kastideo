@@ -17,6 +17,17 @@ struct ControlsBar: View {
             } else if playback.isTimeshifted {
                 TimeshiftBar()
             }
+            if playback.isVideoOnly {
+                HStack(spacing: 8) {
+                    Image(systemName: "speaker.slash.fill")
+                    Text("Image seule : le son de cette chaîne est désactivé.")
+                    Button("Réactiver le son") { playback.restoreSound() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.orange)
+            }
             if let notice = playback.timeshiftNotice {
                 Text(notice)
                     .font(.caption.weight(.semibold))
