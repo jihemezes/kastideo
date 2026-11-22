@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../app_state.dart';
@@ -111,7 +113,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
   void _follow(_Level level) {
     if (!level.scroll.hasClients) return;
     final view = level.scroll.position.viewportDimension;
-    final target = (level.index * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, level.scroll.position.maxScrollExtent);
+    final target = (8 + level.index * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, level.scroll.position.maxScrollExtent);
     level.scroll.animateTo(target, duration: const Duration(milliseconds: 110), curve: Curves.easeOut);
   }
 
@@ -201,13 +203,18 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
               Text(level.spec.title, style: kTextD(root ? 36 : 30, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 12),
               Expanded(
-                child: ListView.builder(
-                  controller: level.scroll,
-                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 30),
-                  itemCount: entries.length,
-                  itemBuilder: (context, n) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _button(entries[n], selected: n == level.index, active: active),
+                // Marge basse = la moitié de la liste : même les dernières lignes peuvent venir au milieu de l'écran
+                // (le défilement commence à partir du milieu, et la dernière ligne n'est jamais collée au bas de l'écran).
+                child: LayoutBuilder(
+                  builder: (context, box) => ListView.builder(
+                    controller: level.scroll,
+                    itemExtent: _rowHeight,
+                    padding: EdgeInsets.fromLTRB(14, 8, 14, math.max(30.0, box.maxHeight / 2)),
+                    itemCount: entries.length,
+                    itemBuilder: (context, n) => Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _button(entries[n], selected: n == level.index, active: active),
+                    ),
                   ),
                 ),
               ),

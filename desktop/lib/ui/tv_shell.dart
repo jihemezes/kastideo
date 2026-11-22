@@ -480,7 +480,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     if (!_epScroll.hasClients) return;
     const row = 76.0;
     final view = _epScroll.position.viewportDimension;
-    final target = _episode < 0 ? 0.0 : (_episode * row - (view - row) / 2).clamp(0.0, _epScroll.position.maxScrollExtent);
+    final target = _episode < 0 ? 0.0 : (8 + _episode * row - (view - row) / 2).clamp(0.0, _epScroll.position.maxScrollExtent);
     _epScroll.animateTo(target, duration: const Duration(milliseconds: 110), curve: Curves.easeOut);
   }
 
@@ -834,10 +834,10 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
               alignment: Alignment.topLeft,
               child: SizedBox(
                 width: 760,
-                child: ListView.builder(
+                child: LayoutBuilder(builder: (context, box) => ListView.builder(
                   controller: _epScroll,
                   itemExtent: 76,
-                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 40),
+                  padding: EdgeInsets.fromLTRB(14, 8, 14, math.max(40.0, box.maxHeight / 2)),
                   itemCount: episodes.length,
                   itemBuilder: (context, i) {
                     final e = episodes[i];
@@ -875,7 +875,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                       ),
                     );
                   },
-                ),
+                )),
               ),
             ),
           ),
@@ -917,7 +917,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
     if (!_scroll.hasClients) return;
     // L'élément choisi reste au milieu de l'écran (sauf aux deux bouts de la liste).
     final view = _scroll.position.viewportDimension;
-    final target = (_index * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
+    final target = (10 + _index * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _scroll.position.maxScrollExtent);
     _scroll.animateTo(target, duration: const Duration(milliseconds: 110), curve: Curves.easeOut);
   }
 
@@ -968,7 +968,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
               Text(widget.title, style: kTextD(38, weight: FontWeight.w800)),
               const SizedBox(height: 16),
               Expanded(
-                child: ListView(controller: _scroll, padding: const EdgeInsets.fromLTRB(34, 10, 34, 40), children: [
+                child: LayoutBuilder(builder: (context, box) => ListView(controller: _scroll, itemExtent: _rowHeight, padding: EdgeInsets.fromLTRB(34, 10, 34, math.max(40.0, box.maxHeight / 2)), children: [
                   for (var i = 0; i < entries.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
@@ -989,7 +989,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
                         ),
                       ),
                     ),
-                ]),
+                ])),
               ),
               if (widget.footer != null) Padding(padding: const EdgeInsets.only(bottom: 14), child: Text(widget.footer!, style: kTextD(17, color: Colors.white54))),
               const TvHints(items: [('OK', 'Choisir'), ('▲ ▼', 'Se déplacer'), ('Retour', 'Revenir')]),
