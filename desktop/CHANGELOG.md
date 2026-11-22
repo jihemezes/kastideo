@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.5-android32] - 2026-11-22
+
+- **Android TV** : l'élément sélectionné (épisodes, en-tête de saison, lignes des réglages) grossissait trop et ses extrémités gauche et droite sortaient de l'affichage. L'agrandissement est maintenant proportionné à la largeur de l'élément, qui reste entièrement visible.
+
 ## [1.19.5-android31] - 2026-11-22
 
 - **Android TV, Séries** : la liste des épisodes défile désormais avec la sélection (elle sortait de l'écran en bas), les boutons sont moins larges. Nouveau **téléchargement** : icône sur chaque épisode (▶ puis OK) et bouton **Télécharger la saison** dans l'en-tête (▲ depuis le premier épisode ; ◀ ▶ y changent de saison). Contient android29 et android30.

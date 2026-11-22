@@ -227,7 +227,7 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
         Icon(e.icon, color: Colors.white70, size: 26),
       ]),
     );
-    if (active) return TvFocusBox(selected: selected, radius: 16, child: body);
+    if (active) return TvFocusBox(selected: selected, radius: 16, scale: 1.03, child: body);
     // Panneau parent : l'élément ouvert reste repéré par un contour orange discret.
     return DecoratedBox(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: selected ? KPalette.orange.withValues(alpha: 0.8) : Colors.transparent, width: 3)),

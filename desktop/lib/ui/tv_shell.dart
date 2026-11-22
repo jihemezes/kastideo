@@ -78,14 +78,16 @@ class TvBackground extends StatelessWidget {
 
 /// Élément sélectionné : contour orange épais et agrandissement (sans halo).
 class TvFocusBox extends StatelessWidget {
-  const TvFocusBox({super.key, required this.selected, required this.child, this.radius = 18});
+  const TvFocusBox({super.key, required this.selected, required this.child, this.radius = 18, this.scale = 1.07});
   final bool selected;
+  /// Agrandissement quand l'élément est sélectionné (réduit pour les éléments très larges).
+  final double scale;
   final Widget child;
   final double radius;
 
   @override
   Widget build(BuildContext context) => AnimatedScale(
-        scale: selected ? 1.07 : 1.0,
+        scale: selected ? scale : 1.0,
         duration: const Duration(milliseconds: 140),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
@@ -806,6 +808,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
               child: TvFocusBox(
                 selected: headerSelected,
                 radius: 16,
+                scale: 1.015,
                 child: Container(
                   height: 60,
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -850,6 +853,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                       child: TvFocusBox(
                         selected: isSel && !_epIcon,
                         radius: 16,
+                        scale: 1.015,
                         child: Container(
                           padding: const EdgeInsets.only(left: 20, right: 8),
                           color: Colors.white.withValues(alpha: 0.12),
@@ -971,6 +975,7 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
                       child: TvFocusBox(
                         selected: i == _index,
                         radius: 18,
+                        scale: 1.03,
                         child: Container(
                           height: 70,
                           padding: const EdgeInsets.symmetric(horizontal: 24),
