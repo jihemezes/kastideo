@@ -1263,10 +1263,10 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
     final address = server?.address;
     return TvBackground(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(100, 50, 100, 30),
+        padding: const EdgeInsets.fromLTRB(100, 32, 100, 20),
         child: Column(children: [
-          Text(tr('Ajouter une source avec mon téléphone'), style: kTextD(38, weight: FontWeight.w800)),
-          const SizedBox(height: 26),
+          Text(tr('Ajouter une source avec mon téléphone'), style: kTextD(34, weight: FontWeight.w800)),
+          const SizedBox(height: 14),
           Expanded(
             child: !_ready
                 ? const Center(child: CircularProgressIndicator(color: Colors.white))
@@ -1275,31 +1275,43 @@ class _TvQrPageState extends State<TvQrPage> with TvKeys<TvQrPage> {
                         child: Text(tr('Impossible de se connecter au réseau local. Vérifiez que la télévision est sur le même Wi-Fi que le téléphone.'),
                             textAlign: TextAlign.center, style: kTextD(24)),
                       )
-                    : Row(children: [
-                        Container(
-                          padding: const EdgeInsets.all(22),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
-                          child: SizedBox(width: 380, height: 380, child: CustomPaint(painter: _QrPainter(address))),
-                        ),
-                        const SizedBox(width: 60),
-                        Expanded(
-                          child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(tr('1. Branchez le téléphone sur le même Wi-Fi.'), style: kTextD(24)),
-                            const SizedBox(height: 10),
-                            Text(tr('2. Scannez le code, ou ouvrez cette adresse :'), style: kTextD(24)),
-                            const SizedBox(height: 8),
-                            Text(address, style: kTextD(26, weight: FontWeight.w800, color: KPalette.orange)),
-                            const SizedBox(height: 10),
-                            Text(tr('3. Saisissez ce code, puis les informations de la source :'), style: kTextD(24)),
-                            const SizedBox(height: 8),
-                            Text(server!.code, style: kTextD(64, weight: FontWeight.w800)),
-                            if (_added != null) ...[
-                              const SizedBox(height: 18),
-                              _AddedStatus(source: _added!),
-                            ],
-                          ]),
-                        ),
-                      ]),
+                    : LayoutBuilder(builder: (context, box) {
+                        // Le code reste entièrement visible sur tout écran : le QR s'adapte à la hauteur disponible
+                        // et le texte à droite se réduit au besoin.
+                        final qr = (box.maxHeight - 44).clamp(180.0, 380.0);
+                        return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                          Container(
+                            padding: const EdgeInsets.all(22),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
+                            child: SizedBox(width: qr, height: qr, child: CustomPaint(painter: _QrPainter(address))),
+                          ),
+                          const SizedBox(width: 50),
+                          Expanded(
+                            child: LayoutBuilder(builder: (context, side) => FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: SizedBox(
+                                width: side.maxWidth,
+                                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                  Text(tr('1. Branchez le téléphone sur le même Wi-Fi.'), style: kTextD(24)),
+                                  const SizedBox(height: 10),
+                                  Text(tr('2. Scannez le code, ou ouvrez cette adresse :'), style: kTextD(24)),
+                                  const SizedBox(height: 8),
+                                  Text(address, style: kTextD(26, weight: FontWeight.w800, color: KPalette.orange)),
+                                  const SizedBox(height: 10),
+                                  Text(tr('3. Saisissez ce code, puis les informations de la source :'), style: kTextD(24)),
+                                  const SizedBox(height: 8),
+                                  Text(server!.code, style: kTextD(64, weight: FontWeight.w800)),
+                                  if (_added != null) ...[
+                                    const SizedBox(height: 18),
+                                    _AddedStatus(source: _added!),
+                                  ],
+                                ]),
+                              ),
+                            )),
+                          ),
+                        ]);
+                      }),
           ),
           const TvHints(items: [('OK', 'Terminer'), ('Retour', 'Revenir')]),
         ]),

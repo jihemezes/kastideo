@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.6-android37] - 2026-11-23
+
+- **Android TV, « Ajouter une source avec mon téléphone »** : le code à saisir sortait de l'écran sur une vraie télévision (QR code trop grand, texte coupé, aide de bas d'écran superposée). Le QR code s'adapte à la hauteur disponible et le texte à droite se réduit pour rester entièrement visible, code compris.
+
 ## [1.19.6-android36] - 2026-11-23
 
 - **Android TV, mode Cinéma : « Voir tout »**. Chaque rangée (Reprendre la lecture, Favoris, Récents, catégories) commence et finit par une vignette **Voir tout (N)** : OK ouvre tous les contenus de la rangée en grille défilante, avec un **tri** (ordre du fournisseur, A à Z, ajout récent, année ; ▲ depuis la première ligne). Retour revient à la rangée, et à la grille depuis une fiche ou un lecteur. Au-delà de 25 catégories, une dernière rangée **Toutes les catégories** permet d'ouvrir les autres.
