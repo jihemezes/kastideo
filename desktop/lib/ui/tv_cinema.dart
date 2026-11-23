@@ -12,23 +12,42 @@ import 'widgets.dart';
 /// Style Cinéma à la télécommande : bannière de l'élément sélectionné, puis rangées d'affiches
 /// (reprise, favoris, récents, catégories). Les touches sont transmises par l'écran parent (`handle`).
 class TvRails extends StatefulWidget {
-  const TvRails({super.key, required this.kind, required this.onOpen});
+  const TvRails({super.key, required this.kind, required this.onOpen, required this.onSeeAll, required this.onCategories});
   final MediaKind kind;
   final void Function(MediaItem item) onOpen;
+
+  /// « Voir tout » : ouvre la rangée complète (titre, tous les contenus).
+  final void Function(String title, List<MediaItem> items) onSeeAll;
+
+  /// Dernière rangée : liste de toutes les catégories (au-delà de celles affichées en rangées).
+  final VoidCallback onCategories;
 
   @override
   State<TvRails> createState() => TvRailsState();
 }
 
 class _Rail {
-  const _Rail(this.title, this.items);
+  const _Rail(this.title, this.items, {List<MediaItem>? full, this.categoryCount}) : full = full ?? items;
   final String title;
+
+  /// Contenus montrés dans la rangée (les premiers).
   final List<MediaItem> items;
+
+  /// Tous les contenus (pour « Voir tout »).
+  final List<MediaItem> full;
+
+  /// Rangée finale « Toutes les catégories » : une seule vignette, sans contenus.
+  final int? categoryCount;
+
+  bool get isCategories => categoryCount != null;
+
+  /// Nombre de vignettes : « Voir tout » au début, les contenus, « Voir tout » à la fin.
+  int get length => isCategories ? 1 : items.length + 2;
 }
 
 class TvRailsState extends State<TvRails> {
   int _row = 0;
-  int _col = 0;
+  int _col = 1; // 0 : « Voir tout » au début de la rangée ; 1 : premier contenu
   final _vertical = ScrollController();
   final _horizontal = <int, ScrollController>{};
   Timer? _load;
@@ -55,17 +74,20 @@ class TvRailsState extends State<TvRails> {
     final kind = widget.kind;
     final rails = <_Rail>[];
     if (!_live) {
-      final resume = [for (final i in library.recentsOf(kind)) if (watch.inResume(i.id)) i].take(30).toList();
-      if (resume.isNotEmpty) rails.add(_Rail(tr('Reprendre la lecture'), resume));
+      final resume = [for (final i in library.recentsOf(kind)) if (watch.inResume(i.id)) i];
+      if (resume.isNotEmpty) rails.add(_Rail(tr('Reprendre la lecture'), resume.take(30).toList(), full: resume));
     }
-    final favorites = library.favoritesOf(kind).take(40).toList();
-    if (favorites.isNotEmpty) rails.add(_Rail(tr('Favoris'), favorites));
-    final recents = library.recentsOf(kind).take(30).toList();
-    if (recents.isNotEmpty) rails.add(_Rail(tr('Récents'), recents));
-    for (final name in library.categories(kind).take(25)) {
-      final items = library.itemsInCategory(kind, name).take(40).toList();
-      if (items.isNotEmpty) rails.add(_Rail(library.prefs(kind).displayName(name), items));
+    final favorites = library.favoritesOf(kind);
+    if (favorites.isNotEmpty) rails.add(_Rail(tr('Favoris'), favorites.take(40).toList(), full: favorites));
+    final recents = library.recentsOf(kind);
+    if (recents.isNotEmpty) rails.add(_Rail(tr('Récents'), recents.take(30).toList(), full: recents));
+    final categories = library.categories(kind);
+    for (final name in categories.take(25)) {
+      final all = library.itemsInCategory(kind, name);
+      if (all.isNotEmpty) rails.add(_Rail(library.prefs(kind).displayName(name), all.take(40).toList(), full: all));
     }
+    final extra = categories.length - 25;
+    if (extra > 0) rails.add(_Rail(tr('Toutes les catégories'), const [], categoryCount: categories.length));
     // Page de départ choisie dans les Réglages : sa rangée passe en premier.
     final settings = context.settings;
     var mode = settings.startPage(kind);
@@ -89,7 +111,8 @@ class TvRailsState extends State<TvRails> {
     if (rails.isEmpty) return false;
     setState(() {
       _row = _row.clamp(0, rails.length - 1);
-      final count = rails[_row].items.length;
+      final rail = rails[_row];
+      final count = rail.length;
       switch (key) {
         case TvKey.left:
           if (_col > 0) _col--;
@@ -98,15 +121,22 @@ class TvRailsState extends State<TvRails> {
         case TvKey.up:
           if (_row > 0) {
             _row--;
-            _col = _col.clamp(0, rails[_row].items.length - 1);
+            _col = _col.clamp(0, rails[_row].length - 1);
           }
         case TvKey.down:
           if (_row < rails.length - 1) {
             _row++;
-            _col = _col.clamp(0, rails[_row].items.length - 1);
+            _col = _col.clamp(0, rails[_row].length - 1);
           }
         case TvKey.ok:
-          widget.onOpen(rails[_row].items[_col.clamp(0, count - 1)]);
+          final c = _col.clamp(0, count - 1);
+          if (rail.isCategories) {
+            widget.onCategories();
+          } else if (c == 0 || c == count - 1) {
+            widget.onSeeAll(rail.title, rail.full);
+          } else {
+            widget.onOpen(rail.items[c - 1]);
+          }
         case TvKey.menu:
           break;
       }
@@ -138,6 +168,32 @@ class TvRailsState extends State<TvRails> {
     });
   }
 
+  /// Vignette « Voir tout » (début et fin de rangée) ou « Toutes les catégories ».
+  Widget _seeAllCard(_Rail rail, bool selected, {required bool atStart}) {
+    final count = rail.isCategories ? rail.categoryCount! : rail.full.length;
+    return SizedBox(
+      width: _cardW,
+      child: Column(children: [
+        TvFocusBox(
+          selected: selected,
+          radius: 10,
+          child: Container(
+            width: _cardW,
+            height: _cardH,
+            color: Colors.white.withValues(alpha: selected ? 0.22 : 0.12),
+            alignment: Alignment.center,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Icon(atStart ? Icons.keyboard_double_arrow_left_rounded : Icons.grid_view_rounded, color: KPalette.orange, size: 34),
+              const SizedBox(height: 8),
+              Text(rail.isCategories ? tr('Toutes les catégories') : tr('Voir tout'), textAlign: TextAlign.center, style: kTextD(16, weight: FontWeight.w800)),
+              Text('($count)', style: kTextD(14, color: Colors.white70)),
+            ]),
+          ),
+        ),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final rails = _rails();
@@ -145,12 +201,15 @@ class TvRailsState extends State<TvRails> {
       return Center(child: Text(context.library.sources.isEmpty ? tr('Aucune source : ajoutez-en une dans Réglages.') : tr('Rien à afficher.'), style: kTextD(22, color: Colors.white70)));
     }
     _row = _row.clamp(0, rails.length - 1);
-    _col = _col.clamp(0, rails[_row].items.length - 1);
-    final focus = rails[_row].items[_col];
-    _scheduleDetails(focus);
-    final d = _live ? null : context.info.details(focus.id);
+    _col = _col.clamp(0, rails[_row].length - 1);
+    final current = rails[_row];
+    // Sur une vignette « Voir tout », l'en-tête montre la rangée ; sinon le contenu sélectionné.
+    final MediaItem? focus = current.isCategories || _col == 0 || _col == current.length - 1 ? null : current.items[_col - 1];
+    if (focus != null) _scheduleDetails(focus);
+    final d = _live || focus == null ? null : context.info.details(focus.id);
     final parts = <String>[
-      if ((d?.year ?? focus.year) != null) '${d?.year ?? focus.year}',
+      if (focus == null) '${current.isCategories ? current.categoryCount : current.full.length} ${current.isCategories ? tr('catégories') : tr('titres')}',
+      if (focus != null && (d?.year ?? focus.year) != null) '${d?.year ?? focus.year}',
       if (d?.runtime != null) '${d!.runtime} min',
       if (d?.rating != null) '★ ${d!.rating!.toStringAsFixed(1)}',
       if (d != null && d.genres.isNotEmpty) d.genres.take(3).join(', '),
@@ -170,7 +229,7 @@ class TvRailsState extends State<TvRails> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text(title, style: kTextD(16, color: KPalette.orange, weight: FontWeight.w800)),
                 const SizedBox(height: 2),
-                Text(d?.title ?? focus.displayName, style: kTextD(30, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(focus == null ? current.title : (d?.title ?? focus.displayName), style: kTextD(30, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
                 if (parts.isNotEmpty) Text(parts.join('  ·  '), style: kTextD(16, color: Colors.white70)),
                 const SizedBox(height: 4),
                 if (d?.plot != null) Text(d!.plot!, style: kTextD(16, color: Colors.white70), maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -199,11 +258,14 @@ class TvRailsState extends State<TvRails> {
                   controller: controller,
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
-                  itemCount: rail.items.length,
+                  itemCount: rail.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 16),
                   itemBuilder: (context, i) {
-                    final item = rail.items[i];
                     final selected = r == _row && i == _col;
+                    if (rail.isCategories || i == 0 || i == rail.length - 1) {
+                      return _seeAllCard(rail, selected, atStart: i == 0 && !rail.isCategories);
+                    }
+                    final item = rail.items[i - 1];
                     final fraction = _live ? null : context.watch.fraction(item.id);
                     return SizedBox(
                       width: _cardW,

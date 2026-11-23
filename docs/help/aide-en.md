@@ -1366,6 +1366,8 @@ On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its 
 
 **History**: Settings > **History** (Android TV: Settings > History) clears, after confirmation, **Recents**, **Watched and resume points** (“watched” marks and positions) and the **YouTube history**, one by one or with **Clear all**. Favourites, sources and settings are not affected. With iCloud sync of playback progress, or a Jellyfin / Emby / Plex server, positions can come back from another device: clear them there too.
 
+**Cinema on Android TV: “See all”**: each Cinema row (Resume, Favourites, Recents, categories) starts and ends with a **See all (N)** tile; **OK** opens every title of the row in a grid. In that grid, ▲ from the first line reaches **Sort** (◀ ▶: provider order, A to Z, recently added, year); **Back** returns to the row. Beyond 25 categories, the last row **All categories** lists the others. The Android TV History menu no longer offers YouTube history (no YouTube player on TV).
+
 **No sound on Android TV?** Open Settings > Playback > **Audio diagnostics** (after starting a channel): it shows the volume, audio track, codec, stream format and the format sent to the TV. **Audio output** chooses Stereo (default, safest over HDMI), Automatic (multichannel) or Dolby / DTS passthrough (amplifier or soundbar). If these values look right but nothing comes out, check the HDMI cable, the TV volume (its speakers can be weak) and the box's audio output in Android settings.
 
 **Recording, subtitles, MultiView and watched / unwatched on Android TV**

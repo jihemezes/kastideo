@@ -1365,6 +1365,8 @@ Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di
 
 **Cronologie**: Impostazioni > **Cronologie** (Android TV: Impostazioni > Cronologie) cancella, dopo conferma, i **Recenti**, i **Visti e la ripresa** (segni «visto» e posizioni) e la **cronologia YouTube**, uno alla volta o con **Cancella tutto**. Preferiti, sorgenti e impostazioni non vengono toccati. Con la sincronizzazione iCloud della ripresa o un server Jellyfin / Emby / Plex, le posizioni possono tornare da un altro dispositivo: cancellale anche lì.
 
+**Cinema su Android TV: «Mostra tutto»**: ogni fila della modalità Cinema (Riprendi, Preferiti, Recenti, categorie) inizia e finisce con una miniatura **Mostra tutto (N)**; **OK** apre tutti i titoli della fila in una griglia. In essa, ▲ dalla prima riga raggiunge l'**Ordinamento** (◀ ▶: ordine del fornitore, A–Z, aggiunti di recente, anno); **Indietro** torna alla fila. Oltre 25 categorie, l'ultima fila **Tutte le categorie** elenca le altre. Il menu Cronologie di Android TV non propone più la cronologia YouTube (nessun lettore YouTube su TV).
+
 **Nessun audio su Android TV?** Apra Impostazioni > Riproduzione > **Diagnostica audio** (dopo aver avviato un canale): mostra volume, traccia audio, codec, formato del flusso e quello inviato al televisore. **Uscita audio** permette di scegliere Stereo (predefinito, il più sicuro via HDMI), Automatico (multicanale) o Passthrough Dolby / DTS (amplificatore o soundbar). Se i valori sono corretti ma non esce nulla, controlli il cavo HDMI, il volume del televisore (gli altoparlanti possono essere deboli) e l'uscita audio del box nelle impostazioni Android.
 
 **Registrazione, sottotitoli, MultiVista e visto / non visto su Android TV**

@@ -2,6 +2,11 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.6-android36] - 2026-11-23
+
+- **Android TV, mode Cinéma : « Voir tout »**. Chaque rangée (Reprendre la lecture, Favoris, Récents, catégories) commence et finit par une vignette **Voir tout (N)** : OK ouvre tous les contenus de la rangée en grille défilante, avec un **tri** (ordre du fournisseur, A à Z, ajout récent, année ; ▲ depuis la première ligne). Retour revient à la rangée, et à la grille depuis une fiche ou un lecteur. Au-delà de 25 catégories, une dernière rangée **Toutes les catégories** permet d'ouvrir les autres.
+- **Android TV, Historiques** : la ligne « Historique YouTube » n'apparaît plus (pas de lecteur YouTube sur TV).
+
 ## [1.19.6-android35] - 2026-11-22
 
 - **Historiques** : nouvelle section dans les Réglages (sur Android TV : Réglages > **Historiques**) pour vider, après confirmation, les **Récents**, les **Vus et la reprise de lecture** (marques « vu » et positions) et l'**historique YouTube**, un par un ou avec **Tout effacer**. Les favoris, les sources et les réglages ne sont pas touchés. Remplace le bouton « Effacer les récents » de Windows / Linux / Android. Version de référence 1.19.6.

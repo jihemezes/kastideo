@@ -152,7 +152,7 @@ class TvHints extends StatelessWidget {
 
 // MARK: Films et séries
 
-enum _Mode { grid, detail, episodes, player }
+enum _Mode { grid, all, detail, episodes, player }
 
 /// Films ou séries : catégories en haut, affiches en dessous, fiche, épisodes puis lecteur plein cadre.
 class TvCatalog extends StatefulWidget {
@@ -189,6 +189,16 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
   final _chipScroll = ScrollController();
   final _rails = GlobalKey<TvRailsState>();
 
+  // « Voir tout » du mode Cinéma : une rangée en grille complète, avec choix du tri.
+  String _allTitle = '';
+  List<MediaItem> _allItems = const [];
+  List<MediaItem> _allSorted = const [];
+  int _allCell = 0;
+  int _allSort = 0;
+  bool _allInHeader = false;
+  bool _fromAll = false; // la fiche ou le lecteur a été ouvert depuis « Voir tout » : Retour y revient
+  final _allScroll = ScrollController();
+
   bool get _useRails => !widget.library && context.settings.interfaceFor(widget.kind) == InterfaceStyle.cinema;
   bool get _live => widget.kind == MediaKind.live && !widget.library;
 
@@ -215,6 +225,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     stopTvKeys();
     if (TvCatalog.onBack == _back) TvCatalog.onBack = null;
     _scroll.dispose();
+    _allScroll.dispose();
     _chipScroll.dispose();
     super.dispose();
   }
@@ -256,13 +267,19 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
         if (_live && (TVView.onBack?.call() ?? false)) return true;
         final playback = context.playback;
         if (playback.current != null) playback.stop();
-        setState(() => _mode = _live ? _Mode.grid : (_item?.kind == MediaKind.series ? _Mode.episodes : _Mode.detail));
+        setState(() => _mode = _live ? (_fromAll ? _Mode.all : _Mode.grid) : (_item?.kind == MediaKind.series ? _Mode.episodes : _Mode.detail));
         return true;
       case _Mode.episodes:
         setState(() => _mode = _Mode.detail);
         return true;
       case _Mode.detail:
-        setState(() => _mode = _Mode.grid);
+        setState(() => _mode = _fromAll ? _Mode.all : _Mode.grid);
+        return true;
+      case _Mode.all:
+        setState(() {
+          _mode = _Mode.grid;
+          _fromAll = false;
+        });
         return true;
       case _Mode.grid:
         return false;
@@ -305,6 +322,8 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
           } else {
             _gridKey(key);
           }
+        case _Mode.all:
+          _allKey(key);
         case _Mode.detail:
           _detailKey(key);
         case _Mode.episodes:
@@ -359,6 +378,108 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
         break;
     }
     _ensureCellVisible();
+  }
+
+  // MARK: « Voir tout » (mode Cinéma)
+
+  static const _sortLabels = ['Ordre du fournisseur', 'Trier de A à Z', 'Ajout récent', 'Année'];
+
+  void _openAll(String title, List<MediaItem> items) {
+    setState(() {
+      _mode = _Mode.all;
+      _allTitle = title;
+      _allItems = items;
+      _allSort = 0;
+      _allCell = 0;
+      _allInHeader = false;
+      _fromAll = false;
+      _applyAllSort();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_allScroll.hasClients) _allScroll.jumpTo(0);
+    });
+  }
+
+  void _applyAllSort() {
+    final list = List<MediaItem>.of(_allItems);
+    switch (_allSort) {
+      case 1:
+        list.sort((a, b) => a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()));
+      case 2:
+        list.sort((a, b) => (b.added ?? DateTime.fromMillisecondsSinceEpoch(0)).compareTo(a.added ?? DateTime.fromMillisecondsSinceEpoch(0)));
+      case 3:
+        list.sort((a, b) => (b.year ?? 0).compareTo(a.year ?? 0));
+    }
+    _allSorted = list;
+  }
+
+  /// Dernière rangée du Cinéma : choisir une catégorie parmi toutes, puis la voir en grille.
+  void _pickCategory() {
+    final library = context.library;
+    final kind = widget.kind;
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => TvMenuPage(
+        title: tr('Toutes les catégories'),
+        entries: (_) => [
+          for (final name in library.categories(kind))
+            TvEntry(library.categoryName(kind, name), (c) {
+              Navigator.of(c).pop();
+              if (mounted) _openAll(library.categoryName(kind, name), library.itemsInCategory(kind, name));
+            }, detail: '${library.itemsInCategory(kind, name).length}'),
+        ],
+      ),
+    ));
+  }
+
+  void _allKey(TvKey key) {
+    final items = _allSorted;
+    if (_allInHeader) {
+      switch (key) {
+        case TvKey.left:
+          _allSort = (_allSort + _sortLabels.length - 1) % _sortLabels.length;
+          _allCell = 0;
+          _applyAllSort();
+        case TvKey.right:
+          _allSort = (_allSort + 1) % _sortLabels.length;
+          _allCell = 0;
+          _applyAllSort();
+        case TvKey.down:
+          if (items.isNotEmpty) _allInHeader = false;
+        case TvKey.up:
+        case TvKey.ok:
+        case TvKey.menu:
+          break;
+      }
+      if (_allScroll.hasClients) _allScroll.jumpTo(0);
+      return;
+    }
+    switch (key) {
+      case TvKey.left:
+        if (_allCell % _columns > 0) _allCell--;
+      case TvKey.right:
+        if (_allCell % _columns < _columns - 1 && _allCell + 1 < items.length) _allCell++;
+      case TvKey.down:
+        if (_allCell + _columns < items.length) _allCell += _columns;
+      case TvKey.up:
+        if (_allCell - _columns >= 0) {
+          _allCell -= _columns;
+        } else {
+          _allInHeader = true;
+        }
+      case TvKey.ok:
+        if (items.isNotEmpty) {
+          _fromAll = true;
+          _openItem(items[_allCell.clamp(0, items.length - 1)]);
+        }
+      case TvKey.menu:
+        break;
+    }
+    if (_allScroll.hasClients) {
+      final row = _allCell ~/ _columns;
+      final view = _allScroll.position.viewportDimension;
+      final target = (row * _rowHeight - (view - _rowHeight) / 2).clamp(0.0, _allScroll.position.maxScrollExtent);
+      if (target != _allScroll.offset) _allScroll.animateTo(target, duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
+    }
   }
 
   /// Ouvre un élément : une chaîne est lancée aussitôt ; un film ou une série ouvre sa fiche.
@@ -568,6 +689,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
       builder: (context, _) => TvBackground(
         child: switch (_mode) {
           _Mode.grid => _gridView(context),
+          _Mode.all => _allGrid(context),
           _Mode.detail => _detailView(context),
           _Mode.episodes => _episodesView(context),
           _Mode.player => const SizedBox(),
@@ -582,7 +704,18 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
     final title = widget.library ? tr('Mes vidéos') : (_live ? tr('Direct') : (widget.kind == MediaKind.movie ? tr('Films') : tr('Séries')));
     if (_useRails) {
       return Column(children: [
-        Expanded(child: TvRails(key: _rails, kind: widget.kind, onOpen: _openItem)),
+        Expanded(
+          child: TvRails(
+            key: _rails,
+            kind: widget.kind,
+            onOpen: (item) {
+              _fromAll = false;
+              _openItem(item);
+            },
+            onSeeAll: _openAll,
+            onCategories: _pickCategory,
+          ),
+        ),
         const Padding(padding: EdgeInsets.only(bottom: 14), child: TvHints()),
       ]);
     }
@@ -667,6 +800,81 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
           const TvHints(),
         ],
       ),
+    );
+  }
+
+  /// « Voir tout » : tous les contenus d'une rangée du Cinéma, en grille, avec choix du tri (▲ puis ◀ ▶).
+  Widget _allGrid(BuildContext context) {
+    final items = _allSorted;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(60, 36, 60, 24),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Flexible(child: Text(_allTitle, style: kTextD(38, weight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          const SizedBox(width: 20),
+          Text('${items.length}', style: kTextD(22, color: Colors.white60)),
+        ]),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 64,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: TvFocusBox(
+                selected: _allInHeader,
+                radius: 24,
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  color: Colors.white.withValues(alpha: 0.14),
+                  child: Text('◀  ${tr('Tri')} : ${tr(_sortLabels[_allSort])}  ▶', style: kTextD(19, weight: FontWeight.w700)),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Expanded(
+          child: items.isEmpty
+              ? Center(child: Text(tr('Rien à afficher.'), style: kTextD(22, color: Colors.white70)))
+              : LayoutBuilder(builder: (context, box) {
+                  const spacing = 22.0;
+                  _columns = 6;
+                  final width = (box.maxWidth - 24 - spacing * (_columns - 1)) / _columns;
+                  final live = widget.kind == MediaKind.live;
+                  final height = live ? width * 0.66 : width * 1.5;
+                  _rowHeight = height + 44 + spacing;
+                  return GridView.builder(
+                    controller: _allScroll,
+                    padding: const EdgeInsets.fromLTRB(12, 14, 12, 40),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _columns, mainAxisSpacing: spacing, crossAxisSpacing: spacing, mainAxisExtent: height + 44),
+                    itemCount: items.length,
+                    itemBuilder: (context, i) {
+                      final item = items[i];
+                      final selected = !_allInHeader && i == _allCell;
+                      final fraction = context.watch.fraction(item.id);
+                      return Column(children: [
+                        TvFocusBox(
+                          selected: selected,
+                          radius: 14,
+                          child: Stack(children: [
+                            PosterImage(url: item.logo, name: item.name, width: width, height: height, fit: live ? BoxFit.contain : BoxFit.cover),
+                            if (context.watch.isWatched(item.id)) const Positioned(top: 8, right: 8, child: Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 28)),
+                            if (fraction != null && fraction > 0 && fraction < 1) Positioned(left: 0, right: 0, bottom: 0, child: LinearProgressIndicator(value: fraction, minHeight: 6, color: KPalette.orange)),
+                          ]),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(16, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+                      ]);
+                    },
+                  );
+                }),
+        ),
+        TvHints(items: _allInHeader
+            ? [('◀ ▶', tr('Changer le tri')), ('▼', tr('Se déplacer')), ('Retour', tr('Revenir'))]
+            : [('OK', tr('Ouvrir')), ('◀ ▲ ▼ ▶', tr('Se déplacer')), ('▲', tr('Tri')), ('Retour', tr('Revenir'))]),
+      ]),
     );
   }
 

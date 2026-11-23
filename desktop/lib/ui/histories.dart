@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../app_state.dart';
+import '../core/device.dart';
 import '../core/youtube.dart';
 import '../l10n.dart';
 
@@ -23,7 +24,8 @@ List<HistoryKind> historyKinds(BuildContext context) {
   return [
     HistoryKind(tr('Récents'), tr('Chaînes, films et épisodes ouverts récemment'), library.recentIds.length, library.clearRecents),
     HistoryKind(tr('Vus et reprise de lecture'), tr('Marques « vu » et positions de reprise des films et épisodes'), watch.count, watch.clearAll),
-    HistoryKind(tr('Historique YouTube'), tr('Vidéos YouTube regardées'), youtube.history.length, youtube.clearHistory),
+    // Pas de lecteur YouTube sur Android TV : rien à vider.
+    if (!Device.isTv) HistoryKind(tr('Historique YouTube'), tr('Vidéos YouTube regardées'), youtube.history.length, youtube.clearHistory),
   ];
 }
 

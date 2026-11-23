@@ -1365,6 +1365,8 @@ No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda
 
 **Históricos**: Definições > **Históricos** (Android TV: Definições > Históricos) apaga, após confirmação, os **Recentes**, os **Vistos e a retoma** (marcas «visto» e posições) e o **histórico do YouTube**, um a um ou com **Apagar tudo**. Os favoritos, as fontes e as definições não são afetados. Com a sincronização iCloud da retoma ou um servidor Jellyfin / Emby / Plex, as posições podem voltar de outro dispositivo: apague-as também aí.
 
+**Cinema no Android TV: «Ver tudo»**: cada fila do modo Cinema (Retomar, Favoritos, Recentes, categorias) começa e acaba com uma miniatura **Ver tudo (N)**; **OK** abre todos os conteúdos da fila numa grelha. Nela, ▲ a partir da primeira linha chega à **Ordenação** (◀ ▶: ordem do fornecedor, A a Z, adicionados recentemente, ano); **Voltar** regressa à fila. Além de 25 categorias, a última fila **Todas as categorias** lista as restantes. O menu Históricos do Android TV já não oferece o histórico do YouTube (não há leitor YouTube na TV).
+
 **Sem som no Android TV?** Abra Ajustes > Reprodução > **Diagnóstico de áudio** (depois de iniciar um canal): mostra o volume, a faixa de áudio, o codec, o formato do fluxo e o enviado para a televisão. **Saída de áudio** permite escolher Estéreo (predefinição, a mais segura por HDMI), Automático (multicanal) ou Passthrough Dolby / DTS (amplificador ou barra de som). Se os valores estiverem corretos mas não sair nada, verifique o cabo HDMI, o volume da televisão (as colunas podem ser fracas) e a saída de áudio da box nas definições do Android.
 
 **Gravação, legendas, MultiVista e visto / não visto no Android TV**

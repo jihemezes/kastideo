@@ -1366,6 +1366,8 @@ En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la
 
 **Historiales**: Ajustes > **Historiales** (Android TV: Ajustes > Historiales) borra, tras confirmar, los **Recientes**, los **Vistos y la reanudación** (marcas «visto» y posiciones) y el **historial de YouTube**, uno por uno o con **Borrar todo**. Los favoritos, las fuentes y los ajustes no se tocan. Con la sincronización iCloud de la reanudación o un servidor Jellyfin / Emby / Plex, las posiciones pueden volver desde otro dispositivo: bórrelas también allí.
 
+**Cine en Android TV: «Ver todo»**: cada fila del modo Cine (Reanudar, Favoritos, Recientes, categorías) empieza y termina con una miniatura **Ver todo (N)**; **OK** abre todos los contenidos de la fila en una cuadrícula. En ella, ▲ desde la primera línea llega a **Orden** (◀ ▶: orden del proveedor, A a Z, añadido reciente, año); **Atrás** vuelve a la fila. Pasadas 25 categorías, la última fila **Todas las categorías** muestra las demás. El menú Historiales de Android TV ya no ofrece el historial de YouTube (no hay reproductor de YouTube en TV).
+
 **¿Sin sonido en Android TV?** Abra Ajustes > Reproducción > **Diagnóstico de audio** (tras iniciar un canal): muestra el volumen, la pista de audio, el códec, el formato del flujo y el enviado al televisor. **Salida de audio** permite elegir Estéreo (por defecto, lo más seguro por HDMI), Automático (multicanal) o Passthrough Dolby / DTS (amplificador o barra de sonido). Si los valores son correctos pero no sale nada, compruebe el cable HDMI, el volumen del televisor (sus altavoces pueden ser débiles) y la salida de audio de la caja en los ajustes de Android.
 
 **Grabación, subtítulos, MultiVista y visto / no visto en Android TV**
