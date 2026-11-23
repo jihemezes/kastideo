@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.19.6</title>
+      <pubDate>Mon, 23 Nov 2026 19:44:14 GMT</pubDate>
+      <sparkle:version>100</sparkle:version>
+      <sparkle:shortVersionString>1.19.6</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Nouvelle section &lt;b&gt;Historiques&lt;/b&gt; dans les Réglages (Mac, iPhone / iPad, Apple TV, et Windows / Linux / Android) : vider, après confirmation, les &lt;b&gt;Récents&lt;/b&gt;, les &lt;b&gt;Vus et la reprise de lecture&lt;/b&gt; (marques « vu » et positions, y compris les retraits de « Reprendre la lecture ») et l&amp;#x27;&lt;b&gt;historique YouTube&lt;/b&gt;, un par un ou avec &lt;b&gt;Tout effacer&lt;/b&gt;. Les favoris, les sources et les réglages ne sont jamais touchés. Remplace les boutons « Effacer les récents » et « Oublier les positions de lecture » du Mac.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.19.6/Kastideo-1.19.6.dmg" length="49631807" type="application/octet-stream" sparkle:edSignature="wTjjx4zDBAktpZrVBql6BxDWRVP1w43kedGXsxC86buLxsaKQgYGLS430rpib1IWiTCmMoVuD6LzWEnb6UP7CQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.19.5</title>
       <pubDate>Sun, 22 Nov 2026 14:24:20 GMT</pubDate>
       <sparkle:version>99</sparkle:version>
@@ -426,22 +437,6 @@
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <description>&lt;p&gt;&lt;b&gt;Correctif de compilation de la 1.4.0&lt;/b&gt; (Mac uniquement) : « Retour au direct » du lecteur référençait un élément non défini. Aucun changement de fonctionnement.&lt;/p&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.4.1/Kastideo-1.4.1.dmg" length="47102606" type="application/octet-stream" sparkle:edSignature="TRHXkpRd3+sEt4kv+/kcAk/3yT0lZqaOtvMzzMjuiyVk98H2S4IfWisI1HOqm3JGWZSxeWYwzjWS6ee1ga/eDg==" />
-    </item>
-    <item>
-      <title>Kastideo 1.3.4</title>
-      <pubDate>Wed, 28 Oct 2026 22:27:34 GMT</pubDate>
-      <sparkle:version>55</sparkle:version>
-      <sparkle:shortVersionString>1.3.4</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;p&gt;&lt;b&gt;Guide TV : des chiffres plus justes et une liste plus propre.&lt;/b&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;b&gt;Séparateurs de catégories ignorés&lt;/b&gt; : les lignes du fournisseur comme « ♣♦♣----|FR| FRANCE FHD |FR|---♣♦♣ » ne sont pas de vraies chaînes. Elles ne sont plus comptées « sans programme » ni proposées dans les listes par thème.&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Versions d&amp;#x27;une même chaîne&lt;/b&gt; : une version 4K, FHD ou UHD sans programme propre reprend désormais celui de la version (HD, SD) qui en a un.&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;« Programme non disponible »&lt;/b&gt; affiché sous les chaînes qui n&amp;#x27;ont aucun programme (au lieu du nom de la catégorie).&lt;/li&gt;
-&lt;li&gt;&lt;b&gt;Journal « Guide TV »&lt;/b&gt; : couverture détaillée, avec les chaînes françaises à part (les chaînes étrangères n&amp;#x27;ont souvent pas de guide) et les exemples de chaînes françaises sans programme.&lt;/li&gt;
-&lt;li&gt;Plus d&amp;#x27;alerte « aucune adresse de guide connue » pour les sources Emby, Jellyfin, Plex et dossiers.&lt;/li&gt;
-&lt;/ul&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.3.4/Kastideo-1.3.4.dmg" length="46956014" type="application/octet-stream" sparkle:edSignature="aq1Q6leqdBBudImnb5E4xwGTb1Tu/wLHet2Iyk0scac3z4BAjd5Qf/QncMwYWZnGBNDeET9VHpqVyO/ioIJGAQ==" />
     </item>
   </channel>
 </rss>
