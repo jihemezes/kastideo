@@ -354,13 +354,23 @@ public enum HTTP {
     public static let userAgent = "VLC/3.0.20 LibVLC/3.0.20"
 
     /// Session dédiée : 60 s sans données = échec, 10 min maximum pour un gros fichier.
-    static let session: URLSession = {
+    static var session: URLSession {
+        // Option « Forcer IPv4 » (Réglages) : les connexions passent par le proxy local qui n'utilise que IPv4.
+        if IPv4Proxy.isEnabled, let forced = ipv4Session { return forced }
+        return directSession
+    }
+
+    private static func makeSession(proxy: [AnyHashable: Any]?) -> URLSession {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 60
         configuration.timeoutIntervalForResource = 600
         configuration.httpAdditionalHeaders = ["User-Agent": userAgent, "Accept": "*/*"]
+        if let proxy { configuration.connectionProxyDictionary = proxy }
         return URLSession(configuration: configuration)
-    }()
+    }
+
+    private static let directSession: URLSession = makeSession(proxy: nil)
+    private static let ipv4Session: URLSession? = IPv4Proxy.proxyDictionary().map { makeSession(proxy: $0) }
 
     /// Réponse HTTP avec les éléments utiles au diagnostic (journal par sujets).
     public struct Reply: Sendable {

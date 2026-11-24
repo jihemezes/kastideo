@@ -638,6 +638,7 @@ final class PlaybackController {
         media.addOption(":network-caching=\(caching)")
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
+        if IPv4Proxy.isEnabled { media.addOption(":ipv4") }
         media.addOption(":http-reconnect")
         if let item = current, item.kind == .live, Self.clockFixIDs.contains(item.id) {
             // Horloge du flux faussée (son jeté) : VLC se cale sur les horodatages du son et de l'image.

@@ -72,20 +72,37 @@ class LibraryStore extends ChangeNotifier {
   /// Catégories dans l'ordre choisi, même si le recalcul des listes est suspendu.
   List<String> orderedCategories(MediaKind kind) => prefs(kind).apply(allCategories(kind));
 
+  Completer<void>? _rebuildDone;
+
   void _scheduleRebuild() {
     if (_holds > 0) {
       _rebuildPending = true;
       notifyListeners();
       return;
     }
+    _rebuildSoon();
+  }
+
+  /// Recalcul différé : le bandeau s'affiche d'abord, puis le calcul a lieu, puis le bandeau disparaît quoi qu'il arrive.
+  /// Le Future se termine quand les listes sont à jour (plusieurs demandes rapprochées partagent un seul calcul).
+  Future<void> _rebuildSoon() {
     indexing = true;
     notifyListeners();
+    final done = _rebuildDone ??= Completer<void>();
     _indexTimer?.cancel();
     _indexTimer = Timer(const Duration(milliseconds: 300), () {
-      _rebuild();
-      indexing = false;
-      notifyListeners();
+      try {
+        _rebuild();
+      } catch (e) {
+        PlaybackLog.shared.error('Recalcul du catalogue : $e', topic: LogTopic.sources);
+      } finally {
+        indexing = false;
+        _rebuildDone = null;
+        notifyListeners();
+        if (!done.isCompleted) done.complete();
+      }
     });
+    return done.future;
   }
   String? lastError;
 
@@ -974,9 +991,12 @@ class LibraryStore extends ChangeNotifier {
       sourceErrors[source.id] = ('$e', e is MediaServerException ? e.detail : null);
       PlaybackLog.shared.error('Source « ${source.name} » : $e', topic: LogTopic.sources);
     } finally {
+      // Le recalcul est annoncé (indexing) avant de retirer « chargement » : le bandeau reste affiché sans trou
+      // pendant le calcul, puis disparaît dès qu'il est terminé.
+      final rebuilt = _rebuildSoon();
       loadingSources.remove(source.id);
       isBusy = loadingSources.isNotEmpty;
-      _rebuild();
+      await rebuilt;
     }
     if (refreshed) {
       if (source.kind.isIptv) onSourceRefreshed?.call(source);

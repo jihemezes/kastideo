@@ -19,7 +19,14 @@ final class StreamRelay: NSObject, @unchecked Sendable {
     private var listener: NWListener?
     private var port: UInt16?
     private var routes: [String: URL] = [:]
-    private var session: URLSession!
+    private var directSession: URLSession!
+    private lazy var ipv4Session: URLSession? = IPv4Proxy.proxyDictionary().map { makeSession(proxy: $0) }
+
+    /// Session vers le fournisseur : directe, ou par le proxy IPv4 local si l'option « Forcer IPv4 » est active.
+    private var session: URLSession {
+        if IPv4Proxy.isEnabled, let forced = ipv4Session { return forced }
+        return directSession
+    }
     /// Session en cours (une seule à la fois : c'est tout l'intérêt du relais).
     private var active: RelaySession?
     /// Dernière réponse du fournisseur pour la chaîne demandée (nil : pas encore de réponse ou pas de relais).
@@ -29,13 +36,18 @@ final class StreamRelay: NSObject, @unchecked Sendable {
 
     private override init() {
         super.init()
+        directSession = makeSession(proxy: nil)
+    }
+
+    private func makeSession(proxy: [AnyHashable: Any]?) -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpAdditionalHeaders = ["User-Agent": HTTP.userAgent, "Accept": "*/*"]
         configuration.timeoutIntervalForRequest = 20
         configuration.timeoutIntervalForResource = 7 * 24 * 3600
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.httpMaximumConnectionsPerHost = 1
-        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        if let proxy { configuration.connectionProxyDictionary = proxy }
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }
 
     /// Démarre l'écoute sur 127.0.0.1 (port libre choisi par le système). Sans erreur bloquante :

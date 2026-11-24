@@ -45,6 +45,7 @@ final class BackgroundRecorder {
         media.addOption(":sout=#std{access=file,mux=ts,dst=\"\(output.path)\"}")
         media.addOption(":sout-all")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
+        if IPv4Proxy.isEnabled { media.addOption(":ipv4") }
         media.addOption(":http-reconnect")
         media.addOption(":network-caching=3000")
         recorder.delegate = bridge
@@ -226,6 +227,7 @@ final class DownloadEngine {
         configuration.timeoutIntervalForRequest = 60
         configuration.timeoutIntervalForResource = 24 * 3600
         configuration.httpAdditionalHeaders = ["User-Agent": HTTP.userAgent, "Accept": "*/*"]
+        if let forced = IPv4Proxy.proxyDictionary() { configuration.connectionProxyDictionary = forced }
         return URLSession(configuration: configuration, delegate: proxy, delegateQueue: .main)
     }
 }

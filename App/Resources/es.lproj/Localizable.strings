@@ -1467,3 +1467,5 @@
 "Vidéos YouTube regardées" = "Vídeos de YouTube vistos";
 "Les favoris, les sources et les réglages ne sont pas touchés." = "Los favoritos, las fuentes y los ajustes no se tocan.";
 "Efface tous les historiques ci-dessus." = "Borra todos los historiales anteriores.";
+"Forcer IPv4 pour joindre les fournisseurs" = "Forzar IPv4 para conectar con los proveedores";
+"À activer si des chaînes ou la liste échouent avec une erreur 520 (ou « serveur inaccessible ») alors que le même fournisseur fonctionne ailleurs, sur iPhone par exemple. Certains serveurs répondent mal en IPv6, que le Mac préfère. Kastideo se connecte alors uniquement en IPv4, sans toucher aux réglages réseau du Mac. S'applique aux prochaines connexions : relancez la chaîne ou actualisez la liste." = "Actívalo si los canales o la lista fallan con un error 520 (o «servidor inaccesible») mientras el mismo proveedor funciona en otro dispositivo, como el iPhone. Algunos servidores responden mal por IPv6, que el Mac prefiere. Kastideo se conecta entonces solo por IPv4, sin tocar los ajustes de red del Mac. Se aplica a las nuevas conexiones: reinicia el canal o actualiza la lista.";

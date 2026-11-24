@@ -125,6 +125,7 @@ final class MultiViewSlot: Identifiable {
         media.addOption(":network-caching=\(caching)")
         media.addOption(":live-caching=\(caching)")
         media.addOption(":http-user-agent=\(HTTP.userAgent)")
+        if IPv4Proxy.isEnabled { media.addOption(":ipv4") }
         media.addOption(":http-reconnect")
         let wait = max(0, 1.2 - Date().timeIntervalSince(stoppedAt))
         PlaybackLog.shared.note("MultiVue : ouverture de \(item.name)")

@@ -168,6 +168,7 @@ struct GeneralSettingsView: View {
     @AppStorage(SettingsKeys.autoRefresh) private var autoRefresh = true
     @AppStorage(PlaybackKeys.buffering) private var buffering = BufferingMode.fast.rawValue
     @AppStorage(StreamRelay.enabledKey) private var relayEnabled = true
+    @AppStorage(IPv4Proxy.defaultsKey) private var forceIPv4 = false
     @AppStorage("decode.always") private var decodeAlways = false
     @AppStorage("decode.autoFallback") private var decodeAuto = true
     @AppStorage(PlaybackKeys.showStartupTime) private var showStartupTime = true
@@ -206,6 +207,10 @@ struct GeneralSettingsView: View {
                 Toggle("Reprendre les films et épisodes là où vous vous êtes arrêté", isOn: $resumePlayback)
                 Toggle("Relais de flux pour le direct (une seule connexion au fournisseur)", isOn: $relayEnabled)
                 Text("Kastideo ouvre lui-même la connexion chez le fournisseur et la transmet au moteur VLC, comme Piboard : la chaîne précédente est fermée net avant d'ouvrir la suivante. À désactiver seulement pour comparer en cas de souci.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle("Forcer IPv4 pour joindre les fournisseurs", isOn: $forceIPv4)
+                Text("À activer si des chaînes ou la liste échouent avec une erreur 520 (ou « serveur inaccessible ») alors que le même fournisseur fonctionne ailleurs, sur iPhone par exemple. Certains serveurs répondent mal en IPv6, que le Mac préfère. Kastideo se connecte alors uniquement en IPv4, sans toucher aux réglages réseau du Mac. S'applique aux prochaines connexions : relancez la chaîne ou actualisez la liste.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Toggle("Décodage logiciel automatique quand l'image se fige", isOn: $decodeAuto)

@@ -2,6 +2,10 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.7-android38] - 2026-11-24
+
+- **Bandeau « Mise à jour du catalogue »** (Android TV et tous les appareils) : il apparaissait après la fin du chargement et pouvait ne pas disparaître. À la fin d'une actualisation, le recalcul des listes est maintenant annoncé avant que « chargement » ne soit retiré : le bandeau reste affiché pendant le calcul sans trou, puis disparaît dès qu'il est terminé, même si le calcul échoue. Plusieurs actualisations rapprochées partagent un seul recalcul.
+
 ## [1.19.6-android37] - 2026-11-23
 
 - **Android TV, « Ajouter une source avec mon téléphone »** : le code à saisir sortait de l'écran sur une vraie télévision (QR code trop grand, texte coupé, aide de bas d'écran superposée). Le QR code s'adapte à la hauteur disponible et le texte à droite se réduit pour rester entièrement visible, code compris.
