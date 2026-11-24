@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.19.7</title>
+      <pubDate>Tue, 24 Nov 2026 21:54:49 GMT</pubDate>
+      <sparkle:version>101</sparkle:version>
+      <sparkle:shortVersionString>1.19.7</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;Nouvelle option &lt;b&gt;Forcer IPv4&lt;/b&gt; (Mac : Réglages &amp;gt; Général &amp;gt; Lecture) : certains fournisseurs répondent par une erreur &lt;b&gt;520&lt;/b&gt; en IPv6 (que le Mac préfère) alors que tout fonctionne en IPv4. Kastideo se connecte alors uniquement en IPv4 (liste, relais, lecture VLC, enregistrements), sans toucher aux réglages réseau du Mac.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.19.7/Kastideo-1.19.7.dmg" length="49688509" type="application/octet-stream" sparkle:edSignature="iwrs9jh7rN6dh+FbSQZRJ/ym6gIXTZsDCnNVx/jXTsVlfsuME/Amb1doPkJbzN/jEXyjbgqdiAKU9EFGdlZjDg==" />
+    </item>
+    <item>
       <title>Kastideo 1.19.6</title>
       <pubDate>Mon, 23 Nov 2026 19:44:14 GMT</pubDate>
       <sparkle:version>100</sparkle:version>
@@ -428,15 +439,6 @@
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <description>&lt;p&gt;&lt;b&gt;Soutenir Kastideo (facultatif).&lt;/b&gt; L&amp;#x27;application reste gratuite ; un bouton discret &lt;b&gt;Offrir un café&lt;/b&gt; (Ko-fi) apparaît sur l&amp;#x27;accueil et dans la fenêtre Nouveautés, avec un onglet &lt;b&gt;Réglages &amp;gt; À propos&lt;/b&gt; et l&amp;#x27;entrée &lt;b&gt;Aide &amp;gt; Soutenir Kastideo (Ko-fi)&lt;/b&gt;. Une option permet de masquer les boutons de l&amp;#x27;accueil et des Nouveautés.&lt;/p&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.4.2/Kastideo-1.4.2.dmg" length="47126213" type="application/octet-stream" sparkle:edSignature="Phv5y33/Lto+8PeR3LsIEWLVDF4j6e88qows6gOuWh/Csp09n+DBUybMIbyjSLrxJ/F6+lSYK05fgFublCXDCg==" />
-    </item>
-    <item>
-      <title>Kastideo 1.4.1</title>
-      <pubDate>Thu, 29 Oct 2026 08:52:57 GMT</pubDate>
-      <sparkle:version>57</sparkle:version>
-      <sparkle:shortVersionString>1.4.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;p&gt;&lt;b&gt;Correctif de compilation de la 1.4.0&lt;/b&gt; (Mac uniquement) : « Retour au direct » du lecteur référençait un élément non défini. Aucun changement de fonctionnement.&lt;/p&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.4.1/Kastideo-1.4.1.dmg" length="47102606" type="application/octet-stream" sparkle:edSignature="TRHXkpRd3+sEt4kv+/kcAk/3yT0lZqaOtvMzzMjuiyVk98H2S4IfWisI1HOqm3JGWZSxeWYwzjWS6ee1ga/eDg==" />
     </item>
   </channel>
 </rss>
