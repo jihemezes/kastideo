@@ -7,6 +7,7 @@ struct IOSRootView: View {
     @Environment(PlaybackController.self) private var playback
     @Environment(IOSUI.self) private var ui
     @Environment(IOSRecorder.self) private var recorder
+    @Environment(\.scenePhase) private var scenePhase
 
     @ViewBuilder
     private var screen: some View {
@@ -62,6 +63,21 @@ struct IOSRootView: View {
             if YouTubeStore.shared.isPlaying, playback.current != nil, !recorder.isRecording {
                 playback.stopByUser()
                 ui.showPlayer = false
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Une chaîne en pause quand on quitte l'application : iOS la suspend, et si on la ferme ensuite, aucun code
+            // ne s'exécute plus. Le flux est donc fermé tout de suite pour que le fournisseur libère la connexion.
+            // (Une chaîne qui joue continue en arrière-plan, et se ferme proprement quand l'application s'arrête.)
+            if phase == .background, playback.current != nil, playback.isLive, !playback.isPlaying, !recorder.isRecording {
+                playback.stopByUser()
+            }
+        }
+        .onChange(of: ui.tab) { _, tab in
+            // Retour à l'Accueil : le flux ouvert est fermé (plus de son en arrière-plan ni de connexion gardée chez le
+            // fournisseur), sauf enregistrement en cours.
+            if tab == .home, playback.current != nil, !recorder.isRecording {
+                playback.stopByUser()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: IOSYouTubeView.openSettingsName)) { _ in

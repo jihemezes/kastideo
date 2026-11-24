@@ -2,6 +2,18 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-iosN` (le numéro X.Y.Z est celui de la version de référence).
 
+## [1.19.6-ios41] - 2026-11-24
+
+- **Fermeture de l'application** : le flux est fermé à l'arrêt de Kastideo (déjà le cas) et maintenant aussi dès qu'on quitte l'application avec une **chaîne en pause**, pour que le fournisseur libère la connexion même si l'application est ensuite fermée depuis le sélecteur d'apps (iOS n'exécute alors plus aucun code).
+
+## [1.19.6-ios40] - 2026-11-24
+
+- Correction : **revenir à l'Accueil arrête maintenant la lecture**. Auparavant, le son du dernier flux continuait derrière l'accueil (mini-lecteur) et la connexion restait ouverte chez le fournisseur, ce qui pouvait faire refuser les autres appareils (abonnement à une seule connexion). Un enregistrement en cours n'est pas interrompu.
+
+## [1.19.6-ios39] - 2026-11-23
+
+- Nouvelle section **Historiques** dans les Réglages : vider les récents, les vus et la reprise de lecture et l'historique YouTube, un par un ou tout d'un coup.
+
 ## [1.19.4-ios38] - 2026-11-20
 
 - Correction de l'envoi à TestFlight : un avertissement d'Apple (« 1 warning ») ne fait plus échouer l'étape ; seul l'absence de « UPLOAD SUCCEEDED » est une erreur.
