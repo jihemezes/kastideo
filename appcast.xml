@@ -6,6 +6,17 @@
     <description>Mises à jour de Kastideo</description>
     <language>fr</language>
     <item>
+      <title>Kastideo 1.19.8</title>
+      <pubDate>Wed, 25 Nov 2026 07:38:58 GMT</pubDate>
+      <sparkle:version>102</sparkle:version>
+      <sparkle:shortVersionString>1.19.8</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Réglages (Mac)&lt;/b&gt; : les titres de rubriques (Langue, Page de départ, Lecture, Thème, Affichage, Replay, Cast, Enregistrement…) s&amp;#x27;affichent en &lt;b&gt;couleur d&amp;#x27;accent&lt;/b&gt; et en gras pour les repérer plus facilement.&lt;/li&gt;
+&lt;/ul&gt;</description>
+      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.19.8/Kastideo-1.19.8.dmg" length="49698968" type="application/octet-stream" sparkle:edSignature="RZexvOqNbSbbioGdfY+d6ru0/bz0ZmVIarHMzGSVppajW4s7aRklp20GMJ4KmviWOtUe3WxyQNsJ20vagD5/AQ==" />
+    </item>
+    <item>
       <title>Kastideo 1.19.7</title>
       <pubDate>Tue, 24 Nov 2026 21:54:49 GMT</pubDate>
       <sparkle:version>101</sparkle:version>
@@ -430,15 +441,6 @@
 &lt;li&gt;La lecture IPTV s&amp;#x27;arrête pendant que YouTube joue (sauf enregistrement en cours).&lt;/li&gt;
 &lt;/ul&gt;</description>
       <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.5.0/Kastideo-1.5.0.dmg" length="47185606" type="application/octet-stream" sparkle:edSignature="GJfIyc5XF1a8Vcg16F4+CP3ueWXLp742Dqe8dKnpk/PpBq0LGKhnp+M0kis1uFDuF37EgRy93/xuWO94PDtBAQ==" />
-    </item>
-    <item>
-      <title>Kastideo 1.4.2</title>
-      <pubDate>Fri, 30 Oct 2026 06:37:39 GMT</pubDate>
-      <sparkle:version>58</sparkle:version>
-      <sparkle:shortVersionString>1.4.2</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <description>&lt;p&gt;&lt;b&gt;Soutenir Kastideo (facultatif).&lt;/b&gt; L&amp;#x27;application reste gratuite ; un bouton discret &lt;b&gt;Offrir un café&lt;/b&gt; (Ko-fi) apparaît sur l&amp;#x27;accueil et dans la fenêtre Nouveautés, avec un onglet &lt;b&gt;Réglages &amp;gt; À propos&lt;/b&gt; et l&amp;#x27;entrée &lt;b&gt;Aide &amp;gt; Soutenir Kastideo (Ko-fi)&lt;/b&gt;. Une option permet de masquer les boutons de l&amp;#x27;accueil et des Nouveautés.&lt;/p&gt;</description>
-      <enclosure url="https://github.com/jihemezes/kastideo/releases/download/v1.4.2/Kastideo-1.4.2.dmg" length="47126213" type="application/octet-stream" sparkle:edSignature="Phv5y33/Lto+8PeR3LsIEWLVDF4j6e88qows6gOuWh/Csp09n+DBUybMIbyjSLrxJ/F6+lSYK05fgFublCXDCg==" />
     </item>
   </channel>
 </rss>
