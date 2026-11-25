@@ -29,6 +29,7 @@ Um eine Quelle zu bearbeiten, zu aktualisieren, zu löschen oder ihre **Reihenfo
 - **Wiedergabe / Pause**: pausieren oder fortsetzen.
 - **Langes Drücken auf ein Poster oder einen Sender**: öffnet ein kleines Menü (Favorit hinzufügen oder entfernen). Bei einer Folge: als gesehen oder nicht gesehen markieren.
 - **Im Player**: ↑ / ↓ wechseln den Sender im Live-Fernsehen, ← springt 10 s zurück und → 30 s vor bei Filmen oder Folgen, ein **Klick** öffnet die Optionen.
+- **Lange Titel**: Ist der Name einer Schaltfläche oder Zeile zu lang, wird er abgeschnitten (…); sobald das Element ausgewählt ist, **läuft** der Text in der Schaltfläche **durch**, damit man ihn vollständig lesen kann.
 
 ## Live und Senderwechsel {#tv-direct}
 

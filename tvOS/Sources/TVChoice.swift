@@ -23,7 +23,7 @@ struct TVChoiceList<Value: Hashable>: View {
                     dismiss()
                 } label: {
                     HStack {
-                        Text(option.label)
+                        TVMarqueeText(option.label)
                         Spacer()
                         if option.value == selection { Image(systemName: "checkmark.circle.fill").foregroundStyle(TVPalette.orange) }
                     }
@@ -63,7 +63,7 @@ struct TVCategoryButton: View {
     var body: some View {
         Button { showing = true } label: {
             Label {
-                Text(title).font(.callout.weight(.semibold)).lineLimit(1)
+                TVMarqueeText(title, font: .callout.weight(.semibold))
             } icon: {
                 Image(systemName: "line.3.horizontal.decrease.circle")
             }

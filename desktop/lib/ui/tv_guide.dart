@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'tv_marquee.dart';
 
 import '../app_state.dart';
 import '../core/epg.dart';
@@ -427,7 +428,7 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(icon, size: 24, color: Colors.white),
             const SizedBox(width: 10),
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 300), child: Text(label, style: kTextD(20, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 300), child: TvMarquee(label, active: _zone == 0 && _head == index, style: kTextD(20, weight: FontWeight.w700))),
           ]),
         ),
       );
@@ -498,7 +499,7 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
             const SizedBox(width: 8),
             LogoView(url: item.logo, name: item.name, size: 46),
             const SizedBox(width: 10),
-            Expanded(child: Text(item.displayName, style: kTextD(18, weight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis)),
+            Expanded(child: TvMarquee(item.displayName, active: i == _row, style: kTextD(18, weight: FontWeight.w600))),
             if (context.library.replayDays(item) > 0) const Icon(Icons.replay_rounded, size: 18, color: Colors.white54),
           ]),
         ),
@@ -545,7 +546,7 @@ class _TvGuideState extends State<TvGuide> with TvKeys<TvGuide> {
             if (context.recordings.isScheduled(item, p)) ...[const Icon(Icons.fiber_manual_record, size: 14, color: Colors.redAccent), const SizedBox(width: 4)],
             if (context.alerts.isWatching(item, p)) ...[const Icon(Icons.notifications_active_rounded, size: 15, color: KPalette.orange), const SizedBox(width: 4)],
             if (past && context.library.canReplay(item, p.startS, nowS: now)) ...[const Icon(Icons.replay_rounded, size: 15, color: Colors.white70), const SizedBox(width: 4)],
-            Expanded(child: Text(p.title, style: kTextD(18, weight: FontWeight.w700, color: past ? Colors.white60 : Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            Expanded(child: TvMarquee(p.title, active: selected, style: kTextD(18, weight: FontWeight.w700, color: past ? Colors.white60 : Colors.white))),
           ]),
           if (c.maxWidth > 120) Text(timeRange(p), style: kTextD(15, color: Colors.white60), maxLines: 1, overflow: TextOverflow.clip),
         ]),

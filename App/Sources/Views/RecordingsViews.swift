@@ -550,7 +550,7 @@ struct RecordingSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Dossier") {
+            AccentSection("Dossier") {
                 LabeledContent("Emplacement") {
                     Text(folderPath)
                         .lineLimit(1)
@@ -568,7 +568,7 @@ struct RecordingSettingsView: View {
                     }
                 }
             }
-            Section("Enregistrement du direct") {
+            AccentSection("Enregistrement du direct") {
                 Stepper("Marge avant le programme : \(marginBefore) min", value: $marginBefore, in: 0...30)
                 Stepper("Marge après le programme : \(marginAfter) min", value: $marginAfter, in: 0...60)
                 Picker("Durée par défaut (sans fin connue dans le guide)", selection: $defaultMinutes) {
@@ -582,17 +582,17 @@ struct RecordingSettingsView: View {
                     .foregroundStyle(.secondary)
                 Toggle("Convertir en MP4 (sans perte de qualité, lisible par QuickTime et l'iPhone)", isOn: $convertMP4)
             }
-            Section("Téléchargements") {
+            AccentSection("Téléchargements") {
                 Picker("« Cette nuit » commence à", selection: $nightHour) {
                     ForEach(0..<7, id: \.self) { hour in Text("\(hour) h").tag(hour) }
                 }
             }
-            Section("Nettoyage automatique") {
+            AccentSection("Nettoyage automatique") {
                 Toggle("Placer les anciens enregistrements dans la corbeille", isOn: $autoClean)
                 Stepper("Après \(autoCleanDays) jours", value: $autoCleanDays, in: 1...365)
                     .disabled(!autoClean)
             }
-            Section("Notifications") {
+            AccentSection("Notifications") {
                 Toggle("Notifier les débuts et fins d'enregistrement et de téléchargement", isOn: $notifications)
             }
             Section {

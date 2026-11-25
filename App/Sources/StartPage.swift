@@ -38,7 +38,7 @@ struct StartPageSettingsSection: View {
     @AppStorage("start.series") private var series = "all"
 
     var body: some View {
-        Section("Page de départ") {
+        AccentSection("Page de départ") {
             picker(.live, $live)
             picker(.movie, $movie)
             picker(.series, $series)

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'tv_marquee.dart';
 import 'package:flutter/services.dart';
 import 'package:qr/qr.dart';
 
@@ -791,7 +792,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                             ]),
                           ),
                           const SizedBox(height: 8),
-                          Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(16, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+                          TvMarquee(item.displayName, active: selected, style: kTextD(16, weight: selected ? FontWeight.w700 : FontWeight.w500)),
                         ]);
                       },
                     );
@@ -865,7 +866,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                           ]),
                         ),
                         const SizedBox(height: 8),
-                        Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(16, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+                        TvMarquee(item.displayName, active: selected, style: kTextD(16, weight: selected ? FontWeight.w700 : FontWeight.w500)),
                       ]);
                     },
                   );
@@ -1067,7 +1068,7 @@ class _TvCatalogState extends State<TvCatalog> with TvKeys<TvCatalog> {
                           color: Colors.white.withValues(alpha: 0.12),
                           child: Row(children: [
                             SizedBox(width: 56, child: Text('${e.number ?? i + 1}', style: kTextD(21, weight: FontWeight.w800, color: KPalette.orange))),
-                            Expanded(child: Text(e.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(20, weight: FontWeight.w600))),
+                            Expanded(child: TvMarquee(e.displayName, active: isSel && !_epIcon, style: kTextD(20, weight: FontWeight.w600))),
                             if (context.watch.isWatched(e.id)) const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 26)),
                             Container(
                               width: 48,
@@ -1189,8 +1190,8 @@ class _TvMenuPageState extends State<TvMenuPage> with TvKeys<TvMenuPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                           color: Colors.white.withValues(alpha: 0.13),
                           child: Row(children: [
-                            Expanded(child: Text(entries[i].label, style: kTextD(22, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            if (entries[i].detail != null) Flexible(child: Text(entries[i].detail!, style: kTextD(18, color: Colors.white60), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            Expanded(child: TvMarquee(entries[i].label, active: i == _index, style: kTextD(22, weight: FontWeight.w700))),
+                            if (entries[i].detail != null) Flexible(child: TvMarquee(entries[i].detail!, active: i == _index, style: kTextD(18, color: Colors.white60))),
                             const SizedBox(width: 10),
                             Icon(entries[i].icon, color: Colors.white70, size: 28),
                           ]),

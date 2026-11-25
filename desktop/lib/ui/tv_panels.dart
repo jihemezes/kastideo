@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'tv_marquee.dart';
 
 import '../app_state.dart';
 import '../theme.dart';
@@ -233,10 +234,10 @@ class _TvPanelHostState extends State<TvPanelHost> with TvKeys<TvPanelHost> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       color: Colors.white.withValues(alpha: 0.13),
       child: Row(children: [
-        Expanded(child: Text(e.label, style: kTextD(20, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+        Expanded(child: TvMarquee(e.label, active: selected, style: kTextD(20, weight: FontWeight.w700))),
         if (e.detail != null) ...[
           const SizedBox(width: 8),
-          Flexible(child: Text(e.detail!, style: kTextD(16, color: Colors.white60), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Flexible(child: TvMarquee(e.detail!, active: selected, style: kTextD(16, color: Colors.white60))),
         ],
         const SizedBox(width: 8),
         Icon(e.icon, color: Colors.white70, size: 26),

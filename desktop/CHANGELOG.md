@@ -2,6 +2,14 @@
 
 Préversions publiées sur GitHub avec les tags `vX.Y.Z-desktopN` (le numéro X.Y.Z est celui de la version Mac de référence).
 
+## [1.19.8-desktop8] - 2026-11-25
+
+- **Réglages** (Windows, Linux, Android, Mac compatible) : les titres de rubriques (Langue, Lecture, Thème, Taille des éléments, Page de départ, Replay…) s'affichent en **couleur d'accent** et en gras.
+
+## [1.19.7-android39] - 2026-11-24
+
+- **Android TV, titres trop longs** : quand le nom d'un bouton ou d'une ligne ne tient pas (accueil, Cinéma, panneaux et Réglages, guide TV, fiches, épisodes), le texte **défile** dans le bouton dès qu'il est sélectionné, au lieu d'être coupé. La taille des boutons ne change pas ; hors sélection le texte reste tronqué (…).
+
 ## [1.19.7-android38] - 2026-11-24
 
 - **Bandeau « Mise à jour du catalogue »** (Android TV et tous les appareils) : il apparaissait après la fin du chargement et pouvait ne pas disparaître. À la fin d'une actualisation, le recalcul des listes est maintenant annoncé avant que « chargement » ne soit retiré : le bandeau reste affiché pendant le calcul sans trou, puis disparaît dès qu'il est terminé, même si le calcul échoue. Plusieurs actualisations rapprochées partagent un seul recalcul.

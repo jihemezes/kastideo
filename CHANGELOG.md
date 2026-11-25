@@ -3,6 +3,10 @@
 Toutes les évolutions notables de Kastideo sont consignées ici.
 Les notes de chaque version sont reprises automatiquement dans la GitHub Release correspondante.
 
+## [1.19.8] - 2026-11-25
+
+- **Réglages (Mac)** : les titres de rubriques (Langue, Page de départ, Lecture, Thème, Affichage, Replay, Cast, Enregistrement…) s'affichent en **couleur d'accent** et en gras pour les repérer plus facilement.
+
 ## [1.19.7] - 2026-11-24
 
 - Nouvelle option **Forcer IPv4** (Mac : Réglages > Général > Lecture) : certains fournisseurs répondent par une erreur **520** en IPv6 (que le Mac préfère) alors que tout fonctionne en IPv4. Kastideo se connecte alors uniquement en IPv4 (liste, relais, lecture VLC, enregistrements), sans toucher aux réglages réseau du Mac.

@@ -558,7 +558,7 @@ struct YouTubeSettingsSection: View {
     @State private var checking = false
 
     var body: some View {
-        Section("YouTube") {
+        AccentSection("YouTube") {
             SecureField("Clé API Google (facultative, pour la recherche)", text: $draft)
                 .onSubmit(save)
             HStack {

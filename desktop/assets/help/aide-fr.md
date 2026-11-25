@@ -1340,6 +1340,7 @@ Sur Android TV, les **Réglages** s'ouvrent en panneaux : le menu occupe les 2/5
 ### Utilisation à la télécommande (Android TV)
 
 Sur Android TV, Kastideo affiche des écrans pensés pour la télécommande : l'élément sélectionné est **entouré d'orange, agrandi et lumineux**, comme sur Apple TV.
+- **Titres trop longs** : quand le nom d'un bouton ou d'une ligne est trop long pour tenir, il est coupé (…) ; dès que l'élément est sélectionné, le texte **défile** dans le bouton pour se lire en entier.
 - **Accueil** : pavés Direct, Films, Séries (et Mes vidéos), puis **Reprendre la lecture** (affiches des films et épisodes commencés, **OK** ouvre la fiche), puis les boutons Recherche, Favoris, Récents, Guide TV, Enregistrements, MultiVue (si vos sources autorisent deux connexions), Aide et Réglages.
 - **Recherche, Favoris, Récents, Aide** : dans Recherche, **OK** sur le champ ouvre le clavier de la télévision ; validez, puis **▼** pour parcourir les résultats (chaînes, films, séries, mes vidéos). Favoris et Récents : grille d'affiches, **OK** ouvre l'élément. Aide : cette aide, lisible à la télécommande (**▲ ▼** font défiler).
 - **Accueil** : Direct, Films, Séries, puis Guide TV, Réglages et Journal.

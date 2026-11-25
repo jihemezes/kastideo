@@ -233,7 +233,7 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Thème") {
+            AccentSection("Thème") {
                 Picker("Apparence", selection: $appearance) {
                     ForEach(Appearance.allCases) { Text($0.label).tag($0.rawValue) }
                 }
@@ -251,7 +251,7 @@ struct AppearanceSettingsView: View {
                     InterfaceScopePicker(scope: scope)
                 }
             } header: {
-                Text("Interface par type de contenu")
+                Text("Interface par type de contenu").settingsHeader()
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(InterfaceStyle.allCases) { style in
@@ -261,7 +261,7 @@ struct AppearanceSettingsView: View {
                 }
             }
 
-            Section("Affichage") {
+            AccentSection("Affichage") {
                 Picker("Densité des listes (Classique)", selection: $density) {
                     ForEach(ListDensity.allCases) { Text($0.label).tag($0.rawValue) }
                 }

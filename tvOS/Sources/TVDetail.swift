@@ -95,7 +95,7 @@ struct TVDetailView: View {
                     HStack {
                         Image(systemName: watch.isWatched(episode.id) ? "checkmark.circle.fill" : "circle")
                             .foregroundStyle(watch.isWatched(episode.id) ? TVBrand.orange : .secondary)
-                        Text(episode.name).lineLimit(1)
+                        TVMarqueeText(episode.name)
                         Spacer()
                         if let fraction = watch.fraction(for: episode.id) {
                             ProgressView(value: fraction).frame(width: 160).tint(TVPalette.orange)

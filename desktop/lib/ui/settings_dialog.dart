@@ -125,7 +125,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
 Widget _section(String title, List<Widget> children) => Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: kText(13, weight: FontWeight.w700, color: KPalette.ink60)),
+        Text(title, style: kText(14, weight: FontWeight.w800, color: KPalette.accent)),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,

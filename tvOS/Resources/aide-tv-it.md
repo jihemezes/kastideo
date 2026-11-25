@@ -29,6 +29,7 @@ Per modificare, aggiornare, eliminare o **cambiare l'ordine** di una sorgente (S
 - **Riproduci / Pausa**: mette in pausa o riprende.
 - **Pressione prolungata su una locandina o un canale**: apre un piccolo menu (aggiungere o rimuovere dai preferiti). Su un episodio: segnare come visto o non visto.
 - **Nel lettore**: ↑ / ↓ cambiano canale in diretta, ← torna indietro di 10 s e → avanza di 30 s in un film o un episodio, un **clic** apre le opzioni.
+- **Titoli lunghi**: quando il nome di un pulsante o di una riga è troppo lungo, viene troncato (…); non appena l'elemento è selezionato, il testo **scorre** nel pulsante per leggerlo per intero.
 
 ## Diretta e zapping {#tv-direct}
 

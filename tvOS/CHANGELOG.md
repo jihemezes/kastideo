@@ -2,6 +2,10 @@
 
 Versions envoyées à TestFlight avec les tags `vX.Y.Z-tvosN` (même app « fr.jmezes.kastideo » que l'iPhone, plateforme tvOS).
 
+## [1.19.7-tvos25] - 2026-11-24
+
+- **Titres trop longs** : dans les listes de choix, les boutons de catégorie/affichage, les épisodes et les cases du guide TV, le texte **défile** dans le bouton quand celui-ci est sélectionné, au lieu d'être coupé. La taille des boutons ne change pas.
+
 ## [1.19.4-tvos23] - 2026-11-20
 
 - Correction de l'envoi à TestFlight : l'avertissement d'Apple sur la version du SDK (90994) ne fait plus échouer l'étape ; l'envoi était pourtant réussi.

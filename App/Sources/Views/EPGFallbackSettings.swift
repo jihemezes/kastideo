@@ -8,7 +8,7 @@ struct EPGFallbackSettingsSection: View {
     @State private var urlText = EPGKeys.fallbackURLText
 
     var body: some View {
-        Section("Guide TV de secours") {
+        AccentSection("Guide TV de secours") {
             Toggle("Compléter le guide du fournisseur avec un guide de secours", isOn: $enabled)
                 .onChange(of: enabled) { _, value in store.setFallbackEnabled(value) }
             if enabled {

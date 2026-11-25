@@ -29,6 +29,7 @@ Para modificar, actualizar, eliminar o **cambiar el orden** de una fuente (Subir
 - **Reproducir / Pausa**: pausa o reanuda.
 - **Pulsación larga sobre un cartel o un canal**: abre un pequeño menú (añadir o quitar de favoritos). En un episodio: marcar como visto o no visto.
 - **En el reproductor**: ↑ / ↓ cambian de canal en directo, ← retrocede 10 s y → avanza 30 s en una película o un episodio, un **clic** abre las opciones.
+- **Títulos largos**: cuando el nombre de un botón o fila es demasiado largo, se corta (…); en cuanto el elemento está seleccionado, el texto **se desplaza** dentro del botón para leerlo entero.
 
 ## Directo y zapping {#tv-direct}
 

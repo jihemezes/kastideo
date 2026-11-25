@@ -189,7 +189,7 @@ struct GeneralSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Langue") {
+            AccentSection("Langue") {
                 Picker("Langue de l'application", selection: languageBinding) {
                     ForEach(AppLanguage.allCases) { Text($0.label).tag($0) }
                 }
@@ -199,7 +199,7 @@ struct GeneralSettingsView: View {
             }
             StartPageSettingsSection()
             ReplaySettingsSection()
-            Section("Lecture") {
+            AccentSection("Lecture") {
                 Picker("Mémoire tampon", selection: $buffering) {
                     ForEach(BufferingMode.allCases) { Text($0.label).tag($0.rawValue) }
                 }

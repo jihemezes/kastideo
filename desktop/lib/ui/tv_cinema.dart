@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'tv_marquee.dart';
 
 import '../app_state.dart';
 import '../core/models.dart';
@@ -280,7 +281,7 @@ class TvRailsState extends State<TvRails> {
                           ]),
                         ),
                         const SizedBox(height: 4),
-                        Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(13, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+                        TvMarquee(item.displayName, active: selected, style: kTextD(13, weight: selected ? FontWeight.w700 : FontWeight.w500)),
                       ]),
                     );
                   },

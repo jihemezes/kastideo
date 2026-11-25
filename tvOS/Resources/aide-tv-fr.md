@@ -29,6 +29,7 @@ Pour modifier, actualiser, supprimer ou **changer l'ordre** d'une source (Monter
 - **Lecture / Pause** : met en pause ou reprend.
 - **Appui long sur une affiche ou une chaîne** : ouvre un petit menu (ajouter ou retirer des favoris). Sur un épisode : marquer comme vu ou non vu.
 - **Dans le lecteur** : ↑ / ↓ changent de chaîne en direct, ← recule de 10 s et → avance de 30 s dans un film ou un épisode, un **clic** ouvre les options.
+- **Titres trop longs** : quand le nom d'un bouton ou d'une ligne est trop long pour tenir, il est coupé (…) ; dès que l'élément est sélectionné, le texte **défile** dans le bouton pour se lire en entier.
 
 ## Direct et zapping {#tv-direct}
 

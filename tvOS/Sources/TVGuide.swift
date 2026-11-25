@@ -150,7 +150,7 @@ struct TVGuideView: View {
                     let airing = programme.start <= Date() && programme.stop > Date()
                     Button { lastChannel = channel.id; selected = ProgrammePick(channel: channel, programme: programme) } label: {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(programme.title).font(.caption.weight(.semibold)).lineLimit(1)
+                            TVMarqueeText(programme.title, font: .caption.weight(.semibold))
                             Text(programme.timeRange()).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                         }
                         .padding(.horizontal, 10)

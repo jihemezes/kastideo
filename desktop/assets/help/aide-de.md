@@ -1337,6 +1337,7 @@ Kastideo erscheint dann mit seinem Banner in der App-Liste des Fernsehers.
 ### Bedienung per Fernbedienung (Android TV)
 
 Auf Android TV zeigt Kastideo Bildschirme für die Fernbedienung: Das gewählte Element ist **orange umrandet, vergrößert und leuchtend**, wie bei Apple TV.
+- **Lange Titel**: Ist der Name einer Schaltfläche oder Zeile zu lang, wird er abgeschnitten (…); sobald das Element ausgewählt ist, **läuft** der Text in der Schaltfläche **durch**, damit man ihn vollständig lesen kann.
 
 Auf Android TV öffnen sich die **Einstellungen** in Panels: Das Menü belegt die linken 2/5, sein Inhalt entfaltet sich in den rechten 3/5; eine weitere Ebene gleitet nach links und überdeckt das übergeordnete Menü teilweise (◀ zurück). Die Einstellung **Startseite** wählt die Kategorie beim Öffnen von Live, Filme oder Serien. Der Start zeigt das Logo neben dem Namen und als Wasserzeichen.
 - **Pfeiltasten** bewegen die Auswahl; **OK** bestätigt; **Zurück** geht eine Stufe zurück (Player → Folgen → Details → Liste → Start).

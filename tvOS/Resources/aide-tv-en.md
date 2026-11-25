@@ -29,6 +29,7 @@ To edit, refresh, delete or **reorder** a source (Move up / Move down: sources a
 - **Play / Pause**: pause or resume.
 - **Long press on a poster or a channel**: opens a small menu (add or remove favorites). On an episode: mark as watched or unwatched.
 - **In the player**: ↑ / ↓ change channel in live TV, ← goes back 10 s and → forward 30 s in a movie or episode, a **click** opens the options.
+- **Long titles**: when a button or row name is too long to fit, it is cut off (…); as soon as the item is selected, the text **scrolls** inside the button so you can read it in full.
 
 ## Live and channel zapping {#tv-direct}
 

@@ -1337,6 +1337,7 @@ O Kastideo então aparece na lista de aplicativos da TV com o seu banner.
 ### Uso do controle remoto (Android TV)
 
 No Android TV, o Kastideo mostra telas pensadas para o controle remoto: o item selecionado fica **com contorno laranja, ampliado e luminoso**, como na Apple TV.
+- **Títulos longos**: quando o nome de um botão ou linha é longo demais, ele é cortado (…); assim que o item é selecionado, o texto **rola** dentro do botão para ser lido por inteiro.
 
 No Android TV, os **Ajustes** abrem em painéis: o menu ocupa os 2/5 da esquerda e o conteúdo se desenvolve nos 3/5 da direita; um nível a mais desliza para a esquerda cobrindo em parte o menu pai (◀ para voltar). O ajuste **Página inicial** escolhe a categoria mostrada ao entrar em Direto, Filmes ou Séries. O Início mostra o logo ao lado do nome e como marca-d'água.
 - **Setas**: movem a seleção; **OK** confirma; **Voltar** retorna (player → episódios → ficha → lista → início).

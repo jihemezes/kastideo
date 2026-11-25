@@ -14,7 +14,7 @@ struct ReplaySettingsSection: View {
     }
 
     var body: some View {
-        Section("Replay") {
+        AccentSection("Replay") {
             Toggle("Proposer le replay des chaînes qui en ont un", isOn: $enabled)
             Picker("Jours de programmes passés gardés dans le guide", selection: $guideDays) {
                 ForEach([1, 2, 3, 5, 7, 10, 14], id: \.self) { Text("\($0) j").tag($0) }

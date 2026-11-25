@@ -1337,6 +1337,7 @@ Kastideo aparece entonces en la lista de aplicaciones del televisor con su banne
 ### Uso del mando a distancia (Android TV)
 
 En Android TV, Kastideo muestra pantallas pensadas para el mando: el elemento seleccionado aparece **con contorno naranja, ampliado y luminoso**, como en Apple TV.
+- **Títulos largos**: cuando el nombre de un botón o fila es demasiado largo, se corta (…); en cuanto el elemento está seleccionado, el texto **se desplaza** dentro del botón para leerlo entero.
 
 En Android TV, los **Ajustes** se abren en paneles: el menú ocupa los 2/5 de la izquierda y su contenido se despliega en los 3/5 de la derecha; un nivel más se desliza a la izquierda cubriendo en parte el menú padre (◀ para volver). El ajuste **Página de inicio** elige la categoría mostrada al entrar en Directo, Películas o Series. El Inicio muestra el logotipo junto al nombre y como marca de agua.
 - **Flechas**: mueven la selección; **OK** confirma; **Atrás** vuelve (reproductor → episodios → ficha → lista → inicio).

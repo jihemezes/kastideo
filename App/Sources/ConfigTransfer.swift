@@ -11,7 +11,7 @@ struct ConfigTransferSection: View {
     @State private var message: String?
 
     var body: some View {
-        Section("Sauvegarde et transfert") {
+        AccentSection("Sauvegarde et transfert") {
             Toggle("Inclure les mots de passe dans le fichier", isOn: $includePasswords)
             Text("Le fichier permet de retrouver vos sources, favoris, récents, catégories et réglages sur un autre Mac, ou dans Kastideo pour Windows et Linux. S'il contient les mots de passe, gardez-le en lieu sûr.")
                 .font(.caption)

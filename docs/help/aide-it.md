@@ -1337,6 +1337,7 @@ Kastideo compare poi nell'elenco delle app del televisore con il suo banner.
 ### Uso del telecomando (Android TV)
 
 Su Android TV, Kastideo mostra schermate pensate per il telecomando: l'elemento selezionato è **evidenziato in arancione, ingrandito e luminoso**, come su Apple TV.
+- **Titoli lunghi**: quando il nome di un pulsante o di una riga è troppo lungo, viene troncato (…); non appena l'elemento è selezionato, il testo **scorre** nel pulsante per leggerlo per intero.
 
 Su Android TV le **Impostazioni** si aprono in pannelli: il menu occupa i 2/5 di sinistra e il suo contenuto si sviluppa nei 3/5 di destra; un livello in più scorre a sinistra coprendo in parte il menu genitore (◀ per tornare). L'impostazione **Pagina iniziale** sceglie la categoria mostrata entrando in Diretta, Film o Serie. La Home mostra il logo accanto al nome e come filigrana.
 - **Frecce**: spostano la selezione; **OK** conferma; **Indietro** torna indietro (lettore → episodi → scheda → elenco → home).

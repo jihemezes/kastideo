@@ -85,7 +85,7 @@ struct HistoriesSection: View {
             }
             .disabled(kinds.allSatisfy { count($0) == 0 })
         } header: {
-            Text("Historiques")
+            Text("Historiques").settingsHeader()
         } footer: {
             Text("Les favoris, les sources et les réglages ne sont pas touchés.")
         }

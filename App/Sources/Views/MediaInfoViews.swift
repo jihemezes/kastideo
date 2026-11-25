@@ -315,7 +315,7 @@ struct MediaInfoSettingsSection: View {
     @AppStorage("tmdb.personal") private var personal = true
 
     var body: some View {
-        Section("Fiches des films et séries") {
+        AccentSection("Fiches des films et séries") {
             SecureField("Clé API TMDB (facultative)", text: $draft)
                 .onSubmit(save)
             HStack {

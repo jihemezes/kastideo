@@ -1337,6 +1337,7 @@ Kastideo then appears in the TV's app list with its banner.
 ### Using the remote (Android TV)
 
 On Android TV, Kastideo shows screens designed for the remote: the selected item is **outlined in orange, enlarged and glowing**, as on Apple TV.
+- **Long titles**: when a button or row name is too long to fit, it is cut off (…); as soon as the item is selected, the text **scrolls** inside the button so you can read it in full.
 
 On Android TV, **Settings** open in panels: the menu takes the left 2/5 and its content unfolds in the right 3/5; one more level slides left and partly covers the parent menu (◀ to go back). The **Start page** setting chooses the category shown when entering Live, Movies or Series. Home shows the logo next to the name and as a watermark.
 - **Arrows** move the selection; **OK** confirms; **Back** goes back (player → episodes → details → list → home).

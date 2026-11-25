@@ -416,7 +416,7 @@ struct CastSettingsSection: View {
     private let cast = CastCenter.shared
 
     var body: some View {
-        Section("Cast (diffusion sur un téléviseur)") {
+        AccentSection("Cast (diffusion sur un téléviseur)") {
             Picker("YouTube sur le téléviseur", selection: $youtubeMode) {
                 Text("Application YouTube du téléviseur").tag("dial")
                 Text("Navigateur (bouton Diffuser de Chrome)").tag("browser")

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'tv_marquee.dart';
 import 'package:flutter/services.dart';
 
 import '../app_state.dart';
@@ -245,7 +246,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
                           color: Colors.white.withValues(alpha: 0.14),
                           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                             Icon(buttons[i].$1, color: Colors.white, size: 24),
-                            Text(buttons[i].$2, style: kTextD(15, weight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            TvMarquee(buttons[i].$2, active: rows[_row] == 'buttons' && _col == i, style: kTextD(15, weight: FontWeight.w700)),
                           ]),
                         ),
                       ),
@@ -289,7 +290,7 @@ class _TvHomeState extends State<TvHome> with TvKeys<TvHome> {
                 ]),
               ),
               const SizedBox(height: 4),
-              Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(14, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+              TvMarquee(item.displayName, active: selected, style: kTextD(14, weight: selected ? FontWeight.w700 : FontWeight.w500)),
             ]),
           );
         },
@@ -505,7 +506,7 @@ class _TvItemsPageState extends State<TvItemsPage> with TvKeys<TvItemsPage> {
                                 ]),
                               ),
                               const SizedBox(height: 6),
-                              Text(item.displayName, maxLines: 1, overflow: TextOverflow.ellipsis, style: kTextD(15, weight: selected ? FontWeight.w700 : FontWeight.w500)),
+                              TvMarquee(item.displayName, active: selected, style: kTextD(15, weight: selected ? FontWeight.w700 : FontWeight.w500)),
                             ]);
                           },
                         );

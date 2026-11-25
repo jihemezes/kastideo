@@ -29,6 +29,7 @@ Para editar, atualizar, excluir ou **mudar a ordem** de uma fonte (Subir / Desce
 - **Reproduzir / Pausar**: pausa ou retoma.
 - **Toque longo em um pôster ou canal**: abre um pequeno menu (adicionar ou remover dos favoritos). Em um episódio: marcar como visto ou não visto.
 - **No player**: ↑ / ↓ trocam de canal ao vivo, ← volta 10 s e → avança 30 s em um filme ou episódio, um **clique** abre as opções.
+- **Títulos longos**: quando o nome de um botão ou linha é longo demais, ele é cortado (…); assim que o item é selecionado, o texto **rola** dentro do botão para ser lido por inteiro.
 
 ## Ao vivo e zapping {#tv-direct}
 
